@@ -1,7 +1,6 @@
 .msg {
     padding: 0.2rem 1rem;
     font-size: 14px;
-    background-color: #2f2e2e;
 }
 
 .msg .channel img {
@@ -38,5 +37,11 @@
 }
 
 .msg:hover {
-    background-color: #121111;
+    @mixin light {
+        background-color: var(--mantine-color-orange-1);
+    }
+
+    @mixin dark {
+        background-color: var(--mantine-color-grape-9);
+    }
 }

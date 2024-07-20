@@ -17,10 +17,10 @@ export function Header(props: {
         </div>
         <div></div>
         <div className={classes.rightGroup}>
-            <ActionIcon variant='transparent' color='white' size={46}>
+            <ActionIcon variant='transparent' color='primary' size={46}>
                 <IconBell style={{ width: "32px", height: "32px" }} onClick={props.openAlerts} size={42}/>
             </ActionIcon>
-            <ActionIcon variant='transparent' color='white' size={46}>
+            <ActionIcon variant='transparent' color='primary' size={46}>
                 <IconSettings style={{ width: "32px", height: "32px" }} onClick={props.openSettings} size={42}/>
             </ActionIcon>
         </div>

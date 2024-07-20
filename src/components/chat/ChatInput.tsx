@@ -1,8 +1,8 @@
 import { useContext, useState } from 'react';
 import { ChatConfigContext, ChatEmotes } from '../../ApplicationContext';
 import { ChannelPicker } from './ChannelPicker';
-import { TextInput, ActionIcon, rem, Flex, Group, Box } from '@mantine/core'
-import { IconSend, IconArrowRight, IconX } from '@tabler/icons-react';
+import { TextInput, ActionIcon, rem, Flex } from '@mantine/core'
+import { IconSend, IconX } from '@tabler/icons-react';
 
 export function ChatInput(props: {close: () => void}) {
     const config = useContext(ChatConfigContext);
@@ -26,7 +26,7 @@ export function ChatInput(props: {close: () => void}) {
             radius="md"
             size="md"
             w="100%"
-            placeholder="Chat with others"
+            placeholder={"Chat in " + config.chatChannel}
             rightSectionWidth={42}
             onKeyDown={event => {
                 if (event.key == "Enter") {
