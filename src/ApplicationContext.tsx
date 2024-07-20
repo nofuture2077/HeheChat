@@ -187,15 +187,15 @@ type MessageHandler = {id?: number, handle: (channel: string, text: string) => v
 const onMessageHandlers: MessageHandler[] = [];
 var onMessageHandlerIndex = 0;
 export const DEFAULT_CHAT_CONFIG: ChatConfig = {
-    channels: [],
-    chatChannel: undefined,
-    ignoredUsers: [],
+    channels: ['ronnyberger', 'knirpz', 'daefoxi', 'zeusspezial', 'mystery_blue', 'einsebastian', 'rasselbandeshow'],
+    chatChannel: 'rasselbandeshow',
+    ignoredUsers: ['streamelements', 'fossabot'],
     maxMessages: 500,
-    showTimestamp: true,
+    showTimestamp: false,
     showProfilePicture: true,
     showImportantBadges: true,
     showSubBadges: true,
-    showPredictions: true,
+    showPredictions: false,
     showOtherBadges: false,
     setChannels: () => {},
     setIgnoredUsers: () => {},
