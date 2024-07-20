@@ -113,7 +113,9 @@ export const CHAT_EMOTES: ChatEmotes = {
         CHAT_EMOTES.emotes = await getBadgesAndEmotesByNames(context, channels);
     },
     updateChannel: async (context, channel) => {
-        CHAT_EMOTES.emotes.set(channel, (await getBadgesAndEmotesByNames(context, [channel])).get(channel));
+        const emoteData = await getBadgesAndEmotesByNames(context, [channel]);
+        CHAT_EMOTES.emotes.set(channel, emoteData.get(channel));
+        CHAT_EMOTES.emotes.set('global', emoteData.get('global'));
     },
     getBadge: (channel: string, badgeData: string, key: string) => {
         const [badge, version] = badgeData.split(',');

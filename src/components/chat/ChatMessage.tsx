@@ -47,7 +47,7 @@ function getBadge(config: ChatConfig, emotes: ChatEmotes, channel: string, key: 
     if (config.showPredictions && ['predictions'].indexOf(badge) > -1) {
         return emotes.getBadge(channel, key, index);
     }
-    if (config.showOtherBadges) {
+    if (config.showOtherBadges && ['moderator', 'vip', 'staff', 'partner', 'subscriber', 'founder', 'predictions'].indexOf(badge) === -1) {
         return emotes.getBadge(channel, key, index);
     }
     return '';
