@@ -1,0 +1,42 @@
+.msg {
+    padding: 0.2rem 1rem;
+    font-size: 14px;
+    background-color: #2f2e2e;
+}
+
+.msg .channel img {
+    height: 24px;
+    vertical-align: middle;
+    margin-right: 6px;
+    border-radius: 16px;
+}
+
+.username {
+    margin-left: 2px;
+}
+
+.text {
+    img {
+        height: 24px;
+    }
+}
+
+.badges {
+    line-height: 1rem;
+}
+.badges img {
+    vertical-align: middle;
+    margin: 0px 2px;
+ }
+
+.text img {
+   vertical-align: bottom;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.msg:hover {
+    background-color: #121111;
+}

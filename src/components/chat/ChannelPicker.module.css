@@ -1,0 +1,9 @@
+
+
+  .menuItem {
+    padding: 4px 8px;
+    margin: 0;
+    >.mantine-Menu-itemSection:where([data-position='left']) {
+        margin-inline-end: 0 !important;
+    }
+  }
