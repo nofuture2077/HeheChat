@@ -10,7 +10,9 @@ export function HomePage() {
         <IconMessageChatbot size={148}/>
         <Stack>
           <h1 style={{marginBottom: 0}}>HEHE Chat</h1>
-          <Text fw={700} size="lg">Best multi channel Chat Client fro Twitch.</Text>
+          <Text fw={700} size="lg">Best multi channel Chat Client for Twitch *</Text>
+
+          <Text fw={100} size="lg">(*) Early Alpha</Text>
         </Stack>
       </Group>
       <Group justify='center' mt={70}><Login /></Group>
