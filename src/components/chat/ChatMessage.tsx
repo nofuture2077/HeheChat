@@ -1,6 +1,6 @@
 import { ChatMessage, ParsedMessagePart, parseChatMessage, buildEmoteImageUrl } from '@twurple/chat';
 import classes from './ChatMessage.module.css';
-import { ChatConfigContext, ChatEmotes, ChatConfig, chatColor } from '../../ApplicationContext';
+import { ChatConfigContext, ChatEmotes, ChatConfig } from '../../ApplicationContext';
 import { useContext } from 'react';
 
 interface ChatMessageProps {
