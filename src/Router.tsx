@@ -9,7 +9,9 @@ const router = createBrowserRouter([
     path: '/',
     element: <ChatPage />,
   }
-]);
+], {
+  basename: '/HeheChat/'
+});
 
 export function Router() {
   const loginContext = useContext(LoginContext);
