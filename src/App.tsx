@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Router } from './Router';
 import { ChatConfigContext, ChatConfig, ChatConfigKey, load, store, LoginContext, DEFAULT_LOGIN_CONTEXT, DEFAULT_CHAT_CONFIG, getUserId} from './ApplicationContext'
 import { StaticAuthProvider } from '@twurple/auth';
-import { ApiClient } from '@twurple/api';
+import { ApiClient, HelixUser } from '@twurple/api';
 
 
 export default function App() {
@@ -48,6 +48,13 @@ export default function App() {
     });
   }
 
+  const setUser = async (user: HelixUser) => {
+    setLoginContext((loginContext) => {
+        const newContext = { ...loginContext, user };
+        return newContext;
+    });
+  }
+
   const isLoggedIn = () => {
     return !!loginContext.accessToken;
   }
@@ -71,7 +78,7 @@ export default function App() {
   return (
     <MantineProvider defaultColorScheme="auto" theme={theme}>
       <ChatConfigContext.Provider value={{ ...chatConfig, setChannels, setIgnoredUsers, setShowTimestamp, setShowProfilePicture, setShowImportantBadges, setShowSubBadges, setShowPredictions, setShowOtherBadges, setChatChannel, getChatChannel, setFontSize }}>
-        <LoginContext.Provider value={{...loginContext, setAccessToken, isLoggedIn, getAuthProvider, getApiClient}}>
+        <LoginContext.Provider value={{...loginContext, setAccessToken, isLoggedIn, getAuthProvider, getApiClient, setUser}}>
           <Router />
         </LoginContext.Provider>
       </ChatConfigContext.Provider>

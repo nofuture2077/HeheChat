@@ -1,6 +1,6 @@
-"use client";
-
 import { Button } from '@mantine/core';
+import { StaticAuthProvider } from '@twurple/auth';
+import { ApiClient } from '@twurple/api';
 import { IconLogin } from '@tabler/icons-react';
 import { useEffect, useState, useContext } from 'react';
 import { LoginContext } from '../../ApplicationContext';
@@ -24,6 +24,13 @@ export default function Login() {
 
     useEffect(() => {
         if (token) {
+            const authProvider = new StaticAuthProvider(loginContext.clientId, token);
+            const api = new ApiClient({authProvider});
+            api.getTokenInfo().then((tokenInfo) => {
+                api.users.getAuthenticatedUser({id: tokenInfo.userId || ''}).then((user) => {
+                    loginContext.setUser(user);
+                });
+            });
             loginContext.setAccessToken(token);
         }
     }, [token]);

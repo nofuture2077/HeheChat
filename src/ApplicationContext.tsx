@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 import { StaticAuthProvider, AuthProvider } from '@twurple/auth';
-import { ApiClient } from '@twurple/api';
+import { ApiClient, HelixUser } from '@twurple/api';
 
 import { toMap } from './components/commons';
 import { get7TVEmotes } from './components/sevenTV'
@@ -9,10 +9,12 @@ export interface LoginContext {
     clientId: string;
     accessToken?: string;
     userid?: string;
+    user?: HelixUser;
     isLoggedIn: () => boolean;
     getAuthProvider: () => AuthProvider
     getApiClient: () => ApiClient,
     setAccessToken: (token: string) => void;
+    setUser: (user: HelixUser) => void;
 }
 
 export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
