@@ -33,7 +33,7 @@ export function ChannelPicker(props: {setReplyMsg: (msg?: any) => void}) {
         <Menu.Target>
             <Image src={chatEmotes.getLogo(chatChannel)?.props.src} width={32} height={32} style={{borderRadius: 16}}/>
         </Menu.Target>
-        <Menu.Dropdown bg='black'>{items}</Menu.Dropdown>
+        <Menu.Dropdown>{items}</Menu.Dropdown>
       </Menu>
     );
   }
