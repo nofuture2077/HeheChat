@@ -144,7 +144,7 @@ export function ChatPage() {
             <Alerts />
           </Drawer>
           {(shouldScroll || settingOpened) ? null : (
-            <Affix position={{ top: 60, left: 0 }} style={{ width: "100%" }}>
+            <Affix position={{ bottom: 15 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }} style={{ width: "100%" }}>
               <Stack align="center">
                 <Button onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'grape', to: 'orange', deg: 90 }} style={{ borderRadius: 16 }}>New Messages</Button>
               </Stack>
