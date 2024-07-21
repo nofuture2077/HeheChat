@@ -28,7 +28,8 @@ export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
     getApiClient: () => {
         return new ApiClient({ authProvider: DEFAULT_LOGIN_CONTEXT.getAuthProvider()});
     },
-    setAccessToken: () => {}
+    setAccessToken: () => {},
+    setUser: (user: HelixUser) => {}
 };
 
 export async function getUserId(context: LoginContext) {
