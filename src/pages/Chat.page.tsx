@@ -16,6 +16,7 @@ import { Settings } from '../components/settings/settings'
 
 export function ChatPage() {
   const viewport = useRef<HTMLDivElement>(null);
+  const footer = useRef<HTMLDivElement>(null);
   const { height } = useViewportSize();
   const chatConfig = useContext(ChatConfigContext);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -44,7 +45,7 @@ export function ChatPage() {
     if (shouldScroll) {
       scrollToBottom();
     }
-  }, [shouldScroll, chatInputOpened, chatMessages]);
+  }, [shouldScroll, chatInputOpened, chatMessages, replyMsg]);
 
   const channelIndex = chatConfig.channels.reduce((obj: any, key: string) => {obj[key] = true; return obj}, {});
 
@@ -152,10 +153,11 @@ export function ChatPage() {
           <ScrollArea viewportRef={viewport} h={height} mx="auto" type="never" onScrollPositionChange={onScrollPositionChange} style={{fontSize: chatConfig.fontSize}}>
             <Chat messages={chatMessages} setReplyMsg={(msg) => { if (msg) {setReplyMsg(msg);chatConfig.setChatChannel(msg.target.substring(1));chatInputHandler.open();}}}/>
           </ScrollArea>
+          <Space h={footer.current ? footer.current.scrollHeight : 0}></Space>
         </ChatEmotes.Provider>
       </AppShell.Main>
       <AppShell.Footer >
-        {chatInputOpened ? <ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg}/> : <Affix position={{bottom: 10, right: 10}}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus/></ActionIcon></Affix>}
+        {chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg}/></div> : <Affix position={{bottom: 10, right: 10}}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus/></ActionIcon></Affix>}
       </AppShell.Footer>
     </AppShell>
   );
