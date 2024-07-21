@@ -83,6 +83,6 @@ export function ChatMessageComp(props: ChatMessageProps) {
         <span>: </span>
         <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</span>
         <span className={classes.actions}></span>
-        {props.hideReply ? null : <ActionIcon size={22} variant='subtle' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp/></ActionIcon>}
+        {props.hideReply ? null : <ActionIcon size={22} variant='subtle' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>}
     </div>);
 }

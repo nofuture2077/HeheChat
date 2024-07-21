@@ -58,7 +58,7 @@ export function ChatPage() {
       const { type, data } = e.data;
       switch (type) {
         case 'NEW_MESSAGE':
-          setChatMessages((prevMessages) => [...prevMessages, parseTwitchMessage(data) as ChatMessage].filter(channelFilter).slice(shouldScroll ? 0 : -500));
+          setChatMessages((prevMessages) => [...prevMessages, parseTwitchMessage(data) as ChatMessage].filter(channelFilter).slice(shouldScroll ? 0 : (-1 * chatConfig.maxMessages)));
           break;
         case 'ALL_MESSAGES':
           setChatMessages((data.map(parseTwitchMessage) as ChatMessage[]).filter(channelFilter));
