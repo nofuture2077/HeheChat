@@ -1,6 +1,6 @@
 import { ChatMessage, ParsedMessagePart, parseChatMessage, buildEmoteImageUrl } from '@twurple/chat';
 import classes from './ChatMessage.module.css';
-import { ChatConfigContext, ChatEmotes, ChatConfig } from '../../ApplicationContext';
+import { ChatConfigContext, ChatEmotes, ChatConfig, ChatConfigKey } from '../../ApplicationContext';
 import { useContext } from 'react';
 
 interface ChatMessageProps {
@@ -36,18 +36,16 @@ function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: string, em
     });
 }
 
+const importantBadgeIndex = ['moderator', 'vip', 'staff', 'partner'].reduce((obj: any, key: string) => {obj[key] = 'showImportantBadges'; return obj}, {});
+const subscriberBadgeIndex = ['subscriber', 'founder'].reduce((obj: any, key: string) => {obj[key] = 'showSubBadges'; return obj}, {});
+const predictionBadgeIndex = ['predictions'].reduce((obj: any, key: string) => {obj[key] = 'showPredictions'; return obj}, {});
+
+const badgeIndex = {...importantBadgeIndex, ...subscriberBadgeIndex, ...predictionBadgeIndex};
+
 function getBadge(config: ChatConfig, emotes: ChatEmotes, channel: string, key: string, index: string) {
     const [badge, version] = key.split(',');
-    if (config.showImportantBadges && ['moderator', 'vip', 'staff', 'partner'].indexOf(badge) > -1) {
-        return emotes.getBadge(channel, key, index);
-    }
-    if (config.showSubBadges && ['subscriber', 'founder'].indexOf(badge) > -1) {
-        return emotes.getBadge(channel, key, index);
-    }
-    if (config.showPredictions && ['predictions'].indexOf(badge) > -1) {
-        return emotes.getBadge(channel, key, index);
-    }
-    if (config.showOtherBadges && ['moderator', 'vip', 'staff', 'partner', 'subscriber', 'founder', 'predictions'].indexOf(badge) === -1) {
+    const requireSetting = badgeIndex[badge];
+    if (requireSetting && config[requireSetting as ChatConfigKey] || !requireSetting && config.showOtherBadges) {
         return emotes.getBadge(channel, key, index);
     }
     return '';

@@ -3,7 +3,7 @@ import { getBadgesAndEmotesByNames, ChatEmotes, CHAT_EMOTES, ChatConfigContext, 
 import { useShallowEffect, useViewportSize, useDisclosure } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Stack, Space, ActionIcon } from '@mantine/core';
 import { Chat } from '../components/chat/Chat';
-import { ChatSettings } from '../components/chat/ChatSettings';
+import { ChatSettings } from '../components/settings/ChatSettings';
 import { IconMessagePause, IconPlus } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '../components/header/Header';
@@ -12,6 +12,7 @@ import { ChatInput } from '@/components/chat/ChatInput';
 import { WorkerMessage, WorkerResponse } from '../components/chat/workerTypes';
 import { ChatMessage, parseTwitchMessage } from '@twurple/chat';
 import { ApiClient } from '@twurple/api';
+import { Settings } from '../components/settings/settings'
 
 export function ChatPage() {
   const viewport = useRef<HTMLDivElement>(null);
@@ -44,17 +45,21 @@ export function ChatPage() {
     }
   }, [shouldScroll, chatInputOpened, chatMessages]);
 
+  const channelIndex = chatConfig.channels.reduce((obj: any, key: string) => {obj[key] = true; return obj}, {});
+
   useEffect(() => {
     workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
+
+    const channelFilter = (msg: ChatMessage) => channelIndex[msg.target.substring(1)];
 
     workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
       const { type, data } = e.data;
       switch (type) {
         case 'NEW_MESSAGE':
-          setChatMessages((prevMessages) => [...prevMessages, parseTwitchMessage(data) as ChatMessage].slice(-500));
+          setChatMessages((prevMessages) => [...prevMessages, parseTwitchMessage(data) as ChatMessage].filter(channelFilter).slice(shouldScroll ? 0 : -500));
           break;
         case 'ALL_MESSAGES':
-          setChatMessages(data.map(parseTwitchMessage) as ChatMessage[]);
+          setChatMessages((data.map(parseTwitchMessage) as ChatMessage[]).filter(channelFilter));
           break;
         case 'CHANNELS': {
             const currentChannels = data.currentChannels;
@@ -130,10 +135,10 @@ export function ChatPage() {
       </AppShell.Header>
       <AppShell.Main>
         <ChatEmotes.Provider value={CHAT_EMOTES}>
-          <Drawer opened={settingOpened} onClose={settingsHandler.close} title="Settings" position='right'>
-            <ChatSettings />
+          <Drawer opened={settingOpened} onClose={settingsHandler.close} withCloseButton={false} padding={0} size={'xl'}>
+            <Settings close={settingsHandler.close}/>
           </Drawer>
-          <Drawer opened={alertsOpened} onClose={alertsHandler.close} title="Alerts">
+          <Drawer opened={alertsOpened} onClose={alertsHandler.close} title="Alerts" position='right'>
             <Alerts />
           </Drawer>
           {(shouldScroll || settingOpened) ? null : (
@@ -143,7 +148,7 @@ export function ChatPage() {
               </Stack>
             </Affix>
           )}
-          <ScrollArea viewportRef={viewport} h={height} mx="auto" type="never" onScrollPositionChange={onScrollPositionChange}>
+          <ScrollArea viewportRef={viewport} h={height} mx="auto" type="never" onScrollPositionChange={onScrollPositionChange} style={{fontSize: chatConfig.fontSize}}>
             <Chat messages={chatMessages} />
           </ScrollArea>
           {chatInputOpened ? <Space h={62}/>: null}

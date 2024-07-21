@@ -1,18 +1,17 @@
-import { TagsInput, Switch, Stack, Title } from '@mantine/core';
-import { ColorSchemeToggle } from '../ColorSchemeToggle/ColorSchemeToggle';
+import { TagsInput, Switch, Stack, Text } from '@mantine/core';
 import { useContext } from 'react';
 import { ChatConfigContext } from '../../ApplicationContext';
-
 
 export function ChatSettings() {
     const chatConfig = useContext(ChatConfigContext);
 
     return (
     <Stack>
-        <ColorSchemeToggle/>
-        <TagsInput label="Channelnames" placeholder="" value={chatConfig.channels} onChange={chatConfig.setChannels}></TagsInput>
-        <TagsInput label="Ignored Users" placeholder="" value={chatConfig.ignoredUsers} onChange={chatConfig.setIgnoredUsers}></TagsInput>
-        <Title order={3}>Chat cosmetics</Title>
+        <Text size='md'>Channelnames</Text>
+        <TagsInput placeholder="" value={chatConfig.channels} onChange={chatConfig.setChannels}></TagsInput>
+        <Text size='md'>Ignored Users</Text>
+        <TagsInput placeholder="" value={chatConfig.ignoredUsers} onChange={chatConfig.setIgnoredUsers}></TagsInput>
+        <Text size='md'>Chat cosmetics</Text>
         <Switch checked={chatConfig.showTimestamp} onChange={(event) => chatConfig.setShowTimestamp(event.currentTarget.checked)} label="Show Timestamp" size="lg"/>
         <Switch checked={chatConfig.showProfilePicture} onChange={(event) => chatConfig.setShowProfilePicture(event.currentTarget.checked)} label="Show Profile Picture" size="lg"/>
         <Switch checked={chatConfig.showImportantBadges} onChange={(event) => chatConfig.setShowImportantBadges(event.currentTarget.checked)} label="Show Important Badges" size="lg"/>

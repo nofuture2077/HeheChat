@@ -158,7 +158,7 @@ export const CHAT_EMOTES: ChatEmotes = {
 
 export const ChatEmotes = createContext<ChatEmotes>(CHAT_EMOTES);
 
-export type ChatConfigKey = 'channels' | 'chatChannel' | 'ignoredUsers' | 'showTimestamp' | 'showProfilePicture' | 'showImportantBadges' | 'showSubBadges' | 'showPredictions' | 'showOtherBadges';
+export type ChatConfigKey = 'channels' | 'chatChannel' | 'ignoredUsers' | 'showTimestamp' | 'showProfilePicture' | 'showImportantBadges' | 'showSubBadges' | 'showPredictions' | 'showOtherBadges' | 'fontSize';
 
 export interface ChatConfig {
     channels: string[];
@@ -171,6 +171,7 @@ export interface ChatConfig {
     showSubBadges: boolean;
     showPredictions: boolean;
     showOtherBadges: boolean;
+    fontSize: number;
     setChannels: (channels: string[]) => void;
     setIgnoredUsers: (users: string[]) => void;
     setShowTimestamp: (value: boolean) => void;
@@ -184,6 +185,7 @@ export interface ChatConfig {
     onMessage: (handler: MessageHandler) => MessageHandler;
     off: (handler: MessageHandler) => void;
     fireMessage: (channel: string, text: string) => void;
+    setFontSize: (val: number) => void;
 }
 type MessageHandler = {id?: number, handle: (channel: string, text: string) => void};
 const onMessageHandlers: MessageHandler[] = [];
@@ -199,6 +201,7 @@ export const DEFAULT_CHAT_CONFIG: ChatConfig = {
     showSubBadges: true,
     showPredictions: false,
     showOtherBadges: false,
+    fontSize: 14,
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setShowTimestamp: (value: boolean) => {},
@@ -224,7 +227,8 @@ export const DEFAULT_CHAT_CONFIG: ChatConfig = {
         onMessageHandlers.forEach(handler => {
             handler.handle(channel, text);
         });
-    }
+    },
+    setFontSize: (val) => {}
 };
 
 export function store(chatConfig: ChatConfig) {
