@@ -2,9 +2,14 @@ import { ChatMessage, ParsedMessagePart, parseChatMessage, buildEmoteImageUrl } 
 import classes from './ChatMessage.module.css';
 import { ChatConfigContext, ChatEmotes, ChatConfig, ChatConfigKey } from '../../ApplicationContext';
 import { useContext } from 'react';
+import { IconArrowBackUp } from '@tabler/icons-react';
+import { ActionIcon } from '@mantine/core';
+
 
 interface ChatMessageProps {
-    msg: ChatMessage
+    msg: ChatMessage;
+    setReplyMsg: (msg?: ChatMessage) => void;
+    hideReply?: boolean;
 }
 
 function formatTime(date: Date): string {
@@ -58,13 +63,14 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const cheerEmotes = emotes.getCheerEmotes(channel);
     const msgParts = parseChatMessage(props.msg.text, props.msg.emoteOffsets, cheerEmotes);
 
-    return (<div key={props.msg.id} className={classes.msg}>
-        <span className={classes.channel}>{config.showProfilePicture ? emotes.getLogo(channel): ''}</span>
+    return (<div key={props.msg.id} className={classes.msg + (props.hideReply ? (' ' + classes.hideReply) : '')}>
+        <span className={classes.channel}>{(config.showProfilePicture && !props.hideReply) ? emotes.getLogo(channel): ''}</span>
         <span className={classes.time}>{config.showTimestamp ? formatTime(props.msg.date) : ''} </span>
         <span className={classes.badges}>{Array.from(props.msg.userInfo.badges).map((key, index) =>  getBadge(config, emotes, channel, key.toString(), index.toString()))}</span>
         <span className={classes.username} style={{color: props.msg.userInfo.color}}>{props.msg.userInfo.displayName}</span>
         <span>: </span>
         <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, emotes)}</span>
         <span className={classes.actions}></span>
+        {props.hideReply ? null : <ActionIcon variant='subtle' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp/></ActionIcon>}
     </div>);
 }

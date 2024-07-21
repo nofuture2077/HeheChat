@@ -1,7 +1,10 @@
 .msg {
     padding: 0.2rem 1rem;
 }
-
+.hideReply {
+    margin-left: 20px;
+    margin-right: 20px;
+}
 .msg .channel img {
     height: 24px;
     vertical-align: middle;
@@ -35,7 +38,7 @@
     font-weight: bold;
 }
 
-.msg:hover {
+.msg:not(.hideReply):hover {
     @mixin light {
         background-color: var(--mantine-color-orange-1);
     }

@@ -1,5 +1,5 @@
-import { ChatClient, ChatMessage, parseTwitchMessage } from '@twurple/chat';
-import { StaticAuthProvider, AuthProvider } from '@twurple/auth';
+import { ChatClient, ChatMessage } from '@twurple/chat';
+import { StaticAuthProvider } from '@twurple/auth';
 
 let chatClient: ChatClient;
 let newMessages: ChatMessage[] = [];
@@ -24,7 +24,7 @@ self.onmessage = async (e) => {
       break;
 
     case 'SEND_MESSAGE':
-        chatClient.say(data.channel, data.text);
+        chatClient.say(data.channel, data.text, {replyTo: data.replyTo});
         break;
 
     case 'JOIN_CHANNEL':

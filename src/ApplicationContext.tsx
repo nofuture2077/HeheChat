@@ -184,10 +184,10 @@ export interface ChatConfig {
     setChatChannel: (channel: string) => void;
     onMessage: (handler: MessageHandler) => MessageHandler;
     off: (handler: MessageHandler) => void;
-    fireMessage: (channel: string, text: string) => void;
+    fireMessage: (channel: string, text: string, replyTo?: string) => void;
     setFontSize: (val: number) => void;
 }
-type MessageHandler = {id?: number, handle: (channel: string, text: string) => void};
+type MessageHandler = {id?: number, handle: (channel: string, text: string, replyTo?: string) => void};
 const onMessageHandlers: MessageHandler[] = [];
 var onMessageHandlerIndex = 0;
 export const DEFAULT_CHAT_CONFIG: ChatConfig = {
@@ -223,9 +223,9 @@ export const DEFAULT_CHAT_CONFIG: ChatConfig = {
             onMessageHandlers.splice(index, 1);
         }
     },
-    fireMessage: (channel: string, text: string) => {
+    fireMessage: (channel: string, text: string, replyTo?: string) => {
         onMessageHandlers.forEach(handler => {
-            handler.handle(channel, text);
+            handler.handle(channel, text, replyTo);
         });
     },
     setFontSize: (val) => {}

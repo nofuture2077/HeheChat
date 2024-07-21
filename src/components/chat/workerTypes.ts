@@ -47,6 +47,7 @@ export interface InitMessage {
     data: {
         channel: string;
         text: string;
+        replyTo?: string;
     };
   }
   

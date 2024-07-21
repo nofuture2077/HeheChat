@@ -20,6 +20,7 @@ export function ChatPage() {
   const chatConfig = useContext(ChatConfigContext);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [shouldScroll, setShouldScroll] = useState(true);
+  const [replyMsg, setReplyMsg] = useState<ChatMessage>();
   const [settingOpened, settingsHandler] = useDisclosure(false);
   const [alertsOpened, alertsHandler] = useDisclosure(false);
   const [chatInputOpened, chatInputHandler] = useDisclosure(false);
@@ -95,11 +96,11 @@ export function ChatPage() {
 
     workerRef.current.postMessage(initMessage);
 
-    const chatHandler = chatConfig.onMessage({handle: async (channel, text) => {
+    const chatHandler = chatConfig.onMessage({handle: async (channel, text, replyTo) => {
       const token = await api.getTokenInfo();
 
       api.asUser({id: token.userId || ''}, async (ctx) => {
-        ctx.chat.sendChatMessage(channel, text);
+        ctx.chat.sendChatMessage(channel, text, {replyParentMessageId: replyTo});
       });
     }});
 
@@ -129,7 +130,7 @@ export function ChatPage() {
   }, [chatConfig.channels]);
 
   return (
-    <AppShell header={{ height: 48, offset: true, collapsed: false }} footer={{ height: 62, offset: false, collapsed: !chatInputOpened}}>
+    <AppShell header={{ height: 48, offset: true, collapsed: false }}>
       <AppShell.Header>
         <Header openSettings={settingsHandler.open} openAlerts={alertsHandler.open} />
       </AppShell.Header>
@@ -142,20 +143,19 @@ export function ChatPage() {
             <Alerts />
           </Drawer>
           {(shouldScroll || settingOpened) ? null : (
-            <Affix position={{ bottom: chatInputOpened ? 70 : 10, left: 0 }} style={{ width: "100%" }}>
+            <Affix position={{ top: 60, left: 0 }} style={{ width: "100%" }}>
               <Stack align="center">
                 <Button onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'grape', to: 'orange', deg: 90 }} style={{ borderRadius: 16 }}>New Messages</Button>
               </Stack>
             </Affix>
           )}
           <ScrollArea viewportRef={viewport} h={height} mx="auto" type="never" onScrollPositionChange={onScrollPositionChange} style={{fontSize: chatConfig.fontSize}}>
-            <Chat messages={chatMessages} />
+            <Chat messages={chatMessages} setReplyMsg={(msg) => { if (msg) {setReplyMsg(msg);chatConfig.setChatChannel(msg.target.substring(1));chatInputHandler.open();}}}/>
           </ScrollArea>
-          {chatInputOpened ? <Space h={62}/>: null}
         </ChatEmotes.Provider>
       </AppShell.Main>
       <AppShell.Footer >
-        {chatInputOpened ? <ChatInput close={chatInputHandler.close}/> : <Affix position={{bottom: 10, right: 10}}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus/></ActionIcon></Affix>}
+        {chatInputOpened ? <ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg}/> : <Affix position={{bottom: 10, right: 10}}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus/></ActionIcon></Affix>}
       </AppShell.Footer>
     </AppShell>
   );
