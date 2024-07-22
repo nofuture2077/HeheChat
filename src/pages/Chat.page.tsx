@@ -211,7 +211,7 @@ export function ChatPage() {
                             </Stack>
                         </Affix>
                     )}
-                    <ScrollArea viewportRef={viewport} w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: chatConfig.fontSize }}>
+                    <ScrollArea viewportRef={viewport} w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} mb={12} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: chatConfig.fontSize }}>
                         <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} timeoutUser={timeoutUser} banUser={banUser} deletedMessages={deletedMessagesIndex} deleteMessage={deleteMessage} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); chatConfig.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
                     </ScrollArea>
                     <Space h={footer.current ? footer.current.scrollHeight : 0}></Space>

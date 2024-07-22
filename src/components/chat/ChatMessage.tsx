@@ -86,14 +86,14 @@ export function ChatMessageComp(props: ChatMessageProps) {
         <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</span>
         <span className={classes.actions}></span>
         {props.hideReply ? null : <ActionIcon size={22} variant='subtle' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>}
-        {canMod ? <ModeratorButtons deleteMessage={() => {props.deleteMessage(props.msg.channelId || '', props.msg.id)}} timeout={timeoutModalHandler.open} ban={banModalHandler.open}/> : null}
+        {canMod ? <ActionButtons deleteMessage={() => {props.deleteMessage(props.msg.channelId || '', props.msg.id)}} timeout={timeoutModalHandler.open} ban={banModalHandler.open}/> : null}
         {timeoutModalOpened ? <TimeoutView channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.timeoutUser}/> : null}
         {banModalOpened ? <BanView channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={banModalHandler.close} banUser={props.banUser}/> : null}
     </div>);
 }
 
-function ModeratorButtons(props: {deleteMessage: () => void, timeout: () => void, ban: () => void}) {
-    return <Group className={classes.modActions} gap={'sm'}>
+function ActionButtons(props: {deleteMessage: () => void, timeout: () => void, ban: () => void}) {
+    return <Group className={classes.actions} gap={'sm'}>
         <ActionIcon variant='white' color='primary' size={22} onClick={props.deleteMessage}><IconTrash size={14} /></ActionIcon>
         <ActionIcon variant='white' color='primary' size={22} onClick={props.timeout}><IconClock size={14} /></ActionIcon>
         <ActionIcon variant='white' color='primary' size={22} onClick={props.ban}><IconHammer size={14} /></ActionIcon>
