@@ -128,18 +128,18 @@ export const CHAT_EMOTES: ChatEmotes = {
         const [badge, version] = badgeData.split(',');
         if (CHAT_EMOTES.emotes.get(channel) && CHAT_EMOTES.emotes.get(channel).channelBadges.get(badge) && CHAT_EMOTES.emotes.get(channel).channelBadges.get(badge).getVersion(version)) {
             const b = CHAT_EMOTES.emotes.get(channel).channelBadges.get(badge).getVersion(version);
-            return <img src={b.getImageUrl(1)} key={key}/>
+            return <img alt={badge} src={b.getImageUrl(1)} key={key}/>
         }
         if (CHAT_EMOTES.emotes.get('global') && CHAT_EMOTES.emotes.get('global').channelBadges.get(badge) && CHAT_EMOTES.emotes.get('global').channelBadges.get(badge).getVersion(version)) {
             const b = CHAT_EMOTES.emotes.get('global').channelBadges.get(badge).getVersion(version);
-            return <img src={b.getImageUrl(1)} key={key}/>
+            return <img alt={badge} src={b.getImageUrl(1)} key={key}/>
         }
         return "";
     },
     getEmote: (channel: string, text: string, key: string) => {
         if (CHAT_EMOTES.emotes.get(channel) && CHAT_EMOTES.emotes.get(channel).sevenTVEmotes.get(text)) {
             const data = CHAT_EMOTES.emotes.get(channel).sevenTVEmotes.get(text).data;      
-            return <img key={key} src={data.host.url + "/" + data.host.files[1].name}/>
+            return <img alt={text} key={key} src={data.host.url + "/" + data.host.files[1].name}/>
         }
         return text;
     },
