@@ -30,6 +30,10 @@ export default function Login() {
                 api.users.getAuthenticatedUser({id: tokenInfo.userId || ''}).then((user) => {
                     loginContext.setUser(user);
                 });
+
+                api.moderation.getModeratedChannelsPaginated({id: tokenInfo.userId || ''}).getAll().then((moderatedChannels) => {
+                    loginContext.setModeratedChannels(moderatedChannels);
+                });
             });
             loginContext.setAccessToken(token);
         }
@@ -44,7 +48,16 @@ export default function Login() {
         setRedirectUrl(encodeURI(url));
     }, []);
     var state = '';
-    let scope = ['chat:read', 'chat:edit', 'user:write:chat'].map(encodeURIComponent).join('+');
+    let scope = [
+        // chatter scopes
+        'chat:read',
+        'chat:edit',
+        'user:write:chat',
+        // mod scopes
+        'user:read:moderated_channels',
+        'moderator:manage:chat_messages',
+        'moderator:manage:banned_users'
+    ].map(encodeURIComponent).join('+');
     
     let responseType = encodeURIComponent('token');
     let authUrl = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${loginContext.clientId}&redirect_uri=${redirectUrl}&scope=${scope}&state=${state}`;

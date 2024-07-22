@@ -2,25 +2,22 @@ import { ChatMessage, ParsedMessagePart, parseChatMessage, buildEmoteImageUrl } 
 import classes from './ChatMessage.module.css';
 import { ChatConfigContext, ChatEmotes, ChatConfig, ChatConfigKey, LoginContext } from '../../ApplicationContext';
 import { useContext } from 'react';
-import { IconArrowBackUp } from '@tabler/icons-react';
-import { ActionIcon, Text } from '@mantine/core';
-
+import { IconArrowBackUp, IconTrash, IconClock, IconHammer } from '@tabler/icons-react';
+import { ActionIcon, Text, Group } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
+import { TimeoutView, BanView } from './mod/modview';
+import { formatTime } from '../commons';
 
 interface ChatMessageProps {
     msg: ChatMessage;
     deletedMessages: {[id: string]: boolean };
+    moderatedChannel: {[id: string]: boolean };
     setReplyMsg: (msg?: ChatMessage) => void;
     hideReply?: boolean;
-}
-
-function formatTime(date: Date): string {
-    let hours: number | string = date.getHours();
-    let minutes: number | string = date.getMinutes();
-    
-    if (hours < 10) hours = '0' + hours;
-    if (minutes < 10) minutes = '0' + minutes;
-    
-    return `${hours}:${minutes}`;
+    openModView: (msg: ChatMessage) => void;
+    deleteMessage: (channelId: string, messageId: string) => void;
+    timeoutUser: (channelId: string, userId: string, duration: number, reason: string) => void;
+    banUser: (channelId: string, userId: string, reason: string) => void;
 }
 
 const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] => {
@@ -76,6 +73,9 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const cheerEmotes = emotes.getCheerEmotes(channel);
     const msgParts = parseChatMessage(props.msg.text, props.msg.emoteOffsets, cheerEmotes);
     const deleted = props.deletedMessages[props.msg.id];
+    const canMod = canModerate(props.msg, channel, props.moderatedChannel, login);
+    const [timeoutModalOpened, timeoutModalHandler] = useDisclosure(false);
+    const [banModalOpened, banModalHandler] = useDisclosure(false);
 
     return (<div key={props.msg.id} className={classes.msg + (props.hideReply ? (' ' + classes.hideReply) : '') + (deleted ? (' ' + classes.deleted) : '')}>
         <span className={classes.channel}>{(config.showProfilePicture && !props.hideReply) ? emotes.getLogo(channel): ''}</span>
@@ -86,5 +86,25 @@ export function ChatMessageComp(props: ChatMessageProps) {
         <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</span>
         <span className={classes.actions}></span>
         {props.hideReply ? null : <ActionIcon size={22} variant='subtle' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>}
+        {canMod ? <ModeratorButtons deleteMessage={() => {props.deleteMessage(props.msg.channelId || '', props.msg.id)}} timeout={timeoutModalHandler.open} ban={banModalHandler.open}/> : null}
+        {timeoutModalOpened ? <TimeoutView channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.timeoutUser}/> : null}
+        {banModalOpened ? <BanView channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={banModalHandler.close} banUser={props.banUser}/> : null}
     </div>);
+}
+
+function ModeratorButtons(props: {deleteMessage: () => void, timeout: () => void, ban: () => void}) {
+    return <Group className={classes.modActions} gap={'sm'}>
+        <ActionIcon variant='white' color='primary' size={22} onClick={props.deleteMessage}><IconTrash size={14} /></ActionIcon>
+        <ActionIcon variant='white' color='primary' size={22} onClick={props.timeout}><IconClock size={14} /></ActionIcon>
+        <ActionIcon variant='white' color='primary' size={22} onClick={props.ban}><IconHammer size={14} /></ActionIcon>
+    </Group>;
+}
+
+export function canModerate(msg: ChatMessage, channel: string, moderatedChannel: {[id: string]: boolean }, login: LoginContext) {
+    const isModerator = moderatedChannel[channel];
+    const isBroadcaster = channel === login.user?.name;
+    const chatterIsMod = msg.userInfo.isMod;
+    const chatterIsBroadcaster = channel === msg.userInfo.userName;
+    const canMod = (isModerator || isBroadcaster) && !chatterIsMod && !chatterIsBroadcaster;
+    return canMod;
 }

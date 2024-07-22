@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 import { StaticAuthProvider, AuthProvider } from '@twurple/auth';
-import { ApiClient, HelixUser } from '@twurple/api';
+import { ApiClient, HelixUser, HelixModeratedChannel } from '@twurple/api';
 
 import { toMap } from './components/commons';
 import { get7TVEmotes } from './components/sevenTV'
@@ -10,11 +10,13 @@ export interface LoginContext {
     accessToken?: string;
     userid?: string;
     user?: HelixUser;
+    moderatedChannels: HelixModeratedChannel[];
     isLoggedIn: () => boolean;
     getAuthProvider: () => AuthProvider
     getApiClient: () => ApiClient,
     setAccessToken: (token: string) => void;
     setUser: (user: HelixUser) => void;
+    setModeratedChannels: (channels: HelixModeratedChannel[]) => void;
 }
 
 export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
@@ -29,7 +31,9 @@ export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
         return new ApiClient({ authProvider: DEFAULT_LOGIN_CONTEXT.getAuthProvider()});
     },
     setAccessToken: () => {},
-    setUser: (user: HelixUser) => {}
+    setUser: (user: HelixUser) => {},
+    moderatedChannels: [],
+    setModeratedChannels: (channels: HelixModeratedChannel[]) => {}
 };
 
 export async function getUserId(context: LoginContext) {

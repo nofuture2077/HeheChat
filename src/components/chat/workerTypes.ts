@@ -42,6 +42,11 @@ export interface InitMessage {
     data: string;
   }
 
+  export interface DeletedMessage {
+    type: 'DELETED_MESSAGE';
+    data: string;
+  }
+
   export interface DeleteMessage {
     type: 'DELETE_MESSAGE';
     data: string;
@@ -76,11 +81,12 @@ export interface InitMessage {
     | LeaveChannelMessage
     | GetMessagesMessage
     | StopMessage
+    | DeleteMessage
     | GetChannelsMessage;
   
   export type WorkerResponse =
     | NewMessage
     | AllMessages
-    | DeleteMessage
+    | DeletedMessage
     | ChannelsMessage;
   

@@ -22,13 +22,13 @@ self.onmessage = async (e) => {
         self.postMessage({ type: 'NEW_MESSAGE', data: msg.rawLine });
       });
       chatClient.onMessageRemove((channel, id) => {
-        self.postMessage({ type: 'DELETE_MESSAGE', data: id });
+        self.postMessage({ type: 'DELETED_MESSAGE', data: id });
       });
       break;
 
     case 'SEND_MESSAGE':
-        chatClient.say(data.channel, data.text, {replyTo: data.replyTo});
-        break;
+      chatClient.say(data.channel, data.text, { replyTo: data.replyTo });
+      break;
 
     case 'JOIN_CHANNEL':
       chatClient.join(data.channel);
@@ -43,10 +43,12 @@ self.onmessage = async (e) => {
       break;
 
     case 'GET_CHANNELS':
-      self.postMessage({ type: 'CHANNELS', data: {
-        targetChannels: data.targetChannels,
-        currentChannels: chatClient.currentChannels.map(s => s.slice(1))
-      } });
+      self.postMessage({
+        type: 'CHANNELS', data: {
+          targetChannels: data.targetChannels,
+          currentChannels: chatClient.currentChannels.map(s => s.slice(1))
+        }
+      });
       break;
 
     case 'STOP':

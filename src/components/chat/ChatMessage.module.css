@@ -1,5 +1,6 @@
 .msg {
     padding: 0.2rem 1rem;
+    position: relative;
 }
 .hideReply {
     margin-left: 20px;
@@ -51,4 +52,16 @@
     @mixin dark {
         background-color: var(--mantine-color-grape-9);
     }
+}
+
+.modActions {
+    display: none;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    padding: 2px 10px;
+}
+
+.msg:not(.hideReply):hover .modActions {
+    display: flex;
 }
