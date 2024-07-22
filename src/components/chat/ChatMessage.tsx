@@ -8,6 +8,7 @@ import { ActionIcon, Text } from '@mantine/core';
 
 interface ChatMessageProps {
     msg: ChatMessage;
+    deletedMessages: {[id: string]: boolean };
     setReplyMsg: (msg?: ChatMessage) => void;
     hideReply?: boolean;
 }
@@ -74,10 +75,11 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const channel = props.msg.target.slice(1);
     const cheerEmotes = emotes.getCheerEmotes(channel);
     const msgParts = parseChatMessage(props.msg.text, props.msg.emoteOffsets, cheerEmotes);
+    const deleted = props.deletedMessages[props.msg.id];
 
-    return (<div key={props.msg.id} className={classes.msg + (props.hideReply ? (' ' + classes.hideReply) : '')}>
+    return (<div key={props.msg.id} className={classes.msg + (props.hideReply ? (' ' + classes.hideReply) : '') + (deleted ? (' ' + classes.deleted) : '')}>
         <span className={classes.channel}>{(config.showProfilePicture && !props.hideReply) ? emotes.getLogo(channel): ''}</span>
-        <span className={classes.time}>{config.showTimestamp ? formatTime(props.msg.date) : ''} </span>
+        <span className={classes.time}>{config.showTimestamp ? formatTime(props.msg.date) : ''}</span>
         <span className={classes.badges}>{Array.from(props.msg.userInfo.badges).map((key, index) =>  getBadge(config, emotes, channel, key.toString(), index.toString()))}</span>
         <span className={classes.username} style={{color: props.msg.userInfo.color}}>{props.msg.userInfo.displayName}</span>
         <span>: </span>

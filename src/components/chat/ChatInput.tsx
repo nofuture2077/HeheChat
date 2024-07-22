@@ -22,7 +22,7 @@ export function ChatInput(props: {close: () => void, replyToMsg?: ChatMessage, s
     }
     return (
         <Stack gap={0}>
-        {props.replyToMsg ? (<ChatMessageComp msg={props.replyToMsg} hideReply={true} setReplyMsg={props.setReplyMsg}/>) : null}
+        {props.replyToMsg ? (<ChatMessageComp msg={props.replyToMsg} hideReply={true} deletedMessages={{}} setReplyMsg={props.setReplyMsg}/>) : null}
         <Flex w="100%" justify="space-between" gap={'md'} pl={'md'} pr={'md'}
         align="center" m='xs'>
             <TextInput

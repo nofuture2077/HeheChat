@@ -42,6 +42,11 @@ export interface InitMessage {
     data: string;
   }
 
+  export interface DeleteMessage {
+    type: 'DELETE_MESSAGE';
+    data: string;
+  }
+
   export interface SendMessage {
     type: 'SEND_MESSAGE';
     data: {
@@ -76,5 +81,6 @@ export interface InitMessage {
   export type WorkerResponse =
     | NewMessage
     | AllMessages
+    | DeleteMessage
     | ChannelsMessage;
   

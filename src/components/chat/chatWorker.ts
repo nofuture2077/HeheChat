@@ -21,6 +21,9 @@ self.onmessage = async (e) => {
         newMessages.push(msg);
         self.postMessage({ type: 'NEW_MESSAGE', data: msg.rawLine });
       });
+      chatClient.onMessageRemove((channel, id) => {
+        self.postMessage({ type: 'DELETE_MESSAGE', data: id });
+      });
       break;
 
     case 'SEND_MESSAGE':

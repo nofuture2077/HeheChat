@@ -27,11 +27,12 @@ export function ChatPage() {
   const [chatInputOpened, chatInputHandler] = useDisclosure(false);
   const loginContext = useContext(LoginContext);
   const workerRef = useRef<Worker>();
+  const [deletedMessages, setDeletedMessages]  = useState<string[]>([]);
 
 
   const authProvider = loginContext.getAuthProvider();
   const api = new ApiClient({authProvider});
-
+  
   const onScrollPositionChange = (position: { x: number, y: number }) => {
     const shouldScroll = (viewport.current!.scrollHeight > viewport.current!.clientHeight) && (viewport.current!.scrollHeight - viewport.current!.clientHeight - position.y < 100);
     setShouldScroll(shouldScroll);
@@ -48,6 +49,7 @@ export function ChatPage() {
   }, [shouldScroll, chatInputOpened, chatMessages, replyMsg]);
 
   const channelIndex = chatConfig.channels.reduce((obj: any, key: string) => {obj[key] = true; return obj}, {});
+  const deletedMessagesIndex = deletedMessages.reduce((obj: any, key: string) => {obj[key] = true; return obj}, {});
 
   useEffect(() => {
     workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
@@ -62,6 +64,14 @@ export function ChatPage() {
           break;
         case 'ALL_MESSAGES':
           setChatMessages((data.map(parseTwitchMessage) as ChatMessage[]).filter(channelFilter));
+          break;
+        case 'DELETE_MESSAGE':
+          setDeletedMessages(deletedMessages => {
+            deletedMessages.push(data);
+            const dM: string[] = deletedMessages.slice(-100);
+            localStorage.setItem("chat-messages-deleted", JSON.stringify(dM))
+            return dM
+          })
           break;
         case 'CHANNELS': {
             const currentChannels = data.currentChannels;
@@ -109,6 +119,9 @@ export function ChatPage() {
     const msgs = rawMessages.map(raw => parseTwitchMessage(raw) as ChatMessage);
     setChatMessages(msgs);
 
+    const deletedMessages: string[] = JSON.parse(localStorage.getItem("chat-messages-deleted") || '[]');
+    setDeletedMessages(deletedMessages);
+
     return () => {
       const stopMessage: WorkerMessage = { type: 'STOP' };
       workerRef.current?.postMessage(stopMessage);
@@ -151,7 +164,7 @@ export function ChatPage() {
             </Affix>
           )}
           <ScrollArea viewportRef={viewport} h={height} mx="auto" type="never" onScrollPositionChange={onScrollPositionChange} style={{fontSize: chatConfig.fontSize}}>
-            <Chat messages={chatMessages} setReplyMsg={(msg) => { if (msg) {setReplyMsg(msg);chatConfig.setChatChannel(msg.target.substring(1));chatInputHandler.open();}}}/>
+            <Chat messages={chatMessages} deletedMessages={deletedMessagesIndex} setReplyMsg={(msg) => { if (msg) {setReplyMsg(msg);chatConfig.setChatChannel(msg.target.substring(1));chatInputHandler.open();}}}/>
           </ScrollArea>
           <Space h={footer.current ? footer.current.scrollHeight : 0}></Space>
         </ChatEmotes.Provider>
