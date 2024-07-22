@@ -1,19 +1,15 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { UnstyledButton, Tooltip, Title, rem, Button, Group } from '@mantine/core';
 import {
   IconHome2,
-  IconGauge,
-  IconDeviceDesktopAnalytics,
-  IconFingerprint,
-  IconCalendarStats,
-  IconUser,
-  IconSettings,
   IconX,
   IconMessageChatbot
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
 import { UISettings } from './UISettings';
+import { UserButton } from '../commons/userbutton';
+import { LoginContext } from '@/ApplicationContext';
 
 const mainLinksMockdata = [
   { icon: IconHome2, label: 'UI' },
@@ -22,6 +18,7 @@ const mainLinksMockdata = [
 
 export function Settings(props: {close: () => void}) {
   const [active, setActive] = useState('Chat');
+  const loginContext = useContext(LoginContext);
 
   const mainLinks = mainLinksMockdata.map((link) => (
     <Tooltip
@@ -54,27 +51,29 @@ export function Settings(props: {close: () => void}) {
 
   return (
     <nav className={classes.navbar}>
+      <div className={classes.header}>
+        <Title order={4}>
+            {active}
+        </Title>
+        <Button onClick={props.close} variant='subtle' color='primary'>
+            <IconX/>
+        </Button>
+      </div>
       <div className={classes.wrapper}>
         <div className={classes.aside}>
           <div className={classes.logo}>
           </div>
           {mainLinks}
         </div>
-        <div className={classes.main}>
-            <Group className={classes.title} justify='space-between'>
-                <Title order={4}>
-                    {active}
-                </Title>
-                <Button onClick={props.close} variant='subtle' color='primary'>
-                    <IconX/>
-                </Button>
-            </Group>
-          
-          <div className={classes.active}>
-            {renderSwitch(active)}
-          </div>
+        <div className={classes.main}>          
+            <div className={classes.active}>
+                {renderSwitch(active)}
+            </div>
         </div>
       </div>
+      <div className={classes.footer}>
+        <UserButton avatarUrl={loginContext.user?.profilePictureUrl || ''} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''}/>
+    </div>
     </nav>
   );
 }

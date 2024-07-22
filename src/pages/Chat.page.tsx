@@ -170,7 +170,9 @@ export function ChatPage() {
         </ChatEmotes.Provider>
       </AppShell.Main>
       <AppShell.Footer >
-        {chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg}/></div> : <Affix position={{bottom: 10, right: 10}}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus/></ActionIcon></Affix>}
+
+        {(!settingOpened && !alertsOpened) ? 
+          chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg}/></div> : <Affix position={{bottom: 10, right: 10}}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus/></ActionIcon></Affix> : null}
       </AppShell.Footer>
     </AppShell>
   );
