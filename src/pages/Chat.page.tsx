@@ -62,7 +62,7 @@ export function ChatPage() {
     }
 
     const scrollToBottom = () => {
-        viewport.current!.scrollTo({ top: viewport.current!.scrollHeight});
+        viewport.current!.scrollTo({ top: viewport.current!.scrollHeight });
     }
 
     useEffect(() => {
@@ -78,7 +78,7 @@ export function ChatPage() {
     const channelFilter = (msg: HeheMessage) => channelIndex[msg.target.substring(1)];
 
     const addMessage = (msg: HeheMessage) => {
-        setChatMessages((prevMessages) => [...prevMessages, msg].filter(channelFilter).slice(shouldScroll ? 0 : (-1 * chatConfig.maxMessages)));
+        setChatMessages((prevMessages) => [...prevMessages, msg].filter(channelFilter).slice(shouldScroll ? (-1 * chatConfig.maxMessages) : 0));
     }
 
     useEffect(() => {
@@ -92,7 +92,7 @@ export function ChatPage() {
                     addMessage(parseMessage(data));
                     break;
                 case 'ALL_MESSAGES':
-                    setChatMessages((data.map(parseTwitchMessage) as ChatMessage[]).filter(channelFilter));
+                    setChatMessages((data.map(parseTwitchMessage) as ChatMessage[]).filter(channelFilter).slice(shouldScroll ? (-1 * chatConfig.maxMessages) : 0));
                     break;
                 case 'DELETED_MESSAGE':
                     setDeletedMessages(deletedMessages => {
