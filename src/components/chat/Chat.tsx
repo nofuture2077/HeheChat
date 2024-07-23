@@ -34,7 +34,7 @@ export function parseMessage(rawLine: string): HeheMessage {
 
 export function parseSystemMessage(rawLine: string): SystemMessage {
     const parts = rawLine.split('$$$');
-    return new SystemMessage(parts[1], parts[5], new Date(Date.parse(parts[2])), parts[3] as 'delete' | 'timeout' | 'ban' | 'raid', parts[4]);
+    return new SystemMessage(parts[1], parts[5], new Date(Date.parse(parts[2])), parts[4] as 'delete' | 'timeout' | 'ban' | 'raid', parts[3]);
 }
 
 export function isSystemMessage(rawLine: string): boolean {
