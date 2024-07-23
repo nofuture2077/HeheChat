@@ -20,9 +20,15 @@ export function ChatInput(props: {close: () => void, replyToMsg?: ChatMessage, s
         if (close)
             props.close();
     }
+    const modActions = {
+        deleteMessage:() => {},
+        timeoutUser:() => {},
+        banUser:() => {},
+        shoutoutUser:() => {}
+    };
     return (
         <Stack gap={0}>
-        {props.replyToMsg ? (<ChatMessageComp msg={props.replyToMsg} openModView={() => {}} moderatedChannel={{}} hideReply={true} deletedMessages={{}} setReplyMsg={props.setReplyMsg} deleteMessage={() => {}} timeoutUser={() => {}} banUser={() => {}}/>) : null}
+        {props.replyToMsg ? (<ChatMessageComp msg={props.replyToMsg} openModView={() => {}} moderatedChannel={{}} hideReply={true} deletedMessages={{}} setReplyMsg={props.setReplyMsg} modActions={modActions}/>) : null}
         <Flex w="100%" justify="space-between" gap={'md'} pl={'md'} pr={'md'}
         align="center" m='xs'>
             <TextInput
