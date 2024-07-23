@@ -3,6 +3,9 @@
     position: relative;
     max-width: 100vw;
 }
+.channel {
+    opacity: 0.4;
+}
 .hideReply {
     margin-left: 20px;
     margin-right: 20px;
