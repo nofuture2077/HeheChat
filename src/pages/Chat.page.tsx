@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotes, CHAT_EMOTES, ChatConfigContext, LoginContext } from '../ApplicationContext';
 import { useShallowEffect, useViewportSize, useDisclosure } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Stack, Space, ActionIcon } from '@mantine/core';
-import { Chat, HeheMessage, parseMessage, SystemMessage } from '../components/chat/Chat';
+import { Chat, HeheMessage, ModActions, parseMessage, SystemMessage } from '../components/chat/Chat';
 import { IconMessagePause, IconPlus } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '../components/header/Header';
@@ -57,7 +57,7 @@ export function ChatPage() {
     const api = new ApiClient({ authProvider });
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
-        const shouldScroll = (viewport.current!.scrollHeight > viewport.current!.clientHeight) && (viewport.current!.scrollHeight - viewport.current!.clientHeight - position.y < 100);
+        const shouldScroll = (viewport.current!.scrollHeight > viewport.current!.clientHeight) && (viewport.current!.scrollHeight - viewport.current!.clientHeight - viewport.current!.scrollTop < 10);
         setShouldScroll(shouldScroll);
     }
 
@@ -104,13 +104,13 @@ export function ChatPage() {
                     })
                     break;
                 case 'TIMEOUT_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["Timeout", data.username, "in", data.channel, "for", formatDuration(data.duration)].join(" "), data.date, "timeout"));
+                    addMessage(new SystemMessage(data.channel, ["Timeout", data.username, "in", data.channel, "for", formatDuration(data.duration)].join(" "), data.date, "timeout", data.channelId, data.userId));
                     break;
                 case 'BAN_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["Ban", data.username, "in", data.channel].join(" "), data.date, "ban"));
+                    addMessage(new SystemMessage(data.channel, ["Ban", data.username, "in", data.channel].join(" "), data.date, "ban", data.channelId, data.userId));
                     break;
                 case 'RAID_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, [data.channel, "got raided from", data.username, "with", data.viewerCount, "viewers"].join(" "), data.date, "raid"));
+                    addMessage(new SystemMessage(data.channel, [data.channel, "got raided from", data.username, "with", data.viewerCount, "viewers"].join(" "), data.date, "raid", data.channelId, data.userId));
                     break;
                 case 'CHANNELS': {
                     const currentChannels = data.currentChannels;
@@ -210,8 +210,21 @@ export function ChatPage() {
         });
     }
 
+    const shoutoutUser = (channelId: string, userId: string) => {
+        api.asUser(loginContext.user?.id || '', async (ctx) => {
+            ctx.chat.shoutoutUser(channelId, userId);
+        });
+    };
+
+    const modActions: ModActions = {
+        deleteMessage,
+        timeoutUser,
+        banUser,
+        shoutoutUser
+    };
+
     return (
-        <AppShell header={{ height: 48, offset: true, collapsed: false }}>
+        <AppShell>
             <AppShell.Header>
                 <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }} />
             </AppShell.Header>
@@ -228,7 +241,8 @@ export function ChatPage() {
                         </Affix>
                     )}
                     <ScrollArea viewportRef={viewport} w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} mb={12} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: chatConfig.fontSize }}>
-                        <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} timeoutUser={timeoutUser} banUser={banUser} deletedMessages={deletedMessagesIndex} deleteMessage={deleteMessage} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); chatConfig.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
+                    <Space h={48}></Space>
+                        <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); chatConfig.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
                     </ScrollArea>
                     <Space h={footer.current ? footer.current.scrollHeight : 0}></Space>
                 </ChatEmotes.Provider>

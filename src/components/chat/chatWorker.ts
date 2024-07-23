@@ -52,6 +52,7 @@ self.onmessage = async (e) => {
           channel,
           channelId: msg.channelId,
           username: user,
+          userId: msg.userInfo.userId,
           date: msg.date,
           viewerCount: raidInfo.viewerCount
         } });

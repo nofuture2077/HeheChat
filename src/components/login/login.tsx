@@ -56,7 +56,8 @@ export default function Login() {
         // mod scopes
         'user:read:moderated_channels',
         'moderator:manage:chat_messages',
-        'moderator:manage:banned_users'
+        'moderator:manage:banned_users',
+        'moderator:manage:shoutouts'
     ].map(encodeURIComponent).join('+');
     
     let responseType = encodeURIComponent('token');

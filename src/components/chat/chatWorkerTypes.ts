@@ -78,6 +78,7 @@ export interface InitMessage {
       channel: string,
       channelId: string,
       username: string,
+      userId: string,
       date: Date,
       viewerCount: number,
     };
