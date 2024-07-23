@@ -235,7 +235,7 @@ export function ChatPage() {
             </AppShell.Main>
             <AppShell.Footer >
                 {(!drawerOpen) ?
-                    chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 20, right: 20 }}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus /></ActionIcon></Affix> : null}
+                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 20, right: 20 }}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus /></ActionIcon></Affix>) : null}
             </AppShell.Footer>
         </AppShell>
     );
