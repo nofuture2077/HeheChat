@@ -2,18 +2,19 @@ import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotes, CHAT_EMOTES, ChatConfigContext, LoginContext } from '../ApplicationContext';
 import { useShallowEffect, useViewportSize, useDisclosure } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Stack, Space, ActionIcon } from '@mantine/core';
-import { Chat } from '../components/chat/Chat';
+import { Chat, HeheMessage, parseMessage, SystemMessage } from '../components/chat/Chat';
 import { IconMessagePause, IconPlus } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '../components/header/Header';
 import { Alerts } from '../components/alerts/Alerts';
 import { ChatInput } from '@/components/chat/ChatInput';
-import { WorkerMessage, WorkerResponse } from '../components/chat/workerTypes';
+import { WorkerMessage, WorkerResponse } from '../components/chat/chatWorkerTypes';
 import { ChatMessage, parseTwitchMessage } from '@twurple/chat';
 import { ApiClient, HelixModeratedChannel } from '@twurple/api';
 import { Settings } from '../components/settings/settings'
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '@/components/chat/mod/modview';
+import { formatDuration } from '@/components/commons';
 
 export type OverlayDrawer = {
     name: string;
@@ -42,7 +43,7 @@ export function ChatPage() {
     const footer = useRef<HTMLDivElement>(null);
     const { width, height } = useViewportSize();
     const chatConfig = useContext(ChatConfigContext);
-    const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+    const [chatMessages, setChatMessages] = useState<HeheMessage[]>([]);
     const [shouldScroll, setShouldScroll] = useState(true);
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
@@ -74,27 +75,42 @@ export function ChatPage() {
     const deletedMessagesIndex = deletedMessages.reduce((obj: any, key: string) => { obj[key] = true; return obj }, {});
     const moderatedChannel = loginContext.moderatedChannels.reduce((obj: any, c: HelixModeratedChannel) => { obj[c.name] = true; return obj }, {});
 
+    const channelFilter = (msg: HeheMessage) => channelIndex[msg.target.substring(1)];
+
+    const addMessage = (msg: HeheMessage) => {
+        setChatMessages((prevMessages) => [...prevMessages, msg].filter(channelFilter).slice(shouldScroll ? 0 : (-1 * chatConfig.maxMessages)));
+    }
+
     useEffect(() => {
         workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
 
-        const channelFilter = (msg: ChatMessage) => channelIndex[msg.target.substring(1)];
-
+    
         workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
             const { type, data } = e.data;
             switch (type) {
                 case 'NEW_MESSAGE':
-                    setChatMessages((prevMessages) => [...prevMessages, parseTwitchMessage(data) as ChatMessage].filter(channelFilter).slice(shouldScroll ? 0 : (-1 * chatConfig.maxMessages)));
+                    addMessage(parseMessage(data));
                     break;
                 case 'ALL_MESSAGES':
                     setChatMessages((data.map(parseTwitchMessage) as ChatMessage[]).filter(channelFilter));
                     break;
                 case 'DELETED_MESSAGE':
                     setDeletedMessages(deletedMessages => {
-                        deletedMessages.push(data);
+                        deletedMessages.push(data.msgId);
+                        // addMessage(new SystemMessage(data.channel, ["Deleted message from", data.username, "in", data.channel].join(" "), data.date, "delete"));
                         const dM: string[] = deletedMessages.slice(-100);
                         localStorage.setItem("chat-messages-deleted", JSON.stringify(dM))
                         return dM
                     })
+                    break;
+                case 'TIMEOUT_MESSAGE':
+                    addMessage(new SystemMessage(data.channel, ["Timeout", data.username, "in", data.channel, "for", formatDuration(data.duration)].join(" "), data.date, "timeout"));
+                    break;
+                case 'BAN_MESSAGE':
+                    addMessage(new SystemMessage(data.channel, ["Ban", data.username, "in", data.channel].join(" "), data.date, "ban"));
+                    break;
+                case 'RAID_MESSAGE':
+                    addMessage(new SystemMessage(data.channel, [data.channel, "got raided from", data.username, "with", data.viewerCount, "viewers"].join(" "), data.date, "raid"));
                     break;
                 case 'CHANNELS': {
                     const currentChannels = data.currentChannels;
@@ -141,7 +157,7 @@ export function ChatPage() {
         });
 
         const rawMessages: string[] = JSON.parse(localStorage.getItem("chat-messages") || '[]');
-        const msgs = rawMessages.map(raw => parseTwitchMessage(raw) as ChatMessage);
+        const msgs = rawMessages.map(parseMessage);
         setChatMessages(msgs);
 
         const deletedMessages: string[] = JSON.parse(localStorage.getItem("chat-messages-deleted") || '[]');
@@ -219,7 +235,7 @@ export function ChatPage() {
             </AppShell.Main>
             <AppShell.Footer >
                 {(!drawerOpen) ?
-                    chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 10, right: 10 }}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus /></ActionIcon></Affix> : null}
+                    chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 20, right: 20 }}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus /></ActionIcon></Affix> : null}
             </AppShell.Footer>
         </AppShell>
     );

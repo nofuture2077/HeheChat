@@ -2,8 +2,8 @@ import { ChatMessage, ParsedMessagePart, parseChatMessage, buildEmoteImageUrl } 
 import classes from './ChatMessage.module.css';
 import { ChatConfigContext, ChatEmotes, ChatConfig, ChatConfigKey, LoginContext } from '../../ApplicationContext';
 import { useContext } from 'react';
-import { IconArrowBackUp, IconTrash, IconClock, IconHammer } from '@tabler/icons-react';
-import { ActionIcon, Text, Group } from '@mantine/core';
+import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconCheck } from '@tabler/icons-react';
+import { ActionIcon, Text, Group, CopyButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { TimeoutView, BanView } from './mod/modview';
 import { formatTime } from '../commons';
@@ -77,6 +77,17 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const [timeoutModalOpened, timeoutModalHandler] = useDisclosure(false);
     const [banModalOpened, banModalHandler] = useDisclosure(false);
 
+    const actions = [];
+    if (canMod && config.modToolsEnabled) {
+        actions.push(<ActionIcon key='deleteAction' variant='white' color='primary' size={22} onClick={() => {props.deleteMessage(props.msg.channelId || '', props.msg.id)}}><IconTrash size={14} /></ActionIcon>);
+        actions.push(<ActionIcon key='timeoutAction' variant='white' color='primary' size={22} onClick={timeoutModalHandler.open}><IconClock size={14} /></ActionIcon>);
+        actions.push(<ActionIcon key='banAction' variant='white' color='primary' size={22} onClick={banModalHandler.open}><IconHammer size={14} /></ActionIcon>);
+    }
+    if (!props.hideReply) {
+        actions.push(<CopyButton value={props.msg.text}>{({ copied, copy }) => (<ActionIcon key='replyAction' size={22} variant='white' onClick={copy}>{copied ? <IconCheck size={config.fontSize}/> : <IconCopy size={config.fontSize}/>}</ActionIcon>)}</CopyButton>);
+        actions.push(<ActionIcon key='replyAction' size={22} variant='white' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>);
+    }
+
     return (<div key={props.msg.id} className={classes.msg + (props.hideReply ? (' ' + classes.hideReply) : '') + (deleted ? (' ' + classes.deleted) : '')}>
         <span className={classes.channel}>{(config.showProfilePicture && !props.hideReply) ? emotes.getLogo(channel): ''}</span>
         <span className={classes.time}>{config.showTimestamp ? formatTime(props.msg.date) : ''}</span>
@@ -84,20 +95,10 @@ export function ChatMessageComp(props: ChatMessageProps) {
         <span className={classes.username} style={{color: props.msg.userInfo.color}}>{props.msg.userInfo.displayName}</span>
         <span>: </span>
         <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</span>
-        <span className={classes.actions}></span>
-        {props.hideReply ? null : <ActionIcon size={22} variant='subtle' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>}
-        {canMod ? <ActionButtons deleteMessage={() => {props.deleteMessage(props.msg.channelId || '', props.msg.id)}} timeout={timeoutModalHandler.open} ban={banModalHandler.open}/> : null}
+        { actions.length ? <Group className={classes.actions} gap={'sm'}>{actions}</Group>: null}
         {timeoutModalOpened ? <TimeoutView channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.timeoutUser}/> : null}
         {banModalOpened ? <BanView channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={banModalHandler.close} banUser={props.banUser}/> : null}
     </div>);
-}
-
-function ActionButtons(props: {deleteMessage: () => void, timeout: () => void, ban: () => void}) {
-    return <Group className={classes.actions} gap={'sm'}>
-        <ActionIcon variant='white' color='primary' size={22} onClick={props.deleteMessage}><IconTrash size={14} /></ActionIcon>
-        <ActionIcon variant='white' color='primary' size={22} onClick={props.timeout}><IconClock size={14} /></ActionIcon>
-        <ActionIcon variant='white' color='primary' size={22} onClick={props.ban}><IconHammer size={14} /></ActionIcon>
-    </Group>;
 }
 
 export function canModerate(msg: ChatMessage, channel: string, moderatedChannel: {[id: string]: boolean }, login: LoginContext) {

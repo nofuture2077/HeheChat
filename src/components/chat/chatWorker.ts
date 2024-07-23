@@ -1,4 +1,4 @@
-import { ChatClient, ChatMessage } from '@twurple/chat';
+import { ChatClient, ChatMessage, ClearChat } from '@twurple/chat';
 import { StaticAuthProvider } from '@twurple/auth';
 
 let chatClient: ChatClient;
@@ -21,8 +21,42 @@ self.onmessage = async (e) => {
         newMessages.push(msg);
         self.postMessage({ type: 'NEW_MESSAGE', data: msg.rawLine });
       });
-      chatClient.onMessageRemove((channel, id) => {
-        self.postMessage({ type: 'DELETED_MESSAGE', data: id });
+      chatClient.onMessageRemove((channel, id, deleteMessage) => {
+        self.postMessage({ type: 'DELETED_MESSAGE', data: {
+          channel,
+          channelId: deleteMessage.channelId,
+          msgId: id,
+          username: deleteMessage.userName,
+          date: deleteMessage.date
+        } });
+      });
+      chatClient.onBan((channel, user, msg) => {
+        self.postMessage({ type: 'BAN_MESSAGE', data: {
+          channel,
+          channelId: msg.channelId,
+          userId: msg.targetUserId,
+          username: user,
+          date: msg.date
+        } });
+      });
+      chatClient.onTimeout((channel, user, duration, msg) => {
+        self.postMessage({ type: 'TIMEOUT_MESSAGE', data: {
+          channel,
+          channelId: msg.channelId,
+          username: user,
+          userId: msg.targetUserId,
+          duration: duration * 1000,
+          date: msg.date
+        } });
+      });
+      chatClient.onRaid((channel, user, raidInfo, msg) => {
+        self.postMessage({ type: 'RAID_MESSAGE', data: {
+          channel,
+          channelId: msg.channelId,
+          username: user,
+          date: msg.date,
+          viewerCount: raidInfo.viewerCount
+        } });
       });
       break;
 

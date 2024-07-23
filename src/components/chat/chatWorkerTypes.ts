@@ -44,7 +44,47 @@ export interface InitMessage {
 
   export interface DeletedMessage {
     type: 'DELETED_MESSAGE';
-    data: string;
+    data: {
+      channel: string,
+      channelId: string,
+      username: string,
+      msgId: string,
+      date: Date
+    };
+  }
+
+  export interface TimoutMessage {
+    type: 'TIMEOUT_MESSAGE';
+    data: {
+      channel: string,
+      channelId: string,
+      username: string,
+      userId: string,
+      date: Date,
+      duration: number,
+    };
+  }
+
+  export interface BanMessage {
+    type: 'BAN_MESSAGE';
+    data: {
+      channel: string,
+      channelId: string,
+      username: string,
+      userId: string,
+      date: Date
+    };
+  }
+
+  export interface RaidMessage {
+    type: 'RAID_MESSAGE';
+    data: {
+      channel: string,
+      channelId: string,
+      username: string,
+      date: Date,
+      viewerCount: number,
+    };
   }
 
   export interface DeleteMessage {
@@ -88,5 +128,8 @@ export interface InitMessage {
     | NewMessage
     | AllMessages
     | DeletedMessage
+    | TimoutMessage
+    | BanMessage
+    | RaidMessage
     | ChannelsMessage;
   

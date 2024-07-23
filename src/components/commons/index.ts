@@ -36,3 +36,9 @@ export function toMap<A, K>(arr: A[], func1: (el: A) => K) {
         return acc;
     }, new Map());
 }
+
+export function generateGUID(): string {
+    const timestamp = new Date().getTime();
+    const randomNum = Math.floor(Math.random() * 1000000);
+    return `${timestamp}-${randomNum}`;
+}

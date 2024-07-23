@@ -28,6 +28,7 @@ export default function App() {
   const setShowPredictions = (value: boolean) => updateChatConfig('showPredictions', value);
   const setShowOtherBadges = (value: boolean) => updateChatConfig('showOtherBadges', value);
   const setFontSize = (value: number) => updateChatConfig('fontSize', value);
+  const setModToolsEnabled = (value: boolean) => updateChatConfig('modToolsEnabled', value);
   const getChatChannel = () => {
     if (chatConfig.channels.includes(chatConfig.chatChannel || '')) {
       return chatConfig.chatChannel;
@@ -84,7 +85,7 @@ export default function App() {
 
   return (
     <MantineProvider defaultColorScheme="auto" theme={theme}>
-      <ChatConfigContext.Provider value={{ ...chatConfig, setChannels, setIgnoredUsers, setShowTimestamp, setShowProfilePicture, setShowImportantBadges, setShowSubBadges, setShowPredictions, setShowOtherBadges, setChatChannel, getChatChannel, setFontSize }}>
+      <ChatConfigContext.Provider value={{ ...chatConfig, setChannels, setIgnoredUsers, setShowTimestamp, setShowProfilePicture, setShowImportantBadges, setShowSubBadges, setShowPredictions, setShowOtherBadges, setChatChannel, getChatChannel, setFontSize, setModToolsEnabled }}>
         <LoginContext.Provider value={{...loginContext, setAccessToken, isLoggedIn, getAuthProvider, getApiClient, setUser, setModeratedChannels}}>
           <Router />
         </LoginContext.Provider>

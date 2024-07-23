@@ -3,17 +3,20 @@ import { UnstyledButton, Tooltip, Title, rem, Button, Group } from '@mantine/cor
 import {
   IconHome2,
   IconX,
-  IconMessageChatbot
+  IconMessageChatbot,
+  IconSword
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
 import { UISettings } from './UISettings';
+import { ModSettings } from './ModSettings';
 import { UserButton } from '../commons/userbutton';
 import { LoginContext } from '@/ApplicationContext';
 
 const mainLinksMockdata = [
   { icon: IconHome2, label: 'UI' },
-  { icon: IconMessageChatbot, label: 'Chat' }
+  { icon: IconMessageChatbot, label: 'Chat' },
+  { icon: IconSword, label: 'Mod' }
 ];
 
 export function Settings(props: {close: () => void}) {
@@ -44,6 +47,8 @@ export function Settings(props: {close: () => void}) {
         return <UISettings/>;
     case 'Chat':
         return <ChatSettings/>;
+    case 'Mod':
+        return <ModSettings/>;
     default:
         return null;
     }
