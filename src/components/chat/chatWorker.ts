@@ -1,8 +1,7 @@
-import { ChatClient, ChatMessage, ClearChat } from '@twurple/chat';
+import { ChatClient } from '@twurple/chat';
 import { StaticAuthProvider } from '@twurple/auth';
 
 let chatClient: ChatClient;
-let newMessages: ChatMessage[] = [];
 
 self.onmessage = async (e) => {
   const { type, data } = e.data;
@@ -18,7 +17,6 @@ self.onmessage = async (e) => {
       await chatClient.connect();
       chatClient.onMessage((channel, user, text, msg) => {
         if (data.ignoredUsers.indexOf(user) !== -1) return;
-        newMessages.push(msg);
         self.postMessage({ type: 'NEW_MESSAGE', data: msg.rawLine });
       });
       chatClient.onMessageRemove((channel, id, deleteMessage) => {
@@ -70,10 +68,6 @@ self.onmessage = async (e) => {
 
     case 'LEAVE_CHANNEL':
       chatClient.part(data.channel);
-      break;
-
-    case 'GET_MESSAGES':
-      self.postMessage({ type: 'ALL_MESSAGES', data: newMessages.map(m => m.rawLine) });
       break;
 
     case 'GET_CHANNELS':

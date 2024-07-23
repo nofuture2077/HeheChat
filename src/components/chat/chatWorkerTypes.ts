@@ -29,10 +29,6 @@ export interface InitMessage {
     };
   }
   
-  export interface GetMessagesMessage {
-    type: 'GET_MESSAGES';
-  }
-  
   export interface StopMessage {
     type: 'STOP';
   }
@@ -119,7 +115,6 @@ export interface InitMessage {
     | SendMessage
     | JoinChannelMessage
     | LeaveChannelMessage
-    | GetMessagesMessage
     | StopMessage
     | DeleteMessage
     | GetChannelsMessage;
