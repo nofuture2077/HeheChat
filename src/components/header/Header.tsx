@@ -1,12 +1,13 @@
 import { Container, ActionIcon } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
-import { IconMessageChatbot, IconSettings, IconBell } from '@tabler/icons-react';
+import { IconBrandTwitch, IconSettings, IconBell } from '@tabler/icons-react';
 import Logo from '../../favicon.svg';
 
 export function Header(props: {
     openSettings: () => void,
-    openAlerts: () => void
+    openAlerts: () => void,
+    openTwitch: () => void
 }) {
   const [opened] = useDisclosure(false);
 
@@ -22,6 +23,9 @@ export function Header(props: {
             </ActionIcon>
             <ActionIcon variant='transparent' color='primary' size={46}>
                 <IconBell style={{ width: "32px", height: "32px" }} onClick={props.openAlerts} size={42}/>
+            </ActionIcon>
+            <ActionIcon variant='transparent' color='primary' size={46}>
+                <IconBrandTwitch style={{ width: "32px", height: "32px" }} onClick={props.openTwitch} size={42}/>
             </ActionIcon>
         </div>
     </Container>

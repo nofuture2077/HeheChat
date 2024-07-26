@@ -15,6 +15,7 @@ import { Settings } from '../components/settings/settings'
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '@/components/chat/mod/modview';
 import { formatDuration } from '@/components/commons';
+import { TwitchView } from '@/components/twitch/twitchview';
 
 export type OverlayDrawer = {
     name: string;
@@ -38,6 +39,13 @@ const AlertDrawer: OverlayDrawer = {
     position: 'right'
 }
 
+const TwitchDrawer: OverlayDrawer = {
+    name: 'twitch',
+    component: TwitchView,
+    size: 'xl',
+    position: 'right'
+}
+
 export function ChatPage() {
     const viewport = useRef<HTMLDivElement>(null);
     const footer = useRef<HTMLDivElement>(null);
@@ -52,6 +60,7 @@ export function ChatPage() {
     const loginContext = useContext(LoginContext);
     const workerRef = useRef<Worker>();
     const [deletedMessages, setDeletedMessages] = useState<string[]>([]);
+    const [refreshSeed, setRefreshSeed] = useState<number>(0);
 
     const authProvider = loginContext.getAuthProvider();
     const api = new ApiClient({ authProvider });
@@ -124,7 +133,9 @@ export function ChatPage() {
                         if (currentChannels.indexOf(nc) === -1) {
                             const joinChannelMessage: WorkerMessage = { type: 'JOIN_CHANNEL', data: { channel: nc } };
                             workerRef.current?.postMessage(joinChannelMessage);
-                            CHAT_EMOTES.updateChannel(loginContext, nc);
+                            CHAT_EMOTES.updateChannel(loginContext, nc).then(() => {
+                                setRefreshSeed(Math.random());
+                            });
                         }
                     });
                 }
@@ -216,6 +227,12 @@ export function ChatPage() {
         });
     };
 
+    const raidUser = (channelId: string, userId: string) => {
+        api.asUser(loginContext.user?.id || '', async (ctx) => {
+            ctx.raids.startRaid(channelId, userId);
+        });
+    };
+
     const modActions: ModActions = {
         deleteMessage,
         timeoutUser,
@@ -226,7 +243,7 @@ export function ChatPage() {
     return (
         <AppShell>
             <AppShell.Header>
-                <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }} />
+                <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }} openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }} />
             </AppShell.Header>
             <AppShell.Main>
                 <ChatEmotes.Provider value={CHAT_EMOTES}>

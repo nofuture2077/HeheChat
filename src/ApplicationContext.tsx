@@ -80,7 +80,7 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
             user,
             channelBadges: toMap(channelBadges, ba => ba.id),
             channelEmotes: toMap(channelEmotes, em => em.name),
-            cheerEmotes: cheerEmotes.getPossibleNames(),
+            cheerEmotes: cheerEmotes,
             sevenTVEmotes
         }
     }));
@@ -110,6 +110,7 @@ export interface ChatEmotes {
     getBadge: (channel: string, badge: string, key: string) => any;
     getEmote: (channel: string, word: string, key: string) => any;
     getCheerEmotes: (channel: string) => string[];
+    getCheerEmote: (channel: string, name: string, bits: number) => any;
     getLogo: (channel: string) => any;
     getChannelId: (channel: string) => string;
 }
@@ -144,10 +145,16 @@ export const CHAT_EMOTES: ChatEmotes = {
         return text;
     },
     getCheerEmotes: (channel: string) => {
-        if(CHAT_EMOTES.emotes.get(channel) && CHAT_EMOTES.emotes.get(channel).cheerEmotes) {
-            return CHAT_EMOTES.emotes.get(channel).cheerEmotes;
+        if (CHAT_EMOTES.emotes.get(channel) && CHAT_EMOTES.emotes.get(channel).cheerEmotes) {
+            return CHAT_EMOTES.emotes.get(channel).cheerEmotes.getPossibleNames();
         }
         return [];
+    },
+    getCheerEmote: (channel: string, name: string, bits: number) => {
+        if (CHAT_EMOTES.emotes.get(channel) && CHAT_EMOTES.emotes.get(channel).cheerEmotes) {
+            return CHAT_EMOTES.emotes.get(channel).cheerEmotes.getCheermoteDisplayInfo(name, bits, {background: 'dark', scale: 1, state: 'animated'});
+        }
+        return name + bits;
     },
     getLogo: (channel: string) => {
         if (CHAT_EMOTES.emotes.get(channel) && CHAT_EMOTES.emotes.get(channel).user) {

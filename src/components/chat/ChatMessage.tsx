@@ -43,8 +43,11 @@ function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: string, em
     return parsedParts.map((part, partIndex) => {
         switch (part.type) {
             case 'text': return joinWithSpace(part.text.split(' ').map((word, index) => wordMapper(word, channel, partIndex, index, emotes, login)))
-            case 'emote': return <img key={partIndex} src={buildEmoteImageUrl(part.id)} />;
-            case 'cheer': return part.amount;
+            case 'emote': return <img alt={part.name} key={partIndex} src={buildEmoteImageUrl(part.id)} />;
+            case 'cheer': {
+                const cheerEmote = emotes.getCheerEmote(channel, part.name, part.amount);
+                return <><img alt={part.name + part.amount} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.amount}</span></>
+            };
         }
     });
 }
