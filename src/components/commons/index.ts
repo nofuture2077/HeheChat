@@ -30,13 +30,6 @@ export const formatDuration = (duration: number) => {
     return shortEnglishHumanizer(duration, { largest: 1 });
 }
 
-export function toMap<A, K>(arr: A[], func1: (el: A) => K) {
-    return arr.reduce((acc, el) => {
-        acc.set(func1(el), el);
-        return acc;
-    }, new Map());
-}
-
 export function generateGUID(): string {
     const timestamp = new Date().getTime();
     const randomNum = Math.floor(Math.random() * 1000000);

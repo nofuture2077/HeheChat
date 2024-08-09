@@ -2,6 +2,7 @@ import { ChatMessage, parseTwitchMessage } from '@twurple/chat';
 import { ChatMessageComp } from './ChatMessage';
 import { SystemMessageComp } from './systemmessage';
 import { generateGUID } from '../commons';
+import { ModActions } from './mod/modactions';
 
 export type HeheMessage = ChatMessage | SystemMessage;
 
@@ -47,13 +48,6 @@ export function isSystemMessage(rawLine: string): boolean {
 
 function isSystemMessageType(msg: HeheMessage) {
     return (msg as SystemMessage).type === 'system';
-}
-
-export interface ModActions {
-    deleteMessage: (channelId: string, messageId: string) => void;
-    timeoutUser: (channelId: string, userId: string, duration: number, reason: string) => void;
-    banUser: (channelId: string, userId: string, reason: string) => void;
-    shoutoutUser: (channelId: string, userId: string) => void;
 }
 
 interface ChatProps {

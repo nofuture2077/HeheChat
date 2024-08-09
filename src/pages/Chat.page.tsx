@@ -1,21 +1,24 @@
 import { useState, useEffect, useRef, useContext } from 'react';
-import { ChatEmotes, CHAT_EMOTES, ChatConfigContext, LoginContext } from '../ApplicationContext';
-import { useShallowEffect, useViewportSize, useDisclosure } from '@mantine/hooks';
+import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
+import { useShallowEffect, useViewportSize, useDisclosure, useForceUpdate } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Stack, Space, ActionIcon } from '@mantine/core';
-import { Chat, HeheMessage, ModActions, parseMessage, SystemMessage } from '../components/chat/Chat';
-import { IconMessagePause, IconPlus } from '@tabler/icons-react';
+import { Chat, HeheMessage, parseMessage, SystemMessage } from '@/components/chat/Chat';
+import { IconMessagePause, IconSend } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
-import { Header } from '../components/header/Header';
-import { Alerts } from '../components/alerts/Alerts';
+import { Header } from '@/components/header/Header';
+import { Alerts } from '@/components/alerts/alerts';
 import { ChatInput } from '@/components/chat/ChatInput';
-import { WorkerMessage, WorkerResponse } from '../components/chat/chatWorkerTypes';
-import { ChatMessage, parseTwitchMessage } from '@twurple/chat';
+import { WorkerMessage, WorkerResponse } from '@/components/chat/chatWorkerTypes';
+import { ChatMessage } from '@twurple/chat';
 import { ApiClient, HelixModeratedChannel } from '@twurple/api';
-import { Settings } from '../components/settings/settings'
+import { Settings } from '@/components/settings/settings'
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '@/components/chat/mod/modview';
 import { formatDuration } from '@/components/commons';
 import { TwitchView } from '@/components/twitch/twitchview';
+import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser } from '@/components/chat/mod/modactions';
+import { ProfileBar } from '@/components/profile/profilebar';
+import { Storage } from '@/components/chat/chatstorage';
 
 export type OverlayDrawer = {
     name: string;
@@ -50,17 +53,20 @@ export function ChatPage() {
     const viewport = useRef<HTMLDivElement>(null);
     const footer = useRef<HTMLDivElement>(null);
     const { width, height } = useViewportSize();
-    const chatConfig = useContext(ChatConfigContext);
+    const config = useContext(ConfigContext);
+    const profile = useContext(ProfileContext);
     const [chatMessages, setChatMessages] = useState<HeheMessage[]>([]);
     const [shouldScroll, setShouldScroll] = useState(true);
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
+    const [profileBarOpen, profileBarHandler] = useDisclosure(false);
     const [replyMsg, setReplyMsg] = useState<ChatMessage>();
     const [chatInputOpened, chatInputHandler] = useDisclosure(false);
-    const loginContext = useContext(LoginContext);
+    const loginContext = useContext(LoginContextContext);
     const workerRef = useRef<Worker>();
     const [deletedMessages, setDeletedMessages] = useState<string[]>([]);
-    const [refreshSeed, setRefreshSeed] = useState<number>(0);
+    const forceUpdate = useForceUpdate();
+    const emotes = useContext(ChatEmotesContext);
 
     const authProvider = loginContext.getAuthProvider();
     const api = new ApiClient({ authProvider });
@@ -75,66 +81,72 @@ export function ChatPage() {
     }
 
     useEffect(() => {
+        forceUpdate();
+    }, [chatInputOpened]);
+
+    useEffect(() => {
         if (shouldScroll) {
             scrollToBottom();
         }
     }, [shouldScroll, chatInputOpened, chatMessages, replyMsg]);
 
-    const channelIndex = chatConfig.channels.reduce((obj: any, key: string) => { obj[key] = true; return obj }, {});
+    const channelIndex = config.channels.reduce((obj: any, key: string) => { obj[key] = true; return obj }, {});
     const deletedMessagesIndex = deletedMessages.reduce((obj: any, key: string) => { obj[key] = true; return obj }, {});
     const moderatedChannel = loginContext.moderatedChannels.reduce((obj: any, c: HelixModeratedChannel) => { obj[c.name] = true; return obj }, {});
 
     const channelFilter = (msg: HeheMessage) => channelIndex[msg.target.substring(1)];
 
-    const addMessage = (msg: HeheMessage) => {
-        setChatMessages((prevMessages) => [...prevMessages, msg].filter(channelFilter).slice(shouldScroll ? (-1 * chatConfig.maxMessages) : 0));
+    const addMessage = (msg: HeheMessage, user: string) => {
+        Storage.store(msg.target.substring(1), user, msg.date, msg.rawLine);
+        if (config.ignoredUsers.indexOf(user) !== -1) {
+            return;
+        }
+        setChatMessages((prevMessages) => [...prevMessages, msg].filter(channelFilter).slice(shouldScroll ? (-1 * config.maxMessages) : 0));
     }
 
     useEffect(() => {
+        setChatMessages([]);
+        setShouldScroll(true);
+        chatInputHandler.close();
         workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
 
-    
         workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
             const { type, data } = e.data;
             switch (type) {
                 case 'NEW_MESSAGE':
-                    addMessage(parseMessage(data));
-                    break;
-                case 'ALL_MESSAGES':
-                    setChatMessages((data.map(parseTwitchMessage) as ChatMessage[]).filter(channelFilter).slice(shouldScroll ? (-1 * chatConfig.maxMessages) : 0));
+                    addMessage(parseMessage(data.msg), data.user);
                     break;
                 case 'DELETED_MESSAGE':
                     setDeletedMessages(deletedMessages => {
                         deletedMessages.push(data.msgId);
-                        // addMessage(new SystemMessage(data.channel, ["Deleted message from", data.username, "in", data.channel].join(" "), data.date, "delete"));
                         const dM: string[] = deletedMessages.slice(-100);
                         localStorage.setItem("chat-messages-deleted", JSON.stringify(dM))
                         return dM
                     })
                     break;
                 case 'TIMEOUT_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["Timeout", data.username, "in", data.channel, "for", formatDuration(data.duration)].join(" "), data.date, "timeout", data.channelId, data.userId));
+                    addMessage(new SystemMessage(data.channel, ["Timeout", data.username, "in", data.channel, "for", formatDuration(data.duration)].join(" "), data.date, "timeout", data.channelId, data.userId), '#system');
                     break;
                 case 'BAN_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["Ban", data.username, "in", data.channel].join(" "), data.date, "ban", data.channelId, data.userId));
+                    addMessage(new SystemMessage(data.channel, ["Ban", data.username, "in", data.channel].join(" "), data.date, "ban", data.channelId, data.userId), '#system');
                     break;
                 case 'RAID_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, [data.channel, "got raided from", data.username, "with", data.viewerCount, "viewers"].join(" "), data.date, "raid", data.channelId, data.userId));
+                    addMessage(new SystemMessage(data.channel, [data.channel, "got raided from", data.username, "with", data.viewerCount, "viewers"].join(" "), data.date, "raid", data.channelId, data.userId), '#system');
                     break;
                 case 'CHANNELS': {
                     const currentChannels = data.currentChannels;
                     currentChannels.forEach(cc => {
-                        if (chatConfig.channels.indexOf(cc) === -1) {
+                        if (config.channels.indexOf(cc) === -1) {
                             const leaveChannelMessage: WorkerMessage = { type: 'LEAVE_CHANNEL', data: { channel: cc } };
                             workerRef.current?.postMessage(leaveChannelMessage);
                         }
                     });
-                    chatConfig.channels.forEach(nc => {
+                    config.channels.forEach(nc => {
                         if (currentChannels.indexOf(nc) === -1) {
                             const joinChannelMessage: WorkerMessage = { type: 'JOIN_CHANNEL', data: { channel: nc } };
                             workerRef.current?.postMessage(joinChannelMessage);
-                            CHAT_EMOTES.updateChannel(loginContext, nc).then(() => {
-                                setRefreshSeed(Math.random());
+                            emotes.updateChannel(loginContext, nc).then(() => {
+                                forceUpdate();
                             });
                         }
                     });
@@ -148,8 +160,7 @@ export function ChatPage() {
         const initMessage: WorkerMessage = {
             type: 'INIT',
             data: {
-                channels: chatConfig.channels,
-                ignoredUsers: chatConfig.ignoredUsers,
+                channels: config.channels,
                 clientId: loginContext.clientId,
                 accessToken: loginContext.accessToken!
             }
@@ -157,7 +168,7 @@ export function ChatPage() {
 
         workerRef.current.postMessage(initMessage);
 
-        const chatHandler = chatConfig.onMessage({
+        const chatHandler = config.onMessage({
             handle: async (channel, text, replyTo) => {
                 const token = await api.getTokenInfo();
 
@@ -167,33 +178,36 @@ export function ChatPage() {
             }
         });
 
-        const rawMessages: string[] = JSON.parse(localStorage.getItem("chat-messages") || '[]');
+        const rawMessages: string[] = Storage.load(config.channels, config.ignoredUsers);
         const msgs = rawMessages.map(parseMessage);
         setChatMessages(msgs);
 
         const deletedMessages: string[] = JSON.parse(localStorage.getItem("chat-messages-deleted") || '[]');
         setDeletedMessages(deletedMessages);
 
+        loginContext.moderatedChannels.forEach(mC => {
+            emotes.updateUserInfo(loginContext, mC.name);
+        });
+
+        config.raidTargets.forEach(mC => {
+            emotes.updateUserInfo(loginContext, mC);
+        });
+
+        emotes.updateUserInfo(loginContext, loginContext.user?.name || '');
+
         return () => {
             const stopMessage: WorkerMessage = { type: 'STOP' };
             workerRef.current?.postMessage(stopMessage);
-            chatConfig.off(chatHandler);
+            config.off(chatHandler);
         };
-    }, [chatConfig]);
-
-    useEffect(() => {
-        if (chatMessages.length) {
-            const rawMessages = chatMessages.map(msg => msg.rawLine);
-            localStorage.setItem("chat-messages", JSON.stringify(rawMessages));
-        }
-    }, [chatMessages]);
+    }, [config, profile]);
 
     useShallowEffect(() => {
         if (workerRef.current) {
-            const getChannelMessage: WorkerMessage = { type: 'GET_CHANNELS', data: { targetChannels: chatConfig.channels } };
+            const getChannelMessage: WorkerMessage = { type: 'GET_CHANNELS', data: { targetChannels: config.channels } };
             workerRef.current?.postMessage(getChannelMessage);
         }
-    }, [chatConfig.channels]);
+    }, [config.channels]);
 
     const openModView = (msg: ChatMessage) => {
         ModDrawer.props = { msg };
@@ -201,72 +215,42 @@ export function ChatPage() {
         drawerHandler.open()
     }
 
-    const deleteMessage = (channelId: string, messageId: string) => {
-        api.asUser(loginContext.user?.id || '', async (ctx) => {
-            ctx.moderation.deleteChatMessages({id: channelId}, messageId);
-        });
-    }
-
-    const timeoutUser = (channelId: string, userId: string, duration: number, reason: string) => {
-        api.asUser(loginContext.user?.id || '', async (ctx) => {
-            const data = {duration, reason, user: {id: userId}};
-            ctx.moderation.banUser({id: channelId}, data);
-        });
-    }
-
-    const banUser = (channelId: string, userId: string, reason: string) => {
-        api.asUser(loginContext.user?.id || '', async (ctx) => {
-            const data = {reason, user: {id: userId}};
-            ctx.moderation.banUser({id: channelId}, data);
-        });
-    }
-
-    const shoutoutUser = (channelId: string, userId: string) => {
-        api.asUser(loginContext.user?.id || '', async (ctx) => {
-            ctx.chat.shoutoutUser(channelId, userId);
-        });
-    };
-
-    const raidUser = (channelId: string, userId: string) => {
-        api.asUser(loginContext.user?.id || '', async (ctx) => {
-            ctx.raids.startRaid(channelId, userId);
-        });
-    };
-
     const modActions: ModActions = {
-        deleteMessage,
-        timeoutUser,
-        banUser,
-        shoutoutUser
+        deleteMessage: deleteMessage(api, loginContext),
+        timeoutUser: timeoutUser(api, loginContext),
+        banUser: banUser(api, loginContext),
+        shoutoutUser: shoutoutUser(api, loginContext),
+        raidUser: raidUser(api, loginContext, emotes)
     };
 
     return (
-        <AppShell>
+        <AppShell navbar={{ width: profileBarOpen ? 200 : 0, breakpoint: 0 }}>
             <AppShell.Header>
-                <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }} openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }} />
+                <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }} openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }} openProfileBar={profileBarHandler.open} showProfileBarButton={!profileBarOpen} />
             </AppShell.Header>
+            <AppShell.Navbar>
+                {profileBarOpen ? <ProfileBar close={profileBarHandler.close} /> : null}
+            </AppShell.Navbar>
             <AppShell.Main>
-                <ChatEmotes.Provider value={CHAT_EMOTES}>
-                    <Drawer opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
-                        {drawer ? <drawer.component close={drawerHandler.close} {...drawer.props}></drawer.component> : null}
-                    </Drawer>
-                    {(drawerOpen || shouldScroll) ? null : (
-                        <Affix position={{ bottom: 15 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }} style={{ width: "100%" }}>
-                            <Stack align="center">
-                                <Button onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'grape', to: 'orange', deg: 90 }} style={{ borderRadius: 16 }}>New Messages</Button>
-                            </Stack>
-                        </Affix>
-                    )}
-                    <ScrollArea viewportRef={viewport} w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} mb={12} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: chatConfig.fontSize }}>
+                <Drawer opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
+                    {drawer ? <drawer.component modActions={modActions} close={drawerHandler.close} openProfileBar={profileBarHandler.open} {...drawer.props}></drawer.component> : null}
+                </Drawer>
+                {(drawerOpen || profileBarOpen || shouldScroll) ? null : (
+                    <Affix position={{ bottom: 15 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }} style={{ width: "100%" }}>
+                        <Stack align="center">
+                            <Button onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'grape', to: 'orange', deg: 90 }} style={{ borderRadius: 16 }}>New Messages</Button>
+                        </Stack>
+                    </Affix>
+                )}
+                <ScrollArea viewportRef={viewport} w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
                     <Space h={48}></Space>
-                        <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); chatConfig.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
-                    </ScrollArea>
-                    <Space h={footer.current ? footer.current.scrollHeight : 0}></Space>
-                </ChatEmotes.Provider>
+                    <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
+                </ScrollArea>
+                <Space h={footer.current ? footer.current.scrollHeight + 5 : 15}></Space>
             </AppShell.Main>
             <AppShell.Footer >
-                {(!drawerOpen) ?
-                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 20, right: 20 }}><ActionIcon color='primary' onClick={chatInputHandler.open}><IconPlus /></ActionIcon></Affix>) : null}
+                {(!drawerOpen && !profileBarOpen) ?
+                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 20, right: 20 }}><ActionIcon color='primary' size='xl' radius='xl' onClick={chatInputHandler.open}><IconSend /></ActionIcon></Affix>) : null}
             </AppShell.Footer>
         </AppShell>
     );

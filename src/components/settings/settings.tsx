@@ -11,17 +11,22 @@ import { ChatSettings } from './ChatSettings';
 import { UISettings } from './UISettings';
 import { ModSettings } from './ModSettings';
 import { UserButton } from '../commons/userbutton';
-import { LoginContext } from '@/ApplicationContext';
+import { LoginContextContext } from '@/ApplicationContext';
 
 const mainLinksMockdata = [
-  { icon: IconHome2, label: 'UI' },
+  { icon: IconHome2, label: 'General' },
   { icon: IconMessageChatbot, label: 'Chat' },
   { icon: IconSword, label: 'Mod' }
 ];
 
-export function Settings(props: {close: () => void}) {
-  const [active, setActive] = useState('Chat');
-  const loginContext = useContext(LoginContext);
+export interface SettingsProperties {
+  close: () => void,
+  openProfileBar: () => void
+}
+
+export function Settings(props: SettingsProperties) {
+  const [active, setActive] = useState('General');
+  const loginContext = useContext(LoginContextContext);
 
   const mainLinks = mainLinksMockdata.map((link) => (
     <Tooltip
@@ -42,14 +47,14 @@ export function Settings(props: {close: () => void}) {
   ));
 
   const renderSwitch = (param: string) => {
-    switch(param) {
-    case 'UI':
-        return <UISettings/>;
-    case 'Chat':
-        return <ChatSettings/>;
-    case 'Mod':
-        return <ModSettings/>;
-    default:
+    switch (param) {
+      case 'General':
+        return <UISettings close={props.close} openProfileBar={props.openProfileBar}/>;
+      case 'Chat':
+        return <ChatSettings />;
+      case 'Mod':
+        return <ModSettings />;
+      default:
         return null;
     }
   }
@@ -58,10 +63,10 @@ export function Settings(props: {close: () => void}) {
     <nav className={classes.navbar}>
       <div className={classes.header}>
         <Title order={4}>
-            {active}
+          {active}
         </Title>
         <Button onClick={props.close} variant='subtle' color='primary'>
-            <IconX/>
+          <IconX />
         </Button>
       </div>
       <div className={classes.wrapper}>
@@ -70,15 +75,15 @@ export function Settings(props: {close: () => void}) {
           </div>
           {mainLinks}
         </div>
-        <div className={classes.main}>          
-            <div className={classes.active}>
-                {renderSwitch(active)}
-            </div>
+        <div className={classes.main}>
+          <div className={classes.active}>
+            {renderSwitch(active)}
+          </div>
         </div>
       </div>
       <div className={classes.footer}>
-        <UserButton avatarUrl={loginContext.user?.profilePictureUrl || ''} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''}/>
-    </div>
+        <UserButton avatarUrl={loginContext.user?.profilePictureUrl || ''} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''} />
+      </div>
     </nav>
   );
 }

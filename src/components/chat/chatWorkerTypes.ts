@@ -2,7 +2,6 @@ export interface InitMessage {
     type: 'INIT';
     data: {
       channels: string[];
-      ignoredUsers: string[];
       clientId: string;
       accessToken: string;
     };
@@ -35,7 +34,12 @@ export interface InitMessage {
   
   export interface NewMessage {
     type: 'NEW_MESSAGE';
-    data: string;
+    data: {
+      channel: string,
+      user: string,
+      date: Date,
+      msg: string
+    };
   }
 
   export interface DeletedMessage {

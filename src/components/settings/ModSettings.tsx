@@ -1,14 +1,16 @@
-import { Stack, Text, Switch } from '@mantine/core';
-import { ColorSchemeToggle } from '../ColorSchemeToggle/ColorSchemeToggle';
+import { Stack, Text, Switch, TagsInput } from '@mantine/core';
 import { useContext } from 'react';
-import { ChatConfigContext } from '@/ApplicationContext';
+import { ConfigContext } from '@/ApplicationContext';
 
 
 export function ModSettings() {
-    const chatConfig = useContext(ChatConfigContext);
+    const config = useContext(ConfigContext);
     return (
     <Stack>
         <Text size="md">Enable Mod Tools</Text>
-        <Switch checked={chatConfig.modToolsEnabled} onChange={(event) => chatConfig.setModToolsEnabled(event.currentTarget.checked)} label="Mod Tools Enabled" size="lg"/>
+        <Switch checked={config.modToolsEnabled} onChange={(event) => config.setModToolsEnabled(event.currentTarget.checked)} label="Mod Tools Enabled" size="lg"/>
+
+        <Text size='md'>Raid Targets</Text>
+        <TagsInput placeholder="" value={config.raidTargets} onChange={config.setRaidTargets}></TagsInput>
     </Stack>)
 }

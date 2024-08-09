@@ -3,7 +3,7 @@ import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
 import { IconLogin } from '@tabler/icons-react';
 import { useEffect, useState, useContext } from 'react';
-import { LoginContext } from '../../ApplicationContext';
+import { ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
 
 function getQueryVariable(query: String, variable: String): string | undefined {
     var vars = query.split('&');
@@ -18,7 +18,8 @@ function getQueryVariable(query: String, variable: String): string | undefined {
 
 export default function Login() {
     const [redirectUrl, setRedirectUrl] = useState<string | null>();
-    const loginContext = useContext(LoginContext);
+    const loginContext = useContext(LoginContextContext);
+    const chatEmotes = useContext(ChatEmotesContext);
 
     const token: string | undefined = window.location.hash ? getQueryVariable(window.location.hash.substring(1), "access_token") : undefined;
 
@@ -57,7 +58,8 @@ export default function Login() {
         'user:read:moderated_channels',
         'moderator:manage:chat_messages',
         'moderator:manage:banned_users',
-        'moderator:manage:shoutouts'
+        'moderator:manage:shoutouts',
+        'channel:manage:raids'
     ].map(encodeURIComponent).join('+');
     
     let responseType = encodeURIComponent('token');

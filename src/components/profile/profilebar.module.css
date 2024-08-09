@@ -1,0 +1,15 @@
+.profile {
+    &:hover {
+        background-color: light-dark(var(--mantine-color-cyan-5), var(--mantine-color-orange-6));
+        cursor: pointer;
+    }
+    &.active {
+        background-color: light-dark(var(--mantine-color-cyan-2), var(--mantine-color-orange-9));
+    }
+}
+
+.header {
+    padding: 6px;
+    display: flex;
+    justify-content: flex-end;
+}

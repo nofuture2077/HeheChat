@@ -1,13 +1,16 @@
 import { ChatMessage, ParsedMessagePart, parseChatMessage, buildEmoteImageUrl } from '@twurple/chat';
 import classes from './ChatMessage.module.css';
-import { ChatConfigContext, ChatEmotes, ChatConfig, ChatConfigKey, LoginContext } from '../../ApplicationContext';
+import { ConfigContext, ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
+import { LoginContext } from '@/commons/login';
 import { useContext } from 'react';
 import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconCheck } from '@tabler/icons-react';
 import { ActionIcon, Text, Group, CopyButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { TimeoutView, BanView } from './mod/modview';
 import { formatTime } from '../commons';
-import { ModActions } from './Chat';
+import { ModActions } from '@/components/chat/mod/modactions';
+import { Config, ConfigKey, } from '@/commons/config'
+import { ChatEmotes } from '@/commons/emotes';
 
 interface ChatMessageProps {
     msg: ChatMessage;
@@ -46,7 +49,7 @@ function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: string, em
             case 'emote': return <img alt={part.name} key={partIndex} src={buildEmoteImageUrl(part.id)} />;
             case 'cheer': {
                 const cheerEmote = emotes.getCheerEmote(channel, part.name, part.amount);
-                return <><img alt={part.name + part.amount} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.amount}</span></>
+                return <span key={partIndex}><img alt={part.name + part.amount} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.amount}</span></span>
             };
         }
     });
@@ -58,19 +61,19 @@ const predictionBadgeIndex = ['predictions'].reduce((obj: any, key: string) => {
 
 const badgeIndex = {...importantBadgeIndex, ...subscriberBadgeIndex, ...predictionBadgeIndex};
 
-function getBadge(config: ChatConfig, emotes: ChatEmotes, channel: string, key: string, index: string) {
+function getBadge(config: Config, emotes: ChatEmotes, channel: string, key: string, index: string) {
     const [badge, version] = key.split(',');
     const requireSetting = badgeIndex[badge];
-    if (requireSetting && config[requireSetting as ChatConfigKey] || !requireSetting && config.showOtherBadges) {
+    if (requireSetting && config[requireSetting as ConfigKey] || !requireSetting && config.showOtherBadges) {
         return emotes.getBadge(channel, key, index);
     }
     return '';
 }
 
 export function ChatMessageComp(props: ChatMessageProps) {
-    const config = useContext(ChatConfigContext);
-    const emotes = useContext(ChatEmotes);
-    const login = useContext(LoginContext);
+    const config = useContext(ConfigContext);
+    const emotes = useContext(ChatEmotesContext);
+    const login = useContext(LoginContextContext);
     const channel = props.msg.target.slice(1);
     const cheerEmotes = emotes.getCheerEmotes(channel);
     const msgParts = parseChatMessage(props.msg.text, props.msg.emoteOffsets, cheerEmotes);
@@ -90,16 +93,16 @@ export function ChatMessageComp(props: ChatMessageProps) {
         actions.push(<ActionIcon key='replyAction' size={22} variant='white' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>);
     }
 
-    return (<div key={props.msg.id} className={classes.msg + (props.hideReply ? (' ' + classes.hideReply) : '') + (deleted ? (' ' + classes.deleted) : '')}>
+    return (<div className={classes.msg + (props.hideReply ? (' ' + classes.hideReply) : '') + (deleted ? (' ' + classes.deleted) : '')}>
         <span className={classes.channel}>{(config.showProfilePicture && !props.hideReply) ? emotes.getLogo(channel): ''}</span>
         <span className={classes.time}>{config.showTimestamp ? formatTime(props.msg.date) : ''}</span>
         <span className={classes.badges}>{Array.from(props.msg.userInfo.badges).map((key, index) =>  getBadge(config, emotes, channel, key.toString(), index.toString()))}</span>
         <span className={classes.username} style={{color: props.msg.userInfo.color}}>{props.msg.userInfo.displayName}</span>
         <span>: </span>
         <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</span>
-        { actions.length ? <Group className={classes.actions} gap={'sm'}>{actions}</Group>: null}
-        {timeoutModalOpened ? <TimeoutView channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.modActions.timeoutUser}/> : null}
-        {banModalOpened ? <BanView channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={banModalHandler.close} banUser={props.modActions.banUser}/> : null}
+        { actions.length ? <Group key='actionsGroup' className={classes.actions} gap={'sm'}>{actions}</Group>: null}
+        {timeoutModalOpened ? <TimeoutView key='timeoutModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.modActions.timeoutUser}/> : null}
+        {banModalOpened ? <BanView key='banModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={banModalHandler.close} banUser={props.modActions.banUser}/> : null}
     </div>);
 }
 

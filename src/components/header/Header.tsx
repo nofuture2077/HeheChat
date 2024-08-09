@@ -1,20 +1,24 @@
 import { Container, ActionIcon } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
-import { IconBrandTwitch, IconSettings, IconBell } from '@tabler/icons-react';
+import { IconBrandTwitch, IconSettings, IconBell, IconUserCode } from '@tabler/icons-react';
 import Logo from '../../favicon.svg';
 
 export function Header(props: {
     openSettings: () => void,
     openAlerts: () => void,
-    openTwitch: () => void
+    openTwitch: () => void,
+    openProfileBar: () => void,
+    showProfileBarButton: boolean
 }) {
   const [opened] = useDisclosure(false);
 
   return (
     <Container className={classes.inner}>
         <div className={classes.logo}>
-            <img src={Logo} height={32} /><h3>HEHE Chat</h3>
+            {props.showProfileBarButton ? <ActionIcon variant='transparent' color='primary' size={46}>
+                <IconUserCode style={{ width: "32px", height: "32px" }} onClick={props.openProfileBar} size={42}/>
+            </ActionIcon> : null}
         </div>
         <div></div>
         <div className={classes.rightGroup}>

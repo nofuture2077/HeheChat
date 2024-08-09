@@ -16,8 +16,7 @@ self.onmessage = async (e) => {
       });
       await chatClient.connect();
       chatClient.onMessage((channel, user, text, msg) => {
-        if (data.ignoredUsers.indexOf(user) !== -1) return;
-        self.postMessage({ type: 'NEW_MESSAGE', data: msg.rawLine });
+        self.postMessage({ type: 'NEW_MESSAGE', data: {channel, user, date: msg.date, msg: msg.rawLine} });
       });
       chatClient.onMessageRemove((channel, id, deleteMessage) => {
         self.postMessage({ type: 'DELETED_MESSAGE', data: {
@@ -81,7 +80,9 @@ self.onmessage = async (e) => {
       break;
 
     case 'STOP':
-      chatClient.quit();
+      if (chatClient.isConnected) {
+        chatClient.quit();
+      }
       close(); // Terminates the worker
       break;
 

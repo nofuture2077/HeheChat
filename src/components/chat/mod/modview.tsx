@@ -1,9 +1,12 @@
-import { ChatMessage, toChannelName } from "@twurple/chat";
+import { ChatMessage } from "@twurple/chat";
 import { OverlayDrawer } from '../../../pages/Chat.page'
-import { Fieldset, TextInput, Button, Group, Modal } from '@mantine/core';
-import { useState } from "react";
+import { Fieldset, TextInput, Button, Group, Modal, Text, Stack } from '@mantine/core';
+import { useContext, useState } from "react";
 import { GradientSegmentedControl } from "@/components/commons/GradientSegmentedControl/GradientSegmentedControl";
 import { formatDuration } from "@/components/commons";
+import { ChannelPicker } from "../ChannelPicker";
+import { IconArrowsRight } from '@tabler/icons-react';
+import { ConfigContext, LoginContextContext } from "@/ApplicationContext";
 
 
 export const ModDrawer: OverlayDrawer = {
@@ -34,7 +37,7 @@ export function TimeoutView(props: {
         <Modal opened={true} onClose={props.close} withCloseButton={false}>
             <Fieldset legend={["Timeout", props.userName, "in", props.channelName].join(" ")}>
                 <Group justify="center">
-                    <GradientSegmentedControl data={durations.map(x => ({label: formatDuration(x * 1000), value: (x * 1000).toString()}))} value={(duration * 1000).toString()} setValue={(v: string) => { setDuration(parseInt(v) / 1000) }}></GradientSegmentedControl>
+                    <GradientSegmentedControl data={durations.map(x => ({ label: formatDuration(x * 1000), value: (x * 1000).toString() }))} value={(duration * 1000).toString()} setValue={(v: string) => { setDuration(parseInt(v) / 1000) }}></GradientSegmentedControl>
                 </Group>
                 <TextInput label="Reason" placeholder="Optional: Why?" value={reason} onChange={(ev) => setReason(ev.target.value)} />
                 <Group justify="flex-end" mt="md">
@@ -57,7 +60,6 @@ export function BanView(props: {
     close: () => void;
 }) {
     const [reason, setReason] = useState("");
-    const [duration, setDuration] = useState<number>(600);
 
     return (
         <Modal opened={true} onClose={props.close} withCloseButton={false}>
@@ -69,6 +71,46 @@ export function BanView(props: {
                         props.banUser(props.channelId, props.userId, reason);
                         props.close();
                     }}>Ban</Button>
+                </Group>
+            </Fieldset>
+        </Modal>);
+}
+
+export function RaidView(props: {
+    initialFrom?: string;
+    initialTo?: string;
+    raidChannel: (from: string, to: string) => Promise<void>,
+    close: () => void;
+}) {
+    const [raidFrom, setRaidFrom] = useState(props.initialFrom);
+    const [raidTo, setRaidTo] = useState(props.initialTo);
+    const login = useContext(LoginContextContext);
+    const config = useContext(ConfigContext);
+
+    return (
+        <Modal opened={true} onClose={props.close} withCloseButton={false}>
+            <Fieldset legend={"Raid channel"}>
+                <Group justify="space-between" mt="md">
+                    <Stack align="center" w="40%">
+                        <ChannelPicker channels={[login.user?.name || '']} disabled value={raidFrom} onChange={setRaidFrom} />
+                        <Text>{raidFrom}</Text>
+                    </Stack>
+
+                    <IconArrowsRight />
+
+                    <Stack align="center" w="40%">
+                        <ChannelPicker channels={config.raidTargets} value={raidTo} onChange={setRaidTo} />
+                        <Text>{raidTo}</Text>
+                    </Stack>
+                </Group>
+                <Group justify="flex-end" mt="md">
+                    <Button onClick={props.close}>Cancel</Button>
+                    <Button color='primary' disabled={!raidFrom || !raidTo} onClick={() => {
+                        if (raidFrom && raidTo) {
+                            props.raidChannel(raidFrom, raidTo);
+                            props.close();
+                        }
+                    }}>Raid</Button>
                 </Group>
             </Fieldset>
         </Modal>);

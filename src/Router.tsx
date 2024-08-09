@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { HomePage } from './pages/Home.page';
 import { ChatPage } from './pages/Chat.page';
-import { LoginContext } from './ApplicationContext';
+import { LoginContextContext } from './ApplicationContext';
 import { useContext } from 'react';
 
 const router = createBrowserRouter([
@@ -14,7 +14,7 @@ const router = createBrowserRouter([
 });
 
 export function Router() {
-  const loginContext = useContext(LoginContext);
+  const loginContext = useContext(LoginContextContext);
   if (!loginContext.isLoggedIn()) {
     return <HomePage/>
   }
