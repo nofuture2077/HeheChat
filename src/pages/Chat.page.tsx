@@ -249,7 +249,7 @@ export function ChatPage() {
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 15}></Space>
             </AppShell.Main>
             <AppShell.Footer >
-                {(!drawerOpen && !profileBarOpen) ?
+                {(!drawerOpen && !profileBarOpen && config.channels.length) ?
                     (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 20, right: 20 }}><ActionIcon color='primary' size='xl' radius='xl' onClick={chatInputHandler.open}><IconSend /></ActionIcon></Affix>) : null}
             </AppShell.Footer>
         </AppShell>

@@ -10,8 +10,9 @@ export function ChatInput(props: { close: () => void, replyToMsg?: ChatMessage, 
     const config = useContext(ConfigContext);
     const emotes = useContext(ChatEmotesContext);
     const [inputText, setInputText] = useState<string>('');
+    const chatChannel = config.getChatChannel();
     const sendMessage = (text: string, close: boolean) => {
-        const channel = emotes.getChannelId(config.getChatChannel() || '');
+        const channel = emotes.getChannelId(chatChannel || '');
         if (channel && text) {
             config.fireMessage(channel, text, props.replyToMsg?.id);
         }
@@ -38,7 +39,7 @@ export function ChatInput(props: { close: () => void, replyToMsg?: ChatMessage, 
                     radius="md"
                     size="md"
                     w="100%"
-                    placeholder={props.replyToMsg ? ("Reply to " + props.replyToMsg.userInfo.displayName) : ("Chat in " + config.chatChannel)}
+                    placeholder={props.replyToMsg ? ("Reply to " + props.replyToMsg.userInfo.displayName) : ("Chat in " + chatChannel)}
                     rightSectionWidth={42}
                     onKeyDown={event => {
                         if (event.key == "Enter") {
@@ -55,7 +56,7 @@ export function ChatInput(props: { close: () => void, replyToMsg?: ChatMessage, 
                         </ActionIcon>
                     }
                 />
-                <ChannelPicker onChange={(item) => { props.setReplyMsg(undefined); config.setChatChannel(item) }} channels={config.channels} value={config.chatChannel} />
+                <ChannelPicker onChange={(item) => { props.setReplyMsg(undefined); config.setChatChannel(item) }} channels={config.channels} value={chatChannel} />
                 <ActionIcon variant="transparent" onClick={() => { props.setReplyMsg(undefined); props.close(); }} color='primary'>
                     <IconX style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
                 </ActionIcon>
