@@ -8,6 +8,7 @@ import classes from './profilebar.module.css'
 
 export interface ProfileBarProps {
     close: () => void;
+    openSettings: () =>  void;
 }
 
 export function ProfileBar(props: ProfileBarProps) {
@@ -40,7 +41,7 @@ export function ProfileBar(props: ProfileBarProps) {
             <ActionIcon size={32} radius="xl" variant="filled" color='primary' m='20px auto' onClick={createProfileHandler.open}>
                 <IconPlus />
             </ActionIcon>
-            {createProfileOpen ? <CreateProfileView profile={profile} close={createProfileHandler.close} /> : null}
+            {createProfileOpen ? <CreateProfileView profile={profile} close={() => {props.close();props.openSettings()}} /> : null}
         </Stack>
     </Stack>
 }

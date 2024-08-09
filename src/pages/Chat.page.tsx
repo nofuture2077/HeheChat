@@ -229,7 +229,7 @@ export function ChatPage() {
                 <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }} openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }} openProfileBar={profileBarHandler.open} showProfileBarButton={!profileBarOpen} />
             </AppShell.Header>
             <AppShell.Navbar>
-                {profileBarOpen ? <ProfileBar close={profileBarHandler.close} /> : null}
+                {profileBarOpen ? <ProfileBar close={profileBarHandler.close} openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }}/> : null}
             </AppShell.Navbar>
             <AppShell.Main>
                 <Drawer opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
