@@ -8,17 +8,16 @@ export function Header(props: {
     openSettings: () => void,
     openAlerts: () => void,
     openTwitch: () => void,
-    openProfileBar: () => void,
-    showProfileBarButton: boolean
+    openProfileBar: () => void
 }) {
   const [opened] = useDisclosure(false);
 
   return (
     <Container className={classes.inner}>
         <div className={classes.logo}>
-            {props.showProfileBarButton ? <ActionIcon variant='transparent' color='primary' size={46}>
+            <ActionIcon variant='transparent' color='primary' size={46}>
                 <IconUserCode style={{ width: "32px", height: "32px" }} onClick={props.openProfileBar} size={42}/>
-            </ActionIcon> : null}
+            </ActionIcon>
         </div>
         <div></div>
         <div className={classes.rightGroup}>

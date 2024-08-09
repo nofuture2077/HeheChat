@@ -24,7 +24,7 @@ export type OverlayDrawer = {
     name: string;
     component: ReactComponentLike;
     position: 'bottom' | 'left' | 'right' | 'top';
-    size: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+    size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number;
     props?: any;
 }
 
@@ -49,6 +49,13 @@ const TwitchDrawer: OverlayDrawer = {
     position: 'right'
 }
 
+const ProfileBarDrawer: OverlayDrawer = {
+    name: 'profileBar',
+    component: ProfileBar,
+    size: 200,
+    position: 'left',
+}
+
 export function ChatPage() {
     const viewport = useRef<HTMLDivElement>(null);
     const footer = useRef<HTMLDivElement>(null);
@@ -59,7 +66,6 @@ export function ChatPage() {
     const [shouldScroll, setShouldScroll] = useState(true);
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
-    const [profileBarOpen, profileBarHandler] = useDisclosure(false);
     const [replyMsg, setReplyMsg] = useState<ChatMessage>();
     const [chatInputOpened, chatInputHandler] = useDisclosure(false);
     const loginContext = useContext(LoginContextContext);
@@ -224,18 +230,19 @@ export function ChatPage() {
     };
 
     return (
-        <AppShell navbar={{ width: profileBarOpen ? 200 : 0, breakpoint: 0 }}>
+        <AppShell>
             <AppShell.Header>
-                <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }} openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }} openProfileBar={profileBarHandler.open} showProfileBarButton={!profileBarOpen} />
+                <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} 
+                openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }} 
+                openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }} 
+                openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} />
             </AppShell.Header>
-            <AppShell.Navbar>
-                {profileBarOpen ? <ProfileBar close={profileBarHandler.close} openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }}/> : null}
-            </AppShell.Navbar>
+
             <AppShell.Main>
                 <Drawer opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
-                    {drawer ? <drawer.component modActions={modActions} close={drawerHandler.close} openProfileBar={profileBarHandler.open} {...drawer.props}></drawer.component> : null}
+                    {drawer ? <drawer.component modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} {...drawer.props}></drawer.component> : null}
                 </Drawer>
-                {(drawerOpen || profileBarOpen || shouldScroll) ? null : (
+                {(drawerOpen || shouldScroll) ? null : (
                     <Affix position={{ bottom: 15 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }} style={{ width: "100%" }}>
                         <Stack align="center">
                             <Button onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'grape', to: 'orange', deg: 90 }} style={{ borderRadius: 16 }}>New Messages</Button>
@@ -249,7 +256,7 @@ export function ChatPage() {
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 15}></Space>
             </AppShell.Main>
             <AppShell.Footer >
-                {(!drawerOpen && !profileBarOpen && config.channels.length) ?
+                {(!drawerOpen && config.channels.length) ?
                     (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 20, right: 20 }}><ActionIcon color='primary' size='xl' radius='xl' onClick={chatInputHandler.open}><IconSend /></ActionIcon></Affix>) : null}
             </AppShell.Footer>
         </AppShell>
