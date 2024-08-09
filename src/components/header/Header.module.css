@@ -3,7 +3,7 @@
     height: 48px;
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: baseline;
     width: 100%;
   }
   
@@ -41,4 +41,8 @@
     h3 {
         margin: 4px 0 0 10px;
     }
+  }
+
+  .title {
+    margin-top: 16px;
   }

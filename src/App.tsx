@@ -138,7 +138,7 @@ export default function App() {
         }
         const profile = JSON.parse(profileData) as Profile;
         localStorage.setItem('hehe-profile', profileName.toLowerCase());
-        setProfile(profile);
+        setProfile({...profile, config: {...DEFAULT_PROFILE.config, ...profile.config}});
         return profile;
     }
 

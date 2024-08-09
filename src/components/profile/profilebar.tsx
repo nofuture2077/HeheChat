@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { ChatEmotesContext, ProfileContext } from '@/ApplicationContext'
-import { AvatarGroup, Avatar, Text, Paper, ActionIcon, Stack, Modal, Fieldset, TextInput, Group, Button } from '@mantine/core';
+import { AvatarGroup, Avatar, Text, Paper, ActionIcon, Stack, Modal, Fieldset, TextInput, Group, Button, Title } from '@mantine/core';
 import { useDisclosure } from "@mantine/hooks";
 import { Profile } from "@/commons/profile";
 import { IconPlus, IconX } from '@tabler/icons-react'
@@ -17,8 +17,11 @@ export function ProfileBar(props: ProfileBarProps) {
     const [createProfileOpen, createProfileHandler] = useDisclosure(false);
     const profiles = profile.listProfiles();
 
-    return <Stack h='100vh' gap={0}>
+    return <Stack h='100vh' gap={0} className={classes.profileBar}>
         <div className={classes.header}>
+            <Title order={4} pt={6} pl={12}>
+                Profiles
+            </Title>
             <Button onClick={props.close} variant='subtle' color='primary'>
                 <IconX/>
             </Button>

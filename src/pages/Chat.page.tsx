@@ -243,17 +243,15 @@ export function ChatPage() {
                     {drawer ? <drawer.component modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} {...drawer.props}></drawer.component> : null}
                 </Drawer>
                 {(drawerOpen || shouldScroll) ? null : (
-                    <Affix position={{ bottom: 15 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }} style={{ width: "100%" }}>
-                        <Stack align="center">
-                            <Button onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'grape', to: 'orange', deg: 90 }} style={{ borderRadius: 16 }}>New Messages</Button>
-                        </Stack>
+                    <Affix position={{ bottom: 20 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>
+                        <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'grape', to: 'orange', deg: 90 }} style={{ borderRadius: 16 }}>New Messages</Button>
                     </Affix>
                 )}
                 <ScrollArea viewportRef={viewport} w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
                     <Space h={48}></Space>
                     <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
                 </ScrollArea>
-                <Space h={footer.current ? footer.current.scrollHeight + 5 : 15}></Space>
+                <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
             <AppShell.Footer >
                 {(!drawerOpen && config.channels.length) ?
