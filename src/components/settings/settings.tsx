@@ -60,7 +60,7 @@ export function Settings(props: SettingsProperties) {
   }
 
   return (
-    <nav className={classes.navbar}>
+    <nav className={classes.navbar} style={{overflow: 'hidden'}}>
       <div className={classes.header}>
         <Title order={4}>
           {active}

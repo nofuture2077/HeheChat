@@ -26,7 +26,7 @@ export function StreamCard(props: { stream: HelixStream, onClick?: (stream: Heli
                         </Group>
                         <Stack>
                             <Badge color="gray"><Text fw={900}>{stream.userName}</Text></Badge>
-                            <Badge color="gray">{stream.title.substring(0, 50)}</Badge>
+                            <Badge color="gray" w='100%' style={{overflow: 'hidden'}}>{stream.title}</Badge>
                         </Stack>
                     </Stack>
                 </BackgroundImage>
