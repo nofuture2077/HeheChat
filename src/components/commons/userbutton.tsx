@@ -5,7 +5,7 @@ import classes from './userbutton.module.css';
 export function UserButton(props: {avatarUrl: string, name: string, text: string}) {
   return (
     <UnstyledButton className={classes.user}>
-      <Group>
+      <Group flex={1}>
         <Avatar
           src={props.avatarUrl}
           radius="xl"
