@@ -1,4 +1,4 @@
-import classes from './alerts.module.css'
+import classes from './alertdialog.module.css'
 import { Title, Button, Group } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
 

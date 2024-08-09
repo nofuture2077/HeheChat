@@ -6,7 +6,7 @@ import { Chat, HeheMessage, parseMessage, SystemMessage } from '@/components/cha
 import { IconMessagePause, IconSend } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '@/components/header/Header';
-import { Alerts } from '@/components/alerts/alerts';
+import { Alerts } from '@/components/alerts/alertdialog';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { WorkerMessage, WorkerResponse } from '@/components/chat/chatWorkerTypes';
 import { ChatMessage } from '@twurple/chat';
