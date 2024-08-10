@@ -1,6 +1,6 @@
 import { Slider, Stack, Text, Space, TextInput, Button, ActionIcon, Modal, Fieldset, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ColorSchemeToggle } from '../ColorSchemeToggle/ColorSchemeToggle';
+import { ColorSchemeToggle } from '../colorscheme/colorscheme';
 import { useContext, useState } from 'react';
 import { ConfigContext, ProfileContext } from '@/ApplicationContext';
 import { IconTrash, IconPencil } from '@tabler/icons-react';
