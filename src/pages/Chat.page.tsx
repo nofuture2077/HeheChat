@@ -184,9 +184,11 @@ export function ChatPage() {
             }
         });
 
-        const rawMessages: string[] = Storage.load(config.channels, config.ignoredUsers);
-        const msgs = rawMessages.map(parseMessage);
-        setChatMessages(msgs);
+        Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
+            const msgs = rawMessages.map(parseMessage);
+            setChatMessages(msgs);
+        });
+
 
         const deletedMessages: string[] = JSON.parse(localStorage.getItem("chat-messages-deleted") || '[]');
         setDeletedMessages(deletedMessages);

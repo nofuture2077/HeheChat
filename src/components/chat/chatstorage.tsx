@@ -1,6 +1,6 @@
 export interface ChatStorage {
-    store: (channel: string, user: string, date: Date, msg: string) => void;
-    load: (channels: string[], ignoredUsers: string[]) => string[];
+    store: (channel: string, user: string, date: Date, msg: string) => Promise<void>;
+    load: (channels: string[], ignoredUsers: string[]) => Promise<string[]>;
 }
 
 interface ChatMessageData {
@@ -9,7 +9,7 @@ interface ChatMessageData {
     msg: string | undefined
 }
 
-export class LSChatStorage implements ChatStorage {
+class LSChatStorage implements ChatStorage {
     private data: Map<string, ChatMessageData[]>;
 
     constructor() {
@@ -17,20 +17,27 @@ export class LSChatStorage implements ChatStorage {
         this.loadFromLS();
     }
 
-    store(channel: string, user: string | undefined, date: Date, msg: string | undefined): void {
-        if (this.data.has(channel)) {
-            this.data.get(channel)!.push({date: date.getDate(), user: user, msg: msg});
-        } else {
-            this.data.set(channel, [{date: date.getDate(), user: user, msg: msg}]);
-        }
-        this.saveToLS(channel);
+    store(channel: string, user: string | undefined, date: Date, msg: string | undefined): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (this.data.has(channel)) {
+                this.data.get(channel)!.push({date: date.getDate(), user: user, msg: msg});
+            } else {
+                this.data.set(channel, [{date: date.getDate(), user: user, msg: msg}]);
+            }
+            this.saveToLS(channel);
+            resolve();
+        });
+
     }
 
-    load(channels: string[], ignoredUsers: string[]): string[] {
-        const messages: ChatMessageData[] = channels.map((channel): ChatMessageData[] => {
-            return this.data.has(channel) ? this.data.get(channel)!.slice(-100) : []
-        }).reduce((accumulator, value) => accumulator!.concat(value!), []);
-        return messages.filter(m => !m.user || ignoredUsers.indexOf(m.user) === -1).sort((a, b) => a.date - b.date).map(msg => msg.msg!);
+    load(channels: string[], ignoredUsers: string[]): Promise<string[]> {
+        return new Promise((resolve, reject) => {
+            const messages: ChatMessageData[] = channels.map((channel): ChatMessageData[] => {
+                return this.data.has(channel) ? this.data.get(channel)!.slice(-100) : []
+            }).reduce((accumulator, value) => accumulator!.concat(value!), []);
+            const data = messages.filter(m => !m.user || ignoredUsers.indexOf(m.user) === -1).sort((a, b) => a.date - b.date).map(msg => msg.msg!);
+            resolve(data);
+        });
     }
 
     loadFromLS(): void {
@@ -50,5 +57,21 @@ export class LSChatStorage implements ChatStorage {
     }
 }
 
-export const Storage = new LSChatStorage();
+class RemoteChatStorage implements ChatStorage {
+    private baseUrl: string;
+    constructor(baseUrl: string) {
+        this.baseUrl = baseUrl;
+    }
+
+    store(channel: string, user: string | undefined, date: Date, msg: string | undefined): Promise<void> {
+        return Promise.resolve();
+    }
+
+    load(channels: string[], ignoredUsers: string[]): Promise<string[]> {
+        return fetch(this.baseUrl + '/chat/history?' + [['channels', channels.join(',')].join('='), ['ignored', ignoredUsers.join(',')].join('=')].join('&')).then(res => res.json());
+    }
+}
+
+
+export const Storage = import.meta.env.VITE_BACKEND_URL ? new RemoteChatStorage(import.meta.env.VITE_BACKEND_URL) : new LSChatStorage();
 
