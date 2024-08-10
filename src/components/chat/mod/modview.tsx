@@ -91,14 +91,14 @@ export function RaidView(props: {
         <Modal opened={true} onClose={props.close} withCloseButton={false}>
             <Fieldset legend={"Raid channel"}>
                 <Group justify="space-between" mt="md">
-                    <Stack align="center" w="40%">
+                    <Stack align="center" w="35%">
                         <ChannelPicker channels={[login.user?.name || '']} disabled value={raidFrom} onChange={setRaidFrom} />
                         <Text>{raidFrom}</Text>
                     </Stack>
 
                     <IconArrowsRight />
 
-                    <Stack align="center" w="40%">
+                    <Stack align="center" w="35%">
                         <ChannelPicker channels={config.raidTargets} value={raidTo} onChange={setRaidTo} />
                         <Text>{raidTo}</Text>
                     </Stack>
