@@ -4,6 +4,7 @@ export interface ChatStorage {
 }
 
 interface ChatMessageData {
+    channel: string,
     date: number,
     user: string | undefined,
     msg: string | undefined
@@ -20,9 +21,9 @@ class LSChatStorage implements ChatStorage {
     store(channel: string, user: string | undefined, date: Date, msg: string | undefined): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.data.has(channel)) {
-                this.data.get(channel)!.push({date: date.getDate(), user: user, msg: msg});
+                this.data.get(channel)!.push({channel, date: date.getTime(), user: user, msg: msg});
             } else {
-                this.data.set(channel, [{date: date.getDate(), user: user, msg: msg}]);
+                this.data.set(channel, [{channel, date: date.getTime(), user: user, msg: msg}]);
             }
             this.saveToLS(channel);
             resolve();
@@ -68,7 +69,7 @@ class RemoteChatStorage implements ChatStorage {
     }
 
     load(channels: string[], ignoredUsers: string[]): Promise<string[]> {
-        return fetch(this.baseUrl + '/chat/history?' + [['channels', channels.join(',')].join('='), ['ignored', ignoredUsers.join(',')].join('=')].join('&')).then(res => res.json());
+        return fetch(this.baseUrl + '/chat/history?' + [['channels', channels.join(',')].join('='), ['ignored', ignoredUsers.join(',')].join('=')].join('&')).then(res => res.json()).then(arr => arr.map((x:any) => x.message));
     }
 }
 

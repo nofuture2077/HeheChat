@@ -2397,7 +2397,7 @@
     "@twurple/common" "7.1.0"
     tslib "^2.0.3"
 
-"@twurple/api@^7.1.0", "@twurple/api@7.1.0":
+"@twurple/api@^7.1.0":
   version "7.1.0"
   resolved "https://registry.npmjs.org/@twurple/api/-/api-7.1.0.tgz"
   integrity sha512-cDVVY+vecMFNEOyp7UobQn4ARydIDf04NZy1YCKIKpJHBuOV/pkTjNGluRZ0nR9/t9hBFfOyHAH4JswRZpZbnw==
@@ -2448,33 +2448,6 @@
   dependencies:
     "@d-fischer/shared-utils" "^3.6.1"
     klona "^2.0.4"
-    tslib "^2.0.3"
-
-"@twurple/eventsub-base@7.1.0":
-  version "7.1.0"
-  resolved "https://registry.npmjs.org/@twurple/eventsub-base/-/eventsub-base-7.1.0.tgz"
-  integrity sha512-3FNmSwhf09yWYQwhkc+EjmEngbMLbmMPJvJ4m30X9duuhFqvZcd0XnnRvHWSd4qpiolJb0BPerqP2EGXlGjElA==
-  dependencies:
-    "@d-fischer/logger" "^4.2.1"
-    "@d-fischer/shared-utils" "^3.6.1"
-    "@d-fischer/typed-event-emitter" "^3.3.0"
-    "@twurple/api" "7.1.0"
-    "@twurple/auth" "7.1.0"
-    "@twurple/common" "7.1.0"
-    tslib "^2.0.3"
-
-"@twurple/eventsub-ws@^7.1.0":
-  version "7.1.0"
-  resolved "https://registry.npmjs.org/@twurple/eventsub-ws/-/eventsub-ws-7.1.0.tgz"
-  integrity sha512-0ZOPAGvStqjBTT2Vjtz6euxgtcb8U4cQ23TOaUssgUYJ6hy34ebmLxt6Ghj/5tJt11sduYAxHRvw+XKTSjGIoA==
-  dependencies:
-    "@d-fischer/connection" "^9.0.0"
-    "@d-fischer/logger" "^4.2.1"
-    "@d-fischer/shared-utils" "^3.6.1"
-    "@d-fischer/typed-event-emitter" "^3.3.0"
-    "@twurple/auth" "7.1.0"
-    "@twurple/common" "7.1.0"
-    "@twurple/eventsub-base" "7.1.0"
     tslib "^2.0.3"
 
 "@types/aria-query@^5.0.1":
@@ -6646,6 +6619,11 @@ peek-stream@^1.1.0:
     buffer-from "^1.0.0"
     duplexify "^3.5.0"
     through2 "^2.0.3"
+
+pg-format@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.npmjs.org/pg-format/-/pg-format-1.0.4.tgz"
+  integrity sha512-YyKEF78pEA6wwTAqOUaHIN/rWpfzzIuMh9KdAhc3rSLQ/7zkRFcCgYBAEGatDstLyZw4g0s9SNICmaTGnBVeyw==
 
 picocolors@^1.0.0, picocolors@^1.0.1:
   version "1.0.1"

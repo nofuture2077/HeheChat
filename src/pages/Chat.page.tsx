@@ -45,7 +45,7 @@ const AlertDrawer: OverlayDrawer = {
 const TwitchDrawer: OverlayDrawer = {
     name: 'twitch',
     component: TwitchView,
-    size: 'xl',
+    size: 340,
     position: 'right'
 }
 
