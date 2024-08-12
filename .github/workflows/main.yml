@@ -24,7 +24,7 @@ jobs:
   # Single deploy job since we're just deploying
   deploy:
     env:
-      VITE_BACKEND_URL: https://scambot2000.asuscomm.com:4000
+      VITE_BACKEND_URL:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
