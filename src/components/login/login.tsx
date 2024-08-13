@@ -4,6 +4,7 @@ import { ApiClient } from '@twurple/api';
 import { IconLogin } from '@tabler/icons-react';
 import { useEffect, useState, useContext } from 'react';
 import { ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
+import { generateGUID } from '../commons';
 
 function getQueryVariable(query: String, variable: String): string | undefined {
     var vars = query.split('&');
@@ -17,15 +18,16 @@ function getQueryVariable(query: String, variable: String): string | undefined {
   }
 
 export default function Login() {
-    const [redirectUrl, setRedirectUrl] = useState<string | null>();
     const loginContext = useContext(LoginContextContext);
     const chatEmotes = useContext(ChatEmotesContext);
-
-    const token: string | undefined = window.location.hash ? getQueryVariable(window.location.hash.substring(1), "access_token") : undefined;
+    const hash = window.location.hash.substring(1);
+    const tokenStored: string | null = localStorage.getItem('hehe-token');
+    const token: string | undefined = window.location.hash ? getQueryVariable(hash, "access_token") : undefined;
+    const tokenState = window.location.hash ? getQueryVariable(hash, "state") : undefined;
 
     useEffect(() => {
-        if (token) {
-            const authProvider = new StaticAuthProvider(loginContext.clientId, token);
+        if (tokenStored || token) {
+            const authProvider = new StaticAuthProvider(loginContext.clientId, tokenStored || token || '');
             const api = new ApiClient({authProvider});
             api.getTokenInfo().then((tokenInfo) => {
                 api.users.getAuthenticatedUser({id: tokenInfo.userId || ''}).then((user) => {
@@ -35,20 +37,35 @@ export default function Login() {
                 api.moderation.getModeratedChannelsPaginated({id: tokenInfo.userId || ''}).getAll().then((moderatedChannels) => {
                     loginContext.setModeratedChannels(moderatedChannels);
                 });
+
+                if (tokenStored) {
+                    loginContext.setAccessToken(tokenStored);
+                }
+                if (token) {
+                    if (localStorage.getItem('hehe-token_state') !== tokenState) {
+                        console.error('Token mismatched... not logged in');
+                        return;
+                    }
+                    loginContext.setAccessToken(token);
+                    localStorage.setItem('hehe-token', token);
+                }
+            }, (err) => {
+                console.error(err);
+                localStorage.removeItem('hehe-token');
+                loginContext.setAccessToken(undefined);
             });
-            loginContext.setAccessToken(token);
         }
     }, [token]);
 
-    if (token) {
+    if (tokenStored || token) {
         return null;
     }
 
-    useEffect(() => {
-        const url = window.location.origin + window.location.pathname.replace("index.html", "");
-        setRedirectUrl(encodeURI(url));
-    }, []);
-    var state = '';
+    const redirectUrl = encodeURI(window.location.origin + window.location.pathname.replace("index.html", ""));
+
+    const state = generateGUID();
+    localStorage.setItem('hehe-token_state', state);
+
     let scope = [
         // chatter scopes
         'chat:read',
@@ -59,6 +76,7 @@ export default function Login() {
         'moderator:manage:chat_messages',
         'moderator:manage:banned_users',
         'moderator:manage:shoutouts',
+        // broadcaster
         'channel:manage:raids'
     ].map(encodeURIComponent).join('+');
     

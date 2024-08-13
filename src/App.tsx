@@ -73,7 +73,7 @@ export default function App() {
         }
     }
     const setChatChannel = (value: string) => updateConfig('chatChannel', value);
-    const setAccessToken = async (accessToken: string) => {
+    const setAccessToken = async (accessToken: string | undefined) => {
         setLoginContext((loginContext) => {
             const newContext = { ...loginContext, accessToken };
             return newContext;

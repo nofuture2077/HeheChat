@@ -12,9 +12,9 @@ export interface LoginContextData {
 
 export interface LoginContext extends LoginContextData {
     isLoggedIn: () => boolean;
-    getAuthProvider: () => AuthProvider
-    getApiClient: () => ApiClient,
-    setAccessToken: (token: string) => void;
+    getAuthProvider: () => AuthProvider;
+    getApiClient: () => ApiClient;
+    setAccessToken: (token: string | undefined) => void;
     setUser: (user: HelixUser) => void;
     setModeratedChannels: (channels: HelixModeratedChannel[]) => void;
 }
