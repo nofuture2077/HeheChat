@@ -31,14 +31,14 @@ export type OverlayDrawer = {
 const SettingsDrawer: OverlayDrawer = {
     name: 'settings',
     component: Settings,
-    size: 'xl',
+    size: 400,
     position: 'left',
 }
 
 const AlertDrawer: OverlayDrawer = {
     name: 'alerts',
     component: Alerts,
-    size: 'xl',
+    size: 340,
     position: 'right'
 }
 

@@ -1,4 +1,5 @@
-.user {
+.card {
+    padding: 16px;
     display: flex;
     width: 100%;
     color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
@@ -7,3 +8,14 @@
       background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
     }
   }
+
+
+
+.channel {
+  img {
+    width: 24px;
+    height: 24px;
+    margin-top: 6px;
+    border-radius: 12px;
+  }
+}

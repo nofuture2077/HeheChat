@@ -1,16 +1,17 @@
 import { useState, useContext } from 'react';
-import { UnstyledButton, Tooltip, Title, rem, Button, Group } from '@mantine/core';
+import { UnstyledButton, Tooltip, Title, rem, Button, Box, Avatar } from '@mantine/core';
 import {
   IconHome2,
   IconX,
   IconMessageChatbot,
-  IconSword
+  IconSword,
+  IconChevronRight
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
 import { UISettings } from './UISettings';
 import { ModSettings } from './ModSettings';
-import { UserButton } from '../commons/userbutton';
+import { InfoCard } from '../commons/infocard';
 import { LoginContextContext } from '@/ApplicationContext';
 
 const mainLinksMockdata = [
@@ -82,7 +83,7 @@ export function Settings(props: SettingsProperties) {
         </div>
       </div>
       <div className={classes.footer}>
-        <UserButton avatarUrl={loginContext.user?.profilePictureUrl || ''} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''} />
+        <InfoCard component={Box} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''} left={<Avatar src={loginContext.user?.profilePictureUrl || ''} radius="xl"/>} right={<IconChevronRight/>}/>
       </div>
     </nav>
   );

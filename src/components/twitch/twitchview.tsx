@@ -1,4 +1,4 @@
-import { Title, Button, SimpleGrid, Tabs } from '@mantine/core';
+import { Title, Button, SimpleGrid, Tabs, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconX } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
@@ -19,6 +19,7 @@ export function TwitchView(props: TwitchViewProps) {
     const config = useContext(ConfigContext);
     const login = useContext(LoginContextContext);
     const [streams, setStreams] = useState<HelixStream[]>([]);
+    const [loadStream, setLoadStreams] = useState<boolean>(true);
     const [raidTargetStreams, setRaidTargetStreams] = useState<HelixStream[]>([]);
     const [activeTab, setActiveTab] = useState<string | null>('live');
     const [raidModalOpenend, raidModalHandler] = useDisclosure(false);
@@ -28,14 +29,17 @@ export function TwitchView(props: TwitchViewProps) {
     const apiClient = new ApiClient({ authProvider });
 
     useEffect(() => {
+        setLoadStreams(true);
         if (activeTab === 'live') {
             apiClient.streams.getStreams({ userName: config.channels }).then((data) => {
                 setStreams(data.data);
+                setLoadStreams(false);
             });
         }
         if (activeTab === 'raids') {
             apiClient.streams.getStreams({ userName: config.raidTargets }).then((data) => {
                 setRaidTargetStreams(data.data);
+                setLoadStreams(false);
             });
         }
     }, [activeTab]);
@@ -59,14 +63,16 @@ export function TwitchView(props: TwitchViewProps) {
 
                 <Tabs.Panel value="live">
                     <SimpleGrid className={classes.streams} cols={{ base: 1, sm: 1 }} m={10}>
-                        {streams.length === 0 ? [1, 2, 3].map((x) => (<StreamCardPlaceholder key={x} />)) : null}
+                        {loadStream ? [1, 2, 3].map((x) => (<StreamCardPlaceholder key={x} />)) : null}
+                        {!loadStream && streams.length === 0 ? <Text pt='xl' size='xl' ta="center" variant='gradient' fw={900} gradient={{ from: 'orange', to: 'cyan', deg: 90 }}>No Streams right now.</Text> : null}
                         {streams.map(stream => (<StreamCard stream={stream} key={stream.id} />))}
                     </SimpleGrid>
                 </Tabs.Panel>
 
                 <Tabs.Panel value="raids">
                     <SimpleGrid className={classes.streams} cols={{ base: 1, sm: 1 }} m={10}>
-                        {raidTargetStreams.length === 0 ? [1, 2, 3].map((x) => (<StreamCardPlaceholder key={x} />)) : null}
+                        {loadStream ? [1, 2, 3].map((x) => (<StreamCardPlaceholder key={x} />)) : null}
+                        {!loadStream && raidTargetStreams.length === 0 ? <Text pt='xl' size='xl' ta="center" variant='gradient' fw={900} gradient={{ from: 'orange', to: 'cyan', deg: 90 }}>No Streams for raid right now.</Text> : null}
                         {raidTargetStreams.map(stream => (<StreamCard stream={stream} key={stream.id} onClick={(stream) => {
                             setInitialRaidTarget(stream.userName);
                             raidModalHandler.open();
