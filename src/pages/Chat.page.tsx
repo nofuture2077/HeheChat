@@ -115,70 +115,8 @@ export function ChatPage() {
 
     useEffect(() => {
         websocket.current = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
-            workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
-
-            workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
-                const { type, data } = e.data;
-                switch (type) {
-                    case 'NEW_MESSAGE':
-                        addMessage(parseMessage(data.msg), data.user);
-                        break;
-                    case 'DELETED_MESSAGE':
-                        setDeletedMessages(deletedMessages => {
-                            deletedMessages.push(data.msgId);
-                            const dM: string[] = deletedMessages.slice(-100);
-                            localStorage.setItem("chat-messages-deleted", JSON.stringify(dM))
-                            return dM
-                        })
-                        break;
-                    case 'TIMEOUT_MESSAGE':
-                        addMessage(new SystemMessage(data.channel, ["timeout", data.channel, data.username, formatDuration(data.duration)].join("***"), data.date, "timeout", data.channelId, data.userId), '#system');
-                        break;
-                    case 'BAN_MESSAGE':
-                        addMessage(new SystemMessage(data.channel, ["ban", data.channel, data.username].join("***"), data.date, "ban", data.channelId, data.userId), '#system');
-                        break;
-                    case 'RAID_MESSAGE':
-                        addMessage(new SystemMessage(data.channel, ["raid", data.channel, data.username, data.viewerCount].join("***"), data.date, "raid", data.channelId, data.userId), '#system');
-                        break;
-                    case 'CHANNELS': {
-                        const currentChannels = data.currentChannels;
-                        currentChannels.forEach(cc => {
-                            if (config.channels.indexOf(cc) === -1) {
-                                const leaveChannelMessage: WorkerMessage = { type: 'LEAVE_CHANNEL', data: { channel: cc } };
-                                workerRef.current?.postMessage(leaveChannelMessage);
-                            }
-                        });
-                        config.channels.forEach(nc => {
-                            if (currentChannels.indexOf(nc) === -1) {
-                                const joinChannelMessage: WorkerMessage = { type: 'JOIN_CHANNEL', data: { channel: nc } };
-                                workerRef.current?.postMessage(joinChannelMessage);
-                                emotes.updateChannel(loginContext, nc).then(() => {
-                                    forceUpdate();
-                                });
-                            }
-                        });
-                    }
-                        break;
-                    default:
-                        break;
-                }
-            };
-    
-            const initMessage: WorkerMessage = {
-                type: 'INIT',
-                data: {
-                    channels: config.channels,
-                    clientId: loginContext.clientId,
-                    accessToken: loginContext.accessToken!
-                }
-            };
-    
-            workerRef.current.postMessage(initMessage);
 
         return () => {
-            console.log('closing websocket');
-            const stopMessage: WorkerMessage = { type: 'STOP' };
-            workerRef.current?.postMessage(stopMessage);
             websocket.current?.close();
         }
     }, []);
@@ -187,6 +125,66 @@ export function ChatPage() {
         setChatMessages([]);
         setShouldScroll(true);
         chatInputHandler.close();
+
+        workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
+
+        workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
+            const { type, data } = e.data;
+            switch (type) {
+                case 'NEW_MESSAGE':
+                    addMessage(parseMessage(data.msg), data.user);
+                    break;
+                case 'DELETED_MESSAGE':
+                    setDeletedMessages(deletedMessages => {
+                        deletedMessages.push(data.msgId);
+                        const dM: string[] = deletedMessages.slice(-100);
+                        localStorage.setItem("chat-messages-deleted", JSON.stringify(dM))
+                        return dM
+                    })
+                    break;
+                case 'TIMEOUT_MESSAGE':
+                    addMessage(new SystemMessage(data.channel, ["timeout", data.channel, data.username, formatDuration(data.duration)].join("***"), data.date, "timeout", data.channelId, data.userId), '#system');
+                    break;
+                case 'BAN_MESSAGE':
+                    addMessage(new SystemMessage(data.channel, ["ban", data.channel, data.username].join("***"), data.date, "ban", data.channelId, data.userId), '#system');
+                    break;
+                case 'RAID_MESSAGE':
+                    addMessage(new SystemMessage(data.channel, ["raid", data.channel, data.username, data.viewerCount].join("***"), data.date, "raid", data.channelId, data.userId), '#system');
+                    break;
+                case 'CHANNELS': {
+                    const currentChannels = data.currentChannels;
+                    currentChannels.forEach(cc => {
+                        if (config.channels.indexOf(cc) === -1) {
+                            const leaveChannelMessage: WorkerMessage = { type: 'LEAVE_CHANNEL', data: { channel: cc } };
+                            workerRef.current?.postMessage(leaveChannelMessage);
+                        }
+                    });
+                    config.channels.forEach(nc => {
+                        if (currentChannels.indexOf(nc) === -1) {
+                            const joinChannelMessage: WorkerMessage = { type: 'JOIN_CHANNEL', data: { channel: nc } };
+                            workerRef.current?.postMessage(joinChannelMessage);
+                            emotes.updateChannel(loginContext, nc).then(() => {
+                                forceUpdate();
+                            });
+                        }
+                    });
+                }
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        const initMessage: WorkerMessage = {
+            type: 'INIT',
+            data: {
+                channels: config.channels,
+                clientId: loginContext.clientId,
+                accessToken: loginContext.accessToken!
+            }
+        };
+
+        workerRef.current.postMessage(initMessage);
 
         const chatHandler = config.onMessage({
             handle: async (channel, text, replyTo) => {
@@ -218,6 +216,8 @@ export function ChatPage() {
         emotes.updateUserInfo(loginContext, loginContext.user?.name || '');
 
         return () => {
+            const stopMessage: WorkerMessage = { type: 'STOP' };
+            workerRef.current?.postMessage(stopMessage);
             config.off(chatHandler);
         };
     }, [config, profile]);
