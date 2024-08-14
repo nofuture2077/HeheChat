@@ -114,82 +114,79 @@ export function ChatPage() {
     }
 
     useEffect(() => {
+        websocket.current = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
+            workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
+
+            workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
+                const { type, data } = e.data;
+                switch (type) {
+                    case 'NEW_MESSAGE':
+                        addMessage(parseMessage(data.msg), data.user);
+                        break;
+                    case 'DELETED_MESSAGE':
+                        setDeletedMessages(deletedMessages => {
+                            deletedMessages.push(data.msgId);
+                            const dM: string[] = deletedMessages.slice(-100);
+                            localStorage.setItem("chat-messages-deleted", JSON.stringify(dM))
+                            return dM
+                        })
+                        break;
+                    case 'TIMEOUT_MESSAGE':
+                        addMessage(new SystemMessage(data.channel, ["timeout", data.channel, data.username, formatDuration(data.duration)].join("***"), data.date, "timeout", data.channelId, data.userId), '#system');
+                        break;
+                    case 'BAN_MESSAGE':
+                        addMessage(new SystemMessage(data.channel, ["ban", data.channel, data.username].join("***"), data.date, "ban", data.channelId, data.userId), '#system');
+                        break;
+                    case 'RAID_MESSAGE':
+                        addMessage(new SystemMessage(data.channel, ["raid", data.channel, data.username, data.viewerCount].join("***"), data.date, "raid", data.channelId, data.userId), '#system');
+                        break;
+                    case 'CHANNELS': {
+                        const currentChannels = data.currentChannels;
+                        currentChannels.forEach(cc => {
+                            if (config.channels.indexOf(cc) === -1) {
+                                const leaveChannelMessage: WorkerMessage = { type: 'LEAVE_CHANNEL', data: { channel: cc } };
+                                workerRef.current?.postMessage(leaveChannelMessage);
+                            }
+                        });
+                        config.channels.forEach(nc => {
+                            if (currentChannels.indexOf(nc) === -1) {
+                                const joinChannelMessage: WorkerMessage = { type: 'JOIN_CHANNEL', data: { channel: nc } };
+                                workerRef.current?.postMessage(joinChannelMessage);
+                                emotes.updateChannel(loginContext, nc).then(() => {
+                                    forceUpdate();
+                                });
+                            }
+                        });
+                    }
+                        break;
+                    default:
+                        break;
+                }
+            };
+    
+            const initMessage: WorkerMessage = {
+                type: 'INIT',
+                data: {
+                    channels: config.channels,
+                    clientId: loginContext.clientId,
+                    accessToken: loginContext.accessToken!
+                }
+            };
+    
+            workerRef.current.postMessage(initMessage);
+
+        return () => {
+            console.log('closing websocket');
+            const stopMessage: WorkerMessage = { type: 'STOP' };
+            workerRef.current?.postMessage(stopMessage);
+            websocket.current?.close();
+        }
+    }, []);
+
+    useEffect(() => {
         setChatMessages([]);
         setShouldScroll(true);
         chatInputHandler.close();
-
-        websocket.current = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
-
-        // Listen for messages
-        websocket.current.addEventListener("message", event => {
-            const data = JSON.parse(event.data);
-            console.log("Message from server ", data)
-
-            if (data.type === 'msg') {
-                addMessage(parseMessage(data.data.message), data.data.username);
-            }
-        });
-
-
-        workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
-
-        workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
-            const { type, data } = e.data;
-            switch (type) {
-                case 'NEW_MESSAGE':
-                    addMessage(parseMessage(data.msg), data.user);
-                    break;
-                case 'DELETED_MESSAGE':
-                    setDeletedMessages(deletedMessages => {
-                        deletedMessages.push(data.msgId);
-                        const dM: string[] = deletedMessages.slice(-100);
-                        localStorage.setItem("chat-messages-deleted", JSON.stringify(dM))
-                        return dM
-                    })
-                    break;
-                case 'TIMEOUT_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["timeout", data.channel, data.username, formatDuration(data.duration)].join("***"), data.date, "timeout", data.channelId, data.userId), '#system');
-                    break;
-                case 'BAN_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["ban", data.channel, data.username].join("***"), data.date, "ban", data.channelId, data.userId), '#system');
-                    break;
-                case 'RAID_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["raid", data.channel, data.username, data.viewerCount].join("***"), data.date, "raid", data.channelId, data.userId), '#system');
-                    break;
-                case 'CHANNELS': {
-                    const currentChannels = data.currentChannels;
-                    currentChannels.forEach(cc => {
-                        if (config.channels.indexOf(cc) === -1) {
-                            const leaveChannelMessage: WorkerMessage = { type: 'LEAVE_CHANNEL', data: { channel: cc } };
-                            workerRef.current?.postMessage(leaveChannelMessage);
-                        }
-                    });
-                    config.channels.forEach(nc => {
-                        if (currentChannels.indexOf(nc) === -1) {
-                            const joinChannelMessage: WorkerMessage = { type: 'JOIN_CHANNEL', data: { channel: nc } };
-                            workerRef.current?.postMessage(joinChannelMessage);
-                            emotes.updateChannel(loginContext, nc).then(() => {
-                                forceUpdate();
-                            });
-                        }
-                    });
-                }
-                    break;
-                default:
-                    break;
-            }
-        };
-
-        const initMessage: WorkerMessage = {
-            type: 'INIT',
-            data: {
-                channels: config.channels,
-                clientId: loginContext.clientId,
-                accessToken: loginContext.accessToken!
-            }
-        };
-
-        workerRef.current.postMessage(initMessage);
 
         const chatHandler = config.onMessage({
             handle: async (channel, text, replyTo) => {
@@ -221,11 +218,7 @@ export function ChatPage() {
         emotes.updateUserInfo(loginContext, loginContext.user?.name || '');
 
         return () => {
-            const stopMessage: WorkerMessage = { type: 'STOP' };
-            workerRef.current?.postMessage(stopMessage);
             config.off(chatHandler);
-            websocket.current?.close();
-            websocket.current = null;
         };
     }, [config, profile]);
 
@@ -236,7 +229,17 @@ export function ChatPage() {
         }
         if (websocket.current) {
             websocket.current.addEventListener("open", event => {
-                websocket.current?.send(JSON.stringify({type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true]))}));
+                console.log("websocket open")
+                websocket.current?.send(JSON.stringify({ type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) }));
+            });
+
+            websocket.current.addEventListener("message", event => {
+                const data = JSON.parse(event.data);
+                console.log("Message from server ", data)
+
+                if (data.type === 'msg') {
+                    addMessage(parseMessage(data.data.message), data.data.username);
+                }
             });
         }
     }, [config.channels]);
@@ -258,10 +261,10 @@ export function ChatPage() {
     return (
         <AppShell>
             <AppShell.Header>
-                <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} 
-                openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }} 
-                openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }} 
-                openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} />
+                <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }}
+                    openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }}
+                    openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }}
+                    openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} />
             </AppShell.Header>
 
             <AppShell.Main>
