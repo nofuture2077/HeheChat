@@ -16,7 +16,7 @@ export class SystemMessage {
     target: string;
     channelId: string;
     userId: string;
-    date: number;
+    date: Date;
     rawLine: string;
 
     constructor(channel: string, text: string, date: Date, subType: SystemMessageType, channelId: string, userId: string, id?: string) {
@@ -27,8 +27,8 @@ export class SystemMessage {
         this.id = id || generateGUID();
         this.text = text;
         this.subType = subType;
-        this.date = date.getTime();
-        this.rawLine = [this.type, channel, this.date, this.id, this.subType, this.channelId, this.userId, this.text].join('$$$');
+        this.date = date;
+        this.rawLine = [this.type, channel, this.date.getTime(), this.id, this.subType, this.channelId, this.userId, this.text].join('$$$');
     }
 }
 
