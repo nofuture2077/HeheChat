@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
 import { useShallowEffect, useViewportSize, useDisclosure, useForceUpdate } from '@mantine/hooks';
@@ -60,6 +61,7 @@ const ProfileBarDrawer: OverlayDrawer = {
 export function ChatPage() {
     const viewport = useRef<HTMLDivElement>(null);
     const footer = useRef<HTMLDivElement>(null);
+    const websocket = useRef<WebSocket | null>(null);
     const { width, height } = useViewportSize();
     const config = useContext(ConfigContext);
     const profile = useContext(ProfileContext);
@@ -115,6 +117,20 @@ export function ChatPage() {
         setChatMessages([]);
         setShouldScroll(true);
         chatInputHandler.close();
+
+        websocket.current = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://"));
+
+        // Listen for messages
+        websocket.current.addEventListener("message", event => {
+            const data = JSON.parse(event.data);
+            console.log("Message from server ", data)
+
+            if (data.type === 'msg') {
+                addMessage(parseMessage(data.data.text), data.data.username);
+            }
+        });
+
+
         workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
 
         workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
@@ -208,6 +224,8 @@ export function ChatPage() {
             const stopMessage: WorkerMessage = { type: 'STOP' };
             workerRef.current?.postMessage(stopMessage);
             config.off(chatHandler);
+            websocket.current?.close();
+            websocket.current = null;
         };
     }, [config, profile]);
 
@@ -215,6 +233,11 @@ export function ChatPage() {
         if (workerRef.current) {
             const getChannelMessage: WorkerMessage = { type: 'GET_CHANNELS', data: { targetChannels: config.channels } };
             workerRef.current?.postMessage(getChannelMessage);
+        }
+        if (websocket.current) {
+            websocket.current.addEventListener("open", event => {
+                websocket.current?.send(JSON.stringify({type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true]))}));
+            });
         }
     }, [config.channels]);
 

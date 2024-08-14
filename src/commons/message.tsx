@@ -5,7 +5,7 @@ export type HeheMessage = ChatMessage | SystemMessage;
 
 export type SystemMessageType = 'delete' | 'timeout' | 'ban' | 'raid' | 
     'sub_1000' | 'sub_2000' | 'sub_3000' | 'sub_Prime' | 
-    'subgift_1000' | 'subgift_2000' | 'subgift_3000' | 
+    'subgift_1000' | 'subgift_2000' | 'subgift_3000' | 'subgiftb_1000' | 'subgiftb_2000' | 'subgiftb_3000' | 
     'follow' | 'cheer';
 
 export class SystemMessage {
@@ -16,7 +16,7 @@ export class SystemMessage {
     target: string;
     channelId: string;
     userId: string;
-    date: Date;
+    date: number;
     rawLine: string;
 
     constructor(channel: string, text: string, date: Date, subType: SystemMessageType, channelId: string, userId: string, id?: string) {
@@ -27,7 +27,7 @@ export class SystemMessage {
         this.id = id || generateGUID();
         this.text = text;
         this.subType = subType;
-        this.date = date;
+        this.date = date.getTime();
         this.rawLine = [this.type, channel, this.date, this.id, this.subType, this.channelId, this.userId, this.text].join('$$$');
     }
 }
@@ -41,7 +41,7 @@ export function parseMessage(rawLine: string): HeheMessage {
 
 export function parseSystemMessage(rawLine: string): SystemMessage {
     const parts = rawLine.split('$$$');
-    return new SystemMessage(parts[1], parts[7], new Date(Date.parse(parts[2])), parts[4] as 'delete' | 'timeout' | 'ban' | 'raid', parts[5], parts[6], parts[3]);
+    return new SystemMessage(parts[1], parts[7], new Date(Number(parts[2]) || Date.parse(parts[2])), parts[4] as 'delete' | 'timeout' | 'ban' | 'raid', parts[5], parts[6], parts[3]);
 }
 
 export function isSystemMessage(rawLine: string): boolean {
