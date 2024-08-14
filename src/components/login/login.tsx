@@ -4,7 +4,7 @@ import { ApiClient } from '@twurple/api';
 import { IconLogin } from '@tabler/icons-react';
 import { useEffect, useState, useContext } from 'react';
 import { ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
-import { generateGUID } from '../commons';
+import { generateGUID } from '@/commons/helper';
 
 function getQueryVariable(query: String, variable: String): string | undefined {
     var vars = query.split('&');

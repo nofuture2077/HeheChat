@@ -11,7 +11,7 @@ import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
 import { UISettings } from './UISettings';
 import { ModSettings } from './ModSettings';
-import { InfoCard } from '../commons/infocard';
+import { InfoCard } from '../infocard/infocard';
 import { LoginContextContext } from '@/ApplicationContext';
 
 const mainLinksMockdata = [

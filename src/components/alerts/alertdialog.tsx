@@ -4,7 +4,7 @@ import { IconX, IconGiftFilled, IconCoinBitcoinFilled, IconReload } from '@table
 import { useState, useEffect, useContext } from 'react';
 import { EventStorage, EventData } from './eventstorage';
 import { ConfigContext } from '@/ApplicationContext';
-import { InfoCard, InfoCardSkeleton } from '../commons/infocard';
+import { InfoCard, InfoCardSkeleton } from '../infocard/infocard';
 
 export interface AlertsProperties {
     close: () => void;
@@ -26,16 +26,16 @@ function getText(event: EventData) {
     return event.eventtype;
 }
 
-function getIcon(event: EventData) {
+function getIcon(event: EventData, key: string) {
     if (event.eventtype.startsWith('sub_')) {
-        return <ThemeIcon><IconGiftFilled/></ThemeIcon>
+        return <ThemeIcon key={key}><IconGiftFilled/></ThemeIcon>
     }
     if (event.eventtype.startsWith('subgift_')) {
         const style = ((event.amount || 0) >= 5) ? { variant: 'gradient', gradient:{ from: 'orange', to: 'cyan', deg: 90 }} : {};
-        return <ThemeIcon {...style}><IconGiftFilled/></ThemeIcon>
+        return <ThemeIcon {...style} key={key}><IconGiftFilled/></ThemeIcon>
     }
     if (event.eventtype.startsWith('cheer')) {
-        return <ThemeIcon><IconCoinBitcoinFilled/></ThemeIcon>
+        return <ThemeIcon key={key}><IconCoinBitcoinFilled/></ThemeIcon>
     }
 }
 
@@ -62,9 +62,9 @@ export function Alerts(props: AlertsProperties) {
                 </Button>
             </Group>
             <div className={classes.main}>
-                {load ? [1,2,3].map(x => <InfoCardSkeleton key={'event' + x}/>) : null}
-                {!load && events.length === 0 ? <Text pt='xl' size='xl' ta="center" variant='gradient' fw={900} gradient={{ from: 'orange', to: 'cyan', deg: 90 }}>No Event to show.</Text> : null}
-                {events.map(event => <InfoCard key={event.id} channel={event.channel} name={event.username} text={getText(event)} component={Box} left={getIcon(event)} right={<IconReload/>}/>)}
+                {load ? <>{[1,2,3].map(x => <InfoCardSkeleton key={'event' + x}/>)}</> : null}
+                {!load && events.length === 0 ? <Text key='event-noevents' pt='xl' size='xl' ta="center" variant='gradient' fw={900} gradient={{ from: 'orange', to: 'cyan', deg: 90 }}>No Event to show.</Text> : null}
+                {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} text={getText(event)} component={Box} left={getIcon(event, 'infocard-left')} right={<IconReload key={'infocard-right'}/>}/>)}
             </div>
         </nav>
     );

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
 import { useShallowEffect, useViewportSize, useDisclosure, useForceUpdate } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Stack, Space, ActionIcon } from '@mantine/core';
-import { Chat, HeheMessage, parseMessage, SystemMessage } from '@/components/chat/Chat';
+import { Chat } from '@/components/chat/Chat';
 import { IconMessagePause, IconSend } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '@/components/header/Header';
@@ -14,7 +14,8 @@ import { ApiClient, HelixModeratedChannel } from '@twurple/api';
 import { Settings } from '@/components/settings/settings'
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '@/components/chat/mod/modview';
-import { formatDuration } from '@/components/commons';
+import { formatDuration } from '@/commons/helper';
+import { HeheMessage, parseMessage, SystemMessage } from '@/commons/message'
 import { TwitchView } from '@/components/twitch/twitchview';
 import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser } from '@/components/chat/mod/modactions';
 import { ProfileBar } from '@/components/profile/profilebar';
@@ -131,13 +132,13 @@ export function ChatPage() {
                     })
                     break;
                 case 'TIMEOUT_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["Timeout", data.username, "in", data.channel, "for", formatDuration(data.duration)].join(" "), data.date, "timeout", data.channelId, data.userId), '#system');
+                    addMessage(new SystemMessage(data.channel, ["timeout", data.channel, data.username, formatDuration(data.duration)].join("***"), data.date, "timeout", data.channelId, data.userId), '#system');
                     break;
                 case 'BAN_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["Ban", data.username, "in", data.channel].join(" "), data.date, "ban", data.channelId, data.userId), '#system');
+                    addMessage(new SystemMessage(data.channel, ["ban", data.channel, data.username].join("***"), data.date, "ban", data.channelId, data.userId), '#system');
                     break;
                 case 'RAID_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, [data.channel, "got raided from", data.username, "with", data.viewerCount, "viewers"].join(" "), data.date, "raid", data.channelId, data.userId), '#system');
+                    addMessage(new SystemMessage(data.channel, ["raid", data.channel, data.username, data.viewerCount].join("***"), data.date, "raid", data.channelId, data.userId), '#system');
                     break;
                 case 'CHANNELS': {
                     const currentChannels = data.currentChannels;

@@ -7,7 +7,7 @@ import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconCheck 
 import { ActionIcon, Text, Group, CopyButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { TimeoutView, BanView } from './mod/modview';
-import { formatTime } from '../commons';
+import { formatTime } from '@/commons/helper';
 import { ModActions } from '@/components/chat/mod/modactions';
 import { Config, ConfigKey, } from '@/commons/config'
 import { ChatEmotes } from '@/commons/emotes';

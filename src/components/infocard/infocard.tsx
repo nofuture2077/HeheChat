@@ -19,7 +19,7 @@ export function InfoCard(props: InfoCardProperties) {
     <props.component className={classes.card}>
       
       <Group flex={1} gap='xs'>
-      {props.channel ? <span className={classes.channel}>{emotes.getLogo(props.channel)}</span> : null}
+      {props.channel ? <span key='infocard-channel' className={classes.channel}>{emotes.getLogo(props.channel)}</span> : null}
       {props.left || null}
 
         <div style={{ flex: 1 }}>

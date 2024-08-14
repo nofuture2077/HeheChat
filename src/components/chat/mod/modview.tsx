@@ -2,8 +2,8 @@ import { ChatMessage } from "@twurple/chat";
 import { OverlayDrawer } from '../../../pages/Chat.page'
 import { Fieldset, TextInput, Button, Group, Modal, Text, Stack } from '@mantine/core';
 import { useContext, useState } from "react";
-import { GradientSegmentedControl } from "@/components/commons/GradientSegmentedControl/GradientSegmentedControl";
-import { formatDuration } from "@/components/commons";
+import { GradientSegmentedControl } from "@/components/GradientSegmentedControl/GradientSegmentedControl";
+import { formatDuration } from "@/commons/helper";
 import { ChannelPicker } from "../ChannelPicker";
 import { IconArrowsRight } from '@tabler/icons-react';
 import { ConfigContext, LoginContextContext } from "@/ApplicationContext";
