@@ -118,7 +118,7 @@ export function ChatPage() {
         setShouldScroll(true);
         chatInputHandler.close();
 
-        websocket.current = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://"));
+        websocket.current = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
 
         // Listen for messages
         websocket.current.addEventListener("message", event => {
@@ -126,7 +126,7 @@ export function ChatPage() {
             console.log("Message from server ", data)
 
             if (data.type === 'msg') {
-                addMessage(parseMessage(data.data.text), data.data.username);
+                addMessage(parseMessage(data.data.message), data.data.username);
             }
         });
 
