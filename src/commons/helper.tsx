@@ -43,3 +43,7 @@ export const formatDuration = (duration: number) => {
     return shortEnglishHumanizer(duration, { largest: 1 });
 }
 
+
+export function formatString(template: string, args: any[]): string {
+    return template.replace(/\$(\d+)/g, (_, index) => args[index] || '');
+}

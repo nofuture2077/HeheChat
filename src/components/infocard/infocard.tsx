@@ -23,11 +23,11 @@ export function InfoCard(props: InfoCardProperties) {
       {props.left || null}
 
         <div style={{ flex: 1 }}>
-          <Text size="sm" fw={500}>
+          <Text size="sm" fw={700}>
             {props.name}
           </Text>
 
-          <Text c="dimmed" size="xs">
+          <Text c="dimmed" size="xs" fw={500}>
             {props.text}
           </Text>
         </div>

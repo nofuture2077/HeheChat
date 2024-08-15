@@ -7,7 +7,7 @@ import { Chat } from '@/components/chat/Chat';
 import { IconMessagePause, IconSend } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '@/components/header/Header';
-import { Alerts } from '@/components/alerts/alertdialog';
+import { EventDrawerView } from '@/components/events/eventdrawer';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { WorkerMessage, WorkerResponse } from '@/components/chat/chatWorkerTypes';
 import { ChatMessage } from '@twurple/chat';
@@ -37,10 +37,10 @@ const SettingsDrawer: OverlayDrawer = {
     position: 'left',
 }
 
-const AlertDrawer: OverlayDrawer = {
-    name: 'alerts',
-    component: Alerts,
-    size: 340,
+const EventDrawer: OverlayDrawer = {
+    name: 'events',
+    component: EventDrawerView,
+    size: 380,
     position: 'right'
 }
 
@@ -262,7 +262,7 @@ export function ChatPage() {
         <AppShell>
             <AppShell.Header>
                 <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }}
-                    openAlerts={() => { setDrawer(AlertDrawer); drawerHandler.open() }}
+                    openEvents={() => { setDrawer(EventDrawer); drawerHandler.open() }}
                     openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }}
                     openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} />
             </AppShell.Header>

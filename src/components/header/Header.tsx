@@ -7,7 +7,7 @@ import { ProfileContext } from '@/ApplicationContext';
 
 export function Header(props: {
     openSettings: () => void,
-    openAlerts: () => void,
+    openEvents: () => void,
     openTwitch: () => void,
     openProfileBar: () => void
 }) {
@@ -22,7 +22,7 @@ export function Header(props: {
                     <IconSettings style={{ width: "32px", height: "32px" }} onClick={props.openSettings} size={42} />
                 </ActionIcon>
                 <ActionIcon variant='transparent' color='primary' size={46}>
-                    <IconBell style={{ width: "32px", height: "32px" }} onClick={props.openAlerts} size={42} />
+                    <IconBell style={{ width: "32px", height: "32px" }} onClick={props.openEvents} size={42} />
                 </ActionIcon>
                 <ActionIcon variant='transparent' color='primary' size={46}>
                     <IconBrandTwitch style={{ width: "32px", height: "32px" }} onClick={props.openTwitch} size={42} />
