@@ -7,6 +7,7 @@ import { ConfigContext } from '@/ApplicationContext';
 import { InfoCard, InfoCardSkeleton } from '../infocard/infocard';
 import { formatString } from "@/commons/helper";
 import { SystemMessageType } from "@/commons/message";
+import { getEventStyle } from '@/components/events/eventhelper';
 
 export interface EventDrawerViewProperties {
     close: () => void;
@@ -63,52 +64,7 @@ function getText(event: EventData) {
 
 function getIcon(event: EventData, key: string) {
     const style: any = {variant: 'transparent'};
-    if (event.eventtype.startsWith('subgift_')) {
-        if ((event.amount || 0) >= 5) {
-            style.variant = 'filled';
-            style.color = 'orange';
-        }
-        if ((event.amount || 0) >=  10) {
-            style.variant = 'filled';
-            style.color = 'cyan';
-        }
-        if ((event.amount || 0 ) >=  20) {
-            style.variant = 'gradient';
-            style.gradient = { from: 'orange', to: 'cyan', deg: 90 };
-        }
-    }
-    if (event.eventtype === 'cheer') {
-        console.log(event.amount || 0);
-        if ((event.amount || 0) >= 500) {
-            console.log("500 " + event);
-            style.variant = 'filled';
-            style.color = 'orange';
-        }
-        if ((event.amount || 0) >= 1000) {
-            console.log("1000 " + event);
-            style.variant = 'filled';
-            style.color = 'cyan';
-        }
-        if ((event.amount || 0) >= 5000) {
-            console.log("5000 " + event);
-            style.variant = 'gradient';
-            style.gradient = { from: 'orange', to: 'cyan', deg: 90 };
-        }
-    }
-    if (event.eventtype === 'raid') {
-        if ((event.amount || 0) >= 100) {
-            style.variant = 'filled';
-            style.color = 'orange';
-        }
-        if ((event.amount || 0) >= 500) {
-            style.variant = 'filled';
-            style.color = 'cyan';
-        }
-        if ((event.amount || 0) >= 1000) {
-            style.variant = 'gradient';
-            style.gradient = { from: 'orange', to: 'cyan', deg: 90 };
-        }
-    }
+    getEventStyle(event, style);
     const icon = icons[event.eventtype as SystemMessageType];
     return <ThemeIcon key={key} {...style}>{icon}</ThemeIcon>
 }
