@@ -122,8 +122,6 @@ export function ChatPage() {
     }, []);
 
     useEffect(() => {
-        setChatMessages([]);
-        setShouldScroll(true);
         chatInputHandler.close();
 
         workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
@@ -159,15 +157,15 @@ export function ChatPage() {
                             workerRef.current?.postMessage(leaveChannelMessage);
                         }
                     });
-                    config.channels.forEach(nc => {
+                    const promises = config.channels.map(nc => {
                         if (currentChannels.indexOf(nc) === -1) {
                             const joinChannelMessage: WorkerMessage = { type: 'JOIN_CHANNEL', data: { channel: nc } };
                             workerRef.current?.postMessage(joinChannelMessage);
-                            emotes.updateChannel(loginContext, nc).then(() => {
-                                forceUpdate();
-                            });
+                            return emotes.updateChannel(loginContext, nc);
                         }
+                        return Promise.resolve();
                     });
+                    Promise.all(promises).then(() => forceUpdate());
                 }
                     break;
                 default:
