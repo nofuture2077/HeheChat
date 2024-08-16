@@ -4,18 +4,39 @@ import { AvatarGroup, Avatar, Text, Paper, ActionIcon, Stack, Modal, Fieldset, T
 import { useDisclosure } from "@mantine/hooks";
 import { Profile } from "@/commons/profile";
 import { IconPlus, IconX } from '@tabler/icons-react'
+import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from 'react-beautiful-dnd';
 import classes from './profilebar.module.css'
+import { ChatEmotes } from "@/commons/emotes";
+import { storeProfile } from "@/App";
 
 export interface ProfileBarProps {
     close: () => void;
-    openSettings: () =>  void;
+    openSettings: () => void;
 }
 
 export function ProfileBar(props: ProfileBarProps) {
-    const profile = useContext(ProfileContext);
+    const activeProfile = useContext(ProfileContext);
     const emotes = useContext(ChatEmotesContext);
     const [createProfileOpen, createProfileHandler] = useDisclosure(false);
-    const profiles = profile.listProfiles();
+
+    const [profiles, setProfiles] = useState(activeProfile.listProfiles());
+
+    function handleOnDragEnd(result: DropResult) {
+        if (!result.destination) {
+            return
+        };
+
+        const items = Array.from(profiles);
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+
+        items.forEach((profile, index) => {
+            profile.index = index;
+            storeProfile(profile);
+        });
+
+        setProfiles(items);
+    }
 
     return <Stack h='100vh' gap={0} className={classes.profileBar}>
         <div className={classes.header}>
@@ -23,38 +44,56 @@ export function ProfileBar(props: ProfileBarProps) {
                 Profiles
             </Title>
             <Button onClick={props.close} variant='subtle' color='primary'>
-                <IconX/>
+                <IconX />
             </Button>
         </div>
-        <Stack h="100%" justify='space-between' flex="1"><div className={classes.profiles}>{profiles.map((p, i) => {
-            const showChannels = 7;
-            const channels = p.config.channels.slice(0, p.config.channels.length === showChannels + 1 ? showChannels + 1 : showChannels);
-            const more = p.config.channels.length - channels.length;
-            const activeProfile = p.name === profile.name;
-            return (<Paper className={[classes.profile, activeProfile ? classes.active : undefined].join(' ')} key={'profile-' + p.name} shadow="xs" pt="sm" pb="xl" onClick={() => {profile.switchProfile(p.name);props.close()}}>
-                <Text m='auto' ta="center">{p.name}</Text>
-                <AvatarGroup spacing='md' style={{ justifyContent: 'center' }}>
-                    {channels.map((c, i) =>
-                        <Avatar src={emotes.getLogo(c)?.props.src} key={c + i} style={{ zIndex: 10 - i }}></Avatar>
+        <Stack h="100%" justify='flex-start' flex="1">
+            <DragDropContext onDragEnd={handleOnDragEnd}>
+                <Droppable droppableId="profiles">
+                    {(provided) => (
+                        ProfileListComp(provided, profiles, activeProfile, emotes, props.close)
                     )}
-                    {more ? <Avatar key="channelmore">+{more}</Avatar> : null}
-                </AvatarGroup>
-            </Paper>)
-        })}</div>
+                </Droppable>
+            </DragDropContext>
             <ActionIcon size={32} radius="xl" variant="filled" color='primary' m='20px auto' onClick={createProfileHandler.open}>
                 <IconPlus />
             </ActionIcon>
-            {createProfileOpen ? <CreateProfileView profile={profile} close={() => {props.close();props.openSettings()}} /> : null}
+            {createProfileOpen ? <CreateProfileView activeProfile={activeProfile} close={() => { props.close(); props.openSettings() }} /> : null}
         </Stack>
     </Stack>
 }
 
+function ProfileListComp(provided: DroppableProvided, profiles: Profile[], activeProfile: Profile, emotes: ChatEmotes, close: () => void) {
+    return <div className={classes.profiles} {...provided.droppableProps} ref={provided.innerRef}>
+        {profiles.map((profile, index) => 
+            <Draggable key={profile.guid} draggableId={profile.guid} index={index}>
+                {(provided) => ProfileComp(provided, profile, activeProfile, close, emotes)}
+            </Draggable>
+        )}
+        {provided.placeholder}
+    </div>;
+}
+
+function ProfileComp(provided: DraggableProvided, profile: Profile, activeProfile: Profile, close: () => void, emotes: ChatEmotes) {
+    const showChannels = 7;
+    const channels = profile.config.channels.slice(0, profile.config.channels.length === showChannels + 1 ? showChannels + 1 : showChannels);
+    const more = profile.config.channels.length - channels.length;
+    const isActive = profile.name === activeProfile.name;
+    return (<Paper ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={[classes.profile, isActive ? classes.active : undefined].join(' ')} key={'profile-' + profile.guid} shadow="xs" pt="sm" pb="xl" onClick={() => { activeProfile.switchProfile(profile.name); close(); } }>
+        <Text m='auto' ta="center">{profile.name}</Text>
+        <AvatarGroup spacing='md' style={{ justifyContent: 'center' }}>
+            {channels.map((channel: string, i: number) => <Avatar src={emotes.getLogo(channel)?.props.src} key={channel + i} style={{ zIndex: 10 - i }}></Avatar>)}
+            {more ? <Avatar key="channelmore">+{more}</Avatar> : null}
+        </AvatarGroup>
+    </Paper>);
+}
+
 export function CreateProfileView(props: {
-    profile: Profile,
+    activeProfile: Profile,
     close: () => void;
 }) {
     const [profileName, setProfileName] = useState("");
-    const error = !props.profile.checkProfileName(profileName);
+    const error = !props.activeProfile.checkProfileName(profileName);
 
     return (
         <Modal opened={true} onClose={props.close} withCloseButton={false}>
@@ -63,7 +102,7 @@ export function CreateProfileView(props: {
                 <Group justify="flex-end" mt="md">
                     <Button onClick={props.close}>Cancel</Button>
                     <Button color='primary' disabled={error} onClick={() => {
-                        props.profile.createProfile(profileName);
+                        props.activeProfile.createProfile(profileName);
                         props.close();
                     }}>Create</Button>
                 </Group>

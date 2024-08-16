@@ -4,6 +4,7 @@ export type Profile = {
     name: string;
     guid: string;
     config: Config;
+    index: number;
     listProfiles: () => Profile[];
     checkProfileName: (name: string) => boolean;
     setProfileName: (name: string) => boolean;
@@ -16,6 +17,7 @@ export const DEFAULT_PROFILE: Profile = {
     name: 'default',
     guid: '',
     config: DEFAULT_CONFIG,
+    index: 0,
     listProfiles: () => [],
     checkProfileName: (name: string) => false,
     setProfileName: (name: string) => false,

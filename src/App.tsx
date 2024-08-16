@@ -9,12 +9,13 @@ import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
 import { Config, ConfigKey, DEFAULT_CONFIG, MessageHandler } from './commons/config';
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
+import { generateGUID } from './commons/helper';
 
 function load(): Config {
     return JSON.parse(localStorage.getItem('chatConfig') || JSON.stringify(DEFAULT_CONFIG)) as Config;
 }
 
-function storeProfile(profile: Profile) {
+export function storeProfile(profile: Profile) {
     localStorage.setItem(['profile', profile.name.toLowerCase()].join('-'), JSON.stringify(profile));
 }
 
@@ -137,6 +138,10 @@ export default function App() {
             return;
         }
         const profile = JSON.parse(profileData) as Profile;
+        if (!profile.guid) {
+            profile.guid = generateGUID();
+            storeProfile(profile);
+        }
         localStorage.setItem('hehe-profile', profileName.toLowerCase());
         setProfile({...profile, config: {...DEFAULT_PROFILE.config, ...profile.config}});
         return profile;
@@ -148,10 +153,14 @@ export default function App() {
             const key = localStorage.key(i);
             if (key?.startsWith('profile-')) {
                 const profile = JSON.parse(localStorage.getItem(key) || '{}');
+                if (!profile.guid) {
+                    profile.guid = generateGUID();
+                    storeProfile(profile);
+                }
                 profiles.push(profile);
             }
         }
-        return profiles;
+        return profiles.sort((a, b) => a.index - b.index);
     }
 
     const checkProfileName = (name: string) => {
@@ -189,7 +198,7 @@ export default function App() {
     const switchProfile = (name: string) => loadProfile(name);
 
     const createProfile = (name: string) => {
-        localStorage.setItem(['profile', name.toLowerCase()].join('-'), JSON.stringify({...DEFAULT_PROFILE, name}));
+        localStorage.setItem(['profile', name.toLowerCase()].join('-'), JSON.stringify({...DEFAULT_PROFILE, name, guid: generateGUID()}));
         switchProfile(name);
     };
 
