@@ -52,7 +52,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const textParts = text.split('///');
 
     const style = {variant: 'color'};
-    getEventStyle({eventtype: parts[1], amount: Number(parts[2])}, style);
+    getEventStyle({eventtype: parts[1] as EventType, amount: Number(parts[2])}, style);
 
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={22} onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)}><IconSpeakerphone size={14} /></ActionIcon> : null;
     return <div className={[classes.msg, classes[props.msg.subType]].join(' ')}>

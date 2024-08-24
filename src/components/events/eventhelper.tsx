@@ -1,4 +1,3 @@
-import { EventData } from './eventstorage';
 import { EventType } from '@/commons/events';
 
 export function getEventStyle(event: {eventtype: EventType, amount?: number}, style: any) {

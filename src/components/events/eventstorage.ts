@@ -1,3 +1,5 @@
+import { EventType } from "@/commons/events"
+
 export interface EventStorage {
     store: (event: EventData) => Promise<void>;
     load: (channels: string[]) => Promise<EventData[]>;
@@ -6,7 +8,7 @@ export interface EventStorage {
 export interface EventData {
     id: number;
     date: number;
-    eventtype: string;
+    eventtype: EventType;
     channel: string;
     username: string;
     usernameTo?: string;
