@@ -20,13 +20,16 @@ const mainLinksMockdata = [
   { icon: IconSword, label: 'Mod' }
 ];
 
+export type SettingsTab = 'General' | 'Chat' | 'Mod';
+
 export interface SettingsProperties {
-  close: () => void,
-  openProfileBar: () => void
+  close: () => void;
+  openProfileBar: () => void;
+  tab?: SettingsTab;
 }
 
 export function Settings(props: SettingsProperties) {
-  const [active, setActive] = useState('General');
+  const [active, setActive] = useState(props.tab || 'General');
   const loginContext = useContext(LoginContextContext);
 
   const mainLinks = mainLinksMockdata.map((link) => (
@@ -38,7 +41,7 @@ export function Settings(props: SettingsProperties) {
       key={link.label}
     >
       <UnstyledButton
-        onClick={() => setActive(link.label)}
+        onClick={() => setActive(link.label as SettingsTab)}
         className={classes.mainLink}
         data-active={link.label === active || undefined}
       >

@@ -12,7 +12,7 @@ import { ChatInput } from '@/components/chat/ChatInput';
 import { WorkerMessage, WorkerResponse } from '@/components/chat/chatWorkerTypes';
 import { ChatMessage } from '@twurple/chat';
 import { ApiClient, HelixModeratedChannel } from '@twurple/api';
-import { Settings } from '@/components/settings/settings'
+import { Settings, SettingsTab } from '@/components/settings/settings'
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '@/components/chat/mod/modview';
 import { formatDuration } from '@/commons/helper';
@@ -256,7 +256,7 @@ export function ChatPage() {
     return (
         <AppShell>
             <AppShell.Header>
-                <Header openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }}
+                <Header openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab} }); drawerHandler.open() }}
                     openEvents={() => { setDrawer(EventDrawer); drawerHandler.open() }}
                     openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }}
                     openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} />
@@ -264,7 +264,7 @@ export function ChatPage() {
 
             <AppShell.Main>
                 <Drawer opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
-                    {drawer ? <drawer.component modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={() => { setDrawer(SettingsDrawer); drawerHandler.open() }} {...drawer.props}></drawer.component> : null}
+                    {drawer ? <drawer.component modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props}></drawer.component> : null}
                 </Drawer>
                 {(drawerOpen || shouldScroll) ? null : (
                     <Affix position={{ bottom: 20 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>

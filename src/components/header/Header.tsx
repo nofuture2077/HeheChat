@@ -4,9 +4,10 @@ import classes from './Header.module.css';
 import { IconBrandTwitch, IconSettings, IconBell, IconUserCode } from '@tabler/icons-react';
 import { useContext } from 'react';
 import { ProfileContext } from '@/ApplicationContext';
+import { SettingsTab } from '@/components/settings/settings';
 
 export function Header(props: {
-    openSettings: () => void,
+    openSettings: (tab?: SettingsTab) => void,
     openEvents: () => void,
     openTwitch: () => void,
     openProfileBar: () => void
@@ -19,7 +20,7 @@ export function Header(props: {
             <div></div>
             <div className={classes.rightGroup}>
                 <ActionIcon variant='transparent' color='primary' size={46}>
-                    <IconSettings style={{ width: "32px", height: "32px" }} onClick={props.openSettings} size={42} />
+                    <IconSettings style={{ width: "32px", height: "32px" }} onClick={() => props.openSettings()} size={42} />
                 </ActionIcon>
                 <ActionIcon variant='transparent' color='primary' size={46}>
                     <IconBell style={{ width: "32px", height: "32px" }} onClick={props.openEvents} size={42} />

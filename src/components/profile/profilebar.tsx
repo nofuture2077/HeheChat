@@ -8,10 +8,11 @@ import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProv
 import classes from './profilebar.module.css'
 import { ChatEmotes } from "@/commons/emotes";
 import { storeProfile } from "@/App";
+import { SettingsTab } from "@/components/settings/settings";
 
 export interface ProfileBarProps {
     close: () => void;
-    openSettings: () => void;
+    openSettings: (tab?: SettingsTab) => void;
 }
 
 export function ProfileBar(props: ProfileBarProps) {
@@ -58,7 +59,7 @@ export function ProfileBar(props: ProfileBarProps) {
             <ActionIcon size={32} radius="xl" variant="filled" color='primary' m='20px auto' onClick={createProfileHandler.open}>
                 <IconPlus />
             </ActionIcon>
-            {createProfileOpen ? <CreateProfileView activeProfile={activeProfile} close={() => { props.close(); props.openSettings() }} /> : null}
+            {createProfileOpen ? <CreateProfileView activeProfile={activeProfile} close={() => { props.close(); props.openSettings("Chat") }} /> : null}
         </Stack>
     </Stack>
 }
