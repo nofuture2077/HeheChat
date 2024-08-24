@@ -146,9 +146,6 @@ export function ChatPage() {
                 case 'BAN_MESSAGE':
                     addMessage(new SystemMessage(data.channel, ["ban", data.channel, data.username].join("***"), data.date, "ban", data.channelId, data.userId), '#system');
                     break;
-                case 'RAID_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["raid", data.channel, data.username, data.viewerCount].join("***"), data.date, "raid", data.channelId, data.userId), '#system');
-                    break;
                 case 'CHANNELS': {
                     const currentChannels = data.currentChannels;
                     currentChannels.forEach(cc => {

@@ -46,17 +46,6 @@ self.onmessage = async (e) => {
           date: msg.date
         } });
       });
-      chatClient.onRaid((channel, user, raidInfo, msg) => {
-        self.postMessage({ type: 'RAID_MESSAGE', data: {
-          channel,
-          channelId: msg.channelId,
-          username: user,
-          userId: msg.userInfo.userId,
-          date: msg.date,
-          viewerCount: raidInfo.viewerCount
-        } });
-      });
-      break;
 
     case 'SEND_MESSAGE':
       chatClient.say(data.channel, data.text, { replyTo: data.replyTo });

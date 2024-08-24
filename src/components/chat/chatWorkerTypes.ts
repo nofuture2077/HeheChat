@@ -76,18 +76,6 @@ export interface InitMessage {
     };
   }
 
-  export interface RaidMessage {
-    type: 'RAID_MESSAGE';
-    data: {
-      channel: string,
-      channelId: string,
-      username: string,
-      userId: string,
-      date: Date,
-      viewerCount: number,
-    };
-  }
-
   export interface DeleteMessage {
     type: 'DELETE_MESSAGE';
     data: string;
