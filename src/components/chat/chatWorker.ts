@@ -46,6 +46,7 @@ self.onmessage = async (e) => {
           date: msg.date
         } });
       });
+      break;
 
     case 'SEND_MESSAGE':
       chatClient.say(data.channel, data.text, { replyTo: data.replyTo });
