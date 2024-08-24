@@ -2,6 +2,8 @@ import { ChatEmotes } from "@/commons/emotes";
 import { LoginContext } from '@/commons/login'
 import { ApiClient } from "@twurple/api";
 
+export type ModActionType = 'delete' | 'timeout' | 'ban';
+
 export const deleteMessage = (api: ApiClient, loginContext: LoginContext) => (channelId: string, messageId: string) => {
     api.asUser(loginContext.user?.id || '', async (ctx) => {
         ctx.moderation.deleteChatMessages({id: channelId}, messageId);

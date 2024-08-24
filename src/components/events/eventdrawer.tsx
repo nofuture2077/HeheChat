@@ -1,6 +1,6 @@
 import classes from './eventdrawer.module.css'
 import { Title, Button, Group, Box, Text, ThemeIcon, ScrollArea } from '@mantine/core';
-import { IconX, IconGiftFilled, IconCoinBitcoinFilled, IconReload, IconUserHeart, IconSparkles } from '@tabler/icons-react';
+import { IconX, IconGiftFilled, IconCoinBitcoinFilled, IconReload, IconUserHeart, IconSparkles, IconMoneybag } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { EventStorage, EventData } from './eventstorage';
 import { ConfigContext } from '@/ApplicationContext';
@@ -8,6 +8,8 @@ import { InfoCard, InfoCardSkeleton } from '../infocard/infocard';
 import { formatString } from "@/commons/helper";
 import { SystemMessageType } from "@/commons/message";
 import { getEventStyle } from '@/components/events/eventhelper';
+import { EventType } from '@/commons/events';
+import { ReactElementLike } from 'prop-types';
 
 export interface EventDrawerViewProperties {
     close: () => void;
@@ -15,7 +17,7 @@ export interface EventDrawerViewProperties {
 
 const subsSteps = [1, 5, 10, 20, 50, 100];
 
-const messages = {
+const messages: Record<EventType, string> = {
     'raid': 'Raid from $1 with $2 viewers',
     'sub_1000': 'Subscribed for $2 months',
     'sub_2000': 'Subscribed with Tier 2 for $2 months',
@@ -29,14 +31,10 @@ const messages = {
     'sub_Prime': 'Subscribed with prime for $2 months',
     'follow': 'Just followed',
     'cheer': 'Cheered $2 bits',
-
-    // not used as events
-    'ban': '',
-    'timeout': '',
-    'delete': ''
+    'donation': "Donated $2 $3"
 }
 
-const icons = {
+const icons: Record<EventType, ReactElementLike> = {
     'raid': <IconSparkles/>,
     'sub_1000': <IconGiftFilled/>,
     'sub_2000': <IconGiftFilled/>,
@@ -50,22 +48,18 @@ const icons = {
     'sub_Prime': <IconGiftFilled/>,
     'follow': <IconUserHeart/>,
     'cheer': <IconCoinBitcoinFilled/>,
-
-    // not used as events
-    'ban': null,
-    'timeout': null,
-    'delete': null
+    'donation': <IconMoneybag/>
 }
 
 function getText(event: EventData) {
-    const msg = formatString(messages[event.eventtype as SystemMessageType], [event.channel, event.username, event.amount]);
+    const msg = formatString(messages[event.eventtype as EventType], [event.channel, event.username, event.amount]);
     return msg;
 }
 
 function getIcon(event: EventData, key: string) {
     const style: any = {variant: 'transparent'};
     getEventStyle(event, style);
-    const icon = icons[event.eventtype as SystemMessageType];
+    const icon = icons[event.eventtype as EventType];
     return <ThemeIcon key={key} {...style}>{icon}</ThemeIcon>
 }
 

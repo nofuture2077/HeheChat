@@ -1,12 +1,10 @@
 import { ChatMessage, parseTwitchMessage } from '@twurple/chat';
 import { generateGUID } from '@/commons/helper';
+import { EventType } from '@/commons/events';
 
 export type HeheMessage = ChatMessage | SystemMessage;
 
-export type SystemMessageType = 'delete' | 'timeout' | 'ban' | 'raid' | 
-    'sub_1000' | 'sub_2000' | 'sub_3000' | 'sub_Prime' | 
-    'subgift_1000' | 'subgift_2000' | 'subgift_3000' | 'subgiftb_1000' | 'subgiftb_2000' | 'subgiftb_3000' | 
-    'follow' | 'cheer';
+export type SystemMessageType = 'delete' | 'timeout' | 'ban' | EventType;
 
 export class SystemMessage {
     type: 'system';

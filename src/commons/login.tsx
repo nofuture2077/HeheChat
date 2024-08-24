@@ -20,7 +20,7 @@ export interface LoginContext extends LoginContextData {
 }
 
 export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
-    clientId: 'bryq3wo8ytvnipgwel5gn7qb8c65zz',
+    clientId: 'cbh6x1h9wkf5qjluedqiljpuz8yb37',
     isLoggedIn: () => {
         return !!DEFAULT_LOGIN_CONTEXT.accessToken;
     },

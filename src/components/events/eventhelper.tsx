@@ -1,6 +1,7 @@
 import { EventData } from './eventstorage';
+import { EventType } from '@/commons/events';
 
-export function getEventStyle(event: {eventtype: string, amount?: number}, style: any) {
+export function getEventStyle(event: {eventtype: EventType, amount?: number}, style: any) {
     if (event.eventtype.startsWith('subgift_')) {
         if ((event.amount || 0) >= 5) {
             style.variant = 'filled';

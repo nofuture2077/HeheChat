@@ -8,6 +8,8 @@ import { ChatEmotesContext, ConfigContext, LoginContextContext } from '@/Applica
 import { ModActions } from "@/components/chat/mod/modactions";
 import { parseMessage } from '@/commons/message'
 import { getEventStyle } from '@/components/events/eventhelper'
+import { EventType } from "@/commons/events";
+import { ModActionType } from '@/components/chat/mod/modactions'
 
 export type SystemMessageProps = {
     msg: SystemMessage;
@@ -15,7 +17,7 @@ export type SystemMessageProps = {
     moderatedChannel: {[id: string]: boolean };
 }
 
-const messages = {
+const messages: Record<EventType | ModActionType, string> = {
     'delete': 'A messages from $1 was deleted',
     'timeout': '$1 was timeouted for $2s',
     'ban': '$1 was banned',
@@ -31,7 +33,8 @@ const messages = {
     'subgiftb_3000': '$1 gifted $2 a Tier 3 sub',
     'sub_Prime': '$1 subscribed with prime for $2 months///$4',
     'follow': '$1 just followed',
-    'cheer': '$1 cheered $2 bits'
+    'cheer': '$1 cheered $2 bits',
+    'donation': '$1 donated $2 $3'
 }
 
 export function SystemMessageComp(props: SystemMessageProps) {
