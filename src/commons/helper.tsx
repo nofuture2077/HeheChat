@@ -58,10 +58,10 @@ export function timeSince(date: number): string {
 
     interval = seconds / 60;
     if (interval > 1) {
-        return Math.floor(interval) + " minutes ago";
+        return Math.floor(interval) + " min ago";
     }
 
-    return Math.floor(seconds) + " seconds ago";
+    return Math.floor(seconds) + " s ago";
 }
 
 export function formatTime(date: Date): string {
