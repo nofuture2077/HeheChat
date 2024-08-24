@@ -118,6 +118,5 @@ export interface InitMessage {
     | DeletedMessage
     | TimoutMessage
     | BanMessage
-    | RaidMessage
     | ChannelsMessage;
   
