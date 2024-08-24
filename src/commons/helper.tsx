@@ -30,6 +30,9 @@ const shortEnglishHumanizer = humanizeDuration.humanizer({
 });
 
 export function timeSince(date: number): string {
+    if (!date) {
+        return '';
+    }
     const seconds = Math.floor((new Date().getTime() - date) / 1000);
   
     let interval = seconds / 31536000;

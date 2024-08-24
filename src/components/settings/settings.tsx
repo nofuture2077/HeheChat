@@ -83,7 +83,7 @@ export function Settings(props: SettingsProperties) {
         </div>
       </div>
       <div className={classes.footer}>
-        <InfoCard component={Box} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''} left={<Avatar src={loginContext.user?.profilePictureUrl || ''} radius="xl"/>} right={<IconChevronRight/>}/>
+        <InfoCard date={0} component={Box} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''} left={<Avatar src={loginContext.user?.profilePictureUrl || ''} radius="xl"/>} right={<IconChevronRight/>}/>
       </div>
     </nav>
   );
