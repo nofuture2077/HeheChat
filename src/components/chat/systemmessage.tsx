@@ -19,7 +19,7 @@ export type SystemMessageProps = {
 
 const messages: Record<EventType | ModActionType, string> = {
     'delete': 'A messages from $1 was deleted',
-    'timeout': '$1 was timeouted for $2s',
+    'timeout': '$1 was timeouted for $2',
     'ban': '$1 was banned',
     'raid': 'Raid from $1 with $2 viewers',
     'sub_1000': '$1 subscribed for $2 months///$4',

@@ -3,11 +3,13 @@ import classes from './infocard.module.css';
 import { ReactComponentLike, ReactElementLike } from 'prop-types';
 import { useContext } from 'react';
 import { ChatEmotesContext } from '@/ApplicationContext';
+import { timeSince } from '@/commons/helper'
 
 export interface InfoCardProperties {
   channel?: string;
   name: string; 
   text: string;
+  date: number;
   component: ReactComponentLike;
   left?: ReactElementLike;
   right?: ReactElementLike;
@@ -23,11 +25,17 @@ export function InfoCard(props: InfoCardProperties) {
       {props.left || null}
 
         <div style={{ flex: 1 }}>
-          <Text size="sm" fw={700}>
-            {props.name}
-          </Text>
+          <Group justify='space-between'>
+            <Text size="sm" fw={700}>
+              {props.name}
+            </Text>
+            <Text fw={500} c="dimmed" size="sm">
+              {timeSince(props.date)}
+            </Text>
+          </Group>
 
-          <Text c="dimmed" size="xs" fw={500}>
+
+          <Text size="sm">
             {props.text}
           </Text>
         </div>
