@@ -63,6 +63,7 @@ export function ChatPage() {
     const viewport = useRef<HTMLDivElement>(null);
     const footer = useRef<HTMLDivElement>(null);
     const websocket = useRef<WebSocket | null>(null);
+    const [websocketOpen, setWebsocketOpen] = useState(false);
     const { width, height } = useViewportSize();
     const config = useContext(ConfigContext);
     const profile = useContext(ProfileContext);
@@ -117,7 +118,7 @@ export function ChatPage() {
     useEffect(() => {
         websocket.current = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
 
-        const onEvent = (event: MessageEvent) => {
+        const onMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
 
             if (data.type === 'msg') {
@@ -130,10 +131,14 @@ export function ChatPage() {
             }
         };
         
-        websocket.current.addEventListener("message", onEvent);
-
+        websocket.current.addEventListener("message", onMessage);
+        websocket.current.addEventListener("open", event => {
+            console.log("websocket open")
+            setWebsocketOpen(true);
+        });
         return () => {
             websocket.current?.close();
+            setWebsocketOpen(false);
         }
     }, []);
 
@@ -235,14 +240,11 @@ export function ChatPage() {
             const getChannelMessage: WorkerMessage = { type: 'GET_CHANNELS', data: { targetChannels: config.channels } };
             workerRef.current?.postMessage(getChannelMessage);
         }
-        if (websocket.current) {
+        if (websocket.current && websocketOpen) {
             AlertSystem.addNewChannels(config.channels);
-            websocket.current.addEventListener("open", event => {
-                console.log("websocket open")
-                websocket.current?.send(JSON.stringify({ type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) }));
-            });
+            websocket.current?.send(JSON.stringify({ type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) }));
         }
-    }, [config.channels]);
+    }, [config.channels, websocketOpen]);
 
     const openModView = (msg: ChatMessage) => {
         ModDrawer.props = { msg };
