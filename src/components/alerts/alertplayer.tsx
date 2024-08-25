@@ -25,8 +25,7 @@ class AlertPlayer {
     }
 
     textToSpeech(msg: string): Promise<string> {
-        
-        return Promise.resolve("");
+        return fetch(BASE_URL + "/tts/generate?text=" + encodeURIComponent(msg)).then(data => data.json()).then(data => data.audioContent);
     }
 
     playAudio(src: string, startCB: Callback, endCB: Callback, minDuration: number, volume: number): undefined {
@@ -47,7 +46,7 @@ class AlertPlayer {
         }
     }
 
-    playTTS(msg: string, startCB: Callback, endCB: Callback, minDuration: number, volume: number): undefined {
+    playTTS2(msg: string, startCB: Callback, endCB: Callback, minDuration: number, volume: number): undefined {
         startCB && startCB();
         const utterance = new SpeechSynthesisUtterance(msg);
 
@@ -63,7 +62,7 @@ class AlertPlayer {
         window.speechSynthesis.speak(utterance);
     }
     
-    playTTS2(msg: string, startCB: Callback, endCB: Callback, minDuration: number, volume: number): undefined {
+    playTTS(msg: string, startCB: Callback, endCB: Callback, minDuration: number, volume: number): undefined {
         this.textToSpeech(msg).then(audioContent => {
             this.playAudio('data:audio/mp3;base64,' + audioContent, startCB, endCB, minDuration, volume)
         });
