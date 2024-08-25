@@ -13,9 +13,15 @@ class AlertPlayer {
     queue: Event[] = [];
     index: number = 0;
     config: Record<string, EventAlertConfig>= {};
+    voice?: SpeechSynthesisVoice;
 
     constructor() {
         setInterval(() => this.checkQueue(), 1000)
+
+        window.speechSynthesis.onvoiceschanged = () => {
+            const voices = window.speechSynthesis.getVoices().filter(x => x.lang === 'de-DE');
+            this.voice = _.sample(voices);
+        };
     }
 
     textToSpeech(msg: string): Promise<string> {
@@ -48,8 +54,7 @@ class AlertPlayer {
         utterance.lang = 'de-DE';
         utterance.pitch = 1;
         utterance.rate = 1; 
-        utterance.volume = volume;
-        utterance.voice = _.sample(window.speechSynthesis.getVoices().filter(x => x.lang === 'de-DE')) || utterance.voice;
+        utterance.voice = this.voice ? this.voice : utterance.voice;
 
         utterance.onend = function(event) {
             endCB && endCB();
