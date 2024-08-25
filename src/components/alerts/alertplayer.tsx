@@ -26,14 +26,18 @@ class AlertPlayer {
     }
 
     playAudio(src: string, startCB: Callback, endCB: Callback, minDuration: number, volume: number): undefined {
-        !src && (startCB() && endCB());
+        if (!src) {
+            startCB();
+            endCB();
+            return;
+        }
         const audio = new Audio(src)
         audio.volume = volume || 1.0
     
         audio.onloadedmetadata = () => {
             const duration = audio.duration;
             startCB && startCB();
-            audio.play();
+            audio.play().catch(() => {this.stopPlaying()});
             endCB && setTimeout(() => endCB(), Math.max(duration * 1000, minDuration || 0));
         };
 

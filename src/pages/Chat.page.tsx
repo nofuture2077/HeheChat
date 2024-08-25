@@ -241,11 +241,11 @@ export function ChatPage() {
             const getChannelMessage: WorkerMessage = { type: 'GET_CHANNELS', data: { targetChannels: config.channels } };
             workerRef.current?.postMessage(getChannelMessage);
         }
-        if (websocket.current && websocketOpen) {
+        if (websocket.current && websocketOpen && websocket.current?.readyState === websocket.current?.OPEN) {
             AlertSystem.addNewChannels(config.channels);
             websocket.current?.send(JSON.stringify({ type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) }));
         }
-    }, [config.channels, websocketOpen]);
+    }, [config.channels, websocketOpen, websocket.current]);
 
     const openModView = (msg: ChatMessage) => {
         ModDrawer.props = { msg };
