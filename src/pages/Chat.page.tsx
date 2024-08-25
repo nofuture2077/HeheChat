@@ -117,6 +117,21 @@ export function ChatPage() {
     useEffect(() => {
         websocket.current = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
 
+        const onEvent = (event: MessageEvent) => {
+            const data = JSON.parse(event.data);
+
+            if (data.type === 'msg') {
+                addMessage(parseMessage(data.data.message), data.data.username);
+            }
+            if (data.type === 'event') {
+                if (config.playAlerts) {
+                    AlertSystem.addEvent(data.data);
+                }
+            }
+        };
+        
+        websocket.current.addEventListener("message", onEvent);
+
         return () => {
             websocket.current?.close();
         }
@@ -225,19 +240,6 @@ export function ChatPage() {
             websocket.current.addEventListener("open", event => {
                 console.log("websocket open")
                 websocket.current?.send(JSON.stringify({ type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) }));
-            });
-
-            websocket.current.addEventListener("message", event => {
-                const data = JSON.parse(event.data);
-
-                if (data.type === 'msg') {
-                    addMessage(parseMessage(data.data.message), data.data.username);
-                }
-                if (data.type === 'event') {
-                    if (config.playAlerts) {
-                        AlertSystem.addEvent(data.data);
-                    }
-                }
             });
         }
     }, [config.channels]);
