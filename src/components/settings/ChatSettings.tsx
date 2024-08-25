@@ -8,7 +8,7 @@ export function ChatSettings() {
     return (
     <Stack>
         <Text size='md'>Channelnames</Text>
-        <TagsInput placeholder="" value={config.channels} onChange={config.setChannels}></TagsInput>
+        <TagsInput placeholder="" value={config.channels} onChange={(channels) => config.setChannels(channels.map(c => c.toLowerCase().trim()))}></TagsInput>
         <Text size='md'>Ignored Users</Text>
         <TagsInput placeholder="" value={config.ignoredUsers} onChange={config.setIgnoredUsers}></TagsInput>
         <Text size='md'>Chat cosmetics</Text>

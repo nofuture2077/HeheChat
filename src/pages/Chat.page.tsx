@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
-import { useShallowEffect, useViewportSize, useDisclosure, useForceUpdate } from '@mantine/hooks';
+import { useShallowEffect, useViewportSize, useDisclosure, useForceUpdate, useThrottledState } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon } from '@mantine/core';
 import { Chat } from '@/components/chat/Chat';
 import { IconMessagePause, IconSend } from '@tabler/icons-react';
@@ -67,7 +67,7 @@ export function ChatPage() {
     const { width, height } = useViewportSize();
     const config = useContext(ConfigContext);
     const profile = useContext(ProfileContext);
-    const [chatMessages, setChatMessages] = useState<HeheMessage[]>([]);
+    const [chatMessages, setChatMessages] = useThrottledState<HeheMessage[]>([], 500);
     const [shouldScroll, setShouldScroll] = useState(true);
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
@@ -112,7 +112,7 @@ export function ChatPage() {
         if (config.ignoredUsers.indexOf(user) !== -1) {
             return;
         }
-        setChatMessages((prevMessages) => [...prevMessages, msg].filter(channelFilter).slice(shouldScroll ? (-1 * config.maxMessages) : 0));
+        setChatMessages((prevMessages) => [...prevMessages, msg].slice(shouldScroll ? (-1 * config.maxMessages) : 0));
     }
 
     useEffect(() => {
@@ -120,7 +120,6 @@ export function ChatPage() {
 
         const onMessage = (event: MessageEvent) => {
             const data = JSON.parse(event.data);
-
             if (data.type === 'msg') {
                 addMessage(parseMessage(data.data.message), data.data.username);
             }
@@ -130,12 +129,14 @@ export function ChatPage() {
                 }
             }
         };
-        
+
         websocket.current.addEventListener("message", onMessage);
+        
         websocket.current.addEventListener("open", event => {
             console.log("websocket open")
             setWebsocketOpen(true);
         });
+
         return () => {
             websocket.current?.close();
             setWebsocketOpen(false);

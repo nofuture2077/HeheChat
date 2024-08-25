@@ -19,7 +19,6 @@ function getQueryVariable(query: String, variable: String): string | undefined {
 
 export default function Login() {
     const loginContext = useContext(LoginContextContext);
-    const chatEmotes = useContext(ChatEmotesContext);
     const hash = window.location.hash.substring(1);
     const tokenStored: string | null = localStorage.getItem('hehe-token');
     const token: string | undefined = window.location.hash ? getQueryVariable(hash, "access_token") : undefined;
