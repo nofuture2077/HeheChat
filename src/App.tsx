@@ -60,6 +60,7 @@ export default function App() {
     const setShowOtherBadges = (value: boolean) => updateConfig('showOtherBadges', value);
     const setFontSize = (value: number) => updateConfig('fontSize', value);
     const setModToolsEnabled = (value: boolean) => updateConfig('modToolsEnabled', value);
+    const setPlayAlerts = (value: boolean) => updateConfig('playAlerts', value);
     const setRaidTargets = (value: string[]) => updateConfig('raidTargets', value);
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -230,6 +231,7 @@ export default function App() {
         setFontSize,
         setModToolsEnabled,
         setRaidTargets,
+        setPlayAlerts,
         onMessage,
         off,
         fireMessage

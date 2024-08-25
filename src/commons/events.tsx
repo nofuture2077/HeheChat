@@ -1,3 +1,5 @@
+import _ from "underscore"
+
 export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' |
 'sub_1000' | 'sub_2000' | 'sub_3000' | 'sub_Prime' | 
 'subgift_1000' | 'subgift_2000' | 'subgift_3000' | 
@@ -34,7 +36,7 @@ export type EventAlertMeta = {
     name: string;
     guid: string;
     hash: string;
-    lastUpdate: Date;
+    lastUpdate: string;
 }
 
 export type EventAlertData = {
@@ -95,11 +97,11 @@ export type EventAlertConfig = {
 }
 
 export type Event = {
-    id: string;
+    id: number;
     channel: string; 
     username: string; 
     eventtype: EventType;
-    date: Date;
+    date: number;
     usernameTo?: string;
     text?: string;
     amount?: number;
@@ -130,4 +132,14 @@ export function getAlert(event: Event, alertConfig: EventAlertConfig): EventAler
             }
         }
     });
+    const exactAlertMatches = exactAlerts[event.amount || 0];
+    if (exactAlertMatches && exactAlertMatches.length) {
+        return _.sample(exactAlertMatches);
+    }
+    const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
+    const step = minKeys.findLast(x => x <= (event.amount || 0));
+    if (!step) {
+        return undefined;
+    }
+    return _.sample(minAlerts[step]);
 }

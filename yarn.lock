@@ -2734,6 +2734,11 @@
     "@types/node" "*"
     "@types/send" "*"
 
+"@types/underscore@^1.11.15":
+  version "1.11.15"
+  resolved "https://registry.npmjs.org/@types/underscore/-/underscore-1.11.15.tgz"
+  integrity sha512-HP38xE+GuWGlbSRq9WrZkousaQ7dragtZCruBVMi0oX1migFZavZ3OROKHSkNp/9ouq82zrWtZpg18jFnVN96g==
+
 "@types/unist@*", "@types/unist@^3.0.0":
   version "3.0.2"
   resolved "https://registry.npmjs.org/@types/unist/-/unist-3.0.2.tgz"
@@ -8417,6 +8422,11 @@ unbox-primitive@^1.0.2:
     has-bigints "^1.0.2"
     has-symbols "^1.0.3"
     which-boxed-primitive "^1.0.2"
+
+underscore@^1.13.7:
+  version "1.13.7"
+  resolved "https://registry.npmjs.org/underscore/-/underscore-1.13.7.tgz"
+  integrity sha512-GMXzWtsc57XAtguZgaQViUOzs0KTkk8ojr3/xAxXLITqf/3EMwxC0inyETfDFjH/Krbhuep0HNbbjI9i/q3F3g==
 
 undici-types@~5.26.4:
   version "5.26.5"

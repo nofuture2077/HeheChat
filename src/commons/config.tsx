@@ -1,7 +1,5 @@
 export type MessageHandler = {id?: number, handle: (channel: string, text: string, replyTo?: string) => void};
 
-export type ConfigKey = 'channels' | 'chatChannel' | 'ignoredUsers' | 'showTimestamp' | 'showProfilePicture' | 'showImportantBadges' | 'showSubBadges' | 'showPredictions' | 'showOtherBadges' | 'fontSize' | 'modToolsEnabled' | 'raidTargets';
-
 export interface ConfigData {
     channels: string[];
     chatChannel?: string;
@@ -16,7 +14,11 @@ export interface ConfigData {
     fontSize: number;
     modToolsEnabled: boolean;
     raidTargets: string[];
+    playAlerts: boolean;
 }
+
+export type ConfigKey = keyof ConfigData;
+
 export interface Config extends ConfigData {
     setChannels: (channels: string[]) => void;
     setIgnoredUsers: (users: string[]) => void;
@@ -34,6 +36,7 @@ export interface Config extends ConfigData {
     setFontSize: (val: number) => void;
     setModToolsEnabled: (val: boolean) => void;
     setRaidTargets: (val: string[]) => void;
+    setPlayAlerts: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -50,6 +53,7 @@ export const DEFAULT_CONFIG: Config = {
     fontSize: 14,
     modToolsEnabled: true,
     raidTargets: [],
+    playAlerts: false,
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setShowTimestamp: (value: boolean) => {},
@@ -65,5 +69,6 @@ export const DEFAULT_CONFIG: Config = {
     fireMessage: (channel: string, text: string, replyTo?: string) => {},
     setFontSize: (val) => {},
     setModToolsEnabled: (val) => {},
-    setRaidTargets: (val) => {}
+    setRaidTargets: (val) => {},
+    setPlayAlerts: (val) => {}
 };

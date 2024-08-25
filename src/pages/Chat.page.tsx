@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
 import { useShallowEffect, useViewportSize, useDisclosure, useForceUpdate } from '@mantine/hooks';
-import { ScrollArea, Affix, Drawer, Button, Stack, Space, ActionIcon } from '@mantine/core';
+import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon } from '@mantine/core';
 import { Chat } from '@/components/chat/Chat';
 import { IconMessagePause, IconSend } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
@@ -21,6 +21,7 @@ import { TwitchView } from '@/components/twitch/twitchview';
 import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser } from '@/components/chat/mod/modactions';
 import { ProfileBar } from '@/components/profile/profilebar';
 import { Storage } from '@/components/chat/chatstorage';
+import { AlertSystem } from '@/components/alerts/alertplayer';
 
 export type OverlayDrawer = {
     name: string;
@@ -129,9 +130,6 @@ export function ChatPage() {
         workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
             const { type, data } = e.data;
             switch (type) {
-                case 'NEW_MESSAGE':
-                    addMessage(parseMessage(data.msg), data.user);
-                    break;
                 case 'DELETED_MESSAGE':
                     setDeletedMessages(deletedMessages => {
                         deletedMessages.push(data.msgId);
@@ -223,6 +221,7 @@ export function ChatPage() {
             workerRef.current?.postMessage(getChannelMessage);
         }
         if (websocket.current) {
+            AlertSystem.addNewChannels(config.channels);
             websocket.current.addEventListener("open", event => {
                 console.log("websocket open")
                 websocket.current?.send(JSON.stringify({ type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) }));
@@ -230,10 +229,14 @@ export function ChatPage() {
 
             websocket.current.addEventListener("message", event => {
                 const data = JSON.parse(event.data);
-                console.log("Message from server ", data)
 
                 if (data.type === 'msg') {
                     addMessage(parseMessage(data.data.message), data.data.username);
+                }
+                if (data.type === 'event') {
+                    if (config.playAlerts) {
+                        AlertSystem.addEvent(data.data);
+                    }
                 }
             });
         }

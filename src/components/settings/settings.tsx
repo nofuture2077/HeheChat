@@ -5,7 +5,8 @@ import {
   IconX,
   IconMessageChatbot,
   IconSword,
-  IconChevronRight
+  IconChevronRight,
+  IconAlarm
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
@@ -13,14 +14,16 @@ import { UISettings } from './UISettings';
 import { ModSettings } from './ModSettings';
 import { InfoCard } from '../infocard/infocard';
 import { LoginContextContext } from '@/ApplicationContext';
+import { AlertSettings } from './AlertSettings';
 
 const mainLinksMockdata = [
   { icon: IconHome2, label: 'General' },
   { icon: IconMessageChatbot, label: 'Chat' },
-  { icon: IconSword, label: 'Mod' }
+  { icon: IconSword, label: 'Mod' },
+  { icon: IconAlarm, label: 'Alerts' }
 ];
 
-export type SettingsTab = 'General' | 'Chat' | 'Mod';
+export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts';
 
 export interface SettingsProperties {
   close: () => void;
@@ -58,6 +61,8 @@ export function Settings(props: SettingsProperties) {
         return <ChatSettings />;
       case 'Mod':
         return <ModSettings />;
+      case 'Alerts':
+        return <AlertSettings />;
       default:
         return null;
     }
