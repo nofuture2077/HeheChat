@@ -13,16 +13,10 @@ class AlertPlayer {
     queue: Event[] = [];
     index: number = 0;
     config: Record<string, EventAlertConfig>= {};
-    voice?: SpeechSynthesisVoice;
     preventBoxDisconnect?: (() => void) & _.Cancelable;
 
     constructor() {
-        setInterval(() => this.checkQueue(), 1000)
-
-        window.speechSynthesis.onvoiceschanged = () => {
-            const voices = window.speechSynthesis.getVoices().filter(x => x.lang === 'de-DE');
-            this.voice = _.sample(voices);
-        };
+        setInterval(() => this.checkQueue(), 1000);
 
         this.initSilence();
     }
@@ -56,23 +50,7 @@ class AlertPlayer {
 
     playSilence() {
         console.log("Playing silence");
-        this.playAudio(silence, () => this.startPlaying(), () => {this.stopPlaying();this.initSilence()}, 1000, 1);
-    }
-
-    playTTS2(msg: string, startCB: Callback, endCB: Callback, minDuration: number, volume: number): undefined {
-        startCB && startCB();
-        const utterance = new SpeechSynthesisUtterance(msg);
-
-        utterance.lang = 'de-DE';
-        utterance.pitch = 1;
-        utterance.rate = 1; 
-        utterance.voice = this.voice ? this.voice : utterance.voice;
-
-        utterance.onend = function(event) {
-            endCB && endCB();
-        };
-
-        window.speechSynthesis.speak(utterance);
+        this.playAudio('data:audio/mp3;base64,' + silence, () => this.startPlaying(), () => {this.stopPlaying();this.initSilence()}, 1000, 1);
     }
     
     playTTS(msg: string, startCB: Callback, endCB: Callback, minDuration: number, volume: number): undefined {
