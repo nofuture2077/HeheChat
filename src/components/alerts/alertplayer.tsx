@@ -49,7 +49,7 @@ class AlertPlayer {
         utterance.pitch = 1;
         utterance.rate = 1; 
         utterance.volume = volume;
-        utterance.voice = window.speechSynthesis.getVoices()[6];
+        utterance.voice = _.sample(window.speechSynthesis.getVoices().filter(x => x.lang === 'de-DE')) || utterance.voice;
 
         utterance.onend = function(event) {
             endCB && endCB();
