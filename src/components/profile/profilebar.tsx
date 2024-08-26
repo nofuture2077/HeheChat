@@ -9,6 +9,14 @@ import classes from './profilebar.module.css'
 import { ChatEmotes } from "@/commons/emotes";
 import { storeProfile } from "@/App";
 import { SettingsTab } from "@/components/settings/settings";
+import { OverlayDrawer } from "@/pages/Chat.page";
+
+export const ProfileBarDrawer: OverlayDrawer = {
+    name: 'profileBar',
+    component: ProfileBar,
+    size: 200,
+    position: 'left',
+}
 
 export interface ProfileBarProps {
     close: () => void;

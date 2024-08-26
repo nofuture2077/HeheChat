@@ -7,19 +7,19 @@ import { Chat } from '@/components/chat/Chat';
 import { IconMessagePause, IconSend } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '@/components/header/Header';
-import { EventDrawerView } from '@/components/events/eventdrawer';
+import { EventDrawer } from '@/components/events/eventdrawer';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { WorkerMessage, WorkerResponse } from '@/components/chat/chatWorkerTypes';
 import { ChatMessage } from '@twurple/chat';
 import { ApiClient, HelixModeratedChannel } from '@twurple/api';
-import { Settings, SettingsTab } from '@/components/settings/settings'
+import { SettingsDrawer, SettingsTab } from '@/components/settings/settings'
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '@/components/chat/mod/modview';
 import { formatDuration } from '@/commons/helper';
 import { HeheMessage, parseMessage, SystemMessage } from '@/commons/message'
-import { TwitchView } from '@/components/twitch/twitchview';
+import { TwitchDrawer } from '@/components/twitch/twitchview';
 import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser } from '@/components/chat/mod/modactions';
-import { ProfileBar } from '@/components/profile/profilebar';
+import { ProfileBarDrawer } from '@/components/profile/profilebar';
 import { Storage } from '@/components/chat/chatstorage';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 
@@ -29,34 +29,6 @@ export type OverlayDrawer = {
     position: 'bottom' | 'left' | 'right' | 'top';
     size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number;
     props?: any;
-}
-
-const SettingsDrawer: OverlayDrawer = {
-    name: 'settings',
-    component: Settings,
-    size: 400,
-    position: 'left',
-}
-
-const EventDrawer: OverlayDrawer = {
-    name: 'events',
-    component: EventDrawerView,
-    size: 380,
-    position: 'right'
-}
-
-const TwitchDrawer: OverlayDrawer = {
-    name: 'twitch',
-    component: TwitchView,
-    size: 340,
-    position: 'right'
-}
-
-const ProfileBarDrawer: OverlayDrawer = {
-    name: 'profileBar',
-    component: ProfileBar,
-    size: 200,
-    position: 'left',
 }
 
 export function ChatPage() {
@@ -101,11 +73,8 @@ export function ChatPage() {
         }
     }, [shouldScroll, chatInputOpened, chatMessages, replyMsg]);
 
-    const channelIndex = config.channels.reduce((obj: any, key: string) => { obj[key] = true; return obj }, {});
     const deletedMessagesIndex = deletedMessages.reduce((obj: any, key: string) => { obj[key] = true; return obj }, {});
     const moderatedChannel = loginContext.moderatedChannels.reduce((obj: any, c: HelixModeratedChannel) => { obj[c.name] = true; return obj }, {});
-
-    const channelFilter = (msg: HeheMessage) => channelIndex[msg.target.substring(1)];
 
     const addMessage = (msg: HeheMessage, user: string) => {
         Storage.store(msg.target.substring(1), user, msg.date, msg.rawLine);

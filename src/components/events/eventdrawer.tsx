@@ -10,12 +10,19 @@ import { getEventStyle } from '@/components/events/eventhelper';
 import { EventType } from '@/commons/events';
 import { ReactElementLike } from 'prop-types';
 import { AlertSystem } from '@/components/alerts/alertplayer';
+import { OverlayDrawer } from '@/pages/Chat.page';
+
+export const EventDrawer: OverlayDrawer = {
+    name: 'events',
+    component: EventDrawerView,
+    size: 380,
+    position: 'right'
+}
+
 
 export interface EventDrawerViewProperties {
     close: () => void;
 }
-
-const subsSteps = [1, 5, 10, 20, 50, 100];
 
 const messages: Record<EventType, string> = {
     'raid': 'Raid from $1 with $2 viewers',

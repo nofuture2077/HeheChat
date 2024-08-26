@@ -8,12 +8,19 @@ import { StreamCardPlaceholder, StreamCard } from './streamcard';
 import { RaidView } from '../chat/mod/modview';
 import classes from './twitchview.module.css';
 import { ModActions } from '../chat/mod/modactions'
+import { OverlayDrawer } from '@/pages/Chat.page';
+
+export const TwitchDrawer: OverlayDrawer = {
+    name: 'twitch',
+    component: TwitchView,
+    size: 340,
+    position: 'right'
+}
 
 export interface TwitchViewProps {
     close: () => void,
     modActions: ModActions,
 }
-
 
 export function TwitchView(props: TwitchViewProps) {
     const config = useContext(ConfigContext);

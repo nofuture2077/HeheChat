@@ -15,6 +15,7 @@ import { ModSettings } from './ModSettings';
 import { InfoCard } from '../infocard/infocard';
 import { LoginContextContext } from '@/ApplicationContext';
 import { AlertSettings } from './AlertSettings';
+import { OverlayDrawer } from '@/pages/Chat.page';
 
 const mainLinksMockdata = [
   { icon: IconHome2, label: 'General' },
@@ -22,6 +23,13 @@ const mainLinksMockdata = [
   { icon: IconSword, label: 'Mod' },
   { icon: IconAlarm, label: 'Alerts' }
 ];
+
+export const SettingsDrawer: OverlayDrawer = {
+  name: 'settings',
+  component: Settings,
+  size: 400,
+  position: 'left',
+}
 
 export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts';
 
