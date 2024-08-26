@@ -51,14 +51,14 @@ export function ChatInput(props: { close: () => void, replyToMsg?: ChatMessage, 
                             <IconX style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
                         </ActionIcon>) : null}
                     rightSection={
-                        <ActionIcon size={32} radius="xl" variant="filled" color='primary' onClick={() => { sendMessage(inputText, true) }}>
+                        <ActionIcon size={32} radius="xl" variant="transparent" color='primary' onClick={() => { sendMessage(inputText, true) }}>
                             <IconSend style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
                         </ActionIcon>
                     }
                 />
                 <ChannelPicker onChange={(item) => { props.setReplyMsg(undefined); config.setChatChannel(item) }} channels={config.channels} value={chatChannel} />
-                <ActionIcon variant="transparent" onClick={() => { props.setReplyMsg(undefined); props.close(); }} color='primary'>
-                    <IconX style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
+                <ActionIcon variant="subtle" onClick={() => { props.setReplyMsg(undefined); props.close(); }} color='primary' mr={10}>
+                    <IconX style={{ width: rem(32), height: rem(32) }} stroke={2} />
                 </ActionIcon>
             </Flex>
         </Stack>

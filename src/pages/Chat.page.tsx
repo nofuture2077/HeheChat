@@ -4,7 +4,7 @@ import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext }
 import { useShallowEffect, useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useIsFirstRender } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon } from '@mantine/core';
 import { Chat } from '@/components/chat/Chat';
-import { IconMessagePause, IconSend } from '@tabler/icons-react';
+import { IconMessagePause, IconMessage } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '@/components/header/Header';
 import { EventDrawer } from '@/components/events/eventdrawer';
@@ -60,13 +60,13 @@ export function ChatPage() {
         if (viewportElement) {
             const shouldScroll = 
                 (viewportElement.scrollHeight > viewportElement.clientHeight) &&
-                (viewportElement.scrollHeight - viewportElement.clientHeight - position.y < 10);
+                (viewportElement.scrollHeight - viewportElement.clientHeight - position.y < 60);
             setShouldScroll(shouldScroll);
         }
     };
 
     const scrollToBottom = () => {
-        viewport.current!.scrollTo({ top: viewport.current!.scrollHeight });
+        viewport.current!.scrollTo({ top: viewport.current!.scrollHeight + 60 });
     }
 
     const deletedMessagesIndex = deletedMessages.reduce((obj: any, key: string) => { obj[key] = true; return obj }, {});
@@ -277,7 +277,7 @@ export function ChatPage() {
             </AppShell.Main>
             <AppShell.Footer >
                 {(!drawerOpen && config.channels.length) ?
-                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 20, right: 20 }}><ActionIcon color='primary' size='xl' radius='xl' onClick={chatInputHandler.open}><IconSend /></ActionIcon></Affix>) : null}
+                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 20, right: 20 }}><ActionIcon color='primary' size='xl' radius='xl' onClick={() => {chatInputHandler.open(); setTimeout(scrollToBottom, 500)}}><IconMessage /></ActionIcon></Affix>) : null}
             </AppShell.Footer>
         </AppShell>
     );
