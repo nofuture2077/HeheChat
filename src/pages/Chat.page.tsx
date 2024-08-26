@@ -55,23 +55,18 @@ export function ChatPage() {
     const api = new ApiClient({ authProvider });
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
-        const shouldScroll = (viewport.current!.scrollHeight > viewport.current!.clientHeight) && (viewport.current!.scrollHeight - viewport.current!.clientHeight - viewport.current!.scrollTop < 10);
-        setShouldScroll(shouldScroll);
-    }
+        const viewportElement = viewport.current;
+        if (viewportElement) {
+            const shouldScroll = 
+                (viewportElement.scrollHeight > viewportElement.clientHeight) &&
+                (viewportElement.scrollHeight - viewportElement.clientHeight - position.y < 10);
+            setShouldScroll(shouldScroll);
+        }
+    };
 
     const scrollToBottom = () => {
         viewport.current!.scrollTo({ top: viewport.current!.scrollHeight });
     }
-
-    useEffect(() => {
-        forceUpdate();
-    }, [chatInputOpened]);
-
-    useEffect(() => {
-        if (shouldScroll) {
-            scrollToBottom();
-        }
-    }, [shouldScroll, chatInputOpened, chatMessages, replyMsg]);
 
     const deletedMessagesIndex = deletedMessages.reduce((obj: any, key: string) => { obj[key] = true; return obj }, {});
     const moderatedChannel = loginContext.moderatedChannels.reduce((obj: any, c: HelixModeratedChannel) => { obj[c.name] = true; return obj }, {});
@@ -113,8 +108,15 @@ export function ChatPage() {
     }, []);
 
     useEffect(() => {
-        chatInputHandler.close();
+        setChatMessages([]);
+        setShouldScroll(true);
 
+        setTimeout(() => {
+            scrollToBottom();
+        }, 1000);
+    }, [profile]);
+
+    useEffect(() => {
         workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
 
         workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
@@ -198,6 +200,8 @@ export function ChatPage() {
 
         emotes.updateUserInfo(loginContext, loginContext.user?.name || '');
 
+        scrollToBottom();
+
         return () => {
             const stopMessage: WorkerMessage = { type: 'STOP' };
             workerRef.current?.postMessage(stopMessage);
@@ -215,6 +219,16 @@ export function ChatPage() {
             websocket.current?.send(JSON.stringify({ type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) }));
         }
     }, [config.channels, websocketOpen, websocket.current]);
+
+    useEffect(() => {
+        forceUpdate();
+    }, [chatInputOpened]);
+
+    useEffect(() => {
+        if (shouldScroll) {
+            scrollToBottom();
+        }
+    }, [chatMessages, shouldScroll]);
 
     const openModView = (msg: ChatMessage) => {
         ModDrawer.props = { msg };

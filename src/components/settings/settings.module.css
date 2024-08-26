@@ -9,6 +9,8 @@
 
   .footer {
     border-top: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+    position: static;
+    bottom: 0px;
   }
   
   .wrapper {
