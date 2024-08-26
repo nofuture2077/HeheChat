@@ -80,7 +80,7 @@ export function Settings(props: SettingsProperties) {
     <nav className={classes.navbar} style={{overflow: 'hidden'}}>
       <div className={classes.header}>
         <Title order={4}>
-          {active}
+          Settings - {active}
         </Title>
         <Button onClick={props.close} variant='subtle' color='primary'>
           <IconX />

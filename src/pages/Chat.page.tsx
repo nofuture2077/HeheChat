@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
-import { useShallowEffect, useViewportSize, useDisclosure, useForceUpdate, useThrottledState } from '@mantine/hooks';
+import { useShallowEffect, useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useIsFirstRender } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon } from '@mantine/core';
 import { Chat } from '@/components/chat/Chat';
 import { IconMessagePause, IconSend } from '@tabler/icons-react';
@@ -50,6 +50,7 @@ export function ChatPage() {
     const [deletedMessages, setDeletedMessages] = useState<string[]>([]);
     const forceUpdate = useForceUpdate();
     const emotes = useContext(ChatEmotesContext);
+    const firstRender = useIsFirstRender();
 
     const authProvider = loginContext.getAuthProvider();
     const api = new ApiClient({ authProvider });
@@ -80,6 +81,12 @@ export function ChatPage() {
     }
 
     useEffect(() => {
+        if (firstRender && profile.name === 'default' && !config.channels.length) {
+            setTimeout(() => {
+                setDrawer({...SettingsDrawer, props: {tab: 'Chat'} });
+                drawerHandler.open();
+            }, 500);
+        }
         websocket.current = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
 
         const onMessage = (event: MessageEvent) => {
