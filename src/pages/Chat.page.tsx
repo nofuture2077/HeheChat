@@ -121,7 +121,7 @@ export function ChatPage() {
         setTimeout(() => {
             scrollToBottom();
         }, 1000);
-    }, [profile]);
+    }, [profile.guid]);
 
     useEffect(() => {
         workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
@@ -214,7 +214,7 @@ export function ChatPage() {
             workerRef.current?.postMessage(stopMessage);
             config.off(chatHandler);
         };
-    }, [config, profile]);
+    }, [config.channels, profile.guid]);
 
     useShallowEffect(() => {
         if (workerRef.current) {
