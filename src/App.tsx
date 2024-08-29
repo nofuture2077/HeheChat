@@ -1,6 +1,6 @@
 import '@mantine/core/styles.css';
 import { createTheme, MantineProvider, virtualColor } from '@mantine/core';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Router } from './Router';
 import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext } from '@/ApplicationContext'
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from '@/commons/login'
@@ -10,6 +10,7 @@ import { Config, ConfigKey, DEFAULT_CONFIG, MessageHandler } from './commons/con
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { generateGUID } from './commons/helper';
+import PubSub from 'pubsub-js';
 
 function load(): Config {
     return JSON.parse(localStorage.getItem('chatConfig') || JSON.stringify(DEFAULT_CONFIG)) as Config;
@@ -35,11 +36,27 @@ export default function App() {
     const [loginContext, setLoginContext] = useState<LoginContext>(DEFAULT_LOGIN_CONTEXT);
     const [chatEmotes, setChatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
     const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
+    const workerRef = useRef<Worker>();
 
     useEffect(() => {
         migrateToProfile();
         const profileName = localStorage.getItem('hehe-profile')!;
         loadProfile(profileName);
+
+        workerRef.current = new Worker(new URL('./components/webworker/webworker.ts', import.meta.url), { type: 'module' });
+
+        PubSub.subscribe("WSSEND", (msg, data) => {
+            workerRef.current!.postMessage({type: "SEND", data});
+        });
+
+        workerRef.current.addEventListener("message", (msg: MessageEvent) => {
+            PubSub.publish("WS-" + msg.data.type, msg.data.data);
+        });
+
+        return () => {
+            const stopMessage = { type: 'STOP' };
+            workerRef.current?.postMessage(stopMessage);
+        }
     }, []);
 
     const updateConfig = (key: ConfigKey, value: any) => {

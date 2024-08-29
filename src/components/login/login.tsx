@@ -2,8 +2,8 @@ import { Button } from '@mantine/core';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
 import { IconLogin } from '@tabler/icons-react';
-import { useEffect, useState, useContext } from 'react';
-import { ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
+import { useEffect, useContext } from 'react';
+import { LoginContextContext } from '@/ApplicationContext';
 import { generateGUID } from '@/commons/helper';
 
 function getQueryVariable(query: String, variable: String): string | undefined {
@@ -60,27 +60,39 @@ export default function Login() {
         return null;
     }
 
-    const redirectUrl = encodeURI(window.location.origin + window.location.pathname.replace("index.html", ""));
-
     const state = generateGUID();
     localStorage.setItem('hehe-token_state', state);
 
+    const authUrl = import.meta.env.VITE_BACKEND_URL + "/twitchauth";
+
     let scope = [
-        // chatter scopes
-        'chat:read',
-        'chat:edit',
-        'user:write:chat',
-        // mod scopes
-        'user:read:moderated_channels',
-        'moderator:manage:chat_messages',
-        'moderator:manage:banned_users',
-        'moderator:manage:shoutouts',
-        // broadcaster
-        'channel:manage:raids'
+        "bits:read",
+        "channel:bot",
+        "channel:manage:predictions",
+        "channel:manage:raids",
+        "channel:manage:redemptions",
+        "channel:read:goals",
+        "channel:read:hype_train",
+        "channel:read:polls",
+        "channel:read:predictions",
+        "channel:read:redemptions",
+        "channel:read:subscriptions",
+        "channel:read:vips",
+        "chat:edit",
+        "chat:read",
+        "clips:edit",
+        "moderator:manage:announcements",
+        "moderator:read:chatters",
+        "moderator:read:followers",
+        "moderator:read:shield_mode",
+        "moderator:read:shoutouts",
+        "user:bot",
+        "user:read:moderated_channels",
+        "user:read:chat"
     ].map(encodeURIComponent).join('+');
     
-    let responseType = encodeURIComponent('token');
-    let authUrl = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${loginContext.clientId}&redirect_uri=${redirectUrl}&scope=${scope}&state=${state}`;
+    let responseType = encodeURIComponent('code');
+    let link = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${loginContext.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}`;
 
     return (<Button
             component="a"
@@ -88,7 +100,7 @@ export default function Login() {
             radius="xl"
             variant='gradient'
             gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
-            href={authUrl}
+            href={link}
             rightSection={<IconLogin size={32} />}>    
             Login with Twitch
         </Button> );

@@ -20,7 +20,7 @@ export interface LoginContext extends LoginContextData {
 }
 
 export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
-    clientId: 'cbh6x1h9wkf5qjluedqiljpuz8yb37',
+    clientId: import.meta.env.VITE_CLIENT_ID,
     isLoggedIn: () => {
         return !!DEFAULT_LOGIN_CONTEXT.accessToken;
     },

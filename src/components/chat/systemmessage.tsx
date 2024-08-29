@@ -1,6 +1,6 @@
 import { SystemMessage, SystemMessageType } from "@/commons/message";
-import { formatString } from "@/commons/helper";
-import { Text, ActionIcon, Group } from "@mantine/core"
+import { formatDuration, formatString } from "@/commons/helper";
+import { Text, ActionIcon } from "@mantine/core"
 import classes from './systemmessage.module.css';
 import { IconSpeakerphone } from '@tabler/icons-react';
 import { useContext } from 'react';
@@ -48,6 +48,9 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const canShoutout = isModerator || isBroadcaster;
     const modToolsEnabled = config.modToolsEnabled;
     const parts = props.msg.text.split('***');
+    if (parts[0] === 'timeout') {
+        parts[3] = formatDuration(Number(parts[3]) * 1000);
+    }
     const text = formatString(messages[parts[0] as SystemMessageType], parts.slice(1, parts.length))
     const textParts = text.split('///');
 

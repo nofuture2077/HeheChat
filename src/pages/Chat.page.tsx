@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
-import { useShallowEffect, useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useIsFirstRender } from '@mantine/hooks';
+import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useIsFirstRender } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon } from '@mantine/core';
 import { Chat } from '@/components/chat/Chat';
 import { IconMessagePause, IconMessage } from '@tabler/icons-react';
@@ -9,19 +9,18 @@ import { AppShell } from '@mantine/core';
 import { Header } from '@/components/header/Header';
 import { EventDrawer } from '@/components/events/eventdrawer';
 import { ChatInput } from '@/components/chat/ChatInput';
-import { WorkerMessage, WorkerResponse } from '@/components/chat/chatWorkerTypes';
 import { ChatMessage } from '@twurple/chat';
 import { ApiClient, HelixModeratedChannel } from '@twurple/api';
 import { SettingsDrawer, SettingsTab } from '@/components/settings/settings'
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '@/components/chat/mod/modview';
-import { formatDuration } from '@/commons/helper';
-import { HeheMessage, parseMessage, SystemMessage } from '@/commons/message'
+import { HeheMessage, parseMessage } from '@/commons/message'
 import { TwitchDrawer } from '@/components/twitch/twitchview';
 import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser } from '@/components/chat/mod/modactions';
 import { ProfileBarDrawer } from '@/components/profile/profilebar';
 import { Storage } from '@/components/chat/chatstorage';
 import { AlertSystem } from '@/components/alerts/alertplayer';
+import PubSub from 'pubsub-js';
 
 export type OverlayDrawer = {
     name: string;
@@ -34,8 +33,6 @@ export type OverlayDrawer = {
 export function ChatPage() {
     const viewport = useRef<HTMLDivElement>(null);
     const footer = useRef<HTMLDivElement>(null);
-    const websocket = useRef<WebSocket | null>(null);
-    const [websocketOpen, setWebsocketOpen] = useState(false);
     const { width, height } = useViewportSize();
     const config = useContext(ConfigContext);
     const profile = useContext(ProfileContext);
@@ -46,7 +43,6 @@ export function ChatPage() {
     const [replyMsg, setReplyMsg] = useState<ChatMessage>();
     const [chatInputOpened, chatInputHandler] = useDisclosure(false);
     const loginContext = useContext(LoginContextContext);
-    const workerRef = useRef<Worker>();
     const [deletedMessages, setDeletedMessages] = useState<string[]>([]);
     const forceUpdate = useForceUpdate();
     const emotes = useContext(ChatEmotesContext);
@@ -87,35 +83,17 @@ export function ChatPage() {
                 drawerHandler.open();
             }, 500);
         }
-        websocket.current = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
-
-        const onMessage = (event: MessageEvent) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'msg') {
-                addMessage(parseMessage(data.data.message), data.data.username);
-            }
-            if (data.type === 'event') {
-                if (config.playAlerts) {
-                    AlertSystem.addEvent(data.data);
-                }
-            }
-        };
-
-        websocket.current.addEventListener("message", onMessage);
-        
-        websocket.current.addEventListener("open", event => {
-            console.log("websocket open")
-            setWebsocketOpen(true);
+        PubSub.subscribe("WS-msg", (msg, data) => {
+            addMessage(parseMessage(data.message), data.username);
         });
-
-        return () => {
-            websocket.current?.close();
-            setWebsocketOpen(false);
-        }
+        PubSub.subscribe("WS-event", (msg, data) => {
+            if (config.playAlerts) {
+                AlertSystem.addEvent(data);
+            }
+        });
     }, []);
 
     useEffect(() => {
-        setChatMessages([]);
         setShouldScroll(true);
 
         setTimeout(() => {
@@ -124,60 +102,6 @@ export function ChatPage() {
     }, [profile.guid]);
 
     useEffect(() => {
-        workerRef.current = new Worker(new URL('../components/chat/chatWorker.ts', import.meta.url), { type: 'module' });
-
-        workerRef.current.onmessage = (e: MessageEvent<WorkerResponse>) => {
-            const { type, data } = e.data;
-            switch (type) {
-                case 'DELETED_MESSAGE':
-                    setDeletedMessages(deletedMessages => {
-                        deletedMessages.push(data.msgId);
-                        const dM: string[] = deletedMessages.slice(-100);
-                        localStorage.setItem("chat-messages-deleted", JSON.stringify(dM))
-                        return dM
-                    })
-                    break;
-                case 'TIMEOUT_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["timeout", data.channel, data.username, formatDuration(data.duration)].join("***"), data.date, "timeout", data.channelId, data.userId), '#system');
-                    break;
-                case 'BAN_MESSAGE':
-                    addMessage(new SystemMessage(data.channel, ["ban", data.channel, data.username].join("***"), data.date, "ban", data.channelId, data.userId), '#system');
-                    break;
-                case 'CHANNELS': {
-                    const currentChannels = data.currentChannels;
-                    currentChannels.forEach(cc => {
-                        if (config.channels.indexOf(cc) === -1) {
-                            const leaveChannelMessage: WorkerMessage = { type: 'LEAVE_CHANNEL', data: { channel: cc } };
-                            workerRef.current?.postMessage(leaveChannelMessage);
-                        }
-                    });
-                    const promises = config.channels.map(nc => {
-                        if (currentChannels.indexOf(nc) === -1) {
-                            const joinChannelMessage: WorkerMessage = { type: 'JOIN_CHANNEL', data: { channel: nc } };
-                            workerRef.current?.postMessage(joinChannelMessage);
-                            return emotes.updateChannel(loginContext, nc);
-                        }
-                        return Promise.resolve();
-                    });
-                    Promise.all(promises).then(() => forceUpdate());
-                }
-                    break;
-                default:
-                    break;
-            }
-        };
-
-        const initMessage: WorkerMessage = {
-            type: 'INIT',
-            data: {
-                channels: config.channels,
-                clientId: loginContext.clientId,
-                accessToken: loginContext.accessToken!
-            }
-        };
-
-        workerRef.current.postMessage(initMessage);
-
         const chatHandler = config.onMessage({
             handle: async (channel, text, replyTo) => {
                 const token = await api.getTokenInfo();
@@ -192,7 +116,6 @@ export function ChatPage() {
             const msgs = rawMessages.map(parseMessage);
             setChatMessages(msgs);
         });
-
 
         const deletedMessages: string[] = JSON.parse(localStorage.getItem("chat-messages-deleted") || '[]');
         setDeletedMessages(deletedMessages);
@@ -210,22 +133,13 @@ export function ChatPage() {
         scrollToBottom();
 
         return () => {
-            const stopMessage: WorkerMessage = { type: 'STOP' };
-            workerRef.current?.postMessage(stopMessage);
             config.off(chatHandler);
         };
     }, [config.channels, profile.guid]);
 
-    useShallowEffect(() => {
-        if (workerRef.current) {
-            const getChannelMessage: WorkerMessage = { type: 'GET_CHANNELS', data: { targetChannels: config.channels } };
-            workerRef.current?.postMessage(getChannelMessage);
-        }
-        if (websocket.current && websocketOpen && websocket.current?.readyState === websocket.current?.OPEN) {
-            AlertSystem.addNewChannels(config.channels);
-            websocket.current?.send(JSON.stringify({ type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) }));
-        }
-    }, [config.channels, websocketOpen, websocket.current]);
+    useEffect(() => {
+        PubSub.publish("WSSEND", { type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) });
+    }, [config.channels]);
 
     useEffect(() => {
         forceUpdate();
