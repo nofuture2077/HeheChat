@@ -4,7 +4,7 @@ import { AvatarGroup, Avatar, Text, Paper, ActionIcon, Stack, Modal, Fieldset, T
 import { useDisclosure } from "@mantine/hooks";
 import { Profile } from "@/commons/profile";
 import { IconPlus, IconX } from '@tabler/icons-react'
-import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from 'react-beautiful-dnd';
+import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from '@hello-pangea/dnd';
 import classes from './profilebar.module.css'
 import { ChatEmotes } from "@/commons/emotes";
 import { storeProfile } from "@/App";
