@@ -1,5 +1,6 @@
 import { LoginContext, getUserdata } from '@/commons/login';
 import { toMap } from '@/commons/helper';
+import { HelixUser } from '@twurple/api';
 
 interface sevenTVEmote {
     name: string;
@@ -71,6 +72,14 @@ export async function getGlobalBadgesAndEmotes(context: LoginContext) {
     }
 }
 
+export async function getProfilesByNames(context: LoginContext, usernames: string[]) {
+    const api = context.getApiClient();
+
+    const users = await api.users.getUsersByNames(usernames);
+
+    return toMap(users, user => user.name);
+}
+
 export async function getBadgesAndEmotesByNames(context: LoginContext, usernames: string[]) {
     const api = context.getApiClient();
 
@@ -89,9 +98,15 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
         }
     }));
 
+    return toMap(data, d => d.user.name);
+}
+
+export async function getGlobalBadgesAndEmotesByNames(context: LoginContext) {
+    const api = context.getApiClient();
+
     const { channelBadges, channelEmotes } = await getGlobalBadgesAndEmotes(context);
 
-    data.push({
+    return {
         //@ts-ignore
         user: {
             name: "global",
@@ -100,9 +115,7 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
         channelBadges: toMap(channelBadges, ba => ba.id),
         //@ts-ignore
         channelEmotes: toMap(channelEmotes, em => em.name)
-    });
-
-    return toMap(data, d => d.user.name);
+    };
 }
 
 export interface ChatEmotes {
@@ -117,6 +130,8 @@ export interface ChatEmotes {
     getLogo: (channel: string) => any;
     getChannelId: (channel: string) => string;
 }
+const LOADING_CHAT_EMOTES: {[key: string]: boolean} = {};
+const LOADING_PROFILES: {[key: string]: boolean} = {};
 
 export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     emotes: new Map(),
@@ -124,19 +139,27 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         DEFAULT_CHAT_EMOTES.emotes = await getBadgesAndEmotesByNames(context, channels);
     },
     updateChannel: async (context, channel) => {
-        const emoteData = await getBadgesAndEmotesByNames(context, [channel]);
-        DEFAULT_CHAT_EMOTES.emotes.set(channel, emoteData.get(channel));
-        DEFAULT_CHAT_EMOTES.emotes.set('global', emoteData.get('global'));
-    },
-    updateUserInfo: async (context, channel) => {
-        if (!channel) {
+        if ((DEFAULT_CHAT_EMOTES.emotes.has(channel) && DEFAULT_CHAT_EMOTES.emotes.get(channel).emotes) || LOADING_CHAT_EMOTES[channel]) {
             return;
         }
+        LOADING_CHAT_EMOTES[channel] = true;
+        if (Object.keys(LOADING_CHAT_EMOTES).length === 1) {
+            const globalEmoteData = await getGlobalBadgesAndEmotesByNames(context);
+            DEFAULT_CHAT_EMOTES.emotes.set('global', globalEmoteData);
+        }
+        const emoteData = await getBadgesAndEmotesByNames(context, [channel]);
+        DEFAULT_CHAT_EMOTES.emotes.set(channel, emoteData.get(channel));
+    },
+    updateUserInfo: async (context, channel) => {
+        if ((DEFAULT_CHAT_EMOTES.emotes.has(channel) && DEFAULT_CHAT_EMOTES.emotes.get(channel).user) || LOADING_PROFILES[channel]) {
+            return;
+        }
+        LOADING_PROFILES[channel] = true;
         const userData = await getUserdata(context, [channel]);
         if (DEFAULT_CHAT_EMOTES.emotes.has(channel)) {
             DEFAULT_CHAT_EMOTES.emotes.get(channel).user = userData.get(channel).user;
         } else {
-            DEFAULT_CHAT_EMOTES.emotes.set(channel, userData.get(channel));
+            DEFAULT_CHAT_EMOTES.emotes.set(channel, {user: userData.get(channel).user});
         }
     },
     getBadge: (channel: string, badgeData: string, key: string) => {

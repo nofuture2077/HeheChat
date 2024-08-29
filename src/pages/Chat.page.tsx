@@ -94,14 +94,6 @@ export function ChatPage() {
     }, []);
 
     useEffect(() => {
-        setShouldScroll(true);
-
-        setTimeout(() => {
-            scrollToBottom();
-        }, 1000);
-    }, [profile.guid]);
-
-    useEffect(() => {
         const chatHandler = config.onMessage({
             handle: async (channel, text, replyTo) => {
                 const token = await api.getTokenInfo();
@@ -128,18 +120,29 @@ export function ChatPage() {
             emotes.updateUserInfo(loginContext, mC);
         });
 
-        emotes.updateUserInfo(loginContext, loginContext.user?.name || '');
+        profile.listProfiles().forEach(profile => {
+            profile.config.channels.forEach(channel => {
+                emotes.updateUserInfo(loginContext, channel);
+            });
+        });
 
-        scrollToBottom();
+        setShouldScroll(true);
+
+        setTimeout(() => {
+            scrollToBottom();
+        }, 1000);
+
+        config.channels.forEach(channel => {
+            emotes.updateChannel(loginContext, channel);
+        });
+
+        AlertSystem.addNewChannels(config.channels);
+        PubSub.publish("WSSEND", { type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) });
 
         return () => {
             config.off(chatHandler);
         };
     }, [config.channels, profile.guid]);
-
-    useEffect(() => {
-        PubSub.publish("WSSEND", { type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) });
-    }, [config.channels]);
 
     useEffect(() => {
         forceUpdate();
