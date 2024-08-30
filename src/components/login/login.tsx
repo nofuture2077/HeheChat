@@ -17,7 +17,7 @@ function getQueryVariable(query: String, variable: String): string | undefined {
     console.log('Query variable %s not found', variable);
   }
 
-const AUTH_VERSION = 3;
+const AUTH_VERSION = 4;
 
 export default function Login() {
     const loginContext = useContext(LoginContextContext);
@@ -94,7 +94,8 @@ export default function Login() {
         "moderator:read:shoutouts",
         "user:bot",
         "user:read:moderated_channels",
-        "user:read:chat"
+        "user:read:chat",
+        "user:write:chat"
     ].map(encodeURIComponent).join('+');
     
     let responseType = encodeURIComponent('code');
