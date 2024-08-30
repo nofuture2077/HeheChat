@@ -10,7 +10,8 @@ import { TimeoutView, BanView } from './mod/modview';
 import { formatTime } from '@/commons/helper';
 import { ModActions } from '@/components/chat/mod/modactions';
 import { Config, ConfigKey, } from '@/commons/config'
-import { ChatEmotes } from '@/commons/emotes';
+import { ChatEmotes } from '@/commons/emotes'
+import { EmoteComponent } from '@/components/emote/emote';
 
 interface ChatMessageProps {
     msg: ChatMessage;
@@ -46,7 +47,7 @@ function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: string, em
     return parsedParts.map((part, partIndex) => {
         switch (part.type) {
             case 'text': return joinWithSpace(part.text.split(' ').map((word, index) => wordMapper(word, channel, partIndex, index, emotes, login)))
-            case 'emote': return <img alt={part.name} key={partIndex} src={buildEmoteImageUrl(part.id)} />;
+            case 'emote': return <EmoteComponent key={partIndex} imageUrl={buildEmoteImageUrl(part.id)} largeImageUrl={buildEmoteImageUrl(part.id, {size: '2.0'})} name={part.name} type='Twitch'/>;
             case 'cheer': {
                 const cheerEmote = emotes.getCheerEmote(channel, part.name, part.amount);
                 return <span key={partIndex}><img alt={part.name + part.amount} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.amount}</span></span>

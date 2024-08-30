@@ -1,6 +1,6 @@
 import { LoginContext, getUserdata } from '@/commons/login';
 import { toMap } from '@/commons/helper';
-import { HelixUser } from '@twurple/api';
+import { EmoteComponent } from '@/components/emote/emote';
 
 interface sevenTVEmote {
     name: string;
@@ -180,9 +180,10 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     getEmote: (channel: string, text: string, key: string) => {
         const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
         const emoteData = channelEmotes?.sevenTVEmotes?.get(text)?.data;
-
+        
         if (emoteData) {
-            return <img alt={text} key={key} src={`${emoteData.host.url}/${emoteData.host.files[1].name}`} />;
+            console.log(emoteData.host.files);
+            return <EmoteComponent key={key} imageUrl={`${emoteData.host.url}/${emoteData.host.files[1].name}`} largeImageUrl={`${emoteData.host.url}/${emoteData.host.files[3].name}`} name={text} type='7 TV'/>;
         }
         return text;
     },

@@ -133,7 +133,7 @@ export function ChatPage() {
         }, 1000);
 
         config.channels.forEach(channel => {
-            emotes.updateChannel(loginContext, channel);
+            emotes.updateChannel(loginContext, channel).then(forceUpdate);
         });
 
         AlertSystem.addNewChannels(config.channels);
