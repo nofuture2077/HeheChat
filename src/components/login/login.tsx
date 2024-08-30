@@ -17,10 +17,13 @@ function getQueryVariable(query: String, variable: String): string | undefined {
     console.log('Query variable %s not found', variable);
   }
 
+const AUTH_VERSION = 3;
+
 export default function Login() {
     const loginContext = useContext(LoginContextContext);
     const hash = window.location.hash.substring(1);
-    const tokenStored: string | null = localStorage.getItem('hehe-token');
+    const authVersion: string | null = localStorage.getItem('hehe-auth-version');
+    const tokenStored: string | null = (authVersion && Number(authVersion) >= AUTH_VERSION) ? localStorage.getItem('hehe-token') : null;
     const token: string | undefined = window.location.hash ? getQueryVariable(hash, "access_token") : undefined;
     const tokenState = window.location.hash ? getQueryVariable(hash, "state") : undefined;
 
@@ -47,6 +50,9 @@ export default function Login() {
                     }
                     loginContext.setAccessToken(token);
                     localStorage.setItem('hehe-token', token);
+                    localStorage.setItem('hehe-auth-version', AUTH_VERSION + "");
+                    const redirectUrl = encodeURI(window.location.origin + window.location.pathname.replace("index.html", ""));
+                    document.location = redirectUrl;
                 }
             }, (err) => {
                 console.error(err);
