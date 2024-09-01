@@ -80,14 +80,19 @@ export function ChatPage() {
                 drawerHandler.open();
             }, 500);
         }
-        PubSub.subscribe("WS-msg", (msg, data) => {
+        const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
             addMessage(parseMessage(data.message), data.username);
         });
-        PubSub.subscribe("WS-event", (msg, data) => {
+        const eventSub = PubSub.subscribe("WS-event", (msg, data) => {
             if (config.playAlerts) {
                 AlertSystem.addEvent(data);
             }
         });
+
+        return () => {
+            PubSub.unsubscribe(msgSub);
+            PubSub.unsubscribe(eventSub);
+        }
     }, []);
 
     useEffect(() => {

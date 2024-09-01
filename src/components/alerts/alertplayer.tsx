@@ -4,11 +4,17 @@ import _ from "underscore";
 import { Config } from "@/commons/config";
 import { parseMessage } from "@/commons/message";
 import { silence } from "./silence";
+import PubSub from 'pubsub-js';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
-type Callback = () => undefined;
-const EmptyFunction = () => { return undefined; }
+interface AudioInfo {
+    duration: number;
+    audio: HTMLAudioElement;
+}
+
+let cheerPrefixes = ['Cheer', 'BibleThump', 'cheerwhal', 'Corgo', 'uni', 'ShowLove', 'Party', 'SeemsGood', 'Pride', 'Kappa', 'FrankerZ', 'HeyGuys', 'DansGame', 'EleGiggle', 'TriHard', 'Kreygasm', '4Head', 'SwiftRage', 'NotLikeThis', 'FailFish', 'VoHiYo', 'PJSalt', 'MrDestructoid', 'bday', 'RIPCheer', 'Shamrock'];
+let cheerPrefixesRegExp = cheerPrefixes.map(x => new RegExp(x + "\\d+", "gi"))
 
 class AlertPlayer {
     playing: boolean = false;
@@ -18,6 +24,9 @@ class AlertPlayer {
     alertConfig: Record<string, EventAlertConfig>= {};
     preventBoxDisconnect?: (() => void) & _.Cancelable;
     config?: Config;
+    audio?: HTMLAudioElement;
+    currentlyPlaying?: number;
+    skipCurrent: boolean = false;
 
     constructor() {
         setInterval(() => this.checkQueue(), 1000);
@@ -25,29 +34,55 @@ class AlertPlayer {
         this.initSilence();
     }
 
-    textToSpeech(msg: string): Promise<string> {
+    async textToSpeech(msg: string): Promise<string> {
         return fetch(BASE_URL + "/tts/generate?text=" + encodeURIComponent(msg)).then(data => data.json()).then(data => data.audioContent);
     }
 
-    playAudio(src: string, startCB: Callback, endCB: Callback, minDuration: number, volume: number): undefined {
-        if (!src) {
-            startCB();
-            endCB();
-            return;
-        }
-        const audio = new Audio(src)
-        audio.volume = volume || 1.0
-    
-        audio.onloadedmetadata = () => {
-            const duration = audio.duration;
-            startCB && startCB();
-            audio.play().catch(() => {this.stopPlaying()});
-            endCB && setTimeout(() => endCB(), Math.max(duration * 1000, minDuration || 0));
-        };
+    async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (!audioInfo || this.skipCurrent) {
+                resolve();
+                return;
+            }
+            this.audio = audioInfo.audio;
+            audioInfo.audio.volume = volume;
+        
+            audioInfo.audio.onended = () => resolve();
+            audioInfo.audio.onerror = reject;
+            audioInfo.audio.play().catch(reject);
+        });
+    }
 
-        audio.onerror = () => {
-            startCB && startCB();
-            endCB && endCB();
+    async getAudioInfo(src: string): Promise<AudioInfo | undefined> {
+        return new Promise((resolve, reject) => {
+            if (!src) {
+                Promise.resolve();
+            }
+            const audio = new Audio(src)
+            audio.onloadedmetadata = () => {
+                resolve({
+                    duration: audio.duration,
+                    audio: audio
+                });
+            }
+
+            audio.onerror = (err) => {
+                reject("Audio analyses error: " + err);
+            }
+        });
+    }
+
+    pause() {
+        if (this.audio) {
+            this.audio.pause();
+            this.paused = true;
+        }
+    }
+
+    resume() {
+        if (this.audio) {
+            this.audio.play();
+            this.paused = false;
         }
     }
 
@@ -56,15 +91,16 @@ class AlertPlayer {
         this.preventBoxDisconnect();
     }
 
-    playSilence() {
+    async playSilence() {
         console.log("Playing silence");
-        this.playAudio('data:audio/mp3;base64,' + silence, () => this.startPlaying(), () => {this.stopPlaying();this.initSilence()}, 1000, 1);
+        return this.playAudio(1.0, await this.getAudioInfo('data:audio/mp3;base64,' + silence));
     }
-    
-    playTTS(msg: string, startCB: Callback, endCB: Callback, minDuration: number, volume: number): undefined {
-        this.textToSpeech(msg).then(audioContent => {
-            this.playAudio('data:audio/mp3;base64,' + audioContent, startCB, endCB, minDuration, volume)
-        });
+
+    cleanMessage(message: string) {
+        return cheerPrefixesRegExp.reduce(
+            (accumulator, prefix) => accumulator.replaceAll(prefix, ""),
+            message
+        );
     }
 
     getAudioFileData(reference: Base64FileReference, alertConfig: EventAlertConfig) {
@@ -96,8 +132,8 @@ class AlertPlayer {
     updateConfig(config: Config) {
         this.config = config;
     }
-
-    showNotification(item: Event) {
+ 
+    async showNotification(item: Event) {
         const alertConfig = this.alertConfig[item.channel];
         const alert = getAlert(item, alertConfig);
 
@@ -117,17 +153,28 @@ class AlertPlayer {
         };
         
         this.startPlaying();
-        const tts: Callback = alert.audio?.tts ? () => this.playTTS(template(vars), EmptyFunction, () => {this.stopPlaying()}, 7000, 1.0) : () => {this.stopPlaying()}
-    
-        alert.audio?.jingle ? this.playAudio(this.getAudioFileData(alert.audio?.jingle, alertConfig), EmptyFunction, tts, 0, 0.8) : tts();    
+        this.currentlyPlaying = item.id;
+        const ttsAudio = alert.audio?.tts ? await this.getAudioInfo('data:audio/mp3;base64,' + await this.textToSpeech(this.cleanMessage(template(vars)))) : undefined;
+        const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
+
+        const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
+        PubSub.publish('AlertPlayer-update', {duration});
+        const onEnd = () => {
+            PubSub.publish('AlertPlayer-update');
+            this.stopPlaying();
+        }
+        this.playAudio(0.8, jingleAudio).then(() => this.playAudio(1.0, ttsAudio)).then(onEnd, onEnd);
     }
 
     startPlaying(): undefined {
+        this.skipCurrent = false;
         this.playing = true;
     }
 
     stopPlaying(): undefined {
+        this.currentlyPlaying = undefined;
         this.playing = false;
+        this.paused = false;
     }
 
     pausePlaying(): undefined {
@@ -142,7 +189,12 @@ class AlertPlayer {
         return this.queue.length - this.index;
     }
 
-    skip(): undefined {}
+    skip(): undefined {
+        this.skipCurrent = true;
+        if (this.audio) {
+            this.audio.currentTime = this.audio.duration;
+        }
+    }
 
     addEvent(item: Event) {
         console.log("Event added to the queue", item);
@@ -150,7 +202,7 @@ class AlertPlayer {
     }
     
     checkQueue() {
-        if (this.playing) {
+        if (this.playing || this.paused) {
             return;
         }
     

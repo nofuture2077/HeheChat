@@ -38,27 +38,27 @@ export function timeSince(date: number): string {
     let interval = seconds / 31536000;
 
     if (interval > 1) {
-        return Math.floor(interval) + " years ago";
+        return Math.floor(interval) + " y ago";
     }
 
     interval = seconds / 2592000;
     if (interval > 1) {
-        return Math.floor(interval) + " months ago";
+        return Math.floor(interval) + " mo ago";
     }
 
     interval = seconds / 86400;
     if (interval > 1) {
-        return Math.floor(interval) + " days ago";
+        return Math.floor(interval) + " d ago";
     }
 
     interval = seconds / 3600;
     if (interval > 1) {
-        return Math.floor(interval) + " hours ago";
+        return Math.floor(interval) + " h ago";
     }
 
     interval = seconds / 60;
     if (interval > 1) {
-        return Math.floor(interval) + " min ago";
+        return Math.floor(interval) + " m ago";
     }
 
     return Math.floor(seconds) + " s ago";
@@ -101,4 +101,12 @@ export function reviver(key: string, value: any) {
         }
     }
     return value;
+}
+
+export function formatSeconds(seconds: number): string {
+    const roundedSeconds = Math.round(seconds);
+    const minutes = Math.floor(roundedSeconds / 60);
+    const remainingSeconds = roundedSeconds % 60;
+
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
