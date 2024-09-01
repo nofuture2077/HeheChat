@@ -46,6 +46,7 @@ export default function App() {
         workerRef.current = new Worker(new URL('./components/webworker/webworker.ts', import.meta.url), { type: 'module' });
 
         PubSub.subscribe("WSSEND", (msg, data) => {
+            data.state = localStorage.getItem('hehe-token_state') || '';
             workerRef.current!.postMessage({type: "SEND", data});
         });
 

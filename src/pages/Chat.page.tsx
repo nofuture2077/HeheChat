@@ -10,7 +10,7 @@ import { Header } from '@/components/header/Header';
 import { EventDrawer } from '@/components/events/eventdrawer';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { ChatMessage } from '@twurple/chat';
-import { ApiClient, HelixModeratedChannel } from '@twurple/api';
+import { HelixModeratedChannel } from '@twurple/api';
 import { SettingsDrawer, SettingsTab } from '@/components/settings/settings'
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '@/components/chat/mod/modview';
@@ -47,9 +47,6 @@ export function ChatPage() {
     const forceUpdate = useForceUpdate();
     const emotes = useContext(ChatEmotesContext);
     const firstRender = useIsFirstRender();
-
-    const authProvider = loginContext.getAuthProvider();
-    const api = new ApiClient({ authProvider });
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
         const viewportElement = viewport.current;
@@ -96,11 +93,7 @@ export function ChatPage() {
     useEffect(() => {
         const chatHandler = config.onMessage({
             handle: async (channel, text, replyTo) => {
-                const token = await api.getTokenInfo();
-
-                api.asUser({ id: token.userId || '' }, async (ctx) => {
-                    ctx.chat.sendChatMessage(channel, text, { replyParentMessageId: replyTo });
-                });
+                PubSub.publish('WSSEND', {type: 'sendMessage', channel, text, replyTo});
             }
         });
 
@@ -134,8 +127,9 @@ export function ChatPage() {
 
         config.channels.forEach(channel => {
             emotes.updateChannel(loginContext, channel).then(forceUpdate);
+            forceUpdate();
         });
-
+        
         AlertSystem.addNewChannels(config.channels);
         PubSub.publish("WSSEND", { type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) });
 
@@ -161,11 +155,11 @@ export function ChatPage() {
     }
 
     const modActions: ModActions = {
-        deleteMessage: deleteMessage(api, loginContext),
-        timeoutUser: timeoutUser(api, loginContext),
-        banUser: banUser(api, loginContext),
-        shoutoutUser: shoutoutUser(api, loginContext),
-        raidUser: raidUser(api, loginContext, emotes)
+        deleteMessage,
+        timeoutUser,
+        banUser,
+        shoutoutUser,
+        raidUser
     };
 
     return (

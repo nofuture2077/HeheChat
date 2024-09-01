@@ -34,9 +34,9 @@ export function timeSince(date: number): string {
         return '';
     }
     const seconds = Math.floor((new Date().getTime() - date) / 1000);
-  
+
     let interval = seconds / 31536000;
-  
+
     if (interval > 1) {
         return Math.floor(interval) + " years ago";
     }
@@ -67,10 +67,10 @@ export function timeSince(date: number): string {
 export function formatTime(date: Date): string {
     let hours: number | string = date.getHours();
     let minutes: number | string = date.getMinutes();
-    
+
     if (hours < 10) hours = '0' + hours;
     if (minutes < 10) minutes = '0' + minutes;
-    
+
     return `${hours}:${minutes}`;
 }
 
@@ -81,4 +81,24 @@ export const formatDuration = (duration: number) => {
 
 export function formatString(template: string, args: any[]): string {
     return template.replace(/\$(\d+)/g, (_, index) => args[index] || '');
+}
+
+export function replacer(key: string, value: any) {
+    if (value instanceof Map) {
+        return {
+            dataType: 'Map',
+            value: Array.from(value.entries()),
+        };
+    } else {
+        return value;
+    }
+}
+
+export function reviver(key: string, value: any) {
+    if (typeof value === 'object' && value !== null) {
+        if (value.dataType === 'Map') {
+            return new Map(value.value);
+        }
+    }
+    return value;
 }

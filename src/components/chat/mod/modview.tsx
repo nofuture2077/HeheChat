@@ -6,7 +6,7 @@ import { GradientSegmentedControl } from "@/components/GradientSegmentedControl/
 import { formatDuration } from "@/commons/helper";
 import { ChannelPicker } from "../ChannelPicker";
 import { IconArrowsRight } from '@tabler/icons-react';
-import { ConfigContext, LoginContextContext } from "@/ApplicationContext";
+import { ChatEmotesContext, ConfigContext, LoginContextContext } from "@/ApplicationContext";
 
 
 export const ModDrawer: OverlayDrawer = {
@@ -79,13 +79,14 @@ export function BanView(props: {
 export function RaidView(props: {
     initialFrom?: string;
     initialTo?: string;
-    raidChannel: (from: string, to: string) => Promise<void>,
+    raidChannel: (from: string, to: string) => void,
     close: () => void;
 }) {
     const [raidFrom, setRaidFrom] = useState(props.initialFrom);
     const [raidTo, setRaidTo] = useState(props.initialTo);
     const login = useContext(LoginContextContext);
     const config = useContext(ConfigContext);
+    const emotes = useContext(ChatEmotesContext);
 
     return (
         <Modal opened={true} onClose={props.close} withCloseButton={false}>
@@ -107,7 +108,9 @@ export function RaidView(props: {
                     <Button onClick={props.close}>Cancel</Button>
                     <Button color='primary' disabled={!raidFrom || !raidTo} onClick={() => {
                         if (raidFrom && raidTo) {
-                            props.raidChannel(raidFrom, raidTo);
+                            const raidFromId = emotes.getChannelId(raidFrom);
+                            const raidToId = emotes.getChannelId(raidTo);
+                            props.raidChannel(raidFromId, raidToId);
                             props.close();
                         }
                     }}>Raid</Button>

@@ -17,7 +17,7 @@ function getQueryVariable(query: String, variable: String): string | undefined {
     console.log('Query variable %s not found', variable);
   }
 
-const AUTH_VERSION = 4;
+const AUTH_VERSION = 5;
 
 export default function Login() {
     const loginContext = useContext(LoginContextContext);
