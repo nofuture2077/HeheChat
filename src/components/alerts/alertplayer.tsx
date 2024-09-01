@@ -19,14 +19,16 @@ let cheerPrefixesRegExp = cheerPrefixes.map(x => new RegExp(x + "\\d+", "gi"))
 class AlertPlayer {
     playing: boolean = false;
     paused: boolean = false;
+    muted: boolean = false;
     queue: Event[] = [];
     index: number = 0;
     alertConfig: Record<string, EventAlertConfig>= {};
     preventBoxDisconnect?: (() => void) & _.Cancelable;
     config?: Config;
     audio?: HTMLAudioElement;
-    currentlyPlaying?: number;
+    currentlyPlaying?: Event;
     skipCurrent: boolean = false;
+    oldVolume?: number;
 
     constructor() {
         setInterval(() => this.checkQueue(), 1000);
@@ -45,7 +47,7 @@ class AlertPlayer {
                 return;
             }
             this.audio = audioInfo.audio;
-            audioInfo.audio.volume = volume;
+            audioInfo.audio.volume = this.muted ? 0 : volume;
         
             audioInfo.audio.onended = () => resolve();
             audioInfo.audio.onerror = reject;
@@ -83,6 +85,38 @@ class AlertPlayer {
         if (this.audio) {
             this.audio.play();
             this.paused = false;
+        }
+    }
+
+    mute() {
+        this.muted = true;
+        if (this.audio) {
+            this.oldVolume = this.audio.volume;
+            this.audio.volume = 0;
+        }
+    }
+
+    unmute() {
+        this.muted = false;
+        if (this.audio) {
+            this.audio.volume = this.oldVolume!;
+        }
+    }
+
+    startPlaying(): undefined {
+        this.skipCurrent = false;
+        this.playing = true;
+    }
+
+    stopPlaying(): undefined {
+        this.playing = false;
+        this.paused = false;
+    }
+
+    skip(): undefined {
+        this.skipCurrent = true;
+        if (this.audio) {
+            this.audio.currentTime = this.audio.duration;
         }
     }
 
@@ -153,7 +187,7 @@ class AlertPlayer {
         };
         
         this.startPlaying();
-        this.currentlyPlaying = item.id;
+        this.currentlyPlaying = item;
         const ttsAudio = alert.audio?.tts ? await this.getAudioInfo('data:audio/mp3;base64,' + await this.textToSpeech(this.cleanMessage(template(vars)))) : undefined;
         const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
 
@@ -166,34 +200,8 @@ class AlertPlayer {
         this.playAudio(0.8, jingleAudio).then(() => this.playAudio(1.0, ttsAudio)).then(onEnd, onEnd);
     }
 
-    startPlaying(): undefined {
-        this.skipCurrent = false;
-        this.playing = true;
-    }
-
-    stopPlaying(): undefined {
-        this.currentlyPlaying = undefined;
-        this.playing = false;
-        this.paused = false;
-    }
-
-    pausePlaying(): undefined {
-        this.paused = true;
-    }
-
-    unpausePlaying(): undefined {
-        this.paused = false;
-    }
-
     quequeLength(): number {
         return this.queue.length - this.index;
-    }
-
-    skip(): undefined {
-        this.skipCurrent = true;
-        if (this.audio) {
-            this.audio.currentTime = this.audio.duration;
-        }
     }
 
     addEvent(item: Event) {
