@@ -111,6 +111,7 @@ class AlertPlayer {
     stopPlaying(): undefined {
         this.playing = false;
         this.paused = false;
+        this.audio = undefined;
     }
 
     skip(): undefined {
@@ -194,8 +195,8 @@ class AlertPlayer {
         const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
         PubSub.publish('AlertPlayer-update', {duration});
         const onEnd = () => {
-            PubSub.publish('AlertPlayer-update');
             this.stopPlaying();
+            PubSub.publish('AlertPlayer-update');
         }
         this.playAudio(0.8, jingleAudio).then(() => this.playAudio(1.0, ttsAudio)).then(onEnd, onEnd);
     }
