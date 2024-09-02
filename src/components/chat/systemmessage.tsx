@@ -10,6 +10,9 @@ import { parseMessage } from '@/commons/message'
 import { getEventStyle } from '@/components/events/eventhelper'
 import { EventType } from "@/commons/events";
 import { ModActionType } from '@/components/chat/mod/modactions'
+import { ChatMessage } from "@twurple/chat";
+import { parseChatMessage, ParsedMessagePart } from "@twurple/chat"
+import { parsedPartsToHtml } from "@/components/chat/ChatMessage"
 
 export type SystemMessageProps = {
     msg: SystemMessage;
@@ -57,10 +60,17 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const style = {variant: 'color'};
     getEventStyle({eventtype: parts[1] as EventType, amount: Number(parts[2])}, style);
 
+    const channel = parts[0];
+    var msgParts: ParsedMessagePart[] = [];
+    if (textParts.length > 1) {
+        const parsedMessage = parseMessage(textParts[1]) as ChatMessage;
+        msgParts = parseChatMessage(parsedMessage.text, parsedMessage.emoteOffsets, emotes.getCheerEmotes(channel));
+    }
+
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={22} onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)}><IconSpeakerphone size={14} /></ActionIcon> : null;
     return <div className={[classes.msg, classes[props.msg.subType]].join(' ')}>
             <Text fw={700} {...style}>{emotes.getLogo(parts[1])}{textParts[0]}</Text>
-            {textParts.length === 2 ? <Text fw={500}>{parseMessage(textParts[1]).text}</Text>: null}
+            {textParts.length === 2 ? <Text fw={500}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</Text>: null}
             {actions}
         </div>;
 }
