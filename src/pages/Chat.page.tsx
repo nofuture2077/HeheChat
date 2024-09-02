@@ -1,8 +1,8 @@
 
 import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
-import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useIsFirstRender } from '@mantine/hooks';
-import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon } from '@mantine/core';
+import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useIsFirstRender, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
+import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon, Badge } from '@mantine/core';
 import { Chat } from '@/components/chat/Chat';
 import { IconMessagePause, IconMessage } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
@@ -20,7 +20,7 @@ import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser
 import { ProfileBarDrawer } from '@/components/profile/profilebar';
 import { Storage } from '@/components/chat/chatstorage';
 import { AlertSystem } from '@/components/alerts/alertplayer';
-import PubSub from 'pubsub-js';
+import { toMap } from '@/commons/helper';
 
 export type OverlayDrawer = {
     name: string;
@@ -47,6 +47,9 @@ export function ChatPage() {
     const forceUpdate = useForceUpdate();
     const emotes = useContext(ChatEmotesContext);
     const firstRender = useIsFirstRender();
+    const [online, setOnline] = useState(true);
+    const documentVisible = useDocumentVisibility();
+    const networkStatus = useNetwork();
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
         const viewportElement = viewport.current;
@@ -58,6 +61,8 @@ export function ChatPage() {
         }
     };
 
+    const messageIndex = toMap(chatMessages, m => m.id);
+
     const scrollToBottom = () => {
         viewport.current!.scrollTo({ top: viewport.current!.scrollHeight + 60 });
     }
@@ -68,6 +73,9 @@ export function ChatPage() {
     const addMessage = (msg: HeheMessage, user: string) => {
         Storage.store(msg.target.substring(1), user, msg.date, msg.rawLine);
         if (config.ignoredUsers.indexOf(user) !== -1) {
+            return;
+        }
+        if (messageIndex.has(msg.id)) {
             return;
         }
         setChatMessages((prevMessages) => [...prevMessages, msg].slice(shouldScroll ? (-1 * config.maxMessages) : 0));
@@ -147,6 +155,17 @@ export function ChatPage() {
         forceUpdate();
     }, [chatInputOpened]);
 
+    useDidUpdate(() => {
+        setOnline(networkStatus.online);
+
+        if (networkStatus.online && documentVisible) {
+            Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
+                const msgs = rawMessages.map(parseMessage);
+                setChatMessages(msgs);
+            });
+        }
+    }, [documentVisible, networkStatus.online]);
+
     useEffect(() => {
         if (shouldScroll) {
             scrollToBottom();
@@ -175,6 +194,10 @@ export function ChatPage() {
                     openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }}
                     openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} />
             </AppShell.Header>
+
+            {!online ? <Affix position={{top: 65}} w="100%" ta="center">
+                <Badge color="red" size="lg">No internet connection...</Badge>
+            </Affix> : null}
 
             <AppShell.Main>
                 <Drawer opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
