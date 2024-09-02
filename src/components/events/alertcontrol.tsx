@@ -11,24 +11,26 @@ export interface AlertControlProps {}
 
 export function AlertControl(props: AlertControlProps) {
     const [runTime, setRuntime] = useState<number>(0);
-    const [text, setText] = useState<string>('Not playing.');
     const [seconds, setSeconds] = useState<number>(0);
-    const timer = useInterval(() => setSeconds(seconds + (playing ? 0.2 : 0)), 200);
+    const [paused, setPaused] = useState<boolean>(AlertSystem.paused);
+    const [text, setText] = useState<string>('');
+    const timer = useInterval(() => setSeconds(seconds + (!paused ? 0.2 : 0)), 200);
     const forceUpdate = useForceUpdate();
 
     useEffect(() => {
         const updateSub = PubSub.subscribe('AlertPlayer-update', (msg, data) => {
+            const playText = paused ? 'Paused' : 'Not Playing';
             if (data) {
                 timer.start();
                 setSeconds(0);
                 setRuntime(data.duration);
                 const item = AlertSystem.currentlyPlaying;
-                setText(item ? item.username + " - " + formatEventText(item) : 'Not playing.');
+                setText(item ? item.username + " - " + formatEventText(item) : playText);
             } else {
                 timer.stop();
                 setRuntime(0);
                 setSeconds(0);
-                setText('Not playing.');
+                setText(playText);
             }
         });
         return () => {
@@ -36,7 +38,12 @@ export function AlertControl(props: AlertControlProps) {
         }
     }, []);
 
-    const playing = AlertSystem.playing && !AlertSystem.paused;
+    useEffect(() => {
+        paused ? AlertSystem.pause() : AlertSystem.resume();
+        const playText = paused ? 'Paused' : 'Not Playing';
+        setText(playText);
+    }, [paused])
+
     const muted = AlertSystem.muted;
 
     return <Stack p={10} style={{borderBottom: "1px solid gray"}}>
@@ -47,7 +54,7 @@ export function AlertControl(props: AlertControlProps) {
                 muted ? AlertSystem.unmute() : AlertSystem.mute();
                 forceUpdate();
                 }} size={32}>{muted ? <IconVolume3/> : <IconVolume/>}</ActionIcon>
-            <ActionIcon variant="light" onClick={() => playing ? AlertSystem.pause() : AlertSystem.resume()}size={48}>{playing ? <IconPlayerPauseFilled/> : <IconPlayerPlayFilled/>}</ActionIcon>
+            <ActionIcon variant="light" onClick={() => !paused ? setPaused(true) : setPaused(false)} size={48}>{!paused ? <IconPlayerPauseFilled/> : <IconPlayerPlayFilled/>}</ActionIcon>
             <ActionIcon variant="subtle" onClick={() => AlertSystem.skip()}><IconPlayerTrackNextFilled/></ActionIcon>
             <span></span>
         </Group>

@@ -47,7 +47,12 @@ class AlertPlayer {
                 return;
             }
             this.audio = audioInfo.audio;
-            audioInfo.audio.volume = this.muted ? 0 : volume;
+            audioInfo.audio.volume = volume;
+
+            if (this.muted) {
+                this.audio.volume = 0;
+                this.audio.muted = true;
+            }
         
             audioInfo.audio.onended = () => resolve();
             audioInfo.audio.onerror = reject;
@@ -75,16 +80,16 @@ class AlertPlayer {
     }
 
     pause() {
+        this.paused = true;
         if (this.audio) {
             this.audio.pause();
-            this.paused = true;
         }
     }
 
     resume() {
+        this.paused = false;
         if (this.audio) {
             this.audio.play();
-            this.paused = false;
         }
     }
 
@@ -93,6 +98,7 @@ class AlertPlayer {
         if (this.audio) {
             this.oldVolume = this.audio.volume;
             this.audio.volume = 0;
+            this.audio.muted = true;
         }
     }
 
@@ -100,6 +106,7 @@ class AlertPlayer {
         this.muted = false;
         if (this.audio) {
             this.audio.volume = this.oldVolume!;
+            this.audio.muted = false;
         }
     }
 
