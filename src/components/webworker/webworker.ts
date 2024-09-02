@@ -1,10 +1,15 @@
 
 var ws: WebSocket | undefined;
 
+var initRequest: any | undefined;
+
 function connect() {
     ws = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
     ws.onopen = function() {
         console.log("websocket open")
+        if (initRequest) {
+            ws?.send(JSON.stringify(initRequest));
+        }
     };
   
     ws.onmessage = (event: MessageEvent) => {
@@ -32,13 +37,16 @@ self.onmessage = async (e) => {
 
     switch (type) {
         case 'SEND':
+            if (data.type === 'subscribe') {
+                initRequest = data;
+            }
             ws?.send(JSON.stringify(data));
-          break;
+            break;
         case 'STOP':
-          close();
-          break;
+            close();
+            break;
     
         default:
-          break;
+            break;
       }
 };
