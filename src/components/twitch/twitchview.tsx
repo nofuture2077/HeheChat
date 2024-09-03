@@ -22,6 +22,8 @@ export interface TwitchViewProps {
     modActions: ModActions,
 }
 
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 export function TwitchView(props: TwitchViewProps) {
     const config = useContext(ConfigContext);
     const login = useContext(LoginContextContext);
@@ -38,19 +40,18 @@ export function TwitchView(props: TwitchViewProps) {
     useEffect(() => {
         setLoadStreams(true);
         if (activeTab === 'live') {
-            apiClient.streams.getStreams({ userName: config.channels }).then((data) => {
-                setStreams(data.data);
+            fetch(BASE_URL + "/twitch/streams?channels=" + config.channels.join(',')).then(res => res.json()).then((data) => {
+                setStreams(data.map((d: any) => new HelixStream(d)));
                 setLoadStreams(false);
             });
         }
         if (activeTab === 'raids') {
-            apiClient.streams.getStreams({ userName: config.raidTargets }).then((data) => {
-                setRaidTargetStreams(data.data);
+            fetch(BASE_URL + "/twitch/streams?channels=" + config.raidTargets.join(',')).then(res => res.json()).then((data) => {
+                setStreams(data.map((d: any) => new HelixStream(d)));
                 setLoadStreams(false);
             });
         }
     }, [activeTab]);
-
 
     return (<nav className={classes.navbar}>
         <div className={classes.header}>
