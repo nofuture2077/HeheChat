@@ -190,13 +190,16 @@ class AlertPlayer {
         const template = _.template(alert.audio?.tts?.text || "");
         const vars = {
             username: item.username,
+            usernameTo: item.usernameTo,
             amount: item.amount,
+            amount2: item.amount2,
             text: parseMessage(item.text!).text
         };
         
         this.startPlaying();
         this.currentlyPlaying = item;
-        const ttsAudio = alert.audio?.tts ? await this.getAudioInfo('data:audio/mp3;base64,' + await this.textToSpeech(this.cleanMessage(template(vars)))) : undefined;
+        const ttsMeesage = this.cleanMessage(template(vars));
+        const ttsAudio = (alert.audio?.tts && ttsMeesage) ? await this.getAudioInfo('data:audio/mp3;base64,' + await this.textToSpeech(ttsMeesage)) : undefined;
         const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
 
         const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
