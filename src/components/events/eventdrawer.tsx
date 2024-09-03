@@ -83,7 +83,9 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
         });
 
         const eventSub = PubSub.subscribe("WS-event", (msg, data) => {
-            setEvents(events.concat(data))
+            setEvents((prevState) => {
+                return prevState.concat(data);
+            })
         });
 
         return () => {
