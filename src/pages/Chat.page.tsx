@@ -46,7 +46,6 @@ export function ChatPage() {
     const [deletedMessages, setDeletedMessages] = useState<string[]>([]);
     const forceUpdate = useForceUpdate();
     const emotes = useContext(ChatEmotesContext);
-    const firstRender = useIsFirstRender();
     const [online, setOnline] = useState(true);
     const documentVisible = useDocumentVisibility();
     const networkStatus = useNetwork();
@@ -82,11 +81,14 @@ export function ChatPage() {
     }
 
     useEffect(() => {
-        if (firstRender && profile.name === 'default' && !config.channels.length) {
+        if (profile.name === 'default' && !config.channels.length) {
             setTimeout(() => {
+                if (loginContext.user) {
+                    config.setChannels([loginContext.user!.name]);
+                }
                 setDrawer({...SettingsDrawer, props: {tab: 'Chat'} });
                 drawerHandler.open();
-            }, 500);
+            }, 1000);
         }
         const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
             addMessage(parseMessage(data.message), data.username);

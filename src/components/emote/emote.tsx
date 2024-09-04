@@ -12,6 +12,7 @@ export const EmoteComponent: React.FC<EmoteComponentProps> = ({ imageUrl, largeI
   return (
     <Tooltip
       withArrow
+      withinPortal={false}
       position="top"
       label={
         <Stack align="center" gap="xs">

@@ -1,10 +1,12 @@
 import { ChatMessage, parseTwitchMessage } from '@twurple/chat';
 import { generateGUID } from '@/commons/helper';
-import { EventType } from '@/commons/events';
+import { EventType, EventMainType } from '@/commons/events';
+import { ModActionType } from '@/components/chat/mod/modactions';
 
 export type HeheMessage = ChatMessage | SystemMessage;
 
-export type SystemMessageType = 'delete' | 'timeout' | 'ban' | EventType;
+export type SystemMessageType = ModActionType | EventType;
+export type SystemMessageMainType = ModActionType | EventMainType;
 
 export class SystemMessage {
     type: 'system';

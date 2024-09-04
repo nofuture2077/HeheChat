@@ -1,3 +1,4 @@
+import { ModActionType } from "@/components/chat/mod/modactions";
 import _ from "underscore"
 
 export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' |
@@ -14,7 +15,7 @@ export type EventAlertSpecifier = {
     amount: number,
 }
 
-export const EventTypeMapping: Record<EventType, EventMainType> = {
+export const EventTypeMapping: Record<EventType | ModActionType, EventMainType | ModActionType> = {
     'raid': 'raid',
     'follow': 'follow',
     'cheer': 'cheer',
@@ -28,8 +29,11 @@ export const EventTypeMapping: Record<EventType, EventMainType> = {
     'subgift_3000': 'subgift',
     'subgiftb_1000': 'subgiftb',
     'subgiftb_2000': 'subgiftb',
-    'subgiftb_3000': 'subgiftb'
-  };
+    'subgiftb_3000': 'subgiftb',
+    'timeout': 'timeout',
+    'ban': 'ban',
+    'delete': 'delete'
+};
 
 export type EventAlertMeta = {
     channel: string;
@@ -109,7 +113,7 @@ export type Event = {
 }
 
 export function getAlert(event: Event, alertConfig: EventAlertConfig): EventAlert | undefined {
-    const eventMainType = EventTypeMapping[event.eventtype];
+    const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
     const alerts = alertConfig.data?.alerts[eventMainType];
     if (!alerts) {
         return undefined;

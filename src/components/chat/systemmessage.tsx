@@ -8,8 +8,7 @@ import { ChatEmotesContext, ConfigContext, LoginContextContext } from '@/Applica
 import { ModActions } from "@/components/chat/mod/modactions";
 import { parseMessage } from '@/commons/message'
 import { getEventStyle } from '@/components/events/eventhelper'
-import { EventType } from "@/commons/events";
-import { ModActionType } from '@/components/chat/mod/modactions'
+import { EventType, EventTypeMapping } from "@/commons/events";
 import { ChatMessage } from "@twurple/chat";
 import { parseChatMessage, ParsedMessagePart } from "@twurple/chat"
 import { parsedPartsToHtml } from "@/components/chat/ChatMessage"
@@ -20,7 +19,7 @@ export type SystemMessageProps = {
     moderatedChannel: {[id: string]: boolean };
 }
 
-const messages: Record<EventType | ModActionType, string> = {
+const messages: Record<SystemMessageType, string> = {
     'delete': 'A messages from $1 was deleted',
     'timeout': '$1 was timeouted for $2',
     'ban': '$1 was banned',
@@ -58,7 +57,12 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const textParts = text.split('///');
 
     const style = {variant: 'color'};
-    getEventStyle({eventtype: parts[1] as EventType, amount: Number(parts[2])}, style);
+    const eventType = parts[0] as EventType;
+    const eventMainType = EventTypeMapping[eventType];
+    if (!config.systemMessageInChat[eventMainType]) {
+        return;
+    }
+    getEventStyle({eventtype: eventType, amount: Number(parts[2])}, style);
 
     const channel = parts[0];
     var msgParts: ParsedMessagePart[] = [];

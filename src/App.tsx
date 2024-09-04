@@ -11,6 +11,7 @@ import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { generateGUID } from './commons/helper';
 import PubSub from 'pubsub-js';
+import { SystemMessageMainType } from "@/commons/message"
 
 function load(): Config {
     return JSON.parse(localStorage.getItem('chatConfig') || JSON.stringify(DEFAULT_CONFIG)) as Config;
@@ -234,6 +235,14 @@ export default function App() {
         }
     }
 
+    const setSystemMessageInChat = (type: SystemMessageMainType, val: boolean) => {
+        setProfile((profile) => {
+            profile.config.systemMessageInChat[type] = val;
+            storeProfile(profile);
+            return profile;
+        });
+    }
+
     const appConfig = {
         ...profile.config,
         setChannels,
@@ -250,6 +259,7 @@ export default function App() {
         setModToolsEnabled,
         setRaidTargets,
         setPlayAlerts,
+        setSystemMessageInChat,
         onMessage,
         off,
         fireMessage

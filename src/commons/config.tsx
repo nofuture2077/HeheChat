@@ -1,3 +1,5 @@
+import { SystemMessageMainType } from "@/commons/message"
+
 export type MessageHandler = {id?: number, handle: (channel: string, text: string, replyTo?: string) => void};
 
 export interface ConfigData {
@@ -15,6 +17,7 @@ export interface ConfigData {
     modToolsEnabled: boolean;
     raidTargets: string[];
     playAlerts: boolean;
+    systemMessageInChat: Partial<Record<SystemMessageMainType, boolean>>,
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -37,6 +40,7 @@ export interface Config extends ConfigData {
     setModToolsEnabled: (val: boolean) => void;
     setRaidTargets: (val: string[]) => void;
     setPlayAlerts: (val: boolean) => void;
+    setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -54,6 +58,7 @@ export const DEFAULT_CONFIG: Config = {
     modToolsEnabled: true,
     raidTargets: [],
     playAlerts: false,
+    systemMessageInChat: {},
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setShowTimestamp: (value: boolean) => {},
@@ -70,5 +75,6 @@ export const DEFAULT_CONFIG: Config = {
     setFontSize: (val) => {},
     setModToolsEnabled: (val) => {},
     setRaidTargets: (val) => {},
-    setPlayAlerts: (val) => {}
+    setPlayAlerts: (val) => {},
+    setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => {}
 };
