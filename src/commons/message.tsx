@@ -45,7 +45,7 @@ export function parseSystemMessage(rawLine: string): SystemMessage {
 }
 
 export function isSystemMessage(rawLine: string): boolean {
-    return rawLine.startsWith('system$$$')
+    return !!rawLine && rawLine.startsWith('system$$$')
 }
 
 export function isSystemMessageType(msg: HeheMessage) {

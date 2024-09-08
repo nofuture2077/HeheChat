@@ -62,7 +62,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
     if (!config.systemMessageInChat[eventMainType]) {
         return;
     }
-    getEventStyle({eventtype: eventType, amount: Number(parts[2])}, style);
+    getEventStyle({eventtype: eventType, amount: Number(parts[3])}, style);
 
     const channel = parts[0];
     var msgParts: ParsedMessagePart[] = [];
