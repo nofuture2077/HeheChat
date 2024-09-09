@@ -24,7 +24,7 @@ export const EmoteComponent: React.FC<EmoteComponentProps> = ({ imageUrl, largeI
         </Stack>
       }
     >
-      <Image src={imageUrl} alt={name} w='auto' h={24} display='inline' />
+      <Image src={imageUrl} alt={name} w='auto' h='1.3rem' display='inline' />
     </Tooltip>
   );
 };

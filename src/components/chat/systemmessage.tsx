@@ -36,7 +36,7 @@ const messages: Record<SystemMessageType, string> = {
     'sub_Prime': '$1 subscribed with prime for $2 months///$4',
     'follow': '$1 just followed',
     'cheer': '$1 cheered $2 bits',
-    'donation': '$1 donated $2 $3'
+    'donation': '$1 donated $2 USD: $3'
 }
 
 export function SystemMessageComp(props: SystemMessageProps) {
