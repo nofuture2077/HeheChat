@@ -198,6 +198,10 @@ class AlertPlayer {
             amount2: item.amount2,
             text: parseMessage(item.text!).text
         };
+
+        if (vars.text.startsWith('donation')) {
+            vars.text = vars.text.split('***').slice(-1)[0];
+        }
         
         this.startPlaying();
         this.currentlyPlaying = item;
