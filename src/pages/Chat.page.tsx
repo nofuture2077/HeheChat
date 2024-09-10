@@ -91,6 +91,8 @@ export function ChatPage() {
                 drawerHandler.open();
             }, 1000);
         }
+        config.loadShares();
+
         const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
             addMessage(parseMessage(data.message), data.username);
         });

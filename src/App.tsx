@@ -252,7 +252,7 @@ export default function App() {
         updateConfig('receivedShares', data.shares);
     }
 
-    const getShares = async () => {
+    const loadShares = async () => {
         const BASE_URL = import.meta.env.VITE_BACKEND_URL;
         const share = localStorage.getItem('hehe-token_state') || '';
         const data: {shares: string[]} = await fetch(BASE_URL + "/shares/get?state=" + share).then(res => res.json());
@@ -265,8 +265,6 @@ export default function App() {
         const data: {shares: string[]} = await fetch(BASE_URL + "/shares/set?state=" + share + "&channels=" + value.join(',')).then(res => res.json());
         updateConfig('shares', data.shares);
     }
-
-    getShares();
 
     const setActivatedShares = (value: string[]) => updateConfig('activatedShares', value);
 
@@ -290,6 +288,7 @@ export default function App() {
         loadReceivedShares,
         setActivatedShares,
         setShares,
+        loadShares,
         onMessage,
         off,
         fireMessage

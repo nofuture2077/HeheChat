@@ -47,6 +47,7 @@ export interface Config extends ConfigData {
     loadReceivedShares: () => void;
     setActivatedShares: (val: string[]) => void;
     setShares: (val: string[]) => void;
+    loadShares: () => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -88,5 +89,6 @@ export const DEFAULT_CONFIG: Config = {
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => {},
     loadReceivedShares: () => {},
     setActivatedShares: (val: string[]) => {},
-    setShares: (val: string[]) => {}
+    setShares: (val: string[]) => {},
+    loadShares: () => {}
 };
