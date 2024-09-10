@@ -1,6 +1,6 @@
 .msg {
     padding: 6px;
-    background-color: #480356;
+    background-color: light-dark(#ffd195, #480356);
     display: flex;
     justify-content: center;
 
