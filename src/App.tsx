@@ -55,6 +55,8 @@ export default function App() {
             PubSub.publish("WS-" + msg.data.type, msg.data.data);
         });
 
+        loadReceivedShares();
+
         return () => {
             const stopMessage = { type: 'STOP' };
             workerRef.current?.postMessage(stopMessage);
@@ -243,6 +245,31 @@ export default function App() {
         });
     }
 
+    const loadReceivedShares = async () => {
+        const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+        const share = localStorage.getItem('hehe-token_state') || '';
+        const data: {shares: string[]} = await fetch(BASE_URL + "/shares?state=" + share).then(res => res.json());
+        updateConfig('receivedShares', data.shares);
+    }
+
+    const getShares = async () => {
+        const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+        const share = localStorage.getItem('hehe-token_state') || '';
+        const data: {shares: string[]} = await fetch(BASE_URL + "/shares/get?state=" + share).then(res => res.json());
+        updateConfig('shares', data.shares);
+    }
+
+    const setShares = async (value: string[]) => {
+        const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+        const share = localStorage.getItem('hehe-token_state') || '';
+        const data: {shares: string[]} = await fetch(BASE_URL + "/shares/set?state=" + share + "&channels=" + value.join(',')).then(res => res.json());
+        updateConfig('shares', data.shares);
+    }
+
+    getShares();
+
+    const setActivatedShares = (value: string[]) => updateConfig('activatedShares', value);
+
     const appConfig = {
         ...profile.config,
         setChannels,
@@ -260,6 +287,9 @@ export default function App() {
         setRaidTargets,
         setPlayAlerts,
         setSystemMessageInChat,
+        loadReceivedShares,
+        setActivatedShares,
+        setShares,
         onMessage,
         off,
         fireMessage

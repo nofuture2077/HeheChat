@@ -6,7 +6,8 @@ import {
   IconMessageChatbot,
   IconSword,
   IconChevronRight,
-  IconAlarm
+  IconAlarm,
+  IconShare
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
@@ -15,13 +16,15 @@ import { ModSettings } from './ModSettings';
 import { InfoCard } from '../infocard/infocard';
 import { LoginContextContext } from '@/ApplicationContext';
 import { AlertSettings } from './AlertSettings';
+import { ShareSettings } from './ShareSettings';
 import { OverlayDrawer } from '@/pages/Chat.page';
 
 const mainLinksMockdata = [
   { icon: IconHome2, label: 'General' },
   { icon: IconMessageChatbot, label: 'Chat' },
   { icon: IconSword, label: 'Mod' },
-  { icon: IconAlarm, label: 'Alerts' }
+  { icon: IconAlarm, label: 'Alerts' },
+  { icon: IconShare, label: 'Share' }
 ];
 
 export const SettingsDrawer: OverlayDrawer = {
@@ -71,6 +74,8 @@ export function Settings(props: SettingsProperties) {
         return <ModSettings />;
       case 'Alerts':
         return <AlertSettings />;
+      case 'Share':
+          return <ShareSettings />;
       default:
         return null;
     }

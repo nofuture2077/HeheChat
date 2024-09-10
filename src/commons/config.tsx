@@ -18,6 +18,9 @@ export interface ConfigData {
     raidTargets: string[];
     playAlerts: boolean;
     systemMessageInChat: Partial<Record<SystemMessageMainType, boolean>>,
+    receivedShares: string[],
+    activatedShares: string[],
+    shares: string[]
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -41,6 +44,9 @@ export interface Config extends ConfigData {
     setRaidTargets: (val: string[]) => void;
     setPlayAlerts: (val: boolean) => void;
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => void;
+    loadReceivedShares: () => void;
+    setActivatedShares: (val: string[]) => void;
+    setShares: (val: string[]) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -59,6 +65,9 @@ export const DEFAULT_CONFIG: Config = {
     raidTargets: [],
     playAlerts: false,
     systemMessageInChat: {},
+    receivedShares: [],
+    activatedShares: [],
+    shares: [],
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setShowTimestamp: (value: boolean) => {},
@@ -76,5 +85,8 @@ export const DEFAULT_CONFIG: Config = {
     setModToolsEnabled: (val) => {},
     setRaidTargets: (val) => {},
     setPlayAlerts: (val) => {},
-    setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => {}
+    setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => {},
+    loadReceivedShares: () => {},
+    setActivatedShares: (val: string[]) => {},
+    setShares: (val: string[]) => {}
 };

@@ -21,6 +21,7 @@ import { ProfileBarDrawer } from '@/components/profile/profilebar';
 import { Storage } from '@/components/chat/chatstorage';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { toMap } from '@/commons/helper';
+import { Event } from '@/commons/events';
 
 export type OverlayDrawer = {
     name: string;
@@ -93,8 +94,8 @@ export function ChatPage() {
         const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
             addMessage(parseMessage(data.message), data.username);
         });
-        const eventSub = PubSub.subscribe("WS-event", (msg, data) => {
-            if (config.playAlerts) {
+        const eventSub = PubSub.subscribe("WS-event", (msg, data: Event) => {
+            if (config.playAlerts && config.receivedShares.includes(data.channel) && config.activatedShares.includes(data.channel)) {
                 AlertSystem.addEvent(data);
             }
         });
