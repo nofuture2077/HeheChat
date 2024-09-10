@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { UnstyledButton, Tooltip, Title, rem, Button, Box, Avatar } from '@mantine/core';
+import { UnstyledButton, Tooltip, Title, rem, Button, Box, Avatar, ScrollArea, ScrollAreaAutosize } from '@mantine/core';
 import {
   IconHome2,
   IconX,
@@ -93,9 +93,9 @@ export function Settings(props: SettingsProperties) {
           {mainLinks}
         </div>
         <div className={classes.main}>
-          <div className={classes.active}>
+          <ScrollArea h="calc(100vh - 130px)" className={classes.active}>
             {renderSwitch(active)}
-          </div>
+          </ScrollArea>
         </div>
       </div>
       <div className={classes.footer}>
