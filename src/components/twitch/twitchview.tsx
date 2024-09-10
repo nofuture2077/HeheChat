@@ -3,7 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconX } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
 import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
-import { ApiClient, HelixStream } from '@twurple/api';
+import { HelixStream } from '@twurple/api';
 import { StreamCardPlaceholder, StreamCard } from './streamcard';
 import { RaidView } from '../chat/mod/modview';
 import classes from './twitchview.module.css';
@@ -33,9 +33,6 @@ export function TwitchView(props: TwitchViewProps) {
     const [activeTab, setActiveTab] = useState<string | null>('live');
     const [raidModalOpenend, raidModalHandler] = useDisclosure(false);
     const [initialRaidTarget, setInitialRaidTarget] = useState<string | undefined>();
-
-    const authProvider = login.getAuthProvider();
-    const apiClient = new ApiClient({ authProvider });
 
     useEffect(() => {
         setLoadStreams(true);
