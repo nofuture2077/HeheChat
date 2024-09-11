@@ -37,7 +37,7 @@ class AlertPlayer {
     }
 
     async googleTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
-        const params = +[
+        const params = [
             ['text', encodeURIComponent(msg)].join('='), 
             ['state', state].join('='), 
             ['voice', voice].join('='), 
@@ -47,7 +47,7 @@ class AlertPlayer {
     }
 
     async aiTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
-        const params = +[
+        const params = [
             ['text', encodeURIComponent(msg)].join('='), 
             ['state', state].join('='), 
             ['voice', voice].join('='), 
