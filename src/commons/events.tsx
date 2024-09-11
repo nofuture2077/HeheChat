@@ -63,7 +63,7 @@ export type EventAlertAudioData = {
 
 export type EventAlertTTS = {
     text?: string;
-    voiceType: 'ai' | 'system';
+    voiceType: 'ai' | 'google' | 'system';
     voiceSpecifier: string;
     voiceParams: Record<string, string | number>;
 }

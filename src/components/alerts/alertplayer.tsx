@@ -36,8 +36,24 @@ class AlertPlayer {
         this.initSilence();
     }
 
-    async textToSpeech(msg: string): Promise<string> {
-        return fetch(BASE_URL + "/tts/generate?text=" + encodeURIComponent(msg)).then(data => data.json()).then(data => data.audioContent);
+    async googleTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
+        const params = +[
+            ['text', encodeURIComponent(msg)].join('='), 
+            ['state', state].join('='), 
+            ['voice', voice].join('='), 
+            ['channel', channel].join('=')
+        ].join('&')
+        return fetch(BASE_URL + "/tts/generate?text=" + params).then(data => data.json()).then(data => data.audioContent);
+    }
+
+    async aiTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
+        const params = +[
+            ['text', encodeURIComponent(msg)].join('='), 
+            ['state', state].join('='), 
+            ['voice', voice].join('='), 
+            ['channel', channel].join('=')
+        ].join('&')
+        return fetch(BASE_URL + "/tts/ai/generate?text=" + params).then(data => data.json()).then(data => data.audioContent);
     }
 
     async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
@@ -174,6 +190,15 @@ class AlertPlayer {
     updateConfig(config: Config) {
         this.config = config;
     }
+
+    async tts(ttsMessage: string, channel: string, voice: string, voiceType: string, state: string) {
+        
+        const audioData = voiceType === 'ai' ? await this.aiTTS(ttsMessage, channel, voice, state) : await this.googleTTS(ttsMessage, channel, voice, state);
+        if (!audioData) {
+            return undefined;
+        }
+        return await this.getAudioInfo('data:audio/mp3;base64,' + audioData);
+    }
  
     async showNotification(item: Event) {
         const alertConfig = this.alertConfig[item.channel];
@@ -202,11 +227,11 @@ class AlertPlayer {
         if (vars.text.startsWith('donation')) {
             vars.text = vars.text.split('***').slice(-1)[0];
         }
-        
+        const state = localStorage.getItem('hehe-token_state') || '';
         this.startPlaying();
         this.currentlyPlaying = item;
-        const ttsMeesage = this.cleanMessage(template(vars));
-        const ttsAudio = (alert.audio?.tts && ttsMeesage) ? await this.getAudioInfo('data:audio/mp3;base64,' + await this.textToSpeech(ttsMeesage)) : undefined;
+        const ttsMessage = this.cleanMessage(template(vars));
+        const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state) : undefined;
         const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
 
         const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
