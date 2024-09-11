@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
-import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useIsFirstRender, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
+import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon, Badge } from '@mantine/core';
 import { Chat } from '@/components/chat/Chat';
 import { IconMessagePause, IconMessage } from '@tabler/icons-react';

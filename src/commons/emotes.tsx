@@ -172,7 +172,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                         || globalEmotes?.channelBadges?.get(badge)?.getVersion(version);
 
         if (badgeInfo) {
-            return <img alt={badge} src={badgeInfo.getImageUrl(1)} key={key} />;
+            return <img alt={badge} src={badgeInfo.getImageUrl(2)} key={key} />;
         }
         return "";
     },
