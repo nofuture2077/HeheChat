@@ -224,7 +224,7 @@ class AlertPlayer {
             text: parseMessage(item.text!).text
         };
 
-        if (vars.text.startsWith('donation')) {
+        if (vars.text && vars.text.startsWith('donation')) {
             vars.text = vars.text.split('***').slice(-1)[0];
         }
         const state = localStorage.getItem('hehe-token_state') || '';
