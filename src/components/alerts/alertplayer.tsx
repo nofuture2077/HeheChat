@@ -43,7 +43,7 @@ class AlertPlayer {
             ['voice', voice].join('='), 
             ['channel', channel].join('=')
         ].join('&')
-        return fetch(BASE_URL + "/tts/generate?text=" + params).then(data => data.json()).then(data => data.audioContent);
+        return fetch(BASE_URL + "/tts/generate?" + params).then(data => data.json()).then(data => data.audioContent);
     }
 
     async aiTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
@@ -53,7 +53,7 @@ class AlertPlayer {
             ['voice', voice].join('='), 
             ['channel', channel].join('=')
         ].join('&')
-        return fetch(BASE_URL + "/tts/ai/generate?text=" + params).then(data => data.json()).then(data => data.audioContent);
+        return fetch(BASE_URL + "/tts/ai/generate?" + params).then(data => data.json()).then(data => data.audioContent);
     }
 
     async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
