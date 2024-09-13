@@ -23,6 +23,8 @@ const messages: Record<SystemMessageType, string> = {
     'delete': 'A messages from $1 was deleted',
     'timeout': '$1 was timeouted for $2',
     'ban': '$1 was banned',
+    'streamOnline': '$0 is just went Live',
+    'streamOffline': '$0 is now Offline',
     'raid': 'Raid from $1 with $2 viewers',
     'sub_1000': '$1 subscribed for $2 months///$4',
     'sub_2000': '$1 subscribed with Tier 2 for $2 months///$4',

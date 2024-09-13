@@ -5,7 +5,9 @@ import { ModActionType } from '@/components/chat/mod/modactions';
 
 export type HeheMessage = ChatMessage | SystemMessage;
 
-export type SystemMessageType = ModActionType | EventType;
+export type StreamEventType = "streamOnline" | "streamOffline";
+
+export type SystemMessageType = ModActionType | EventType | StreamEventType;
 export type SystemMessageMainType = ModActionType | EventMainType;
 
 export class SystemMessage {
