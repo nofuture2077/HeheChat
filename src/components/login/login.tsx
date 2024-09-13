@@ -57,7 +57,10 @@ export default function Login() {
             }, (err) => {
                 console.error(err);
                 localStorage.removeItem('hehe-token');
+                localStorage.removeItem('hehe-token_state');
                 loginContext.setAccessToken(undefined);
+                const redirectUrl = encodeURI(window.location.origin + window.location.pathname.replace("index.html", ""));
+                document.location = redirectUrl;
             });
         }
     }, [token]);
