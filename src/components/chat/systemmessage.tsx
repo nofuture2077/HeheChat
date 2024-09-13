@@ -25,6 +25,7 @@ const messages: Record<SystemMessageType, string> = {
     'ban': '$1 was banned',
     'streamOnline': '$0 is just went Live',
     'streamOffline': '$0 is now Offline',
+    'channelPointRedemption': '$1 redeemed "$2" $3',
     'raid': 'Raid from $1 with $2 viewers',
     'sub_1000': '$1 subscribed for $2 months///$4',
     'sub_2000': '$1 subscribed with Tier 2 for $2 months///$4',

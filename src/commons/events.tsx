@@ -1,4 +1,4 @@
-import { ModActionType } from "@/components/chat/mod/modactions";
+import { SystemMessageType, SystemMessageMainType } from "@/commons/message";
 import _ from "underscore"
 
 export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' |
@@ -15,7 +15,7 @@ export type EventAlertSpecifier = {
     amount: number,
 }
 
-export const EventTypeMapping: Record<EventType | ModActionType, EventMainType | ModActionType> = {
+export const EventTypeMapping: Record<SystemMessageType, SystemMessageMainType> = {
     'raid': 'raid',
     'follow': 'follow',
     'cheer': 'cheer',
@@ -32,7 +32,10 @@ export const EventTypeMapping: Record<EventType | ModActionType, EventMainType |
     'subgiftb_3000': 'subgiftb',
     'timeout': 'timeout',
     'ban': 'ban',
-    'delete': 'delete'
+    'delete': 'delete',
+    'streamOnline': 'streamOnline',
+    'streamOffline': 'streamOffline',
+    'channelPointRedemption': 'channelPointRedemption'
 };
 
 export type EventAlertMeta = {
@@ -44,11 +47,13 @@ export type EventAlertMeta = {
 }
 
 export type EventAlertData = {
-    alerts: Record<EventMainType, EventAlert[]>;
+    alerts: Record<EventMainType | EventType, EventAlert[]>;
     files: Record<Base64FileReference, Base64File>;
 }
 
 export type EventAlert = {
+    name: string;
+    id: string;
     type: EventType;
     specifier: EventAlertSpecifier;
     restriction: EventAlertRestriction;
@@ -114,7 +119,7 @@ export type Event = {
 
 export function getAlert(event: Event, alertConfig: EventAlertConfig): EventAlert | undefined {
     const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
-    const alerts = alertConfig.data?.alerts[eventMainType];
+    const alerts = alertConfig.data?.alerts[event.eventtype] || alertConfig.data?.alerts[eventMainType];
     if (!alerts) {
         return undefined;
     }

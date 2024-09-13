@@ -3,7 +3,7 @@ import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
 import { SystemMessageMainType } from '@/commons/message'
 
-const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'ban', 'timeout', 'delete'];
+const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'ban', 'timeout', 'delete', 'streamOnline', 'streamOffline', 'channelPointRedemption'];
 
 const Messages: Record<SystemMessageMainType, string> = {
     'sub': 'Subscriptions',
@@ -15,7 +15,10 @@ const Messages: Record<SystemMessageMainType, string> = {
     "cheer": "Bit-Donations",
     "ban": "Banned Users",
     "timeout": "Timeouted Users",
-    "delete": "Deleted Messages"
+    "delete": "Deleted Messages",
+    "streamOnline": "Stream Online Message",
+    "streamOffline": "Stream Offline Message",
+    "channelPointRedemption": "Channel Point Rewards",
 };
 
 export function ChatSettings() {
