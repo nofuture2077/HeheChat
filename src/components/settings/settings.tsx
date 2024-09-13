@@ -6,7 +6,7 @@ import {
   IconMessageChatbot,
   IconSword,
   IconChevronRight,
-  IconAlarm,
+  IconBell,
   IconShare
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
@@ -23,7 +23,7 @@ const mainLinksMockdata = [
   { icon: IconHome2, label: 'General' },
   { icon: IconMessageChatbot, label: 'Chat' },
   { icon: IconSword, label: 'Mod' },
-  { icon: IconAlarm, label: 'Alerts' },
+  { icon: IconBell, label: 'Alerts' },
   { icon: IconShare, label: 'Share' }
 ];
 
