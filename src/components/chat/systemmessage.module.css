@@ -1,8 +1,12 @@
 .msg {
     padding: 6px;
     background-color: light-dark(#ffd195, #480356);
-    display: flex;
-    justify-content: center;
+    text-align: center;
+
+    >.action {
+        display: flex;
+        justify-content: center;
+    }
 
     img {
         width: 24px;
