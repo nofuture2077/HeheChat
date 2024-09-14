@@ -1,4 +1,5 @@
 import { SystemMessageType, SystemMessageMainType } from "@/commons/message";
+import { Config } from "@/commons/config";
 import _ from "underscore"
 
 export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' |
@@ -117,7 +118,7 @@ export type Event = {
     amount2?: number;
 }
 
-export function getAlert(event: Event, alertConfig: EventAlertConfig): EventAlert | undefined {
+export function getAlert(event: Event, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
     const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
     const alerts = alertConfig.data?.alerts[event.eventtype] || alertConfig.data?.alerts[eventMainType];
     if (!alerts) {
@@ -125,7 +126,7 @@ export function getAlert(event: Event, alertConfig: EventAlertConfig): EventAler
     }
     const exactAlerts: Record<number, EventAlert[]> = {};
     const minAlerts: Record<number, EventAlert[]> = {};
-    alerts.forEach(alert => {
+    alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
         if (alert.specifier.type === "exact") {
             if (exactAlerts[alert.specifier.amount]) {
                 exactAlerts[alert.specifier.amount].push(alert)

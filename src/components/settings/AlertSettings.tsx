@@ -2,6 +2,7 @@ import { Stack, Text, Switch, Space } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
+import { AlertSystem } from '../../components/alerts/alertplayer'
 
 export function AlertSettings() {
     const config = useContext(ConfigContext);
@@ -27,7 +28,30 @@ export function AlertSettings() {
     <Stack>
         <Text size="md">Play Alerts</Text>
         <Switch checked={config.playAlerts} onChange={(event) => {config.setPlayAlerts(event.currentTarget.checked);forceUpdate()}} label="Play Alerts" size="lg"/>
-        {config.channels.map(channel => <Switch key={channel} checked={isActive(channel)} disabled={!hasShare(channel)} label={channel} onChange={(event) => {changeActive(channel, event.currentTarget.checked);forceUpdate()}} size="lg"/>)}
-        <Text fs="italic">(*) Ask other Streams to share their alerts with you.</Text>
+        {config.channels.map(channel => <Switch key={channel} checked={isActive(channel)} disabled={!hasShare(channel)} label={channel + (hasShare(channel) ? '' : ' *')} onChange={(event) => {changeActive(channel, event.currentTarget.checked);forceUpdate()}} size="lg"/>)}
+        <Text fs="italic">(*) No Permission - Ask other Streams to share their alerts with you.</Text>
+        
+        {Object.keys(AlertSystem.alertConfig).map(channel => {
+            if (!AlertSystem.alertConfig[channel] || !config.channels.includes(channel)) {
+                return null;
+            }
+            return <Stack key={"alert-config-" + channel}>
+                <Space h="md"/>
+                <Text size="md">{channel}</Text>
+                {Object.values(AlertSystem.alertConfig[channel].data?.alerts || []).reduce((accumulator, value) => accumulator.concat(value), []).map((alert) => {
+                    return <Switch disabled={!isActive(channel)} checked={!config.deactivatedAlerts[alert.id]} onChange={(event) => {config.setDeactivatedAlerts(alert.id, !event.currentTarget.checked);forceUpdate()}} key={alert.id} label={alert.name} size="lg"/>
+                })}
+            </Stack>
+        })}
+        {Object.keys(AlertSystem.alertConfig).map(channel => {
+            if (AlertSystem.alertConfig[channel] || !config.channels.includes(channel)) {
+                return null;
+            }
+            return <Stack key={"alert-config-" + channel}>
+                <Space h="md"/>
+                <Text size="md">{channel}</Text>
+                <Text fs="italic">No Share</Text>
+            </Stack>
+        })}
     </Stack>)
 }

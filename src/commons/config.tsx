@@ -20,7 +20,8 @@ export interface ConfigData {
     systemMessageInChat: Partial<Record<SystemMessageMainType, boolean>>,
     receivedShares: string[],
     activatedShares: string[],
-    shares: string[]
+    shares: string[],
+    deactivatedAlerts: Record<string, boolean>
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -48,6 +49,7 @@ export interface Config extends ConfigData {
     setActivatedShares: (val: string[]) => void;
     setShares: (val: string[]) => void;
     loadShares: () => void;
+    setDeactivatedAlerts: (id: string, val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -69,6 +71,7 @@ export const DEFAULT_CONFIG: Config = {
     receivedShares: [],
     activatedShares: [],
     shares: [],
+    deactivatedAlerts: {},
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setShowTimestamp: (value: boolean) => {},
@@ -87,6 +90,7 @@ export const DEFAULT_CONFIG: Config = {
     setRaidTargets: (val) => {},
     setPlayAlerts: (val) => {},
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => {},
+    setDeactivatedAlerts: (id: string, val: boolean) => {},
     loadReceivedShares: () => {},
     setActivatedShares: (val: string[]) => {},
     setShares: (val: string[]) => {},

@@ -245,6 +245,14 @@ export default function App() {
         });
     }
 
+    const setDeactivatedAlerts = (id: string, val: boolean) => {
+        setProfile((profile) => {
+            profile.config.deactivatedAlerts[id] = val;
+            storeProfile(profile);
+            return profile;
+        });
+    }
+
     const loadReceivedShares = async () => {
         const BASE_URL = import.meta.env.VITE_BACKEND_URL;
         const share = localStorage.getItem('hehe-token_state') || '';
@@ -285,6 +293,7 @@ export default function App() {
         setRaidTargets,
         setPlayAlerts,
         setSystemMessageInChat,
+        setDeactivatedAlerts,
         loadReceivedShares,
         setActivatedShares,
         setShares,

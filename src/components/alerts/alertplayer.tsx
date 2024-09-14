@@ -22,7 +22,7 @@ class AlertPlayer {
     muted: boolean = false;
     queue: Event[] = [];
     index: number = 0;
-    alertConfig: Record<string, EventAlertConfig>= {};
+    alertConfig: Record<string, EventAlertConfig> = {};
     preventBoxDisconnect?: (() => void) & _.Cancelable;
     config?: Config;
     audio?: HTMLAudioElement;
@@ -205,7 +205,7 @@ class AlertPlayer {
         if (!alertConfig) {
             return;
         }
-        const alert = getAlert(item, alertConfig);
+        const alert = getAlert(item, alertConfig, this.config!);
 
         if (!alert) {
             return;
@@ -253,7 +253,7 @@ class AlertPlayer {
     }
     
     checkQueue() {
-        if (this.playing || this.paused) {
+        if (this.playing || this.paused || !this.config) {
             return;
         }
     
