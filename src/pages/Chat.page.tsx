@@ -147,9 +147,9 @@ export function ChatPage() {
             emotes.updateChannel(loginContext, channel).then(forceUpdate);
             forceUpdate();
         });
-        
+        const state = localStorage.getItem('hehe-token_state') || '';
         AlertSystem.addNewChannels(config.channels);
-        PubSub.publish("WSSEND", { type: "subscribe", channels: Object.fromEntries(config.channels.map(key => [key, true])) });
+        PubSub.publish("WSSEND", { type: "subscribe", state, channels: Object.fromEntries(config.channels.map(key => [key, true])) });
 
         return () => {
             config.off(chatHandler);

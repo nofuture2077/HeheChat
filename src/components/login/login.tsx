@@ -1,10 +1,11 @@
 import { Button } from '@mantine/core';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
-import { IconLogin } from '@tabler/icons-react';
+import { IconLink } from '@tabler/icons-react';
 import { useEffect, useContext } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 import { generateGUID } from '@/commons/helper';
+import PubSub from 'pubsub-js'
 
 function getQueryVariable(query: String, variable: String): string | undefined {
     var vars = query.split('&');
@@ -111,9 +112,14 @@ export default function Login() {
             size='xl'
             radius="xl"
             variant='gradient'
-            gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
+            gradient={{ from: 'blue', to: 'cyan', deg: 135 }}
             href={link}
-            rightSection={<IconLogin size={32} />}>    
+            rightSection={<IconLink size={32} />}>    
             Login with Twitch
         </Button> );
-  }
+}
+
+PubSub.subscribe('WS-auth-update', (msg, data) => {
+    console.log('Got new access token: ' + data.token);
+    localStorage.setItem('hehe-token', data.token);
+});
