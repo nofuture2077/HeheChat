@@ -2,6 +2,8 @@
     padding: 6px;
     background-color: light-dark(#ffd195, #480356);
     text-align: center;
+    word-break: break-word;
+    max-width: 100vh;
 
     >.action {
         display: flex;
