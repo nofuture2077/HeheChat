@@ -48,7 +48,7 @@ export type EventAlertMeta = {
 }
 
 export type EventAlertData = {
-    alerts: Record<EventMainType | EventType, EventAlert[]>;
+    alerts: Record<EventMainType, EventAlert[]>;
     files: Record<Base64FileReference, Base64File>;
 }
 
@@ -89,18 +89,6 @@ export type Base64File = {
     data: string;
 }
 
-export type Base64ImageFile = {
-    image: Base64File
-}
-
-export type Base64AudioFile = {
-    audio: Base64File
-}
-
-export type Base64VideoFile = {
-    video: Base64File
-}
-
 export type EventAlertConfig = {
     meta: EventAlertMeta;
     data?: EventAlertData;
@@ -120,7 +108,7 @@ export type Event = {
 
 export function getAlert(event: Event, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
     const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
-    const alerts = alertConfig.data?.alerts[event.eventtype] || alertConfig.data?.alerts[eventMainType];
+    const alerts = alertConfig.data?.alerts[eventMainType];
     if (!alerts) {
         return undefined;
     }
