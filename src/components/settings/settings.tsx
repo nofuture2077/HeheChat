@@ -39,6 +39,7 @@ export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts';
 export interface SettingsProperties {
   close: () => void;
   openProfileBar: () => void;
+  openUserProfile: () => void;
   tab?: SettingsTab;
 }
 
@@ -104,7 +105,7 @@ export function Settings(props: SettingsProperties) {
         </div>
       </div>
       <div className={classes.footer}>
-        <InfoCard date={0} component={Box} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''} left={<Avatar src={loginContext.user?.profilePictureUrl || ''} radius="xl"/>} right={<IconChevronRight/>}/>
+        <InfoCard onClick={props.openUserProfile} date={0} component={Box} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''} left={<Avatar src={loginContext.user?.profilePictureUrl || ''} radius="xl"/>} right={<IconChevronRight/>}/>
       </div>
     </nav>
   );

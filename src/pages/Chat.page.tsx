@@ -22,6 +22,7 @@ import { Storage } from '@/components/chat/chatstorage';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { toMap } from '@/commons/helper';
 import { Event } from '@/commons/events';
+import { UserCardDrawer } from '@/components/login/usercard';
 
 export type OverlayDrawer = {
     name: string;
@@ -206,7 +207,7 @@ export function ChatPage() {
 
             <AppShell.Main>
                 <Drawer opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
-                    {drawer ? <drawer.component modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props}></drawer.component> : null}
+                    {drawer ? <drawer.component modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props} openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }} ></drawer.component> : null}
                 </Drawer>
                 {(drawerOpen || shouldScroll) ? null : (
                     <Affix position={{ bottom: 20 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>

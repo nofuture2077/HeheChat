@@ -13,12 +13,13 @@ export interface InfoCardProperties {
   component: ReactComponentLike;
   left?: ReactElementLike;
   right?: ReactElementLike;
+  onClick?: () => void;
 }
 
 export function InfoCard(props: InfoCardProperties) {
   const emotes = useContext(ChatEmotesContext);
   return (
-    <props.component className={classes.card}>
+    <props.component className={classes.card} onClick={props.onClick}>
       
       <Group flex={1} gap='xs'>
       {props.channel ? <span key='infocard-channel' className={classes.channel}>{emotes.getLogo(props.channel)}</span> : null}
