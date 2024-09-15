@@ -1,4 +1,5 @@
 import { TagsInput, Switch, Stack, Text, Space } from '@mantine/core';
+import { useForceUpdate } from '@mantine/hooks';
 import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
 import { SystemMessageMainType } from '@/commons/message'
@@ -23,6 +24,7 @@ const Messages: Record<SystemMessageMainType, string> = {
 
 export function ChatSettings() {
     const config = useContext(ConfigContext);
+    const forceUpdate = useForceUpdate();
 
     return (
     <Stack>
@@ -39,6 +41,6 @@ export function ChatSettings() {
         <Switch checked={config.showOtherBadges} onChange={(event) => config.setShowOtherBadges(event.currentTarget.checked)} label="Show Other Badges" size="lg"/>
         <Space h="sm" />
         <Text size="md">System Messages</Text>
-        {eventMainTypeValues.map(eventType => <Switch key={eventType} checked={config.systemMessageInChat[eventType]} onChange={(event) => {config.setSystemMessageInChat(eventType, event.currentTarget.checked);}} label={Messages[eventType]} size="lg"/>)}
+        {eventMainTypeValues.map(eventType => <Switch key={eventType} checked={config.systemMessageInChat[eventType]} onChange={(event) => {config.setSystemMessageInChat(eventType, event.currentTarget.checked);forceUpdate();}} label={Messages[eventType]} size="lg"/>)}
     </Stack>)
 }

@@ -27,7 +27,7 @@ class RemoteEventStorage implements EventStorage {
         return Promise.resolve();
     }
 
-    load(channels: string[]): Promise<EventData[]> {
+    async load(channels: string[]): Promise<EventData[]> {
         return fetch(this.baseUrl + '/event/history?' + [['channels', channels.join(',')].join('=')].join('&')).then(res => res.json());
     }
 }

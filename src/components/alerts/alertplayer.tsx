@@ -1,4 +1,4 @@
-import { Event, EventAlertConfig, Base64FileReference, getAlert, Base64AudioFile } from "@/commons/events";
+import { Event, EventAlertConfig, Base64FileReference, Base64File, getAlert } from "@/commons/events";
 import _ from "underscore";
 
 import { Config } from "@/commons/config";
@@ -162,9 +162,9 @@ class AlertPlayer {
     }
 
     getAudioFileData(reference: Base64FileReference, alertConfig: EventAlertConfig) {
-        const file = alertConfig.data?.files[reference] as unknown as Base64AudioFile;
-        if (file && file.audio) {
-            return 'data:audio/mp3;base64,' + file.audio.data;
+        const file = alertConfig.data?.files[reference] as unknown as Base64File;
+        if (file && file.data) {
+            return 'data:audio/mp3;base64,' + file.data;
         }
         return "";
     }
