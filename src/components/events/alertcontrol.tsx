@@ -47,7 +47,7 @@ export function AlertControl(props: AlertControlProps) {
     const muted = AlertSystem.muted;
 
     return <Stack p={10} style={{borderBottom: "1px solid gray"}}>
-        <Text ta="center" c="dimmed" lineClamp={2} h={50}>{text}</Text>
+        <Text ta="center" c="dimmed" lineClamp={2} h={50} style={{maxWidth: 'unset', width: '100%'}}>{text}</Text>
         <Group justify="space-between">
             <span></span>
             <ActionIcon variant="subtle" onClick={() => {

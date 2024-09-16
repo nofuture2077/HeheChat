@@ -27,7 +27,7 @@ export function InfoCard(props: InfoCardProperties) {
 
         <div style={{ flex: 1 }}>
           <Group justify='space-between'>
-            <Text size="sm" fw={700}>
+            <Text size="sm" fw={700} className={classes.username}>
               {props.name}
             </Text>
             <Text fw={500} c="dimmed" size="sm">
