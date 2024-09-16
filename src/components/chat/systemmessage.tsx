@@ -76,11 +76,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
 
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)}><IconSpeakerphone size={22} /></ActionIcon> : null;
     return <div className={[classes.msg, classes[props.msg.subType]].join(' ')}>
-            <div className={classes.action}>
-                <Text fw={700} {...style}>{emotes.getLogo(parts[1])}{textParts[0]}</Text>
-                {actions}
-            </div>
-            {textParts.length === 2 ? <Text inline={false} fw={500}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</Text>: null}
-            
+                <Text key="msg-main" fw={700} {...style}>{emotes.getLogo(parts[1])}{textParts[0]}{actions}</Text>
+                {textParts.length === 2 ? <Text key="msg-second" fw={500}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</Text>: null}
         </div>;
 }
