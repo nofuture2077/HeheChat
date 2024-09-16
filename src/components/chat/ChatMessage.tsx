@@ -97,7 +97,16 @@ export function ChatMessageComp(props: ChatMessageProps) {
         actions.push(<ActionIcon key='replyAction' size={22} variant='white' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>);
     }
 
-    return (<div className={classes.msg + (props.hideReply ? (' ' + classes.hideReply) : '') + (deleted ? (' ' + classes.deleted) : '')}>
+    const msgClasses = [classes.msg];
+    props.hideReply && msgClasses.push(classes.hideReply);
+    deleted && msgClasses.push(classes.deleted);
+    props.msg.isFirst && msgClasses.push(classes.first);
+    props.msg.isHighlight && msgClasses.push(classes.highlight);
+
+    const badge = props.msg.isFirst ? <span className={classes.firstBadge} key="first-badge">FIRST MESSAGE</span> : props.msg.isHighlight ? <span className={classes.highlightBadge} key="highlight-badge">HIGHLIGHT</span> : null;
+
+    return (<div className={msgClasses.join(' ')}>
+        {badge}
         <span className={classes.channel}>{(config.showProfilePicture && !props.hideReply) ? emotes.getLogo(channel): ''}</span>
         <span className={classes.time}>{config.showTimestamp ? formatTime(props.msg.date) : ''}</span>
         <span className={classes.badges}>{Array.from(props.msg.userInfo.badges).map((key, index) =>  getBadge(config, emotes, channel, key.toString(), index.toString()))}</span>
