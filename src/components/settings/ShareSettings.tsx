@@ -1,6 +1,15 @@
-import { TagsInput, Text, Space, TextInput } from '@mantine/core';
+import { TagsInput, Text, Space, TextInput, ActionIcon, Table, Anchor } from '@mantine/core';
 import { useContext, useEffect, useState } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
+import { IconLink, IconPlus, IconTrash } from '@tabler/icons-react';
+
+interface EditorData {
+    id: string;
+    userid: string;
+    channelname: string;
+    token: string;
+    name: string;
+}
 
 export function ShareSettings() {
     const config = useContext(ConfigContext);
@@ -8,6 +17,7 @@ export function ShareSettings() {
     const [elevenLabsApiKey, setElevenLabsApiKey] = useState<string>("");
     const [pallyggApiKey, setPallyggApiKey] = useState<string>("");
     const [pallyggChannel, setPallyggChannel] = useState<string>("");
+    const [editors, setEditors] = useState<EditorData[]>([]);
 
     const state = localStorage.getItem('hehe-token_state') || '';
 
@@ -33,6 +43,31 @@ export function ShareSettings() {
         setElevenLabsApiKey(apikey || '');
     };
 
+    const loadEditors = () => {
+        fetch(import.meta.env.VITE_BACKEND_URL + '/alert/editor?state='  + state).then(res => res.json()).then((data) => {
+            setEditors(data);
+        });
+    }
+
+    const createEditor = (name: string) => {
+        const state = localStorage.getItem('hehe-token_state') || '';
+        fetch(import.meta.env.VITE_BACKEND_URL + '/alert/editor?state='  + state + '&name=' +  encodeURIComponent(name), {method: 'PUT'}).then(res => res.json()).then((data) => {
+            setEditors(data);
+        });
+    }
+
+    const deleteEditor = (token: string) => {
+        const state = localStorage.getItem('hehe-token_state') || '';
+        fetch(import.meta.env.VITE_BACKEND_URL + '/alert/editor?state='  + state + '&token=' +  encodeURIComponent(token), {method: 'DELETE'}).then(res => res.json()).then((data) => {
+            setEditors(data);
+        });
+    }
+
+    useEffect(() => {
+        loadEditors();
+    }, []);
+
+
     useEffect(() => {
         if (shares != config.shares) {
             config.setShares(shares);
@@ -44,6 +79,27 @@ export function ShareSettings() {
         <TagsInput placeholder="" value={config.shares} onChange={setShares}></TagsInput>
         <Space h="xs" />
         <Text fs="italic">* Share your alerts with other Streams so they can use your sounds. Be aware: If you use AI-TTS shared alerts will count against your Quota from elevenlabs</Text>
+        <Space h="lg" />
+        <Text size="md" fw={700}>Editor Tokens</Text>
+        <Table>
+            <Table.Thead>
+                <Table.Tr>
+                    <Table.Th></Table.Th>
+                    <Table.Th>Name</Table.Th>
+                    <Table.Th>Key</Table.Th>
+                    <Table.Th></Table.Th>
+                </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>{editors.map(element => <Table.Tr key={element.id}>
+      <Table.Td><ActionIcon variant="subtle" onClick={() => deleteEditor(element.token)}><IconTrash/></ActionIcon></Table.Td>
+      <Table.Td>{element.name}</Table.Td>
+      <Table.Td>...{element.token.slice(-4)}</Table.Td>
+      <Table.Td><Anchor href={import.meta.env.VITE_EDITOR_URL + "?token=" + element.token} target="_blank"><IconLink/></Anchor></Table.Td>
+    </Table.Tr>)}</Table.Tbody>
+        </Table>
+
+        <Space h="xs" />
+        <ActionIcon color='primary' onClick={() => createEditor("Share")}><IconPlus/></ActionIcon>
         <Space h="lg" />
         <Text size="md" fw={700}>Pally.gg Config</Text>
         <TextInput label="API Key" placeholder="" value={pallyggApiKey} onChange={(ev) => updatePallyGG(ev.target.value, pallyggChannel)} />
