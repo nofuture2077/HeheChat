@@ -1,6 +1,4 @@
 import { SystemMessageType, SystemMessageMainType } from "@/commons/message";
-import { Config } from "@/commons/config";
-import _ from "underscore"
 
 export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' |
 'sub_1000' | 'sub_2000' | 'sub_3000' | 'sub_Prime' | 
@@ -104,40 +102,4 @@ export type Event = {
     text?: string;
     amount?: number;
     amount2?: number;
-}
-
-export function getAlert(event: Event, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
-    const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
-    const alerts = alertConfig.data?.alerts[eventMainType];
-    if (!alerts) {
-        return undefined;
-    }
-    const exactAlerts: Record<number, EventAlert[]> = {};
-    const minAlerts: Record<number, EventAlert[]> = {};
-    alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
-        if (alert.specifier.type === "exact") {
-            if (exactAlerts[alert.specifier.amount]) {
-                exactAlerts[alert.specifier.amount].push(alert)
-            } else {
-                exactAlerts[alert.specifier.amount] = [alert];
-            }
-        }
-        if (alert.specifier.type === "min") {
-            if (minAlerts[alert.specifier.amount]) {
-                minAlerts[alert.specifier.amount].push(alert)
-            } else {
-                minAlerts[alert.specifier.amount] = [alert];
-            }
-        }
-    });
-    const exactAlertMatches = exactAlerts[event.amount || 0];
-    if (exactAlertMatches && exactAlertMatches.length) {
-        return _.sample(exactAlertMatches);
-    }
-    const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
-    const step = minKeys.findLast(x => x <= (event.amount || 0));
-    if (!step) {
-        return undefined;
-    }
-    return _.sample(minAlerts[step]);
 }

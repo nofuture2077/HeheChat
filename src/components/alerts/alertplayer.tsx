@@ -1,4 +1,4 @@
-import { Event, EventAlertConfig, Base64FileReference, Base64File, getAlert } from "@/commons/events";
+import { Event, EventAlertConfig, Base64FileReference, Base64File, EventAlert, EventMainType, EventTypeMapping } from "@/commons/events";
 import _ from "underscore";
 
 import { Config } from "@/commons/config";
@@ -199,13 +199,49 @@ class AlertPlayer {
         }
         return await this.getAudioInfo('data:audio/mp3;base64,' + audioData);
     }
+
+    getAlert(event: Event, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
+        const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
+        const alerts = alertConfig.data?.alerts[eventMainType];
+        if (!alerts) {
+            return undefined;
+        }
+        const exactAlerts: Record<number, EventAlert[]> = {};
+        const minAlerts: Record<number, EventAlert[]> = {};
+        alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
+            if (alert.specifier.type === "exact") {
+                if (exactAlerts[alert.specifier.amount]) {
+                    exactAlerts[alert.specifier.amount].push(alert)
+                } else {
+                    exactAlerts[alert.specifier.amount] = [alert];
+                }
+            }
+            if (alert.specifier.type === "min") {
+                if (minAlerts[alert.specifier.amount]) {
+                    minAlerts[alert.specifier.amount].push(alert)
+                } else {
+                    minAlerts[alert.specifier.amount] = [alert];
+                }
+            }
+        });
+        const exactAlertMatches = exactAlerts[event.amount || 0];
+        if (exactAlertMatches && exactAlertMatches.length) {
+            return _.sample(exactAlertMatches);
+        }
+        const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
+        const step = minKeys.findLast(x => x <= (event.amount || 0));
+        if (!step) {
+            return undefined;
+        }
+        return _.sample(minAlerts[step]);
+    }
  
     async showNotification(item: Event) {
         const alertConfig = this.alertConfig[item.channel];
         if (!alertConfig) {
             return;
         }
-        const alert = getAlert(item, alertConfig, this.config!);
+        const alert = this.getAlert(item, alertConfig, this.config!);
 
         if (!alert) {
             return;
