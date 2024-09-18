@@ -21,7 +21,7 @@ export function InfoCard(props: InfoCardProperties) {
      <Group className={classes.card} onClick={props.onClick} gap="xs" p={10} justify='space-between'>
       {props.channel ? <span key='infocard-channel' className={classes.channel}>{emotes.getLogo(props.channel)}</span> : null}
       {props.left || null}
-        <Stack gap={0}>
+        <Stack gap={0} style={{flexGrow: 5}}>
           <Group justify='space-between'>
             <Text size="sm" fw={700} className={classes.username}>
               {props.name}
