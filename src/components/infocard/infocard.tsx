@@ -1,4 +1,4 @@
-import { Group, Text, Card, Skeleton } from '@mantine/core';
+import { Group, Text, Card, Skeleton, Stack } from '@mantine/core';
 import classes from './infocard.module.css';
 import { ReactComponentLike, ReactElementLike } from 'prop-types';
 import { useContext } from 'react';
@@ -10,7 +10,6 @@ export interface InfoCardProperties {
   name: string; 
   text: string;
   date: number;
-  component: ReactComponentLike;
   left?: ReactElementLike;
   right?: ReactElementLike;
   onClick?: () => void;
@@ -19,13 +18,10 @@ export interface InfoCardProperties {
 export function InfoCard(props: InfoCardProperties) {
   const emotes = useContext(ChatEmotesContext);
   return (
-    <props.component className={classes.card} onClick={props.onClick}>
-      
-      <Group flex={1} gap='xs'>
+     <Group className={classes.card} onClick={props.onClick} gap="xs" p={10}>
       {props.channel ? <span key='infocard-channel' className={classes.channel}>{emotes.getLogo(props.channel)}</span> : null}
       {props.left || null}
-
-        <div style={{ flex: 1 }}>
+        <Stack gap={0}>
           <Group justify='space-between'>
             <Text size="sm" fw={700} className={classes.username}>
               {props.name}
@@ -36,14 +32,13 @@ export function InfoCard(props: InfoCardProperties) {
           </Group>
 
 
-          <Text size="sm">
-            {props.text}
-          </Text>
-        </div>
+          <Text>{props.text.substring(0, 30)}</Text>
+        </Stack>
 
-        {props.right || null}
+        <div>
+          {props.right || null}
+        </div>
       </Group>
-    </props.component>
   );
 }
 

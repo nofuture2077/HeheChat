@@ -117,7 +117,7 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
                 <div className={classes.reverse}>
                     {load ? <>{[1,2,3].map(x => <InfoCardSkeleton key={'event' + x}/>)}</> : null}
                     {!load && events.length === 0 ? <Text key='event-noevents' pt='xl' size='xl' ta="center" variant='gradient' fw={900} gradient={{ from: 'orange', to: 'cyan', deg: 90 }}>No Event to show.</Text> : null}
-                    {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} date={event.date} text={formatEventText(event)} component={Box} left={getIcon(event, 'infocard-left')} right={<ActionIcon disabled={!canReplayEvent(event)} variant='transparent' key={'infocard-right'} onClick={() => replayEvent(event)}><IconReload/></ActionIcon>}/>)}
+                    {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} date={event.date} text={formatEventText(event)} left={getIcon(event, 'infocard-left')} right={<ActionIcon disabled={!canReplayEvent(event)} variant='transparent' key={'infocard-right'} onClick={() => replayEvent(event)}><IconReload/></ActionIcon>}/>)}
                 </div>
             </ScrollArea>
         </nav>
