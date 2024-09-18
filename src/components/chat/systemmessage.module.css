@@ -16,6 +16,11 @@
     }
 
     img {
+        height: 24px;
+        vertical-align: bottom;
+    }
+
+    .logo img {
         width: 24px;
         height: 24px;
         border-radius: 12px;

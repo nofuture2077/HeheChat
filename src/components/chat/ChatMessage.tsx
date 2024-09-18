@@ -23,7 +23,7 @@ interface ChatMessageProps {
     modActions: ModActions;
 }
 
-const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] => {
+export const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] => {
     return elements.reduce<React.ReactNode[]>((acc, elem, index) => {
       if (index === 0) {
         return [elem];

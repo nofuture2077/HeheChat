@@ -11,7 +11,7 @@ import { getEventStyle } from '@/components/events/eventhelper'
 import { EventType, EventTypeMapping } from "@/commons/events";
 import { ChatMessage } from "@twurple/chat";
 import { parseChatMessage, ParsedMessagePart } from "@twurple/chat"
-import { parsedPartsToHtml } from "@/components/chat/ChatMessage"
+import { parsedPartsToHtml, joinWithSpace } from "@/components/chat/ChatMessage"
 
 export type SystemMessageProps = {
     msg: SystemMessage;
@@ -40,7 +40,7 @@ const messages: Record<SystemMessageType, string> = {
     'follow': '$1 just followed',
     'cheer': '$1 cheered $2 bits',
     'donation': '$1 donated $2 USD: $3',
-    'sevenTVAdded': '$1 added new Emote $2',
+    'sevenTVAdded': '$1 added new Emote $2 $2',
     'sevenTVRemoved': '$1 removed Emote $2'
 }
 
@@ -58,6 +58,14 @@ export function SystemMessageComp(props: SystemMessageProps) {
     if (parts[0] === 'timeout') {
         parts[3] = formatDuration(Number(parts[3]) * 1000);
     }
+
+    const wordMapper = (type: string, word: string, index: number, arr: string[]) => {
+        if ((type === 'sevenTVAdded') && index === arr.length - 2) {
+            return emotes.getEmote(parts[1], word, props.msg.id);
+        }
+        return word;
+    }
+
     const text = formatString(messages[parts[0] as SystemMessageType], parts.slice(1, parts.length))
     const textParts = text.split('///');
 
@@ -78,7 +86,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
 
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)}><IconSpeakerphone size={22} /></ActionIcon> : null;
     return <div className={[classes.msg, classes[props.msg.subType]].join(' ')}>
-                <Text key="msg-main" fw={700} {...style}>{emotes.getLogo(parts[1])}{textParts[0]}{actions}</Text>
+                <Text key="msg-main" fw={700} {...style}><span className={classes.logo}>{emotes.getLogo(parts[1])}</span>{joinWithSpace(textParts[0].split(" ").map((value, index, array) => wordMapper(parts[0], value, index, array)))}{actions}</Text>
                 {textParts.length === 2 ? <Text key="msg-second" fw={500}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</Text>: null}
         </div>;
 }
