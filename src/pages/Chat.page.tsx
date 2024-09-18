@@ -76,7 +76,7 @@ export function ChatPage() {
         if (config.ignoredUsers.indexOf(user) !== -1) {
             return;
         }
-        if (messageIndex.has(msg.id)) {
+        if (msg.id && messageIndex.has(msg.id)) {
             return;
         }
         setChatMessages((prevMessages) => [...prevMessages, msg].slice(shouldScroll ? (-1 * config.maxMessages) : 0));

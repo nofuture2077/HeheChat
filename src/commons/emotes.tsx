@@ -2,6 +2,7 @@ import { LoginContext, getUserdata } from '@/commons/login';
 import { toMap, reviver, replacer } from '@/commons/helper';
 import { EmoteComponent } from '@/components/emote/emote';
 import PubSub from 'pubsub-js';
+import { SystemMessage } from './message';
 
 interface sevenTVEmote {
     name: string;
@@ -218,14 +219,22 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     }
 }
 
-PubSub.subscribe('WS-seventTV', (message, data) => {
+PubSub.subscribe('WS-seventTV', (m, data) => {
     console.log(data);
     if (data.type === 'add') {
-        const username = emoteSetUserNameMap[data.emoteSetId];
-        DEFAULT_CHAT_EMOTES.emotes.get(username).sevenTVEmotes.set(data.emote.name, data.emote);
+        const username = data.user;
+        const channel = emoteSetUserNameMap[data.emoteSetId];
+        DEFAULT_CHAT_EMOTES.emotes.get(channel).sevenTVEmotes.set(data.emote.name, data.emote);
+        const text = ['sevenTVAdded', channel, username, data.emote.name].join('***');
+        const message = new SystemMessage(channel, text, new Date(), "sevenTVAdded", "", "").rawLine;
+        PubSub.publish("WS-msg", {message, username});
     }
     if (data.type === 'remove') {
-        const username = emoteSetUserNameMap[data.emoteSetId];
-        DEFAULT_CHAT_EMOTES.emotes.get(username).sevenTVEmotes.delete(data.emote.name);
+        const username = data.user;
+        const channel = emoteSetUserNameMap[data.emoteSetId];
+        DEFAULT_CHAT_EMOTES.emotes.get(channel).sevenTVEmotes.delete(data.emote.name);
+        const text = ['sevenTVRemoved', channel, username, data.emote.name].join('***');
+        const message = new SystemMessage(channel, text, new Date(), "sevenTVRemoved", "", "").rawLine;
+        PubSub.publish("WS-msg", {message, username});
     }
 })

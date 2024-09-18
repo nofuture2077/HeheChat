@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
 import { SystemMessageMainType } from '@/commons/message'
 
-const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'ban', 'timeout', 'delete', 'streamOnline', 'streamOffline', 'channelPointRedemption'];
+const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'ban', 'timeout', 'delete', 'streamOnline', 'streamOffline', 'channelPointRedemption', 'sevenTVAdded', 'sevenTVRemoved'];
 
 const Messages: Record<SystemMessageMainType, string> = {
     'sub': 'Subscriptions',
@@ -20,6 +20,8 @@ const Messages: Record<SystemMessageMainType, string> = {
     "streamOnline": "Stream Online Message",
     "streamOffline": "Stream Offline Message",
     "channelPointRedemption": "Channel Point Rewards",
+    "sevenTVAdded": "New 7TV Emotes",
+    "sevenTVRemoved": "Removed 7TV Emotes"
 };
 
 export function ChatSettings() {
@@ -42,5 +44,6 @@ export function ChatSettings() {
         <Space h="sm" />
         <Text size="md">System Messages</Text>
         {eventMainTypeValues.map(eventType => <Switch key={eventType} checked={config.systemMessageInChat[eventType]} onChange={(event) => {config.setSystemMessageInChat(eventType, event.currentTarget.checked);forceUpdate();}} label={Messages[eventType]} size="lg"/>)}
+        <Space h="xl"/>
     </Stack>)
 }

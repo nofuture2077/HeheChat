@@ -34,7 +34,9 @@ export const EventTypeMapping: Record<SystemMessageType, SystemMessageMainType> 
     'delete': 'delete',
     'streamOnline': 'streamOnline',
     'streamOffline': 'streamOffline',
-    'channelPointRedemption': 'channelPointRedemption'
+    'channelPointRedemption': 'channelPointRedemption',
+    'sevenTVAdded': 'sevenTVAdded',
+    'sevenTVRemoved': 'sevenTVRemoved'
 };
 
 export type EventAlertMeta = {
