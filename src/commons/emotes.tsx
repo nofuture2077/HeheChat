@@ -220,7 +220,6 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
 }
 
 PubSub.subscribe('WS-seventTV', (m, data) => {
-    console.log(data);
     if (data.type === 'add') {
         const username = data.user;
         const channel = emoteSetUserNameMap[data.emoteSetId];

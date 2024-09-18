@@ -54,7 +54,6 @@ function connectToSevenTV() {
 
     sevenTVWebsocket.onmessage = (event: MessageEvent) => {
         const data = JSON.parse(event.data);
-        console.log('Empfangenes Event:', data);
 
         if (data.op === 0 && data.d.type === 'emote_set.update') {
             const body = data.d.body;
