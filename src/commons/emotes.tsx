@@ -1,6 +1,7 @@
 import { LoginContext, getUserdata } from '@/commons/login';
 import { toMap, reviver, replacer } from '@/commons/helper';
 import { EmoteComponent } from '@/components/emote/emote';
+import PubSub from 'pubsub-js';
 
 interface sevenTVEmote {
     name: string;
@@ -31,7 +32,9 @@ interface sevenTVUser {
     emote_set: sevenTVEmoteSet;
 }
 
-export async function get7TVEmotes(userId: string) {
+const emoteSetUserNameMap: Record<string, string> = {};
+
+export async function get7TVEmotes(userId: string, username: string) {
     const user: sevenTVUser = await fetch('https://7tv.io/v3/users/twitch/' + userId)
         .then(res => {
             if (!res.ok) {
@@ -44,6 +47,8 @@ export async function get7TVEmotes(userId: string) {
             }
         }));
 
+    emoteSetUserNameMap[user.emote_set.id] = username;
+    PubSub.publish("WSSEND", { type: "sevenTVSubscribe", objectId: user.emote_set.id, userId: user.id });
     const emotes = toMap(user.emote_set.emotes, e => e.name);
     return emotes;
 }
@@ -87,7 +92,7 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
 
     const data = await Promise.all(users.map(async (user) => {
         const { channelBadges, channelEmotes } = await getBadgesAndEmotes(context, user.id);
-        const sevenTVEmotes = await get7TVEmotes(user.id);
+        const sevenTVEmotes = await get7TVEmotes(user.id, user.name);
         const cheerEmotes = await api.bits.getCheermotes(user.id);
         return {
             user,
@@ -212,3 +217,15 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         return DEFAULT_CHAT_EMOTES.emotes.get(channel)?.user?.id || '';
     }
 }
+
+PubSub.subscribe('WS-seventTV', (message, data) => {
+    console.log(data);
+    if (data.type === 'add') {
+        const username = emoteSetUserNameMap[data.emoteSetId];
+        DEFAULT_CHAT_EMOTES.emotes.get(username).sevenTVEmotes.set(data.emote.name, data.emote);
+    }
+    if (data.type === 'remove') {
+        const username = emoteSetUserNameMap[data.emoteSetId];
+        DEFAULT_CHAT_EMOTES.emotes.get(username).sevenTVEmotes.delete(data.emote.name);
+    }
+})
