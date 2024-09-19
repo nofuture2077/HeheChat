@@ -7,7 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   plugins: [react(), tsconfigPaths(), mkcert(), VitePWA({ 
     registerType: 'autoUpdate',
-    includeAssets: ['/src/assets/*.png', '/src/assets/*.svg', , '/src/assets/*.ico'],
+    includeAssets: ['src/assets/*.png', 'src/assets/*.svg' , '/rc/assets/*.ico'],
       manifest: {
         name: 'Hehe Chat',
         short_name: 'Hehe',
