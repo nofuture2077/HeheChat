@@ -30,7 +30,7 @@ const mainLinksMockdata = [
 export const SettingsDrawer: OverlayDrawer = {
   name: 'settings',
   component: Settings,
-  size: 400,
+  size: 440,
   position: 'left',
 }
 
@@ -99,7 +99,7 @@ export function Settings(props: SettingsProperties) {
           {mainLinks}
         </div>
         <div className={classes.main}>
-          <ScrollArea h="calc(100vh - 130px)" className={classes.active}>
+          <ScrollArea h="calc(100vh - 130px)" maw="100%" className={classes.active} scrollbars="y">
             {renderSwitch(active)}
           </ScrollArea>
         </div>

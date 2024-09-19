@@ -29,7 +29,7 @@ export function UISettings(props: UISettingProperties) {
         {confirmDeleteOpen ? <ConfirmProfileDeleteView title='Are you sure to delete Profile?' close={confirmDeleteHandler.close} confirm={() => {profile.deleteProfile(profile.name);props.close();props.openProfileBar()}}/> : null}
         <Button variant="filled" color="pink" leftSection={<IconTrash size={14} />} onClick={confirmDeleteHandler.open}>Delete</Button>
         <Text size="md">Font Size</Text>
-        <Slider w="295" value={config.fontSize} onChange={config.setFontSize} min={11} max={18} label={(value) => `${value} px`} marks={marks} />
+        <Slider w="calc(100% - 20px)" m="10" value={config.fontSize} onChange={config.setFontSize} min={11} max={18} label={(value) => `${value} px`} marks={marks} />
         <Space h={"md"}/>
         <Text size="md">Color Mode</Text>
         <ColorSchemeToggle/>

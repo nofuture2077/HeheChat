@@ -92,7 +92,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
         actions.push(<ActionIcon key='timeoutAction' variant='white' color='primary' size={22} onClick={timeoutModalHandler.open}><IconClock size={14} /></ActionIcon>);
         actions.push(<ActionIcon key='banAction' variant='white' color='primary' size={22} onClick={banModalHandler.open}><IconHammer size={14} /></ActionIcon>);
     }
-    if (!props.hideReply) {
+    if (!props.hideReply && config.chatEnabled) {
         actions.push(<CopyButton key='copyAction' value={props.msg.text}>{({ copied, copy }) => (<ActionIcon key='replyAction' size={22} variant='white' onClick={copy}>{copied ? <IconCheck size={config.fontSize}/> : <IconCopy size={config.fontSize}/>}</ActionIcon>)}</CopyButton>);
         actions.push(<ActionIcon key='replyAction' size={22} variant='white' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>);
     }

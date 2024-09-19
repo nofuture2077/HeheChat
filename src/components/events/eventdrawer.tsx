@@ -25,17 +25,17 @@ export interface EventDrawerViewProperties {
 }
 
 const messages: Record<EventType, string> = {
-    'raid': 'Raid from $1 with $2 viewers',
-    'sub_1000': 'Subscribed for $2 months',
-    'sub_2000': 'Subscribed with Tier 2 for $2 months',
-    'sub_3000': 'Subscribed with Tier 3 for $2 months',
+    'raid': 'Raid with $2 viewers',
+    'sub_1000': 'Sub for $2 months',
+    'sub_2000': 'Sub with T2 for $2 months',
+    'sub_3000': 'Sub with T3 for $2 months',
     'subgift_1000': 'Gifted $2 subs',
     'subgift_2000': 'Gifted $2 Tier 2 subs',
     'subgift_3000': 'Gifted $2 Tier 3 subs',
     'subgiftb_1000': 'Gifted $3 a sub',
     'subgiftb_2000': 'Gifted $3 a Tier 2 sub',
     'subgiftb_3000': 'Gifted $3 a Tier 3 sub',
-    'sub_Prime': 'Subscribed with prime for $2 months',
+    'sub_Prime': 'Sub with prime for $2 months',
     'follow': 'Just followed',
     'cheer': 'Cheered $2 bits',
     'donation': "Donated $2 $3"

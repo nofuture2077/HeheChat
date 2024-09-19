@@ -221,8 +221,8 @@ export function ChatPage() {
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
             <AppShell.Footer >
-                {(!drawerOpen && config.channels.length) ?
-                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 20, right: 20 }}><ActionIcon color='primary' size='xl' radius='xl' onClick={() => {chatInputHandler.open(); setTimeout(scrollToBottom, 500)}}><IconMessage /></ActionIcon></Affix>) : null}
+                {(config.chatEnabled && !drawerOpen && config.channels.length) ?
+                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 30, right: 20 }}><ActionIcon variant='gradient' gradient={{ from: 'blue', to: 'cyan', deg: 45 }} size='48' radius='xl' onClick={() => {chatInputHandler.open(); setTimeout(scrollToBottom, 500)}}><IconMessage /></ActionIcon></Affix>) : null}
             </AppShell.Footer>
         </AppShell>
     );

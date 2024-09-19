@@ -69,7 +69,7 @@ export function TwitchView(props: TwitchViewProps) {
                 <Tabs.Panel value="live">
                     <SimpleGrid className={classes.streams} cols={{ base: 1, sm: 1 }} m={10}>
                         {loadStream ? [1, 2, 3].map((x) => (<StreamCardPlaceholder key={x} />)) : null}
-                        {!loadStream && streams.length === 0 ? <Text pt='xl' size='xl' ta="center" variant='gradient' fw={900} gradient={{ from: 'orange', to: 'cyan', deg: 90 }}>No Streams right now.</Text> : null}
+                        {!loadStream && streams.length === 0 ? <Text pt='xl' size='xl' ta="center" fw={500}>No Streams right now.</Text> : null}
                         {streams.map(stream => (<StreamCard stream={stream} key={stream.id} />))}
                     </SimpleGrid>
                 </Tabs.Panel>
@@ -77,7 +77,7 @@ export function TwitchView(props: TwitchViewProps) {
                 <Tabs.Panel value="raids">
                     <SimpleGrid className={classes.streams} cols={{ base: 1, sm: 1 }} m={10}>
                         {loadStream ? [1, 2, 3].map((x) => (<StreamCardPlaceholder key={x} />)) : null}
-                        {!loadStream && raidTargetStreams.length === 0 ? <Text pt='xl' size='xl' ta="center" variant='gradient' fw={900} gradient={{ from: 'orange', to: 'cyan', deg: 90 }}>No Streams for raid right now.</Text> : null}
+                        {!loadStream && raidTargetStreams.length === 0 ? <Text pt='xl' size='xl' ta="center" fw={500}>No Streams for raid right now.</Text> : null}
                         {raidTargetStreams.map(stream => (<StreamCard stream={stream} key={stream.id} onClick={(stream) => {
                             setInitialRaidTarget(stream.userName);
                             raidModalHandler.open();

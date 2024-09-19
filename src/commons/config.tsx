@@ -5,6 +5,7 @@ export type MessageHandler = {id?: number, handle: (channel: string, text: strin
 export interface ConfigData {
     channels: string[];
     chatChannel?: string;
+    chatEnabled: boolean;
     ignoredUsers: string[];
     maxMessages: number;
     showTimestamp: boolean;
@@ -37,6 +38,7 @@ export interface Config extends ConfigData {
     setShowOtherBadges: (value: boolean) => void;
     getChatChannel: () => string | undefined;
     setChatChannel: (channel: string) => void;
+    setChatEnabled: (val: boolean) => void;
     onMessage: (handler: MessageHandler) => MessageHandler;
     off: (handler: MessageHandler) => void;
     fireMessage: (channel: string, text: string, replyTo?: string) => void;
@@ -55,6 +57,7 @@ export interface Config extends ConfigData {
 export const DEFAULT_CONFIG: Config = {
     channels: [],
     chatChannel: undefined,
+    chatEnabled: true,
     ignoredUsers: [],
     maxMessages: 500,
     showTimestamp: false,
@@ -82,6 +85,7 @@ export const DEFAULT_CONFIG: Config = {
     setShowOtherBadges: (value: boolean) => {},
     getChatChannel: () => { return undefined; },
     setChatChannel: (channel: string) => {},
+    setChatEnabled: (val: boolean) => {},
     onMessage: (handler: MessageHandler) => ({handle: () => {}}),
     off: (handler: MessageHandler) => {},
     fireMessage: (channel: string, text: string, replyTo?: string) => {},
