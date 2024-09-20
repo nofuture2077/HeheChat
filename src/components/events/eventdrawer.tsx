@@ -63,7 +63,7 @@ export function formatEventText(event: EventData) {
     return msg;
 }
 
-function getIcon(event: EventData, key: string, colorScheme: "dark" | "light") {
+function getIcon(event: EventData, key: string) {
     const style: any = {variant: 'transparent'};
     getEventStyle(event, style);
     const icon = icons[event.eventtype as EventType];
