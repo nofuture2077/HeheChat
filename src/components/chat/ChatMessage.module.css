@@ -9,7 +9,7 @@
 }
 
 .first {
-    background-color: light-dark(rgb(100, 255, 131), rgb(0, 53, 0));
+    background-color: light-dark(#a9d4ba, #375442);
 
     .firstBadge {
         font-size: 10px;
@@ -22,7 +22,7 @@
 }
 
 .highlight {
-    background-color: light-dark(rgb(100, 185, 255), rgb(18, 0, 53));
+    background-color: light-dark(#9d9cbc, #383754);
     .highlightBadge {
         font-size: 10px;
         position: absolute;
@@ -36,7 +36,6 @@
 .channel {
     position: absolute;
     left: -8px;
-    opacity: 0.7;
 }
 
 .deleted {
@@ -79,7 +78,7 @@
 
 .msg:not(.hideReply):hover {
     @mixin light {
-        background-color: var(--mantine-color-orange-1);
+        background-color: var(--mantine-color-gray-5);
     }
 
     @mixin dark {

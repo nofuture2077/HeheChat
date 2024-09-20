@@ -1,7 +1,7 @@
 import { EventType } from '@/commons/events';
 
 export function getEventStyle(event: {eventtype: EventType, amount?: number}, style: any) {
-    style.color = "var(--mantine-color-dimmed)"
+    style.color = "light-dark(black, white)"
     style.variant = 'subtle';
     if (event.eventtype.startsWith('sub_2000')) {
         style.color = 'cyan';
@@ -11,7 +11,7 @@ export function getEventStyle(event: {eventtype: EventType, amount?: number}, st
 }
     if (event.eventtype.startsWith('subgift_')) {
         if ((event.amount || 0) >= 5) {
-            style.color = 'orange';
+            style.color = "light-dark(#520974, orange)";
         }
         if ((event.amount || 0) >= 10) {
             style.color = 'cyan';
@@ -23,7 +23,7 @@ export function getEventStyle(event: {eventtype: EventType, amount?: number}, st
     }
     if (event.eventtype === 'cheer') {
         if ((event.amount || 0) >= 500) {
-            style.color = 'orange';
+            style.color = "light-dark(#520974, orange)";
         }
         if ((event.amount || 0) >= 1000) {
             style.color = 'cyan';
@@ -35,7 +35,7 @@ export function getEventStyle(event: {eventtype: EventType, amount?: number}, st
     }
     if (event.eventtype === 'raid') {
         if ((event.amount || 0) >= 100) {
-            style.color = 'orange';
+            style.color = "light-dark(#520974, orange)";
         }
         if ((event.amount || 0) >= 500) {
             style.color = 'cyan';

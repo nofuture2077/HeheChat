@@ -222,7 +222,7 @@ export function ChatPage() {
             </AppShell.Main>
             <AppShell.Footer >
                 {(config.chatEnabled && !drawerOpen && config.channels.length) ?
-                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 30, right: 20 }}><ActionIcon variant='gradient' gradient={{ from: 'blue', to: 'cyan', deg: 45 }} size='48' radius='xl' onClick={() => {chatInputHandler.open(); setTimeout(scrollToBottom, 500)}}><IconMessage /></ActionIcon></Affix>) : null}
+                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 30, right: 20 }}><ActionIcon variant='gradient' gradient={{ from: 'violet', to: 'cyan', deg: 45 }} size='48' radius='xl' onClick={() => {chatInputHandler.open(); setTimeout(scrollToBottom, 500)}}><IconMessage /></ActionIcon></Affix>) : null}
             </AppShell.Footer>
         </AppShell>
     );

@@ -1,4 +1,4 @@
-import { Title, Button, SimpleGrid, Tabs, Text } from '@mantine/core';
+import { Title, Button, SimpleGrid, Tabs, Text, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconX } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
@@ -51,14 +51,14 @@ export function TwitchView(props: TwitchViewProps) {
     }, [activeTab]);
 
     return (<nav className={classes.navbar}>
-        <div className={classes.header}>
+        <Group justify='space-between' p='md'>
             <Title order={4}>
                 Twitch Streams
             </Title>
             <Button onClick={props.close} variant='subtle' color='primary'>
                 <IconX />
             </Button>
-        </div>
+        </Group>
         <div className={classes.main}>
             <Tabs value={activeTab} onChange={setActiveTab}>
                 <Tabs.List>

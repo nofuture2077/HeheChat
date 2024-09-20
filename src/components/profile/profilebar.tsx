@@ -14,7 +14,7 @@ import { OverlayDrawer } from "@/pages/Chat.page";
 export const ProfileBarDrawer: OverlayDrawer = {
     name: 'profileBar',
     component: ProfileBar,
-    size: 200,
+    size: 280,
     position: 'left',
 }
 
@@ -48,14 +48,14 @@ export function ProfileBar(props: ProfileBarProps) {
     }
 
     return <Stack h='100vh' gap={0} className={classes.profileBar}>
-        <div className={classes.header}>
-            <Title order={4} pt={6} pl={12}>
+        <Group justify="space-between" p="md">
+            <Title order={4}>
                 Profiles
             </Title>
             <Button onClick={props.close} variant='subtle' color='primary'>
                 <IconX />
             </Button>
-        </div>
+        </Group>
         <Stack h="100%" justify='flex-start' flex="1">
             <DragDropContext onDragEnd={handleOnDragEnd}>
                 <Droppable droppableId="profiles">

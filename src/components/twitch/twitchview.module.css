@@ -7,15 +7,6 @@
     justify-content: space-between;
 }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    background-color: var(--mantine-color-body);
-    padding: var(--mantine-spacing-md);
-    padding-left: 68px;
-    height: rem(60px);
-}
-
 .main {
     flex: 1;
 }

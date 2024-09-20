@@ -3,7 +3,7 @@ import { formatDuration, formatString } from "@/commons/helper";
 import { Text, ActionIcon } from "@mantine/core"
 import classes from './systemmessage.module.css';
 import { IconSpeakerphone } from '@tabler/icons-react';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '@/ApplicationContext';
 import { ModActions } from "@/components/chat/mod/modactions";
 import { parseMessage } from '@/commons/message'
@@ -12,6 +12,7 @@ import { EventType, EventTypeMapping } from "@/commons/events";
 import { ChatMessage } from "@twurple/chat";
 import { parseChatMessage, ParsedMessagePart } from "@twurple/chat"
 import { parsedPartsToHtml, joinWithSpace } from "@/components/chat/ChatMessage"
+import { useColorScheme, useDidUpdate, useForceUpdate } from '@mantine/hooks';
 
 export type SystemMessageProps = {
     msg: SystemMessage;
@@ -49,6 +50,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const config = useContext(ConfigContext);
     const emotes = useContext(ChatEmotesContext);
 
+
     const isModerator = props.moderatedChannel[props.msg.target.substring(1)];
     const isBroadcaster = props.msg.target.substring(1) === login.user?.name;
 
@@ -84,7 +86,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
         msgParts = parseChatMessage(parsedMessage.text, parsedMessage.emoteOffsets, emotes.getCheerEmotes(channel));
     }
 
-    const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)}><IconSpeakerphone size={22} /></ActionIcon> : null;
+    const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)} style={{ verticalAlign: 'middle' }}><IconSpeakerphone size={22} /></ActionIcon> : null;
     return <div className={[classes.msg, classes[props.msg.subType]].join(' ')}>
                 <Text key="msg-main" fw={700} {...style}><span className={classes.logo}>{emotes.getLogo(parts[1])}</span>{joinWithSpace(textParts[0].split(" ").map((value, index, array) => wordMapper(parts[0], value, index, array)))}{actions}</Text>
                 {textParts.length === 2 ? <Text key="msg-second" fw={500}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</Text>: null}
