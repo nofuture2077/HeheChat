@@ -21,14 +21,14 @@ export function Header(props: {
             <Button fw={300} p={0} variant='transparent' color='primary' size='lg' onClick={props.openProfileBar} leftSection={<HeaderLogo height={28}/>}><Text fw={700}>HEHE</Text><Text fw={300}>Chat</Text></Button>
             <div></div>
             <div className={classes.rightGroup}>
-                <ActionIcon variant='transparent' color='primary' size={46}>
-                    <IconSettings style={{ width: "32px", height: "32px" }} onClick={() => props.openSettings()} size={42} />
+                <ActionIcon variant='transparent' color='primary' size='44px'>
+                    <IconSettings onClick={() => props.openSettings()} />
                 </ActionIcon>
-                <ActionIcon variant='transparent' color='primary' size={46}>
-                    <IconBell style={{ width: "32px", height: "32px" }} onClick={props.openEvents} size={42} />
+                <ActionIcon variant='transparent' color='primary' size='44px'>
+                    <IconBell onClick={props.openEvents} />
                 </ActionIcon>
-                <ActionIcon variant='transparent' color='primary' size={46}>
-                    <IconBrandTwitch style={{ width: "32px", height: "32px" }} onClick={props.openTwitch} size={42} />
+                <ActionIcon variant='transparent' color='primary' size='44px'>
+                    <IconBrandTwitch onClick={props.openTwitch}/>
                 </ActionIcon>
             </div>
         </Container>
