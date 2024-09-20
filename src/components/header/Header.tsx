@@ -1,10 +1,12 @@
-import { Container, ActionIcon, Title, Button } from '@mantine/core';
+import { Container, ActionIcon, Button, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
 import { IconBrandTwitch, IconSettings, IconBell, IconUserCircle } from '@tabler/icons-react';
 import { useContext } from 'react';
 import { ProfileContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
+import { HeaderLogo } from './HeaderLogo';
+
 
 export function Header(props: {
     openSettings: (tab?: SettingsTab) => void,
@@ -16,7 +18,7 @@ export function Header(props: {
     const profile = useContext(ProfileContext);
     return (
         <Container className={classes.inner}>
-            <Button p={0} variant='transparent' color='primary' size='lg' onClick={props.openProfileBar} leftSection={<IconUserCircle style={{ width: "28px", height: "28px" }} size={42} />}>{profile.name}</Button>
+            <Button fw={300} p={0} variant='transparent' color='primary' size='lg' onClick={props.openProfileBar} leftSection={<HeaderLogo height={28}/>}><Text fw={700}>HEHE</Text><Text fw={300}>Chat</Text></Button>
             <div></div>
             <div className={classes.rightGroup}>
                 <ActionIcon variant='transparent' color='primary' size={46}>

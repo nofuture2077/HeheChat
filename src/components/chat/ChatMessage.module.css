@@ -5,6 +5,7 @@
     width: 100vw;
     word-wrap: break-word;
     overflow: hidden;
+    font-weight: 500;
 }
 
 .first {

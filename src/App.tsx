@@ -1,5 +1,5 @@
 import '@mantine/core/styles.css';
-import { createTheme, MantineProvider, virtualColor } from '@mantine/core';
+import { MantineProvider } from '@mantine/core';
 import { useEffect, useState, useRef } from 'react';
 import { Router } from './Router';
 import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext } from '@/ApplicationContext'
@@ -11,7 +11,8 @@ import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { generateGUID } from './commons/helper';
 import PubSub from 'pubsub-js';
-import { SystemMessageMainType } from "@/commons/message"
+import { SystemMessageMainType } from "@/commons/message";
+import { theme } from '@/theme';
 
 function load(): Config {
     return JSON.parse(localStorage.getItem('chatConfig') || JSON.stringify(DEFAULT_CONFIG)) as Config;
@@ -127,16 +128,6 @@ export default function App() {
     const getApiClient = () => {
         return new ApiClient({ authProvider: getAuthProvider() });
     };
-
-    const theme = createTheme({
-        colors: {
-            primary: virtualColor({
-                name: 'primary',
-                dark: 'orange',
-                light: 'cyan',
-            }),
-        },
-    });
 
     const onMessage = (handler: MessageHandler) => {
         onMessageHandlers.push(handler);
