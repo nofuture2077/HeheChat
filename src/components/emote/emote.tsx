@@ -14,6 +14,7 @@ export const EmoteComponent: React.FC<EmoteComponentProps> = ({ imageUrl, largeI
       withArrow
       withinPortal={true}
       position="top"
+      events={{ hover: true, focus: true, touch: true }}
       label={
         <Stack align="center" gap="xs">
           <Image src={largeImageUrl} alt={name} h={64} />
