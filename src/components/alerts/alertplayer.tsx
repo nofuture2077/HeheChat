@@ -150,8 +150,10 @@ class AlertPlayer {
     }
 
     async playSilence() {
-        console.log("Playing silence");
-        return this.playAudio(1.0, await this.getAudioInfo('data:audio/mp3;base64,' + silence));
+        if (this.config?.playAlerts) {
+            console.log("Playing silence");
+            return this.playAudio(1.0, await this.getAudioInfo('data:audio/mp3;base64,' + silence));
+        }
     }
 
     cleanMessage(message: string) {

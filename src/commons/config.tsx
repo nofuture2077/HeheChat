@@ -67,7 +67,7 @@ export const DEFAULT_CONFIG: Config = {
     showPredictions: false,
     showOtherBadges: false,
     fontSize: 14,
-    modToolsEnabled: true,
+    modToolsEnabled: false,
     raidTargets: [],
     playAlerts: false,
     systemMessageInChat: {},
