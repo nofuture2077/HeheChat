@@ -99,7 +99,7 @@ export function Settings(props: SettingsProperties) {
           </div>
         </div>
         <div className={classes.main}>
-          <ScrollArea h="calc(100vh - 130px)" maw="100%" className={classes.active} scrollbars="y">
+          <ScrollArea h="calc(100vh - 126px)" maw="100%" className={classes.active} scrollbars="y">
             {renderSwitch(active)}
           </ScrollArea>
         </div>
