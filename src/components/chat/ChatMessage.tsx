@@ -88,13 +88,13 @@ export function ChatMessageComp(props: ChatMessageProps) {
 
     const actions = [];
     if (canMod && config.modToolsEnabled) {
-        actions.push(<ActionIcon key='deleteAction' variant='white' color='primary' size={22} onClick={() => {props.modActions.deleteMessage(props.msg.channelId || '', props.msg.id)}}><IconTrash size={14} /></ActionIcon>);
-        actions.push(<ActionIcon key='timeoutAction' variant='white' color='primary' size={22} onClick={timeoutModalHandler.open}><IconClock size={14} /></ActionIcon>);
-        actions.push(<ActionIcon key='banAction' variant='white' color='primary' size={22} onClick={banModalHandler.open}><IconHammer size={14} /></ActionIcon>);
+        actions.push(<ActionIcon key='deleteAction' variant='light' color='primary' size={22} onClick={() => {props.modActions.deleteMessage(props.msg.channelId || '', props.msg.id)}}><IconTrash size={14} /></ActionIcon>);
+        actions.push(<ActionIcon key='timeoutAction' variant='light' color='primary' size={22} onClick={timeoutModalHandler.open}><IconClock size={14} /></ActionIcon>);
+        actions.push(<ActionIcon key='banAction' variant='light' color='primary' size={22} onClick={banModalHandler.open}><IconHammer size={14} /></ActionIcon>);
     }
     if (!props.hideReply && config.chatEnabled) {
-        actions.push(<CopyButton key='copyAction' value={props.msg.text}>{({ copied, copy }) => (<ActionIcon key='replyAction' size={22} variant='white' onClick={copy}>{copied ? <IconCheck size={config.fontSize}/> : <IconCopy size={config.fontSize}/>}</ActionIcon>)}</CopyButton>);
-        actions.push(<ActionIcon key='replyAction' size={22} variant='white' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>);
+        actions.push(<CopyButton key='copyAction' value={props.msg.text}>{({ copied, copy }) => (<ActionIcon key='replyAction' size={22} variant='light' color='gray' onClick={copy}>{copied ? <IconCheck size={config.fontSize}/> : <IconCopy size={config.fontSize}/>}</ActionIcon>)}</CopyButton>);
+        actions.push(<ActionIcon key='replyAction' size={22} variant='light' color='gray' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>);
     }
 
     const msgClasses = [classes.msg];

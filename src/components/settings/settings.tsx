@@ -94,9 +94,9 @@ export function Settings(props: SettingsProperties) {
       </div>
       <div className={classes.wrapper}>
         <div className={classes.aside}>
-          <div className={classes.logo}>
+          <div>
+            {mainLinks}
           </div>
-          {mainLinks}
         </div>
         <div className={classes.main}>
           <ScrollArea h="calc(100vh - 130px)" maw="100%" className={classes.active} scrollbars="y">

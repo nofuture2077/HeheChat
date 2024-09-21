@@ -10,9 +10,9 @@ export interface EmoteComponentProps {
 
 export const EmoteComponent: React.FC<EmoteComponentProps> = ({ imageUrl, largeImageUrl, name, type }) => {
   return (
-    <Tooltip
+    <Tooltip color="gray"
       withArrow
-      withinPortal={false}
+      withinPortal={true}
       position="top"
       label={
         <Stack align="center" gap="xs">

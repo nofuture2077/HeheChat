@@ -17,12 +17,11 @@
   }
   
   .aside {
-    flex: 0 0 rem(60px);
-    background-color: var(--mantine-color-body);
+    padding-top: 30px;
+    width: 60px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-right: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
   }
   
   .main {
@@ -31,7 +30,7 @@
   }
 
   .active {
-    padding: 4px 12px;
+    padding: 0px 12px 0px 20px;
   }
   
   .mainLink {
@@ -61,21 +60,11 @@
     justify-content: space-between;
     background-color: var(--mantine-color-body);
     padding: var(--mantine-spacing-md);
-    padding-left: 68px;
     height: rem(60px);
+    border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
   }
   
-  
-  .logo {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    height: rem(60px);
-    padding-top: var(--mantine-spacing-md);
-    border-bottom: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
-    margin-bottom: var(--mantine-spacing-xl);
-  }
-  
+
   .link {
     display: block;
     text-decoration: none;

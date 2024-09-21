@@ -162,7 +162,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         }
         LOADING_PROFILES[channel] = true;
         const userData = await getUserdata(context, [channel]);
-        if (DEFAULT_CHAT_EMOTES.emotes.has(channel)) {
+        if (DEFAULT_CHAT_EMOTES.emotes.has(channel) && userData.get(channel) && userData.get(channel).user) {
             DEFAULT_CHAT_EMOTES.emotes.get(channel).user = userData.get(channel).user;
         } else {
             DEFAULT_CHAT_EMOTES.emotes.set(channel, {user: userData.get(channel).user});

@@ -16,24 +16,30 @@ export function UISettings(props: UISettingProperties) {
     const profile = useContext(ProfileContext);
     const [confirmDeleteOpen, confirmDeleteHandler] = useDisclosure(false);
     const [renameOpen, renameHandler] = useDisclosure(false);
-    const marks = [11, 12, 13, 14, 15, 16, 17, 18].map(x => ({value: x, label: x + "px"}));
+    const marks = [11, 12, 13, 14, 15, 16, 17, 18].map(x => ({ value: x, label: x + "px" }));
     return (
-    <Stack>
-        <Text size="md">Profile</Text>
-        <TextInput value={profile.name} readOnly disabled rightSection={
-                        <ActionIcon size={32} radius="xl" variant='transparent' color='primary' onClick={renameHandler.open}>
-                            <IconPencil style={{ width: 14, height: 14 }} stroke={1.5} />
-                        </ActionIcon>
-                    }></TextInput>
-        {renameOpen ? <RenameProfileView profile={profile} close={renameHandler.close}/> : null}
-        {confirmDeleteOpen ? <ConfirmProfileDeleteView title='Are you sure to delete Profile?' close={confirmDeleteHandler.close} confirm={() => {profile.deleteProfile(profile.name);props.close();props.openProfileBar()}}/> : null}
-        <Button variant="filled" color="pink" leftSection={<IconTrash size={14} />} onClick={confirmDeleteHandler.open}>Delete</Button>
-        <Text size="md">Font Size</Text>
-        <Slider w="calc(100% - 20px)" m="10" value={config.fontSize} onChange={config.setFontSize} min={11} max={18} label={(value) => `${value} px`} marks={marks} />
-        <Space h={"md"}/>
-        <Text size="md">Color Mode</Text>
-        <ColorSchemeToggle/>
-    </Stack>)
+        <Stack mt={30} mb={30} gap={30}>
+            <Fieldset legend="Profile" variant='filled'>
+                <Stack>
+                <TextInput value={profile.name} readOnly disabled rightSection={
+                    <ActionIcon size={32} radius="xl" variant='transparent' color='primary' onClick={renameHandler.open}>
+                        <IconPencil style={{ width: 14, height: 14 }} stroke={1.5} />
+                    </ActionIcon>
+                }></TextInput>
+                {renameOpen ? <RenameProfileView profile={profile} close={renameHandler.close} /> : null}
+                {confirmDeleteOpen ? <ConfirmProfileDeleteView title='Are you sure to delete Profile?' close={confirmDeleteHandler.close} confirm={() => { profile.deleteProfile(profile.name); props.close(); props.openProfileBar() }} /> : null}
+                <Button variant="filled" color="pink" leftSection={<IconTrash size={14} />} onClick={confirmDeleteHandler.open}>Delete</Button>
+                </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Font Size" variant='filled'>
+                <Slider w="calc(100% - 20px)" m="10" value={config.fontSize} onChange={config.setFontSize} min={11} max={18} label={(value) => `${value} px`} marks={marks} />
+            </Fieldset>
+
+            <Fieldset legend="Color Mode" variant='filled'>
+                <ColorSchemeToggle />
+            </Fieldset>
+        </Stack>)
 }
 
 export function ConfirmProfileDeleteView(props: {
