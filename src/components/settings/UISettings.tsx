@@ -48,7 +48,7 @@ export function ConfirmProfileDeleteView(props: {
     confirm: () => void;
 }) {
     return (
-        <Modal opened={true} onClose={props.close} withCloseButton={false}>
+        <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
             <Fieldset legend={props.title}>
                 <Group justify="space-around" mt="md">
                     <Button onClick={props.close}>Cancel</Button>
