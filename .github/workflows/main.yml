@@ -27,6 +27,7 @@ jobs:
       VITE_BACKEND_URL: https://scambot2000.asuscomm.com
       VITE_EDITOR_URL: https://nofuture2077.github.io/HeheChat-AlertEditor/
       VITE_CLIENT_ID: 7tmrvoh4llxtx9yft7pwhtgbi61ba9
+      VITE_BUILDNUMBER: ${{ github.run_number }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

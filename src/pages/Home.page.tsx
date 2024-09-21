@@ -17,7 +17,7 @@ export function HomePage() {
             <Space h="xs"/>
             <Text fw={300} size="lg">Best multi channel App for Twitch *</Text>
             <Space h="xs"/>
-            <Text fw={200} size="lg" fs="italic">(*) Early Alpha</Text>
+            <Text fw={200} size="lg" fs="italic">(*) Alpha #{import.meta.env.VITE_BUILDNUMBER}</Text>
           </div>
         </Stack>
       </Group>

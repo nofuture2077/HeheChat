@@ -6,7 +6,7 @@
 
 .hero {
     color: #fff;
-    background-image: linear-gradient(22.5deg, var(--mantine-color-grape-filled), orange);
+    background-image: linear-gradient(22.5deg, var(--mantine-color-violet-filled), var(--mantine-color-grape-filled));
     min-height: 200px;
     width: 100%;
     clip-path: polygon(100% 87%, 0 100%, 0 0, 100% 0);
