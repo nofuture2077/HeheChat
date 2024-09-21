@@ -10,14 +10,14 @@ const seventTVMessages: SystemMessageMainType[] = ['sevenTVAdded', 'sevenTVRemov
 const Messages: Record<string, string> = {
     'sub': 'Subscriptions',
     'subgift': "Gift-Subs",
-    "subgiftb": "Received Gift Subs",
+    "subgiftb": "Received Subs",
     "raid": "Raids",
     "follow": "Follows",
     "donation": "Donations",
     "cheer": "Bit-Donations",
-    "streamOnline": "Stream Online Message",
-    "streamOffline": "Stream Offline Message",
-    "channelPointRedemption": "Channel Point Rewards",
+    "streamOnline": "Online Message",
+    "streamOffline": "Offline Message",
+    "channelPointRedemption": "Channel Points",
     "sevenTVAdded": "New 7TV Emotes",
     "sevenTVRemoved": "Removed 7TV Emotes"
 };
@@ -38,13 +38,13 @@ export function ChatSettings() {
 
             <Fieldset legend="Chat cosmetics" variant='filled'>
                 <Stack>
-                    <Switch checked={config.chatEnabled} onChange={(event) => config.setChatEnabled(event.currentTarget.checked)} label="Enable Chat Input" size="lg" />
-                    <Switch checked={config.showTimestamp} onChange={(event) => config.setShowTimestamp(event.currentTarget.checked)} label="Show Timestamp" size="lg" />
-                    <Switch checked={config.showProfilePicture} onChange={(event) => config.setShowProfilePicture(event.currentTarget.checked)} label="Show Profile Picture" size="lg" />
-                    <Switch checked={config.showImportantBadges} onChange={(event) => config.setShowImportantBadges(event.currentTarget.checked)} label="Show Important Badges" size="lg" />
-                    <Switch checked={config.showSubBadges} onChange={(event) => config.setShowSubBadges(event.currentTarget.checked)} label="Show Sub Badges" size="lg" />
-                    <Switch checked={config.showPredictions} onChange={(event) => config.setShowPredictions(event.currentTarget.checked)} label="Show Predictions" size="lg" />
-                    <Switch checked={config.showOtherBadges} onChange={(event) => config.setShowOtherBadges(event.currentTarget.checked)} label="Show Other Badges" size="lg" />
+                    <Switch checked={config.chatEnabled} onChange={(event) => config.setChatEnabled(event.currentTarget.checked)} label="Chat Input" size="lg" />
+                    <Switch checked={config.showTimestamp} onChange={(event) => config.setShowTimestamp(event.currentTarget.checked)} label="Timestamp" size="lg" />
+                    <Switch checked={config.showProfilePicture} onChange={(event) => config.setShowProfilePicture(event.currentTarget.checked)} label="Profile Picture" size="lg" />
+                    <Switch checked={config.showImportantBadges} onChange={(event) => config.setShowImportantBadges(event.currentTarget.checked)} label="Important Badges" size="lg" />
+                    <Switch checked={config.showSubBadges} onChange={(event) => config.setShowSubBadges(event.currentTarget.checked)} label="Sub Badges" size="lg" />
+                    <Switch checked={config.showPredictions} onChange={(event) => config.setShowPredictions(event.currentTarget.checked)} label="Prediction Badges" size="lg" />
+                    <Switch checked={config.showOtherBadges} onChange={(event) => config.setShowOtherBadges(event.currentTarget.checked)} label="Other Badges" size="lg" />
                 </Stack>
             </Fieldset>
 

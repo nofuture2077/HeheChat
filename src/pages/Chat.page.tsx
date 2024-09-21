@@ -102,10 +102,14 @@ export function ChatPage() {
                 AlertSystem.addEvent(data);
             }
         });
+        const modEventSub = PubSub.subscribe("WS-modevent", (msg, data) => {
+            console.log("modEvent", data);
+        });
 
         return () => {
             PubSub.unsubscribe(msgSub);
             PubSub.unsubscribe(eventSub);
+            PubSub.unsubscribe(modEventSub);
         }
     }, []);
 
@@ -120,9 +124,6 @@ export function ChatPage() {
             const msgs = rawMessages.map(parseMessage);
             setChatMessages(msgs);
         });
-
-        const deletedMessages: string[] = JSON.parse(localStorage.getItem("chat-messages-deleted") || '[]');
-        setDeletedMessages(deletedMessages);
 
         loginContext.moderatedChannels.forEach(mC => {
             emotes.updateUserInfo(loginContext, mC.name);
@@ -206,15 +207,15 @@ export function ChatPage() {
             </Affix> : null}
 
             <AppShell.Main>
-                <Drawer pos='relative' h="100vh" zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
-                    {drawer ? <drawer.component modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props} openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }} ></drawer.component> : null}
+                <Drawer zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
+                    {drawer ? <drawer.component height="100vh" modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props} openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }} ></drawer.component> : null}
                 </Drawer>
                 {(drawerOpen || shouldScroll) ? null : (
                     <Affix position={{ bottom: 20 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>
                         <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'grape', to: 'orange', deg: 90 }} style={{ borderRadius: 16 }}>New Messages</Button>
                     </Affix>
                 )}
-                <ScrollArea viewportRef={viewport} w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
+                <ScrollArea viewportRef={viewport} pos='absolute' w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
                     <Space h={48}></Space>
                     <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
                 </ScrollArea>
