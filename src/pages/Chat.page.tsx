@@ -79,7 +79,7 @@ export function ChatPage() {
         if (msg.id && messageIndex.has(msg.id)) {
             return;
         }
-        setChatMessages((prevMessages) => [...prevMessages, msg].slice(shouldScroll ? (-1 * config.maxMessages) : 0));
+        setChatMessages((prevMessages) => prevMessages.concat(msg).slice((shouldScroll && chatMessages.length % 2 == 1) ? (-1 * config.maxMessages) + (chatMessages.length % 2) : 0));
     }
 
     useEffect(() => {
@@ -156,7 +156,7 @@ export function ChatPage() {
         return () => {
             config.off(chatHandler);
         };
-    }, [config.channels, profile.guid]);
+    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid]);
 
     useEffect(() => {
         forceUpdate();
@@ -211,8 +211,8 @@ export function ChatPage() {
                     {drawer ? <drawer.component height="100vh" modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props} openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }} ></drawer.component> : null}
                 </Drawer>
                 {(drawerOpen || shouldScroll) ? null : (
-                    <Affix position={{ bottom: 20 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>
-                        <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'grape', to: 'violet', deg: 90 }} style={{ borderRadius: 16 }}>New Messages</Button>
+                    <Affix position={{ bottom: 35 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>
+                        <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'var(--mantine-color-skyblue-8)', to: 'var(--mantine-color-paleviolet-5)', deg: 55 }} style={{ borderRadius: 16 }}>New Messages</Button>
                     </Affix>
                 )}
                 <ScrollArea viewportRef={viewport} pos='absolute' w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
@@ -223,7 +223,7 @@ export function ChatPage() {
             </AppShell.Main>
             <AppShell.Footer >
                 {(config.chatEnabled && !drawerOpen && config.channels.length) ?
-                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 30, right: 20 }}><ActionIcon variant='gradient' gradient={{ from: 'violet', to: 'grape', deg: 125 }} size='48' radius='xl' onClick={() => {chatInputHandler.open(); setTimeout(scrollToBottom, 500)}}><IconMessage /></ActionIcon></Affix>) : null}
+                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 30, right: 20 }}><ActionIcon variant='gradient' gradient={{ to: 'var(--mantine-color-paleviolet-5)', from: 'var(--mantine-color-skyblue-8)', deg: 270 }} size='48' radius='xl' onClick={() => {chatInputHandler.open(); setTimeout(scrollToBottom, 500)}}><IconMessage /></ActionIcon></Affix>) : null}
             </AppShell.Footer>
         </AppShell>
     );

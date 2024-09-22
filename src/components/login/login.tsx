@@ -112,7 +112,7 @@ export default function Login() {
             size='xl'
             radius="xl"
             variant='gradient'
-            gradient={{ from: 'violet', to: 'grape', deg: 135 }}
+            gradient={{ from: 'var(--mantine-color-skyblue-8)', to: 'var(--mantine-color-paleviolet-6)', deg: 157 }}
             href={link}
             rightSection={<IconLink size={32} />}>    
             Login with Twitch

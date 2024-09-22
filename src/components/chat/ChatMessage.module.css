@@ -6,6 +6,10 @@
     word-wrap: break-word;
     overflow: hidden;
     font-weight: 500;
+
+    &:nth-child(odd) {
+        background-color: #2e2e2e;
+    }
 }
 
 .first {
