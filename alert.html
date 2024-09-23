@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" manifest="cache.manifest">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="icon" type="image/x-icon" href="favicon.ico"> 
+    <meta name="theme-color" content="#242424">
+    <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"/>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Hehe Chat</title>
+    <title>Twitchs finest chat app</title>
+    <style>
+      span.highlight span {
+        position: relative;
+        top: 5px;
+        display: inline-block;
+        animation: bounce 0.3s ease infinite alternate;
+        color: #f39;
+      }
+
+      #alert {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: sans-serif;
+        text-transform: uppercase;
+        visibility: hidden;
+      }
+
+      .text {
+        font-size: 24px;
+        line-height: 36px;
+        color: white;
+        text-shadow: 2px 2px 2px #333;
+        font-weight: 900;
+        letter-spacing: 5px;
+
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .text > p {
+        max-width: 60%;
+      }
+
+      span.highlight span:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+
+      span.highlight span:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+
+      span.highlight span:nth-child(4) {
+        animation-delay: 0.3s;
+      }
+
+      span.highlight span:nth-child(5) {
+        animation-delay: 0.4s;
+      }
+
+      span.highlight span:nth-child(6) {
+        animation-delay: 0.5s;
+      }
+
+      span.highlight span:nth-child(7) {
+        animation-delay: 0.6s;
+      }
+
+      span.highlight span:nth-child(8) {
+        animation-delay: 0.2s;
+      }
+
+      span.highlight span:nth-child(9) {
+        animation-delay: 0.3s;
+      }
+
+      span.highlight span:nth-child(10) {
+        animation-delay: 0.4s;
+      }
+
+      span.highlight span:nth-child(11) {
+        animation-delay: 0.5s;
+      }
+
+      span.highlight span:nth-child(12) {
+        animation-delay: 0.6s;
+      }
+
+      span.highlight span:nth-child(13) {
+        animation-delay: 0.7s;
+      }
+
+      span.highlight span:nth-child(14) {
+        animation-delay: 0.8s;
+      }
+
+      /* ANIMATION */
+      @keyframes bounce {
+        100% {
+          top: -5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="alert">
+      <img id='image'/>
+      <div class="text">
+          <p id="headline"></p>
+          <p id="text"></p>
+      </div>
+    </div>
+    <script>
+      function toText(s) {
+          return s.replaceAll(/##(.*?)##/g, function (m, p1) {
+              return '<span class="highlight">' + p1.split('').map(x => '<span>' + x + '</span>').join('') + '</span>'
+          });
+      }
+
+      function showAlert(alert) {
+        document.getElementById('headline').innerHTML = toText(alert.headline);
+        document.getElementById('text').innerText = alert.text;
+        document.getElementById('image').src = alert.image;
+
+        document.getElementById('alert').style.visibility = 'visible';
+        setTimeout(() => {
+          document.getElementById('alert').style.visibility = 'hidden';
+        }, alert.duration);
+      }
+
+      setInterval(() => {
+          showAlert({
+              duration: 5000,
+              text: 'Danke für deinen Content. Motiviert mich immer selbst Fahrrad zu fahren!',
+              headline: 'this is a ##Nofuture2077## test ##7## bla',
+              image: 'favicon-32x32.png'
+          });
+      }, 15000);
+    </script>
+  </body>
+</html>
