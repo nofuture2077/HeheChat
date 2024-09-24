@@ -1,14 +1,25 @@
-import { Stack, Text, Switch, Space, Fieldset } from '@mantine/core';
+import { Stack, Text, Switch, Fieldset, Anchor } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
-import { useContext } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 import { AlertSystem } from '../../components/alerts/alertplayer'
+import { IconLink } from '@tabler/icons-react'
 
 export function AlertSettings() {
     const config = useContext(ConfigContext);
     const forceUpdate = useForceUpdate();
+    const [sink, setSink] = useState<string | undefined>(undefined);
     const hasShare = (channel: string) => config.receivedShares.includes(channel);
     const isActive = (channel: string) => config.activatedShares.includes(channel);
+
+    useEffect(() => {
+        const state = localStorage.getItem('hehe-token_state') || '';
+
+        fetch(import.meta.env.VITE_BACKEND_URL + "/sink/get?state=" + state).then(res => res.json()).then((data) => {
+            setSink(data.sink);
+        });
+    }, []);
+
     const changeActive = (channel: string, active: boolean) => {
         const activatedShares = config.activatedShares;
 
@@ -26,6 +37,10 @@ export function AlertSettings() {
     };
     return (
         <Stack mt={30} mb={30} gap={30}>
+            {sink ? (<>
+                <Text span inline key={'browser-source-label'}>Browsersource (visual only) <Anchor inline key={'browser-source-link'} href={import.meta.env.VITE_SINK_URL + "?token=" + sink} target="_blank"><IconLink /></Anchor></Text>
+                
+            </>) : null}
             <Fieldset legend="Play Alerts" variant="filled">
                 <Stack>
                     <Switch checked={config.playAlerts} onChange={(event) => { config.setPlayAlerts(event.currentTarget.checked); forceUpdate() }} label="Play Alerts" size="lg" />

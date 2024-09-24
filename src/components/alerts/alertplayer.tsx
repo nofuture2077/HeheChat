@@ -190,6 +190,7 @@ class AlertPlayer {
     }
 
     updateConfig(config: Config) {
+        console.log('update config', config)
         this.config = config;
     }
 
@@ -269,16 +270,28 @@ class AlertPlayer {
         this.startPlaying();
         this.currentlyPlaying = item;
         const ttsMessage = this.cleanMessage(template(vars));
-        const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state) : undefined;
-        const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
-
-        const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
-        PubSub.publish('AlertPlayer-update', {duration});
-        const onEnd = () => {
+        try {
+            const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state) : undefined;
+            const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
+    
+            const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
+            PubSub.publish('AlertPlayer-update', {duration});
+            if (alert.visual) {
+                const headline = _.template(alert.visual?.headline || "")(vars);
+                const text = this.cleanMessage(_.template(alert.visual?.text || "")(vars));
+                PubSub.publish('WSSEND', {type: 'alert', data: {image: alert.visual?.element, headline, text, duration: duration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout}});
+            }
+            const onEnd = () => {
+                this.stopPlaying();
+                PubSub.publish('AlertPlayer-update');
+            }
+            this.playAudio(0.8, jingleAudio).then(() => this.playAudio(1.0, ttsAudio)).then(onEnd, onEnd);
+        } catch (err) {
+            console.error(err);
+        } finally {
             this.stopPlaying();
-            PubSub.publish('AlertPlayer-update');
         }
-        this.playAudio(0.8, jingleAudio).then(() => this.playAudio(1.0, ttsAudio)).then(onEnd, onEnd);
+
     }
 
     quequeLength(): number {

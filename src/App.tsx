@@ -13,6 +13,7 @@ import { generateGUID } from './commons/helper';
 import PubSub from 'pubsub-js';
 import { SystemMessageMainType } from "@/commons/message";
 import { theme } from '@/theme';
+import { AlertSystem } from '@/components/alerts/alertplayer';
 
 function load(): Config {
     return JSON.parse(localStorage.getItem('chatConfig') || JSON.stringify(DEFAULT_CONFIG)) as Config;
@@ -158,6 +159,7 @@ export default function App() {
         }
         localStorage.setItem('hehe-profile', profileName.toLowerCase());
         setProfile({...profile, config: {...DEFAULT_PROFILE.config, ...profile.config}});
+        AlertSystem.updateConfig(profile.config);
         return profile;
     }
 

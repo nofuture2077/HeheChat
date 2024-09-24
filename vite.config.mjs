@@ -5,6 +5,14 @@ import mkcert from 'vite-plugin-mkcert';
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      input: {
+        main: './index.html',
+        alert: './alert.html'
+      }
+    }
+  },
   plugins: [react(), tsconfigPaths(), mkcert(), VitePWA({ 
     registerType: 'autoUpdate',
       manifest: {
