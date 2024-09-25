@@ -26,11 +26,11 @@ function getImage(ref: string, channel: string) {
     return "";
 }
 
-function showAlert(alert: {text: string, headline: string, image: string, duration: number, channel: string}) {
+function showAlert(alert: {text: string, headline: string, image: string, duration: number, channel: string, position: string, layout: string}) {
     document!.getElementById('headline')!.innerHTML = toText(alert.headline);
     document!.getElementById('text')!.innerText = alert.text;
     document!.getElementById('image')!.setAttribute("src",  getImage(alert.image, alert.channel));
-
+    document!.getElementById('alert')!.className = (alert.position ? alert.position.split(' ') : []).concat(alert.layout ? alert.layout.split(' ') : []).join(' ');
     document!.getElementById('alert')!.style.visibility = 'visible';
     setTimeout(() => {
         document!.getElementById('alert')!.style.visibility = 'hidden';
@@ -54,7 +54,6 @@ function connectToServer(): Promise<WebSocket> {
             
             if (data.type === 'alert') {
                 showAlert(data.data);
-                console.log(data);
             }
         };
 
@@ -74,6 +73,6 @@ function connectToServer(): Promise<WebSocket> {
 }
 
 connectToServer().then(socket => {
-    const query = window.location.search.substring(1);
+    const query = window.location.hash.substring(1);
     socket.send(JSON.stringify({ type: 'sink', token: getQueryVariable(query, "token") }));
 });

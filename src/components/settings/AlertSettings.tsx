@@ -38,7 +38,7 @@ export function AlertSettings() {
     return (
         <Stack mt={30} mb={30} gap={30}>
             {sink ? (<>
-                <Text span inline key={'browser-source-label'}>Browsersource (visual only) <Anchor inline key={'browser-source-link'} href={import.meta.env.VITE_SINK_URL + "?token=" + sink} target="_blank"><IconLink /></Anchor></Text>
+                <Text span inline key={'browser-source-label'}>Browsersource (visual only) <Anchor inline key={'browser-source-link'} href={import.meta.env.VITE_SINK_URL + "#token=" + sink} target="_blank"><IconLink /></Anchor></Text>
                 
             </>) : null}
             <Fieldset legend="Play Alerts" variant="filled">
