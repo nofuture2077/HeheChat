@@ -43,7 +43,7 @@ export function ChatPage() {
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
     const [replyMsg, setReplyMsg] = useState<ChatMessage>();
-    const [chatInputOpened, chatInputHandler] = useDisclosure(false);
+    const [chatInputOpened, chatInputHandler] = useDisclosure(true);
     const loginContext = useContext(LoginContextContext);
     const [deletedMessages, setDeletedMessages] = useState<string[]>([]);
     const forceUpdate = useForceUpdate();
@@ -211,7 +211,7 @@ export function ChatPage() {
                     {drawer ? <drawer.component height="100vh" modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props} openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }} ></drawer.component> : null}
                 </Drawer>
                 {(drawerOpen || shouldScroll) ? null : (
-                    <Affix position={{ bottom: 35 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>
+                    <Affix position={{ bottom: 10 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>
                         <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'var(--mantine-color-skyblue-8)', to: 'var(--mantine-color-paleviolet-5)', deg: 55 }} style={{ borderRadius: 16 }}>New Messages</Button>
                     </Affix>
                 )}
@@ -222,8 +222,7 @@ export function ChatPage() {
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
             <AppShell.Footer >
-                {(config.chatEnabled && !drawerOpen && config.channels.length) ?
-                    (chatInputOpened ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : <Affix position={{ bottom: 30, right: 20 }}><ActionIcon variant='gradient' gradient={{ to: 'var(--mantine-color-paleviolet-5)', from: 'var(--mantine-color-skyblue-8)', deg: 270 }} size='48' radius='xl' onClick={() => {chatInputHandler.open(); setTimeout(scrollToBottom, 500)}}><IconMessage /></ActionIcon></Affix>) : null}
+                <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div>
             </AppShell.Footer>
         </AppShell>
     );
