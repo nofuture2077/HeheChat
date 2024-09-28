@@ -66,7 +66,7 @@ export function RenameProfileView(props: {
     const error = !props.profile.checkProfileName(profileName);
 
     return (
-        <Modal opened={true} onClose={props.close} withCloseButton={false}>
+        <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
             <Fieldset legend={'Rename Profile'}>
                 <TextInput label="Profilename" placeholder="" value={profileName} onChange={(ev) => setProfileName(ev.target.value)} error={profileName && error} />
                 <Group justify="flex-end" mt="md">

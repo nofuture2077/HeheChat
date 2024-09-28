@@ -34,7 +34,7 @@ export function TimeoutView(props: {
     const [duration, setDuration] = useState<number>(600);
 
     return (
-        <Modal opened={true} onClose={props.close} withCloseButton={false}>
+        <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
             <Fieldset legend={["Timeout", props.userName, "in", props.channelName].join(" ")}>
                 <Group justify="center">
                     <GradientSegmentedControl data={durations.map(x => ({ label: formatDuration(x * 1000), value: (x * 1000).toString() }))} value={(duration * 1000).toString()} setValue={(v: string) => { setDuration(parseInt(v) / 1000) }}></GradientSegmentedControl>
@@ -62,7 +62,7 @@ export function BanView(props: {
     const [reason, setReason] = useState("");
 
     return (
-        <Modal opened={true} onClose={props.close} withCloseButton={false}>
+        <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
             <Fieldset legend={["Ban", props.userName, "in", props.channelName].join(" ")}>
                 <TextInput label="Reason" placeholder="Optional: Why?" value={reason} onChange={(ev) => setReason(ev.target.value)} />
                 <Group justify="flex-end" mt="md">
@@ -89,7 +89,7 @@ export function RaidView(props: {
     const emotes = useContext(ChatEmotesContext);
 
     return (
-        <Modal opened={true} onClose={props.close} withCloseButton={false}>
+        <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
             <Fieldset legend={"Raid channel"}>
                 <Group justify="space-between" mt="md">
                     <Stack align="center" w="35%">
