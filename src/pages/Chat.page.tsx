@@ -71,7 +71,7 @@ export function ChatPage() {
     const deletedMessagesIndex = deletedMessages.reduce((obj: any, key: string) => { obj[key] = true; return obj }, {});
     const moderatedChannel = loginContext.moderatedChannels.reduce((obj: any, c: HelixModeratedChannel) => { obj[c.name] = true; return obj }, {});
 
-    const addMessage = (msg: HeheMessage, user: string) => {
+    const addMessage = (msg: HeheMessage, user: string, maxMessages: number) => {
         Storage.store(msg.target.substring(1), user, msg.date, msg.rawLine);
         if (config.ignoredUsers.indexOf(user) !== -1) {
             return;
@@ -79,7 +79,7 @@ export function ChatPage() {
         if (msg.id && messageIndex.has(msg.id)) {
             return;
         }
-        setChatMessages((prevMessages) => prevMessages.concat(msg).slice((shouldScroll && chatMessages.length % 2 == 1) ? (-1 * config.maxMessages) + (chatMessages.length % 2) : 0));
+        setChatMessages((prevMessages) => prevMessages.concat(msg).slice((prevMessages.length % 2) ? 0 : (-1 * maxMessages + 1)));
     }
 
     useEffect(() => {
@@ -94,9 +94,6 @@ export function ChatPage() {
         }
         config.loadShares();
 
-        const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
-            addMessage(parseMessage(data.message), data.username);
-        });
         const eventSub = PubSub.subscribe("WS-event", (msg, data: Event) => {
             if (config.playAlerts && config.receivedShares.includes(data.channel) && config.activatedShares.includes(data.channel)) {
                 AlertSystem.addEvent(data);
@@ -107,7 +104,6 @@ export function ChatPage() {
         });
 
         return () => {
-            PubSub.unsubscribe(msgSub);
             PubSub.unsubscribe(eventSub);
             PubSub.unsubscribe(modEventSub);
         }
@@ -118,6 +114,10 @@ export function ChatPage() {
             handle: async (channel, text, replyTo) => {
                 PubSub.publish('WSSEND', {type: 'sendMessage', channel, text, replyTo});
             }
+        });
+
+        const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
+            addMessage(parseMessage(data.message), data.username, config.maxMessages);
         });
 
         Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
@@ -154,13 +154,10 @@ export function ChatPage() {
         PubSub.publish("WSSEND", { type: "subscribe", state, channels: Object.fromEntries(config.channels.map(key => [key, true])) });
 
         return () => {
+            PubSub.unsubscribe(msgSub);
             config.off(chatHandler);
         };
-    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid]);
-
-    useEffect(() => {
-        forceUpdate();
-    }, [chatInputOpened]);
+    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages]);
 
     useDidUpdate(() => {
         setOnline(networkStatus.online);

@@ -1,4 +1,4 @@
-import { TagsInput, Switch, Stack, Text, Space, Fieldset } from '@mantine/core';
+import { TagsInput, Switch, Stack, Select, Fieldset } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
@@ -34,6 +34,10 @@ export function ChatSettings() {
 
             <Fieldset legend="Ignored Users" variant='filled'>
                 <TagsInput placeholder="" value={config.ignoredUsers} onChange={(users) => config.setIgnoredUsers(users.map(u => u.toLowerCase().substring(0, 25).trim()))}></TagsInput>
+            </Fieldset>
+
+            <Fieldset legend="Messages" variant='filled'>
+                 <Select label="Max Messages" data={['100', '200', '500']} value={config.maxMessages + ''} onChange={(value) => config.setMaxMessages(Number(value))} />
             </Fieldset>
 
             <Fieldset legend="Chat cosmetics" variant='filled'>

@@ -75,6 +75,7 @@ export default function App() {
 
     const setChannels = (value: string[]) => updateConfig('channels', value);
     const setIgnoredUsers = (value: string[]) => updateConfig('ignoredUsers', value);
+    const setMaxMessages = (value: number) => updateConfig('maxMessages', value);
     const setShowTimestamp = (value: boolean) => updateConfig('showTimestamp', value);
     const setShowProfilePicture = (value: boolean) => updateConfig('showProfilePicture', value);
     const setShowImportantBadges = (value: boolean) => updateConfig('showImportantBadges', value);
@@ -274,6 +275,7 @@ export default function App() {
         ...profile.config,
         setChannels,
         setIgnoredUsers,
+        setMaxMessages,
         setShowTimestamp,
         setShowProfilePicture,
         setShowImportantBadges,

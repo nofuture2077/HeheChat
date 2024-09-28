@@ -30,6 +30,7 @@ export type ConfigKey = keyof ConfigData;
 export interface Config extends ConfigData {
     setChannels: (channels: string[]) => void;
     setIgnoredUsers: (users: string[]) => void;
+    setMaxMessages: (value: number) => void,
     setShowTimestamp: (value: boolean) => void;
     setShowProfilePicture: (value: boolean) => void;
     setShowImportantBadges: (value: boolean) => void;
@@ -59,7 +60,7 @@ export const DEFAULT_CONFIG: Config = {
     chatChannel: undefined,
     chatEnabled: true,
     ignoredUsers: [],
-    maxMessages: 500,
+    maxMessages: 200,
     showTimestamp: false,
     showProfilePicture: true,
     showImportantBadges: true,
@@ -77,6 +78,7 @@ export const DEFAULT_CONFIG: Config = {
     deactivatedAlerts: {},
     setChannels: () => {},
     setIgnoredUsers: () => {},
+    setMaxMessages: (value: number) => {},
     setShowTimestamp: (value: boolean) => {},
     setShowProfilePicture: (value: boolean) => {},
     setShowImportantBadges: (value: boolean) => {},

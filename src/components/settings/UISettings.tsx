@@ -1,4 +1,4 @@
-import { Slider, Stack, Text, Space, TextInput, Button, ActionIcon, Modal, Fieldset, Group } from '@mantine/core';
+import { Slider, Stack, TextInput, Button, ActionIcon, Modal, Fieldset, Group } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle } from '../colorscheme/colorscheme';
 import { useContext, useState } from 'react';
