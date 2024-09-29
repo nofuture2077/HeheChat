@@ -46,7 +46,9 @@ export function ChatInput(props: { close: () => void, replyToMsg?: ChatMessage, 
                     rightSectionWidth={42}
                     onKeyDown={event => {
                         if (event.key == "Enter") {
-                            sendMessage(inputText, false)
+                            sendMessage(inputText, false);
+                            event.preventDefault();
+                            return false;
                         }
                     }}
                     leftSection={props.replyToMsg ?
