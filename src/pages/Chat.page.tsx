@@ -46,6 +46,7 @@ export function ChatPage() {
     const [chatInputOpened, chatInputHandler] = useDisclosure(true);
     const loginContext = useContext(LoginContextContext);
     const [deletedMessages, setDeletedMessages] = useState<string[]>([]);
+    const [bannedUser, setBannedUser] = useState<string[]>([]);
     const forceUpdate = useForceUpdate();
     const emotes = useContext(ChatEmotesContext);
     const [online, setOnline] = useState(true);
@@ -100,6 +101,10 @@ export function ChatPage() {
             }
         });
         const modEventSub = PubSub.subscribe("WS-modevent", (msg, data) => {
+            if (data.type === 'delete') {
+                const msgId = data.text;
+                setDeletedMessages((deletedMessages) => deletedMessages.concat(msgId))
+            }
             console.log("modEvent", data);
         });
 

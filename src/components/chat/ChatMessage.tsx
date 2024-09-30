@@ -107,8 +107,8 @@ export function ChatMessageComp(props: ChatMessageProps) {
 
     return (<div className={msgClasses.join(' ')}>
         {badge}
-        <span className={classes.channel}>{(config.showProfilePicture && !props.hideReply) ? emotes.getLogo(channel): ''}</span>
-        <span className={classes.time}>{config.showTimestamp ? formatTime(props.msg.date) : ''}</span>
+        {(config.showProfilePicture && !props.hideReply) ? <span key='channel' className={classes.channel}>{emotes.getLogo(channel)}</span>: null}
+        {config.showTimestamp ? <span  key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
         <span className={classes.badges}>{Array.from(props.msg.userInfo.badges).map((key, index) =>  getBadge(config, emotes, channel, key.toString(), index.toString()))}</span>
         <span className={classes.username} style={{color: props.msg.userInfo.color}}>{props.msg.userInfo.displayName}</span>
         <span>: </span>
