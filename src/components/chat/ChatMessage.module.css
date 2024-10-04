@@ -8,7 +8,7 @@
     font-weight: 500;
 
     &:nth-child(odd) {
-        background-color: #2e2e2e;
+        background-color: light-dark(#d8d8d8, #e2e2e2);;
     }
 }
 
