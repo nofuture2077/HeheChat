@@ -8,7 +8,7 @@
     font-weight: 500;
 
     &:nth-child(odd) {
-        background-color: light-dark(#d8d8d8, #e2e2e2);;
+        background-color: light-dark(#e2e2e2, rgb(30, 30, 30));;
     }
 }
 
@@ -23,6 +23,10 @@
         right: 10px;
         top: -4px;
     }
+}
+
+.highlight_name {
+    background-color: light-dark(#9d9cbc, #383754);
 }
 
 .highlight {

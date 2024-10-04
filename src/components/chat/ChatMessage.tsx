@@ -36,7 +36,7 @@ const wordMapper = (word: string, channel: string, partIndex: number, index: num
     if (word.startsWith('http://') || word.startsWith('https://')) {
         return <a href={word} key={partIndex + "_" + index} target='_blank'>{word}</a>;
     } else if (word.toLocaleLowerCase().indexOf(login.user?.name || ' ') > -1) {
-        return <Text fw={700} key={partIndex + "_" + index} bg='primary' inline span>{word}</Text>
+        return <Text fw={700} key={partIndex + "_" + index} className={classes.highlight_name} inline span>{word}</Text>
     } else if (word.startsWith('@')) {
         return <b key={partIndex + "_" + index}>{word}</b>
     }
