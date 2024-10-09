@@ -15,6 +15,7 @@ export function ShareSettings() {
     const config = useContext(ConfigContext);
     const [shares, setShares] = useState<string[]>(config.shares);
     const [elevenLabsApiKey, setElevenLabsApiKey] = useState<string>("");
+    const [streamelementsJWT, setStreamelementsJWT] = useState<string>("");
     const [pallyggApiKey, setPallyggApiKey] = useState<string>("");
     const [pallyggChannel, setPallyggChannel] = useState<string>("");
     const [editors, setEditors] = useState<EditorData[]>([]);
@@ -30,12 +31,21 @@ export function ShareSettings() {
         fetch(import.meta.env.VITE_BACKEND_URL + "/elevenlabs/get?state=" + state).then(res => res.json()).then((data) => {
             setElevenLabsApiKey(data.apikey || '');
         });
+
+        fetch(import.meta.env.VITE_BACKEND_URL + "/streamelements/get?state=" + state).then(res => res.json()).then((data) => {
+            setStreamelementsJWT(data.jwt || '');
+        });
     }, []);
 
     const updatePallyGG = (apikey: string, channel: string) => {
         fetch(import.meta.env.VITE_BACKEND_URL + "/pallygg/set?state=" + state + "&apikey=" + apikey + "&channel=" + channel);
         setPallyggApiKey(apikey || '');
         setPallyggChannel(channel || '');
+    };
+
+    const updateStreamelements = (jwt: string) => {
+        fetch(import.meta.env.VITE_BACKEND_URL + "/streamelements/set?state=" + state + "&jwt=" + jwt);
+        setStreamelementsJWT(jwt || '');
     };
 
     const updateElevenLabs = (apikey: string) => {
@@ -101,6 +111,10 @@ export function ShareSettings() {
 
             <Space h="xs" />
             <ActionIcon color='primary' onClick={() => createEditor("Share")}><IconPlus /></ActionIcon>
+        </Fieldset>
+
+        <Fieldset legend="Streamelements Config" variant="filled">
+            <TextInput label="JWT" placeholder="" value={streamelementsJWT} onChange={(ev) => updateStreamelements(ev.target.value)} />
         </Fieldset>
 
         <Fieldset legend="Pally.gg Config" variant="filled">
