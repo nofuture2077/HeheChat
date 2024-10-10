@@ -82,10 +82,6 @@
     font-weight: bold;
 }
 
-.msg:not(.hideReply):hover {
-    background-color: light-dark(var(--mantine-color-gray-5), var(--mantine-color-grape-9));
-}
-
 .actions {
     display: none;
     position: absolute;
