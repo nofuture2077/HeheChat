@@ -34,7 +34,7 @@ export default defineConfig({
         ]
       }
   })],
-  base: '#{import.meta.env.VITE_BUILDNUMBER}',
+  base: '#{import.meta.env.VITE_SLUG}',
   test: {
     globals: true,
     environment: 'jsdom',

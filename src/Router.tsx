@@ -10,7 +10,7 @@ const router = createBrowserRouter([
     element: <ChatPage />,
   }
 ], {
-  basename: '#{import.meta.env.VITE_BUILDNUMBER}'
+  basename: '#{import.meta.env.VITE_SLUG}'
 });
 
 export function Router() {
