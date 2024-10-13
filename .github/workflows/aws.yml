@@ -1,0 +1,39 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Verwende die gewünschte Node.js-Version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Transfer files to AWS
+        env:
+          AWS_SSH_HOST: ${{ secrets.AWS_SSH_HOST }}
+          AWS_SSH_USER: ${{ secrets.AWS_SSH_USER }}
+          AWS_SSH_KEY: ${{ secrets.AWS_SSH_KEY }}
+          AWS_SSH_PATH: '/home/ec2-user/hehechat-client'
+        run: |
+          mkdir -p ~/.ssh
+          echo "${AWS_SSH_KEY}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${AWS_SSH_HOST}" >> ~/.ssh/known_hosts
+          # Dateien mit rsync übertragen
+          rsync -avz --delete out/ "${AWS_SSH_USER}@${AWS_SSH_HOST}:${AWS_SSH_PATH}"
