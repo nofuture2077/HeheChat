@@ -36,4 +36,4 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${AWS_SSH_HOST}" >> ~/.ssh/known_hosts
           # Dateien mit rsync übertragen
-          rsync -avz --delete out/ "${AWS_SSH_USER}@${AWS_SSH_HOST}:${AWS_SSH_PATH}"
+          rsync -avz --delete ./dist "${AWS_SSH_USER}@${AWS_SSH_HOST}:${AWS_SSH_PATH}"
