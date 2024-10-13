@@ -34,7 +34,7 @@ export default defineConfig({
         ]
       }
   })],
-  base: '/HeheChat/',
+  base: '#{import.meta.env.VITE_BUILDNUMBER}',
   test: {
     globals: true,
     environment: 'jsdom',

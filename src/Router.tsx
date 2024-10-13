@@ -10,7 +10,7 @@ const router = createBrowserRouter([
     element: <ChatPage />,
   }
 ], {
-  basename: '/HeheChat/'
+  basename: '#{import.meta.env.VITE_BUILDNUMBER}'
 });
 
 export function Router() {
