@@ -13,6 +13,7 @@ import { generateGUID } from './commons/helper';
 import PubSub from 'pubsub-js';
 import { SystemMessageMainType } from "@/commons/message";
 import { theme } from '@/theme';
+import { AlertSystem } from '@/components/alerts/alertplayer';
 import _ from 'underscore';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -109,6 +110,7 @@ export default function App() {
             obj.guid === profile.guid ? profile : obj
         );
         setProfiles(updatedArray);
+        AlertSystem.updateConfig(profile.config);
     }, [profile])
 
     const updateConfig = (key: ConfigKey, value: any) => {
