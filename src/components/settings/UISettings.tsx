@@ -16,7 +16,7 @@ export function UISettings(props: UISettingProperties) {
     const profile = useContext(ProfileContext);
     const [confirmDeleteOpen, confirmDeleteHandler] = useDisclosure(false);
     const [renameOpen, renameHandler] = useDisclosure(false);
-    const marks = [11, 12, 13, 14, 15, 16, 17, 18].map(x => ({ value: x, label: x + "px" }));
+    const marks = [10, 14, 18, 22, 26].map(x => ({ value: x, label: x + "px" }));
     return (
         <Stack mt={30} mb={30} gap={30}>
             <Fieldset legend="Profile" variant='filled'>
@@ -33,7 +33,7 @@ export function UISettings(props: UISettingProperties) {
             </Fieldset>
 
             <Fieldset legend="Font Size" variant='filled'>
-                <Slider w="calc(100% - 20px)" m="10" value={config.fontSize} onChange={config.setFontSize} min={11} max={18} label={(value) => `${value} px`} marks={marks} />
+                <Slider w="calc(100% - 20px)" m="10" value={config.fontSize} onChange={config.setFontSize} min={10} max={26} label={(value) => `${value} px`} marks={marks} />
             </Fieldset>
 
             <Fieldset legend="Color Mode" variant='filled'>
