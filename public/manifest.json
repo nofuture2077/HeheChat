@@ -3,6 +3,9 @@
     "short_name": "Hehe",
     "description": "Twitchs finest chat app",
     "theme_color": "#480356",
+    "background_color": "#242424",
+    "display": "standalone",
+    "start_url": "/",
     "icons": [
       {
         "src": "android-chrome-192x192.png",
