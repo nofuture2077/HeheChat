@@ -7,7 +7,6 @@ import { IconPlus, IconX } from '@tabler/icons-react'
 import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from '@hello-pangea/dnd';
 import classes from './profilebar.module.css'
 import { ChatEmotes } from "@/commons/emotes";
-import { storeProfile } from "@/App";
 import { SettingsTab } from "@/components/settings/settings";
 import { OverlayDrawer } from "@/pages/Chat.page";
 
@@ -39,11 +38,7 @@ export function ProfileBar(props: ProfileBarProps) {
         const [reorderedItem] = items.splice(result.source.index, 1);
         items.splice(result.destination.index, 0, reorderedItem);
 
-        items.forEach((profile, index) => {
-            profile.index = index;
-            storeProfile(profile);
-        });
-
+        activeProfile.setProfiles(items);
         setProfiles(items);
     }
 
@@ -88,7 +83,7 @@ function ProfileComp(provided: DraggableProvided, profile: Profile, activeProfil
     const channels = profile.config.channels.slice(0, profile.config.channels.length === showChannels + 1 ? showChannels + 1 : showChannels);
     const more = profile.config.channels.length - channels.length;
     const isActive = profile.name === activeProfile.name;
-    return (<Paper ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={[classes.profile, isActive ? classes.active : undefined].join(' ')} key={'profile-' + profile.guid} shadow="xs" pt="sm" pb="xl" onClick={() => { activeProfile.switchProfile(profile.name); close(); } }>
+    return (<Paper ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={[classes.profile, isActive ? classes.active : undefined].join(' ')} key={'profile-' + profile.guid} shadow="xs" pt="sm" pb="xl" onClick={() => { activeProfile.switchProfile(profile.guid); close(); } }>
         <Text m='auto' ta="center">{profile.name}</Text>
         <AvatarGroup spacing='md' style={{ justifyContent: 'center' }}>
             {channels.map((channel: string, i: number) => <Avatar src={emotes.getLogo(channel)?.props.src} key={channel + i} style={{ zIndex: 10 - i }}></Avatar>)}

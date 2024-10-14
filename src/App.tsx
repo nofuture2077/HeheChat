@@ -6,30 +6,50 @@ import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext }
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from '@/commons/login'
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
-import { Config, ConfigKey, DEFAULT_CONFIG, MessageHandler } from './commons/config';
+import { ConfigKey, MessageHandler } from './commons/config';
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { generateGUID } from './commons/helper';
 import PubSub from 'pubsub-js';
 import { SystemMessageMainType } from "@/commons/message";
 import { theme } from '@/theme';
-import { AlertSystem } from '@/components/alerts/alertplayer';
+import _ from 'underscore';
 
-function load(): Config {
-    return JSON.parse(localStorage.getItem('chatConfig') || JSON.stringify(DEFAULT_CONFIG)) as Config;
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+async function storeProfile(profile: Profile): Promise<any> {
+    const token = localStorage.getItem('hehe-token_state') || '';
+    return fetch(BASE_URL + "/profile?" + [["token", token].join("="), ["guid", profile.guid].join("=")].join("&"), {
+        method: 'PUT',
+        body: JSON.stringify(profile)
+    });
 }
 
-export function storeProfile(profile: Profile) {
-    localStorage.setItem(['profile', profile.name.toLowerCase()].join('-'), JSON.stringify(profile));
+async function loadProfileFromServer(guid: String): Promise<Profile> {
+    const token = localStorage.getItem('hehe-token_state') || '';
+    return fetch(BASE_URL + "/profile?" + [["token", token].join("="), ["guid", guid].join("=")].join("&")).then(res => res.json());
 }
 
-function migrateToProfile() {
-    const config = load();
-    if (!localStorage.getItem('hehe-profile')) {
-        localStorage.setItem('hehe-profile', 'default');
-        localStorage.setItem('profile-default', JSON.stringify({ name: 'default', config }));
-        localStorage.removeItem('chatConfig');
-    }
+async function deleteProfileFromServer(guid: String): Promise<any> {
+    const token = localStorage.getItem('hehe-token_state') || '';
+    return fetch(BASE_URL + "/profile?" + [["token", token].join("="), ["guid", guid].join("=")].join("&"), {method: 'DELETE'});
+}
+
+async function loadProfilesFromServer(): Promise<{profiles: Profile[]}> {
+    const token = localStorage.getItem('hehe-token_state') || '';
+    return fetch(BASE_URL + "/profile/list?" + [["token", token].join("=")].join("&")).then(res => res.json());
+}
+
+async function loadProfiles(): Promise<{active?: string, profiles: string}> {
+    const token = localStorage.getItem('hehe-token_state') || '';
+    return fetch(BASE_URL + "/profiles/list?" + [["token", token].join("=")].join("&")).then(res => res.json());
+}
+
+async function saveProfiles(active: string, profiles: string[]): Promise<any> {
+    const token = localStorage.getItem('hehe-token_state') || '';
+    return fetch(BASE_URL + "/profiles/list?" + [["token", token].join("="), ["active", active].join("="), ["profiles", profiles.join(',')].join("=")].join("&"), {
+        method: 'PUT'
+    });
 }
 
 const onMessageHandlers: MessageHandler[] = [];
@@ -38,13 +58,26 @@ var onMessageHandlerIndex = 0;
 export default function App() {
     const [loginContext, setLoginContext] = useState<LoginContext>(DEFAULT_LOGIN_CONTEXT);
     const [chatEmotes, setChatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
-    const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE);
+    const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE, guid: generateGUID()});
+    const [profiles, setProfiles] = useState<Profile[]>([]);
     const workerRef = useRef<Worker>();
 
     useEffect(() => {
-        migrateToProfile();
-        const profileName = localStorage.getItem('hehe-profile')!;
-        loadProfile(profileName);
+        loadProfiles().then(async (data) => {
+            if (data.active) {
+                const profileData = await loadProfileFromServer(data.active);
+                setProfile(profileData);
+                const order = data.profiles.split(',');
+                loadProfilesFromServer().then(r => {
+                    setProfiles(_.sortBy(r.profiles, item => order.indexOf(item.guid)) || [profileData]);
+                });
+            } else {
+                storeProfile(profile).then(() => {
+                    setProfile(profile);
+                    setProfiles([profile]);
+                });
+            }
+        }, (err) => console.error(err));
 
         workerRef.current = new Worker(new URL('./components/webworker/webworker.ts', import.meta.url), { type: 'module' });
 
@@ -64,6 +97,19 @@ export default function App() {
             workerRef.current?.postMessage(stopMessage);
         }
     }, []);
+
+    useEffect(() => {
+        if (profiles.length) {
+            saveProfiles(profile.guid, profiles.map(p => p.guid));
+        }
+    }, [profile, profiles]);
+
+    useEffect(() => {
+        const updatedArray = profiles.map(obj =>
+            obj.guid === profile.guid ? profile : obj
+        );
+        setProfiles(updatedArray);
+    }, [profile])
 
     const updateConfig = (key: ConfigKey, value: any) => {
         setProfile((profile) => {
@@ -148,36 +194,8 @@ export default function App() {
         });
     };
 
-    const loadProfile = (profileName: string): Profile | undefined => {
-        const profileData = localStorage.getItem(['profile', profileName.toLowerCase()].join('-'));
-        if (!profileData) {
-            return;
-        }
-        const profile = JSON.parse(profileData) as Profile;
-        if (!profile.guid) {
-            profile.guid = generateGUID();
-            storeProfile(profile);
-        }
-        localStorage.setItem('hehe-profile', profileName.toLowerCase());
-        setProfile({...profile, config: {...DEFAULT_PROFILE.config, ...profile.config}});
-        AlertSystem.updateConfig(profile.config);
-        return profile;
-    }
-
     const listProfiles = () => {
-        const profiles: Profile[] = [];
-        for (var i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key?.startsWith('profile-')) {
-                const profile = JSON.parse(localStorage.getItem(key) || '{}');
-                if (!profile.guid) {
-                    profile.guid = generateGUID();
-                    storeProfile(profile);
-                }
-                profiles.push(profile);
-            }
-        }
-        return profiles.sort((a, b) => a.index - b.index);
+        return profiles;
     }
 
     const checkProfileName = (name: string) => {
@@ -187,7 +205,6 @@ export default function App() {
         if (name.length > 12) {
             return false;
         }
-        const profiles = listProfiles();
         for (var i = 0; i < profiles.length;i++) {
             if (name.toLowerCase() === profile.name.toLowerCase()) {
                 return false;
@@ -197,39 +214,33 @@ export default function App() {
     }
 
     const setProfileName = (name: string) => {
-        const check = checkProfileName(name);
-        if (!check) {
-            return false;
-        }
-        const oldName = profile.name;
         setProfile((profile) => {
             const newProfile = { ...profile, name };
             storeProfile(newProfile);
             return newProfile;
         });
-        switchProfile(name);
-        localStorage.removeItem(['profile', oldName.toLowerCase()].join('-'));
-        return true;
     };
 
-    const switchProfile = (name: string) => loadProfile(name);
+    const switchProfile = (guid: string) => {
+        const p = profiles.find(p => p.guid === guid);
+        if (p) {
+            setProfile(p);
+        }
+    };
 
     const createProfile = (name: string) => {
-        localStorage.setItem(['profile', name.toLowerCase()].join('-'), JSON.stringify({...DEFAULT_PROFILE, name, guid: generateGUID()}));
-        switchProfile(name);
+        const guid = generateGUID();
+        const newProfile = {...DEFAULT_PROFILE, name, guid};
+        storeProfile(newProfile).then(() => {
+            setProfile(newProfile);
+        });
+        setProfiles(profiles => profiles.concat(newProfile));
     };
 
-    const deleteProfile = (profileName: string) => {
-        if (profile.name.toLowerCase() === profileName.toLowerCase()) {
-            const profiles = listProfiles();
-            const newProfile = profiles.find(p => p.name.toLowerCase() !== profileName.toLowerCase());
-            if (newProfile) {
-                switchProfile(newProfile.name);
-                localStorage.removeItem(['profile', profileName.toLowerCase()].join('-'));
-            }
-        } else {
-            localStorage.removeItem(['profile', profileName.toLowerCase()].join('-'));
-        }
+    const deleteProfile = (guid: string) => {
+        deleteProfileFromServer(guid);
+        setProfiles(profiles => profiles.filter(p => p.guid !== guid));
+        setProfile(profiles[0])
     }
 
     const setSystemMessageInChat = (type: SystemMessageMainType, val: boolean) => {
@@ -249,21 +260,18 @@ export default function App() {
     }
 
     const loadReceivedShares = async () => {
-        const BASE_URL = import.meta.env.VITE_BACKEND_URL;
         const share = localStorage.getItem('hehe-token_state') || '';
         const data: {shares: string[]} = await fetch(BASE_URL + "/shares?state=" + share).then(res => res.json());
         updateConfig('receivedShares', data.shares);
     }
 
     const loadShares = async () => {
-        const BASE_URL = import.meta.env.VITE_BACKEND_URL;
         const share = localStorage.getItem('hehe-token_state') || '';
         const data: {shares: string[]} = await fetch(BASE_URL + "/shares/get?state=" + share).then(res => res.json());
         updateConfig('shares', data.shares);
     }
 
     const setShares = async (value: string[]) => {
-        const BASE_URL = import.meta.env.VITE_BACKEND_URL;
         const share = localStorage.getItem('hehe-token_state') || '';
         const data: {shares: string[]} = await fetch(BASE_URL + "/shares/set?state=" + share + "&channels=" + value.join(',')).then(res => res.json());
         updateConfig('shares', data.shares);
@@ -317,7 +325,8 @@ export default function App() {
         setProfileName,
         createProfile,
         switchProfile,
-        deleteProfile
+        deleteProfile,
+        setProfiles
     }
 
     return (

@@ -9,8 +9,9 @@ export type Profile = {
     checkProfileName: (name: string) => boolean;
     setProfileName: (name: string) => boolean;
     createProfile: (name: string) => void;
-    switchProfile: (name: string) => void;
-    deleteProfile: (name: string) => void;
+    switchProfile: (guid: string) => void;
+    deleteProfile: (guid: string) => void;
+    setProfiles: (profiles: Profile[]) => void;
 }
 
 export const DEFAULT_PROFILE: Profile = {
@@ -22,6 +23,7 @@ export const DEFAULT_PROFILE: Profile = {
     checkProfileName: (name: string) => false,
     setProfileName: (name: string) => false,
     createProfile: (name: string) => {},
-    switchProfile: (name: string) => {},
-    deleteProfile: (name: string) => {}
+    switchProfile: (guid: string) => {},
+    deleteProfile: (guid: string) => {},
+    setProfiles: (profiles: Profile[]) => {}
 }

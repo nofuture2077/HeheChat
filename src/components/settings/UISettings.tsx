@@ -27,7 +27,7 @@ export function UISettings(props: UISettingProperties) {
                     </ActionIcon>
                 }></TextInput>
                 {renameOpen ? <RenameProfileView profile={profile} close={renameHandler.close} /> : null}
-                {confirmDeleteOpen ? <ConfirmProfileDeleteView title='Are you sure to delete Profile?' close={confirmDeleteHandler.close} confirm={() => { profile.deleteProfile(profile.name); props.close(); props.openProfileBar() }} /> : null}
+                {confirmDeleteOpen ? <ConfirmProfileDeleteView title='Are you sure to delete Profile?' close={confirmDeleteHandler.close} confirm={() => { profile.deleteProfile(profile.guid); props.close(); props.openProfileBar() }} /> : null}
                 <Button variant="filled" color="pink" leftSection={<IconTrash size={14} />} onClick={confirmDeleteHandler.open}>Delete</Button>
                 </Stack>
             </Fieldset>
