@@ -165,7 +165,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         if (DEFAULT_CHAT_EMOTES.emotes.has(channel) && userData.get(channel) && userData.get(channel).user) {
             DEFAULT_CHAT_EMOTES.emotes.get(channel).user = userData.get(channel).user;
         } else {
-            DEFAULT_CHAT_EMOTES.emotes.set(channel, {user: userData.get(channel).user});
+            DEFAULT_CHAT_EMOTES.emotes.set(channel, {user: userData.get(channel) ? userData.get(channel).user : undefined});
         }
     },
     getBadge: (channel: string, badgeData: string, key: string) => {
