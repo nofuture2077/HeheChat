@@ -7,7 +7,7 @@ export type Profile = {
     index: number;
     listProfiles: () => Profile[];
     checkProfileName: (name: string) => boolean;
-    setProfileName: (name: string) => boolean;
+    setProfileName: (name: string) => void;
     createProfile: (name: string) => void;
     switchProfile: (guid: string) => void;
     deleteProfile: (guid: string) => void;
@@ -21,7 +21,7 @@ export const DEFAULT_PROFILE: Profile = {
     index: 0,
     listProfiles: () => [],
     checkProfileName: (name: string) => false,
-    setProfileName: (name: string) => false,
+    setProfileName: (name: string) => {},
     createProfile: (name: string) => {},
     switchProfile: (guid: string) => {},
     deleteProfile: (guid: string) => {},
