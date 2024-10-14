@@ -1,21 +1,10 @@
-import { Paper, Flex, Image, Stack, Text, Badge, Group, Box, Skeleton, BackgroundImage } from '@mantine/core';
+import { Paper, Stack, Text, Badge, Group, Box, Skeleton, BackgroundImage, Anchor } from '@mantine/core';
 import { HelixStream } from '@twurple/api';
 import classes from './streamcard.module.css'
-import { Link } from 'react-router-dom';
-
-const onClickOverrideLink = (stream: HelixStream, onClick?: (stream: HelixStream) => void) => {
-    return (ev: any) => {
-        if (onClick) {
-            onClick(stream);
-            ev.preventDefault();
-            return false;
-        }
-    }
-}
 
 export function StreamCard(props: { stream: HelixStream, onClick?: (stream: HelixStream) => void }) {
     const stream = props.stream;
-    return (<Link to={"https://twitch.tv/" + stream.userName} onClick={onClickOverrideLink(stream, props.onClick)} target='blank' className={classes.link}>
+    return (<Anchor href={"https://twitch.tv/" + stream.userName} target='blank' className={classes.link}>
         <Paper shadow="sm" radius="md" withBorder>
             <Box>
                 <BackgroundImage src={stream.getThumbnailUrl(320, 180)} radius="sm">
@@ -32,7 +21,7 @@ export function StreamCard(props: { stream: HelixStream, onClick?: (stream: Heli
                 </BackgroundImage>
             </Box>
         </Paper>
-    </Link>);
+    </Anchor>);
 }
 
 export function StreamCardPlaceholder(props: {}) {
