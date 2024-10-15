@@ -50,9 +50,9 @@
     opacity: 0.4;
 }
 .msg .channel img {
-    height: 1.3rem;
+    height: 1.5em;
     vertical-align: middle;
-    border-radius: 16px;
+    border-radius: 50%;
 }
 
 .username {
@@ -71,7 +71,7 @@
 .badges img {
     vertical-align: middle;
     margin: 0px 2px;
-    height: 1.3rem;
+    height: 1.5em;
  }
 
 .text img {
