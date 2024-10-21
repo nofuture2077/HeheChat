@@ -133,6 +133,7 @@ export default function App() {
     const setFontSize = (value: number) => updateConfig('fontSize', value);
     const setModToolsEnabled = (value: boolean) => updateConfig('modToolsEnabled', value);
     const setPlayAlerts = (value: boolean) => updateConfig('playAlerts', value);
+    const setShowVideo = (value: boolean) => updateConfig('showVideo', value);
     const setRaidTargets = (value: string[]) => updateConfig('raidTargets', value);
     const setChatEnabled = (value: boolean) => updateConfig('chatEnabled', value);
     const getChatChannel = () => {
@@ -294,6 +295,7 @@ export default function App() {
         setShowOtherBadges,
         setChatEnabled,
         setChatChannel,
+        setShowVideo,
         getChatChannel,
         setFontSize,
         setModToolsEnabled,

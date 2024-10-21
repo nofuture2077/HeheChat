@@ -4,6 +4,7 @@ export type MessageHandler = {id?: number, handle: (channel: string, text: strin
 
 export interface ConfigData {
     channels: string[];
+    showVideo: boolean;
     chatChannel?: string;
     chatEnabled: boolean;
     ignoredUsers: string[];
@@ -53,10 +54,12 @@ export interface Config extends ConfigData {
     setShares: (val: string[]) => void;
     loadShares: () => void;
     setDeactivatedAlerts: (id: string, val: boolean) => void;
+    setShowVideo: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
     channels: [],
+    showVideo: false,
     chatChannel: undefined,
     chatEnabled: true,
     ignoredUsers: [],
@@ -99,6 +102,7 @@ export const DEFAULT_CONFIG: Config = {
     getChatChannel: () => { return undefined; },
     setChatChannel: (channel: string) => {},
     setChatEnabled: (val: boolean) => {},
+    setShowVideo: (val: boolean) => {},
     onMessage: (handler: MessageHandler) => ({handle: () => {}}),
     off: (handler: MessageHandler) => {},
     fireMessage: (channel: string, text: string, replyTo?: string) => {},
