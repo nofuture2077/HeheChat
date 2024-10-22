@@ -78,10 +78,24 @@ export const formatDuration = (duration: number) => {
     return shortEnglishHumanizer(duration, { largest: 1 });
 }
 
+const formatFunctions: { [key: string]: (value: any) => string } = {
+    whole: (value: number) => Number(value).toFixed(0),
+    decimal: (value: number) => Number(value).toFixed(2),
+    uppercase: (value: string) => value.toUpperCase(),
+    lowercase: (value: string) => value.toLowerCase(),
+    duration: (value: string) => formatDuration(Number(value) * 1000),
+};
 
 export function formatString(template: string, args: any[]): string {
-    return template.replace(/\$(\d+)/g, (_, index) => args[index] || '');
+    return template.replace(/\$(\d+)(?::(\w+))?/g, (_, index, formatFunction) => {
+        const value = args[parseInt(index, 10)] || '';
+        if (formatFunction && formatFunctions[formatFunction]) {
+            return formatFunctions[formatFunction](value);
+        }
+        return value.toString();
+    });
 }
+
 
 export function replacer(key: string, value: any) {
     if (value instanceof Map) {

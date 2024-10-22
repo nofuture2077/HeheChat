@@ -25,20 +25,20 @@ export interface EventDrawerViewProperties {
 }
 
 const messages: Record<EventType, string> = {
-    'raid': 'Raid with $2 viewers',
-    'sub_1000': 'Sub for $2 months',
-    'sub_2000': 'Sub with T2 for $2 months',
-    'sub_3000': 'Sub with T3 for $2 months',
-    'subgift_1000': 'Gifted $2 subs',
-    'subgift_2000': 'Gifted $2 Tier 2 subs',
-    'subgift_3000': 'Gifted $2 Tier 3 subs',
+    'raid': 'Raid with $2:whole viewers',
+    'sub_1000': 'Sub for $2:whole months',
+    'sub_2000': 'Sub with T2 for $2:whole months',
+    'sub_3000': 'Sub with T3 for $2:whole months',
+    'subgift_1000': 'Gifted $2:whole subs',
+    'subgift_2000': 'Gifted $2:whole Tier 2 subs',
+    'subgift_3000': 'Gifted $2:whole Tier 3 subs',
     'subgiftb_1000': 'Gifted $3 a sub',
     'subgiftb_2000': 'Gifted $3 a Tier 2 sub',
     'subgiftb_3000': 'Gifted $3 a Tier 3 sub',
-    'sub_Prime': 'Sub with prime for $2 months',
+    'sub_Prime': 'Sub with prime for $2:whole months',
     'follow': 'Just followed',
-    'cheer': 'Cheered $2 bits',
-    'donation': "Donated $2 $3"
+    'cheer': 'Cheered $2:whole bits',
+    'donation': "Donated $2:decimal $3"
 }
 
 const icons: Record<EventType, ReactElementLike> = {
