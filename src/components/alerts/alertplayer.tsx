@@ -255,7 +255,7 @@ class AlertPlayer {
         };
         
         const template = _.template(alert.audio?.tts?.text || "");
-        const vars = {
+        const vars:any = {
             username: item.username,
             usernameTo: item.usernameTo,
             amount: item.amount,
@@ -266,8 +266,12 @@ class AlertPlayer {
         if (vars.text && vars.text.startsWith('donation')) {
             vars.text = vars.text.split('***').slice(-1)[0];
         } else {
-            vars.amount?.toFixed(0);
-            vars.amount2?.toFixed(0);
+            if (vars.amount) {
+                vars.amount = Number(vars.amount).toFixed(0);
+            }
+            if (vars.amount2) {
+                vars.amount2 = Number(vars.amount2).toFixed(0);
+            }
         }
         const state = localStorage.getItem('hehe-token_state') || '';
         this.startPlaying();
