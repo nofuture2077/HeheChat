@@ -295,7 +295,6 @@ class AlertPlayer {
             this.playAudio(0.8, jingleAudio).then(() => this.playAudio(1.0, ttsAudio)).then(onEnd, onEnd);
         } catch (err) {
             console.error(err);
-        } finally {
             this.stopPlaying();
         }
 
