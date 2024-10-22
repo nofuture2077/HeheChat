@@ -265,6 +265,9 @@ class AlertPlayer {
 
         if (vars.text && vars.text.startsWith('donation')) {
             vars.text = vars.text.split('***').slice(-1)[0];
+        } else {
+            vars.amount?.toFixed(0);
+            vars.amount2?.toFixed(0);
         }
         const state = localStorage.getItem('hehe-token_state') || '';
         this.startPlaying();
