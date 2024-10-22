@@ -12,6 +12,7 @@ import { ReactElementLike } from 'prop-types';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { OverlayDrawer } from '@/pages/Chat.page';
 import { AlertControl } from './alertcontrol';
+import { SystemMessageMainType } from "@/commons/message";
 
 export const EventDrawer: OverlayDrawer = {
     name: 'events',
@@ -76,7 +77,12 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
     const [load, setLoad] = useState(true);
 
     useEffect(() => {
-        EventStorage?.load(config.channels).then((events) => {
+        const ignored: string[] = Object.keys(config.systemMessageInChat).filter(
+            // @ts-ignore
+            (key: string) => !config.systemMessageInChat[key]
+        );
+        
+        EventStorage?.load(config.channels, ignored).then((events) => {
             setEvents(events.filter(event => config.systemMessageInChat[EventTypeMapping[event.eventtype]]));
             setLoad(false);
         });

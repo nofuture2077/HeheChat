@@ -2,7 +2,7 @@ import { EventType } from "@/commons/events"
 
 export interface EventStorage {
     store: (event: EventData) => Promise<void>;
-    load: (channels: string[]) => Promise<EventData[]>;
+    load: (channels: string[], ignored: string[]) => Promise<EventData[]>;
 }
 
 export interface EventData {
@@ -27,8 +27,8 @@ class RemoteEventStorage implements EventStorage {
         return Promise.resolve();
     }
 
-    async load(channels: string[]): Promise<EventData[]> {
-        return fetch(this.baseUrl + '/event/history?' + [['channels', channels.join(',')].join('=')].join('&')).then(res => res.json());
+    async load(channels: string[], ignored: string[]): Promise<EventData[]> {
+        return fetch(this.baseUrl + '/event/history?' + [['channels', channels.join(',')].join('='), ['ignored', ignored.join(',')].join('=')].join('&')).then(res => res.json());
     }
 }
 
