@@ -1,13 +1,13 @@
 import Login from '@/components/login/login';
 import { Stack, Group, Text, Space, Image } from '@mantine/core';
 import classes from './home.module.css'
-import icon from "./Icon_clean.svg"
+import logo from "./logo.svg"
 
 export function HomePage() {
   return (
     <Stack className={classes.layout}>
       <Group className={classes.hero} justify='center' pb={60} pt={50}>
-        <Image src={icon} height={192}/>
+        <Image src={logo} height={192}/>
         <Stack>
           <div>
             <Text ta="center" fw={600} size="92px" style={{marginBottom: 0, letterSpacing: "12px", textShadow: "3px 3px rgba(255, 255, 255, 0.2)"}}>HEHE</Text>
