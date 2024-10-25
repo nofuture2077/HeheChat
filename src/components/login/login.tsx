@@ -2,7 +2,7 @@ import { Button } from '@mantine/core';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
 import { IconLink } from '@tabler/icons-react';
-import { useEffect, useContext } from 'react';
+import { useEffect, useContext, useState } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 import { generateGUID } from '@/commons/helper';
 import PubSub from 'pubsub-js'
@@ -27,8 +27,13 @@ export default function Login() {
     const tokenStored: string | null = (authVersion && Number(authVersion) >= AUTH_VERSION) ? localStorage.getItem('hehe-token') : null;
     const token: string | undefined = window.location.hash ? getQueryVariable(hash, "access_token") : undefined;
     const tokenState = window.location.hash ? getQueryVariable(hash, "state") : undefined;
+    const [waitover, setWaitOver] = useState<boolean>(false);
 
     useEffect(() => {
+        setTimeout(() => {
+            setWaitOver(true);
+        }, 5000);
+
         if (tokenStored || token) {
             const authProvider = new StaticAuthProvider(loginContext.clientId, tokenStored || token || '');
             const api = new ApiClient({authProvider});
@@ -66,13 +71,6 @@ export default function Login() {
         }
     }, [token]);
 
-    if (tokenStored || token) {
-        return null;
-    }
-
-    const state = generateGUID();
-    localStorage.setItem('hehe-token_state', state);
-
     const authUrl = import.meta.env.VITE_BACKEND_URL + "/twitchauth";
 
     let scope = [
@@ -104,16 +102,24 @@ export default function Login() {
         "user:write:chat"
     ].map(encodeURIComponent).join('+');
     
-    let responseType = encodeURIComponent('code');
-    let link = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${loginContext.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}`;
+    const onClick = () => {
+        const state = generateGUID();
+        localStorage.setItem('hehe-token_state', state);
+
+        let responseType = encodeURIComponent('code');
+        let link = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${loginContext.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}`;
+
+        window.location.href = link;
+    };
 
     return (<Button
             component="a"
+            disabled={(!!(token || tokenStored) && !waitover)}
             size='xl'
             radius="xl"
             variant='gradient'
             gradient={{ from: 'var(--mantine-color-skyblue-8)', to: 'var(--mantine-color-paleviolet-6)', deg: 157 }}
-            href={link}
+            onClick={onClick}
             rightSection={<IconLink size={32} />}>    
             Login with Twitch
         </Button> );
