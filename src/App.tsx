@@ -66,7 +66,7 @@ export default function App() {
 
     useDidUpdate(() => {
         if (!profile.guid) {
-            console.error("Faving profile without guid", profile);
+            console.error("Saving profile without guid", profile);
             return;
         }
         storeProfile(profile);

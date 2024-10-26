@@ -91,26 +91,11 @@ export function ChatPage() {
                 }
                 setDrawer({...SettingsDrawer, props: {tab: 'Chat'} });
                 drawerHandler.open();
-            }, 1000);
+            }, 2500);
         }
         config.loadShares();
 
-        const eventSub = PubSub.subscribe("WS-event", (msg, data: Event) => {
-            if (config.playAlerts && config.receivedShares.includes(data.channel) && config.activatedShares.includes(data.channel)) {
-                AlertSystem.addEvent(data);
-            }
-        });
-        const modEventSub = PubSub.subscribe("WS-modevent", (msg, data) => {
-            if (data.type === 'delete') {
-                const msgId = data.text;
-                setDeletedMessages((deletedMessages) => deletedMessages.concat(msgId))
-            }
-            console.log("modEvent", data);
-        });
-
         return () => {
-            PubSub.unsubscribe(eventSub);
-            PubSub.unsubscribe(modEventSub);
         }
     }, []);
 
@@ -123,6 +108,19 @@ export function ChatPage() {
 
         const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
             addMessage(parseMessage(data.message), data.username, config.maxMessages);
+        });
+
+        const eventSub = PubSub.subscribe("WS-event", (msg, data: Event) => {
+            if (config.playAlerts && config.receivedShares.includes(data.channel) && config.activatedShares.includes(data.channel)) {
+                AlertSystem.addEvent(data);
+            }
+        });
+        const modEventSub = PubSub.subscribe("WS-modevent", (msg, data) => {
+            if (data.type === 'delete') {
+                const msgId = data.text;
+                setDeletedMessages((deletedMessages) => deletedMessages.concat(msgId))
+            }
+            console.log("modEvent", data);
         });
 
         Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
@@ -160,6 +158,8 @@ export function ChatPage() {
 
         return () => {
             PubSub.unsubscribe(msgSub);
+            PubSub.unsubscribe(eventSub);
+            PubSub.unsubscribe(modEventSub);
             config.off(chatHandler);
         };
     }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages]);
