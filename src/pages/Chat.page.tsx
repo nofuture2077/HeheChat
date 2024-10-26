@@ -138,8 +138,8 @@ export function ChatPage() {
             emotes.updateUserInfo(loginContext, mC);
         });
 
-        profile.listProfiles().forEach(profile => {
-            profile.config.channels.forEach(channel => {
+        profile.listProfiles().forEach(p => {
+            p.config.channels.forEach(channel => {
                 emotes.updateUserInfo(loginContext, channel);
             });
         });

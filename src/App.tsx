@@ -1,5 +1,6 @@
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
+import { useDidUpdate } from '@mantine/hooks';
 import { useEffect, useState, useRef } from 'react';
 import { Router } from './Router';
 import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext } from '@/ApplicationContext'
@@ -63,20 +64,26 @@ export default function App() {
     const [profiles, setProfiles] = useState<Profile[]>([]);
     const workerRef = useRef<Worker>();
 
+    useDidUpdate(() => {
+        if (!profile.guid) {
+            console.error("Faving profile without guid", profile);
+            return;
+        }
+        storeProfile(profile);
+    }, [profile])
+
     useEffect(() => {
         loadProfiles().then(async (data) => {
             if (data.active) {
                 const profileData = await loadProfileFromServer(data.active);
                 setProfile(profileData);
-                const order = data.profiles.split(',');
+                const order = data.profiles.split(',').filter(x => x);
                 loadProfilesFromServer().then(r => {
                     setProfiles(_.sortBy(r.profiles, item => order.indexOf(item.guid)) || [profileData]);
                 });
             } else {
-                storeProfile(profile).then(() => {
-                    setProfile(profile);
-                    setProfiles([profile]);
-                });
+                setProfile(profile);
+                setProfiles([profile]);
             }
         }, (err) => console.error(err));
 
@@ -116,7 +123,6 @@ export default function App() {
     const updateConfig = (key: ConfigKey, value: any) => {
         setProfile((profile) => {
             const newProfile = { ...profile, config: { ...profile.config, [key]: value } };
-            storeProfile(newProfile);
             return newProfile;
         });
     }
@@ -219,7 +225,6 @@ export default function App() {
     const setProfileName = (name: string) => {
         setProfile((profile) => {
             const newProfile = { ...profile, name };
-            storeProfile(newProfile);
             return newProfile;
         });
     };
@@ -234,9 +239,7 @@ export default function App() {
     const createProfile = (name: string) => {
         const guid = generateGUID();
         const newProfile = {...DEFAULT_PROFILE, name, guid};
-        storeProfile(newProfile).then(() => {
-            setProfile(newProfile);
-        });
+        setProfile(newProfile);
         setProfiles(profiles => profiles.concat(newProfile));
     };
 
@@ -249,7 +252,6 @@ export default function App() {
     const setSystemMessageInChat = (type: SystemMessageMainType, val: boolean) => {
         setProfile((profile) => {
             profile.config.systemMessageInChat[type] = val;
-            storeProfile(profile);
             return profile;
         });
     }
@@ -257,7 +259,6 @@ export default function App() {
     const setDeactivatedAlerts = (id: string, val: boolean) => {
         setProfile((profile) => {
             profile.config.deactivatedAlerts[id] = val;
-            storeProfile(profile);
             return profile;
         });
     }
