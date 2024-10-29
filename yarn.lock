@@ -1368,10 +1368,10 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@mantine/core@7.12.2":
-  version "7.12.2"
-  resolved "https://registry.npmjs.org/@mantine/core/-/core-7.12.2.tgz"
-  integrity sha512-FrMHOKq4s3CiPIxqZ9xnVX7H4PEGNmbtHMvWO/0YlfPgoV0Er/N/DNJOFW1ys4WSnidPTayYeB41riyxxGOpRQ==
+"@mantine/core@7.13.4":
+  version "7.13.4"
+  resolved "https://registry.npmjs.org/@mantine/core/-/core-7.13.4.tgz"
+  integrity sha512-9I6+SqTq90pnI3WPmOQzQ1PL7IkhQg/5ft8Awhgut8tvk1VaKruDm/K5ysUG3ncHrP+QTI2UHYjNlUrux6HKlw==
   dependencies:
     "@floating-ui/react" "^0.26.9"
     clsx "^2.1.1"
@@ -1380,10 +1380,10 @@
     react-textarea-autosize "8.5.3"
     type-fest "^4.12.0"
 
-"@mantine/hooks@7.12.2":
-  version "7.12.2"
-  resolved "https://registry.npmjs.org/@mantine/hooks/-/hooks-7.12.2.tgz"
-  integrity sha512-dVMw8jpM0hAzc8e7/GNvzkk9N0RN/m+PKycETB3H6lJGuXJJSRR4wzzgQKpEhHwPccktDpvb4rkukKDq2jA8Fg==
+"@mantine/hooks@7.13.4":
+  version "7.13.4"
+  resolved "https://registry.npmjs.org/@mantine/hooks/-/hooks-7.13.4.tgz"
+  integrity sha512-B2QCegQyWlLdenVNaLNK8H9cTAjLW9JKJ3xWg+ShhpjZDHT2hjZz4L0Nt071Z7mPvyAaOwKGM0FyqTcTjdECfg==
 
 "@mdx-js/react@^3.0.0":
   version "3.0.1"

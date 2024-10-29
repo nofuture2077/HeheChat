@@ -77,11 +77,13 @@ export default function App() {
             if (data.active) {
                 const profileData = await loadProfileFromServer(data.active);
                 setProfile(profileData);
+                AlertSystem.updateConfig(profileData.config);
                 const order = data.profiles.split(',').filter(x => x);
                 loadProfilesFromServer().then(r => {
                     setProfiles(_.sortBy(r.profiles, item => order.indexOf(item.guid)) || [profileData]);
                 });
             } else {
+                AlertSystem.updateConfig(profile.config);
                 setProfile(profile);
                 setProfiles([profile]);
             }

@@ -111,7 +111,7 @@ export function ChatPage() {
         });
 
         const eventSub = PubSub.subscribe("WS-event", (msg, data: Event) => {
-            if (config.playAlerts && config.receivedShares.includes(data.channel) && config.activatedShares.includes(data.channel)) {
+            if (AlertSystem.shouldBePlayed(data)) {
                 AlertSystem.addEvent(data);
             }
         });

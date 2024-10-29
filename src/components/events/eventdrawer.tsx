@@ -98,12 +98,8 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
         }
     }, []);
 
-    const canReplayEvent = (data: EventData) => {
-        return config.playAlerts && config.receivedShares.includes(data.channel) && config.activatedShares.includes(data.channel);
-    }
-
     const replayEvent = (data: EventData) => {
-        if (canReplayEvent(data)) {
+        if (AlertSystem.shouldBePlayed(data)) {
             AlertSystem.addEvent(data);
         }
     };
@@ -123,7 +119,7 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
                 <div className={classes.reverse}>
                     {load ? <>{[1,2,3].map(x => <InfoCardSkeleton key={'event' + x}/>)}</> : null}
                     {!load && events.length === 0 ? <Text key='event-noevents' pt='xl' size='xl' ta="center" fw={500}>No Events to show.</Text> : null}
-                    {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} date={event.date} text={formatEventText(event)} left={getIcon(event, 'infocard-left')} right={<ActionIcon disabled={!canReplayEvent(event)} variant='transparent' key={'infocard-right'} onClick={() => replayEvent(event)}><IconReload/></ActionIcon>}/>)}
+                    {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} date={event.date} text={formatEventText(event)} left={getIcon(event, 'infocard-left')} right={<ActionIcon disabled={!AlertSystem.shouldBePlayed(event)} variant='transparent' key={'infocard-right'} onClick={() => replayEvent(event)}><IconReload/></ActionIcon>}/>)}
                 </div>
             </ScrollArea>
         </nav>

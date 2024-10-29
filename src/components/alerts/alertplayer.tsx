@@ -304,6 +304,14 @@ class AlertPlayer {
         return this.queue.length - this.index;
     }
 
+    shouldBePlayed(item: Event): boolean {
+        if (!this.config) {
+            console.error('Adding event but config not set', item);
+            return false;
+        }
+        return this.config!.playAlerts && this.config!.receivedShares.includes(item.channel) && this.config!.activatedShares.includes(item.channel);
+    }
+
     addEvent(item: Event) {
         console.log("Event added to the queue", item);
         this.queue.push(item);
