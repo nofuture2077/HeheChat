@@ -242,11 +242,13 @@ class AlertPlayer {
     async showNotification(item: Event) {
         const alertConfig = this.alertConfig[item.channel];
         if (!alertConfig) {
+            console.log('No alertconfig set');
             return;
         }
         const alert = this.getAlert(item, alertConfig, this.config!);
 
         if (!alert) {
+            console.log('No alert for event', this.config, alertConfig, item);
             return;
         }
 
@@ -309,7 +311,11 @@ class AlertPlayer {
             console.error('Adding event but config not set', item);
             return false;
         }
-        return this.config!.playAlerts && this.config!.receivedShares.includes(item.channel) && this.config!.activatedShares.includes(item.channel);
+        const sbp = this.config!.playAlerts && this.config!.receivedShares.includes(item.channel) && this.config!.activatedShares.includes(item.channel);
+        if (!sbp) {
+            console.debug('Will not play alerts', this.config, item);
+        }
+        return sbp;
     }
 
     addEvent(item: Event) {
@@ -320,15 +326,6 @@ class AlertPlayer {
     checkQueue() {
         if (this.playing || this.paused || !this.config) {
             return;
-        }
-    
-        const queuelength = this.queue.length;
-    
-        while (this.index + 3 < queuelength) {
-            // skip follow bot
-            if (this.queue[this.index].eventtype !== "follow") break;
-            console.log('skip', this.queue[this.index]);
-            this.index++;
         }
     
         if (this.index >= this.queue.length) {
