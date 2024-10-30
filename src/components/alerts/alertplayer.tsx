@@ -252,6 +252,8 @@ class AlertPlayer {
             return;
         }
 
+        console.log('Play alert with config', item, alertConfig);
+
         _.templateSettings = {
             interpolate: /\{\{(.+?)\}\}/g
         };
