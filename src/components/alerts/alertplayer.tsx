@@ -77,6 +77,10 @@ class AlertPlayer {
                 resolve();
                 return;
             }
+
+            if (this.audioContext!.state === 'suspended') {
+                this.audioContext!.resume();
+            }
             
             const { audio, duration } = audioInfo;
             audio.volume = volume;
@@ -91,7 +95,10 @@ class AlertPlayer {
                 reject(new Error("Audio playback error"));
             };
 
-            audio.play().catch(reject);
+            audio.play().catch(err => {
+                console.error("Audio play failed:", err);
+                reject(new Error("Audio playback error"));
+            });
         });
     }
 
@@ -152,7 +159,7 @@ class AlertPlayer {
     }
 
     initSilence() {
-        this.preventBoxDisconnect = _.debounce(() => this.playSilence(), 120000);
+        this.preventBoxDisconnect = _.debounce(() => this.playSilence(), 30 * 1000);
         this.preventBoxDisconnect();
     }
 
