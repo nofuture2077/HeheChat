@@ -71,6 +71,16 @@ class AlertPlayer {
         return data.audioContent;
     }
 
+    private ensureAudioContext() {
+        if (!this.audioContext || this.audioContext.state === 'closed') {
+            this.audioContext = new AudioContext();
+            this.gainNode = this.audioContext.createGain();
+            this.gainNode.connect(this.audioContext.destination);
+        } else if (this.audioContext.state === 'suspended') {
+            this.audioContext.resume();
+        }
+    }
+
     async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
         return new Promise((resolve, reject) => {
             if (!audioInfo || this.skipCurrent) {
@@ -78,9 +88,7 @@ class AlertPlayer {
                 return;
             }
 
-            if (this.audioContext!.state === 'suspended') {
-                this.audioContext!.resume();
-            }
+            this.ensureAudioContext();
             
             const { audio, duration } = audioInfo;
             audio.volume = volume;
