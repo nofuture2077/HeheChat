@@ -17,6 +17,10 @@ import { theme } from '@/theme';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import _ from 'underscore';
 
+window.addEventListener("click", () => {
+    AlertSystem.initialize();
+});
+
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 async function storeProfile(profile: Profile): Promise<any> {

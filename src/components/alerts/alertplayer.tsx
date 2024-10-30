@@ -17,6 +17,9 @@ let cheerPrefixes = ['Cheer', 'BibleThump', 'cheerwhal', 'Corgo', 'uni', 'ShowLo
 let cheerPrefixesRegExp = cheerPrefixes.map(x => new RegExp(x + "\\d+", "gi"))
 
 class AlertPlayer {
+    init: boolean = false;
+    audioContext?: AudioContext;
+    gainNode?: GainNode;
     playing: boolean = false;
     paused: boolean = false;
     muted: boolean = false;
@@ -25,136 +28,137 @@ class AlertPlayer {
     alertConfig: Record<string, EventAlertConfig> = {};
     preventBoxDisconnect?: (() => void) & _.Cancelable;
     config?: Config;
-    audio?: HTMLAudioElement;
     currentlyPlaying?: Event;
     skipCurrent: boolean = false;
-    oldVolume?: number;
 
     constructor() {
         setInterval(() => this.checkQueue(), 1000);
-
         this.initSilence();
     }
 
+    initialize() {
+        if (this.init) return;
+
+        console.log('Alert system initialized');
+        this.init = true;
+        this.audioContext = new (window.AudioContext)();
+        this.gainNode = this.audioContext.createGain();
+        this.gainNode.gain.value = 0;
+        this.gainNode.connect(this.audioContext.destination);
+    }
+
     async googleTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
-        const params = [
-            ['text', encodeURIComponent(msg)].join('='), 
-            ['state', state].join('='), 
-            ['voice', voice].join('='), 
-            ['channel', channel].join('=')
-        ].join('&')
-        return fetch(BASE_URL + "/tts/generate?" + params).then(data => data.json()).then(data => data.audioContent);
+        const params = new URLSearchParams({
+            text: msg,
+            state,
+            voice,
+            channel
+        });
+        const response = await fetch(`${BASE_URL}/tts/generate?${params}`);
+        const data = await response.json();
+        return data.audioContent;
     }
 
     async aiTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
-        const params = [
-            ['text', encodeURIComponent(msg)].join('='), 
-            ['state', state].join('='), 
-            ['voice', voice].join('='), 
-            ['channel', channel].join('=')
-        ].join('&')
-        return fetch(BASE_URL + "/tts/ai/generate?" + params).then(data => data.json()).then(data => data.audioContent);
+        const params = new URLSearchParams({
+            text: msg,
+            state,
+            voice,
+            channel
+        });
+        const response = await fetch(`${BASE_URL}/tts/ai/generate?${params}`);
+        const data = await response.json();
+        return data.audioContent;
     }
 
     async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
         return new Promise((resolve, reject) => {
             if (!audioInfo || this.skipCurrent) {
-                console.log('Skipped audio', audioInfo);
                 resolve();
                 return;
             }
-            this.audio = audioInfo.audio;
-            audioInfo.audio.volume = volume;
+            
+            const { audio, duration } = audioInfo;
+            audio.volume = volume;
+            const source = this.audioContext!.createMediaElementSource(audio);
+            source.connect(this.gainNode!);
+            audio.onended = () => {
+                source.disconnect(this.gainNode!);
+                resolve();
+            };
+            audio.onerror = () => {
+                source.disconnect(this.gainNode!);
+                reject(new Error("Audio playback error"));
+            };
 
-            if (this.muted) {
-                console.log('Audio muted');
-                this.audio.volume = 0;
-                this.audio.muted = true;
-            }
-        
-            audioInfo.audio.onended = () => resolve();
-            audioInfo.audio.onerror = reject;
-            audioInfo.audio.play().catch(reject);
+            audio.play().catch(reject);
         });
     }
 
     async getAudioInfo(src: string): Promise<AudioInfo | undefined> {
         return new Promise((resolve, reject) => {
             if (!src) {
-                Promise.resolve();
+                resolve(undefined);
+                return;
             }
-            const audio = new Audio(src)
+            const audio = new Audio(src);
             audio.onloadedmetadata = () => {
                 resolve({
                     duration: audio.duration,
-                    audio: audio
+                    audio
                 });
-            }
-
-            audio.onerror = (err) => {
-                reject("Audio analyses error: " + err);
-            }
+            };
+            audio.onerror = () => {
+                reject(new Error("Failed to load audio metadata"));
+            };
         });
     }
 
     pause() {
         this.paused = true;
-        if (this.audio) {
-            this.audio.pause();
-        }
+        this.audioContext?.suspend();
     }
 
     resume() {
         this.paused = false;
-        if (this.audio) {
-            this.audio.play();
-        }
+        this.audioContext?.resume();
     }
 
     mute() {
         this.muted = true;
-        if (this.audio) {
-            this.oldVolume = this.audio.volume;
-            this.audio.volume = 0;
-            this.audio.muted = true;
-        }
+        if (this.gainNode) this.gainNode.gain.value = 0;
     }
 
     unmute() {
         this.muted = false;
-        if (this.audio) {
-            this.audio.volume = this.oldVolume!;
-            this.audio.muted = false;
-        }
+        if (this.gainNode) this.gainNode.gain.value = 1;
     }
 
-    startPlaying(): undefined {
+    startPlaying() {
         this.skipCurrent = false;
         this.playing = true;
+        if (this.gainNode) this.gainNode.gain.value = 1;
     }
 
-    stopPlaying(): undefined {
+    stopPlaying() {
         this.playing = false;
         this.paused = false;
-        this.audio = undefined;
+        if (this.gainNode) this.gainNode.gain.value = 0;
     }
 
-    skip(): undefined {
+    skip() {
         this.skipCurrent = true;
-        if (this.audio) {
-            this.audio.currentTime = this.audio.duration;
-        }
+        if (this.gainNode) this.gainNode.gain.value = 0;
     }
 
     initSilence() {
-        this.preventBoxDisconnect = _.debounce(() => this.playSilence(), 2*60*1000);
+        this.preventBoxDisconnect = _.debounce(() => this.playSilence(), 120000);
         this.preventBoxDisconnect();
     }
 
     async playSilence() {
         if (this.config?.playAlerts) {
-            console.log("Playing silence");
-            return this.playAudio(1.0, await this.getAudioInfo('data:audio/mp3;base64,' + silence));
+            await this.playAudio(1.0, await this.getAudioInfo(`data:audio/mp3;base64,${silence}`));
         }
     }
 
