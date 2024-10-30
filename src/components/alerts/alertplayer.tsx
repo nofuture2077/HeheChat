@@ -59,6 +59,7 @@ class AlertPlayer {
     async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
         return new Promise((resolve, reject) => {
             if (!audioInfo || this.skipCurrent) {
+                console.log('Skipped audio', audioInfo);
                 resolve();
                 return;
             }
@@ -66,6 +67,7 @@ class AlertPlayer {
             audioInfo.audio.volume = volume;
 
             if (this.muted) {
+                console.log('Audio muted');
                 this.audio.volume = 0;
                 this.audio.muted = true;
             }
@@ -303,7 +305,14 @@ class AlertPlayer {
                 this.stopPlaying();
                 PubSub.publish('AlertPlayer-update');
             }
-            this.playAudio(0.8, jingleAudio).then(() => this.playAudio(1.0, ttsAudio)).then(onEnd, onEnd);
+
+            const onError = (reason: any) => {
+                console.log('Error while Playing', reason);
+                this.stopPlaying();
+                PubSub.publish('AlertPlayer-update');
+            }
+
+            this.playAudio(0.8, jingleAudio).then(() => this.playAudio(1.0, ttsAudio)).then(onEnd, onError);
         } catch (err) {
             console.error(err);
             this.stopPlaying();
