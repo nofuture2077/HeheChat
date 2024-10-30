@@ -252,7 +252,7 @@ class AlertPlayer {
             return;
         }
 
-        console.log('Play alert with config', item, alertConfig);
+        console.log('Play alert with config', item, alert);
 
         _.templateSettings = {
             interpolate: /\{\{(.+?)\}\}/g
@@ -279,20 +279,27 @@ class AlertPlayer {
         }
         const state = localStorage.getItem('hehe-token_state') || '';
         this.startPlaying();
+        console.log('Start playing');
         this.currentlyPlaying = item;
         const ttsMessage = this.cleanMessage(template(vars));
         try {
             const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state) : undefined;
             const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
+
+            console.log('Audio', ttsAudio, jingleAudio);
     
             const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
             PubSub.publish('AlertPlayer-update', {duration});
             if (alert.visual) {
                 const headline = _.template(alert.visual?.headline || "")(vars);
                 const text = this.cleanMessage(_.template(alert.visual?.text || "")(vars));
+
+                console.log('Visuell', text, headline);
+
                 PubSub.publish('WSSEND', {type: 'alert', data: {image: alert.visual?.element, headline, text, duration: duration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout}});
             }
             const onEnd = () => {
+                console.log('Stop Playing');
                 this.stopPlaying();
                 PubSub.publish('AlertPlayer-update');
             }
