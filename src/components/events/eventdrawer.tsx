@@ -62,7 +62,8 @@ const icons: Record<EventType, ReactElementLike> = {
 }
 
 export function formatEventText(event: EventData) {
-    const msg = formatString(messages[event.eventtype as EventType], [event.channel, event.username, event.amount].concat(event.text?.split('***')));
+    const textParts = event.text?.split('***') || [];
+    const msg = formatString(messages[event.eventtype as EventType], [event.channel, event.username, event.amount].concat(textParts));
     return msg;
 }
 
