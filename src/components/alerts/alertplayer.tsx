@@ -88,19 +88,19 @@ class AlertPlayer {
         }
     }
 
-    private preciseTimer(callback: () => void, delay: number) {
+    private preciseTimer(callback: () => void, delay: number, extra: number) {
         const targetTime = performance.now() + delay;
         
         function checkTime() {
             const currentTime = performance.now();
-            if (currentTime >= targetTime) {
+            if (currentTime >= (targetTime + extra)) {
                 callback();
             } else {
                 requestAnimationFrame(checkTime);
             }
         }
 
-        setTimeout(checkTime, delay - 10);
+        setTimeout(checkTime, delay - 100);
     }
 
     async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
@@ -118,7 +118,7 @@ class AlertPlayer {
             this.preciseTimer(() => {
                 this.silenceAudio!.src = silence;
                 resolve();
-            }, (duration * 1000));
+            }, (duration * 1000), 20);
 
             this.silenceAudio!.src = audio.src;
 
