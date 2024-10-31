@@ -258,8 +258,8 @@ class AlertPlayer {
             return _.sample(minAlerts[step]);
         }
         const parts = event.text?.split('***') || [];
-        if (parts.length >= 3) {
-            const matchesAlertMatches = matchesAlerts[parts[2]];
+        if (parts.length >= 4) {
+            const matchesAlertMatches = matchesAlerts[parts[3]];
             if (matchesAlertMatches && matchesAlertMatches.length) {
                 return _.sample(matchesAlertMatches);
             }
