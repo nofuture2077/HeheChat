@@ -93,6 +93,8 @@ class AlertPlayer {
         const targetTime = this.audioContext!.currentTime + delay / 1000;
     
         const oscillator = this.audioContext!.createOscillator();
+        oscillator.type = "square";
+        oscillator.frequency.setValueAtTime(440, this.audioContext!.currentTime); // value in hertz
         oscillator.onended = callback;
         oscillator.start(targetTime);
         oscillator.stop(targetTime + interval);
