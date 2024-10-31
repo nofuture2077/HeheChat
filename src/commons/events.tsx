@@ -1,5 +1,3 @@
-import { SystemMessageType, SystemMessageMainType } from "@/commons/message";
-
 export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' |
 'sub_1000' | 'sub_2000' | 'sub_3000' | 'sub_Prime' | 
 'subgift_1000' | 'subgift_2000' | 'subgift_3000' | 
@@ -15,7 +13,7 @@ export type EventAlertSpecifier = {
     text?: string
 }
 
-export const EventTypeMapping: Record<SystemMessageType, SystemMessageMainType> = {
+export const EventTypeMapping: Record<string, string> = {
     'raid': 'raid',
     'follow': 'follow',
     'cheer': 'cheer',

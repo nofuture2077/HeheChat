@@ -88,7 +88,7 @@ class AlertPlayer {
         source.start();
     }
 
-    async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
+    async playAudio(volume: number, audioInfo: AudioInfo | undefined, extra: number): Promise<void> {
         return new Promise((resolve, reject) => {
             if (!audioInfo || this.skipCurrent) {
                 resolve();
@@ -100,7 +100,7 @@ class AlertPlayer {
 
             this.silenceAudio!.onloadedmetadata = () => {
                 this.silenceAudio!.currentTime = 0;
-                this.preciseTimer(resolve, (duration * 1000) + 60);
+                this.preciseTimer(resolve, (duration * 1000) + extra);
             };
 
             audio.onerror = () => {
@@ -337,7 +337,7 @@ class AlertPlayer {
                 PubSub.publish('AlertPlayer-update');
             }
 
-            this.playAudio(0.8, jingleAudio).then(() => this.playAudio(1.0, ttsAudio)).then(onEnd, onError);
+            this.playAudio(0.8, jingleAudio, 0).then(() => this.playAudio(1.0, ttsAudio, 160)).then(onEnd, onError);
         } catch (err) {
             console.error(err);
             this.stopPlaying();
