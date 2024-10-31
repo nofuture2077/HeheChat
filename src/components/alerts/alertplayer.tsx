@@ -78,16 +78,6 @@ class AlertPlayer {
         return data.audioContent;
     }
 
-    private ensureAudioContext() {
-        if (!this.audioContext || this.audioContext.state === 'closed') {
-            this.audioContext = new AudioContext();
-            this.gainNode = this.audioContext.createGain();
-            this.gainNode.connect(this.audioContext.destination);
-        } else if (this.audioContext.state === 'suspended') {
-            this.audioContext.resume();
-        }
-    }
-
     private preciseTimer(callback: () => void, delay: number) {
         const audioBuffer = this.audioContext!.createBuffer(1, this.audioContext!.sampleRate * delay / 1000, this.audioContext!.sampleRate);
         const source = this.audioContext!.createBufferSource();
@@ -104,11 +94,17 @@ class AlertPlayer {
                 resolve();
                 return;
             }
-
-            this.ensureAudioContext();
             
             const { audio, duration } = audioInfo;
             audio.volume = volume;
+
+            this.silenceAudio!.onloadedmetadata = () => {
+                this.silenceAudio!.currentTime = 0;
+                this.preciseTimer(() => {
+                    this.silenceAudio!.src = silence;
+                    resolve();
+                }, (duration * 1000));
+            }
 
             audio.onerror = () => {
                 this.silenceAudio!.src = silence;
@@ -117,12 +113,7 @@ class AlertPlayer {
 
             setTimeout(() => {
                 this.silenceAudio!.src = audio.src;
-
-                this.preciseTimer(() => {
-                    this.silenceAudio!.src = silence;
-                    resolve();
-                }, (duration * 1000));
-            }, 0);
+            }, 1);
         });
     }
 
