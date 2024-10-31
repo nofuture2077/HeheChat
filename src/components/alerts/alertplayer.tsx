@@ -114,7 +114,7 @@ class AlertPlayer {
                 this.preciseTimer(() => {
                     this.silenceAudio!.src = silence;
                     resolve();
-                }, (duration * 1000));
+                }, (duration * 1000) + 10);
             }
 
             audio.onerror = () => {
