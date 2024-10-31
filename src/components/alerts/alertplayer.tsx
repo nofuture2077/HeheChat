@@ -88,6 +88,17 @@ class AlertPlayer {
         }
     }
 
+    private preciseAudioContextTimer(callback: () => void, delay: number) {
+        const audioContext = new AudioContext();
+        const interval = 0.001;
+        const targetTime = audioContext.currentTime + delay / 1000;
+    
+        const oscillator = audioContext.createOscillator();
+        oscillator.onended = callback;
+        oscillator.start(targetTime);
+        oscillator.stop(targetTime + interval);
+    }
+
     async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
         return new Promise((resolve, reject) => {
             if (!audioInfo || this.skipCurrent) {
@@ -100,10 +111,10 @@ class AlertPlayer {
             const { audio, duration } = audioInfo;
             audio.volume = volume;
             
-            setTimeout(() => {
+            this.preciseAudioContextTimer(() => {
                 this.silenceAudio!.src = silence;
                 resolve();
-            }, duration * 1000 + 50);
+            }, (duration * 1000));
 
             this.silenceAudio!.src = audio.src;
 
