@@ -1,4 +1,4 @@
-import { SystemMessage, SystemMessageType } from "@/commons/message";
+import { SystemMessage, SystemMessageMainType } from "@/commons/message";
 import { formatDuration, formatString } from "@/commons/helper";
 import { Text, ActionIcon } from "@mantine/core"
 import classes from './systemmessage.module.css';
@@ -19,7 +19,7 @@ export type SystemMessageProps = {
     moderatedChannel: {[id: string]: boolean };
 }
 
-const messages: Record<SystemMessageType, string> = {
+const messages: Record<string, string> = {
     'delete': 'A messages from $1 was deleted',
     'timeout': '$1 was timeouted for $2:duration',
     'ban': '$1 was banned',
@@ -64,12 +64,12 @@ export function SystemMessageComp(props: SystemMessageProps) {
         return word;
     }
 
-    const text = formatString(messages[parts[0] as SystemMessageType], parts.slice(1, parts.length))
+    const text = formatString(messages[parts[0]], parts.slice(1, parts.length))
     const textParts = text.split('///');
 
     const style = {variant: 'color', width: '100%'};
     const eventType = parts[0] as EventType;
-    const eventMainType = EventTypeMapping[eventType];
+    const eventMainType = EventTypeMapping[eventType] as SystemMessageMainType;
     if (!config.systemMessageInChat[eventMainType]) {
         return;
     }

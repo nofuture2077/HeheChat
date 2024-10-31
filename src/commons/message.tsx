@@ -8,7 +8,7 @@ export type SevenTVMessage = "sevenTVAdded" | "sevenTVRemoved";
 
 export type StreamEventType = "streamOnline" | "streamOffline";
 
-export type SystemMessageType = ModActionType | EventType | StreamEventType | SevenTVMessage;
+export type SystemMessageType = ModActionType |  EventType | StreamEventType | SevenTVMessage;
 export type SystemMessageMainType = ModActionType | EventMainType | StreamEventType | SevenTVMessage;
 
 export class SystemMessage {

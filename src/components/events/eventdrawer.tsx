@@ -7,7 +7,7 @@ import { ConfigContext } from '@/ApplicationContext';
 import { InfoCard, InfoCardSkeleton } from '../infocard/infocard';
 import { formatString } from "@/commons/helper";
 import { getEventStyle } from '@/components/events/eventhelper';
-import { EventType, EventTypeMapping } from '@/commons/events';
+import { EventMainType, EventType, EventTypeMapping } from '@/commons/events';
 import { ReactElementLike } from 'prop-types';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { OverlayDrawer } from '@/pages/Chat.page';
@@ -86,7 +86,7 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
         );
         
         EventStorage?.load(config.channels, ignored).then((events) => {
-            setEvents(events.filter(event => config.systemMessageInChat[EventTypeMapping[event.eventtype]]));
+            setEvents(events.filter(event => config.systemMessageInChat[EventTypeMapping[event.eventtype] as EventMainType]));
             setLoad(false);
         });
 
