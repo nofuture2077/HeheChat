@@ -109,11 +109,13 @@ class AlertPlayer {
             
             const { audio, duration } = audioInfo;
             audio.volume = volume;
-            
-            this.preciseTimer(() => {
-                this.silenceAudio!.src = silence;
-                resolve();
-            }, (duration * 1000) + 30);
+
+            this.silenceAudio!.onloadedmetadata = () => {
+                this.preciseTimer(() => {
+                    this.silenceAudio!.src = silence;
+                    resolve();
+                }, (duration * 1000));
+            }
 
             this.silenceAudio!.src = audio.src;
 
