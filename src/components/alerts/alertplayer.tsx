@@ -110,21 +110,19 @@ class AlertPlayer {
             const { audio, duration } = audioInfo;
             audio.volume = volume;
 
-            this.silenceAudio!.onloadedmetadata = () => {
-                this.preciseTimer(() => {
-                    this.silenceAudio!.src = silence;
-                    resolve();
-                }, (duration * 1000) + 10);
-            }
-
             audio.onerror = () => {
                 this.silenceAudio!.src = silence;
                 reject(new Error("Audio playback error"));
             };
 
-            this.preciseTimer(() => {
+            setTimeout(() => {
                 this.silenceAudio!.src = audio.src;
-            }, 1);
+
+                this.preciseTimer(() => {
+                    this.silenceAudio!.src = silence;
+                    resolve();
+                }, (duration * 1000));
+            }, 0);
         });
     }
 
