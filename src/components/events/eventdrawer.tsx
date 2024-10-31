@@ -40,7 +40,7 @@ const messages: Record<EventType, string> = {
     'follow': 'Just followed',
     'cheer': 'Cheered $2:whole bits',
     'donation': "Donated $2:decimal $3",
-    'channelPointRedemption': 'Channelpoints: "$5"'
+    'channelPointRedemption': 'Channelpoints: "$6"'
 }
 
 const icons: Record<EventType, ReactElementLike> = {
