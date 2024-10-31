@@ -294,7 +294,7 @@ class AlertPlayer {
             text: parseMessage(item.text!).text
         };
 
-        if (vars.text && (vars.text.startsWith('donation') || vars.text.startsWith('channelPointRedemption'))) {
+        if ((item.text!.startsWith('donation***') || item.text!.startsWith('channelPointRedemption***'))) {
             vars.text = vars.text.split('***').slice(-1)[0];
         } else {
             if (vars.amount) {
