@@ -88,15 +88,19 @@ class AlertPlayer {
         }
     }
 
-    private preciseAudioContextTimer(callback: () => void, delay: number) {
-        const audioContext = new AudioContext();
-        const interval = 0.001;
-        const targetTime = audioContext.currentTime + delay / 1000;
-    
-        const oscillator = audioContext.createOscillator();
-        oscillator.onended = callback;
-        oscillator.start(targetTime);
-        oscillator.stop(targetTime + interval);
+    private preciseTimer(callback: () => void, delay: number) {
+        const targetTime = performance.now() + delay;
+        
+        function checkTime() {
+            const currentTime = performance.now();
+            if (currentTime >= targetTime) {
+                callback();
+            } else {
+                requestAnimationFrame(checkTime);
+            }
+        }
+
+        setTimeout(checkTime, delay - 10);
     }
 
     async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
@@ -111,7 +115,7 @@ class AlertPlayer {
             const { audio, duration } = audioInfo;
             audio.volume = volume;
             
-            this.preciseAudioContextTimer(() => {
+            this.preciseTimer(() => {
                 this.silenceAudio!.src = silence;
                 resolve();
             }, (duration * 1000));
