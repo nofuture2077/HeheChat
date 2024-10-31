@@ -100,7 +100,7 @@ class AlertPlayer {
 
             this.silenceAudio!.onloadedmetadata = () => {
                 this.silenceAudio!.currentTime = 0;
-                this.preciseTimer(resolve, (duration * 1000));
+                this.preciseTimer(resolve, (duration * 1000) + 50);
             };
 
             audio.onerror = () => {
