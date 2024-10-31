@@ -100,16 +100,14 @@ class AlertPlayer {
 
             this.silenceAudio!.onloadedmetadata = () => {
                 this.silenceAudio!.currentTime = 0;
-                this.preciseTimer(resolve, (duration * 1000) + 50);
+                this.preciseTimer(resolve, (duration * 1000) + 60);
             };
 
             audio.onerror = () => {
                 reject("Audio playback error");
             };
 
-            setTimeout(() => {
-                this.silenceAudio!.src = audio.src;
-            }, 1);
+            this.silenceAudio!.src = audio.src;
         });
     }
 
