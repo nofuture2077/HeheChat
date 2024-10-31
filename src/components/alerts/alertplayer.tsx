@@ -89,15 +89,13 @@ class AlertPlayer {
     }
 
     private preciseTimer(callback: () => void, delay: number) {
-        const interval = 0.001;
-        const targetTime = this.audioContext!.currentTime + delay / 1000;
+        const audioBuffer = this.audioContext!.createBuffer(1, this.audioContext!.sampleRate * delay / 1000, this.audioContext!.sampleRate);
+        const source = this.audioContext!.createBufferSource();
+        source.buffer = audioBuffer;
     
-        const oscillator = this.audioContext!.createOscillator();
-        oscillator.type = "square";
-        oscillator.frequency.setValueAtTime(440, this.audioContext!.currentTime); // value in hertz
-        oscillator.onended = callback;
-        oscillator.start(targetTime);
-        oscillator.stop(targetTime + interval);
+        source.onended = callback;
+        source.connect(this.audioContext!.destination);
+        source.start();
     }
 
     async playAudio(volume: number, audioInfo?: AudioInfo): Promise<void> {
