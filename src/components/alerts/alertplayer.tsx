@@ -20,6 +20,8 @@ class AlertPlayer {
     init: boolean = false;
     audioContext?: AudioContext;
     gainNode?: GainNode;
+    silenceAudio?: HTMLAudioElement;
+    silenceSource?: MediaElementAudioSourceNode;
     playing: boolean = false;
     paused: boolean = false;
     muted: boolean = false;
@@ -33,7 +35,6 @@ class AlertPlayer {
 
     constructor() {
         setInterval(() => this.checkQueue(), 1000);
-        this.initSilence();
     }
 
     initialize() {
@@ -45,6 +46,12 @@ class AlertPlayer {
         this.gainNode = this.audioContext.createGain();
         this.gainNode.gain.value = 0;
         this.gainNode.connect(this.audioContext.destination);
+        this.silenceAudio = new Audio(silence);
+        this.silenceAudio.autoplay = true;
+        this.silenceAudio.loop = true;
+
+        this.silenceSource = this.audioContext.createMediaElementSource(this.silenceAudio);
+        this.silenceSource.connect(this.gainNode);
     }
 
     async googleTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
@@ -92,21 +99,16 @@ class AlertPlayer {
             
             const { audio, duration } = audioInfo;
             audio.volume = volume;
-            const source = this.audioContext!.createMediaElementSource(audio);
-            source.connect(this.gainNode!);
-            audio.onended = () => {
-                source.disconnect(this.gainNode!);
+            this.silenceAudio!.src = audio.src;
+            setTimeout(() => {
+                this.silenceAudio!.src = silence;
                 resolve();
-            };
-            audio.onerror = () => {
-                source.disconnect(this.gainNode!);
-                reject(new Error("Audio playback error"));
-            };
+            }, duration * 1000)
 
-            audio.play().catch(err => {
-                console.error("Audio play failed:", err);
+            audio.onerror = () => {
+                this.silenceAudio!.src = silence;
                 reject(new Error("Audio playback error"));
-            });
+            };
         });
     }
 
@@ -164,17 +166,6 @@ class AlertPlayer {
     skip() {
         this.skipCurrent = true;
         if (this.gainNode) this.gainNode.gain.value = 0;
-    }
-
-    initSilence() {
-        this.preventBoxDisconnect = _.debounce(() => this.playSilence(), 30 * 1000);
-        this.preventBoxDisconnect();
-    }
-
-    async playSilence() {
-        if (this.config?.playAlerts) {
-            await this.playAudio(1.0, await this.getAudioInfo(`data:audio/mp3;base64,${silence}`));
-        }
     }
 
     cleanMessage(message: string) {
@@ -375,7 +366,6 @@ class AlertPlayer {
             return;
         }
         console.log("Play Event", item);
-        this.preventBoxDisconnect!();
         this.showNotification(item);
     }
 }
