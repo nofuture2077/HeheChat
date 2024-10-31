@@ -40,7 +40,7 @@ const messages: Record<EventType, string> = {
     'follow': 'Just followed',
     'cheer': 'Cheered $2:whole bits',
     'donation': "Donated $2:decimal $3",
-    'channelPointRedemption': 'Channelpoints: "$5"'
+    'channelPointRedemption': 'Channelpoints: "$6"'
 }
 
 const icons: Record<EventType, ReactElementLike> = {
@@ -63,7 +63,7 @@ const icons: Record<EventType, ReactElementLike> = {
 
 export function formatEventText(event: EventData) {
     const textParts = event.text?.split('***') || [];
-    const msg = formatString(messages[event.eventtype as EventType], [event.channel, event.username, event.amount].concat(textParts));
+    const msg = formatString(messages[event.eventtype as EventType], [event.channel, event.username, event.amount, event.usernameTo].concat(textParts));
     return msg;
 }
 
