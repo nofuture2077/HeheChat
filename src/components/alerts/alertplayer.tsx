@@ -99,11 +99,13 @@ class AlertPlayer {
             
             const { audio, duration } = audioInfo;
             audio.volume = volume;
-            this.silenceAudio!.src = audio.src;
+            
             setTimeout(() => {
                 this.silenceAudio!.src = silence;
                 resolve();
-            }, duration * 1000)
+            }, duration * 1000 + 50);
+
+            this.silenceAudio!.src = audio.src;
 
             audio.onerror = () => {
                 this.silenceAudio!.src = silence;
