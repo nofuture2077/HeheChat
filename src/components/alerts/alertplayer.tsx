@@ -100,15 +100,11 @@ class AlertPlayer {
 
             this.silenceAudio!.onloadedmetadata = () => {
                 this.silenceAudio!.currentTime = 0;
-                this.preciseTimer(() => {
-                    this.silenceAudio!.src = silence;
-                    resolve();
-                }, (duration * 1000));
-            }
+                this.preciseTimer(resolve, (duration * 1000));
+            };
 
             audio.onerror = () => {
-                this.silenceAudio!.src = silence;
-                reject(new Error("Audio playback error"));
+                reject("Audio playback error");
             };
 
             setTimeout(() => {
@@ -165,6 +161,7 @@ class AlertPlayer {
     stopPlaying() {
         this.playing = false;
         this.paused = false;
+        this.silenceAudio!.src = silence;
         if (this.gainNode) this.gainNode.gain.value = 0;
     }
 
