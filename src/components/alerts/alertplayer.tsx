@@ -117,12 +117,14 @@ class AlertPlayer {
                 }, (duration * 1000));
             }
 
-            this.silenceAudio!.src = audio.src;
-
             audio.onerror = () => {
                 this.silenceAudio!.src = silence;
                 reject(new Error("Audio playback error"));
             };
+
+            this.preciseTimer(() => {
+                this.silenceAudio!.src = audio.src;
+            }, 1);
         });
     }
 
