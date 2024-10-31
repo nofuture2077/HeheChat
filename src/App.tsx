@@ -19,7 +19,7 @@ import _ from 'underscore';
 
 window.addEventListener("click", () => {
     AlertSystem.initialize();
-});
+}); 
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 

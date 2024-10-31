@@ -12,7 +12,6 @@ import { EventType, EventTypeMapping } from "@/commons/events";
 import { ChatMessage } from "@twurple/chat";
 import { parseChatMessage, ParsedMessagePart } from "@twurple/chat"
 import { parsedPartsToHtml, joinWithSpace } from "@/components/chat/ChatMessage"
-import { useColorScheme, useDidUpdate, useForceUpdate } from '@mantine/hooks';
 
 export type SystemMessageProps = {
     msg: SystemMessage;

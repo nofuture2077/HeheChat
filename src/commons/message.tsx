@@ -6,7 +6,7 @@ import { ModActionType } from '@/components/chat/mod/modactions';
 export type HeheMessage = ChatMessage | SystemMessage;
 export type SevenTVMessage = "sevenTVAdded" | "sevenTVRemoved";
 
-export type StreamEventType = "streamOnline" | "streamOffline" | "channelPointRedemption";
+export type StreamEventType = "streamOnline" | "streamOffline";
 
 export type SystemMessageType = ModActionType | EventType | StreamEventType | SevenTVMessage;
 export type SystemMessageMainType = ModActionType | EventMainType | StreamEventType | SevenTVMessage;

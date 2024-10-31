@@ -223,19 +223,28 @@ class AlertPlayer {
         }
         const exactAlerts: Record<number, EventAlert[]> = {};
         const minAlerts: Record<number, EventAlert[]> = {};
+        const matchesAlerts: Record<string, EventAlert[]> = {};
+        const conatinsAlerts: Record<string, EventAlert[]> = {};
         alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
-            if (alert.specifier.type === "exact") {
+            if (alert.specifier.type === "exact" && alert.specifier.amount) {
                 if (exactAlerts[alert.specifier.amount]) {
                     exactAlerts[alert.specifier.amount].push(alert)
                 } else {
                     exactAlerts[alert.specifier.amount] = [alert];
                 }
             }
-            if (alert.specifier.type === "min") {
+            if (alert.specifier.type === "min" && alert.specifier.amount) {
                 if (minAlerts[alert.specifier.amount]) {
                     minAlerts[alert.specifier.amount].push(alert)
                 } else {
                     minAlerts[alert.specifier.amount] = [alert];
+                }
+            }
+            if (alert.specifier.type === "matches" && alert.specifier.text) {
+                if (matchesAlerts[alert.specifier.text]) {
+                    matchesAlerts[alert.specifier.text].push(alert)
+                } else {
+                    matchesAlerts[alert.specifier.text] = [alert];
                 }
             }
         });
@@ -245,10 +254,16 @@ class AlertPlayer {
         }
         const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
         const step = minKeys.findLast(x => x <= (event.amount || 0));
-        if (!step) {
-            return undefined;
+        if (step) {
+            return _.sample(minAlerts[step]);
         }
-        return _.sample(minAlerts[step]);
+        const parts = event.text?.split('***') || [];
+        if (parts.length >= 3) {
+            const matchesAlertMatches = matchesAlerts[parts[2]];
+            if (matchesAlertMatches && matchesAlertMatches.length) {
+                return _.sample(matchesAlertMatches);
+            }
+        }
     }
  
     async showNotification(item: Event) {
@@ -279,7 +294,7 @@ class AlertPlayer {
             text: parseMessage(item.text!).text
         };
 
-        if (vars.text && vars.text.startsWith('donation')) {
+        if (vars.text && vars.text.startsWith('donation') || vars.text.startsWith('channelPointRedemption')) {
             vars.text = vars.text.split('***').slice(-1)[0];
         } else {
             if (vars.amount) {

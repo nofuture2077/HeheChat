@@ -3,15 +3,16 @@ import { SystemMessageType, SystemMessageMainType } from "@/commons/message";
 export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' |
 'sub_1000' | 'sub_2000' | 'sub_3000' | 'sub_Prime' | 
 'subgift_1000' | 'subgift_2000' | 'subgift_3000' | 
-'subgiftb_1000' | 'subgiftb_2000' | 'subgiftb_3000';
+'subgiftb_1000' | 'subgiftb_2000' | 'subgiftb_3000' | 'channelPointRedemption';
 
-export type EventMainType = 'sub' | 'subgift' | 'subgiftb' | 'raid' | 'follow' | 'donation' | 'cheer';
+export type EventMainType = 'sub' | 'subgift' | 'subgiftb' | 'raid' | 'follow' | 'donation' | 'cheer' | 'channelPointRedemption';
 
 export type EventAlertRestriction = 'none' | 'mod' | 'system';
 
 export type EventAlertSpecifier = {
-    type: 'min' | 'exact',
-    amount: number,
+    type: 'min' | 'exact' | 'matches',
+    amount?: number,
+    text?: string
 }
 
 export const EventTypeMapping: Record<SystemMessageType, SystemMessageMainType> = {

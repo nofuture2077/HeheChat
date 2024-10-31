@@ -1,6 +1,6 @@
 import classes from './eventdrawer.module.css'
 import { Title, Button, Group, Box, Text, ThemeIcon, ScrollArea, ActionIcon } from '@mantine/core';
-import { IconX, IconGiftFilled, IconCoinBitcoinFilled, IconReload, IconUserHeart, IconSparkles, IconMoneybag } from '@tabler/icons-react';
+import { IconX, IconGiftFilled, IconCoinBitcoinFilled, IconReload, IconUserHeart, IconSparkles, IconMoneybag, IconPlant } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { EventStorage, EventData } from './eventstorage';
 import { ConfigContext } from '@/ApplicationContext';
@@ -39,7 +39,8 @@ const messages: Record<EventType, string> = {
     'sub_Prime': 'Sub with prime for $2:whole months',
     'follow': 'Just followed',
     'cheer': 'Cheered $2:whole bits',
-    'donation': "Donated $2:decimal $3"
+    'donation': "Donated $2:decimal $3",
+    'channelPointRedemption': 'Channelpoints: "$5"'
 }
 
 const icons: Record<EventType, ReactElementLike> = {
@@ -56,11 +57,12 @@ const icons: Record<EventType, ReactElementLike> = {
     'sub_Prime': <IconGiftFilled/>,
     'follow': <IconUserHeart/>,
     'cheer': <IconCoinBitcoinFilled/>,
-    'donation': <IconMoneybag/>
+    'donation': <IconMoneybag/>,
+    'channelPointRedemption': <IconPlant/>
 }
 
 export function formatEventText(event: EventData) {
-    const msg = formatString(messages[event.eventtype as EventType], [event.channel, event.username, event.amount]);
+    const msg = formatString(messages[event.eventtype as EventType], [event.channel, event.username, event.amount].concat(event.text?.split('***')));
     return msg;
 }
 
