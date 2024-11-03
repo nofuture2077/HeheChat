@@ -1,12 +1,13 @@
-import { Container, ActionIcon, Button, Text, Stack } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { Container, ActionIcon, Button, Text, Stack, Indicator } from '@mantine/core';
+import { useDisclosure, useInterval } from '@mantine/hooks';
 import classes from './Header.module.css';
-import { IconBrandTwitch, IconSettings, IconBell, IconUserCircle } from '@tabler/icons-react';
-import { useContext } from 'react';
+import { IconBrandTwitch, IconSettings, IconBell } from '@tabler/icons-react';
+import { useContext, useEffect, useState } from 'react';
 import { ConfigContext, ProfileContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
 import { HeaderLogo } from './HeaderLogo';
 import { TwitchPlayer } from '@/components/twitch/twitchplayer'
+import { AlertSystem } from '../alerts/alertplayer';
 
 
 export function Header(props: {
@@ -18,6 +19,17 @@ export function Header(props: {
     const config = useContext(ConfigContext);
     const [opened] = useDisclosure(false);
     const profile = useContext(ProfileContext);
+    const [alertsActive, setAlertsActive] = useState<boolean>(false);
+
+    const interval = useInterval(() => {
+        const active = AlertSystem.status();
+        setAlertsActive(active);
+    }, 5 * 1000);
+
+    useEffect(() => {
+        interval.start();
+        return interval.stop;
+    });
     return (
         <Stack gap={0}>
             <Container className={classes.inner}>
@@ -28,7 +40,9 @@ export function Header(props: {
                         <IconSettings onClick={() => props.openSettings()} />
                     </ActionIcon>
                     <ActionIcon variant='transparent' color='primary' size='44px'>
-                        <IconBell onClick={props.openEvents} />
+                        <Indicator size={8} offset={2} color={alertsActive ? 'green' : 'red'} processing={!alertsActive} disabled={!config.playAlerts}>
+                            <IconBell onClick={props.openEvents} />
+                        </Indicator>
                     </ActionIcon>
                     <ActionIcon variant='transparent' color='primary' size='44px'>
                         <IconBrandTwitch onClick={props.openTwitch}/>

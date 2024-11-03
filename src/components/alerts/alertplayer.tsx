@@ -17,7 +17,6 @@ let cheerPrefixes = ['Cheer', 'BibleThump', 'cheerwhal', 'Corgo', 'uni', 'ShowLo
 let cheerPrefixesRegExp = cheerPrefixes.map(x => new RegExp(x + "\\d+", "gi"))
 
 class AlertPlayer {
-    init: boolean = false;
     audioContext?: AudioContext;
     gainNode?: GainNode;
     silenceAudio?: HTMLAudioElement;
@@ -37,11 +36,12 @@ class AlertPlayer {
         setInterval(() => this.checkQueue(), 1000);
     }
 
-    initialize() {
-        if (this.init) return;
+    status(): boolean {
+        return this.audioContext !== undefined && this.audioContext.state === 'running';
+    }
 
+    initialize() {
         console.log('Alert system initialized');
-        this.init = true;
         this.audioContext = new (window.AudioContext)();
         this.gainNode = this.audioContext.createGain();
         this.gainNode.gain.value = 0;
