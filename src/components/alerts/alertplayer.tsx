@@ -226,18 +226,19 @@ class AlertPlayer {
         const matchesAlerts: Record<string, EventAlert[]> = {};
         const conatinsAlerts: Record<string, EventAlert[]> = {};
         alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
-            if (alert.specifier.type === "exact" && alert.specifier.amount) {
-                if (exactAlerts[alert.specifier.amount]) {
-                    exactAlerts[alert.specifier.amount].push(alert)
+            const amount = Number(alert.specifier.amount || 0);
+            if (alert.specifier.type === "exact") {
+                if (exactAlerts[amount]) {
+                    exactAlerts[amount].push(alert)
                 } else {
-                    exactAlerts[alert.specifier.amount] = [alert];
+                    exactAlerts[amount] = [alert];
                 }
             }
-            if (alert.specifier.type === "min" && alert.specifier.amount) {
-                if (minAlerts[alert.specifier.amount]) {
-                    minAlerts[alert.specifier.amount].push(alert)
+            if (alert.specifier.type === "min") {
+                if (minAlerts[amount]) {
+                    minAlerts[amount].push(alert)
                 } else {
-                    minAlerts[alert.specifier.amount] = [alert];
+                    minAlerts[amount] = [alert];
                 }
             }
             if (alert.specifier.type === "matches" && alert.specifier.text) {
