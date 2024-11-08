@@ -224,7 +224,6 @@ class AlertPlayer {
         const exactAlerts: Record<number, EventAlert[]> = {};
         const minAlerts: Record<number, EventAlert[]> = {};
         const matchesAlerts: Record<string, EventAlert[]> = {};
-        const conatinsAlerts: Record<string, EventAlert[]> = {};
         alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
             const amount = Number(alert.specifier.amount || 0);
             if (alert.specifier.type === "exact") {
@@ -249,14 +248,10 @@ class AlertPlayer {
                 }
             }
         });
-        const exactAlertMatches = exactAlerts[event.amount || 0];
+        const eventAmount = Number(event.amount || 0);
+        const exactAlertMatches = exactAlerts[eventAmount];
         if (exactAlertMatches && exactAlertMatches.length) {
             return _.sample(exactAlertMatches);
-        }
-        const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
-        const step = minKeys.findLast(x => x <= (event.amount || 0));
-        if (step) {
-            return _.sample(minAlerts[step]);
         }
         const parts = event.text?.split('***') || [];
         if (parts.length >= 4) {
@@ -264,6 +259,11 @@ class AlertPlayer {
             if (matchesAlertMatches && matchesAlertMatches.length) {
                 return _.sample(matchesAlertMatches);
             }
+        }
+        const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
+        const step = minKeys.findLast(x => x <= eventAmount);
+        if (step) {
+            return _.sample(minAlerts[step]);
         }
     }
  
