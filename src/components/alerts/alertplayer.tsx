@@ -262,7 +262,7 @@ class AlertPlayer {
         }
         const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
         const step = minKeys.findLast(x => x <= eventAmount);
-        if (step) {
+        if (step || step === 0) {
             return _.sample(minAlerts[step]);
         }
     }
