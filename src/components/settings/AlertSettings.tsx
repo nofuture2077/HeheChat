@@ -1,4 +1,4 @@
-import { Stack, Text, Switch, Fieldset, Anchor } from '@mantine/core';
+import { Stack, Text, Switch, Fieldset, Anchor, Slider } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
@@ -9,6 +9,7 @@ export function AlertSettings() {
     const config = useContext(ConfigContext);
     const forceUpdate = useForceUpdate();
     const [sink, setSink] = useState<string | undefined>(undefined);
+    const [ttsExtra, setTTSExtra] = useState<number>(AlertSystem.ttsExtra || 0);
     const hasShare = (channel: string) => config.receivedShares.includes(channel);
     const isActive = (channel: string) => config.activatedShares.includes(channel);
 
@@ -19,6 +20,12 @@ export function AlertSettings() {
             setSink(data.sink);
         });
     }, []);
+
+    useEffect(() => {
+        if (AlertSystem.ttsExtra !== ttsExtra) {
+            AlertSystem.setTTSExtra(ttsExtra);
+        }
+    }, [ttsExtra])
 
     const changeActive = (channel: string, active: boolean) => {
         const activatedShares = config.activatedShares;
@@ -35,13 +42,15 @@ export function AlertSettings() {
         }
         config.setActivatedShares(activatedShares);
     };
+
+    const marks = [0, 100, 200, 300].map(x => ({ value: x, label: x + "ms" }));
     return (
         <Stack mt={30} mb={30} gap={30}>
             {sink ? (<>
                 <Text span inline key={'browser-source-label'}>Browsersource (visual only) <Anchor inline key={'browser-source-link'} href={import.meta.env.VITE_SINK_URL + "#token=" + sink} target="_blank"><IconLink /></Anchor></Text>
                 
             </>) : null}
-            <Fieldset legend="Play Alerts" variant="filled">
+            <Fieldset legend="Play Alerts" variant="filled" key="playalerts">
                 <Stack>
                     <Switch checked={config.playAlerts} onChange={(event) => { config.setPlayAlerts(event.currentTarget.checked); forceUpdate() }} label="Play Alerts" size="lg" />
                     {config.channels.map(channel => <Switch key={channel} checked={isActive(channel)} disabled={!hasShare(channel)} label={channel + (hasShare(channel) ? '' : ' *')} onChange={(event) => { changeActive(channel, event.currentTarget.checked); forceUpdate() }} size="lg" />)}
@@ -54,7 +63,7 @@ export function AlertSettings() {
                 if (!AlertSystem.alertConfig[channel] || !config.channels.includes(channel)) {
                     return null;
                 }
-                return <Fieldset legend={"Alerts " + channel} variant="filled">
+                return <Fieldset key={"Alerts-" + channel} legend={"Alerts " + channel} variant="filled">
                     <Stack key={"alert-config-" + channel}>
                         {Object.values(AlertSystem.alertConfig[channel].data?.alerts || []).reduce((accumulator, value) => accumulator.concat(value), []).map((alert) => {
                             return <Switch disabled={!isActive(channel)} checked={!config.deactivatedAlerts[alert.id]} onChange={(event) => { config.setDeactivatedAlerts(alert.id, !event.currentTarget.checked); forceUpdate() }} key={alert.id} label={alert.name} size="lg" />
@@ -62,5 +71,11 @@ export function AlertSettings() {
                     </Stack>
                 </Fieldset>
             })}
+
+            <Fieldset legend="TTS Delay" variant="filled" key="tts-delay">
+                <Stack>
+                <Slider w="calc(100% - 20px)" m="10" value={ttsExtra} onChange={setTTSExtra} min={0} max={300} label={(value) => `${value}ms`} marks={marks} />
+                </Stack>
+            </Fieldset>
         </Stack>)
 }
