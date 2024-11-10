@@ -1,5 +1,5 @@
 import { Stack, Badge } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
+import { useDisclosure, useInterval, useForceUpdate } from "@mantine/hooks";
 import { ReactNodeLike } from "prop-types";
 import { useEffect, useState } from "react";
 import { Hypetrain } from "./hypetrain";
@@ -20,14 +20,23 @@ function toNode(pin: Pin, onClick: (id: string) => void): ReactNodeLike {
     }
     return null;
 }
-
+//var counter = 32;
 export function PinManager() {
     const [pins, setPins] = useState<Pin[]>([]);
+    const forceUpdate = useForceUpdate();
 
     const [expanded, expandHandler] = useDisclosure(false);
-    useEffect(() => {
-        // upsertPin({type: 'hypetrain', id: '124', channel: 'ronnyberger', endTime: new Date(new Date().getTime() +4* 60 * 1000), remove: () => removePin('124'), data: {level: 12, progress: 432, goal: 3443}});
 
+/*
+    const int = useInterval(() => {
+        console.log(counter);
+        counter = counter + 1000;
+        upsertPin({type: 'hypetrain', id: '124', channel: 'ronnyberger', endTime: new Date(new Date().getTime() + 4* 60 * 1000 - counter), remove: () => removePin('124'), data: {level: 12, progress: counter, goal: 33343}});
+
+    }, 1000)
+*/
+    useEffect(() => {
+       // int.start();
         const streamEventSub = PubSub.subscribe("WS-streamevent", (msg, data) => {
             console.log("streamevent", data);
 
@@ -90,6 +99,7 @@ export function PinManager() {
             }
             return pins;
         });
+        forceUpdate();
     }
 
     if (!pins.length) {

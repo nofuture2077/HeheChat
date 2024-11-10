@@ -1,0 +1,16 @@
+.hypetrain {
+    position: relative;
+    background: linear-gradient(to right, var(--mantine-color-skyblue-9), var(--mantine-color-paleviolet-5));
+}
+
+.progress {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    background: light-dark(var(--mantine-color-primary-1), var(--mantine-color-primary-8));
+}
+
+.content {
+    z-index: 5;
+}
