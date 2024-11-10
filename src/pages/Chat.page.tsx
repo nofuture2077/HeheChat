@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
-import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon, Badge } from '@mantine/core';
+import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon, Badge, Stack, Group } from '@mantine/core';
 import { Chat } from '@/components/chat/Chat';
 import { IconMessagePause, IconMessage } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
@@ -23,6 +23,9 @@ import { AlertSystem } from '@/components/alerts/alertplayer';
 import { toMap } from '@/commons/helper';
 import { Event } from '@/commons/events';
 import { UserCardDrawer } from '@/components/login/usercard';
+import { PinManager } from '@/components/pinned/pinmanager';
+import { useViewportWidthCallback } from '@/commons/helper';
+import { getDimension } from '@/components/twitch/twitchplayer';
 
 export type OverlayDrawer = {
     name: string;
@@ -52,6 +55,7 @@ export function ChatPage() {
     const [online, setOnline] = useState(true);
     const documentVisible = useDocumentVisibility();
     const networkStatus = useNetwork();
+    const [videoHeight, setVideoHeight] = useState(0);
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
         const viewportElement = viewport.current;
@@ -82,6 +86,11 @@ export function ChatPage() {
         }
         setChatMessages((prevMessages) => prevMessages.concat(msg).slice((prevMessages.length % 2) ? 0 : (-1 * maxMessages + 1)));
     }
+
+    useViewportWidthCallback(() => {
+        const [w, h] = getDimension();
+        setVideoHeight(h);
+    });
 
     useEffect(() => {
         if (profile.name === 'default' && !config.channels.length) {
@@ -195,6 +204,9 @@ export function ChatPage() {
         raidUser
     };
 
+    const headerHeight = 36 + (config.showVideo ? videoHeight : 0);
+    const affixOffset = headerHeight + 15;
+
     return (
         <AppShell>
             <AppShell.Header>
@@ -204,11 +216,14 @@ export function ChatPage() {
                     openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} />
             </AppShell.Header>
 
-            {!online ? <Affix position={{top: 65}} w="100%" ta="center">
-                <Badge color="red" size="lg">No internet connection...</Badge>
-            </Affix> : null}
-
             <AppShell.Main>
+                <Affix top={affixOffset} w="100%">
+                    <Stack align='stretch'>
+                        {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}
+                        <PinManager/>
+                    </Stack>
+                </Affix>
+
                 <Drawer zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
                     {drawer ? <drawer.component height="100vh" modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props} openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }} ></drawer.component> : null}
                 </Drawer>

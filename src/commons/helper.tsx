@@ -1,3 +1,6 @@
+import { useViewportSize } from '@mantine/hooks';
+import { useEffect } from 'react';
+
 export function toMap<A, K>(arr: A[], func1: (el: A) => K) {
     return arr.reduce((acc, el) => {
         acc.set(func1(el), el);
@@ -74,6 +77,15 @@ export function formatTime(date: Date): string {
     return `${hours}:${minutes}`;
 }
 
+export function formatMinuteSeconds(seconds: number): string {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+  
+    const formattedSeconds = remainingSeconds < 10 ? `0${remainingSeconds}` : remainingSeconds;
+  
+    return `${minutes}:${formattedSeconds}`;
+  }
+
 export const formatDuration = (duration: number) => {
     return shortEnglishHumanizer(duration, { largest: 1 });
 }
@@ -123,4 +135,12 @@ export function formatSeconds(seconds: number): string {
     const remainingSeconds = roundedSeconds % 60;
 
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+export function useViewportWidthCallback(callback: (width: number) => void) {
+    const { width } = useViewportSize();
+  
+    useEffect(() => {
+      callback(width);
+    }, [width, callback]);
 }
