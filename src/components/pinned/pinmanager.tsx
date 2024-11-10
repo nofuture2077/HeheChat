@@ -41,18 +41,18 @@ export function PinManager() {
             console.log("streamevent", data);
 
             if (data.eventtype === 'hypeTrainBegin') {
-                const d = JSON.parse(data.data.text);
+                const d = JSON.parse(data.text);
                 const pin: Pin = {type: 'hypetrain', id: d.id, channel: d.channel, endTime: new Date(Date.parse(d.expiryDate)), remove: () => removePin(d.id), data: {level: d.level, progress: d.progress, goal: d.goal}};
                 upsertPin(pin);
                 return;
             }
             if (data.eventtype === 'hypeTrainEnd') {
-                const d = JSON.parse(data.data.text);
+                const d = JSON.parse(data.text);
                 removePin(d.id);
                 return;
             }
             if (data.eventtype === 'hypeTrainProgress') {
-                const d = JSON.parse(data.data.text);
+                const d = JSON.parse(data.text);
                 const pin: Pin = {type: 'hypetrain', id: d.id, channel: d.channel, endTime: new Date(Date.parse(d.expiryDate)), remove: () => removePin(d.id), data: {level: d.level, progress: d.progress, goal: d.goal}};
                 upsertPin(pin);
                 return;
