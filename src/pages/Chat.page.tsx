@@ -217,7 +217,7 @@ export function ChatPage() {
             </AppShell.Header>
 
             <AppShell.Main>
-                <Affix top={affixOffset} w="100%">
+                <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch'>
                         {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}
                         <PinManager/>
