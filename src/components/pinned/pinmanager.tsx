@@ -40,18 +40,18 @@ export function PinManager() {
         const streamEventSub = PubSub.subscribe("WS-streamevent", (msg, data) => {
             console.log("streamevent", data);
 
-            if (data.type === 'hypeTrainBegin') {
+            if (data.eventtype === 'hypeTrainBegin') {
                 const d = JSON.parse(data.data.text);
                 const pin: Pin = {type: 'hypetrain', id: d.id, channel: d.channel, endTime: new Date(Date.parse(d.expiryDate)), remove: () => removePin(d.id), data: {level: d.level, progress: d.progress, goal: d.goal}};
                 upsertPin(pin);
                 return;
             }
-            if (data.type === 'hypeTrainEnd') {
+            if (data.eventtype === 'hypeTrainEnd') {
                 const d = JSON.parse(data.data.text);
                 removePin(d.id);
                 return;
             }
-            if (data.type === 'hypeTrainProgress') {
+            if (data.eventtype === 'hypeTrainProgress') {
                 const d = JSON.parse(data.data.text);
                 const pin: Pin = {type: 'hypetrain', id: d.id, channel: d.channel, endTime: new Date(Date.parse(d.expiryDate)), remove: () => removePin(d.id), data: {level: d.level, progress: d.progress, goal: d.goal}};
                 upsertPin(pin);
