@@ -10,6 +10,7 @@ export function AlertSettings() {
     const forceUpdate = useForceUpdate();
     const [sink, setSink] = useState<string | undefined>(undefined);
     const [ttsExtra, setTTSExtra] = useState<number>(AlertSystem.ttsExtra || 0);
+    const [jingleExtra, setJingleExtra] = useState<number>(AlertSystem.jingleExtra || 0);
     const hasShare = (channel: string) => config.receivedShares.includes(channel);
     const isActive = (channel: string) => config.activatedShares.includes(channel);
 
@@ -25,7 +26,10 @@ export function AlertSettings() {
         if (AlertSystem.ttsExtra !== ttsExtra) {
             AlertSystem.setTTSExtra(ttsExtra);
         }
-    }, [ttsExtra])
+        if (AlertSystem.jingleExtra !== jingleExtra) {
+            AlertSystem.setJingleExtra(jingleExtra);
+        }
+    }, [ttsExtra, jingleExtra])
 
     const changeActive = (channel: string, active: boolean) => {
         const activatedShares = config.activatedShares;
@@ -43,7 +47,7 @@ export function AlertSettings() {
         config.setActivatedShares(activatedShares);
     };
 
-    const marks = [0, 100, 200, 300].map(x => ({ value: x, label: x + "ms" }));
+    const marks = [-100, 0, 100, 200, 300].map(x => ({ value: x, label: x + "ms" }));
     return (
         <Stack mt={30} mb={30} gap={30}>
             {sink ? (<>
@@ -72,9 +76,12 @@ export function AlertSettings() {
                 </Fieldset>
             })}
 
-            <Fieldset legend="TTS Delay" variant="filled" key="tts-delay">
+            <Fieldset legend="Alert Delay" variant="filled" key="tts-delay">
                 <Stack>
-                <Slider w="calc(100% - 20px)" m="10" value={ttsExtra} onChange={setTTSExtra} min={0} max={300} label={(value) => `${value}ms`} marks={marks} />
+                    <Text size="sm">Jingle</Text>
+                    <Slider w="calc(100% - 20px)" m="10" value={jingleExtra} onChange={setJingleExtra} min={-100} max={300} label={(value) => `${value}ms`} marks={marks} />
+                    <Text size="sm">Text to Speech</Text>
+                    <Slider w="calc(100% - 20px)" m="10" value={ttsExtra} onChange={setTTSExtra} min={-100} max={300} label={(value) => `${value}ms`} marks={marks} />
                 </Stack>
             </Fieldset>
         </Stack>)

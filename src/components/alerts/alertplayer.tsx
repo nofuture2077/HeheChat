@@ -32,10 +32,12 @@ class AlertPlayer {
     currentlyPlaying?: Event;
     skipCurrent: boolean = false;
     ttsExtra?: number;
+    jingleExtra?: number;
 
     constructor() {
         setInterval(() => this.checkQueue(), 1000);
         this.ttsExtra = Number(localStorage.getItem('hehechat-ttsExtra') || '0') || 160;
+        this.jingleExtra = Number(localStorage.getItem('hehechat-jingleExtra') || '0') || 0;
     }
 
     status(): boolean {
@@ -180,6 +182,11 @@ class AlertPlayer {
     setTTSExtra(extra: number) {
         this.ttsExtra = extra;
         localStorage.setItem('hehechat-ttsExtra', extra + "");
+    }
+
+    setJingleExtra(extra: number) {
+        this.jingleExtra = extra;
+        localStorage.setItem('hehechat-jingleExtra', extra + "");
     }
 
     getAudioFileData(reference: Base64FileReference, alertConfig: EventAlertConfig) {
@@ -345,7 +352,7 @@ class AlertPlayer {
                 PubSub.publish('AlertPlayer-update');
             }
 
-            this.playAudio(0.8, jingleAudio, 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(onEnd, onError);
+            this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(onEnd, onError);
         } catch (err) {
             console.error(err);
             this.stopPlaying();
