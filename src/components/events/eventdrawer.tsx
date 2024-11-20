@@ -12,8 +12,8 @@ import { ReactElementLike } from 'prop-types';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { OverlayDrawer } from '@/pages/Chat.page';
 import { AlertControl } from './alertcontrol';
-import { SystemMessageMainType } from "@/commons/message";
 import { Dictionary } from 'underscore';
+import { useForceUpdate } from '@mantine/hooks';
 
 export const EventDrawer: OverlayDrawer = {
     name: 'events',
@@ -80,6 +80,7 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
     const [events, setEvents] = useState<EventData[]>([]);
     const [load, setLoad] = useState(true);
     const [checkedEvents, setCheckedEvents] = useState<Dictionary<boolean>>({});
+    const forceUpdate = useForceUpdate();
 
     useEffect(() => {
         const ignored: string[] = Object.keys(config.systemMessageInChat).filter(
@@ -111,9 +112,11 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
             ev[data.id] = true;
             return ev;
         });
+        forceUpdate();
         setTimeout(() => {
             setCheckedEvents(ev => {
                 ev[data.id] = false;
+                forceUpdate();
                 return ev;
             });
         }, 2500);
