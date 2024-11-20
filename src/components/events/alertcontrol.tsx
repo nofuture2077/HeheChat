@@ -19,7 +19,7 @@ export function AlertControl(props: AlertControlProps) {
 
     useEffect(() => {
         const updateSub = PubSub.subscribe('AlertPlayer-update', (msg, data) => {
-            const playText = data.text || (paused ? 'Paused' : 'Not Playing');
+            const playText = (data && data.text) || (paused ? 'Paused' : 'Not Playing');
             if (data) {
                 timer.start();
                 setSeconds(0);
