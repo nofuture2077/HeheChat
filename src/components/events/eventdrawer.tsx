@@ -1,6 +1,6 @@
 import classes from './eventdrawer.module.css'
 import { Title, Button, Group, Box, Text, ThemeIcon, ScrollArea, ActionIcon } from '@mantine/core';
-import { IconX, IconGiftFilled, IconCoinBitcoinFilled, IconReload, IconUserHeart, IconSparkles, IconMoneybag, IconPlant } from '@tabler/icons-react';
+import { IconX, IconGiftFilled, IconCoinBitcoinFilled, IconReload, IconUserHeart, IconSparkles, IconMoneybag, IconPlant, IconCheck } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { EventStorage, EventData } from './eventstorage';
 import { ConfigContext } from '@/ApplicationContext';
@@ -13,6 +13,7 @@ import { AlertSystem } from '@/components/alerts/alertplayer';
 import { OverlayDrawer } from '@/pages/Chat.page';
 import { AlertControl } from './alertcontrol';
 import { SystemMessageMainType } from "@/commons/message";
+import { Dictionary } from 'underscore';
 
 export const EventDrawer: OverlayDrawer = {
     name: 'events',
@@ -78,6 +79,7 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
     const config = useContext(ConfigContext);
     const [events, setEvents] = useState<EventData[]>([]);
     const [load, setLoad] = useState(true);
+    const [checkedEvents, setCheckedEvents] = useState<Dictionary<boolean>>({});
 
     useEffect(() => {
         const ignored: string[] = Object.keys(config.systemMessageInChat).filter(
@@ -102,9 +104,19 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
     }, []);
 
     const replayEvent = (data: EventData) => {
-        if (AlertSystem.shouldBePlayed(data)) {
+        if (AlertSystem.shouldBePlayed(data) && !checkedEvents[data.id]) {
             AlertSystem.addEvent(data);
         }
+        setCheckedEvents(ev => {
+            ev[data.id] = true;
+            return ev;
+        });
+        setTimeout(() => {
+            setCheckedEvents(ev => {
+                ev[data.id] = false;
+                return ev;
+            });
+        }, 2500);
     };
 
     return (
@@ -122,7 +134,9 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
                 <div className={classes.reverse}>
                     {load ? <>{[1,2,3].map(x => <InfoCardSkeleton key={'event' + x}/>)}</> : null}
                     {!load && events.length === 0 ? <Text key='event-noevents' pt='xl' size='xl' ta="center" fw={500}>No Events to show.</Text> : null}
-                    {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} date={event.date} text={formatEventText(event)} left={getIcon(event, 'infocard-left')} right={<ActionIcon disabled={!AlertSystem.shouldBePlayed(event)} variant='transparent' key={'infocard-right'} onClick={() => replayEvent(event)}><IconReload/></ActionIcon>}/>)}
+                    {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} date={event.date} text={formatEventText(event)} left={getIcon(event, 'infocard-left')} right={<ActionIcon disabled={!AlertSystem.shouldBePlayed(event)} variant='transparent' key={'infocard-right'} onClick={() => replayEvent(event)}>
+                        {(checkedEvents[event.id] ? <IconCheck/> : <IconReload/>)}
+                    </ActionIcon>}/>)}
                 </div>
             </ScrollArea>
         </nav>
