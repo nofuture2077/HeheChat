@@ -290,10 +290,12 @@ class AlertPlayer {
         const alert = this.getAlert(item, alertConfig, this.config!);
 
         if (!alert) {
+            PubSub.publish('AlertPlayer-update', {text: 'No Alert for Event'});
             console.log('No alert for event', this.config, alertConfig, item);
             return;
         }
 
+        PubSub.publish('AlertPlayer-update', {text: 'Prepare Alert'});
         console.log('Play alert with config', item, alert);
 
         _.templateSettings = {
@@ -378,6 +380,7 @@ class AlertPlayer {
 
     addEvent(item: Event) {
         console.log("Event added to the queue", item);
+        PubSub.publish('AlertPlayer-update', {text: 'Event added'});
         this.queue.push(item);
     }
     
