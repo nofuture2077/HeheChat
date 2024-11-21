@@ -386,7 +386,7 @@ class AlertPlayer {
     }
     
     checkQueue() {
-        if (this.playing || this.paused || !this.config) {
+        if (this.playing || this.paused || !this.config || !this.status()) {
             return;
         }
     
