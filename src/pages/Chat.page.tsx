@@ -155,7 +155,7 @@ export function ChatPage() {
 
         setTimeout(() => {
             scrollToBottom();
-        }, 1000);
+        }, 2000);
 
         config.channels.forEach(channel => {
             emotes.updateChannel(loginContext, channel).then(forceUpdate);
@@ -175,13 +175,19 @@ export function ChatPage() {
 
     useDidUpdate(() => {
         setOnline(networkStatus.online);
-
+        setShouldScroll(true);
         if (networkStatus.online && documentVisible) {
             Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
                 const msgs = rawMessages.map(parseMessage);
                 setChatMessages(msgs);
             });
         }
+        if (!AlertSystem.status()) {
+            AlertSystem.initialize();
+        } 
+        setTimeout(() => {
+            scrollToBottom();
+        }, 2000);
     }, [documentVisible, networkStatus.online]);
 
     useEffect(() => {

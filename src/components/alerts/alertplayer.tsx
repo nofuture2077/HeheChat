@@ -311,8 +311,9 @@ class AlertPlayer {
             text: parseMessage(item.text!).text
         };
 
-        if (vars.text && (vars.text.startsWith('donation***') || vars.text.startsWith('channelPointRedemption***'))) {
-            vars.text = vars.text!.split('***').slice(-1)[0];
+        const ttsText = vars.text || item.text;
+        if (ttsText && (ttsText.startsWith('donation***') || ttsText.startsWith('channelPointRedemption***'))) {
+            vars.text = ttsText.split('***').slice(-1)[0];
         } else {
             if (vars.amount) {
                 vars.amount = Number(vars.amount).toFixed(0);
