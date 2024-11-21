@@ -75,6 +75,9 @@ export default function App() {
             console.error("Saving profile without guid", profile);
             return;
         }
+        if (!profile.config.channels || !profile.config.channels.length) {
+            return;
+        }
         storeProfile(profile);
     }, [profile])
 

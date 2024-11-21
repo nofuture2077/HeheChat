@@ -3,7 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle } from '../colorscheme/colorscheme';
 import { useContext, useState } from 'react';
 import { ConfigContext, ProfileContext } from '@/ApplicationContext';
-import { IconTrash, IconPencil } from '@tabler/icons-react';
+import { IconTrash, IconPencil, IconReload } from '@tabler/icons-react';
 import { Profile } from '@/commons/profile';
 
 export interface UISettingProperties {
@@ -19,6 +19,11 @@ export function UISettings(props: UISettingProperties) {
     const marks = [10, 14, 18, 22, 26].map(x => ({ value: x, label: x + "px" }));
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Fieldset legend="Hehechat" variant='filled'>
+                <Stack>
+                    <Button variant="light" leftSection={<IconReload size={14}/>} onClick={() => window.location.reload()}>Reload</Button>
+                </Stack>
+            </Fieldset>
             <Fieldset legend="Profile" variant='filled'>
                 <Stack>
                 <TextInput value={profile.name} readOnly disabled rightSection={
