@@ -84,7 +84,20 @@ export function formatMinuteSeconds(seconds: number): string {
     const formattedSeconds = remainingSeconds < 10 ? `0${remainingSeconds}` : remainingSeconds;
   
     return `${minutes}:${formattedSeconds}`;
-  }
+}
+
+export function formatHoursMinute(secondsElapsed: number): string {
+
+    const hours = Math.floor(secondsElapsed / 3600);
+    const minutes = Math.floor((secondsElapsed % 3600) / 60);
+    const seconds = secondsElapsed % 60;
+  
+    const formattedHours = hours < 10 ? `0${hours}` : hours;
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    const formattedSeconds = seconds < 10 ? `0${seconds}` : seconds;
+  
+    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+}
 
 export const formatDuration = (duration: number) => {
     return shortEnglishHumanizer(duration, { largest: 1 });

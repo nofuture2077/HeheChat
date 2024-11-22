@@ -15,6 +15,8 @@ export interface ConfigData {
     showSubBadges: boolean;
     showPredictions: boolean;
     showOtherBadges: boolean;
+    hideViewers: boolean;
+    hideOwnViewers: boolean;
     fontSize: number;
     modToolsEnabled: boolean;
     raidTargets: string[];
@@ -55,6 +57,8 @@ export interface Config extends ConfigData {
     loadShares: () => void;
     setDeactivatedAlerts: (id: string, val: boolean) => void;
     setShowVideo: (val: boolean) => void;
+    setHideViewers: (val: boolean) => void;
+    setHideOwnViewers: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -74,6 +78,8 @@ export const DEFAULT_CONFIG: Config = {
     modToolsEnabled: false,
     raidTargets: [],
     playAlerts: false,
+    hideViewers: false,
+    hideOwnViewers: false,
     systemMessageInChat: {
         sub: true,
         subgift: true,
@@ -115,5 +121,7 @@ export const DEFAULT_CONFIG: Config = {
     loadReceivedShares: () => {},
     setActivatedShares: (val: string[]) => {},
     setShares: (val: string[]) => {},
+    setHideViewers: (val: boolean) => {},
+    setHideOwnViewers: (val: boolean) => {},
     loadShares: () => {}
 };

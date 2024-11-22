@@ -153,6 +153,8 @@ export default function App() {
     const setShowVideo = (value: boolean) => updateConfig('showVideo', value);
     const setRaidTargets = (value: string[]) => updateConfig('raidTargets', value);
     const setChatEnabled = (value: boolean) => updateConfig('chatEnabled', value);
+    const setHideViewers = (value: boolean) => updateConfig('hideViewers', value);
+    const setHideOwnViewers = (value: boolean) => updateConfig('hideOwnViewers', value);
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
             return profile.config.chatChannel;
@@ -318,6 +320,8 @@ export default function App() {
         loadReceivedShares,
         setActivatedShares,
         setShares,
+        setHideViewers,
+        setHideOwnViewers,
         loadShares,
         onMessage,
         off,

@@ -50,6 +50,8 @@ export function ChatSettings() {
                     <Switch checked={config.showSubBadges} onChange={(event) => config.setShowSubBadges(event.currentTarget.checked)} label="Sub Badges" size="lg" />
                     <Switch checked={config.showPredictions} onChange={(event) => config.setShowPredictions(event.currentTarget.checked)} label="Prediction Badges" size="lg" />
                     <Switch checked={config.showOtherBadges} onChange={(event) => config.setShowOtherBadges(event.currentTarget.checked)} label="Other Badges" size="lg" />
+                    <Switch checked={config.hideViewers} onChange={(event) => config.setHideViewers(event.currentTarget.checked)} label="Hide Viewers" size="lg" />
+                    <Switch checked={config.hideOwnViewers} onChange={(event) => config.setHideOwnViewers(event.currentTarget.checked)} label="Hide Own Viewers" size="lg" />
                 </Stack>
             </Fieldset>
 
