@@ -86,7 +86,7 @@ export function ShareSettings() {
 
     return (<Stack mt={30} mb={30} gap={30}>
         <Fieldset legend="Share Alerts with" variant="filled">
-            <TagsInput placeholder="" value={config.shares} onChange={setShares}></TagsInput>
+            <TagsInput placeholder="" value={config.shares} onChange={(shares) => setShares(shares.map(c => c.toLowerCase().substring(0, 25).trim()))}></TagsInput>
             <Space h="xs" />
             <Text fs="italic" size='14px'>* Share your alerts with other Streams so they can use your sounds. Be aware: If you use AI-TTS shared alerts will count against your Quota from elevenlabs</Text>
         </Fieldset>
