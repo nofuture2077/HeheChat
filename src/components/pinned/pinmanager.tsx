@@ -3,57 +3,299 @@ import { useDisclosure, useInterval, useForceUpdate } from "@mantine/hooks";
 import { ReactNodeLike } from "prop-types";
 import { useEffect, useState } from "react";
 import { Hypetrain } from "./hypetrain";
+import { Prediction } from "./prediction";
+import { Poll } from "./poll";
+import { Raid } from "./raid";
+import { Shoutout } from "./shoutout";
 import PubSub from "pubsub-js";
 
-interface Pin {
-    type: 'hypetrain';
+const FINAL_STATE_DURATION = 15000; // 15 seconds in milliseconds
+const RAID_DURATION = 90 * 1000; // 90 seconds in milliseconds
+const SHOUTOUT_DURATION = 15 * 1000; // 15 seconds in milliseconds
+
+export interface Pin {
+    type: 'hypetrain' | 'poll' | 'prediction' | 'raid' | 'shoutout';
     id: string;
     channel: string;
     endTime: Date;
     data: any;
     remove: () => void;
+    state?: 'active' | 'ended';
+    finalRemoveTime?: Date;
 }
 
 function toNode(pin: Pin, onClick: (id: string) => void): ReactNodeLike {
     switch(pin.type) {
-        case 'hypetrain': return <Hypetrain key={pin.id} id={pin.id} channel={pin.channel} endTime={pin.endTime} {...pin.data} onClick={() => onClick(pin.id)} remove={pin.remove}/>;
+        case 'hypetrain': 
+            return <Hypetrain 
+                key={pin.id} 
+                id={pin.id} 
+                channel={pin.channel} 
+                endTime={pin.state === 'ended' ? pin.finalRemoveTime! : pin.endTime} 
+                {...pin.data} 
+                onClick={() => onClick(pin.id)} 
+                remove={pin.remove}
+                state={pin.state}
+            />;
+        case 'prediction':
+            return <Prediction 
+                key={pin.id} 
+                id={pin.id} 
+                channel={pin.channel} 
+                endTime={pin.state === 'ended' ? pin.finalRemoveTime! : pin.endTime} 
+                {...pin.data} 
+                onClick={() => onClick(pin.id)} 
+                remove={pin.remove}
+                state={pin.state}
+            />;
+        case 'poll':
+            return <Poll 
+                key={pin.id} 
+                id={pin.id} 
+                channel={pin.channel} 
+                endTime={pin.state === 'ended' ? pin.finalRemoveTime! : pin.endTime} 
+                {...pin.data} 
+                onClick={() => onClick(pin.id)} 
+                remove={pin.remove}
+                state={pin.state}
+            />;
+        case 'raid':
+            return <Raid 
+                key={pin.id} 
+                id={pin.id} 
+                channel={pin.channel} 
+                endTime={pin.endTime} 
+                {...pin.data} 
+                onClick={() => onClick(pin.id)} 
+                remove={pin.remove}
+            />;
+        case 'shoutout':
+            return <Shoutout 
+                key={pin.id} 
+                id={pin.id} 
+                channel={pin.channel} 
+                endTime={pin.endTime} 
+                {...pin.data} 
+                onClick={() => onClick(pin.id)} 
+                remove={pin.remove}
+            />;
     }
     return null;
 }
-//var counter = 32;
+
 export function PinManager() {
     const [pins, setPins] = useState<Pin[]>([]);
     const forceUpdate = useForceUpdate();
 
     const [expanded, expandHandler] = useDisclosure(false);
 
-/*
-    const int = useInterval(() => {
-        console.log(counter);
-        counter = counter + 1000;
-        upsertPin({type: 'hypetrain', id: '124', channel: 'ronnyberger', endTime: new Date(new Date().getTime() + 4* 60 * 1000 - counter), remove: () => removePin('124'), data: {level: 12, progress: counter, goal: 33343}});
-
-    }, 1000)
-*/
     useEffect(() => {
-       // int.start();
         const streamEventSub = PubSub.subscribe("WS-streamevent", (msg, data) => {
             console.log("streamevent", data);
 
+            // Hype Train Events
             if (data.eventtype === 'hypeTrainBegin') {
                 const d = JSON.parse(data.text);
-                const pin: Pin = {type: 'hypetrain', id: d.id, channel: d.channel, endTime: new Date(Date.parse(d.expiryDate)), remove: () => removePin(d.id), data: {level: d.level, progress: d.progress, goal: d.goal}};
+                const pin: Pin = {
+                    type: 'hypetrain', 
+                    id: d.id, 
+                    channel: d.channel, 
+                    endTime: new Date(Date.parse(d.expiryDate)), 
+                    remove: () => removePin(d.id), 
+                    data: {level: d.level, progress: d.progress, goal: d.goal},
+                    state: 'active'
+                };
                 upsertPin(pin);
                 return;
             }
             if (data.eventtype === 'hypeTrainEnd') {
                 const d = JSON.parse(data.text);
-                removePin(d.id);
+                const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
+                const pin: Pin = {
+                    type: 'hypetrain',
+                    id: d.id,
+                    channel: d.channel,
+                    endTime: new Date(Date.parse(d.endDate)),
+                    finalRemoveTime,
+                    remove: () => removePin(d.id),
+                    data: {
+                        level: d.level,
+                        progress: 100,  // Show full progress in final state
+                        goal: d.total,
+                        final: true
+                    },
+                    state: 'ended'
+                };
+                upsertPin(pin);
+                setTimeout(() => removePin(d.id), FINAL_STATE_DURATION);
                 return;
             }
             if (data.eventtype === 'hypeTrainProgress') {
                 const d = JSON.parse(data.text);
-                const pin: Pin = {type: 'hypetrain', id: d.id, channel: d.channel, endTime: new Date(Date.parse(d.expiryDate)), remove: () => removePin(d.id), data: {level: d.level, progress: d.progress, goal: d.goal}};
+                const pin: Pin = {
+                    type: 'hypetrain', 
+                    id: d.id, 
+                    channel: d.channel, 
+                    endTime: new Date(Date.parse(d.expiryDate)), 
+                    remove: () => removePin(d.id), 
+                    data: {level: d.level, progress: d.progress, goal: d.goal},
+                    state: 'active'
+                };
+                upsertPin(pin);
+                return;
+            }
+
+            // Prediction Events
+            if (data.eventtype === 'predictionBegin') {
+                const d = JSON.parse(data.text);
+                const pin: Pin = {
+                    type: 'prediction',
+                    id: d.id,
+                    channel: d.channel,
+                    endTime: new Date(Date.parse(d.endDate)),
+                    remove: () => removePin(d.id),
+                    data: {
+                        title: d.title || 'Prediction',
+                        outcomes: d.outcomes,
+                    },
+                    state: 'active'
+                };
+                upsertPin(pin);
+                return;
+            }
+            if (data.eventtype === 'predictionEnd') {
+                const d = JSON.parse(data.text);
+                const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
+                const pin: Pin = {
+                    type: 'prediction',
+                    id: d.id,
+                    channel: d.channel,
+                    endTime: new Date(Date.parse(d.endDate)),
+                    finalRemoveTime,
+                    remove: () => removePin(d.id),
+                    data: {
+                        title: d.title || 'Prediction',
+                        outcomes: d.outcomes,
+                        winningOutcome: d.winningOutcome,
+                        final: true
+                    },
+                    state: 'ended'
+                };
+                upsertPin(pin);
+                setTimeout(() => removePin(d.id), FINAL_STATE_DURATION);
+                return;
+            }
+            if (data.eventtype === 'predictionProgress') {
+                const d = JSON.parse(data.text);
+                const pin: Pin = {
+                    type: 'prediction',
+                    id: d.id,
+                    channel: d.channel,
+                    endTime: new Date(Date.parse(d.endDate)),
+                    remove: () => removePin(d.id),
+                    data: {
+                        title: d.title || 'Prediction',
+                        outcomes: d.outcomes,
+                    },
+                    state: 'active'
+                };
+                upsertPin(pin);
+                return;
+            }
+
+            // Poll Events
+            if (data.eventtype === 'pollBegin') {
+                const d = JSON.parse(data.text);
+                const pin: Pin = {
+                    type: 'poll',
+                    id: d.id,
+                    channel: d.channel,
+                    endTime: new Date(Date.parse(d.endDate)),
+                    remove: () => removePin(d.id),
+                    data: {
+                        title: d.title || d.question,
+                        options: d.choices,
+                    },
+                    state: 'active'
+                };
+                upsertPin(pin);
+                return;
+            }
+            if (data.eventtype === 'pollEnd') {
+                const d = JSON.parse(data.text);
+                const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
+                const pin: Pin = {
+                    type: 'poll',
+                    id: d.id,
+                    channel: d.channel,
+                    endTime: new Date(Date.parse(d.endDate)),
+                    finalRemoveTime,
+                    remove: () => removePin(d.id),
+                    data: {
+                        title: d.title || d.question,
+                        options: d.choices,
+                        winningChoice: d.winningChoice,
+                        final: true
+                    },
+                    state: 'ended'
+                };
+                upsertPin(pin);
+                setTimeout(() => removePin(d.id), FINAL_STATE_DURATION);
+                return;
+            }
+            if (data.eventtype === 'pollProgress') {
+                const d = JSON.parse(data.text);
+                const pin: Pin = {
+                    type: 'poll',
+                    id: d.id,
+                    channel: d.channel,
+                    endTime: new Date(Date.parse(d.endDate)),
+                    remove: () => removePin(d.id),
+                    data: {
+                        title: d.title || d.question,
+                        options: d.choices,
+                    },
+                    state: 'active'
+                };
+                upsertPin(pin);
+                return;
+            }
+
+            // Raid Events
+            if (data.eventtype === 'raidTo') {
+                const d = JSON.parse(data.text);
+                const pin: Pin = {
+                    type: 'raid',
+                    id: `raid-${Date.now()}`,
+                    channel: d.broadcasterName,
+                    endTime: new Date(Date.now() + RAID_DURATION),
+                    remove: () => removePin(`raid-${Date.now()}`),
+                    data: {
+                        broadcasterName: d.broadcasterName,
+                        targetChannelName: d.targetChannelName,
+                        viewers: d.viewers
+                    }
+                };
+                upsertPin(pin);
+                return;
+            }
+
+            // Shoutout Events
+            if (data.eventtype === 'shoutoutCreate') {
+                const d = JSON.parse(data.text);
+                const pin: Pin = {
+                    type: 'shoutout',
+                    id: `shoutout-${Date.now()}`,
+                    channel: d.broadcasterName,
+                    endTime: new Date(Date.now() + SHOUTOUT_DURATION),
+                    remove: () => removePin(`shoutout-${Date.now()}`),
+                    data: {
+                        broadcasterName: d.broadcasterName,
+                        targetUserName: d.targetUserName,
+                        viewerCount: d.viewerCount,
+                        moderatorName: d.moderatorName
+                    }
+                };
                 upsertPin(pin);
                 return;
             }
@@ -73,7 +315,7 @@ export function PinManager() {
               pins.unshift(pin);
             }
             expandHandler.close();
-            return pins;
+            return [...pins];
         })
     };
 
@@ -82,7 +324,9 @@ export function PinManager() {
             const index = pins.findIndex(pin => pin.id === id);
       
             if (index > -1) {
-              pins.splice(index, 1);
+              const newPins = [...pins];
+              newPins.splice(index, 1);
+              return newPins;
             }
             return pins;
         });
@@ -90,14 +334,15 @@ export function PinManager() {
 
     const upsertPin = (newPin: Pin): void => {
         setPins((pins) => {
-            const index = pins.findIndex(pin => pin.type === newPin.type && pin.channel === newPin.channel);
+            const newPins = [...pins];
+            const index = newPins.findIndex(pin => pin.type === newPin.type && pin.channel === newPin.channel);
     
             if (index !== -1) {
-                pins[index] = newPin;
+                newPins[index] = newPin;
             } else {
-                pins.unshift(newPin);
+                newPins.unshift(newPin);
             }
-            return pins;
+            return newPins;
         });
         forceUpdate();
     }
@@ -106,7 +351,10 @@ export function PinManager() {
         return null;
     }
 
-    return (expanded ? <PinExpandedView pins={pins} selectPin={selectPin}/> : <PinCollapsedView pin={pins[0]} more={pins.length > 1} expand={expandHandler.open}/>);
+    return (expanded ? 
+        <PinExpandedView pins={pins} selectPin={selectPin}/> : 
+        <PinCollapsedView pin={pins[0]} more={pins.length > 1} expand={expandHandler.open}/>
+    );
 }
 
 interface PinExpandedViewProps {
@@ -115,9 +363,11 @@ interface PinExpandedViewProps {
 }
 
 function PinExpandedView(props: PinExpandedViewProps) {
-    return (<Stack gap="xs">
+    return (
+        <Stack gap="xs">
             {props.pins.map((p) => toNode(p, props.selectPin))}
-        </Stack>)
+        </Stack>
+    )
 }
 
 interface PinCollapsedViewProps {
@@ -126,10 +376,22 @@ interface PinCollapsedViewProps {
     expand: () => void;
 }
 
-
 function PinCollapsedView(props: PinCollapsedViewProps) {
-    return (<Stack gap="xs">
+    return (
+        <Stack gap="xs">
             {toNode(props.pin, props.expand)}
-            {props.more ? <Badge key="badge-more" size="lg" color="primary" onClick={props.expand} m="0 auto">More</Badge> : null }
-        </Stack>)
+            {props.more ? 
+                <Badge 
+                    key="badge-more" 
+                    size="lg" 
+                    color="primary" 
+                    onClick={props.expand} 
+                    m="0 auto"
+                >
+                    More
+                </Badge> : 
+                null
+            }
+        </Stack>
+    )
 }

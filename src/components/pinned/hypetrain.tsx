@@ -5,15 +5,12 @@ import { formatMinuteSeconds } from '@/commons/helper'
 import { ChatEmotesContext } from '@/ApplicationContext'
 import pinClasses from './pinmanager.module.css';
 import htClasses from './hypetrain.module.css';
+import { Pin } from './pinmanager';
 
-interface HypetrainProps {
-    id: string;
-    channel: string;
+interface HypetrainProps extends Pin {
     level: number;
     progress: number;
     goal: number;
-    endTime: Date;
-    remove: () => void;
     onClick: () => void;
 }
 
@@ -24,7 +21,7 @@ export function Hypetrain(props: HypetrainProps) {
       const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
       setRemaining(remaining);
     }, 1000);
-    const progress = Math.round(100 * props.progress / props.goal);
+    const progress = Math.ceil(100 * props.progress / props.goal);
 
     useEffect(() => {
       timer.start();
@@ -49,7 +46,7 @@ export function Hypetrain(props: HypetrainProps) {
       </Group>
       <Group justify='space-between'>
         <Text fw={600}>Help supporting the Hypetrain</Text>
-        <Text fw={900} size='48px'>{progress}%</Text>
+        <Text fw={900} size='36px'>{progress}%</Text>
       </Group>
     </Stack>
   </Card>
