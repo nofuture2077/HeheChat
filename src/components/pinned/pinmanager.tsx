@@ -1,12 +1,12 @@
 import { Stack, Badge } from "@mantine/core";
-import { useDisclosure, useInterval, useForceUpdate } from "@mantine/hooks";
+import { useDisclosure, useForceUpdate } from "@mantine/hooks";
 import { ReactNodeLike } from "prop-types";
 import { useEffect, useState } from "react";
-import { Hypetrain } from "./hypetrain";
-import { Prediction } from "./prediction";
-import { Poll } from "./poll";
-import { Raid } from "./raid";
-import { Shoutout } from "./shoutout";
+import { Hypetrain } from "@/components/pinned/hypetrain";
+import { Prediction } from "@/components/pinned/prediction";
+import { Poll } from "@/components/pinned/poll";
+import { Raid } from "@/components/pinned/raid";
+import { Shoutout } from "@/components/pinned/shoutout";
 import PubSub from "pubsub-js";
 
 const FINAL_STATE_DURATION = 15000; // 15 seconds in milliseconds
