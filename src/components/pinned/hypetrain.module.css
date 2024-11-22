@@ -1,6 +1,18 @@
+.content {
+    z-index: 5;
+}
+
 .hypetrain {
     position: relative;
+    overflow: hidden;
+    cursor: pointer;
     background: linear-gradient(to right, var(--mantine-color-skyblue-9), var(--mantine-color-paleviolet-5));
+    border: 1px solid #333;
+}
+
+.content {
+    position: relative;
+    z-index: 2;
 }
 
 .progress {
@@ -9,8 +21,27 @@
     right: 0;
     height: 100%;
     background: light-dark(var(--mantine-color-primary-1), var(--mantine-color-primary-8));
+    transition: width 0.5s ease-out;
+    z-index: 1;
 }
 
-.content {
-    z-index: 5;
+.progress.completed {
+    background: linear-gradient(45deg, #6b46c1, #805ad5);
+    animation: pulse 2s infinite;
+}
+
+.completed {
+    color: #805ad5;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.8;
+    }
 }

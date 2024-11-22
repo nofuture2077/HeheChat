@@ -152,7 +152,7 @@ export function PinManager() {
                     type: 'prediction',
                     id: d.id,
                     channel: d.channel,
-                    endTime: new Date(Date.parse(d.endDate)),
+                    endTime: new Date(Date.parse(d.lockDate)),
                     remove: () => removePin(d.id),
                     data: {
                         title: d.title || 'Prediction',
@@ -185,13 +185,35 @@ export function PinManager() {
                 setTimeout(() => removePin(d.id), FINAL_STATE_DURATION);
                 return;
             }
+            if (data.eventtype === 'predictionLock') {
+                const d = JSON.parse(data.text);
+                const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
+                const pin: Pin = {
+                    type: 'prediction',
+                    id: d.id,
+                    channel: d.channel,
+                    endTime: new Date(Date.parse(d.endDate)),
+                    finalRemoveTime,
+                    remove: () => removePin(d.id),
+                    data: {
+                        title: d.title || 'Prediction',
+                        outcomes: d.outcomes,
+                        winningOutcome: d.winningOutcome,
+                        final: true
+                    },
+                    state: 'ended'
+                };
+                upsertPin(pin);
+                setTimeout(() => removePin(d.id), FINAL_STATE_DURATION);
+                return;
+            }
             if (data.eventtype === 'predictionProgress') {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
                     type: 'prediction',
                     id: d.id,
                     channel: d.channel,
-                    endTime: new Date(Date.parse(d.endDate)),
+                    endTime: new Date(Date.parse(d.lockDate)),
                     remove: () => removePin(d.id),
                     data: {
                         title: d.title || 'Prediction',
