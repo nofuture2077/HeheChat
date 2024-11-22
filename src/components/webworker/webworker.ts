@@ -74,6 +74,9 @@ function connectToSevenTV() {
 
     sevenTVWebsocket.onclose = function (e) {
         console.log('7TV Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+        seventTVReady = new Promise((resolve) => {
+            seventTVIsReady = resolve;
+        });
         setTimeout(function () {
             connectToSevenTV();
         }, 1000);
@@ -109,7 +112,6 @@ const subscribeToSeventTVUpdates = async function (userId: string, objectId: str
         }
     };
 
-    sevenTVWebsocket?.send(JSON.stringify(emoteUpdate));
     sevenTVWebsocket?.send(JSON.stringify(emoteSetUpdate));
 }
 
@@ -122,6 +124,7 @@ self.onmessage = async (e) => {
                 initRequest = data;
             }
             if (data.type === 'sevenTVSubscribe') {
+                console.log(data);
                 subscribeToSeventTVUpdates(data.userId, data.objectId);
                 return;
             }
