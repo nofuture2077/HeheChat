@@ -66,7 +66,6 @@ export function Poll(props: PollProps) {
 
           <Progress 
             value={progress} 
-            mt={5}
             radius="xl" size="xl"
             color={isWinner ? 'green' : 'grape'}
           />

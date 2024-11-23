@@ -66,7 +66,6 @@ export function Prediction(props: PredictionProps) {
 
           <Progress 
             value={progress} 
-            mt={5}
             radius="xl" size="xl"
             color={isWinner ? 'green' : 'grape'}
           />
