@@ -18,6 +18,8 @@ interface PredictionProps extends Pin {
     outcomes: Outcome[];
     winningOutcome?: Outcome;
     onClick: () => void;
+    state?: 'active' | 'ended';
+    final?: boolean;
 }
 
 export function Prediction(props: PredictionProps) {
@@ -33,7 +35,7 @@ export function Prediction(props: PredictionProps) {
       return timer.stop;
     });
 
-    if (remaining < 0) {
+    if (remaining < 0 && props.state !== 'ended') {
       props.remove();
       return null;
     }
@@ -50,23 +52,32 @@ export function Prediction(props: PredictionProps) {
 
       {props.outcomes.map((opt) => {
         const progress = Math.ceil(100 * opt.channelPoints / total) || 0;
-        return <>
-        <Group justify="space-between" mt="xs">
-            <Text fz="sm" c="dimmed">
-            {opt.title}
-            </Text>
-            <Text fz="sm" c="dimmed">
-            {progress}%
-            </Text>
-        </Group>
+        const isWinner = props.final && props.winningOutcome?.title === opt.title;
+        
+        return <div key={opt.title}>
+          <Group justify="space-between" mt="xs">
+              <Text fz="sm" fw={isWinner ? 700 : undefined} c={isWinner ? 'green' : 'dimmed'}>
+                {opt.title} {isWinner && '(Winner!)'}
+              </Text>
+              <Text fz="sm" c="dimmed">
+                {progress}%
+              </Text>
+          </Group>
 
-        <Progress value={progress} mt={5} />
-      </>})}
-
+          <Progress 
+            value={progress} 
+            mt={5}
+            radius="xl" size="xl"
+            color={isWinner ? 'green' : 'grape'}
+          />
+        </div>
+      })}
 
       <Group justify="space-between" mt="md">
-        <Text fz="sm">{total}</Text>
-        <Badge size="sm">{formatMinuteSeconds(remaining)}</Badge>
+        <Text fz="sm">{total.toLocaleString()} points</Text>
+        <Badge size="sm" color={props.final ? 'green' : undefined}>
+          {props.final ? 'Ended' : formatMinuteSeconds(remaining)}
+        </Badge>
       </Group>
-  </Card>
+    </Card>
 }

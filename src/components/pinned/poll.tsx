@@ -46,7 +46,7 @@ export function Poll(props: PollProps) {
       <Text ta="center" fw={700} className={pollClasses.title}>
         {props.title}
       </Text>
-      <Text c="dimmed" ta="center" fz="sm">
+      <Text c="dimmed" ta="center" fz="sm" size='lg'>
         <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span> {props.channel}
       </Text>
 
@@ -67,7 +67,8 @@ export function Poll(props: PollProps) {
           <Progress 
             value={progress} 
             mt={5}
-            color={isWinner ? 'blue' : undefined}
+            radius="xl" size="xl"
+            color={isWinner ? 'green' : 'grape'}
           />
         </div>
       })}

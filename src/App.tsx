@@ -155,6 +155,11 @@ export default function App() {
     const setChatEnabled = (value: boolean) => updateConfig('chatEnabled', value);
     const setHideViewers = (value: boolean) => updateConfig('hideViewers', value);
     const setHideOwnViewers = (value: boolean) => updateConfig('hideOwnViewers', value);
+    const setHideHypetrain = (value: boolean) => updateConfig('hideHypetrain', value);
+    const setHidePoll = (value: boolean) => updateConfig('hidePoll', value);
+    const setHidePrediction = (value: boolean) => updateConfig('hidePrediction', value);
+    const setHideRaid = (value: boolean) => updateConfig('hideRaid', value);
+    const setHideShoutout = (value: boolean) => updateConfig('hideShoutout', value);
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
             return profile.config.chatChannel;
@@ -322,6 +327,11 @@ export default function App() {
         setShares,
         setHideViewers,
         setHideOwnViewers,
+        setHideHypetrain,
+        setHidePoll,
+        setHidePrediction,
+        setHideRaid,
+        setHideShoutout,
         loadShares,
         onMessage,
         off,

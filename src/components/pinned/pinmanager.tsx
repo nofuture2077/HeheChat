@@ -8,6 +8,8 @@ import { Poll } from "@/components/pinned/poll";
 import { Raid } from "@/components/pinned/raid";
 import { Shoutout } from "@/components/pinned/shoutout";
 import PubSub from "pubsub-js";
+import { useContext } from 'react';
+import { ConfigContext } from '../../ApplicationContext';
 
 const FINAL_STATE_DURATION = 15000; // 15 seconds in milliseconds
 const RAID_DURATION = 90 * 1000; // 90 seconds in milliseconds
@@ -84,6 +86,7 @@ function toNode(pin: Pin, onClick: (id: string) => void): ReactNodeLike {
 }
 
 export function PinManager() {
+    const config = useContext(ConfigContext);
     const [pins, setPins] = useState<Pin[]>([]);
     const forceUpdate = useForceUpdate();
 
@@ -94,7 +97,7 @@ export function PinManager() {
             console.log("streamevent", data);
 
             // Hype Train Events
-            if (data.eventtype === 'hypeTrainBegin') {
+            if (data.eventtype === 'hypeTrainBegin' && !config.hideHypetrain) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
                     type: 'hypetrain', 
@@ -108,7 +111,7 @@ export function PinManager() {
                 upsertPin(pin);
                 return;
             }
-            if (data.eventtype === 'hypeTrainEnd') {
+            if (data.eventtype === 'hypeTrainEnd' && !config.hideHypetrain) {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
@@ -130,7 +133,7 @@ export function PinManager() {
                 setTimeout(() => removePin(d.id), FINAL_STATE_DURATION);
                 return;
             }
-            if (data.eventtype === 'hypeTrainProgress') {
+            if (data.eventtype === 'hypeTrainProgress' && !config.hideHypetrain) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
                     type: 'hypetrain', 
@@ -146,7 +149,7 @@ export function PinManager() {
             }
 
             // Prediction Events
-            if (data.eventtype === 'predictionBegin') {
+            if (data.eventtype === 'predictionBegin' && !config.hidePrediction) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
                     type: 'prediction',
@@ -163,7 +166,7 @@ export function PinManager() {
                 upsertPin(pin);
                 return;
             }
-            if (data.eventtype === 'predictionEnd') {
+            if (data.eventtype === 'predictionEnd' && !config.hidePrediction) {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
@@ -185,7 +188,7 @@ export function PinManager() {
                 setTimeout(() => removePin(d.id), FINAL_STATE_DURATION);
                 return;
             }
-            if (data.eventtype === 'predictionLock') {
+            if (data.eventtype === 'predictionLock' && !config.hidePrediction) {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
@@ -198,7 +201,6 @@ export function PinManager() {
                     data: {
                         title: d.title || 'Prediction',
                         outcomes: d.outcomes,
-                        winningOutcome: d.winningOutcome,
                         final: true
                     },
                     state: 'ended'
@@ -207,7 +209,7 @@ export function PinManager() {
                 setTimeout(() => removePin(d.id), FINAL_STATE_DURATION);
                 return;
             }
-            if (data.eventtype === 'predictionProgress') {
+            if (data.eventtype === 'predictionProgress' && !config.hidePrediction) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
                     type: 'prediction',
@@ -226,7 +228,7 @@ export function PinManager() {
             }
 
             // Poll Events
-            if (data.eventtype === 'pollBegin') {
+            if (data.eventtype === 'pollBegin' && !config.hidePoll) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
                     type: 'poll',
@@ -243,7 +245,7 @@ export function PinManager() {
                 upsertPin(pin);
                 return;
             }
-            if (data.eventtype === 'pollEnd') {
+            if (data.eventtype === 'pollEnd' && !config.hidePoll) {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
@@ -265,7 +267,7 @@ export function PinManager() {
                 setTimeout(() => removePin(d.id), FINAL_STATE_DURATION);
                 return;
             }
-            if (data.eventtype === 'pollProgress') {
+            if (data.eventtype === 'pollProgress' && !config.hidePoll) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
                     type: 'poll',
@@ -284,7 +286,7 @@ export function PinManager() {
             }
 
             // Raid Events
-            if (data.eventtype === 'raidTo') {
+            if (data.eventtype === 'raidTo' && !config.hideRaid) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
                     type: 'raid',
@@ -303,7 +305,7 @@ export function PinManager() {
             }
 
             // Shoutout Events
-            if (data.eventtype === 'shoutoutCreate') {
+            if (data.eventtype === 'shoutoutCreate' && !config.hideShoutout) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
                     type: 'shoutout',
