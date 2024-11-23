@@ -1,6 +1,5 @@
 .prediction {
     overflow: hidden;
     cursor: pointer;
-    background: linear-gradient(to right, var(--mantine-color-skyblue-9), var(--mantine-color-paleviolet-5));
     border: 1px solid #333;
 }

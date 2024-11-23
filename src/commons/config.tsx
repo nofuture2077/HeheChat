@@ -93,8 +93,8 @@ export const DEFAULT_CONFIG: Config = {
     hideHypetrain: false,
     hidePrediction: false,
     hidePoll: false,
-    hideShoutout: true,
-    hideRaid: true,
+    hideShoutout: false,
+    hideRaid: false,
     systemMessageInChat: {
         sub: true,
         subgift: true,

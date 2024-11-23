@@ -46,7 +46,7 @@ export function Poll(props: PollProps) {
       <Text ta="center" fw={700} className={pollClasses.title}>
         {props.title}
       </Text>
-      <Text c="dimmed" ta="center" fz="sm" size='lg'>
+      <Text ta="center" fz="sm" size='lg'>
         <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span> {props.channel}
       </Text>
 
@@ -56,10 +56,10 @@ export function Poll(props: PollProps) {
         
         return <div key={opt.title}>
           <Group justify="space-between" mt="xs">
-              <Text fz="sm" fw={isWinner ? 700 : undefined} c={isWinner ? 'blue' : 'dimmed'}>
+              <Text fz="md"  fw="bold" c={isWinner ? 'green' : undefined}>
                 {opt.title} {isWinner && '(Winner!)'}
               </Text>
-              <Text fz="sm" c="dimmed">
+              <Text fz="md" fw="bold">
                 {progress}%
               </Text>
           </Group>
@@ -74,8 +74,8 @@ export function Poll(props: PollProps) {
       })}
 
       <Group justify="space-between" mt="md">
-        <Text fz="sm">{total.toLocaleString()} votes</Text>
-        <Badge size="sm" color={props.final ? 'blue' : undefined}>
+        <Text fz="md">{total.toLocaleString()} votes</Text>
+        <Badge size="md" color={props.final ? 'blue' : undefined}>
           {props.final ? 'Ended' : formatMinuteSeconds(remaining)}
         </Badge>
       </Group>

@@ -46,7 +46,7 @@ export function Prediction(props: PredictionProps) {
       <Text ta="center" fw={700} className={predictionClasses.title}>
         {props.title}
       </Text>
-      <Text c="dimmed" ta="center" fz="sm">
+      <Text ta="center" fz="sm" size='lg'>
         <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span> {props.channel}
       </Text>
 
@@ -56,10 +56,10 @@ export function Prediction(props: PredictionProps) {
         
         return <div key={opt.title}>
           <Group justify="space-between" mt="xs">
-              <Text fz="sm" fw={isWinner ? 700 : undefined} c={isWinner ? 'green' : 'dimmed'}>
+              <Text fz="md" fw="bold" c={isWinner ? 'green' : undefined}>
                 {opt.title} {isWinner && '(Winner!)'}
               </Text>
-              <Text fz="sm" c="dimmed">
+              <Text fz="md" fw="bold">
                 {progress}%
               </Text>
           </Group>
@@ -74,8 +74,8 @@ export function Prediction(props: PredictionProps) {
       })}
 
       <Group justify="space-between" mt="md">
-        <Text fz="sm">{total.toLocaleString()} points</Text>
-        <Badge size="sm" color={props.final ? 'green' : undefined}>
+        <Text fz="md">{total.toLocaleString()} points</Text>
+        <Badge size="md" color={props.final ? 'green' : undefined}>
           {props.final ? 'Ended' : formatMinuteSeconds(remaining)}
         </Badge>
       </Group>
