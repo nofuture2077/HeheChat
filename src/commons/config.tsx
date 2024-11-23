@@ -17,6 +17,11 @@ export interface ConfigData {
     showOtherBadges: boolean;
     hideViewers: boolean;
     hideOwnViewers: boolean;
+    hideHypetrain: boolean;
+    hidePrediction: boolean;
+    hidePoll: boolean;
+    hideShoutout: boolean;
+    hideRaid: boolean;
     fontSize: number;
     modToolsEnabled: boolean;
     raidTargets: string[];
@@ -59,6 +64,11 @@ export interface Config extends ConfigData {
     setShowVideo: (val: boolean) => void;
     setHideViewers: (val: boolean) => void;
     setHideOwnViewers: (val: boolean) => void;
+    setHideHypetrain: (val: boolean) => void;
+    setHidePrediction: (val: boolean) => void;
+    setHideePoll: (val: boolean) => void;
+    setHideShoutout: (val: boolean) => void;
+    setHideRaid: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -80,6 +90,11 @@ export const DEFAULT_CONFIG: Config = {
     playAlerts: false,
     hideViewers: false,
     hideOwnViewers: false,
+    hideHypetrain: false,
+    hidePrediction: false,
+    hidePoll: false,
+    hideShoutout: true,
+    hideRaid: true,
     systemMessageInChat: {
         sub: true,
         subgift: true,
@@ -116,6 +131,11 @@ export const DEFAULT_CONFIG: Config = {
     setModToolsEnabled: (val) => {},
     setRaidTargets: (val) => {},
     setPlayAlerts: (val) => {},
+    setHideHypetrain: (val) => {},
+    setHidePrediction: (val) => {},
+    setHideePoll: (val) => {},
+    setHideShoutout: (val) => {},
+    setHideRaid: (val) => {},
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => {},
     setDeactivatedAlerts: (id: string, val: boolean) => {},
     loadReceivedShares: () => {},
@@ -123,5 +143,5 @@ export const DEFAULT_CONFIG: Config = {
     setShares: (val: string[]) => {},
     setHideViewers: (val: boolean) => {},
     setHideOwnViewers: (val: boolean) => {},
-    loadShares: () => {}
+    loadShares: () => {},
 };
