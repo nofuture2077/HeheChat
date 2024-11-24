@@ -43,11 +43,11 @@ export function Poll(props: PollProps) {
     const total = props.options.map(x => x.totalVotes).reduce((t, v) => t + v, 0);
 
     return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={props.onClick} className={pollClasses.poll}>
-      <Text ta="center" fw={700} className={pollClasses.title}>
-        {props.title}
+            <Text ta="center" fz="sm">
+        <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span> Poll
       </Text>
-      <Text ta="center" fz="sm" size='lg'>
-        <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span> {props.channel}
+      <Text ta="center" fw={700} size="lg" className={pollClasses.title}>
+        {props.title}
       </Text>
 
       {props.options.map((opt) => {
@@ -57,7 +57,7 @@ export function Poll(props: PollProps) {
         return <div key={opt.title}>
           <Group justify="space-between" mt="xs">
               <Text fz="md"  fw="bold" c={isWinner ? 'green' : undefined}>
-                {opt.title} {isWinner && '(Winner!)'}
+                {opt.title}
               </Text>
               <Text fz="md" fw="bold">
                 {progress}%
@@ -74,9 +74,7 @@ export function Poll(props: PollProps) {
 
       <Group justify="space-between" mt="md">
         <Text fz="md">{total.toLocaleString()} votes</Text>
-        <Badge size="md" color={props.final ? 'blue' : undefined}>
-          {props.final ? 'Ended' : formatMinuteSeconds(remaining)}
-        </Badge>
+        {props.final ?  <Badge size="md" color='green'>Ended</Badge> : formatMinuteSeconds(remaining)}
       </Group>
     </Card>
 }

@@ -43,11 +43,11 @@ export function Prediction(props: PredictionProps) {
     const total = props.outcomes.map(x => x.channelPoints).reduce((t, v) => t + v, 0);
 
     return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={props.onClick} className={predictionClasses.prediction}>
-      <Text ta="center" fw={700} className={predictionClasses.title}>
-        {props.title}
+            <Text ta="center" fz="sm" >
+        <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span> Prediction
       </Text>
-      <Text ta="center" fz="sm" size='lg'>
-        <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span> {props.channel}
+      <Text ta="center" size='lg' fw={700} className={predictionClasses.title}>
+        {props.title}
       </Text>
 
       {props.outcomes.map((opt) => {
@@ -67,16 +67,14 @@ export function Prediction(props: PredictionProps) {
           <Progress 
             value={progress} 
             radius="xl" size="xl"
-            color={isWinner ? 'green' : 'grape'}
+            color={isWinner ? 'green' : 'orange'}
           />
         </div>
       })}
 
       <Group justify="space-between" mt="md">
         <Text fz="md">{total.toLocaleString()} points</Text>
-        <Badge size="md" color={props.final ? 'green' : undefined}>
-          {props.final ? 'Ended' : formatMinuteSeconds(remaining)}
-        </Badge>
+        {props.final ?  <Badge size="md" color='green'>Ended</Badge> : formatMinuteSeconds(remaining)}
       </Group>
     </Card>
 }

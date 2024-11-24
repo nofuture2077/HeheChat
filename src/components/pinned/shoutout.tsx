@@ -1,4 +1,4 @@
-import { Text, Card, Badge, Group } from '@mantine/core';
+import { Text, Card, Group } from '@mantine/core';
 import { useState, useEffect, useContext } from 'react';
 import { useInterval } from '@mantine/hooks';
 import { formatMinuteSeconds } from '@/commons/helper'
@@ -39,22 +39,14 @@ export function Shoutout(props: ShoutoutProps) {
                 <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
                 <div>
                     <Group gap="xs">
-                        {props.moderatorName ? (
-                            <>
-                                <Text fw={700}>{props.moderatorName}</Text>
-                                <Text c="dimmed">shouted out</Text>
-                            </>
-                        ) : (
-                            <Text c="dimmed">Shoutout to</Text>
-                        )}
+                        <Text>Shoutout to</Text>
                         <Text fw={700}>{props.targetUserName}</Text>
                     </Group>
-                    <Text c="dimmed" size="sm">{props.viewerCount.toLocaleString()} viewers in chat</Text>
                 </div>
             </Group>
-            <Badge size="lg" variant="gradient" gradient={{ from: 'cyan', to: 'teal' }}>
+            <Text>
                 {formatMinuteSeconds(remaining)}
-            </Badge>
+            </Text>
         </Group>
     </Card>
 }

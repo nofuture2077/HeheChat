@@ -2,22 +2,7 @@
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
-    border: 1px solid #dee2e6;
-    transition: all 0.2s ease-out;
-}
-
-.shoutout:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.shoutout::after {
-    content: '📢';
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 2rem;
-    opacity: 0.1;
+    background: light-dark(var(--mantine-color-white), var(--mantine-color-black));
+    border: 1px solid #333;
+    transition: all 1s ease-out;
 }

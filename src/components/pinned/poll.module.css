@@ -1,5 +1,7 @@
 .poll {
     overflow: hidden;
     cursor: pointer;
+    background: light-dark(var(--mantine-color-white), var(--mantine-color-black));
     border: 1px solid #333;
+    transition: all 1s ease-out;
 }

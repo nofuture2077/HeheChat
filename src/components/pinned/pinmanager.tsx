@@ -85,9 +85,15 @@ function toNode(pin: Pin, onClick: (id: string) => void): ReactNodeLike {
     return null;
 }
 
+
 export function PinManager() {
     const config = useContext(ConfigContext);
-    const [pins, setPins] = useState<Pin[]>([]);
+    const [pins, setPins] = useState<Pin[]>([
+        //{type: 'shoutout', id: '5', endTime: new Date(Date.now() + 5*1000*60), remove: () => removePin('5'), channel: 'ronnyberger', data: {    broadcasterName: 'ronnyberger', targetUserName: 'jonsman', viewerCount: 1224,moderatorName: 'nofuture2077'}},
+        //{type: 'hypetrain', id: '4', endTime: new Date(Date.now() + 5*1000*60), remove: () => removePin('4'), channel: 'ronnyberger', data: {level: 7, progress: 2323, goal: 4356, state: 'active', final: false, onClick: () => {}}},
+        //{type: 'poll', id: '6', endTime: new Date(Date.now() + 5*1000*60), remove: () => removePin('6'), channel: 'ronnyberger', data: {title: 'was esst ihr lieber?', winningChoice: {title: 'Nutella', totalVotes: 43}, options: [{title: 'Nutella', totalVotes: 43}, {title: 'Marmelade', totalVotes: 7}], state: 'ended', final: false, onClick: () => {}}},
+        //{type: 'prediction', id: '7', endTime: new Date(Date.now() + 5*1000*60), remove: () => removePin('7'), channel: 'ronnyberger', data: {title: 'was esst ihr lieber?', winningOutcomes: {title: 'Nutella', channelPoints: 31343, users: 23}, outcomes: [{title: 'Nutella', channelPoints: 31343, users: 23}, {title: 'Marmelande', channelPoints: 23132, users: 12}, {title: 'Obst', channelPoints: 2222, users: 1}], state: 'ended', final: true, onClick: () => {}}},
+    ]);
     const forceUpdate = useForceUpdate();
 
     const [expanded, expandHandler] = useDisclosure(false);
@@ -377,7 +383,7 @@ export function PinManager() {
 
     return (expanded ? 
         <PinExpandedView pins={pins} selectPin={selectPin}/> : 
-        <PinCollapsedView pin={pins[0]} more={pins.length > 1} expand={expandHandler.open}/>
+        <PinCollapsedView pin={pins[0]} more={pins.length - 1} expand={expandHandler.open}/>
     );
 }
 
@@ -396,7 +402,7 @@ function PinExpandedView(props: PinExpandedViewProps) {
 
 interface PinCollapsedViewProps {
     pin: Pin;
-    more: boolean;
+    more: number;
     expand: () => void;
 }
 
@@ -408,11 +414,13 @@ function PinCollapsedView(props: PinCollapsedViewProps) {
                 <Badge 
                     key="badge-more" 
                     size="lg" 
-                    color="primary" 
+                    p="pl"
+                    color="grape" 
                     onClick={props.expand} 
+                    style={{cursor: 'pointer'}}
                     m="0 auto"
                 >
-                    More
+                   {props.more} More
                 </Badge> : 
                 null
             }

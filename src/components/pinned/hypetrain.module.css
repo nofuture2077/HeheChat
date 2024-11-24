@@ -8,6 +8,7 @@
     cursor: pointer;
     background: linear-gradient(to right, var(--mantine-color-skyblue-9), var(--mantine-color-paleviolet-5));
     border: 1px solid #333;
+    transition: all 1s ease-out;
 }
 
 .content {
@@ -20,7 +21,7 @@
     top: 0;
     right: 0;
     height: 100%;
-    background: light-dark(var(--mantine-color-primary-1), var(--mantine-color-primary-8));
+    background: light-dark(var(--mantine-color-white), var(--mantine-color-black));
     transition: width 0.5s ease-out;
     z-index: 1;
 }
