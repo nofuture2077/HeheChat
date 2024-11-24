@@ -19,7 +19,7 @@ export function HomePage() {
       <Group justify='center' mt={0}><Login /></Group>
     </Stack>
     <Stack style={{position: 'fixed', bottom: 0, width: '100%', textAlign: 'center'}} gap={0}>
-      <Group style={{textAlign: 'center'}} justify='space-between' p="10">
+      <Group style={{textAlign: 'center'}} justify='space-between' p="20">
         <Text c="dimmed" size="sm" fs="italic">Proudly created by NoFuture</Text>
         <Text c="dimmed" size="sm" fs="italic">Build: #{import.meta.env.VITE_BUILDNUMBER}</Text>
       </Group>
