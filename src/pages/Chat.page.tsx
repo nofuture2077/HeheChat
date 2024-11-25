@@ -92,7 +92,7 @@ export function ChatPage() {
             const msgId = data.text;
             setDeletedMessages((dM) => dM.concat(msgId));
         }
-        if (data.eventtype === 'timeout') {
+        if (data.eventtype === 'timeout' || data.eventtype === 'ban') {
             const username = data.username;
             // @ts-ignore
             const messagesToDelete = chatMessages.filter(m => m._prefix?.user === username).map(m => m.id);
