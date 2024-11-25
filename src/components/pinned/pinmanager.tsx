@@ -292,7 +292,7 @@ export function PinManager() {
             }
 
             // Raid Events
-            if (data.eventtype === 'raidFrom' && !config.hideRaid) {
+            if (data.eventtype === 'raidTo' && !config.hideRaid) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
                     type: 'raid',

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef, useContext } from 'react';
+import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon, Badge, Stack, Group } from '@mantine/core';
@@ -87,10 +87,31 @@ export function ChatPage() {
         setChatMessages((prevMessages) => prevMessages.concat(msg).slice((prevMessages.length % 2) ? 0 : (-1 * maxMessages + 1)));
     }
 
+    const onModEvent = useCallback((eventname: string, data: any) => {
+        if (data.eventtype === 'delete') {
+            const msgId = data.text;
+            setDeletedMessages((dM) => dM.concat(msgId));
+        }
+        if (data.eventtype === 'timeout') {
+            const username = data.username;
+            // @ts-ignore
+            const messagesToDelete = chatMessages.filter(m => m._prefix?.user === username).map(m => m.id);
+            console.log('Messages to delete:', messagesToDelete, 'Current messages:', chatMessages);
+            setDeletedMessages((dM) => dM.concat(messagesToDelete));
+        }
+    }, [chatMessages]);
+
     useViewportWidthCallback(() => {
         const [w, h] = getDimension();
         setVideoHeight(h);
     });
+
+    useEffect(() => {
+        const modEventSub = PubSub.subscribe("WS-modevent", onModEvent);
+        return () => {
+            PubSub.unsubscribe(modEventSub);
+        };
+    }, [onModEvent]);
 
     useEffect(() => {
         if (profile.name === 'default' && !config.channels.length) {
@@ -124,13 +145,7 @@ export function ChatPage() {
                 AlertSystem.addEvent(data);
             }
         });
-        const modEventSub = PubSub.subscribe("WS-modevent", (msg, data) => {
-            if (data.type === 'delete') {
-                const msgId = data.text;
-                setDeletedMessages((deletedMessages) => deletedMessages.concat(msgId))
-            }
-            console.log("modEvent", data);
-        });
+        const modEventSub = PubSub.subscribe("WS-modevent", onModEvent);
 
         Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
             const msgs = rawMessages.map(parseMessage);
