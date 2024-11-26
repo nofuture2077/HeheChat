@@ -57,6 +57,7 @@ export function ChatSettings() {
                     <Switch checked={config.hidePoll} onChange={(event) => config.setHideePoll(event.currentTarget.checked)} label="Hide Polls" size="lg" />
                     <Switch checked={config.hideShoutout} onChange={(event) => config.setHideShoutout(event.currentTarget.checked)} label="Hide Shoutouts" size="lg" />
                     <Switch checked={config.hideRaid} onChange={(event) => config.setHideRaid(event.currentTarget.checked)} label="Hide Raids" size="lg" />
+                    <Switch checked={config.hideAdBreak} onChange={(event) => config.setHideAdBreak(event.currentTarget.checked)} label="Hide Ad Break" size="lg" />
                 </Stack>
             </Fieldset>
 

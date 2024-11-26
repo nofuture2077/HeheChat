@@ -7,6 +7,7 @@ import { Prediction } from "@/components/pinned/prediction";
 import { Poll } from "@/components/pinned/poll";
 import { Raid } from "@/components/pinned/raid";
 import { Shoutout } from "@/components/pinned/shoutout";
+import { AdBreak } from "@/components/pinned/adbreak";
 import PubSub from "pubsub-js";
 import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
@@ -15,88 +16,138 @@ const FINAL_STATE_DURATION = 15000; // 15 seconds in milliseconds
 const RAID_DURATION = 90 * 1000; // 90 seconds in milliseconds
 const SHOUTOUT_DURATION = 15 * 1000; // 15 seconds in milliseconds
 
+export interface PinProps extends Pin {
+    remove: () => void;
+    onClick: () => void;
+    hide: () => void;
+    toggleExpand: () => void;
+    pinsExpanded: boolean;
+}
+
 export interface Pin {
-    type: 'hypetrain' | 'poll' | 'prediction' | 'raid' | 'shoutout';
+    type: 'hypetrain' | 'poll' | 'prediction' | 'raid' | 'shoutout' | 'adbreak';
     id: string;
     channel: string;
     endTime: Date;
     data: any;
-    remove: () => void;
+    
     state?: 'active' | 'ended';
     finalRemoveTime?: Date;
+    expanded: boolean;
+    hidden: boolean;
 }
 
-function toNode(pin: Pin, onClick: (id: string) => void): ReactNodeLike {
+const toNode = (pin: Pin, onClick: (id: string) => void, removePin: (id: string) => void, hidePin: (id: string) => void, toggleExpand: (id: string) => void, pinsExpanded: boolean): ReactNodeLike => {
     switch(pin.type) {
         case 'hypetrain': 
             return <Hypetrain 
+                pinsExpanded={pinsExpanded}
+                expanded={pin.expanded}
+                hidden={pin.hidden}
                 key={pin.id} 
                 id={pin.id} 
                 channel={pin.channel} 
                 endTime={pin.state === 'ended' ? pin.finalRemoveTime! : pin.endTime} 
                 {...pin.data} 
                 onClick={() => onClick(pin.id)} 
-                remove={pin.remove}
+                remove={() => removePin(pin.id)} 
+                hide={() => hidePin(pin.id)} 
+                toggleExpand={() => toggleExpand(pin.id)} 
                 state={pin.state}
             />;
         case 'prediction':
             return <Prediction 
+                pinsExpanded={pinsExpanded}
+                expanded={pin.expanded}
+                hidden={pin.hidden}
                 key={pin.id} 
                 id={pin.id} 
                 channel={pin.channel} 
                 endTime={pin.state === 'ended' ? pin.finalRemoveTime! : pin.endTime} 
                 {...pin.data} 
                 onClick={() => onClick(pin.id)} 
-                remove={pin.remove}
+                remove={() => removePin(pin.id)} 
+                hide={() => hidePin(pin.id)} 
+                toggleExpand={() => toggleExpand(pin.id)} 
                 state={pin.state}
             />;
         case 'poll':
             return <Poll 
+                pinsExpanded={pinsExpanded}
+                expanded={pin.expanded}
+                hidden={pin.hidden}
                 key={pin.id} 
                 id={pin.id} 
                 channel={pin.channel} 
                 endTime={pin.state === 'ended' ? pin.finalRemoveTime! : pin.endTime} 
                 {...pin.data} 
                 onClick={() => onClick(pin.id)} 
-                remove={pin.remove}
+                remove={() => removePin(pin.id)} 
+                hide={() => hidePin(pin.id)} 
+                toggleExpand={() => toggleExpand(pin.id)} 
                 state={pin.state}
             />;
         case 'raid':
             return <Raid 
+                pinsExpanded={pinsExpanded}
+                expanded={pin.expanded}
+                hidden={pin.hidden}
                 key={pin.id} 
                 id={pin.id} 
                 channel={pin.channel} 
                 endTime={pin.endTime} 
                 {...pin.data} 
                 onClick={() => onClick(pin.id)} 
-                remove={pin.remove}
+                remove={() => removePin(pin.id)} 
+                hide={() => hidePin(pin.id)} 
+                toggleExpand={() => toggleExpand(pin.id)} 
             />;
         case 'shoutout':
             return <Shoutout 
+                pinsExpanded={pinsExpanded}
+                expanded={pin.expanded}
+                hidden={pin.hidden}
                 key={pin.id} 
                 id={pin.id} 
                 channel={pin.channel} 
                 endTime={pin.endTime} 
                 {...pin.data} 
                 onClick={() => onClick(pin.id)} 
-                remove={pin.remove}
+                remove={() => removePin(pin.id)} 
+                hide={() => hidePin(pin.id)} 
+                toggleExpand={() => toggleExpand(pin.id)} 
+            />;
+        case 'adbreak':
+            return <AdBreak 
+                pinsExpanded={pinsExpanded}
+                expanded={pin.expanded}
+                hidden={pin.hidden}
+                key={pin.id} 
+                id={pin.id} 
+                channel={pin.channel} 
+                endTime={pin.endTime} 
+                {...pin.data} 
+                onClick={() => onClick(pin.id)} 
+                remove={() => removePin(pin.id)} 
+                hide={() => hidePin(pin.id)} 
+                toggleExpand={() => toggleExpand(pin.id)} 
             />;
     }
     return null;
 }
 
-
 export function PinManager() {
     const config = useContext(ConfigContext);
+    const [pinsExpanded, expandHandler] = useDisclosure(false);
     const [pins, setPins] = useState<Pin[]>([
-        //{type: 'shoutout', id: '5', endTime: new Date(Date.now() + 5*1000*60), remove: () => removePin('5'), channel: 'ronnyberger', data: {    broadcasterName: 'ronnyberger', targetUserName: 'jonsman', viewerCount: 1224,moderatorName: 'nofuture2077'}},
-        //{type: 'hypetrain', id: '4', endTime: new Date(Date.now() + 5*1000*60), remove: () => removePin('4'), channel: 'ronnyberger', data: {level: 7, progress: 2323, goal: 4356, state: 'active', final: false, onClick: () => {}}},
-        //{type: 'poll', id: '6', endTime: new Date(Date.now() + 5*1000*60), remove: () => removePin('6'), channel: 'ronnyberger', data: {title: 'was esst ihr lieber?', winningChoice: {title: 'Nutella', totalVotes: 43}, options: [{title: 'Nutella', totalVotes: 43}, {title: 'Marmelade', totalVotes: 7}], state: 'ended', final: false, onClick: () => {}}},
-        //{type: 'prediction', id: '7', endTime: new Date(Date.now() + 5*1000*60), remove: () => removePin('7'), channel: 'ronnyberger', data: {title: 'was esst ihr lieber?', winningOutcomes: {title: 'Nutella', channelPoints: 31343, users: 23}, outcomes: [{title: 'Nutella', channelPoints: 31343, users: 23}, {title: 'Marmelande', channelPoints: 23132, users: 12}, {title: 'Obst', channelPoints: 2222, users: 1}], state: 'ended', final: true, onClick: () => {}}},
+    //    {expanded: true, hidden: false, type: 'adbreak', id: '1', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {onClick: () => {}}},
+    //    {expanded: true, hidden: false, type: 'shoutout', id: '5', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {    broadcasterName: 'ronnyberger', targetUserName: 'jonsman', viewerCount: 1224,moderatorName: 'nofuture2077'}},
+    //    {expanded: true, hidden: false, type: 'hypetrain', id: '4', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {level: 7, progress: 2323, goal: 4356, state: 'active'}},
+    //    {expanded: false, hidden: false, type: 'poll', id: '6', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {title: 'was esst ihr lieber?', winningChoice: {title: 'Nutella', totalVotes: 43}, options: [{title: 'Nutella', totalVotes: 43}, {title: 'Marmelade', totalVotes: 7}], state: 'ended'}},
+    //    {expanded: false, hidden: false, type: 'prediction', id: '7', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {title: 'was esst ihr lieber?', winningOutcomes: {title: 'Nutella', channelPoints: 31343, users: 23}, outcomes: [{title: 'Nutella', channelPoints: 31343, users: 23}, {title: 'Marmelande', channelPoints: 23132, users: 12}, {title: 'Obst', channelPoints: 2222, users: 1}], state: 'active'}},
+    //    {expanded: true, hidden: false, type: 'raid', id: '8', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: { broadcasterName: 'z0kka', targetChannelName: 'ronnyberger', viewers: 1242}},
     ]);
     const forceUpdate = useForceUpdate();
-
-    const [expanded, expandHandler] = useDisclosure(false);
 
     useEffect(() => {
         const streamEventSub = PubSub.subscribe("WS-streamevent", (msg, data) => {
@@ -106,11 +157,12 @@ export function PinManager() {
             if (data.eventtype === 'hypeTrainBegin' && !config.hideHypetrain) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
+                    expanded: true,
+                    hidden: false,
                     type: 'hypetrain', 
                     id: d.id, 
                     channel: d.channel, 
                     endTime: new Date(Date.parse(d.expiryDate)), 
-                    remove: () => removePin(d.id), 
                     data: {level: d.level, progress: d.progress, goal: d.goal},
                     state: 'active'
                 };
@@ -121,17 +173,17 @@ export function PinManager() {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
+                    expanded: true,
+                    hidden: false,
                     type: 'hypetrain',
                     id: d.id,
                     channel: d.channel,
                     endTime: new Date(Date.parse(d.endDate)),
                     finalRemoveTime,
-                    remove: () => removePin(d.id),
                     data: {
                         level: d.level,
                         progress: 100,  // Show full progress in final state
-                        goal: d.total,
-                        final: true
+                        goal: d.total
                     },
                     state: 'ended'
                 };
@@ -142,11 +194,12 @@ export function PinManager() {
             if (data.eventtype === 'hypeTrainProgress' && !config.hideHypetrain) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
+                    expanded: true,
+                    hidden: false,
                     type: 'hypetrain', 
                     id: d.id, 
                     channel: d.channel, 
                     endTime: new Date(Date.parse(d.expiryDate)), 
-                    remove: () => removePin(d.id), 
                     data: {level: d.level, progress: d.progress, goal: d.goal},
                     state: 'active'
                 };
@@ -158,11 +211,12 @@ export function PinManager() {
             if (data.eventtype === 'predictionBegin' && !config.hidePrediction) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
+                    expanded: false,
+                    hidden: false,
                     type: 'prediction',
                     id: d.id,
                     channel: d.channel,
                     endTime: new Date(Date.parse(d.lockDate)),
-                    remove: () => removePin(d.id),
                     data: {
                         title: d.title || 'Prediction',
                         outcomes: d.outcomes,
@@ -176,17 +230,17 @@ export function PinManager() {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
+                    expanded: false,
+                    hidden: false,
                     type: 'prediction',
                     id: d.id,
                     channel: d.channel,
                     endTime: new Date(Date.parse(d.endDate)),
                     finalRemoveTime,
-                    remove: () => removePin(d.id),
                     data: {
                         title: d.title || 'Prediction',
                         outcomes: d.outcomes,
-                        winningOutcome: d.winningOutcome,
-                        final: true
+                        winningOutcome: d.winningOutcome
                     },
                     state: 'ended'
                 };
@@ -198,16 +252,16 @@ export function PinManager() {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
+                    expanded: false,
+                    hidden: false,
                     type: 'prediction',
                     id: d.id,
                     channel: d.channel,
                     endTime: new Date(Date.parse(d.endDate)),
                     finalRemoveTime,
-                    remove: () => removePin(d.id),
                     data: {
                         title: d.title || 'Prediction',
-                        outcomes: d.outcomes,
-                        final: true
+                        outcomes: d.outcomes
                     },
                     state: 'ended'
                 };
@@ -218,11 +272,12 @@ export function PinManager() {
             if (data.eventtype === 'predictionProgress' && !config.hidePrediction) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
+                    expanded: false,
+                    hidden: false,
                     type: 'prediction',
                     id: d.id,
                     channel: d.channel,
                     endTime: new Date(Date.parse(d.lockDate)),
-                    remove: () => removePin(d.id),
                     data: {
                         title: d.title || 'Prediction',
                         outcomes: d.outcomes,
@@ -237,11 +292,12 @@ export function PinManager() {
             if (data.eventtype === 'pollBegin' && !config.hidePoll) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
+                    expanded: false,
+                    hidden: false,
                     type: 'poll',
                     id: d.id,
                     channel: d.channel,
                     endTime: new Date(Date.parse(d.endDate)),
-                    remove: () => removePin(d.id),
                     data: {
                         title: d.title || d.question,
                         options: d.choices,
@@ -255,17 +311,17 @@ export function PinManager() {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
+                    expanded: false,
+                    hidden: false,
                     type: 'poll',
                     id: d.id,
                     channel: d.channel,
                     endTime: new Date(Date.parse(d.endDate)),
                     finalRemoveTime,
-                    remove: () => removePin(d.id),
                     data: {
                         title: d.title || d.question,
                         options: d.choices,
-                        winningChoice: d.winningChoice,
-                        final: true
+                        winningChoice: d.winningChoice
                     },
                     state: 'ended'
                 };
@@ -276,11 +332,12 @@ export function PinManager() {
             if (data.eventtype === 'pollProgress' && !config.hidePoll) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
+                    expanded: false,
+                    hidden: false,
                     type: 'poll',
                     id: d.id,
                     channel: d.channel,
                     endTime: new Date(Date.parse(d.endDate)),
-                    remove: () => removePin(d.id),
                     data: {
                         title: d.title || d.question,
                         options: d.choices,
@@ -295,11 +352,12 @@ export function PinManager() {
             if (data.eventtype === 'raidTo' && !config.hideRaid) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
+                    expanded: true,
+                    hidden: false,
                     type: 'raid',
                     id: `raid-${Date.now()}`,
                     channel: d.broadcasterName,
                     endTime: new Date(Date.now() + RAID_DURATION),
-                    remove: () => removePin(`raid-${Date.now()}`),
                     data: {
                         broadcasterName: d.broadcasterName,
                         targetChannelName: d.targetChannelName,
@@ -314,17 +372,33 @@ export function PinManager() {
             if (data.eventtype === 'shoutoutCreate' && !config.hideShoutout) {
                 const d = JSON.parse(data.text);
                 const pin: Pin = {
+                    expanded: true,
+                    hidden: false,
                     type: 'shoutout',
                     id: `shoutout-${Date.now()}`,
                     channel: d.broadcasterName,
                     endTime: new Date(Date.now() + SHOUTOUT_DURATION),
-                    remove: () => removePin(`shoutout-${Date.now()}`),
                     data: {
                         broadcasterName: d.broadcasterName,
                         targetUserName: d.targetUserName,
                         viewerCount: d.viewerCount,
                         moderatorName: d.moderatorName
                     }
+                };
+                upsertPin(pin);
+                return;
+            }
+
+            if (data.eventtype === 'adBreak' && !config.hideAdBreak) {
+                const d = JSON.parse(data.text);
+                const pin: Pin = {
+                    expanded: true,
+                    hidden: false,
+                    type: 'shoutout',
+                    id: `shoutout-${Date.now()}`,
+                    channel: d.broadcasterName,
+                    endTime: new Date(Date.now() + d.durationSeconds * 1000),
+                    data: {}
                 };
                 upsertPin(pin);
                 return;
@@ -349,6 +423,30 @@ export function PinManager() {
         })
     };
 
+    const hidePin = (id: string) => {
+        setPins(pins => {
+            const index = pins.findIndex(pin => pin.id === id);
+  
+            if (index > -1) {
+              const pin = pins[index];
+              pin.hidden = true;
+            }
+            return [...pins];
+        })
+    };
+
+    const toggleExpand = (id: string) => {
+        setPins(pins => {
+            const index = pins.findIndex(pin => pin.id === id);
+
+            if (index > -1) {
+              const pin = pins[index];
+              pin.expanded = !pin.expanded;
+            }
+            return [...pins];
+        })
+    };
+
     const removePin = (id: string): void => {
         setPins(pins => {
             const index = pins.findIndex(pin => pin.id === id);
@@ -368,6 +466,8 @@ export function PinManager() {
             const index = newPins.findIndex(pin => pin.type === newPin.type && pin.channel === newPin.channel);
     
             if (index !== -1) {
+                newPin.hidden = newPins[index].hidden;
+                newPin.expanded = newPins[index].expanded;
                 newPins[index] = newPin;
             } else {
                 newPins.unshift(newPin);
@@ -377,25 +477,30 @@ export function PinManager() {
         forceUpdate();
     }
 
-    if (!pins.length) {
+    const visiblePins = pins.filter(x => !x.hidden);
+
+    if (!visiblePins.length) {
         return null;
     }
 
-    return (expanded ? 
-        <PinExpandedView pins={pins} selectPin={selectPin}/> : 
-        <PinCollapsedView pin={pins[0]} more={pins.length - 1} expand={expandHandler.open}/>
+    return (pinsExpanded ? 
+        <PinExpandedView pins={visiblePins} selectPin={selectPin} removePin={removePin} hidePin={hidePin} toggleExpand={toggleExpand}/> : 
+        <PinCollapsedView pin={visiblePins[0]} more={visiblePins.length - 1} expand={expandHandler.open} removePin={removePin} hidePin={hidePin} toggleExpand={toggleExpand}/>
     );
 }
 
 interface PinExpandedViewProps {
     pins: Pin[];
     selectPin: (id: string) => void;
+    removePin: (id: string) => void;
+    hidePin: (id: string) => void;
+    toggleExpand: (id: string) => void;
 }
 
 function PinExpandedView(props: PinExpandedViewProps) {
     return (
         <Stack gap="xs">
-            {props.pins.map((p) => toNode(p, props.selectPin))}
+            {props.pins.map((p) => toNode(p, props.selectPin, props.removePin, props.hidePin, props.toggleExpand, true))}
         </Stack>
     )
 }
@@ -404,12 +509,15 @@ interface PinCollapsedViewProps {
     pin: Pin;
     more: number;
     expand: () => void;
+    removePin: (id: string) => void;
+    hidePin: (id: string) => void;
+    toggleExpand: (id: string) => void;
 }
 
 function PinCollapsedView(props: PinCollapsedViewProps) {
     return (
         <Stack gap="xs">
-            {toNode(props.pin, props.expand)}
+            {toNode(props.pin, props.expand, props.removePin, props.hidePin, props.toggleExpand, false)}
             {props.more ? 
                 <Badge 
                     key="badge-more" 

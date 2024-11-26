@@ -1,20 +1,18 @@
-import { Text, Card, Badge, Group, ActionIcon } from '@mantine/core';
+import { Text, Card, Group, ActionIcon } from '@mantine/core';
 import { useState, useEffect, useContext } from 'react';
 import { useInterval } from '@mantine/hooks';
 import { formatMinuteSeconds } from '@/commons/helper'
 import { ChatEmotesContext } from '@/ApplicationContext'
 import pinClasses from './pinmanager.module.css';
-import raidClasses from './raid.module.css';
+import adClasses from './adbreak.module.css';
 import { PinProps } from './pinmanager';
 import { IconEyeOff } from '@tabler/icons-react';
 
-interface RaidProps extends PinProps {
-    broadcasterName: string;
-    targetChannelName: string;
-    viewers: number;
+interface AdBreakProps extends PinProps {
+    
 }
 
-export function Raid(props: RaidProps) {
+export function AdBreak(props: AdBreakProps) {
     const emotes = useContext(ChatEmotesContext);
     const [remaining, setRemaining] = useState<number>(Math.round((props.endTime.getTime() - new Date().getTime()) / 1000));
     const timer = useInterval(() => {
@@ -32,18 +30,14 @@ export function Raid(props: RaidProps) {
       return null;
     }
 
-    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={props.onClick} className={raidClasses.raid}>
+    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={props.onClick} className={adClasses.adbreak}>
         <Group justify="space-between" align="center">
             <Group>
                 <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
-                <div>
-                    <Group gap="xs">
-                        <Text fw={700}>{props.broadcasterName}</Text>
-                        <Text>is raiding</Text>
-                        <Text fw={700}>{props.targetChannelName}</Text>
-                    </Group>
-                    <Text>{props.viewers.toLocaleString()} viewers</Text>
-                </div>
+                <Group gap="xs">
+                    <Text fw={700}>Commercial Break</Text>
+                    <Text>for all the non subs</Text>
+                </Group>
             </Group>
             <Group>
                 <Text fw={700}>

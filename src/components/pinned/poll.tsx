@@ -1,13 +1,15 @@
-import { Text, Card, Badge, Group, Progress } from '@mantine/core';
+import { Text, Card, Badge, Group, Progress, ActionIcon } from '@mantine/core';
 import { useState, useEffect, useContext } from 'react';
 import { useInterval } from '@mantine/hooks';
+import { useDisclosure } from '@mantine/hooks';
 import { formatMinuteSeconds } from '@/commons/helper'
 import { ChatEmotesContext } from '@/ApplicationContext'
 import pinClasses from './pinmanager.module.css';
 import pollClasses from './poll.module.css';
-import { Pin } from './pinmanager';
+import { PinProps } from './pinmanager';
+import { IconEyeOff } from '@tabler/icons-react';
 
-interface PollProps extends Pin {
+interface PollProps extends PinProps {
     title: string;
     options: {
         title: string;
@@ -17,9 +19,7 @@ interface PollProps extends Pin {
         title: string;
         totalVotes: number;
     };
-    onClick: () => void;
     state?: 'active' | 'ended';
-    final?: boolean;
 }
 
 export function Poll(props: PollProps) {
@@ -42,17 +42,46 @@ export function Poll(props: PollProps) {
 
     const total = props.options.map(x => x.totalVotes).reduce((t, v) => t + v, 0);
 
-    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={props.onClick} className={pollClasses.poll}>
-            <Text ta="center" fz="sm">
-        <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span> Poll
-      </Text>
+    if (!props.expanded) {
+      return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={pollClasses.poll}>
+            <Group justify="space-between" align="center">
+              <Group>
+                  <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
+                  <Group gap="xs">
+                      <Text fw={700}>Poll</Text>
+                      <Text fw={900}>{props.title}</Text>
+                  </Group>
+              </Group>
+              <Group>
+                  {props.state === 'ended' ?  <Badge size="md" color='green'>Ended</Badge> : <Text fw={700}>{formatMinuteSeconds(remaining)}</Text>}
+                  <ActionIcon variant="subtle" onClick={props.hide} color='primary'>
+                      <IconEyeOff/>
+                  </ActionIcon>
+              </Group>
+          </Group>
+      </Card>
+    }
+
+    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={pollClasses.poll}>
+      <Group justify="space-between">
+          <Group>
+              <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
+              <Text fw={700}>Poll</Text>
+          </Group>
+          <Group>
+              {props.state === 'ended' ?  <Badge size="md" color='green'>Ended</Badge> : <Text fw={700}>{formatMinuteSeconds(remaining)}</Text>}
+              <ActionIcon variant="subtle" onClick={props.hide} color='primary'>
+                  <IconEyeOff/>
+              </ActionIcon>
+          </Group>
+      </Group>
       <Text ta="center" fw={700} size="lg" className={pollClasses.title}>
         {props.title}
       </Text>
 
       {props.options.map((opt) => {
         const progress = Math.ceil(100 * opt.totalVotes / total) || 0;
-        const isWinner = props.final && props.winningChoice?.title === opt.title;
+        const isWinner = props.state === 'ended' && props.winningChoice?.title === opt.title;
         
         return <div key={opt.title}>
           <Group justify="space-between" mt="xs">
@@ -74,7 +103,6 @@ export function Poll(props: PollProps) {
 
       <Group justify="space-between" mt="md">
         <Text fz="md">{total.toLocaleString()} votes</Text>
-        {props.final ?  <Badge size="md" color='green'>Ended</Badge> : formatMinuteSeconds(remaining)}
       </Group>
     </Card>
 }

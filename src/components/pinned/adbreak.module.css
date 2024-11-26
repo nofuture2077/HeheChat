@@ -1,8 +1,8 @@
-.raid {
+.adbreak {
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    background: light-dark(var(--mantine-color-pink-2), var(--mantine-color-pink-8));
+    background: light-dark(var(--mantine-color-green-2), var(--mantine-color-green-8));
     border: 1px solid #333;
     transition: all 1s ease-out;
 }

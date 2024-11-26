@@ -2,7 +2,7 @@
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    background: light-dark(var(--mantine-color-white), var(--mantine-color-black));
+    background: light-dark(var(--mantine-color-violet-2), var(--mantine-color-violet-8));
     border: 1px solid #333;
     transition: all 1s ease-out;
 }

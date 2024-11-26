@@ -124,7 +124,6 @@ self.onmessage = async (e) => {
                 initRequest = data;
             }
             if (data.type === 'sevenTVSubscribe') {
-                console.log(data);
                 subscribeToSeventTVUpdates(data.userId, data.objectId);
                 return;
             }

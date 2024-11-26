@@ -22,6 +22,7 @@ export interface ConfigData {
     hidePoll: boolean;
     hideShoutout: boolean;
     hideRaid: boolean;
+    hideAdBreak: boolean;
     fontSize: number;
     modToolsEnabled: boolean;
     raidTargets: string[];
@@ -69,6 +70,7 @@ export interface Config extends ConfigData {
     setHideePoll: (val: boolean) => void;
     setHideShoutout: (val: boolean) => void;
     setHideRaid: (val: boolean) => void;
+    setHideAdBreak: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -95,6 +97,7 @@ export const DEFAULT_CONFIG: Config = {
     hidePoll: false,
     hideShoutout: false,
     hideRaid: false,
+    hideAdBreak: false,
     systemMessageInChat: {
         sub: true,
         subgift: true,
@@ -136,6 +139,7 @@ export const DEFAULT_CONFIG: Config = {
     setHideePoll: (val) => {},
     setHideShoutout: (val) => {},
     setHideRaid: (val) => {},
+    setHideAdBreak: (val) => {},
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => {},
     setDeactivatedAlerts: (id: string, val: boolean) => {},
     loadReceivedShares: () => {},

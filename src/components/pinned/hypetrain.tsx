@@ -1,19 +1,18 @@
-import { Text, Card, Badge, Group, Stack } from '@mantine/core';
+import { Text, Card, Badge, Group, Stack, ActionIcon } from '@mantine/core';
 import { useState, useEffect, useContext } from 'react';
 import { useInterval } from '@mantine/hooks';
 import { formatMinuteSeconds } from '@/commons/helper'
 import { ChatEmotesContext } from '@/ApplicationContext'
 import pinClasses from './pinmanager.module.css';
 import htClasses from './hypetrain.module.css';
-import { Pin } from './pinmanager';
+import { PinProps } from './pinmanager';
+import { IconEyeOff } from '@tabler/icons-react';
 
-interface HypetrainProps extends Pin {
+interface HypetrainProps extends PinProps {
     level: number;
     progress: number;
     goal: number;
-    onClick: () => void;
     state?: 'active' | 'ended';
-    final?: boolean;
 }
 
 export function Hypetrain(props: HypetrainProps) {
@@ -38,33 +37,37 @@ export function Hypetrain(props: HypetrainProps) {
     return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={props.onClick} className={htClasses.hypetrain}>
       <div 
         style={{ width: `${100 - progress}%` }} 
-        className={`${htClasses.progress} ${props.final ? htClasses.completed : ''}`}
+        className={`${htClasses.progress} ${props.state === 'ended' ? htClasses.completed : ''}`}
       ></div>
       <Stack gap={0} className={htClasses.content}>
         <Group justify='space-between'>
           <Group gap='xs'>
-            <Badge color={props.final ? "purple" : undefined}>LVL {props.level}</Badge>
             <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
             <Text fw={900}>
-              {props.final ? "Hype Train Completed!" : "Hype Train"}
+              {props.state === 'ended' ? "Hype Train Completed!" : "Hype Train"}
             </Text>
+            <Badge color={props.state === 'ended' ? "purple" : "pink"}>LVL {props.level}</Badge>
           </Group>
-          <Text>
-            {props.final ? (
-              <Badge color="purple" size="lg">FINAL</Badge>
-            ) : (
-              formatMinuteSeconds(remaining)
-            )}
-          </Text>
+          <Group>
+                {props.state === 'ended' ? (
+                  <Badge color="purple" size="lg">FINAL</Badge>
+                ) : (
+                  <Text fw={700}>{formatMinuteSeconds(remaining)}</Text>
+                )}
+                <ActionIcon variant="subtle" onClick={props.hide} color='primary'>
+                    <IconEyeOff/>
+                </ActionIcon>
+            </Group>
+          
         </Group>
         <Group justify='space-between'>
           <Text fw={600}>
-            {props.final ? 
+            {props.state === 'ended' ? 
               `Final Level ${props.level} Achieved!` : 
               'Help supporting the Hypetrain'
             }
           </Text>
-          <Text fw={900} size='36px' className={props.final ? htClasses.completed : undefined}>
+          <Text fw={900} size='36px' className={props.state === 'ended' ? htClasses.completed : undefined}>
             {progress}%
           </Text>
         </Group>

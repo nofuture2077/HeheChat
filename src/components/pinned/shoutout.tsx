@@ -1,18 +1,18 @@
-import { Text, Card, Group } from '@mantine/core';
+import { Text, Card, Group, ActionIcon } from '@mantine/core';
 import { useState, useEffect, useContext } from 'react';
 import { useInterval } from '@mantine/hooks';
 import { formatMinuteSeconds } from '@/commons/helper'
 import { ChatEmotesContext } from '@/ApplicationContext'
 import pinClasses from './pinmanager.module.css';
 import soClasses from './shoutout.module.css';
-import { Pin } from './pinmanager';
+import { PinProps } from './pinmanager';
+import { IconEyeOff } from '@tabler/icons-react';
 
-interface ShoutoutProps extends Pin {
+interface ShoutoutProps extends PinProps {
     broadcasterName: string;
     targetUserName: string;
     viewerCount: number;
     moderatorName?: string;
-    onClick: () => void;
 }
 
 export function Shoutout(props: ShoutoutProps) {
@@ -37,16 +37,19 @@ export function Shoutout(props: ShoutoutProps) {
         <Group justify="space-between" align="center">
             <Group>
                 <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
-                <div>
-                    <Group gap="xs">
-                        <Text>Shoutout to</Text>
-                        <Text fw={700}>{props.targetUserName}</Text>
-                    </Group>
-                </div>
+                <Group gap="xs">
+                    <Text fw={700}>Shoutout to</Text>
+                    <Text fw={700}>{props.targetUserName}</Text>
+                </Group>
             </Group>
-            <Text>
-                {formatMinuteSeconds(remaining)}
-            </Text>
+            <Group>
+                <Text fw={700}>
+                    {formatMinuteSeconds(remaining)}
+                </Text>
+                <ActionIcon variant="subtle" onClick={props.hide} color='primary'>
+                    <IconEyeOff/>
+                </ActionIcon>
+            </Group>
         </Group>
     </Card>
 }

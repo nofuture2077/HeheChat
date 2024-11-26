@@ -1,11 +1,13 @@
-import { Text, Card, Badge, Group, Progress } from '@mantine/core';
+import { Text, Card, Badge, Group, Progress, ActionIcon } from '@mantine/core';
 import { useState, useEffect, useContext } from 'react';
+import { useDisclosure } from '@mantine/hooks';
 import { useInterval } from '@mantine/hooks';
 import { formatMinuteSeconds } from '@/commons/helper'
 import { ChatEmotesContext } from '@/ApplicationContext'
 import pinClasses from './pinmanager.module.css';
 import predictionClasses from './prediction.module.css';
-import { Pin } from './pinmanager';
+import { PinProps } from './pinmanager';
+import { IconEyeOff } from '@tabler/icons-react';
 
 interface Outcome {
   title: string;
@@ -13,13 +15,11 @@ interface Outcome {
   channelPoints: number;
 }
 
-interface PredictionProps extends Pin {
+interface PredictionProps extends PinProps {
     title: string;
     outcomes: Outcome[];
     winningOutcome?: Outcome;
-    onClick: () => void;
     state?: 'active' | 'ended';
-    final?: boolean;
 }
 
 export function Prediction(props: PredictionProps) {
@@ -42,17 +42,45 @@ export function Prediction(props: PredictionProps) {
 
     const total = props.outcomes.map(x => x.channelPoints).reduce((t, v) => t + v, 0);
 
-    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={props.onClick} className={predictionClasses.prediction}>
-            <Text ta="center" fz="sm" >
-        <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span> Prediction
-      </Text>
+    if (!props.expanded) {
+      return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={predictionClasses.prediction}>
+            <Group justify="space-between">
+              <Group>
+                  <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
+                  <Group>
+                      <Text fw={700}>Prediction</Text>
+                      <Text fw={900}>{props.title}</Text>
+                  </Group>
+              </Group>
+              <Group>
+                  {props.state === 'ended' ?  <Badge size="md" color='green'>Ended</Badge> : <Text fw={700}>{formatMinuteSeconds(remaining)}</Text>}
+                  <ActionIcon variant="subtle" onClick={props.hide} color='primary'>
+                      <IconEyeOff/>
+                  </ActionIcon>
+              </Group>
+          </Group>
+      </Card>
+    }
+
+    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={predictionClasses.prediction}>
+      <Group justify="space-between">
+          <Group>
+              <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
+              <Text fw={700}>Prediction</Text>
+          </Group>
+          <Group>
+              {props.state === 'ended' ?  <Badge size="md" color='green'>Ended</Badge> : <Text fw={700}>{formatMinuteSeconds(remaining)}</Text>}
+              <ActionIcon variant="subtle" onClick={props.hide} color='primary'>
+                  <IconEyeOff/>
+              </ActionIcon>
+          </Group>
+      </Group>
       <Text ta="center" size='lg' fw={700} className={predictionClasses.title}>
         {props.title}
       </Text>
-
       {props.outcomes.map((opt) => {
         const progress = Math.ceil(100 * opt.channelPoints / total) || 0;
-        const isWinner = props.final && props.winningOutcome?.title === opt.title;
+        const isWinner = props.state === 'ended' && props.winningOutcome?.title === opt.title;
         
         return <div key={opt.title}>
           <Group justify="space-between" mt="xs">
@@ -73,8 +101,8 @@ export function Prediction(props: PredictionProps) {
       })}
 
       <Group justify="space-between" mt="md">
-        <Text fz="md">{total.toLocaleString()} points</Text>
-        {props.final ?  <Badge size="md" color='green'>Ended</Badge> : formatMinuteSeconds(remaining)}
+        <Text fz="md">{total.toLocaleString()} points</Text>        
       </Group>
+     
     </Card>
 }
