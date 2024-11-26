@@ -31,6 +31,7 @@ export interface ConfigData {
     receivedShares: string[],
     activatedShares: string[],
     shares: string[],
+    freeTTS: string[],
     deactivatedAlerts: Record<string, boolean>
 }
 
@@ -71,6 +72,7 @@ export interface Config extends ConfigData {
     setHideShoutout: (val: boolean) => void;
     setHideRaid: (val: boolean) => void;
     setHideAdBreak: (val: boolean) => void;
+    setFreeTTS: (val: string[]) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -113,6 +115,7 @@ export const DEFAULT_CONFIG: Config = {
     receivedShares: [],
     activatedShares: [],
     shares: [],
+    freeTTS: [],
     deactivatedAlerts: {},
     setChannels: () => {},
     setIgnoredUsers: () => {},
@@ -148,4 +151,5 @@ export const DEFAULT_CONFIG: Config = {
     setHideViewers: (val: boolean) => {},
     setHideOwnViewers: (val: boolean) => {},
     loadShares: () => {},
+    setFreeTTS: (val: string[]) => {},
 };

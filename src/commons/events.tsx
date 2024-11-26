@@ -106,4 +106,5 @@ export type Event = {
     text?: string;
     amount?: number;
     amount2?: number;
+    eventAlert?: EventAlert;
 }

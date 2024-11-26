@@ -152,6 +152,7 @@ export default function App() {
     const setPlayAlerts = (value: boolean) => updateConfig('playAlerts', value);
     const setShowVideo = (value: boolean) => updateConfig('showVideo', value);
     const setRaidTargets = (value: string[]) => updateConfig('raidTargets', value);
+    const setFreeTTS = (value: string[]) => updateConfig('freeTTS', value);
     const setChatEnabled = (value: boolean) => updateConfig('chatEnabled', value);
     const setHideViewers = (value: boolean) => updateConfig('hideViewers', value);
     const setHideOwnViewers = (value: boolean) => updateConfig('hideOwnViewers', value);
@@ -320,6 +321,7 @@ export default function App() {
         setFontSize,
         setModToolsEnabled,
         setRaidTargets,
+        setFreeTTS,
         setPlayAlerts,
         setSystemMessageInChat,
         setDeactivatedAlerts,

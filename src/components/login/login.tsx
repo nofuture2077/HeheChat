@@ -18,7 +18,7 @@ function getQueryVariable(query: String, variable: String): string | undefined {
     console.log('Query variable %s not found', variable);
   }
 
-const AUTH_VERSION = 8;
+const AUTH_VERSION = 9;
 
 export default function Login() {
     const loginContext = useContext(LoginContextContext);
@@ -79,6 +79,7 @@ export default function Login() {
         "channel:manage:predictions",
         "channel:manage:raids",
         "channel:manage:redemptions",
+        "channel:manage:ads",
         "channel:read:goals",
         "channel:read:hype_train",
         "channel:read:polls",
@@ -86,6 +87,7 @@ export default function Login() {
         "channel:read:redemptions",
         "channel:read:subscriptions",
         "channel:read:vips",
+        "channel:read:ads",
         "chat:edit",
         "chat:read",
         "clips:edit",
@@ -118,7 +120,7 @@ export default function Login() {
             size='xl'
             radius="xl"
             variant='gradient'
-            gradient={{ from: 'var(--mantine-color-skyblue-8)', to: 'var(--mantine-color-paleviolet-6)', deg: 157 }}
+            gradient={{ from: 'var(--mantine-color-skyblue-8)', to: 'var(--mantine-color-paleviolet-6)', deg: 135 }}
             onClick={onClick}
             rightSection={<IconLink size={32} />}>    
             Login with Twitch

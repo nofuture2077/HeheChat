@@ -230,6 +230,9 @@ class AlertPlayer {
     }
 
     getAlert(event: Event, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
+        if (event.eventAlert) {
+            return event.eventAlert;
+        }
         const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
         const alerts = alertConfig.data?.alerts[eventMainType];
         if (!alerts) {
@@ -283,7 +286,7 @@ class AlertPlayer {
  
     async showNotification(item: Event) {
         const alertConfig = this.alertConfig[item.channel];
-        if (!alertConfig) {
+        if (!alertConfig && !item.eventAlert) {
             console.log('No alertconfig set');
             return;
         }

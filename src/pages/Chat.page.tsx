@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
@@ -77,15 +76,42 @@ export function ChatPage() {
     const moderatedChannel = loginContext.moderatedChannels.reduce((obj: any, c: HelixModeratedChannel) => { obj[c.name] = true; return obj }, {});
 
     const addMessage = (msg: HeheMessage, user: string, maxMessages: number) => {
-        Storage.store(msg.target.substring(1), user, msg.date, msg.rawLine);
         if (config.ignoredUsers.indexOf(user) !== -1) {
             return;
         }
         if (msg.id && messageIndex.has(msg.id)) {
             return;
         }
+        if (msg.text.startsWith("!tts") && (config.freeTTS || []).includes(user)) {
+            const message = msg.text.split("!tts")[1];
+            AlertSystem.addEvent({
+                id: Date.now(),
+                channel: msg.channelId || '',
+                username: user, 
+                eventtype: 'raid',
+                date: Date.now(),
+                text: message,
+                eventAlert: {
+                    name: 'defaul',
+                    id: Date.now() + "",
+                    type: 'raid',
+                    specifier: {
+                        type: 'matches'
+                    },
+                    restriction: 'none',
+                    audio: {
+                        tts: {
+                            text: message,
+                            voiceType: 'google',
+                            voiceSpecifier: 'adam',
+                            voiceParams: {}
+                        }
+                    }
+                }
+            });
+        }
         setChatMessages((prevMessages) => prevMessages.concat(msg).slice((prevMessages.length % 2) ? 0 : (-1 * maxMessages + 1)));
-    }
+    };
 
     const onModEvent = useCallback((eventname: string, data: any) => {
         if (data.eventtype === 'delete') {
@@ -185,7 +211,7 @@ export function ChatPage() {
             PubSub.unsubscribe(modEventSub);
             config.off(chatHandler);
         };
-    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages]);
+    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS]);
 
     useDidUpdate(() => {
         setOnline(networkStatus.online);
