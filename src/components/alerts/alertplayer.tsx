@@ -18,9 +18,9 @@ let cheerPrefixesRegExp = cheerPrefixes.map(x => new RegExp(x + "\\d+", "gi"))
 
 class AlertPlayer {
     audioContext?: AudioContext;
-    gainNode?: GainNode;
-    silenceAudio?: HTMLAudioElement;
-    silenceSource?: MediaElementAudioSourceNode;
+    mainAudioGain?: GainNode;
+    mainAudio?: HTMLAudioElement;
+    mainAudioSource?: MediaElementAudioSourceNode;
     playing: boolean = false;
     paused: boolean = false;
     muted: boolean = false;
@@ -47,15 +47,15 @@ class AlertPlayer {
     initialize() {
         console.log('Alert system initialized');
         this.audioContext = new (window.AudioContext)();
-        this.gainNode = this.audioContext.createGain();
-        this.gainNode.gain.value = 0;
-        this.gainNode.connect(this.audioContext.destination);
-        this.silenceAudio = new Audio(silence);
-        this.silenceAudio.autoplay = true;
-        this.silenceAudio.loop = true;
+        this.mainAudioGain = this.audioContext.createGain();
+        this.mainAudioGain.gain.value = 0;
+        this.mainAudioGain.connect(this.audioContext.destination);
+        this.mainAudio = new Audio(silence);
+        this.mainAudio.autoplay = true;
+        this.mainAudio.loop = true;
 
-        this.silenceSource = this.audioContext.createMediaElementSource(this.silenceAudio);
-        this.silenceSource.connect(this.gainNode);
+        this.mainAudioSource = this.audioContext.createMediaElementSource(this.mainAudio);
+        this.mainAudioSource.connect(this.mainAudioGain);
     }
 
     async googleTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
@@ -100,18 +100,17 @@ class AlertPlayer {
             }
             
             const { audio, duration } = audioInfo;
-            audio.volume = volume;
-
-            this.silenceAudio!.onloadedmetadata = () => {
-                this.silenceAudio!.currentTime = 0;
+            
+            this.mainAudio!.onloadedmetadata = () => {
+                this.mainAudio!.currentTime = 0;
                 this.preciseTimer(resolve, (duration * 1000) + extra);
             };
 
             audio.onerror = () => {
                 reject("Audio playback error");
             };
-
-            this.silenceAudio!.src = audio.src;
+            this.mainAudio!.volume = volume;
+            this.mainAudio!.src = audio.src;
         });
     }
 
@@ -146,30 +145,30 @@ class AlertPlayer {
 
     mute() {
         this.muted = true;
-        if (this.gainNode) this.gainNode.gain.value = 0;
+        if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
     }
 
     unmute() {
         this.muted = false;
-        if (this.gainNode) this.gainNode.gain.value = 1;
+        if (this.mainAudioGain) this.mainAudioGain.gain.value = 1;
     }
 
     startPlaying() {
         this.skipCurrent = false;
         this.playing = true;
-        if (this.gainNode) this.gainNode.gain.value = 1;
+        if (this.mainAudioGain) this.mainAudioGain.gain.value = 1;
     }
 
     stopPlaying() {
         this.playing = false;
         this.paused = false;
-        this.silenceAudio!.src = silence;
-        if (this.gainNode) this.gainNode.gain.value = 0;
+        this.mainAudio!.src = silence;
+        if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
     }
 
     skip() {
         this.skipCurrent = true;
-        if (this.gainNode) this.gainNode.gain.value = 0;
+        if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
     }
 
     cleanMessage(message: string) {
