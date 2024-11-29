@@ -1,17 +1,17 @@
 import { ChatMessage, ParsedMessagePart, parseChatMessage, buildEmoteImageUrl } from '@twurple/chat';
 import classes from './ChatMessage.module.css';
-import { ConfigContext, ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
-import { LoginContext } from '@/commons/login';
+import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
+import { LoginContext } from '../../commons/login';
 import { useContext } from 'react';
 import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconCheck } from '@tabler/icons-react';
 import { ActionIcon, Text, Group, CopyButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { TimeoutView, BanView } from './mod/modview';
-import { formatTime } from '@/commons/helper';
-import { ModActions } from '@/components/chat/mod/modactions';
-import { Config, ConfigKey, } from '@/commons/config'
-import { ChatEmotes } from '@/commons/emotes'
-import { EmoteComponent } from '@/components/emote/emote';
+import { formatTime } from '../../commons/helper';
+import { ModActions } from './mod/modactions';
+import { Config, ConfigKey } from '../../commons/config';
+import { ChatEmotes } from '../../commons/emotes';
+import { EmoteComponent } from '../emote/emote';
 
 interface ChatMessageProps {
     msg: ChatMessage;
@@ -32,8 +32,22 @@ export const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] =>
     }, []);
 };
 
+const extractClipId = (url: string): string | null => {
+    try {
+        const clipRegex = /(?:clips\.twitch\.tv\/|twitch\.tv\/\w+\/clip\/)([A-Za-z0-9-_]+)/;
+        const match = url.match(clipRegex);
+        return match ? match[1] : null;
+    } catch {
+        return null;
+    }
+};
+
 const wordMapper = (word: string, channel: string, partIndex: number, index: number, emotes: ChatEmotes, login: LoginContext) => {
     if (word.startsWith('http://') || word.startsWith('https://')) {
+        const clipId = extractClipId(word);
+        if (clipId) {
+            return <a href="#" key={partIndex + "_" + index} onClick={(e) => { e.preventDefault(); PubSub.publish("CLIP-CLICK", { clipId }); }}>{word}</a>;
+        }
         return <a href={word} key={partIndex + "_" + index} target='_blank'>{word}</a>;
     } else if (word.toLocaleLowerCase().indexOf(login.user?.name || ' ') > -1) {
         return <Text fw={700} key={partIndex + "_" + index} className={classes.highlight_name} inline span>{word}</Text>

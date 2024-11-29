@@ -7,6 +7,8 @@ import { ConfigContext, ProfileContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
 import { HeaderLogo } from './HeaderLogo';
 import { TwitchPlayer } from '@/components/twitch/twitchplayer'
+import { TwitchClipsPlayer } from '@/components/twitch/twitchclipsplayer';
+
 import { AlertSystem } from '../alerts/alertplayer';
 
 
@@ -20,6 +22,7 @@ export function Header(props: {
     const [opened] = useDisclosure(false);
     const profile = useContext(ProfileContext);
     const [alertsActive, setAlertsActive] = useState<boolean>(false);
+    const [currentClipId, setCurrentClipId] = useState<string | null>(null);
 
     const interval = useInterval(() => {
         const active = AlertSystem.status();
@@ -28,8 +31,17 @@ export function Header(props: {
 
     useEffect(() => {
         interval.start();
-        return interval.stop;
+
+        const clipSub = PubSub.subscribe("CLIP-CLICK", (msg: any, data: { clipId: string }) => {
+            setCurrentClipId(data.clipId);
+        });
+
+        return () => {
+            PubSub.unsubscribe(clipSub);
+            interval.stop();
+        };
     });
+
     return (
         <Stack gap={0}>
             <Container className={classes.inner}>
@@ -49,7 +61,7 @@ export function Header(props: {
                     </ActionIcon>
                 </div>
             </Container>
-            {config.showVideo ? (<Container p={0}>
+            {currentClipId ? <TwitchClipsPlayer clipId={currentClipId} onClose={() => setCurrentClipId(null)}/> : config.showVideo ? (<Container p={0}>
                 <TwitchPlayer/>
             </Container>): null}
 
