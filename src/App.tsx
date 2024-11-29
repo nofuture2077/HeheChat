@@ -3,8 +3,8 @@ import { MantineProvider } from '@mantine/core';
 import { useDidUpdate } from '@mantine/hooks';
 import { useEffect, useState, useRef } from 'react';
 import { Router } from './Router';
-import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext } from '@/ApplicationContext'
-import { LoginContext, DEFAULT_LOGIN_CONTEXT } from '@/commons/login'
+import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext } from './ApplicationContext';
+import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
 import { ConfigKey, MessageHandler } from './commons/config';
@@ -12,9 +12,9 @@ import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { generateGUID } from './commons/helper';
 import PubSub from 'pubsub-js';
-import { SystemMessageMainType } from "@/commons/message";
-import { theme } from '@/theme';
-import { AlertSystem } from '@/components/alerts/alertplayer';
+import { SystemMessageMainType } from './commons/message';
+import { theme } from './theme';
+import { AlertSystem } from './components/alerts/alertplayer';
 import _ from 'underscore';
 
 window.addEventListener("click", () => {
@@ -151,6 +151,7 @@ export default function App() {
     const setModToolsEnabled = (value: boolean) => updateConfig('modToolsEnabled', value);
     const setPlayAlerts = (value: boolean) => updateConfig('playAlerts', value);
     const setShowVideo = (value: boolean) => updateConfig('showVideo', value);
+    const setVideoQuality = (value: string) => updateConfig('videoQuality', value);
     const setRaidTargets = (value: string[]) => updateConfig('raidTargets', value);
     const setFreeTTS = (value: string[]) => updateConfig('freeTTS', value);
     const setChatEnabled = (value: boolean) => updateConfig('chatEnabled', value);
@@ -317,6 +318,7 @@ export default function App() {
         setChatEnabled,
         setChatChannel,
         setShowVideo,
+        setVideoQuality,
         getChatChannel,
         setFontSize,
         setModToolsEnabled,

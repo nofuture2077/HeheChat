@@ -1,10 +1,11 @@
-import { SystemMessageMainType } from "@/commons/message"
+import { SystemMessageMainType } from '../commons/message';
 
 export type MessageHandler = {id?: number, handle: (channel: string, text: string, replyTo?: string) => void};
 
 export interface ConfigData {
     channels: string[];
     showVideo: boolean;
+    videoQuality: string;
     chatChannel?: string;
     chatEnabled: boolean;
     ignoredUsers: string[];
@@ -64,6 +65,7 @@ export interface Config extends ConfigData {
     loadShares: () => void;
     setDeactivatedAlerts: (id: string, val: boolean) => void;
     setShowVideo: (val: boolean) => void;
+    setVideoQuality: (val: string) => void;
     setHideViewers: (val: boolean) => void;
     setHideOwnViewers: (val: boolean) => void;
     setHideHypetrain: (val: boolean) => void;
@@ -78,6 +80,7 @@ export interface Config extends ConfigData {
 export const DEFAULT_CONFIG: Config = {
     channels: [],
     showVideo: false,
+    videoQuality: '480p',
     chatChannel: undefined,
     chatEnabled: true,
     ignoredUsers: [],
@@ -130,6 +133,7 @@ export const DEFAULT_CONFIG: Config = {
     setChatChannel: (channel: string) => {},
     setChatEnabled: (val: boolean) => {},
     setShowVideo: (val: boolean) => {},
+    setVideoQuality: (val: string) => {},
     onMessage: (handler: MessageHandler) => ({handle: () => {}}),
     off: (handler: MessageHandler) => {},
     fireMessage: (channel: string, text: string, replyTo?: string) => {},

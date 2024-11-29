@@ -2,7 +2,7 @@ import { TagsInput, Switch, Stack, Select, Fieldset } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
-import { SystemMessageMainType } from '@/commons/message'
+import { SystemMessageMainType } from '../../commons/message';
 
 const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'streamOnline', 'streamOffline', 'channelPointRedemption'];
 const seventTVMessages: SystemMessageMainType[] = ['sevenTVAdded', 'sevenTVRemoved'];
@@ -59,6 +59,15 @@ export function ChatSettings() {
                     <Switch checked={config.hideRaid} onChange={(event) => config.setHideRaid(event.currentTarget.checked)} label="Hide Raids" size="lg" />
                     <Switch checked={config.hideAdBreak} onChange={(event) => config.setHideAdBreak(event.currentTarget.checked)} label="Hide Ad Break" size="lg" />
                 </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Twitch Player"  variant='filled'>
+                <Select
+                    label="Video Quality"
+                    data={['auto', 'source', '1080p60', '1080p', '720p60', '720p', '480p', '360p', '160p']}
+                    value={config.videoQuality}
+                    onChange={(value) => config.setVideoQuality(value || '480p')}
+                />
             </Fieldset>
 
             <Fieldset legend="Event Messages" variant='filled'>

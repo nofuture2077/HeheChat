@@ -119,7 +119,7 @@ export function TwitchPlayer({ audioOnly = false }: TwitchPlayerProps) {
             
             if (loginContext.accessToken) {
                 const player = embed.getPlayer();
-                player.setQuality('480p');
+                player.setQuality(config.videoQuality);
                 player.setMuted(!audioOnly);
             }
         });
@@ -165,7 +165,7 @@ export function TwitchPlayer({ audioOnly = false }: TwitchPlayerProps) {
         const player = playerRef.current.getPlayer();
         player.setChannel(channel);
         player.setMuted(!audioOnly);
-        player.setQuality('480p');
+        player.setQuality(config.videoQuality);
     }, [channel, audioOnly]);
 
     if (!channel) return null;
