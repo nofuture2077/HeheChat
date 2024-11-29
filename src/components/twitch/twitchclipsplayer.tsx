@@ -43,7 +43,8 @@ export function TwitchClipsPlayer({ clipId, onClose }: TwitchClipsPlayerProps) {
             style={{ 
                 position: 'relative', 
                 width: w, 
-                height: h 
+                height: h,
+                margin: '0 auto' 
             }}
         >
             <iframe
