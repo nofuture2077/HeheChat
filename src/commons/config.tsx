@@ -1,4 +1,5 @@
 import { SystemMessageMainType } from '../commons/message';
+import { ShortCut } from './shortcuts';
 
 export type MessageHandler = {id?: number, handle: (channel: string, text: string, replyTo?: string) => void};
 
@@ -33,7 +34,8 @@ export interface ConfigData {
     activatedShares: string[],
     shares: string[],
     freeTTS: string[],
-    deactivatedAlerts: Record<string, boolean>
+    deactivatedAlerts: Record<string, boolean>,
+    shortcuts: ShortCut[]
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -75,6 +77,7 @@ export interface Config extends ConfigData {
     setHideRaid: (val: boolean) => void;
     setHideAdBreak: (val: boolean) => void;
     setFreeTTS: (val: string[]) => void;
+    setShortcuts: (val: ShortCut[]) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -120,6 +123,7 @@ export const DEFAULT_CONFIG: Config = {
     shares: [],
     freeTTS: [],
     deactivatedAlerts: {},
+    shortcuts: [],
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setMaxMessages: (value: number) => {},
@@ -156,4 +160,5 @@ export const DEFAULT_CONFIG: Config = {
     setHideOwnViewers: (val: boolean) => {},
     loadShares: () => {},
     setFreeTTS: (val: string[]) => {},
+    setShortcuts: (val: ShortCut[]) => {},
 };

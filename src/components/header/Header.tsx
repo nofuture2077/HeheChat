@@ -1,7 +1,7 @@
 import { Container, ActionIcon, Button, Text, Stack, Indicator } from '@mantine/core';
 import { useDisclosure, useInterval } from '@mantine/hooks';
 import classes from './Header.module.css';
-import { IconBrandTwitch, IconSettings, IconBell } from '@tabler/icons-react';
+import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
 import { ConfigContext, ProfileContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
@@ -11,12 +11,13 @@ import { TwitchClipsPlayer } from '@/components/twitch/twitchclipsplayer';
 
 import { AlertSystem } from '../alerts/alertplayer';
 
-
 export function Header(props: {
     openSettings: (tab?: SettingsTab) => void,
     openEvents: () => void,
     openTwitch: () => void,
-    openProfileBar: () => void
+    openProfileBar: () => void,
+    toggleShortcuts: () => void,
+    showShortcutsToggle: boolean
 }) {
     const config = useContext(ConfigContext);
     const [opened] = useDisclosure(false);
@@ -48,23 +49,28 @@ export function Header(props: {
                 <Button fw={300} p={0} variant='transparent' color='primary' size='lg' onClick={props.openProfileBar} leftSection={<HeaderLogo height={28}/>}><Text fw={700}>HEHE</Text><Text fw={300}>Chat</Text></Button>
                 <div></div>
                 <div className={classes.rightGroup}>
-                    <ActionIcon variant='transparent' color='primary' size='44px'>
-                        <IconSettings onClick={() => props.openSettings()} />
+                    <ActionIcon variant='transparent' color='primary' size='44px' onClick={() => props.openSettings()}>
+                        <IconSettings />
                     </ActionIcon>
-                    <ActionIcon variant='transparent' color='primary' size='44px'>
+                    {props.showShortcutsToggle ? 
+                        (<ActionIcon variant='transparent' color='primary' onClick={props.toggleShortcuts}  size='44px'>
+                            <IconKeyboard/>
+                        </ActionIcon>)
+                    : null}
+
+                    <ActionIcon variant='transparent' color='primary' size='44px' onClick={props.openEvents}>
                         <Indicator size={8} offset={2} color={alertsActive ? 'green' : 'red'} processing={!alertsActive} disabled={!config.playAlerts}>
-                            <IconBell onClick={props.openEvents} />
+                            <IconBell  />
                         </Indicator>
                     </ActionIcon>
-                    <ActionIcon variant='transparent' color='primary' size='44px'>
-                        <IconBrandTwitch onClick={props.openTwitch}/>
+                    <ActionIcon variant='transparent' color='primary' size='44px' onClick={props.openTwitch}>
+                        <IconBrandTwitch/>
                     </ActionIcon>
                 </div>
             </Container>
             {currentClipId ? <TwitchClipsPlayer clipId={currentClipId} onClose={() => setCurrentClipId(null)}/> : config.showVideo ? (<Container p={0}>
                 <TwitchPlayer/>
             </Container>): null}
-
         </Stack>
     );
 }

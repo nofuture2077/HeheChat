@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { UnstyledButton, Tooltip, Title, rem, Button, Box, Avatar, ScrollArea, ScrollAreaAutosize } from '@mantine/core';
+import { UnstyledButton, Tooltip, Title, rem, Button, Box, Avatar, ScrollArea } from '@mantine/core';
 import {
   IconHome2,
   IconX,
@@ -7,7 +7,8 @@ import {
   IconSword,
   IconChevronRight,
   IconBell,
-  IconShare
+  IconShare,
+  IconKeyboard
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
@@ -17,6 +18,7 @@ import { InfoCard } from '../infocard/infocard';
 import { LoginContextContext } from '@/ApplicationContext';
 import { AlertSettings } from './AlertSettings';
 import { ShareSettings } from './ShareSettings';
+import { ShortcutSettings } from './ShortcutSettings';
 import { OverlayDrawer } from '@/pages/Chat.page';
 
 const mainLinksMockdata = [
@@ -24,7 +26,8 @@ const mainLinksMockdata = [
   { icon: IconMessageChatbot, label: 'Chat' },
   { icon: IconSword, label: 'Mod' },
   { icon: IconBell, label: 'Alerts' },
-  { icon: IconShare, label: 'Share' }
+  { icon: IconShare, label: 'Share' },
+  { icon: IconKeyboard, label: 'Shortcuts' }
 ];
 
 export const SettingsDrawer: OverlayDrawer = {
@@ -34,7 +37,7 @@ export const SettingsDrawer: OverlayDrawer = {
   position: 'left',
 }
 
-export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts';
+export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts' | 'Share' | 'Shortcuts';
 
 export interface SettingsProperties {
   close: () => void;
@@ -76,7 +79,9 @@ export function Settings(props: SettingsProperties) {
       case 'Alerts':
         return <AlertSettings />;
       case 'Share':
-          return <ShareSettings />;
+        return <ShareSettings />;
+      case 'Shortcuts':
+        return <ShortcutSettings />;
       default:
         return null;
     }

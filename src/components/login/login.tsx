@@ -18,7 +18,7 @@ function getQueryVariable(query: String, variable: String): string | undefined {
     console.log('Query variable %s not found', variable);
   }
 
-const AUTH_VERSION = 9;
+const AUTH_VERSION = 10;
 
 export default function Login() {
     const loginContext = useContext(LoginContextContext);
@@ -88,6 +88,8 @@ export default function Login() {
         "channel:read:subscriptions",
         "channel:read:vips",
         "channel:read:ads",
+        "channel:edit:commercial",
+        "channel:manage:broadcast",
         "chat:edit",
         "chat:read",
         "clips:edit",

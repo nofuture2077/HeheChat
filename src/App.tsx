@@ -15,6 +15,7 @@ import PubSub from 'pubsub-js';
 import { SystemMessageMainType } from './commons/message';
 import { theme } from './theme';
 import { AlertSystem } from './components/alerts/alertplayer';
+import { ShortCut } from './commons/shortcuts';
 import _ from 'underscore';
 
 window.addEventListener("click", () => {
@@ -163,6 +164,7 @@ export default function App() {
     const setHideRaid = (value: boolean) => updateConfig('hideRaid', value);
     const setHideAdBreak = (value: boolean) => updateConfig('hideAdBreak', value);
     const setHideShoutout = (value: boolean) => updateConfig('hideShoutout', value);
+    const setShortcuts = (value: ShortCut[]) => updateConfig('shortcuts', value);
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
             return profile.config.chatChannel;
@@ -341,7 +343,8 @@ export default function App() {
         loadShares,
         onMessage,
         off,
-        fireMessage
+        fireMessage,
+        setShortcuts
     };
 
     const appLogin = {

@@ -3,7 +3,8 @@ import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext }
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon, Badge, Stack, Group } from '@mantine/core';
 import { Chat } from '@/components/chat/Chat';
-import { IconMessagePause, IconMessage } from '@tabler/icons-react';
+import { ShortcutView } from '@/components/shortcuts/ShortcutView';
+import { IconMessagePause } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '@/components/header/Header';
 import { EventDrawer } from '@/components/events/eventdrawer';
@@ -55,6 +56,7 @@ export function ChatPage() {
     const documentVisible = useDocumentVisibility();
     const networkStatus = useNetwork();
     const [videoHeight, setVideoHeight] = useState(0);
+    const [shortcutsVisible, setShortcutsVisible] = useState(true);
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
         const viewportElement = viewport.current;
@@ -256,16 +258,21 @@ export function ChatPage() {
     return (
         <AppShell>
             <AppShell.Header>
-                <Header openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab} }); drawerHandler.open() }}
+                <Header 
+                    openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab} }); drawerHandler.open() }}
                     openEvents={() => { setDrawer(EventDrawer); drawerHandler.open() }}
                     openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }}
-                    openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} />
+                    openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }}
+                    toggleShortcuts={() => setShortcutsVisible(!shortcutsVisible)}
+                    showShortcutsToggle={!!(config.shortcuts && config.shortcuts.length)}
+                />
             </AppShell.Header>
 
             <AppShell.Main>
                 <Affix position={{top: affixOffset}} w="100%">
-                    <Stack align='stretch'>
+                    <Stack align='stretch' gap="md">
                         {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}
+                        {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                         <PinManager/>
                     </Stack>
                 </Affix>
@@ -286,7 +293,6 @@ export function ChatPage() {
             </AppShell.Main>
             <AppShell.Footer >
                 {config.chatEnabled ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : null}
-                
             </AppShell.Footer>
         </AppShell>
     );

@@ -1,5 +1,4 @@
 export interface ChatStorage {
-    store: (channel: string, user: string, date: Date, msg: string) => Promise<void>;
     load: (channels: string[], ignoredUsers: string[]) => Promise<string[]>;
 }
 
@@ -14,10 +13,6 @@ class RemoteChatStorage implements ChatStorage {
     private baseUrl: string;
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
-    }
-
-    store(channel: string, user: string | undefined, date: Date, msg: string | undefined): Promise<void> {
-        return Promise.resolve();
     }
 
     async load(channels: string[], ignoredUsers: string[]): Promise<string[]> {

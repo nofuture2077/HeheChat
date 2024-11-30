@@ -79,10 +79,9 @@ function debounce<T extends (...args: any[]) => any>(
 }
 
 interface TwitchPlayerProps {
-    audioOnly?: boolean;
 }
 
-export function TwitchPlayer({ audioOnly = false }: TwitchPlayerProps) {
+export function TwitchPlayer(props: TwitchPlayerProps) {
     const config = useContext(ConfigContext);
     const loginContext = useContext(LoginContextContext);
     const playerRef = useRef<TwitchEmbed | null>(null);
@@ -110,7 +109,7 @@ export function TwitchPlayer({ audioOnly = false }: TwitchPlayerProps) {
             parent: [window.location.hostname],
             autoplay: true,
             layout: "video",
-            muted: !audioOnly
+            muted: true
         };
 
         const embed = new window.Twitch.Embed(containerId, options);
@@ -120,10 +119,10 @@ export function TwitchPlayer({ audioOnly = false }: TwitchPlayerProps) {
             if (loginContext.accessToken) {
                 const player = embed.getPlayer();
                 player.setQuality(config.videoQuality);
-                player.setMuted(!audioOnly);
+                player.setMuted(true);
             }
         });
-    }, [channel, audioOnly, loginContext.accessToken, w, h]);
+    }, [channel, loginContext.accessToken, w, h]);
 
     // Handle resize
     const handleResize = useCallback(
@@ -164,9 +163,9 @@ export function TwitchPlayer({ audioOnly = false }: TwitchPlayerProps) {
 
         const player = playerRef.current.getPlayer();
         player.setChannel(channel);
-        player.setMuted(!audioOnly);
+        player.setMuted(true);
         player.setQuality(config.videoQuality);
-    }, [channel, audioOnly]);
+    }, [channel]);
 
     if (!channel) return null;
 
