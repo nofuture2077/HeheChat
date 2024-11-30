@@ -221,10 +221,15 @@ export function ChatPage() {
                 const msgs = rawMessages.map(parseMessage);
                 setChatMessages(msgs);
             });
+            if (!AlertSystem.status()) {
+                AlertSystem.initialize();
+            } 
         }
-        if (!AlertSystem.status()) {
-            AlertSystem.initialize();
-        } 
+
+        if(!documentVisible) {
+            AlertSystem.suspend();
+        }
+
         setTimeout(() => {
             scrollToBottom();
         }, 2000);
