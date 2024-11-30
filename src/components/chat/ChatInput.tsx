@@ -42,7 +42,7 @@ export function ChatInput(props: { close: () => void, replyToMsg?: ChatMessage, 
                     autosize
                     minRows={1}
                     maxRows={3}
-                    placeholder={props.replyToMsg ? ("Reply to " + props.replyToMsg.userInfo.displayName) : ("Chat in " + chatChannel)}
+                    placeholder={props.replyToMsg ? ("Reply to " + props.replyToMsg.userInfo.displayName + " in " + chatChannel) : ("Chat in " + chatChannel)}
                     rightSectionWidth={42}
                     onKeyDown={event => {
                         if (event.key == "Enter") {
@@ -54,14 +54,13 @@ export function ChatInput(props: { close: () => void, replyToMsg?: ChatMessage, 
                     leftSection={props.replyToMsg ?
                         (<ActionIcon variant="subtle" onClick={() => { props.setReplyMsg(undefined) }}>
                             <IconX style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-                        </ActionIcon>) : null}
+                        </ActionIcon>) : <ChannelPicker onChange={(item) => { props.setReplyMsg(undefined); config.setChatChannel(item) }} channels={config.channels} value={chatChannel} />}
                     rightSection={
                         <ActionIcon size={32} radius="xl" variant="transparent" color='primary' onClick={() => { sendMessage(inputText, false) }}>
                             <IconSend style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
                         </ActionIcon>
                     }
                 />
-                <ChannelPicker onChange={(item) => { props.setReplyMsg(undefined); config.setChatChannel(item) }} channels={config.channels} value={chatChannel} />
             </Flex>
         </Stack>
     );
