@@ -58,12 +58,6 @@ class AlertPlayer {
         this.mainAudioSource.connect(this.mainAudioGain);
     }
 
-    suspend() {
-        if (this.mainAudio?.loop) {
-            this.mainAudio.loop = false;
-        }
-    }
-
     async googleTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
         const params = new URLSearchParams({
             text: msg,
