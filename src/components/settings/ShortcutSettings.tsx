@@ -13,9 +13,7 @@ const shortcutTypes = [
 ];
 
 const colorOptions = [
-    { value: '#1c7ed6', label: 'Blue' },
     { value: '#be4bdb', label: 'Grape' },
-    { value: '#37b24d', label: 'Green' },
     { value: '#4263eb', label: 'Indigo' },
     { value: '#f76707', label: 'Orange' },
     { value: '#e64980', label: 'Pink' },
