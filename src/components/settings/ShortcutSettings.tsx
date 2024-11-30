@@ -37,6 +37,8 @@ export function ShortcutSettings() {
         setType('clip');
         setColor(colorOptions[0].value);
         setParams('');
+        setInput(false);
+        setConfirm(false);
         setEditingShortcut(null);
         setModalOpen(false);
     };
@@ -66,6 +68,8 @@ export function ShortcutSettings() {
         setType(shortcut.type);
         setColor(shortcut.color);
         setParams(shortcut.params.join(', '));
+        setInput(shortcut.input);
+        setConfirm(shortcut.confirm);
         setModalOpen(true);
     };
 
@@ -131,8 +135,9 @@ export function ShortcutSettings() {
                         onChange={(e) => setParams(e.target.value)}
                         placeholder="e.g. !live"
                     />
-                    <Switch checked={input} onChange={(event) => setInput(event.currentTarget.checked)} label="Requires Input" size="lg" />
-                    <Switch checked={confirm} onChange={(event) => setConfirm(event.currentTarget.checked)} label="Confirmation" size="lg" />
+                    <Switch checked={input} onChange={(event) => setInput(event.currentTarget.checked)} label="Input" size="lg" />
+                    <Switch checked={confirm} onChange={(event) => setConfirm(event.currentTarget.checked)} label="Confirm" size="lg" />
+                    <Text fs='italic'>Input can be used to set the streammarkers name. Confirm makes sure that a shortcut is only executed after confirmation.</Text>
                     <Group justify="space-between" mt="md">
                         <Button variant="light" onClick={resetForm}>Cancel</Button>
                         <Button onClick={handleSave}>{editingShortcut ? 'Update' : 'Add'}</Button>
