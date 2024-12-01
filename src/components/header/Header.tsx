@@ -17,13 +17,14 @@ export function Header(props: {
     openTwitch: () => void,
     openProfileBar: () => void,
     toggleShortcuts: () => void,
-    showShortcutsToggle: boolean
+    showShortcutsToggle: boolean,
+    currentClipId: string | null,
+    setCurrentClipId: (currentClipId: string | null) => void,
 }) {
     const config = useContext(ConfigContext);
     const [opened] = useDisclosure(false);
     const profile = useContext(ProfileContext);
     const [alertsActive, setAlertsActive] = useState<boolean>(false);
-    const [currentClipId, setCurrentClipId] = useState<string | null>(null);
 
     const interval = useInterval(() => {
         const active = AlertSystem.status();
@@ -34,7 +35,7 @@ export function Header(props: {
         interval.start();
 
         const clipSub = PubSub.subscribe("CLIP-CLICK", (msg: any, data: { clipId: string }) => {
-            setCurrentClipId(data.clipId);
+            props.setCurrentClipId(data.clipId);
         });
 
         return () => {
@@ -68,7 +69,7 @@ export function Header(props: {
                     </ActionIcon>
                 </div>
             </Container>
-            {currentClipId ? <TwitchClipsPlayer clipId={currentClipId} onClose={() => setCurrentClipId(null)}/> : config.showVideo ? (<Container p={0}>
+            {props.currentClipId ? <TwitchClipsPlayer clipId={props.currentClipId} onClose={() => props.setCurrentClipId(null)}/> : config.showVideo ? (<Container p={0}>
                 <TwitchPlayer/>
             </Container>): null}
         </Stack>

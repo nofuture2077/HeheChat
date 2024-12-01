@@ -57,6 +57,7 @@ export function ChatPage() {
     const networkStatus = useNetwork();
     const [videoHeight, setVideoHeight] = useState(0);
     const [shortcutsVisible, setShortcutsVisible] = useState(true);
+    const [currentClipId, setCurrentClipId] = useState<string | null>(null);
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
         const viewportElement = viewport.current;
@@ -252,7 +253,7 @@ export function ChatPage() {
         raidUser
     };
 
-    const headerHeight = 36 + (config.showVideo ? videoHeight : 0);
+    const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);
     const affixOffset = headerHeight + 15;
 
     return (
@@ -265,6 +266,8 @@ export function ChatPage() {
                     openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }}
                     toggleShortcuts={() => setShortcutsVisible(!shortcutsVisible)}
                     showShortcutsToggle={!!(config.shortcuts && config.shortcuts.length)}
+                    currentClipId={currentClipId}
+                    setCurrentClipId={setCurrentClipId}
                 />
             </AppShell.Header>
 
