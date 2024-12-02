@@ -43,7 +43,7 @@ export function Prediction(props: PredictionProps) {
     const total = props.outcomes.map(x => x.channelPoints).reduce((t, v) => t + v, 0);
 
     if (!props.expanded) {
-      return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={predictionClasses.prediction}>
+      return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={predictionClasses.prediction}>
             <Group justify="space-between">
               <Group>
                   <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
@@ -62,7 +62,7 @@ export function Prediction(props: PredictionProps) {
       </Card>
     }
 
-    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={predictionClasses.prediction}>
+    return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={predictionClasses.prediction}>
       <Group justify="space-between">
           <Group>
               <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>

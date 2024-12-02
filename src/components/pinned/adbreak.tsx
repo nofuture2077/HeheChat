@@ -30,13 +30,12 @@ export function AdBreak(props: AdBreakProps) {
       return null;
     }
 
-    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={props.onClick} className={adClasses.adbreak}>
+    return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={props.onClick} className={adClasses.adbreak}>
         <Group justify="space-between" align="center">
             <Group>
                 <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
                 <Group gap="xs">
                     <Text fw={700}>Commercial Break</Text>
-                    <Text>for all the non subs</Text>
                 </Group>
             </Group>
             <Group>

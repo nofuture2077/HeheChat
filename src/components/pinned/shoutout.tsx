@@ -33,7 +33,7 @@ export function Shoutout(props: ShoutoutProps) {
       return null;
     }
 
-    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={props.onClick} className={soClasses.shoutout}>
+    return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={props.onClick} className={soClasses.shoutout}>
         <Group justify="space-between" align="center">
             <Group>
                 <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>

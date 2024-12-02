@@ -1,6 +1,6 @@
 import { Group, ActionIcon, Text, Modal, TextInput, Button, Stack, Badge, Card } from '@mantine/core';
 import { useContext, useState } from 'react';
-import { ConfigContext, ChatEmotesContext } from '@/ApplicationContext';
+import { ConfigContext, ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
 import { ShortCut, shortcutHandler } from '@/commons/shortcuts';
 import { 
     IconClipboard, 
@@ -35,6 +35,7 @@ const getIconForType = (type: string) => {
 export function ShortcutView() {
     const config = useContext(ConfigContext);
     const emotes = useContext(ChatEmotesContext);
+    const loginContext = useContext(LoginContextContext);
     const [modalOpen, setModalOpen] = useState(false);
     const [activeShortcut, setActiveShortcut] = useState<ShortCut | null>(null);
     const [inputValue, setInputValue] = useState('');
@@ -50,7 +51,7 @@ export function ShortcutView() {
             setModalOpen(true);
             setInputValue('');
         } else {
-            shortcutHandler.handle(shortcut, emotes.getChannelId(config.chatChannel || ''), '');
+            shortcutHandler.handle(shortcut, loginContext.user?.id || '', '');
             setCheckedShortcuts(prev => ({
                 ...prev,
                 [shortcut.id]: true
@@ -71,9 +72,9 @@ export function ShortcutView() {
                     ...activeShortcut,
                     params: [inputValue]
                 };
-                shortcutHandler.handle(shortcutWithParams, emotes.getChannelId(config.chatChannel || ''), inputValue);
+                shortcutHandler.handle(shortcutWithParams, loginContext.user?.id || '', inputValue);
             } else {
-                shortcutHandler.handle(activeShortcut, emotes.getChannelId(config.chatChannel || ''), inputValue);
+                shortcutHandler.handle(activeShortcut, loginContext.user?.id || '', inputValue);
             }
             setCheckedShortcuts(prev => ({
                 ...prev,
@@ -96,7 +97,7 @@ export function ShortcutView() {
     };
 
     return (
-        <Card withBorder radius="md" p="sm" ml="md" mr="md" mt={0} mb={0}>
+        <Card withBorder radius="md" p="sm" ml="sm" mr="sm" mt={0} mb={0}>
             <Group justify="center" gap="md">
                 {config.shortcuts.map((shortcut) => {
                     const Icon = checkedShortcuts[shortcut.id] ? IconCheck : getIconForType(shortcut.type);

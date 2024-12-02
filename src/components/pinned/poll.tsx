@@ -43,7 +43,7 @@ export function Poll(props: PollProps) {
     const total = props.options.map(x => x.totalVotes).reduce((t, v) => t + v, 0);
 
     if (!props.expanded) {
-      return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={pollClasses.poll}>
+      return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={pollClasses.poll}>
             <Group justify="space-between" align="center">
               <Group>
                   <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
@@ -62,7 +62,7 @@ export function Poll(props: PollProps) {
       </Card>
     }
 
-    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={pollClasses.poll}>
+    return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={() => props.pinsExpanded ? props.onClick() : props.toggleExpand()} className={pollClasses.poll}>
       <Group justify="space-between">
           <Group>
               <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>

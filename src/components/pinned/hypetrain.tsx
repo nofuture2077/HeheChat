@@ -34,7 +34,7 @@ export function Hypetrain(props: HypetrainProps) {
       return null;
     }
 
-    return <Card withBorder radius="md" p="md" ml="lg" mr="lg" mt={0} mb={0} onClick={props.onClick} className={htClasses.hypetrain}>
+    return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={props.onClick} className={htClasses.hypetrain}>
       <div 
         style={{ width: `${100 - progress}%` }} 
         className={`${htClasses.progress} ${props.state === 'ended' ? htClasses.completed : ''}`}
@@ -60,14 +60,14 @@ export function Hypetrain(props: HypetrainProps) {
             </Group>
           
         </Group>
-        <Group justify='space-between'>
+        <Group justify='space-between' align='flex-end'>
           <Text fw={600}>
             {props.state === 'ended' ? 
               `Final Level ${props.level} Achieved!` : 
               'Help supporting the Hypetrain'
             }
           </Text>
-          <Text fw={900} size='36px' className={props.state === 'ended' ? htClasses.completed : undefined}>
+          <Text fw={900} size='28px' className={props.state === 'ended' ? htClasses.completed : undefined}>
             {progress}%
           </Text>
         </Group>
