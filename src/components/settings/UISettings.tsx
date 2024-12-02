@@ -3,7 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle } from '../colorscheme/colorscheme';
 import { useContext, useState } from 'react';
 import { ConfigContext, ProfileContext } from '@/ApplicationContext';
-import { IconTrash, IconPencil, IconReload } from '@tabler/icons-react';
+import { IconTrash, IconPencil, IconReload, IconCopy } from '@tabler/icons-react';
 import { Profile } from '@/commons/profile';
 
 export interface UISettingProperties {
@@ -16,6 +16,7 @@ export function UISettings(props: UISettingProperties) {
     const profile = useContext(ProfileContext);
     const [confirmDeleteOpen, confirmDeleteHandler] = useDisclosure(false);
     const [renameOpen, renameHandler] = useDisclosure(false);
+    const [cloneOpen, cloneHandler] = useDisclosure(false);
     const marks = [10, 14, 18, 22, 26].map(x => ({ value: x, label: x + "px" }));
     return (
         <Stack mt={30} mb={30} gap={30}>
@@ -32,8 +33,10 @@ export function UISettings(props: UISettingProperties) {
                     </ActionIcon>
                 }></TextInput>
                 {renameOpen ? <RenameProfileView profile={profile} close={renameHandler.close} /> : null}
+                {cloneOpen ? <CloneProfileView profile={profile} close={cloneHandler.close} /> : null}
                 {confirmDeleteOpen ? <ConfirmProfileDeleteView title='Are you sure to delete Profile?' close={confirmDeleteHandler.close} confirm={() => { profile.deleteProfile(profile.guid); props.close(); props.openProfileBar() }} /> : null}
                 <Button variant="filled" color="pink" leftSection={<IconTrash size={14} />} onClick={confirmDeleteHandler.open}>Delete</Button>
+                <Button variant="filled" leftSection={<IconCopy size={14} />} onClick={cloneHandler.open}>Clone</Button>
                 </Stack>
             </Fieldset>
 
@@ -80,6 +83,28 @@ export function RenameProfileView(props: {
                         props.profile.setProfileName(profileName);
                         props.close();
                     }}>Rename</Button>
+                </Group>
+            </Fieldset>
+        </Modal>);
+}
+
+export function CloneProfileView(props: {
+    profile: Profile,
+    close: () => void;
+}) {
+    const [profileName, setProfileName] = useState("");
+    const error = !props.profile.checkProfileName(profileName);
+
+    return (
+        <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
+            <Fieldset legend={'Clone Profile'}>
+                <TextInput label="Profilename" placeholder="" value={profileName} onChange={(ev) => setProfileName(ev.target.value)} error={profileName && error} />
+                <Group justify="flex-end" mt="md">
+                    <Button onClick={props.close}>Cancel</Button>
+                    <Button color='primary' disabled={error} onClick={() => {
+                        props.profile.createProfile(profileName, props.profile);
+                        props.close();
+                    }}>Clone</Button>
                 </Group>
             </Fieldset>
         </Modal>);

@@ -259,9 +259,9 @@ export default function App() {
         }
     };
 
-    const createProfile = (name: string) => {
+    const createProfile = (name: string, oldProfile?: Profile) => {
         const guid = generateGUID();
-        const newProfile = {...DEFAULT_PROFILE, name, guid};
+        const newProfile = {...DEFAULT_PROFILE, ...oldProfile, name, guid};
         setProfile(newProfile);
         setProfiles(profiles => profiles.concat(newProfile));
     };
