@@ -11,6 +11,7 @@ import { AdBreak } from "@/components/pinned/adbreak";
 import PubSub from "pubsub-js";
 import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
+import { generateGUID } from "@/commons/helper";
 
 const FINAL_STATE_DURATION = 15000; // 15 seconds in milliseconds
 const RAID_DURATION = 90 * 1000; // 90 seconds in milliseconds
@@ -355,7 +356,7 @@ export function PinManager() {
                     expanded: true,
                     hidden: false,
                     type: 'raid',
-                    id: `raid-${Date.now()}`,
+                    id: generateGUID(),
                     channel: d.broadcasterName,
                     endTime: new Date(Date.now() + RAID_DURATION),
                     data: {
@@ -375,7 +376,7 @@ export function PinManager() {
                     expanded: true,
                     hidden: false,
                     type: 'shoutout',
-                    id: `shoutout-${Date.now()}`,
+                    id: generateGUID(),
                     channel: d.broadcasterName,
                     endTime: new Date(Date.now() + SHOUTOUT_DURATION),
                     data: {
@@ -394,8 +395,8 @@ export function PinManager() {
                 const pin: Pin = {
                     expanded: true,
                     hidden: false,
-                    type: 'shoutout',
-                    id: `shoutout-${Date.now()}`,
+                    type: 'adbreak',
+                    id: generateGUID(),
                     channel: d.broadcasterName,
                     endTime: new Date(Date.now() + d.durationSeconds * 1000),
                     data: {}
