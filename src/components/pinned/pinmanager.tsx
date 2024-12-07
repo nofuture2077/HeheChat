@@ -369,6 +369,25 @@ export function PinManager() {
                 return;
             }
 
+            if (data.eventtype === 'raidCancel') {
+                const d = JSON.parse(data.text);
+                const pin: Pin = {
+                    expanded: true,
+                    hidden: true,
+                    type: 'raid',
+                    id: generateGUID(),
+                    channel: d.broadcasterName,
+                    endTime: new Date(Date.now() + 0),
+                    data: {
+                        broadcasterName: d.broadcasterName,
+                        targetChannelName: d.targetChannelName,
+                        viewers: d.viewers
+                    }
+                };
+                upsertPin(pin);
+                return;
+            }
+
             // Shoutout Events
             if (data.eventtype === 'shoutoutCreate' && !config.hideShoutout) {
                 const d = JSON.parse(data.text);
