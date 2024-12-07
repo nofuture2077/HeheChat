@@ -18,7 +18,7 @@ function getQueryVariable(query: String, variable: String): string | undefined {
     console.log('Query variable %s not found', variable);
   }
 
-const AUTH_VERSION = 11;
+const AUTH_VERSION = 12;
 
 export default function Login() {
     const loginContext = useContext(LoginContextContext);
@@ -99,6 +99,7 @@ export default function Login() {
         "moderator:manage:banned_users",
         "moderator:manage:unban_requests",
         "moderator:manage:chat_settings",
+        "moderator:manage:warnings",
         "moderator:read:moderators",
         "moderator:read:vips",
         "moderator:read:chatters",
