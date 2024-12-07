@@ -100,7 +100,7 @@ export default function Login() {
         "moderator:manage:unban_requests",
         "moderator:manage:chat_settings",
         "moderator:read:moderators",
-        "moderator:read:vip",
+        "moderator:read:vips",
         "moderator:read:chatters",
         "moderator:read:followers",
         "moderator:read:shield_mode",
