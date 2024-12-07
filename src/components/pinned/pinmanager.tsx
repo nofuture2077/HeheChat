@@ -381,7 +381,7 @@ export function PinManager() {
                     data: {
                         broadcasterName: d.broadcasterName,
                         targetChannelName: d.targetChannelName,
-                        viewers: d.viewers
+                        viewers: 0
                     }
                 };
                 upsertPin(pin);

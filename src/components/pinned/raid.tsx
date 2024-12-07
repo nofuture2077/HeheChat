@@ -42,7 +42,6 @@ export function Raid(props: RaidProps) {
                         <Text>is raiding</Text>
                         <Text fw={700}>{props.targetChannelName}</Text>
                     </Group>
-                    <Text>{props.viewers.toLocaleString()} viewers</Text>
                 </div>
             </Group>
             <Group>
