@@ -86,6 +86,8 @@ export default function App() {
         loadProfiles().then(async (data) => {
             if (data.active) {
                 const profileData = await loadProfileFromServer(data.active);
+                profileData.config.channels = profileData.config.channels || [];
+                profileData.config.raidTargets = profileData.config.raidTargets || [];
                 setProfile(profileData);
                 AlertSystem.updateConfig(profileData.config);
                 const order = data.profiles.split(',').filter(x => x);
