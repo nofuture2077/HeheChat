@@ -72,7 +72,9 @@ export function ChatPage() {
     const messageIndex = toMap(chatMessages, m => m.id);
 
     const scrollToBottom = () => {
-        viewport.current!.scrollTo({ top: viewport.current!.scrollHeight + 60 });
+        if (viewport.current) {
+            viewport.current!.scrollTo({ top: viewport.current!.scrollHeight + 60 });
+        }
     }
 
     const deletedMessagesIndex = deletedMessages.reduce((obj: any, key: string) => { obj[key] = true; return obj }, {});
@@ -189,7 +191,7 @@ export function ChatPage() {
         });
 
         profile.listProfiles().forEach(p => {
-            p.config.channels.forEach(channel => {
+            (p.config.channels || []).forEach(channel => {
                 emotes.updateUserInfo(loginContext, channel);
             });
         });
@@ -200,7 +202,7 @@ export function ChatPage() {
             scrollToBottom();
         }, 2000);
 
-        config.channels.forEach(channel => {
+        (config.channels || []).forEach(channel => {
             emotes.updateChannel(loginContext, channel).then(forceUpdate);
         });
         const state = localStorage.getItem('hehe-token_state') || '';
