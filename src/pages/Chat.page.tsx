@@ -182,7 +182,7 @@ export function ChatPage() {
             setChatMessages(msgs);
         });
 
-        loginContext.moderatedChannels.forEach(mC => {
+        (loginContext.moderatedChannels || []).forEach(mC => {
             emotes.updateUserInfo(loginContext, mC.name);
         });
 
@@ -190,7 +190,7 @@ export function ChatPage() {
             emotes.updateUserInfo(loginContext, mC);
         });
 
-        profile.listProfiles().forEach(p => {
+        (profile.listProfiles() || []).forEach(p => {
             (p.config.channels || []).forEach(channel => {
                 emotes.updateUserInfo(loginContext, channel);
             });

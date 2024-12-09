@@ -198,7 +198,7 @@ class AlertPlayer {
 
     addNewChannels(channels: string[]) {
         const newChannels: string[] = [];
-        channels.forEach(channel => {
+        (channels || []).forEach(channel => {
             if (!this.alertConfig[channel]) {
                 newChannels.push(channel);
             }

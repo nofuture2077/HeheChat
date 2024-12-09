@@ -59,12 +59,12 @@ function connectToSevenTV() {
             const body = data.d.body;
             const emoteSetId = body.id;
 
-            body.pushed?.forEach((eW: {value: any}) => {
+            (body.pushed || []).forEach((eW: {value: any}) => {
                 const emote = eW.value;
                 self.postMessage({type: 'seventTV', data: {type: 'add', emoteSetId, emote, user: body.actor.display_name}});
             });
 
-            body.pulled?.forEach((eW: {old_value: any}) => {
+            (body.pulled || []).forEach((eW: {old_value: any}) => {
                 const emote = eW.old_value;
                 self.postMessage({type: 'seventTV', data: {type: 'remove', emoteSetId, emote, user: body.actor.display_name}});
             });

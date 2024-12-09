@@ -221,7 +221,7 @@ export default function App() {
         }
     };
     const fireMessage = (channel: string, text: string, replyTo?: string) => {
-        onMessageHandlers.forEach(handler => {
+        (onMessageHandlers || []).forEach(handler => {
             handler.handle(channel, text, replyTo);
         });
     };
