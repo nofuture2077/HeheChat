@@ -184,7 +184,7 @@ export function ChatPage() {
             emotes.updateUserInfo(loginContext, mC.name);
         });
 
-        config.raidTargets.forEach(mC => {
+        (config.raidTargets || []).forEach(mC => {
             emotes.updateUserInfo(loginContext, mC);
         });
 

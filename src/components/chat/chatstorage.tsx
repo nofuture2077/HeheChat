@@ -16,7 +16,7 @@ class RemoteChatStorage implements ChatStorage {
     }
 
     async load(channels: string[], ignoredUsers: string[]): Promise<string[]> {
-        return fetch(this.baseUrl + '/chat/history?' + [['channels', channels.join(',')].join('='), ['ignored', ignoredUsers.join(',')].join('=')].join('&')).then(res => res.json()).then(arr => arr.map((x:any) => x.message));
+        return fetch(this.baseUrl + '/chat/history?' + [['channels', (channels || []).join(',')].join('='), ['ignored', (ignoredUsers || []).join(',')].join('=')].join('&')).then(res => res.json()).then(arr => arr.map((x:any) => x.message));
     }
 }
 

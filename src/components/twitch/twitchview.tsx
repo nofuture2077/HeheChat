@@ -43,7 +43,7 @@ export function TwitchView(props: TwitchViewProps) {
             });
         }
         if (activeTab === 'raids') {
-            fetch(BASE_URL + "/twitch/streams?channels=" + config.raidTargets.join(',')).then(res => res.json()).then((data) => {
+            fetch(BASE_URL + "/twitch/streams?channels=" + (config.raidTargets || []).join(',')).then(res => res.json()).then((data) => {
                 setStreams(data.map((d: any) => new HelixStream(d)));
                 setLoadStreams(false);
             });
