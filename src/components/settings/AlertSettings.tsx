@@ -47,7 +47,7 @@ export function AlertSettings() {
         config.setActivatedShares(activatedShares);
     };
 
-    const marks = [-100, 0, 100, 200, 300].map(x => ({ value: x, label: x + "ms" }));
+    const marks = [-250, -0, 250, 500].map(x => ({ value: x, label: x + "ms" }));
     return (
         <Stack mt={30} mb={30} gap={30}>
             {sink ? (<>
@@ -83,9 +83,9 @@ export function AlertSettings() {
             <Fieldset legend="Alert Delay" variant="filled" key="tts-delay">
                 <Stack>
                     <Text size="sm">Jingle</Text>
-                    <Slider w="calc(100% - 20px)" m="10" value={jingleExtra} onChange={setJingleExtra} min={-100} max={300} label={(value) => `${value}ms`} marks={marks} />
+                    <Slider w="calc(100% - 20px)" m="10" value={jingleExtra} onChange={setJingleExtra} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
                     <Text size="sm">Text to Speech</Text>
-                    <Slider w="calc(100% - 20px)" m="10" value={ttsExtra} onChange={setTTSExtra} min={-100} max={300} label={(value) => `${value}ms`} marks={marks} />
+                    <Slider w="calc(100% - 20px)" m="10" value={ttsExtra} onChange={setTTSExtra} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
                 </Stack>
             </Fieldset>
         </Stack>)
