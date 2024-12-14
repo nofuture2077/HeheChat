@@ -23,7 +23,7 @@
     .logo img {
         width: auto;
         height: 1.5em;
-        border-radius: 12px;
+        border-radius: 50%;
         margin-right: 6px;
         vertical-align: bottom;
     }

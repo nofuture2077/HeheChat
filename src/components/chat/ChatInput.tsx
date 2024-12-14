@@ -1,12 +1,12 @@
 import { useContext, useState } from 'react';
-import { ConfigContext, ChatEmotesContext } from '@/ApplicationContext';
+import { ConfigContext, ChatEmotesContext } from '../../ApplicationContext';
 import { ChannelPicker } from './ChannelPicker';
 import { Textarea, ActionIcon, rem, Flex, Stack } from '@mantine/core'
 import { IconSend, IconX } from '@tabler/icons-react';
-import { ChatMessage } from '@twurple/chat';
+import { HeheChatMessage } from '../../commons/message';
 import { ChatMessageComp } from './ChatMessage';
 
-export function ChatInput(props: { close: () => void, replyToMsg?: ChatMessage, setReplyMsg: (msg?: ChatMessage) => void }) {
+export function ChatInput(props: { close: () => void, replyToMsg?: HeheChatMessage, setReplyMsg: (msg?: HeheChatMessage) => void }) {
     const config = useContext(ConfigContext);
     const emotes = useContext(ChatEmotesContext);
     const [inputText, setInputText] = useState<string>('');

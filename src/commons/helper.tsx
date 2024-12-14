@@ -111,16 +111,15 @@ const formatFunctions: { [key: string]: (value: any) => string } = {
     duration: (value: string) => formatDuration(Number(value) * 1000),
 };
 
-export function formatString(template: string, args: any[]): string {
-    return template.replace(/\$(\d+)(?::(\w+))?/g, (_, index, formatFunction) => {
-        const value = args[parseInt(index, 10)] || '';
+export function formatString(messageTemplate: string, args: Record<string, any>): string {
+    return messageTemplate.replace(/\${(\w+)(?::(\w+))?}/g, (_, key, formatFunction) => {
+        const value = args[key];
         if (formatFunction && formatFunctions[formatFunction]) {
             return formatFunctions[formatFunction](value);
         }
-        return value.toString();
+        return String(value ?? '');
     });
 }
-
 
 export function replacer(key: string, value: any) {
     if (value instanceof Map) {

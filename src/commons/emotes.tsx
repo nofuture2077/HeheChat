@@ -224,16 +224,24 @@ PubSub.subscribe('WS-seventTV', (m, data) => {
         const username = data.user;
         const channel = emoteSetUserNameMap[data.emoteSetId];
         DEFAULT_CHAT_EMOTES.emotes.get(channel).sevenTVEmotes.set(data.emote.name, data.emote);
-        const text = ['sevenTVAdded', channel, username, data.emote.name].join('***');
-        const message = new SystemMessage(channel, text, new Date(), "sevenTVAdded", "", "").rawLine;
+        const message = new SystemMessage(channel, {
+            type: 'sevenTVAdded',
+            channel,
+            username,
+            emote: data.emote.name
+        }, new Date(), "sevenTVAdded", "", "").rawLine;
         PubSub.publish("WS-msg", {message, username});
     }
     if (data.type === 'remove') {
         const username = data.user;
         const channel = emoteSetUserNameMap[data.emoteSetId];
         DEFAULT_CHAT_EMOTES.emotes.get(channel).sevenTVEmotes.delete(data.emote.name);
-        const text = ['sevenTVRemoved', channel, username, data.emote.name].join('***');
-        const message = new SystemMessage(channel, text, new Date(), "sevenTVRemoved", "", "").rawLine;
+        const message = new SystemMessage(channel, {
+            type: 'sevenTVRemoved',
+            channel,
+            username,
+            emote: data.emote.name
+        }, new Date(), "sevenTVRemoved", "", "").rawLine;
         PubSub.publish("WS-msg", {message, username});
     }
 })

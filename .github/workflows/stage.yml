@@ -3,15 +3,15 @@ name: Deploy to AWS
 on:
   push:
     branches:
-      - release
+      - stage
 
 jobs:
   build-and-deploy:
     env:
       VITE_SLUG: /
-      VITE_BACKEND_URL: https://server.hehechat.io
-      VITE_EDITOR_URL: https://editor.hehechat.io
-      VITE_SINK_URL: https://browsersource.hehechat.io
+      VITE_BACKEND_URL: https://stage.server.hehechat.io
+      VITE_EDITOR_URL: https://stage.editor.hehechat.io
+      VITE_SINK_URL: https://stage.browsersource.hehechat.io
       VITE_CLIENT_ID: 7tmrvoh4llxtx9yft7pwhtgbi61ba9
       VITE_BUILDNUMBER: ${{ github.run_number }}
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
           AWS_SSH_HOST: ${{ secrets.AWS_SSH_HOST }}
           AWS_SSH_USER: ${{ secrets.AWS_SSH_USER }}
           AWS_SSH_KEY: ${{ secrets.AWS_SSH_KEY }}
-          AWS_SSH_PATH: '/home/ec2-user/hehechat-client'
+          AWS_SSH_PATH: '/home/ec2-user/stage/hehechat-client'
         run: |
           mkdir -p ~/.ssh
           echo "${AWS_SSH_KEY}" > ~/.ssh/id_rsa

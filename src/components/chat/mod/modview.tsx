@@ -1,13 +1,12 @@
-import { ChatMessage } from "@twurple/chat";
 import { OverlayDrawer } from '../../../pages/Chat.page'
 import { Fieldset, TextInput, Button, Group, Modal, Text, Stack } from '@mantine/core';
 import { useContext, useState } from "react";
-import { GradientSegmentedControl } from "@/components/GradientSegmentedControl/GradientSegmentedControl";
-import { formatDuration } from "@/commons/helper";
+import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
+import { formatDuration } from '../../../commons/helper';
 import { ChannelPicker } from "../ChannelPicker";
 import { IconArrowsRight } from '@tabler/icons-react';
-import { ChatEmotesContext, ConfigContext, LoginContextContext } from "@/ApplicationContext";
-
+import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
+import { HeheChatMessage } from '../../../commons/message';
 
 export const ModDrawer: OverlayDrawer = {
     name: 'mod',
@@ -16,7 +15,7 @@ export const ModDrawer: OverlayDrawer = {
     position: 'bottom'
 }
 
-export function ModView(props: { msg: ChatMessage }) {
+export function ModView(props: { msg: HeheChatMessage }) {
     return <><h1>MODS</h1><span>{props.msg.text}</span></>
 }
 

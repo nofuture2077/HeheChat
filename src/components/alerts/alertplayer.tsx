@@ -2,7 +2,7 @@ import { Event, EventAlertConfig, Base64FileReference, Base64File, EventAlert, E
 import _ from "underscore";
 
 import { Config } from "@/commons/config";
-import { parseMessage } from "@/commons/message";
+import { HeheChatMessage, parseMessage } from "@/commons/message";
 import { silence } from "./silence";
 import PubSub from 'pubsub-js';
 
@@ -305,15 +305,17 @@ class AlertPlayer {
         };
         
         const template = _.template(alert.audio?.tts?.text || "");
+        const message = parseMessage(item.text!);
         const vars:any = {
             username: item.username,
             usernameTo: item.usernameTo,
             amount: item.amount,
             amount2: item.amount2,
-            text: parseMessage(item.text!).text
+            text: message instanceof HeheChatMessage ? message.text : message.data.text
         };
 
         const ttsText = vars.text || item.text;
+        // FIXME
         if (ttsText && (ttsText.startsWith('donation***') || ttsText.startsWith('channelPointRedemption***'))) {
             vars.text = ttsText.split('***').slice(-1)[0];
         } else {

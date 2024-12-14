@@ -27,21 +27,21 @@ export interface EventDrawerViewProperties {
 }
 
 const messages: Record<EventType, string> = {
-    'raid': 'Raid with $2:whole viewers',
-    'sub_1000': 'Sub for $2:whole months',
-    'sub_2000': 'Sub with T2 for $2:whole months',
-    'sub_3000': 'Sub with T3 for $2:whole months',
-    'subgift_1000': 'Gifted $2:whole subs',
-    'subgift_2000': 'Gifted $2:whole Tier 2 subs',
-    'subgift_3000': 'Gifted $2:whole Tier 3 subs',
-    'subgiftb_1000': 'Gifted $3 a sub',
-    'subgiftb_2000': 'Gifted $3 a Tier 2 sub',
-    'subgiftb_3000': 'Gifted $3 a Tier 3 sub',
-    'sub_Prime': 'Sub with prime for $2:whole months',
+    'raid': 'Raid with ${amount:whole} viewers',
+    'sub_1000': 'Sub for ${amount:whole} months',
+    'sub_2000': 'Sub with T2 for ${amount:whole} months',
+    'sub_3000': 'Sub with T3 for ${amount:whole} months',
+    'subgift_1000': 'Gifted ${amount:whole} subs',
+    'subgift_2000': 'Gifted ${amount:whole} Tier 2 subs',
+    'subgift_3000': 'Gifted ${amount:whole} Tier 3 subs',
+    'subgiftb_1000': 'Gifted ${recipient} a sub',
+    'subgiftb_2000': 'Gifted ${recipient} a Tier 2 sub',
+    'subgiftb_3000': 'Gifted ${recipient} a Tier 3 sub',
+    'sub_Prime': 'Sub with prime for ${amount:whole} months',
     'follow': 'Just followed',
-    'cheer': 'Cheered $2:whole bits',
-    'donation': "Donated $2:decimal $3",
-    'channelPointRedemption': 'Channelpoints: "$7"'
+    'cheer': 'Cheered ${amount:whole} bits',
+    'donation': "Donated ${amount:decimal} ${text}",
+    'channelPointRedemption': 'Channelpoints: ${rewardTitle}'
 }
 
 const icons: Record<EventType, ReactElementLike> = {
@@ -63,8 +63,7 @@ const icons: Record<EventType, ReactElementLike> = {
 }
 
 export function formatEventText(event: EventData) {
-    const textParts = event.text?.split('***') || [];
-    const msg = formatString(messages[event.eventtype as EventType], [event.channel, event.username, event.amount, event.usernameTo].concat(textParts));
+    const msg = formatString(messages[event.eventtype as EventType], event);
     return msg;
 }
 

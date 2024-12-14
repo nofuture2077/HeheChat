@@ -90,6 +90,7 @@ export default function Login() {
         "channel:read:ads",
         "channel:edit:commercial",
         "channel:manage:broadcast",
+        "channel:moderate",
         "chat:edit",
         "chat:read",
         "clips:edit",

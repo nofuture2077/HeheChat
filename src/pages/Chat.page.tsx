@@ -1,31 +1,30 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
-import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '@/ApplicationContext';
+import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '../ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon, Badge, Stack, Group } from '@mantine/core';
-import { Chat } from '@/components/chat/Chat';
-import { ShortcutView } from '@/components/shortcuts/ShortcutView';
+import { Chat } from '../components/chat/Chat';
+import { ShortcutView } from '../components/shortcuts/ShortcutView';
 import { IconMessagePause } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
-import { Header } from '@/components/header/Header';
-import { EventDrawer } from '@/components/events/eventdrawer';
-import { ChatInput } from '@/components/chat/ChatInput';
-import { ChatMessage } from '@twurple/chat';
+import { Header } from '../components/header/Header';
+import { EventDrawer } from '../components/events/eventdrawer';
+import { ChatInput } from '../components/chat/ChatInput';
 import { HelixModeratedChannel } from '@twurple/api';
-import { SettingsDrawer, SettingsTab } from '@/components/settings/settings'
+import { SettingsDrawer, SettingsTab } from '../components/settings/settings';
 import { ReactComponentLike } from 'prop-types';
-import { ModDrawer } from '@/components/chat/mod/modview';
-import { HeheMessage, parseMessage } from '@/commons/message'
-import { TwitchDrawer } from '@/components/twitch/twitchview';
-import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser } from '@/components/chat/mod/modactions';
-import { ProfileBarDrawer } from '@/components/profile/profilebar';
-import { Storage } from '@/components/chat/chatstorage';
-import { AlertSystem } from '@/components/alerts/alertplayer';
-import { toMap } from '@/commons/helper';
-import { Event } from '@/commons/events';
-import { UserCardDrawer } from '@/components/login/usercard';
-import { PinManager } from '@/components/pinned/pinmanager';
-import { useViewportWidthCallback } from '@/commons/helper';
-import { getDimension } from '@/components/twitch/twitchplayer';
+import { ModDrawer } from '../components/chat/mod/modview';
+import { HeheMessage, parseMessage, HeheChatMessage } from '../commons/message';
+import { TwitchDrawer } from '../components/twitch/twitchview';
+import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser } from '../components/chat/mod/modactions';
+import { ProfileBarDrawer } from '../components/profile/profilebar';
+import { Storage } from '../components/chat/chatstorage';
+import { AlertSystem } from '../components/alerts/alertplayer';
+import { toMap } from '../commons/helper';
+import { Event } from '../commons/events';
+import { UserCardDrawer } from '../components/login/usercard';
+import { PinManager } from '../components/pinned/pinmanager';
+import { useViewportWidthCallback } from '../commons/helper';
+import { getDimension } from '../components/twitch/twitchplayer';
 
 export type OverlayDrawer = {
     name: string;
@@ -45,7 +44,7 @@ export function ChatPage() {
     const [shouldScroll, setShouldScroll] = useState(true);
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
-    const [replyMsg, setReplyMsg] = useState<ChatMessage>();
+    const [replyMsg, setReplyMsg] = useState<HeheChatMessage>();
     const [chatInputOpened, chatInputHandler] = useDisclosure(true);
     const loginContext = useContext(LoginContextContext);
     const [deletedMessages, setDeletedMessages] = useState<string[]>([]);
@@ -87,7 +86,7 @@ export function ChatPage() {
         if (msg.id && messageIndex.has(msg.id)) {
             return;
         }
-        if (msg.text.startsWith("!tts") && (config.freeTTS || []).includes(user)) {
+        if (msg instanceof HeheChatMessage && msg.text.startsWith("!tts") && (config.freeTTS || []).includes(user)) {
             const message = msg.text.split("!tts")[1];
             AlertSystem.addEvent({
                 id: Date.now(),
@@ -240,7 +239,7 @@ export function ChatPage() {
         }
     }, [chatMessages, shouldScroll]);
 
-    const openModView = (msg: ChatMessage) => {
+    const openModView = (msg: HeheChatMessage) => {
         ModDrawer.props = { msg };
         setDrawer(ModDrawer);
         drawerHandler.open()
