@@ -194,12 +194,13 @@ export const adjustColorForContrast = (color: string, backgroundColor: string) =
     const [r, g, b] = parseColor(color);
     let newColor = color;
     let contrast = getContrastRatio(color, backgroundColor);
-    
+    const bgLuminance = getLuminance(...parseColor(backgroundColor));
+    const darken = bgLuminance > 0.5;
     // Minimum contrast ratio for WCAG AA (4.5:1)
-    if (contrast < 4.5) {
+    
+    while (contrast < 4.5) {
         // If background is light, darken the text color
-        const bgLuminance = getLuminance(...parseColor(backgroundColor));
-        if (bgLuminance > 0.5) {
+        if (darken) {
             // Darken the color
             const darkerRGB = [r, g, b].map(c => Math.max(0, c - 50));
             newColor = `rgb(${darkerRGB.join(',')})`;
@@ -208,6 +209,7 @@ export const adjustColorForContrast = (color: string, backgroundColor: string) =
             const lighterRGB = [r, g, b].map(c => Math.min(255, c + 50));
             newColor = `rgb(${lighterRGB.join(',')})`;
         }
+        contrast = getContrastRatio(newColor, backgroundColor);
     }
     
     return newColor;
