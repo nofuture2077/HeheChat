@@ -315,7 +315,7 @@ class AlertPlayer {
         };
 
         const ttsText = vars.text || item.text;
-        const eventData = item.text ? JSON.parse(item.text) : {};
+        const eventData = (item.text && item.text.startsWith('{')) ? JSON.parse(item.text) : {};
         if (ttsText && (eventData.input || eventData.text)) {
             vars.text = (eventData.input || eventData.text);
         } else {
