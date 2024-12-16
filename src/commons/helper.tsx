@@ -191,26 +191,37 @@ export const getContrastRatio = (color1: string, color2: string) => {
 };
 
 export const adjustColorForContrast = (color: string, backgroundColor: string) => {
-    const [r, g, b] = parseColor(color);
-    let newColor = color;
-    let contrast = getContrastRatio(color, backgroundColor);
+    let [r, g, b] = parseColor(color);
+    let contrast = getContrastRatio(`rgb(${r},${g},${b})`, backgroundColor);
     const bgLuminance = getLuminance(...parseColor(backgroundColor));
     const darken = bgLuminance > 0.5;
-    // Minimum contrast ratio for WCAG AA (4.5:1)
+    const step = 10; // Smaller step size for more gradual adjustments
+    let iterations = 0;
+    const maxIterations = 50; // Prevent infinite loops
     
-    while (contrast < 4.5) {
-        // If background is light, darken the text color
+    while (contrast < 4.5 && iterations < maxIterations) {
         if (darken) {
             // Darken the color
-            const darkerRGB = [r, g, b].map(c => Math.max(0, c - 50));
-            newColor = `rgb(${darkerRGB.join(',')})`;
+            r = Math.max(0, r - step);
+            g = Math.max(0, g - step);
+            b = Math.max(0, b - step);
         } else {
             // Lighten the color
-            const lighterRGB = [r, g, b].map(c => Math.min(255, c + 50));
-            newColor = `rgb(${lighterRGB.join(',')})`;
+            r = Math.min(255, r + step);
+            g = Math.min(255, g + step);
+            b = Math.min(255, b + step);
         }
+        
+        const newColor = `rgb(${r},${g},${b})`;
         contrast = getContrastRatio(newColor, backgroundColor);
+        iterations++;
+        
+        // If we've reached the limits of RGB values and still haven't achieved desired contrast
+        if ((darken && r === 0 && g === 0 && b === 0) || 
+            (!darken && r === 255 && g === 255 && b === 255)) {
+            break;
+        }
     }
     
-    return newColor;
+    return `rgb(${r},${g},${b})`;
 };
