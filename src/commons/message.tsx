@@ -18,13 +18,17 @@ interface UserInfo {
 }
 
 export interface ParsedMessagePart {
-    type: 'text' | 'emote' | 'cheer';
+    type: 'text' | 'emote' | 'cheer' | 'mention';
     text: string;
     id?: string;
     name: string;
     amount?: number;
     emote?: {
         id: string;
+    },
+    mention?: {
+        user_id: string;
+        user_name: string;
     }
 }
 
