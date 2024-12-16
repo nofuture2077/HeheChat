@@ -156,3 +156,59 @@ export function useViewportWidthCallback(callback: (width: number) => void) {
       callback(width);
     }, [width, callback]);
 }
+
+const getLuminance = (r: number, g: number, b: number) => {
+    const [rs, gs, bs] = [r, g, b].map(c => {
+        c = c / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+};
+
+const parseColor = (color: string): [number, number, number] => {
+    const hex = color.startsWith('#');
+    if (hex) {
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+        return [r, g, b];
+    }
+    const rgb = color.match(/\d+/g)?.map(Number) || [0, 0, 0];
+    return rgb as [number, number, number];
+};
+
+export const getContrastRatio = (color1: string, color2: string) => {
+    const [r1, g1, b1] = parseColor(color1);
+    const [r2, g2, b2] = parseColor(color2);
+
+    const l1 = getLuminance(r1, g1, b1);
+    const l2 = getLuminance(r2, g2, b2);
+
+    const lighter = Math.max(l1, l2);
+    const darker = Math.min(l1, l2);
+
+    return (lighter + 0.05) / (darker + 0.05);
+};
+
+export const adjustColorForContrast = (color: string, backgroundColor: string) => {
+    const [r, g, b] = parseColor(color);
+    let newColor = color;
+    let contrast = getContrastRatio(color, backgroundColor);
+    
+    // Minimum contrast ratio for WCAG AA (4.5:1)
+    if (contrast < 4.5) {
+        // If background is light, darken the text color
+        const bgLuminance = getLuminance(...parseColor(backgroundColor));
+        if (bgLuminance > 0.5) {
+            // Darken the color
+            const darkerRGB = [r, g, b].map(c => Math.max(0, c - 50));
+            newColor = `rgb(${darkerRGB.join(',')})`;
+        } else {
+            // Lighten the color
+            const lighterRGB = [r, g, b].map(c => Math.min(255, c + 50));
+            newColor = `rgb(${lighterRGB.join(',')})`;
+        }
+    }
+    
+    return newColor;
+};

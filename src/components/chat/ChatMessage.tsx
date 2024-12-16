@@ -7,7 +7,7 @@ import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconCheck 
 import { ActionIcon, Text, Group, CopyButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { TimeoutView, BanView } from './mod/modview';
-import { formatTime } from '../../commons/helper';
+import { formatTime, adjustColorForContrast } from '../../commons/helper';
 import { ModActions } from './mod/modactions';
 import { Config, ConfigKey } from '../../commons/config';
 import { ChatEmotes } from '../../commons/emotes';
@@ -101,6 +101,9 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const [timeoutModalOpened, timeoutModalHandler] = useDisclosure(false);
     const [banModalOpened, banModalHandler] = useDisclosure(false);
 
+    // Adjust username color for contrast against standard dark background
+    const adjustedColor = adjustColorForContrast(props.msg.userInfo.color || '#ffffff', '#1e1e1e');
+
     const actions = [];
     if (canMod && config.modToolsEnabled) {
         actions.push(<ActionIcon key='deleteAction' variant='filled' color='primary' size={22} onClick={() => {props.modActions.deleteMessage(props.msg.channelId || '', props.msg.id)}}><IconTrash size={14} /></ActionIcon>);
@@ -125,7 +128,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
         {(config.showProfilePicture && !props.hideReply) ? <span key='channel' className={classes.channel}>{emotes.getLogo(channel)}</span>: null}
         {config.showTimestamp ? <span  key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
         <span className={classes.badges}>{Array.from(props.msg.userInfo.badges).map((key, index) =>  getBadge(config, emotes, channel, key.toString(), index.toString()))}</span>
-        <span className={classes.username} style={{color: props.msg.userInfo.color}}>{props.msg.userInfo.displayName}</span>
+        <span className={classes.username} style={{color: adjustedColor}}>{props.msg.userInfo.displayName}</span>
         <span>: </span>
         <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, config, emotes, login)}</span>
         { actions.length ? <Group key='actionsGroup' className={classes.actions} gap={'sm'}>{actions}</Group>: null}
