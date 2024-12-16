@@ -69,8 +69,8 @@ export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: str
                 }
                 return part.name + "0";
             };
-            case 'text': return joinWithSpace(part.text!.split(' ').map((word, index) => wordMapper(word, channel, partIndex, index, config, emotes, login)))
-            case 'mention': return joinWithSpace(wordMapper(part.text, channel, partIndex, 0, config, emotes, login))
+            case 'text': return joinWithSpace(part.text!.split(' ').map((word, index) => wordMapper(word, channel, partIndex, index, config, emotes, login)));
+            case 'mention': return wordMapper(part.text, channel, partIndex, 0, config, emotes, login)
         }
     });
 }
