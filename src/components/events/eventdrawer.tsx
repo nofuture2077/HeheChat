@@ -63,7 +63,8 @@ const icons: Record<EventType, ReactElementLike> = {
 }
 
 export function formatEventText(event: EventData) {
-    const msg = formatString(messages[event.eventtype as EventType], event);
+    const additionalData = event.text ? JSON.parse(event.text) : {};
+    const msg = formatString(messages[event.eventtype as EventType], {...event, ...additionalData});
     return msg;
 }
 
