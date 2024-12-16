@@ -305,16 +305,15 @@ class AlertPlayer {
         };
         
         const template = _.template(alert.audio?.tts?.text || "");
-        const message = parseMessage(item.text!);
         const vars:any = {
             username: item.username,
             usernameTo: item.usernameTo,
             amount: item.amount,
             amount2: item.amount2,
-            text: message instanceof HeheChatMessage ? message.text : message.data.text
+            text: item.text
         };
 
-        const ttsText = vars.text || item.text;
+        const ttsText = item.text;
         const eventData = (item.text && item.text.startsWith('{')) ? JSON.parse(item.text) : {};
         if (ttsText && (eventData.input || eventData.text)) {
             vars.text = (eventData.input || eventData.text);
