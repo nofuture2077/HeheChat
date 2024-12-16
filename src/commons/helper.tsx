@@ -195,9 +195,9 @@ export const adjustColorForContrast = (color: string, backgroundColor: string) =
     let contrast = getContrastRatio(`rgb(${r},${g},${b})`, backgroundColor);
     const bgLuminance = getLuminance(...parseColor(backgroundColor));
     const darken = bgLuminance > 0.5;
-    const step = 10; // Smaller step size for more gradual adjustments
+    const step = 50; // Smaller step size for more gradual adjustments
     let iterations = 0;
-    const maxIterations = 50; // Prevent infinite loops
+    const maxIterations = 4; // Prevent infinite loops
     
     while (contrast < 4.5 && iterations < maxIterations) {
         if (darken) {
