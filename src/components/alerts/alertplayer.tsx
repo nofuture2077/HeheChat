@@ -269,9 +269,9 @@ class AlertPlayer {
         if (exactAlertMatches && exactAlertMatches.length) {
             return _.sample(exactAlertMatches);
         }
-        const parts = event.text?.split('***') || [];
-        if (parts.length >= 4) {
-            const matchesAlertMatches = matchesAlerts[parts[3]];
+        const eventData = event.text ? JSON.parse(event.text) : {};
+        if (eventData.rewardTitle) {
+            const matchesAlertMatches = matchesAlerts[eventData.rewardTitle];
             if (matchesAlertMatches && matchesAlertMatches.length) {
                 return _.sample(matchesAlertMatches);
             }
@@ -315,9 +315,9 @@ class AlertPlayer {
         };
 
         const ttsText = vars.text || item.text;
-        // FIXME
-        if (ttsText && (ttsText.startsWith('donation***') || ttsText.startsWith('channelPointRedemption***'))) {
-            vars.text = ttsText.split('***').slice(-1)[0];
+        const eventData = item.text ? JSON.parse(item.text) : {};
+        if (ttsText && (eventData.input || eventData.text)) {
+            vars.text = (eventData.input || eventData.text);
         } else {
             if (vars.amount) {
                 vars.amount = Number(vars.amount).toFixed(0);
