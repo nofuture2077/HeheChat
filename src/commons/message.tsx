@@ -29,6 +29,9 @@ export interface ParsedMessagePart {
     mention?: {
         user_id: string;
         user_name: string;
+    },
+    cheermote?: {
+        bits: number;
     }
 }
 

@@ -63,8 +63,8 @@ export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: str
         switch (part.type) {
             case 'emote': return <EmoteComponent key={partIndex} imageUrl={buildEmoteImageUrl(part.emote?.id!)} largeImageUrl={buildEmoteImageUrl(part.emote?.id!, {size: '2.0'})} name={part.name!} type='Twitch'/>;
             case 'cheer': {
-                if (part.amount) {
-                    const cheerEmote = emotes.getCheerEmote(channel, part.name!, part.amount);
+                if (part.amount || part.cheermote?.bits) {
+                    const cheerEmote = emotes.getCheerEmote(channel, part.name!, part.amount || part.cheermote?.bits || 0);
                     return <span key={partIndex}><img alt={part.name + part.amount} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.amount}</span></span>
                 }
                 return part.name + "0";

@@ -23,7 +23,7 @@ const messages = {
     'ban': '${username} was banned',
     'streamOnline': '${channel} just went Live',
     'streamOffline': '${channel} is now Offline',
-    'channelPointRedemption': '${username} redeemed "${rewardTitle}"///${input}',
+    'channelPointRedemption': '${username} redeemed "${rewardTitle}"///${text}',
     'raid': 'Raid from ${username} with ${viewers:whole} viewers',
     'sub_1000': '${username} subscribed for ${amount:whole} months///${text}',
     'sub_2000': '${username} subscribed with Tier 2 for ${amount:whole} months///${text}',
