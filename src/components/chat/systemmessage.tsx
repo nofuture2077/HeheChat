@@ -1,4 +1,4 @@
-import { SystemMessage, SystemMessageMainType, HeheChatMessage } from '../../commons/message';
+import { SystemMessage, SystemMessageMainType, HeheChatMessage, parseMessage } from '../../commons/message';
 import { formatDuration, formatString } from '../../commons/helper';
 import { Text, ActionIcon } from "@mantine/core"
 import classes from './systemmessage.module.css';
@@ -36,7 +36,7 @@ const messages = {
     'subgiftb_3000': '${username} gifted ${recipient} a Tier 3 sub',
     'sub_Prime': '${username} subscribed with prime for ${amount:whole} months///${text}',
     'follow': '${username} just followed',
-    'cheer': '${username} cheered ${amount:whole} bits',
+    'cheer': '${username} cheered ${amount:whole} bits///${text}',
     'donation': '${username} donated ${amount} EURO: ${text}',
     'sevenTVAdded': '${username} added new Emote ${emote} ${emote}',
     'sevenTVRemoved': '${username} removed Emote ${emote}'
@@ -75,7 +75,8 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const channel = props.msg.data.channel;
     var msgParts: ParsedMessagePart[] = [];
     if (textParts.length > 1) {
-        msgParts = props.msg.data.text ? props.msg.data.text.parts : [];
+        // @ts-ignore
+        msgParts = props.msg.data.text ? (parseMessage(props.msg.data.text).parts ?? []) : [];
     }
 
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)} style={{ verticalAlign: 'middle' }}><IconSpeakerphone size={22} /></ActionIcon> : null;
