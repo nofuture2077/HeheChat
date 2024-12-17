@@ -36,7 +36,7 @@ const messages = {
     'subgiftb_3000': '${username} gifted ${recipient} a Tier 3 sub',
     'sub_Prime': '${username} subscribed with prime for ${amount:whole} months///${text}',
     'follow': '${username} just followed',
-    'cheer': '${username} cheered ${bits:whole} bits',
+    'cheer': '${username} cheered ${amount:whole} bits',
     'donation': '${username} donated ${amount} EURO: ${text}',
     'sevenTVAdded': '${username} added new Emote ${emote} ${emote}',
     'sevenTVRemoved': '${username} removed Emote ${emote}'
