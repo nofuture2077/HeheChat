@@ -75,8 +75,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const channel = props.msg.data.channel;
     var msgParts: ParsedMessagePart[] = [];
     if (textParts.length > 1) {
-        // @ts-ignore
-        msgParts = props.msg.data.text ? (parseMessage(props.msg.data.text).parts ?? []) : [];
+        msgParts = props.msg.data.text ? (props.msg.data.text.parts ?? []) : [];
     }
 
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)} style={{ verticalAlign: 'middle' }}><IconSpeakerphone size={22} /></ActionIcon> : null;
