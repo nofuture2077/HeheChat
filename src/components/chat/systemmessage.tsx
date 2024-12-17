@@ -25,6 +25,7 @@ const messages = {
     'streamOffline': '${channel} is now Offline',
     'channelPointRedemption': '${username} redeemed "${rewardTitle}"///${text}',
     'raid': 'Raid from ${username} with ${viewers:whole} viewers',
+    'raidTo': 'Raid from ${username} with ${viewers:whole} viewers',
     'sub_1000': '${username} subscribed for ${amount:whole} months///${text}',
     'sub_2000': '${username} subscribed with Tier 2 for ${amount:whole} months///${text}',
     'sub_3000': '${username} subscribed with Tier 3 for ${amount:whole} months///${text}',
