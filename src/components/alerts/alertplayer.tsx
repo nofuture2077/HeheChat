@@ -60,7 +60,7 @@ class AlertPlayer {
 
     async googleTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
         const params = new URLSearchParams({
-            text: msg,
+            text: encodeURIComponent(msg),
             state,
             voice,
             channel
@@ -72,7 +72,7 @@ class AlertPlayer {
 
     async aiTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
         const params = new URLSearchParams({
-            text: msg,
+            text: encodeURIComponent(msg),
             state,
             voice,
             channel
@@ -282,6 +282,15 @@ class AlertPlayer {
             return _.sample(minAlerts[step]);
         }
     }
+
+    getEventData(item?: string): any {
+        if (!item || !item.startsWith('{')) return {};
+        try {
+            return JSON.parse(item);
+        } catch (ex) {
+            return {};
+        }
+    }
  
     async showNotification(item: Event) {
         const alertConfig = this.alertConfig[item.channel];
@@ -314,7 +323,7 @@ class AlertPlayer {
         };
 
         const ttsText = item.text;
-        const eventData = (item.text && item.text.startsWith('{')) ? JSON.parse(item.text) : {};
+        const eventData = this.getEventData(item.text);
         if (ttsText && (eventData.input || eventData.text)) {
             vars.text = (eventData.input || eventData.text);
         } else {
