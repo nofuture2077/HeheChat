@@ -61,7 +61,7 @@ const wordMapper = (word: string, channel: string, partIndex: number, index: num
 export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: string, config: Config, emotes: ChatEmotes, login: LoginContext) {
     return parsedParts.map((part, partIndex) => {
         switch (part.type) {
-            case 'emote': return <EmoteComponent key={partIndex} imageUrl={buildEmoteImageUrl(part.emote?.id! || part.name)} largeImageUrl={buildEmoteImageUrl(part.emote?.id! || part.name, {size: '2.0'})} name={part.name!} type='Twitch'/>;
+            case 'emote': return <EmoteComponent key={partIndex} imageUrl={buildEmoteImageUrl(part.emote?.id! || part.id || '')} largeImageUrl={buildEmoteImageUrl(part.emote?.id! || part.id || '', {size: '2.0'})} name={part.name!} type='Twitch'/>;
             case 'cheer': {
                 if (part.amount || part.cheermote?.bits) {
                     const cheerEmote = emotes.getCheerEmote(channel, part.name!, part.amount || part.cheermote?.bits || 0);
