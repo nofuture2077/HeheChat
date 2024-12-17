@@ -60,7 +60,7 @@ class AlertPlayer {
 
     async googleTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
         const params = new URLSearchParams({
-            text: msg,
+            text: encodeURIComponent(msg),
             state,
             voice,
             channel
@@ -72,7 +72,7 @@ class AlertPlayer {
 
     async aiTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
         const params = new URLSearchParams({
-            text: msg,
+            text: encodeURIComponent(msg),
             state,
             voice,
             channel
