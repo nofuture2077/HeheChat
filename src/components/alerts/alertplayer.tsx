@@ -295,6 +295,12 @@ class AlertPlayer {
             return {};
         }
     }
+
+    parsedPartsToText(parsedParts: any[]) {
+        return parsedParts.map((part, partIndex) => {
+            return part.text;
+        }).join(' ');
+    }
  
     async showNotification(item: Event) {
         const alertConfig = this.alertConfig[item.channel];
@@ -328,8 +334,8 @@ class AlertPlayer {
 
         const ttsText = item.text;
         const eventData = this.getEventData(item.text);
-        if (ttsText && (eventData.input || eventData.text)) {
-            vars.text = (eventData.input || eventData.text);
+        if (ttsText && eventData.text) {
+            vars.text = this.parsedPartsToText(eventData.text);
         } else {
             if (vars.amount) {
                 vars.amount = Number(vars.amount).toFixed(0);
