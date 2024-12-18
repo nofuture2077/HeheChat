@@ -335,7 +335,7 @@ class AlertPlayer {
         const ttsText = item.text;
         const eventData = this.getEventData(item.text);
         if (ttsText && eventData.text) {
-            vars.text = this.parsedPartsToText(eventData.text);
+            vars.text = this.parsedPartsToText(eventData.text.parts || eventData.text);
         } else {
             if (vars.amount) {
                 vars.amount = Number(vars.amount).toFixed(0);
