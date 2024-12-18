@@ -114,6 +114,11 @@ export default function App() {
 
         loadReceivedShares();
 
+        PubSub.subscribe("WS-alertConfig", (msg, data) => {
+            console.log('Alertconfig was updated for: ', data.channel);
+            AlertSystem.loadAlertConfig([data.channel]);
+        });
+
         return () => {
             const stopMessage = { type: 'STOP' };
             workerRef.current?.postMessage(stopMessage);

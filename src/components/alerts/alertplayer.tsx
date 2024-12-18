@@ -206,9 +206,13 @@ class AlertPlayer {
         if (!newChannels.length) {
             return;
         }
+        this.loadAlertConfig(newChannels);
+    }
+
+    loadAlertConfig(channels: string[]) {
         const state = localStorage.getItem('hehe-token_state') || '';
-        fetch(BASE_URL + '/event/config?' + [['channels', newChannels.join(',')].join('='), ['state', state].join('=')].join('&')).then(res => res.json()).then(data => {
-            newChannels.forEach(channel => {
+        fetch(BASE_URL + '/event/config?' + [['channels', channels.join(',')].join('='), ['state', state].join('=')].join('&')).then(res => res.json()).then(data => {
+            channels.forEach(channel => {
                 this.alertConfig[channel] = data[channel];
             });
         });

@@ -231,7 +231,7 @@ export function PinManager() {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
-                    expanded: false,
+                    expanded: true,
                     hidden: false,
                     type: 'prediction',
                     id: d.id,
@@ -253,7 +253,7 @@ export function PinManager() {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
-                    expanded: false,
+                    expanded: true,
                     hidden: false,
                     type: 'prediction',
                     id: d.id,
@@ -312,7 +312,7 @@ export function PinManager() {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
-                    expanded: false,
+                    expanded: true,
                     hidden: false,
                     type: 'poll',
                     id: d.id,
