@@ -243,7 +243,9 @@ class AlertPlayer {
         }
         const exactAlerts: Record<number, EventAlert[]> = {};
         const minAlerts: Record<number, EventAlert[]> = {};
-        const matchesAlerts: Record<string, EventAlert[]> = {};
+        const matchesAlerts: EventAlert[] = [];
+        const eventData = event.text ? JSON.parse(event.text) : {};
+
         alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
             const amount = Number(alert.specifier.amount || 0);
             if (alert.specifier.type === "exact") {
@@ -260,12 +262,9 @@ class AlertPlayer {
                     minAlerts[amount] = [alert];
                 }
             }
-            if (alert.specifier.type === "matches" && alert.specifier.text) {
-                if (matchesAlerts[alert.specifier.text]) {
-                    matchesAlerts[alert.specifier.text].push(alert)
-                } else {
-                    matchesAlerts[alert.specifier.text] = [alert];
-                }
+            if (alert.specifier.type === "matches" && alert.specifier.text && 
+                alert.specifier.attribute && (eventData[alert.specifier.attribute] === alert.specifier.text)) {
+                    matchesAlerts.push(alert);
             }
         });
         const eventAmount = Number(event.amount || 0);
@@ -273,12 +272,8 @@ class AlertPlayer {
         if (exactAlertMatches && exactAlertMatches.length) {
             return _.sample(exactAlertMatches);
         }
-        const eventData = event.text ? JSON.parse(event.text) : {};
-        if (eventData.rewardTitle) {
-            const matchesAlertMatches = matchesAlerts[eventData.rewardTitle];
-            if (matchesAlertMatches && matchesAlertMatches.length) {
-                return _.sample(matchesAlertMatches);
-            }
+        if (matchesAlerts.length) {
+            return _.sample(matchesAlerts);
         }
         const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
         const step = minKeys.findLast(x => x <= eventAmount);
