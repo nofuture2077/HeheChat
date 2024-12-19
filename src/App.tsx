@@ -7,7 +7,7 @@ import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext }
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
-import { ConfigKey, MessageHandler } from './commons/config';
+import { ConfigKey, DEFAULT_CONFIG, MessageHandler } from './commons/config';
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { generateGUID } from './commons/helper';
@@ -86,8 +86,9 @@ export default function App() {
         loadProfiles().then(async (data) => {
             if (data.active) {
                 const profileData = await loadProfileFromServer(data.active);
-                profileData.config.channels = profileData.config.channels || [];
-                profileData.config.raidTargets = profileData.config.raidTargets || [];
+                profileData.config.channels ??= [];
+                profileData.config.raidTargets ??= [];
+                profileData.config.hideEvents ??= DEFAULT_CONFIG.hideEvents;
                 setProfile(profileData);
                 AlertSystem.updateConfig(profileData.config);
                 const order = data.profiles.split(',').filter(x => x);
@@ -286,6 +287,13 @@ export default function App() {
         });
     }
 
+    const setHideEvents = (type: SystemMessageMainType, val: boolean) => {
+        setProfile((profile) => {
+            profile.config.hideEvents[type] = val;
+            return profile;
+        });
+    }
+
     const setDeactivatedAlerts = (id: string, val: boolean) => {
         setProfile((profile) => {
             profile.config.deactivatedAlerts[id] = val;
@@ -335,6 +343,7 @@ export default function App() {
         setFreeTTS,
         setPlayAlerts,
         setSystemMessageInChat,
+        setHideEvents,
         setDeactivatedAlerts,
         loadReceivedShares,
         setActivatedShares,

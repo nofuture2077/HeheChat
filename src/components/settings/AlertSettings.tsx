@@ -4,6 +4,21 @@ import { useContext, useState, useEffect } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 import { AlertSystem } from '../../components/alerts/alertplayer'
 import { IconLink } from '@tabler/icons-react'
+import { SystemMessageMainType } from '../../commons/message';
+
+const hideEventsValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'channelPointRedemption'];
+
+const Messages: Record<string, string> = {
+    'sub': 'Subscriptions',
+    'subgift': "Gift-Subs",
+    "subgiftb": "Received Subs",
+    "raid": "Raids",
+    "follow": "Follows",
+    "donation": "Donations",
+    "cheer": "Bit-Donations",
+    "channelPointRedemption": "Channel Points"
+};
+
 
 export function AlertSettings() {
     const config = useContext(ConfigContext);
@@ -75,6 +90,12 @@ export function AlertSettings() {
                     </Stack>
                 </Fieldset>
             })}
+
+            <Fieldset legend="Hide Events" variant='filled'>
+                <Stack>
+                    {hideEventsValues.map(eventType => <Switch key={eventType} checked={config.hideEvents[eventType]} onChange={(event) => { config.setHideEvents(eventType, event.currentTarget.checked); forceUpdate(); }} label={Messages[eventType]} size="lg" />)}
+                </Stack>
+            </Fieldset>
 
             <Fieldset legend="Free TTS User" variant="filled" key="free-tts">
                 <TagsInput placeholder="" value={config.freeTTS} onChange={(freeTTS) => config.setFreeTTS(freeTTS.map(c => c.toLowerCase().substring(0, 50).trim()))}></TagsInput>
