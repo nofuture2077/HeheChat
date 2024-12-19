@@ -82,7 +82,7 @@ function ProfileComp(provided: DraggableProvided, profile: Profile, activeProfil
     const showChannels = 7;
     const channels = profile.config.channels.slice(0, profile.config.channels.length === showChannels + 1 ? showChannels + 1 : showChannels);
     const more = profile.config.channels.length - channels.length;
-    const isActive = profile.name === activeProfile.name;
+    const isActive = profile.guid === activeProfile.guid;
     return (<Paper ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={[classes.profile, isActive ? classes.active : undefined].join(' ')} key={'profile-' + profile.guid} shadow="xs" pt="sm" pb="xl" onClick={() => { activeProfile.switchProfile(profile.guid); close(); } }>
         <Text m='auto' ta="center">{profile.name}</Text>
         <AvatarGroup spacing='md' style={{ justifyContent: 'center' }}>
