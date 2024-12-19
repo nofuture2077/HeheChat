@@ -2,7 +2,7 @@ import { Event, EventAlertConfig, Base64FileReference, Base64File, EventAlert, E
 import _ from "underscore";
 
 import { Config } from "@/commons/config";
-import { HeheChatMessage, parseMessage } from "@/commons/message";
+import { formatString } from "@/commons/helper";
 import { silence } from "./silence";
 import PubSub from 'pubsub-js';
 
@@ -314,16 +314,11 @@ class AlertPlayer {
         PubSub.publish('AlertPlayer-update', {text: 'Prepare Alert'});
         console.log('Play alert with config', item, alert);
 
-        _.templateSettings = {
-            interpolate: /\{\{(.+?)\}\}/g
-        };
-        
-        const template = _.template(alert.audio?.tts?.text || "");
         const vars:any = {
             username: item.username,
             usernameTo: item.usernameTo,
-            amount: item.amount,
-            amount2: item.amount2,
+            amount: Number(item.amount),
+            amount2: Number(item.amount2),
             text: item.text
         };
 
@@ -332,13 +327,11 @@ class AlertPlayer {
         if (ttsText && eventData.text) {
             vars.text = this.parsedPartsToText(eventData.text.parts || eventData.text);
         }
-        vars.amount = Number(vars.amount || '0').toFixed(0);
-        vars.amount2 = Number(vars.amount2 || '0').toFixed(0);
         const state = localStorage.getItem('hehe-token_state') || '';
         this.startPlaying();
         console.log('Start playing');
         this.currentlyPlaying = item;
-        const ttsMessage = this.cleanMessage(template(vars));
+        const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", vars));
         try {
             const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state) : undefined;
             const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
