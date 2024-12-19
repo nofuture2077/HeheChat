@@ -331,14 +331,9 @@ class AlertPlayer {
         const eventData = this.getEventData(item.text);
         if (ttsText && eventData.text) {
             vars.text = this.parsedPartsToText(eventData.text.parts || eventData.text);
-        } else {
-            if (vars.amount) {
-                vars.amount = Number(vars.amount).toFixed(0);
-            }
-            if (vars.amount2) {
-                vars.amount2 = Number(vars.amount2).toFixed(0);
-            }
         }
+        vars.amount = Number(vars.amount || '0').toFixed(0);
+        vars.amount2 = Number(vars.amount2 || '0').toFixed(0);
         const state = localStorage.getItem('hehe-token_state') || '';
         this.startPlaying();
         console.log('Start playing');
