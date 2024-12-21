@@ -62,12 +62,12 @@ export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: str
     return parsedParts.map((part, partIndex) => {
         switch (part.type) {
             case 'emote': return <EmoteComponent key={partIndex} imageUrl={buildEmoteImageUrl(part.emote?.id! || part.id || '')} largeImageUrl={buildEmoteImageUrl(part.emote?.id! || part.id || '', {size: '2.0'})} name={part.text} type='Twitch'/>;
-            case 'cheer': {
-                if (part.amount || part.cheermote?.bits) {
-                    const cheerEmote = emotes.getCheerEmote(channel, part.cheermote?.prefix || '', part.amount || part.cheermote?.bits || 0);
-                    return <span key={partIndex}><img alt={part.name + part.amount} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.amount}</span></span>
+            case 'cheermote': {
+                if (part.cheermote?.bits) {
+                    const cheerEmote = emotes.getCheerEmote(channel, part.cheermote?.prefix || '', part.cheermote?.bits || 0);
+                    return <span key={partIndex}><img alt={part.cheermote?.prefix + part.cheermote?.bits} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.cheermote?.bits}</span></span>
                 }
-                return part.name + "0";
+                return part.cheermote?.prefix + "0";
             };
             case 'text': return joinWithSpace(part.text!.split(' ').map((word, index) => wordMapper(word, channel, partIndex, index, config, emotes, login)));
             case 'mention': return wordMapper(part.text, channel, partIndex, 0, config, emotes, login)

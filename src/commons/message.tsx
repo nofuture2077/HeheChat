@@ -22,7 +22,6 @@ export interface ParsedMessagePart {
     text: string;
     id?: string;
     name: string;
-    amount?: number;
     emote?: {
         id: string;
     },
