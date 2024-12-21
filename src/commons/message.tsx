@@ -18,7 +18,7 @@ interface UserInfo {
 }
 
 export interface ParsedMessagePart {
-    type: 'text' | 'emote' | 'cheer' | 'mention';
+    type: 'text' | 'emote' | 'cheermote' | 'mention';
     text: string;
     id?: string;
     name: string;
