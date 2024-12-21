@@ -65,7 +65,7 @@ export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: str
             case 'cheermote': {
                 if (part.cheermote?.bits) {
                     const cheerEmote = emotes.getCheerEmote(channel, part.cheermote?.prefix || '', part.cheermote?.bits || 0);
-                    return <span key={partIndex}><img alt={part.cheermote?.prefix + part.cheermote?.bits} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.cheermote?.bits}</span></span>
+                    return <span key={partIndex}><img style={{width: "auto", height: "1.5em", display: "inline"}} alt={part.cheermote?.prefix + part.cheermote?.bits} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.cheermote?.bits}</span></span>
                 }
                 return part.cheermote?.prefix + "0";
             };
