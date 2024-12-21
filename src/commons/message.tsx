@@ -32,6 +32,7 @@ export interface ParsedMessagePart {
     },
     cheermote?: {
         bits: number;
+        prefix: string;
     }
 }
 
