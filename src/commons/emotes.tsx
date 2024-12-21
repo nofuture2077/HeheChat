@@ -201,7 +201,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     getCheerEmote: (channel: string, name: string, bits: number) => {
         const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
         if (channelEmotes?.cheerEmotes) {
-            return channelEmotes.cheerEmotes.getCheermoteDisplayInfo(name, bits, { background: 'dark', scale: 1, state: 'animated' });
+            return channelEmotes.cheerEmotes.getCheermoteDisplayInfo(name, bits, { background: 'dark', scale: 2, state: 'animated' });
         }
         return `${name}${bits}`;
     },
