@@ -31,7 +31,7 @@ export const theme = createTheme({
         "#7d3ec9",
         "#6b31b2",
         "#5f2aa0",
-        "#52228e"
+        "#52228d"
       ]
   },
 });
