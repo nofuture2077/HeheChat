@@ -2,7 +2,7 @@ import { Event, EventAlertConfig, Base64FileReference, Base64File, EventAlert, E
 import _ from "underscore";
 
 import { Config } from "@/commons/config";
-import { parseMessage } from "@/commons/message";
+import { formatString } from "@/commons/helper";
 import { silence } from "./silence";
 import PubSub from 'pubsub-js';
 
@@ -206,9 +206,13 @@ class AlertPlayer {
         if (!newChannels.length) {
             return;
         }
+        this.loadAlertConfig(newChannels);
+    }
+
+    loadAlertConfig(channels: string[]) {
         const state = localStorage.getItem('hehe-token_state') || '';
-        fetch(BASE_URL + '/event/config?' + [['channels', newChannels.join(',')].join('='), ['state', state].join('=')].join('&')).then(res => res.json()).then(data => {
-            newChannels.forEach(channel => {
+        fetch(BASE_URL + '/event/config?' + [['channels', channels.join(',')].join('='), ['state', state].join('=')].join('&')).then(res => res.json()).then(data => {
+            channels.forEach(channel => {
                 this.alertConfig[channel] = data[channel];
             });
         });
@@ -239,7 +243,9 @@ class AlertPlayer {
         }
         const exactAlerts: Record<number, EventAlert[]> = {};
         const minAlerts: Record<number, EventAlert[]> = {};
-        const matchesAlerts: Record<string, EventAlert[]> = {};
+        const matchesAlerts: EventAlert[] = [];
+        const eventData = event.text ? JSON.parse(event.text) : {};
+
         alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
             const amount = Number(alert.specifier.amount || 0);
             if (alert.specifier.type === "exact") {
@@ -256,12 +262,9 @@ class AlertPlayer {
                     minAlerts[amount] = [alert];
                 }
             }
-            if (alert.specifier.type === "matches" && alert.specifier.text) {
-                if (matchesAlerts[alert.specifier.text]) {
-                    matchesAlerts[alert.specifier.text].push(alert)
-                } else {
-                    matchesAlerts[alert.specifier.text] = [alert];
-                }
+            if (alert.specifier.type === "matches" && alert.specifier.text && 
+                alert.specifier.attribute && (eventData[alert.specifier.attribute] === alert.specifier.text)) {
+                    matchesAlerts.push(alert);
             }
         });
         const eventAmount = Number(event.amount || 0);
@@ -269,18 +272,29 @@ class AlertPlayer {
         if (exactAlertMatches && exactAlertMatches.length) {
             return _.sample(exactAlertMatches);
         }
-        const parts = event.text?.split('***') || [];
-        if (parts.length >= 4) {
-            const matchesAlertMatches = matchesAlerts[parts[3]];
-            if (matchesAlertMatches && matchesAlertMatches.length) {
-                return _.sample(matchesAlertMatches);
-            }
+        if (matchesAlerts.length) {
+            return _.sample(matchesAlerts);
         }
         const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
         const step = minKeys.findLast(x => x <= eventAmount);
         if (step || step === 0) {
             return _.sample(minAlerts[step]);
         }
+    }
+
+    getEventData(item?: string): any {
+        if (!item || !item.startsWith('{')) return {};
+        try {
+            return JSON.parse(item);
+        } catch (ex) {
+            return {};
+        }
+    }
+
+    parsedPartsToText(parsedParts: any[]) {
+        return parsedParts.map((part, partIndex) => {
+            return part.text;
+        }).join(' ');
     }
  
     async showNotification(item: Event) {
@@ -300,35 +314,24 @@ class AlertPlayer {
         PubSub.publish('AlertPlayer-update', {text: 'Prepare Alert'});
         console.log('Play alert with config', item, alert);
 
-        _.templateSettings = {
-            interpolate: /\{\{(.+?)\}\}/g
-        };
-        
-        const template = _.template(alert.audio?.tts?.text || "");
         const vars:any = {
             username: item.username,
             usernameTo: item.usernameTo,
-            amount: item.amount,
-            amount2: item.amount2,
-            text: parseMessage(item.text!).text
+            amount: Number(item.amount),
+            amount2: Number(item.amount2),
+            text: item.text
         };
 
-        const ttsText = vars.text || item.text;
-        if (ttsText && (ttsText.startsWith('donation***') || ttsText.startsWith('channelPointRedemption***'))) {
-            vars.text = ttsText.split('***').slice(-1)[0];
-        } else {
-            if (vars.amount) {
-                vars.amount = Number(vars.amount).toFixed(0);
-            }
-            if (vars.amount2) {
-                vars.amount2 = Number(vars.amount2).toFixed(0);
-            }
+        const ttsText = item.text;
+        const eventData = this.getEventData(item.text);
+        if (ttsText && eventData.text) {
+            vars.text = this.parsedPartsToText(eventData.text.parts || eventData.text);
         }
         const state = localStorage.getItem('hehe-token_state') || '';
         this.startPlaying();
         console.log('Start playing');
         this.currentlyPlaying = item;
-        const ttsMessage = this.cleanMessage(template(vars));
+        const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", vars));
         try {
             const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state) : undefined;
             const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;

@@ -17,7 +17,7 @@ export function UISettings(props: UISettingProperties) {
     const [confirmDeleteOpen, confirmDeleteHandler] = useDisclosure(false);
     const [renameOpen, renameHandler] = useDisclosure(false);
     const [cloneOpen, cloneHandler] = useDisclosure(false);
-    const marks = [10, 14, 18, 22, 26].map(x => ({ value: x, label: x + "px" }));
+    const marks = [14, 18, 22, 26].map(x => ({ value: x, label: x + "px" }));
     return (
         <Stack mt={30} mb={30} gap={30}>
             <Fieldset legend="Hehechat" variant='filled'>
@@ -41,7 +41,7 @@ export function UISettings(props: UISettingProperties) {
             </Fieldset>
 
             <Fieldset legend="Font Size" variant='filled'>
-                <Slider w="calc(100% - 20px)" m="10" value={config.fontSize} onChange={config.setFontSize} min={10} max={26} label={(value) => `${value} px`} marks={marks} />
+                <Slider w="calc(100% - 20px)" m="10" value={config.fontSize} onChange={config.setFontSize} min={14} max={26} label={(value) => `${value} px`} marks={marks} />
             </Fieldset>
 
             <Fieldset legend="Color Mode" variant='filled'>

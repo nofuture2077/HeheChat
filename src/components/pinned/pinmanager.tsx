@@ -231,7 +231,7 @@ export function PinManager() {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
-                    expanded: false,
+                    expanded: true,
                     hidden: false,
                     type: 'prediction',
                     id: d.id,
@@ -253,7 +253,7 @@ export function PinManager() {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
-                    expanded: false,
+                    expanded: true,
                     hidden: false,
                     type: 'prediction',
                     id: d.id,
@@ -312,7 +312,7 @@ export function PinManager() {
                 const d = JSON.parse(data.text);
                 const finalRemoveTime = new Date(Date.now() + FINAL_STATE_DURATION);
                 const pin: Pin = {
-                    expanded: false,
+                    expanded: true,
                     hidden: false,
                     type: 'poll',
                     id: d.id,
@@ -357,10 +357,10 @@ export function PinManager() {
                     hidden: false,
                     type: 'raid',
                     id: generateGUID(),
-                    channel: d.broadcasterName,
+                    channel: d.channel,
                     endTime: new Date(Date.now() + RAID_DURATION),
                     data: {
-                        broadcasterName: d.broadcasterName,
+                        broadcasterName: d.channel,
                         targetChannelName: d.targetChannelName,
                         viewers: d.viewers
                     }

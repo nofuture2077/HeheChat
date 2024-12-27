@@ -24,7 +24,6 @@
     "@mantine/hooks": "7.13.4",
     "@tabler/icons-react": "^3.10.0",
     "@twurple/api": "^7.1.0",
-    "@twurple/chat": "^7.1.0",
     "@types/pubsub-js": "^1.8.6",
     "@types/react-beautiful-dnd": "^13.1.8",
     "@types/underscore": "^1.11.15",

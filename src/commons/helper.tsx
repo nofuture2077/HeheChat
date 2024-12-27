@@ -111,16 +111,15 @@ const formatFunctions: { [key: string]: (value: any) => string } = {
     duration: (value: string) => formatDuration(Number(value) * 1000),
 };
 
-export function formatString(template: string, args: any[]): string {
-    return template.replace(/\$(\d+)(?::(\w+))?/g, (_, index, formatFunction) => {
-        const value = args[parseInt(index, 10)] || '';
+export function formatString(messageTemplate: string, args: Record<string, any>): string {
+    return messageTemplate.replace(/\${(\w+)(?::(\w+))?}/g, (_, key, formatFunction) => {
+        const value = args[key];
         if (formatFunction && formatFunctions[formatFunction]) {
             return formatFunctions[formatFunction](value);
         }
-        return value.toString();
+        return String(value ?? '');
     });
 }
-
 
 export function replacer(key: string, value: any) {
     if (value instanceof Map) {
@@ -157,3 +156,72 @@ export function useViewportWidthCallback(callback: (width: number) => void) {
       callback(width);
     }, [width, callback]);
 }
+
+const getLuminance = (r: number, g: number, b: number) => {
+    const [rs, gs, bs] = [r, g, b].map(c => {
+        c = c / 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+};
+
+const parseColor = (color: string): [number, number, number] => {
+    const hex = color.startsWith('#');
+    if (hex) {
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+        return [r, g, b];
+    }
+    const rgb = color.match(/\d+/g)?.map(Number) || [0, 0, 0];
+    return rgb as [number, number, number];
+};
+
+export const getContrastRatio = (color1: string, color2: string) => {
+    const [r1, g1, b1] = parseColor(color1);
+    const [r2, g2, b2] = parseColor(color2);
+
+    const l1 = getLuminance(r1, g1, b1);
+    const l2 = getLuminance(r2, g2, b2);
+
+    const lighter = Math.max(l1, l2);
+    const darker = Math.min(l1, l2);
+
+    return (lighter + 0.05) / (darker + 0.05);
+};
+
+export const adjustColorForContrast = (color: string, backgroundColor: string) => {
+    let [r, g, b] = parseColor(color);
+    let contrast = getContrastRatio(`rgb(${r},${g},${b})`, backgroundColor);
+    const bgLuminance = getLuminance(...parseColor(backgroundColor));
+    const darken = bgLuminance > 0.5;
+    const step = 50; // Smaller step size for more gradual adjustments
+    let iterations = 0;
+    const maxIterations = 4; // Prevent infinite loops
+    
+    while (contrast < 4.5 && iterations < maxIterations) {
+        if (darken) {
+            // Darken the color
+            r = Math.max(0, r - step);
+            g = Math.max(0, g - step);
+            b = Math.max(0, b - step);
+        } else {
+            // Lighten the color
+            r = Math.min(255, r + step);
+            g = Math.min(255, g + step);
+            b = Math.min(255, b + step);
+        }
+        
+        const newColor = `rgb(${r},${g},${b})`;
+        contrast = getContrastRatio(newColor, backgroundColor);
+        iterations++;
+        
+        // If we've reached the limits of RGB values and still haven't achieved desired contrast
+        if ((darken && r === 0 && g === 0 && b === 0) || 
+            (!darken && r === 255 && g === 255 && b === 255)) {
+            break;
+        }
+    }
+    
+    return `rgb(${r},${g},${b})`;
+};

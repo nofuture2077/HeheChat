@@ -30,6 +30,7 @@ export interface ConfigData {
     raidTargets: string[];
     playAlerts: boolean;
     systemMessageInChat: Partial<Record<SystemMessageMainType, boolean>>,
+    hideEvents: Partial<Record<SystemMessageMainType, boolean>>,
     receivedShares: string[],
     activatedShares: string[],
     shares: string[],
@@ -61,6 +62,7 @@ export interface Config extends ConfigData {
     setRaidTargets: (val: string[]) => void;
     setPlayAlerts: (val: boolean) => void;
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => void;
+    setHideEvents: (type: SystemMessageMainType, val: boolean) => void;
     loadReceivedShares: () => void;
     setActivatedShares: (val: string[]) => void;
     setShares: (val: string[]) => void;
@@ -118,6 +120,15 @@ export const DEFAULT_CONFIG: Config = {
         streamOffline: true,
         channelPointRedemption: true
     },
+    hideEvents: {
+        sub: false,
+        subgift: false,
+        subgiftb: false,
+        raid: false,
+        follow: true,
+        donation: false,
+        channelPointRedemption: true
+    },
     receivedShares: [],
     activatedShares: [],
     shares: [],
@@ -152,6 +163,7 @@ export const DEFAULT_CONFIG: Config = {
     setHideRaid: (val) => {},
     setHideAdBreak: (val) => {},
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => {},
+    setHideEvents: (type: SystemMessageMainType, val: boolean) => {},
     setDeactivatedAlerts: (id: string, val: boolean) => {},
     loadReceivedShares: () => {},
     setActivatedShares: (val: string[]) => {},

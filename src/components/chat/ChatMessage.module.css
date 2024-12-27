@@ -26,7 +26,8 @@
 }
 
 .highlight_name {
-    background-color: light-dark(#9d9cbc, #383754);
+    background-color: light-dark(#d4007c, #ffb9ff);
+    color: light-dark(#e9e9e9, #161f16);
 }
 
 .msg.highlight {

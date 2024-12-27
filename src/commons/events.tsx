@@ -8,9 +8,10 @@ export type EventMainType = 'sub' | 'subgift' | 'subgiftb' | 'raid' | 'follow' |
 export type EventAlertRestriction = 'none' | 'mod' | 'system';
 
 export type EventAlertSpecifier = {
-    type: 'min' | 'exact' | 'matches',
-    amount?: number,
-    text?: string
+    type: 'min' | 'exact' | 'matches';
+    amount?: number;
+    attribute?: string;
+    text?: string;
 }
 
 export const EventTypeMapping: Record<string, string> = {

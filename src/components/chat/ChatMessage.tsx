@@ -1,4 +1,4 @@
-import { ChatMessage, ParsedMessagePart, parseChatMessage, buildEmoteImageUrl } from '@twurple/chat';
+import { buildEmoteImageUrl } from '../../commons/twitch';
 import classes from './ChatMessage.module.css';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { LoginContext } from '../../commons/login';
@@ -7,19 +7,20 @@ import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconCheck 
 import { ActionIcon, Text, Group, CopyButton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { TimeoutView, BanView } from './mod/modview';
-import { formatTime } from '../../commons/helper';
+import { formatTime, adjustColorForContrast } from '../../commons/helper';
 import { ModActions } from './mod/modactions';
 import { Config, ConfigKey } from '../../commons/config';
 import { ChatEmotes } from '../../commons/emotes';
 import { EmoteComponent } from '../emote/emote';
+import { HeheChatMessage, ParsedMessagePart } from '../../commons/message';
 
 interface ChatMessageProps {
-    msg: ChatMessage;
+    msg: HeheChatMessage;
     deletedMessages: {[id: string]: boolean };
     moderatedChannel: {[id: string]: boolean };
-    setReplyMsg: (msg?: ChatMessage) => void;
+    setReplyMsg: (msg?: HeheChatMessage) => void;
     hideReply?: boolean;
-    openModView: (msg: ChatMessage) => void;
+    openModView: (msg: HeheChatMessage) => void;
     modActions: ModActions;
 }
 
@@ -42,7 +43,7 @@ const extractClipId = (url: string): string | null => {
     }
 };
 
-const wordMapper = (word: string, channel: string, partIndex: number, index: number, emotes: ChatEmotes, login: LoginContext) => {
+const wordMapper = (word: string, channel: string, partIndex: number, index: number, config: Config, emotes: ChatEmotes, login: LoginContext) => {
     if (word.startsWith('http://') || word.startsWith('https://')) {
         const clipId = extractClipId(word);
         if (clipId) {
@@ -50,30 +51,31 @@ const wordMapper = (word: string, channel: string, partIndex: number, index: num
         }
         return <a href={word} key={partIndex + "_" + index} target='_blank'>{word}</a>;
     } else if (word.toLocaleLowerCase().indexOf(login.user?.name || ' ') > -1) {
-        return <Text fw={700} key={partIndex + "_" + index} className={classes.highlight_name} inline span>{word}</Text>
+        return <Text fw={700} key={partIndex + "_" + index} className={classes.highlight_name} inline span style={{fontSize: config.fontSize}}>{word}</Text>
     } else if (word.startsWith('@')) {
         return <b key={partIndex + "_" + index}>{word}</b>
     }
     return emotes.getEmote(channel, word, partIndex + "_" + index);
 }
 
-export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: string, emotes: ChatEmotes, login: LoginContext) {
+export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: string, config: Config, emotes: ChatEmotes, login: LoginContext) {
     return parsedParts.map((part, partIndex) => {
         switch (part.type) {
-            case 'emote': return <EmoteComponent key={partIndex} imageUrl={buildEmoteImageUrl(part.id)} largeImageUrl={buildEmoteImageUrl(part.id, {size: '2.0'})} name={part.name} type='Twitch'/>;
-            case 'cheer': {
-                if (part.amount) {
-                    const cheerEmote = emotes.getCheerEmote(channel, part.name, part.amount);
-                    return <span key={partIndex}><img alt={part.name + part.amount} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.amount}</span></span>
+            case 'emote': return <EmoteComponent key={partIndex} imageUrl={buildEmoteImageUrl(part.emote?.id! || part.id || '')} largeImageUrl={buildEmoteImageUrl(part.emote?.id! || part.id || '', {size: '2.0'})} name={part.text} type='Twitch'/>;
+            case 'cheermote': {
+                if (part.cheermote?.bits) {
+                    const cheerEmote = emotes.getCheerEmote(channel, part.cheermote?.prefix || '', part.cheermote?.bits || 0);
+                    return <span key={partIndex}><img style={{width: "auto", height: "1.5em", display: "inline"}} alt={part.cheermote?.prefix + part.cheermote?.bits} key={partIndex} src={cheerEmote.url} /><span key={partIndex+'_amount'} style={{color: cheerEmote.color}}> {part.cheermote?.bits}</span></span>
                 }
-                return part.name + "0";
+                return part.cheermote?.prefix + "0";
             };
-            case 'text': return joinWithSpace(part.text.split(' ').map((word, index) => wordMapper(word, channel, partIndex, index, emotes, login)))
+            case 'text': return joinWithSpace(part.text!.split(' ').map((word, index) => wordMapper(word, channel, partIndex, index, config, emotes, login)));
+            case 'mention': return wordMapper(part.text, channel, partIndex, 0, config, emotes, login)
         }
     });
 }
 
-const importantBadgeIndex = ['moderator', 'vip', 'staff', 'partner'].reduce((obj: any, key: string) => {obj[key] = 'showImportantBadges'; return obj}, {});
+const importantBadgeIndex = ['moderator', 'vip', 'staff', 'partner', 'broadcaster'].reduce((obj: any, key: string) => {obj[key] = 'showImportantBadges'; return obj}, {});
 const subscriberBadgeIndex = ['subscriber', 'founder'].reduce((obj: any, key: string) => {obj[key] = 'showSubBadges'; return obj}, {});
 const predictionBadgeIndex = ['predictions'].reduce((obj: any, key: string) => {obj[key] = 'showPredictions'; return obj}, {});
 
@@ -94,11 +96,14 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const login = useContext(LoginContextContext);
     const channel = props.msg.target.slice(1);
     const cheerEmotes = emotes.getCheerEmotes(channel);
-    const msgParts = parseChatMessage(props.msg.text, props.msg.emoteOffsets, cheerEmotes);
+    const msgParts = props.msg.parts || [];
     const deleted = props.deletedMessages[props.msg.id];
     const canMod = canModerate(props.msg, channel, props.moderatedChannel, login);
     const [timeoutModalOpened, timeoutModalHandler] = useDisclosure(false);
     const [banModalOpened, banModalHandler] = useDisclosure(false);
+
+    // Adjust username color for contrast against standard dark background
+    const adjustedColor = adjustColorForContrast(props.msg.userInfo.color || '#ffffff', '#1e1e1e');
 
     const actions = [];
     if (canMod && config.modToolsEnabled) {
@@ -124,16 +129,16 @@ export function ChatMessageComp(props: ChatMessageProps) {
         {(config.showProfilePicture && !props.hideReply) ? <span key='channel' className={classes.channel}>{emotes.getLogo(channel)}</span>: null}
         {config.showTimestamp ? <span  key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
         <span className={classes.badges}>{Array.from(props.msg.userInfo.badges).map((key, index) =>  getBadge(config, emotes, channel, key.toString(), index.toString()))}</span>
-        <span className={classes.username} style={{color: props.msg.userInfo.color}}>{props.msg.userInfo.displayName}</span>
+        <span className={classes.username} style={{color: adjustedColor}}>{props.msg.userInfo.displayName}</span>
         <span>: </span>
-        <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, emotes, login)}</span>
+        <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, config, emotes, login)}</span>
         { actions.length ? <Group key='actionsGroup' className={classes.actions} gap={'sm'}>{actions}</Group>: null}
         {timeoutModalOpened ? <TimeoutView key='timeoutModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.modActions.timeoutUser}/> : null}
         {banModalOpened ? <BanView key='banModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={banModalHandler.close} banUser={props.modActions.banUser}/> : null}
     </div>);
 }
 
-export function canModerate(msg: ChatMessage, channel: string, moderatedChannel: {[id: string]: boolean }, login: LoginContext) {
+export function canModerate(msg: HeheChatMessage, channel: string, moderatedChannel: {[id: string]: boolean }, login: LoginContext) {
     const isModerator = moderatedChannel[channel];
     const isBroadcaster = channel === login.user?.name;
     const chatterIsMod = msg.userInfo.isMod;
