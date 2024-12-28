@@ -13,7 +13,7 @@ interface UserInfo {
     userId: string;
     userName: string;
     color?: string;
-    badges: Map<string, string>;
+    badges: Record<string, string>;
     isMod: boolean;
 }
 
@@ -46,7 +46,6 @@ export class HeheChatMessage {
     channelId: string;
     isFirst?: boolean;
     isHighlight?: boolean;
-    rawLine: string;
 
     constructor(
         id: string,
@@ -68,68 +67,20 @@ export class HeheChatMessage {
         this.channelId = channelId;
         this.isFirst = isFirst;
         this.isHighlight = isHighlight;
-        this.rawLine = this.serialize();
-    }
-
-    private serialize(): string {
-        const badges = this.userInfo?.badges instanceof Map ? 
-            Array.from(this.userInfo.badges.entries()) : 
-        [];
-        return JSON.stringify({
-            type: this.type,
-            id: this.id,
-            text: this.text,
-            target: this.target,
-            date: this.date.getTime(),
-            userInfo: {
-                ...this.userInfo,
-                badges
-            },
-            parts: this.parts,
-            channelId: this.channelId,
-            isFirst: this.isFirst,
-            isHighlight: this.isHighlight
-        });
     }
 
     static deserialize(json: string): HeheChatMessage {
         const data = JSON.parse(json);
-        const userInfo = {
-            ...data.userInfo,
-            badges: new Map(Array.isArray(data.userInfo?.badges) ? data.userInfo.badges : [])
-        };
         return new HeheChatMessage(
             data.id,
             data.text,
             data.parts,
             data.target,
             new Date(data.date),
-            userInfo,
+            data.userInfo,
             data.channelId,
             data.isFirst,
             data.isHighlight
-        );
-    }
-
-    static fromParts(
-        text: string,
-        parts: ParsedMessagePart[],
-        target: string,
-        userInfo: UserInfo,
-        channelId: string,
-        isFirst?: boolean,
-        isHighlight?: boolean
-    ): HeheChatMessage {
-        return new HeheChatMessage(
-            generateGUID(),
-            text,
-            parts,
-            target,
-            new Date(),
-            userInfo,
-            channelId,
-            isFirst,
-            isHighlight
         );
     }
 }

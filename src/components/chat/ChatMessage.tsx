@@ -128,7 +128,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
         {badge}
         {(config.showProfilePicture && !props.hideReply) ? <span key='channel' className={classes.channel}>{emotes.getLogo(channel)}</span>: null}
         {config.showTimestamp ? <span  key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
-        <span className={classes.badges}>{Array.from(props.msg.userInfo.badges).map((key, index) =>  getBadge(config, emotes, channel, key.toString(), index.toString()))}</span>
+        <span className={classes.badges}>{Object.entries(props.msg.userInfo.badges).map((entry, index) =>  getBadge(config, emotes, channel, entry.join(','), index.toString()))}</span>
         <span className={classes.username} style={{color: adjustedColor}}>{props.msg.userInfo.displayName}</span>
         <span>: </span>
         <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, config, emotes, login)}</span>
