@@ -13,7 +13,7 @@ interface UserInfo {
     userId: string;
     userName: string;
     color?: string;
-    badges: Map<string, string>;
+    badges: Record<string, string>;
     isMod: boolean;
 }
 
@@ -81,10 +81,7 @@ export class HeheChatMessage {
             text: this.text,
             target: this.target,
             date: this.date.getTime(),
-            userInfo: {
-                ...this.userInfo,
-                badges
-            },
+            userInfo: this.userInfo,
             parts: this.parts,
             channelId: this.channelId,
             isFirst: this.isFirst,
@@ -94,17 +91,13 @@ export class HeheChatMessage {
 
     static deserialize(json: string): HeheChatMessage {
         const data = JSON.parse(json);
-        const userInfo = {
-            ...data.userInfo,
-            badges: new Map(Array.isArray(data.userInfo?.badges) ? data.userInfo.badges : [])
-        };
         return new HeheChatMessage(
             data.id,
             data.text,
             data.parts,
             data.target,
             new Date(data.date),
-            userInfo,
+            data.userInfo,
             data.channelId,
             data.isFirst,
             data.isHighlight
