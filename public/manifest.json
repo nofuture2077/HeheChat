@@ -17,12 +17,5 @@
         "sizes": "512x512",
         "type": "image/png"
       }
-    ],
-    "web_workers": [
-      {
-        "src": "/src/components/webworker/webworker.ts",
-        "type": "module",
-        "scope": "/"
-      }
     ]
 }
