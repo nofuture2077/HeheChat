@@ -102,7 +102,8 @@ export default function App() {
             }
         }, (err) => console.error(err));
 
-        workerRef.current = new Worker(new URL('./components/webworker/webworker.ts', import.meta.url), { type: 'module' });
+        // Use the registered worker from manifest
+        workerRef.current = new Worker('/src/components/webworker/webworker.ts');
 
         PubSub.subscribe("WSSEND", (msg, data) => {
             data.state = localStorage.getItem('hehe-token_state') || '';
