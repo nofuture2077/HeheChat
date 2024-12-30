@@ -5,10 +5,11 @@
     width: 100vw;
     word-wrap: break-word;
     overflow: hidden;
-    font-weight: 500;
-    &:nth-child(even) {
-        background-color: light-dark(#e2e2e2, rgb(30, 30, 30));;
-    }
+    font-weight: 500; 
+}
+
+.msg:nth-child(odd) {
+    background-color: light-dark(#e2e2e2, rgb(30, 30, 30));
 }
 
 .msg.deleted {

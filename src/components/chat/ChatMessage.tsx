@@ -2,7 +2,7 @@ import { buildEmoteImageUrl } from '../../commons/twitch';
 import classes from './ChatMessage.module.css';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { LoginContext } from '../../commons/login';
-import { useContext, useState } from 'react';
+import { useContext, useState, useRef } from 'react';
 import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconDotsCircleHorizontal } from '@tabler/icons-react';
 import { Text, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -102,6 +102,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const login = useContext(LoginContextContext);
     const computedColorScheme = useComputedColorScheme('dark');
     const [clickPosition, setClickPosition] = useState<ClickPosition | null>(null);
+    const messageRef = useRef<HTMLDivElement>(null);
     const channel = props.msg.target.slice(1);
     const cheerEmotes = emotes.getCheerEmotes(channel);
     const msgParts = props.msg.parts || [];
@@ -182,6 +183,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
     return (
         <>
             <div 
+                ref={messageRef}
                 className={msgClasses.join(' ')} 
                 onMouseDown={handleMouseDown}
                 onContextMenu={(e) => e.preventDefault()} // Prevent right-click menu
@@ -196,7 +198,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
             </div>
             
             {clickPosition && (
-                <div 
+                <><div 
                     className={classes.radialContainer}
                     style={{
                         left: clickPosition.x,
@@ -208,8 +210,9 @@ export function ChatMessageComp(props: ChatMessageProps) {
                         icon={<IconDotsCircleHorizontal size={64} />}
                         radius={100}
                         onClose={handleCloseRadial}
+                        messageRef={messageRef}
                     />
-                </div>
+                </div><div></div></>
             )}
 
             {timeoutModalOpened ? <TimeoutView key='timeoutModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.modActions.timeoutUser}/> : null}
