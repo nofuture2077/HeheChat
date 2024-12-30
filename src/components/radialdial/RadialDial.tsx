@@ -114,14 +114,32 @@ export const RadialDial: React.FC<RadialDialProps> = ({
     ? actions[hoveredIndex].tooltip 
     : null;
 
+  // Calculate position offset towards screen center
+  const screenCenterX = window.innerWidth / 2;
+  const screenCenterY = window.innerHeight / 2;
+  const maxOffset = 50;
+
+  // Calculate direction vector towards screen center
+  const dirX = screenCenterX - position.x;
+  const dirY = screenCenterY - position.y;
+  
+  // Normalize and scale the offset
+  const length = Math.sqrt(dirX * dirX + dirY * dirY);
+  const normalizedX = (dirX / length) * Math.min(maxOffset, length);
+  const normalizedY = (dirY / length) * Math.min(maxOffset, length);
+
+  // Apply the offset to the position
+  const adjustedX = position.x + normalizedX;
+  const adjustedY = position.y + normalizedY;
+
   return (
     <div 
       ref={containerRef} 
       className={styles.container}
       style={{
         position: 'fixed',
-        left: position.x,
-        top: position.y,
+        left: adjustedX,
+        top: adjustedY,
       }}
     >
       {currentTooltip && (
