@@ -61,10 +61,10 @@
 
 .badges {
     line-height: 1rem;
+    margin-right: 0.2rem;
 }
 
 .badges img {
-
     vertical-align: middle;
     margin: 0px 2px;
     height: 1.5em;
@@ -103,6 +103,12 @@
 
 .hideReply .actions {
     display: none !important;
+}
+
+.hideReply {
+    padding-left: 34px;
+    background: none !important;
+    padding-top: 8px;
 }
 
 /* RadialDial positioning */
