@@ -127,7 +127,7 @@ export const RadialDial: React.FC<RadialDialProps> = ({
       }}
     >
       <button
-        className={`${styles.trigger} ${isOpen ? styles.open : ''}`}
+        className={`${styles.trigger}`}
       >
         {icon}
       </button>

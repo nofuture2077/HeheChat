@@ -11,6 +11,7 @@
   position: absolute;
   width: 40px;
   height: 40px;
+  opacity: 0;
   border-radius: 50%;
   background-color: var(--mantine-color-dark-6);
   color: var(--mantine-color-white);
@@ -25,16 +26,6 @@
   top: 50%;
   transform: translate(-50%, -50%);
   -webkit-tap-highlight-color: transparent;
-}
-
-.trigger:hover,
-.trigger:active {
-  background-color: var(--mantine-color-dark-5);
-  transform: translate(-50%, -50%) scale(1.1);
-}
-
-.trigger.open {
-  transform: translate(-50%, -50%);
 }
 
 .actions {
