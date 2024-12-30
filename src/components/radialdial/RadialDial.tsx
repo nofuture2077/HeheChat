@@ -26,6 +26,7 @@ export const RadialDial: React.FC<RadialDialProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const isTouchingRef = useRef<boolean>(false);
 
   const closeMenu = useCallback(() => {
@@ -99,11 +100,32 @@ export const RadialDial: React.FC<RadialDialProps> = ({
     };
   }, [isOpen, handleInteractionEnd, calculateHoveredButton]);
 
-  // Touch event handlers
+  // Touch event handlers for the trigger button
   useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
+    const handleTriggerTouchStart = (e: TouchEvent) => {
       e.preventDefault();
       isTouchingRef.current = true;
+      setIsOpen(true);
+      if (messageRef?.current) {
+        messageRef.current.classList.add(styles.highlightedMessage);
+      }
+    };
+
+    if (triggerRef.current) {
+      const trigger = triggerRef.current;
+      trigger.addEventListener('touchstart', handleTriggerTouchStart, { passive: false });
+      
+      return () => {
+        trigger.removeEventListener('touchstart', handleTriggerTouchStart);
+      };
+    }
+  }, [messageRef]);
+
+  // Touch event handlers for the menu
+  useEffect(() => {
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      if (!isTouchingRef.current) return;
       const touch = e.touches[0];
       calculateHoveredButton(touch.clientX, touch.clientY);
     };
@@ -113,13 +135,6 @@ export const RadialDial: React.FC<RadialDialProps> = ({
       handleInteractionEnd(true);
     };
 
-    const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-      if (!isTouchingRef.current) return;
-      const touch = e.touches[0];
-      calculateHoveredButton(touch.clientX, touch.clientY);
-    };
-
     const handleTouchCancel = (e: TouchEvent) => {
       e.preventDefault();
       isTouchingRef.current = false;
@@ -127,30 +142,27 @@ export const RadialDial: React.FC<RadialDialProps> = ({
       closeMenu();
     };
 
-    if (isOpen && containerRef.current) {
-      const element = containerRef.current;
-      element.addEventListener('touchstart', handleTouchStart, { passive: false });
-      element.addEventListener('touchend', handleTouchEnd, { passive: false });
-      element.addEventListener('touchmove', handleTouchMove, { passive: false });
-      element.addEventListener('touchcancel', handleTouchCancel, { passive: false });
+    if (isOpen) {
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd, { passive: false });
+      document.addEventListener('touchcancel', handleTouchCancel, { passive: false });
     }
 
     return () => {
-      if (containerRef.current) {
-        const element = containerRef.current;
-        element.removeEventListener('touchstart', handleTouchStart);
-        element.removeEventListener('touchend', handleTouchEnd);
-        element.removeEventListener('touchmove', handleTouchMove);
-        element.removeEventListener('touchcancel', handleTouchCancel);
-      }
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+      document.removeEventListener('touchcancel', handleTouchCancel);
     };
   }, [isOpen, handleInteractionEnd, calculateHoveredButton, closeMenu]);
 
-  // Auto-open the dial when it's mounted and highlight the message
+  // Auto-open effect for desktop
   useEffect(() => {
-    setIsOpen(true);
-    if (messageRef?.current) {
-      messageRef.current.classList.add(styles.highlightedMessage);
+    // Only auto-open if not in a touch interaction
+    if (!isTouchingRef.current) {
+      setIsOpen(true);
+      if (messageRef?.current) {
+        messageRef.current.classList.add(styles.highlightedMessage);
+      }
     }
   }, [messageRef]);
 
@@ -160,6 +172,7 @@ export const RadialDial: React.FC<RadialDialProps> = ({
       className={styles.container}
     >
       <button
+        ref={triggerRef}
         className={`${styles.trigger}`}
       >
         {icon}
