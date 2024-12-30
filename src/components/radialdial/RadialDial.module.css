@@ -63,9 +63,9 @@
   z-index: 9999;
 }
 
-.actionButton:hover,
-.actionButton.hovered,
-.actionButton:active {
+.actionButton:not(:disabled):hover,
+.actionButton:not(:disabled).hovered,
+.actionButton:not(:disabled):active {
   background-color: light-dark(var(--mantine-color-green-5), var(--mantine-color-green-9));
 }
 
@@ -88,8 +88,8 @@
   z-index: 9999;
 }
 
-.actionButton:hover .tooltip,
-.actionButton.hovered .tooltip {
+.actionButton:not(:disabled):hover .tooltip,
+.actionButton:not(:disabled).hovered .tooltip {
   opacity: 1;
 }
 

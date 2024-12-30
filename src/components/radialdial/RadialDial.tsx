@@ -28,7 +28,7 @@ export const RadialDial: React.FC<RadialDialProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleInteractionEnd = useCallback(() => {
-    if (hoveredIndex !== null) {
+    if (hoveredIndex !== null && !actions[hoveredIndex].disabled) {
       actions[hoveredIndex].onClick();
     }
     if (messageRef?.current) {
@@ -139,7 +139,7 @@ export const RadialDial: React.FC<RadialDialProps> = ({
             >
               <>
                 {action.icon}
-                {action.tooltip && (
+                {action.tooltip && !action.disabled && (
                   <span className={styles.tooltip}>{action.tooltip}</span>
                 )}
               </>
