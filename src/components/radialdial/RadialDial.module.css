@@ -1,5 +1,6 @@
 .container {
   position: relative;
+  border: 5000px solid light-dark(rgba(255,255,255,0.7), rgba(0,0,0,0.7));
   width: 180px;
   height: 180px;
   transform: translate(-50%, -50%);
@@ -71,13 +72,11 @@
 
 .tooltip {
   position: absolute;
-  background: var(--mantine-color-dark-7);
-  background-color: light-dark(var(--mantine-color-green-5), var(--mantine-color-green-9));
-  color: var(--mantine-color-white);
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
   padding: 8px 32px;
   border-radius: 4px;
   font-size: 36px;
-  top: -50%;
+  top: -180px;
   font-weight: 900;
   white-space: nowrap;
   pointer-events: none;
