@@ -4,7 +4,9 @@
   height: 180px;
   transform: translate(-50%, -50%);
   user-select: none;
+  -webkit-user-select: none;
   touch-action: none;
+  -webkit-touch-callout: none;
 }
 
 .trigger {
@@ -26,6 +28,7 @@
   top: 50%;
   transform: translate(-50%, -50%);
   -webkit-tap-highlight-color: transparent;
+  touch-action: none;
 }
 
 .actions {
@@ -34,6 +37,9 @@
   left: 50%;
   width: 0;
   height: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
 }
 
 .actionButton {
@@ -48,6 +54,10 @@
   transform: scale(0);
   overflow: initial !important;
   -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .open .actionButton {
@@ -76,6 +86,8 @@
   top: -36px;
   left: 50%;
   transform: translateX(-50%);
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .actionButton:hover .tooltip,
@@ -93,7 +105,7 @@
 /* Touch-specific optimizations */
 @media (pointer: coarse) {
   .actionButton {
-    /* Slightly larger touch target on touch devices */
+    /* Larger touch target on touch devices */
     width: 80px;
     height: 80px;
   }
@@ -102,5 +114,11 @@
     /* Larger tooltip text on touch devices */
     font-size: 28px;
     padding: 6px 12px;
+  }
+
+  .container {
+    /* Ensure container is large enough for touch targets */
+    width: 200px;
+    height: 200px;
   }
 }

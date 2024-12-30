@@ -26,17 +26,28 @@ export const RadialDial: React.FC<RadialDialProps> = ({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isTouchingRef = useRef<boolean>(false);
 
-  const handleInteractionEnd = useCallback(() => {
-    if (hoveredIndex !== null) {
-      actions[hoveredIndex].onClick();
-    }
+  const closeMenu = useCallback(() => {
     setIsOpen(false);
     if (messageRef?.current) {
       messageRef.current.classList.remove(styles.highlightedMessage);
     }
     onClose?.();
-  }, [hoveredIndex, actions, onClose, messageRef]);
+  }, [onClose, messageRef]);
+
+  const handleInteractionEnd = useCallback((isTouch: boolean = false) => {
+    // Only process if it matches the current interaction type
+    if (isTouch !== isTouchingRef.current) return;
+    
+    if (hoveredIndex !== null) {
+      actions[hoveredIndex].onClick();
+    }
+    closeMenu();
+    if (isTouch) {
+      isTouchingRef.current = false;
+    }
+  }, [hoveredIndex, actions, closeMenu]);
 
   // Calculate which action button is being hovered/touched based on coordinates
   const calculateHoveredButton = useCallback((clientX: number, clientY: number) => {
@@ -68,10 +79,12 @@ export const RadialDial: React.FC<RadialDialProps> = ({
   // Mouse event handlers
   useEffect(() => {
     const handleMouseUp = (e: MouseEvent) => {
-      handleInteractionEnd();
+      if (isTouchingRef.current) return; // Ignore if touch interaction
+      handleInteractionEnd(false);
     };
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (isTouchingRef.current) return; // Ignore if touch interaction
       calculateHoveredButton(e.clientX, e.clientY);
     };
 
@@ -88,26 +101,50 @@ export const RadialDial: React.FC<RadialDialProps> = ({
 
   // Touch event handlers
   useEffect(() => {
-    const handleTouchEnd = () => {
-      handleInteractionEnd();
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault(); // Prevent scrolling while using the radial menu
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      isTouchingRef.current = true;
       const touch = e.touches[0];
       calculateHoveredButton(touch.clientX, touch.clientY);
     };
 
-    if (isOpen) {
-      document.addEventListener('touchend', handleTouchEnd);
-      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      handleInteractionEnd(true);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      if (!isTouchingRef.current) return;
+      const touch = e.touches[0];
+      calculateHoveredButton(touch.clientX, touch.clientY);
+    };
+
+    const handleTouchCancel = (e: TouchEvent) => {
+      e.preventDefault();
+      isTouchingRef.current = false;
+      setHoveredIndex(null);
+      closeMenu();
+    };
+
+    if (isOpen && containerRef.current) {
+      const element = containerRef.current;
+      element.addEventListener('touchstart', handleTouchStart, { passive: false });
+      element.addEventListener('touchend', handleTouchEnd, { passive: false });
+      element.addEventListener('touchmove', handleTouchMove, { passive: false });
+      element.addEventListener('touchcancel', handleTouchCancel, { passive: false });
     }
 
     return () => {
-      document.removeEventListener('touchend', handleTouchEnd);
-      document.removeEventListener('touchmove', handleTouchMove);
+      if (containerRef.current) {
+        const element = containerRef.current;
+        element.removeEventListener('touchstart', handleTouchStart);
+        element.removeEventListener('touchend', handleTouchEnd);
+        element.removeEventListener('touchmove', handleTouchMove);
+        element.removeEventListener('touchcancel', handleTouchCancel);
+      }
     };
-  }, [isOpen, handleInteractionEnd, calculateHoveredButton]);
+  }, [isOpen, handleInteractionEnd, calculateHoveredButton, closeMenu]);
 
   // Auto-open the dial when it's mounted and highlight the message
   useEffect(() => {
@@ -121,10 +158,6 @@ export const RadialDial: React.FC<RadialDialProps> = ({
     <div 
       ref={containerRef} 
       className={styles.container}
-      onTouchStart={(e) => {
-        const touch = e.touches[0];
-        calculateHoveredButton(touch.clientX, touch.clientY);
-      }}
     >
       <button
         className={`${styles.trigger}`}
@@ -143,8 +176,8 @@ export const RadialDial: React.FC<RadialDialProps> = ({
               key={index}
               variant="default"
               className={`${styles.actionButton} ${hoveredIndex === index ? styles.hovered : ''}`}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
+              onMouseEnter={() => !isTouchingRef.current && setHoveredIndex(index)}
+              onMouseLeave={() => !isTouchingRef.current && setHoveredIndex(null)}
               style={{
                 transform: isOpen
                   ? `translate(${x}px, ${y}px) scale(1)`

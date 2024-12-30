@@ -6,6 +6,8 @@
     word-wrap: break-word;
     overflow: hidden;
     font-weight: 500; 
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .msg:nth-child(odd) {
