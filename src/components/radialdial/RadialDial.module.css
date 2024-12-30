@@ -1,0 +1,86 @@
+.container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%);
+  user-select: none;
+}
+
+.trigger {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--mantine-color-dark-6);
+  color: var(--mantine-color-white);
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, background-color 0.2s;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.trigger:hover {
+  background-color: var(--mantine-color-dark-5);
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.trigger.open {
+  transform: translate(-50%, -50%);
+}
+
+.actions {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+
+.actionButton {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out, background-color 0.15s ease-out;
+  transform: scale(0);
+  overflow: initial !important;
+}
+
+.open .actionButton {
+  transform: scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.actionButton:hover {
+  background-color: light-dark(var(--mantine-color-cyan-2), var(--mantine-color-orange-9));;
+}
+
+.tooltip {
+  position: absolute;
+  background: var(--mantine-color-dark-7);
+  color: var(--mantine-color-white);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 24px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.actionButton:hover .tooltip {
+  opacity: 1;
+}
