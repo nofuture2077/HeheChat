@@ -106,7 +106,6 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const longPressTimerRef = useRef<number | null>(null);
     const touchStartPositionRef = useRef<Position | null>(null);
     const channel = props.msg.target.slice(1);
-    const cheerEmotes = emotes.getCheerEmotes(channel);
     const msgParts = props.msg.parts || [];
     const deleted = props.deletedMessages[props.msg.id];
     const canMod = canModerate(props.msg, channel, props.moderatedChannel, login);
@@ -201,6 +200,34 @@ export function ChatMessageComp(props: ChatMessageProps) {
             }
         );
     }
+    if (!canMod && config.modToolsEnabled) {
+        radialActions.push(
+            {
+                icon: <IconTrash size={48} />,
+                disabled: true,
+                onClick: () => {
+                    props.modActions.deleteMessage(props.msg.channelId || '', props.msg.id);
+                },
+                tooltip: 'Delete'
+            },
+            {
+                icon: <IconClock size={48} />,
+                disabled: true,
+                onClick: () => {
+                    timeoutModalHandler.open();
+                },
+                tooltip: 'Timeout'
+            },
+            {
+                icon: <IconHammer size={48} />,
+                disabled: true,
+                onClick: () => {
+                    banModalHandler.open();
+                },
+                tooltip: 'Ban'
+            }
+        );
+    }
 
     if (!props.hideReply && config.chatEnabled) {
         radialActions.push(
@@ -250,6 +277,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
             </div>
             
             {menuPosition && (
+                <>
                 <RadialDial
                     actions={radialActions}
                     radius={100}
@@ -257,6 +285,8 @@ export function ChatMessageComp(props: ChatMessageProps) {
                     messageRef={messageRef}
                     position={menuPosition}
                 />
+                <span></span>
+                </>
             )}
 
             {timeoutModalOpened ? <TimeoutView key='timeoutModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.modActions.timeoutUser}/> : null}

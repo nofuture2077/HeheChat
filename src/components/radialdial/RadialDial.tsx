@@ -6,6 +6,7 @@ export interface RadialAction {
   icon: React.ReactNode;
   onClick: () => void;
   tooltip?: string;
+  disabled?: boolean;
 }
 
 interface RadialDialProps {
@@ -128,6 +129,7 @@ export const RadialDial: React.FC<RadialDialProps> = ({
           return (
             <ActionIcon
               key={index}
+              disabled={action.disabled}
               variant="default"
               className={`${styles.actionButton} ${hoveredIndex === index ? styles.hovered : ''}`}
               style={{
