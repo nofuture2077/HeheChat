@@ -17,29 +17,34 @@
 }
 
 .msg.first {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: light-dark(#a9d4ba, #375442);
+
+
+    .firstBadge {
+        font-size: 10px;
+        position: absolute;
+        color: light-dark(rgb(0, 53, 0), rgb(100, 255, 131));
+        margin-left: 0%;
+        right: 10px;
+        top: -4px;
+    }
+}
+
+.highlight_name {
+    background-color: light-dark(#d4007c, #ffb9ff);
+    color: light-dark(#e9e9e9, #161f16);
 }
 
 .msg.highlight {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.firstBadge {
-    background-color: #9146ff;
-    color: white;
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    margin-right: 4px;
-}
-
-.highlightBadge {
-    background-color: #ff4646;
-    color: white;
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    margin-right: 4px;
+    background-color: light-dark(#9d9cbc, #383754);
+    .highlightBadge {
+        font-size: 10px;
+        position: absolute;
+        color: light-dark(rgb(18, 0, 53), rgb(100, 185, 255));
+        margin-left: 0%;
+        right: 10px;
+        top: -4px;
+    }
 }
 
 .channel {
