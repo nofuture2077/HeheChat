@@ -25,7 +25,7 @@ interface ChatMessageProps {
     modActions: ModActions;
 }
 
-interface ClickPosition {
+interface Position {
     x: number;
     y: number;
 }
@@ -101,7 +101,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const emotes = useContext(ChatEmotesContext);
     const login = useContext(LoginContextContext);
     const computedColorScheme = useComputedColorScheme('dark');
-    const [clickPosition, setClickPosition] = useState<ClickPosition | null>(null);
+    const [menuPosition, setMenuPosition] = useState<Position | null>(null);
     const messageRef = useRef<HTMLDivElement>(null);
     const channel = props.msg.target.slice(1);
     const cheerEmotes = emotes.getCheerEmotes(channel);
@@ -114,15 +114,18 @@ export function ChatMessageComp(props: ChatMessageProps) {
     // Adjust username color for contrast against standard dark background
     const adjustedColor = adjustColorForContrast(props.msg.userInfo.color || '#ffffff', computedColorScheme === 'light' ? '#f1f1f1' : '#1e1e1e');
 
-    const handleMouseDown = (e: React.MouseEvent) => {
+    const handleInteractionStart = (e: React.MouseEvent | React.TouchEvent) => {
         if (!props.hideReply) {
-            e.preventDefault(); // Prevent text selection
-            setClickPosition({ x: e.clientX, y: e.clientY });
+            e.preventDefault();
+            const position = 'touches' in e 
+                ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
+                : { x: e.clientX, y: e.clientY };
+            setMenuPosition(position);
         }
     };
 
     const handleCloseRadial = () => {
-        setClickPosition(null);
+        setMenuPosition(null);
     };
 
     const radialActions = [];
@@ -185,7 +188,8 @@ export function ChatMessageComp(props: ChatMessageProps) {
             <div 
                 ref={messageRef}
                 className={msgClasses.join(' ')} 
-                onMouseDown={handleMouseDown}
+                onMouseDown={handleInteractionStart}
+                onTouchStart={handleInteractionStart}
                 onContextMenu={(e) => e.preventDefault()} // Prevent right-click menu
             >
                 {badge}
@@ -197,22 +201,14 @@ export function ChatMessageComp(props: ChatMessageProps) {
                 <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, config, emotes, login)}</span>
             </div>
             
-            {clickPosition && (
-                <><div 
-                    className={classes.radialContainer}
-                    style={{
-                        left: clickPosition.x,
-                        top: clickPosition.y
-                    }}
-                >
-                    <RadialDial
-                        actions={radialActions}
-                        icon={<IconDotsCircleHorizontal size={64} />}
-                        radius={100}
-                        onClose={handleCloseRadial}
-                        messageRef={messageRef}
-                    />
-                </div><div></div></>
+            {menuPosition && (
+                <RadialDial
+                    actions={radialActions}
+                    radius={100}
+                    onClose={handleCloseRadial}
+                    messageRef={messageRef}
+                    position={menuPosition}
+                />
             )}
 
             {timeoutModalOpened ? <TimeoutView key='timeoutModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.modActions.timeoutUser}/> : null}
