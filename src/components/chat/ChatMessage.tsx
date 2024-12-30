@@ -2,7 +2,7 @@ import { buildEmoteImageUrl } from '../../commons/twitch';
 import classes from './ChatMessage.module.css';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { LoginContext } from '../../commons/login';
-import { useContext, useState, useRef } from 'react';
+import { useContext, useState, useRef, useCallback, useEffect } from 'react';
 import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconDotsCircleHorizontal } from '@tabler/icons-react';
 import { Text, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -103,6 +103,8 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const computedColorScheme = useComputedColorScheme('dark');
     const [menuPosition, setMenuPosition] = useState<Position | null>(null);
     const messageRef = useRef<HTMLDivElement>(null);
+    const longPressTimerRef = useRef<number | null>(null);
+    const touchStartPositionRef = useRef<Position | null>(null);
     const channel = props.msg.target.slice(1);
     const cheerEmotes = emotes.getCheerEmotes(channel);
     const msgParts = props.msg.parts || [];
@@ -114,19 +116,63 @@ export function ChatMessageComp(props: ChatMessageProps) {
     // Adjust username color for contrast against standard dark background
     const adjustedColor = adjustColorForContrast(props.msg.userInfo.color || '#ffffff', computedColorScheme === 'light' ? '#f1f1f1' : '#1e1e1e');
 
-    const handleInteractionStart = (e: React.MouseEvent | React.TouchEvent) => {
+    const clearLongPressTimer = useCallback(() => {
+        if (longPressTimerRef.current !== null) {
+            window.clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+        touchStartPositionRef.current = null;
+    }, []);
+
+    const handleMouseDown = (e: React.MouseEvent) => {
         if (!props.hideReply) {
             e.preventDefault();
-            const position = 'touches' in e 
-                ? { x: e.touches[0].clientX, y: e.touches[0].clientY }
-                : { x: e.clientX, y: e.clientY };
-            setMenuPosition(position);
+            setMenuPosition({ x: e.clientX, y: e.clientY });
         }
+    };
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (!props.hideReply) {
+            const touch = e.touches[0];
+            touchStartPositionRef.current = { x: touch.clientX, y: touch.clientY };
+            
+            // Start long press timer
+            longPressTimerRef.current = window.setTimeout(() => {
+                if (touchStartPositionRef.current) {
+                    setMenuPosition(touchStartPositionRef.current);
+                    e.preventDefault(); // Prevent scrolling once menu is shown
+                }
+            }, 500); // 500ms for long press
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (touchStartPositionRef.current) {
+            const touch = e.touches[0];
+            const deltaX = Math.abs(touch.clientX - touchStartPositionRef.current.x);
+            const deltaY = Math.abs(touch.clientY - touchStartPositionRef.current.y);
+            
+            // If moved more than 10px, cancel long press
+            if (deltaX > 10 || deltaY > 10) {
+                clearLongPressTimer();
+            }
+        }
+    };
+
+    const handleTouchEnd = () => {
+        clearLongPressTimer();
     };
 
     const handleCloseRadial = () => {
         setMenuPosition(null);
     };
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            clearLongPressTimer();
+        };
+    }, [clearLongPressTimer]);
 
     const radialActions = [];
     
@@ -188,8 +234,10 @@ export function ChatMessageComp(props: ChatMessageProps) {
             <div 
                 ref={messageRef}
                 className={msgClasses.join(' ')} 
-                onMouseDown={handleInteractionStart}
-                onTouchStart={handleInteractionStart}
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
                 onContextMenu={(e) => e.preventDefault()} // Prevent right-click menu
             >
                 {badge}
