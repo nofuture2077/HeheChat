@@ -72,24 +72,21 @@
 .tooltip {
   position: absolute;
   background: var(--mantine-color-dark-7);
+  background-color: light-dark(var(--mantine-color-green-5), var(--mantine-color-green-9));
   color: var(--mantine-color-white);
-  padding: 4px 8px;
+  padding: 8px 32px;
   border-radius: 4px;
-  font-size: 24px;
+  font-size: 36px;
+  top: -50%;
+  font-weight: 900;
   white-space: nowrap;
   pointer-events: none;
-  opacity: 0;
   transition: opacity 0.2s;
-  top: -36px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50px);
   user-select: none;
   -webkit-user-select: none;
-  z-index: 9999;
-}
-
-.actionButton:not(:disabled):hover .tooltip,
-.actionButton:not(:disabled).hovered .tooltip {
+  z-index: 10000;
   opacity: 1;
 }
 
@@ -110,7 +107,6 @@
   
   .tooltip {
     /* Larger tooltip text on touch devices */
-    font-size: 28px;
     padding: 6px 12px;
   }
 

@@ -110,6 +110,10 @@ export const RadialDial: React.FC<RadialDialProps> = ({
     }
   }, [messageRef]);
 
+  const currentTooltip = hoveredIndex !== null && !actions[hoveredIndex].disabled 
+    ? actions[hoveredIndex].tooltip 
+    : null;
+
   return (
     <div 
       ref={containerRef} 
@@ -120,6 +124,9 @@ export const RadialDial: React.FC<RadialDialProps> = ({
         top: position.y,
       }}
     >
+      {currentTooltip && (
+        <div className={styles.tooltip}>{currentTooltip}</div>
+      )}
       <div className={styles.actions}>
         {actions.map((action, index) => {
           const angle = (2 * Math.PI * index) / actions.length - Math.PI / 2;
@@ -137,12 +144,7 @@ export const RadialDial: React.FC<RadialDialProps> = ({
                 transitionDelay: `${index * 0.03}s`,
               }}
             >
-              <>
-                {action.icon}
-                {action.tooltip && !action.disabled && (
-                  <span className={styles.tooltip}>{action.tooltip}</span>
-                )}
-              </>
+              {action.icon}
             </ActionIcon>
           );
         })}
