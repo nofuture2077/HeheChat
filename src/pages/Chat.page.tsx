@@ -143,6 +143,10 @@ export function ChatPage() {
     }, [onModEvent]);
 
     useEffect(() => {
+        forceUpdate();
+    }, [replyMsg]);
+
+    useEffect(() => {
         if (profile.name === 'default' && !config.channels.length) {
             setTimeout(() => {
                 if (loginContext.user) {
@@ -199,7 +203,7 @@ export function ChatPage() {
 
         setTimeout(() => {
             scrollToBottom();
-        }, 2000);
+        }, 5000);
 
         (config.channels || []).forEach(channel => {
             emotes.updateChannel(loginContext, channel).then(forceUpdate);
