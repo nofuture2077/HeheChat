@@ -1,5 +1,5 @@
 import { SystemMessage, SystemMessageMainType, HeheChatMessage, parseMessage } from '../../commons/message';
-import { formatDuration, formatString } from '../../commons/helper';
+import { formatTime, formatString } from '../../commons/helper';
 import { Text, ActionIcon } from "@mantine/core"
 import classes from './systemmessage.module.css';
 import { IconSpeakerphone } from '@tabler/icons-react';
@@ -81,7 +81,11 @@ export function SystemMessageComp(props: SystemMessageProps) {
 
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)} style={{ verticalAlign: 'middle' }}><IconSpeakerphone size={22} /></ActionIcon> : null;
     return <div className={[classes.msg, classes[props.msg.subType]].join(' ')}>
-                <Text key="msg-main" fw={700} {...style} style={{fontSize: config.fontSize}}><span className={classes.logo}>{emotes.getLogo(props.msg.data.channel)}</span>{joinWithSpace(textParts[0].split(" ").map((value, index, array) => wordMapper(eventType, value, index, array)))}{actions}</Text>
+                {config.showProfilePicture ? <span className={classes.logo}>{emotes.getLogo(props.msg.data.channel)}</span> : null}
+                {config.showTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)} </span> : null}
+                <Text key="msg-main" fw={700} {...style} style={{fontSize: config.fontSize}} span>
+                    {joinWithSpace(textParts[0].split(" ").map((value, index, array) => wordMapper(eventType, value, index, array)))}{actions}
+                </Text>
                 {textParts.length === 2 ? <Text key="msg-second" fw={500} style={{fontSize: config.fontSize}}>{parsedPartsToHtml(msgParts, channel, config, emotes, login)}</Text>: null}
         </div>;
 }
