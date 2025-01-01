@@ -2,9 +2,9 @@ import { buildEmoteImageUrl } from '../../commons/twitch';
 import classes from './ChatMessage.module.css';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { LoginContext } from '../../commons/login';
-import { useContext } from 'react';
-import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconCheck } from '@tabler/icons-react';
-import { ActionIcon, Text, Group, CopyButton } from '@mantine/core';
+import { useContext, useState, useRef, useCallback, useEffect } from 'react';
+import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconDotsCircleHorizontal } from '@tabler/icons-react';
+import { Text, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { TimeoutView, BanView } from './mod/modview';
 import { formatTime, adjustColorForContrast } from '../../commons/helper';
@@ -13,6 +13,7 @@ import { Config, ConfigKey } from '../../commons/config';
 import { ChatEmotes } from '../../commons/emotes';
 import { EmoteComponent } from '../emote/emote';
 import { HeheChatMessage, ParsedMessagePart } from '../../commons/message';
+import { RadialDial } from '../radialdial/RadialDial';
 
 interface ChatMessageProps {
     msg: HeheChatMessage;
@@ -22,6 +23,11 @@ interface ChatMessageProps {
     hideReply?: boolean;
     openModView: (msg: HeheChatMessage) => void;
     modActions: ModActions;
+}
+
+interface Position {
+    x: number;
+    y: number;
 }
 
 export const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] => {
@@ -94,8 +100,12 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const config = useContext(ConfigContext);
     const emotes = useContext(ChatEmotesContext);
     const login = useContext(LoginContextContext);
+    const computedColorScheme = useComputedColorScheme('dark');
+    const [menuPosition, setMenuPosition] = useState<Position | null>(null);
+    const messageRef = useRef<HTMLDivElement>(null);
+    const longPressTimerRef = useRef<number | null>(null);
+    const touchStartPositionRef = useRef<Position | null>(null);
     const channel = props.msg.target.slice(1);
-    const cheerEmotes = emotes.getCheerEmotes(channel);
     const msgParts = props.msg.parts || [];
     const deleted = props.deletedMessages[props.msg.id];
     const canMod = canModerate(props.msg, channel, props.moderatedChannel, login);
@@ -103,17 +113,139 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const [banModalOpened, banModalHandler] = useDisclosure(false);
 
     // Adjust username color for contrast against standard dark background
-    const adjustedColor = adjustColorForContrast(props.msg.userInfo.color || '#ffffff', '#1e1e1e');
+    const adjustedColor = adjustColorForContrast(props.msg.userInfo.color || '#ffffff', computedColorScheme === 'light' ? '#f1f1f1' : '#1e1e1e');
 
-    const actions = [];
+    const clearLongPressTimer = useCallback(() => {
+        if (longPressTimerRef.current !== null) {
+            window.clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+        touchStartPositionRef.current = null;
+    }, []);
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (!props.hideReply) {
+            e.preventDefault();
+            setMenuPosition({ x: e.clientX, y: e.clientY });
+        }
+    };
+
+    const handleTouchStart = (e: React.TouchEvent) => {
+        if (!props.hideReply) {
+            const touch = e.touches[0];
+            touchStartPositionRef.current = { x: touch.clientX, y: touch.clientY };
+            
+            // Start long press timer
+            longPressTimerRef.current = window.setTimeout(() => {
+                if (touchStartPositionRef.current) {
+                    setMenuPosition(touchStartPositionRef.current);
+                    e.preventDefault(); // Prevent scrolling once menu is shown
+                }
+            }, 500); // 500ms for long press
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (touchStartPositionRef.current) {
+            const touch = e.touches[0];
+            const deltaX = Math.abs(touch.clientX - touchStartPositionRef.current.x);
+            const deltaY = Math.abs(touch.clientY - touchStartPositionRef.current.y);
+            
+            // If moved more than 10px, cancel long press
+            if (deltaX > 10 || deltaY > 10) {
+                clearLongPressTimer();
+            }
+        }
+    };
+
+    const handleTouchEnd = () => {
+        clearLongPressTimer();
+    };
+
+    const handleCloseRadial = () => {
+        setMenuPosition(null);
+    };
+
+    // Cleanup timer on unmount
+    useEffect(() => {
+        return () => {
+            clearLongPressTimer();
+        };
+    }, [clearLongPressTimer]);
+
+    const radialActions = [];
+    
     if (canMod && config.modToolsEnabled) {
-        actions.push(<ActionIcon key='deleteAction' variant='filled' color='primary' size={22} onClick={() => {props.modActions.deleteMessage(props.msg.channelId || '', props.msg.id)}}><IconTrash size={14} /></ActionIcon>);
-        actions.push(<ActionIcon key='timeoutAction' variant='filled' color='primary' size={22} onClick={timeoutModalHandler.open}><IconClock size={14} /></ActionIcon>);
-        actions.push(<ActionIcon key='banAction' variant='filled' color='primary' size={22} onClick={banModalHandler.open}><IconHammer size={14} /></ActionIcon>);
+        radialActions.push(
+            {
+                icon: <IconTrash size={48} />,
+                onClick: () => {
+                    props.modActions.deleteMessage(props.msg.channelId || '', props.msg.id);
+                },
+                tooltip: 'Delete'
+            },
+            {
+                icon: <IconClock size={48} />,
+                onClick: () => {
+                    timeoutModalHandler.open();
+                },
+                tooltip: 'Timeout'
+            },
+            {
+                icon: <IconHammer size={48} />,
+                onClick: () => {
+                    banModalHandler.open();
+                },
+                tooltip: 'Ban'
+            }
+        );
     }
+    if (!canMod && config.modToolsEnabled) {
+        radialActions.push(
+            {
+                icon: <IconTrash size={48} />,
+                disabled: true,
+                onClick: () => {
+                    props.modActions.deleteMessage(props.msg.channelId || '', props.msg.id);
+                },
+                tooltip: 'Delete'
+            },
+            {
+                icon: <IconClock size={48} />,
+                disabled: true,
+                onClick: () => {
+                    timeoutModalHandler.open();
+                },
+                tooltip: 'Timeout'
+            },
+            {
+                icon: <IconHammer size={48} />,
+                disabled: true,
+                onClick: () => {
+                    banModalHandler.open();
+                },
+                tooltip: 'Ban'
+            }
+        );
+    }
+
     if (!props.hideReply && config.chatEnabled) {
-        actions.push(<CopyButton key='copyAction' value={props.msg.text}>{({ copied, copy }) => (<ActionIcon key='replyAction' size={22} variant='filled' color='gray' onClick={copy}>{copied ? <IconCheck size={config.fontSize}/> : <IconCopy size={config.fontSize}/>}</ActionIcon>)}</CopyButton>);
-        actions.push(<ActionIcon key='replyAction' size={22} variant='filled' color='gray' onClick={() => props.setReplyMsg(props.msg)}><IconArrowBackUp size={config.fontSize}/></ActionIcon>);
+        radialActions.push(
+            {
+                icon: <IconCopy size={48} />,
+                onClick: () => {
+                    navigator.clipboard.writeText(props.msg.text);
+                },
+                tooltip: 'Copy'
+            },
+            {
+                icon: <IconArrowBackUp size={48} />,
+                onClick: () => {
+                    props.setReplyMsg(props.msg);
+                },
+                tooltip: 'Reply'
+            }
+        );
     }
 
     const msgClasses = [classes.msg];
@@ -124,18 +256,43 @@ export function ChatMessageComp(props: ChatMessageProps) {
 
     const badge = props.msg.isFirst ? <span className={classes.firstBadge} key="first-badge">FIRST MESSAGE</span> : props.msg.isHighlight ? <span className={classes.highlightBadge} key="highlight-badge">HIGHLIGHT</span> : null;
 
-    return (<div className={msgClasses.join(' ')}>
-        {badge}
-        {(config.showProfilePicture && !props.hideReply) ? <span key='channel' className={classes.channel}>{emotes.getLogo(channel)}</span>: null}
-        {config.showTimestamp ? <span  key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
-        <span className={classes.badges}>{Object.entries(props.msg.userInfo.badges).map((entry, index) =>  getBadge(config, emotes, channel, entry.join(','), index.toString()))}</span>
-        <span className={classes.username} style={{color: adjustedColor}}>{props.msg.userInfo.displayName}</span>
-        <span>: </span>
-        <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, config, emotes, login)}</span>
-        { actions.length ? <Group key='actionsGroup' className={classes.actions} gap={'sm'}>{actions}</Group>: null}
-        {timeoutModalOpened ? <TimeoutView key='timeoutModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.modActions.timeoutUser}/> : null}
-        {banModalOpened ? <BanView key='banModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={banModalHandler.close} banUser={props.modActions.banUser}/> : null}
-    </div>);
+    return (
+        <>
+            <div 
+                ref={messageRef}
+                className={msgClasses.join(' ')} 
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onContextMenu={(e) => e.preventDefault()} // Prevent right-click menu
+            >
+                {badge}
+                {(config.showProfilePicture && !props.hideReply) ? <span key='channel' className={classes.channel}>{emotes.getLogo(channel)}</span>: null}
+                {config.showTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
+                <span className={classes.badges}>{Object.entries(props.msg.userInfo.badges).map((entry, index) =>  getBadge(config, emotes, channel, entry.join(','), index.toString()))}</span>
+                <span className={classes.username} style={{color: adjustedColor}}>{props.msg.userInfo.displayName}</span>
+                <span>: </span>
+                <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, config, emotes, login)}</span>
+            </div>
+            
+            {menuPosition && (
+                <>
+                <RadialDial
+                    actions={radialActions}
+                    radius={100}
+                    onClose={handleCloseRadial}
+                    messageRef={messageRef}
+                    position={menuPosition}
+                />
+                <span></span>
+                </>
+            )}
+
+            {timeoutModalOpened ? <TimeoutView key='timeoutModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.modActions.timeoutUser}/> : null}
+            {banModalOpened ? <BanView key='banModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={banModalHandler.close} banUser={props.modActions.banUser}/> : null}
+        </>
+    );
 }
 
 export function canModerate(msg: HeheChatMessage, channel: string, moderatedChannel: {[id: string]: boolean }, login: LoginContext) {
