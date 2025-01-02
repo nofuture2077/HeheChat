@@ -25,8 +25,13 @@ export function ChatInput(props: { close: () => void, replyToMsg?: HeheChatMessa
         deleteMessage: () => { },
         timeoutUser: () => { },
         banUser: () => { },
+        unbanUser: () => { },
         shoutoutUser: () => { },
-        raidUser: () => new Promise<void>(() => { })
+        raidUser: () => new Promise<void>(() => { }),
+        modUser: () => { },
+        unmodUser: () => { },
+        vipUser: () => { },
+        unvipUser: () => { }
     };
     return (
         <Stack gap={0}>

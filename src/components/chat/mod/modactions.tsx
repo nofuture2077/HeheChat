@@ -1,7 +1,7 @@
 import PubSub from 'pubsub-js';
-import { query, param } from '@/commons/helper';
+import { query, param } from '../../../commons/helper';
 
-export type ModActionType = 'delete' | 'timeout' | 'ban';
+export type ModActionType = 'delete' | 'timeout' | 'ban' | 'unban' | 'mod' | 'unmod' | 'vip' | 'unvip';
 
 export const deleteMessage = (channelId: string, messageId: string) => {
     PubSub.publish('WSSEND', {type: 'deleteMessage', channelId, messageId});
@@ -15,7 +15,27 @@ export const banUser = (channelId: string, targetUserId: string, reason: string)
     PubSub.publish('WSSEND', {type: 'banUser', channelId, targetUserId, reason});
 }
 
-export const shoutoutUser =  (channelId: string, targetUserId: string) => {
+export const unbanUser = (channelId: string, targetUserId: string) => {
+    PubSub.publish('WSSEND', {type: 'unbanUser', channelId, targetUserId});
+}
+
+export const modUser = (channelId: string, targetUserId: string) => {
+    PubSub.publish('WSSEND', {type: 'modUser', channelId, targetUserId});
+}
+
+export const unmodUser = (channelId: string, targetUserId: string) => {
+    PubSub.publish('WSSEND', {type: 'unmodUser', channelId, targetUserId});
+}
+
+export const vipUser = (channelId: string, targetUserId: string) => {
+    PubSub.publish('WSSEND', {type: 'vipUser', channelId, targetUserId});
+}
+
+export const unvipUser = (channelId: string, targetUserId: string) => {
+    PubSub.publish('WSSEND', {type: 'unvipUser', channelId, targetUserId});
+}
+
+export const shoutoutUser = (channelId: string, targetUserId: string) => {
     PubSub.publish('WSSEND', {type: 'shoutoutUser', channelId, targetUserId});
 };
 
@@ -32,6 +52,11 @@ export interface ModActions {
     deleteMessage: (channelId: string, messageId: string) => void;
     timeoutUser: (channelId: string, userId: string, duration: number, reason: string) => void;
     banUser: (channelId: string, userId: string, reason: string) => void;
+    unbanUser: (channelId: string, userId: string) => void;
     shoutoutUser: (channelId: string, userId: string) => void;
     raidUser: (fromChannelId: string, toChannelId: string) => void;
+    modUser: (channelId: string, userId: string) => void;
+    unmodUser: (channelId: string, userId: string) => void;
+    vipUser: (channelId: string, userId: string) => void;
+    unvipUser: (channelId: string, userId: string) => void;
 }

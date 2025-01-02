@@ -15,7 +15,7 @@ import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { HeheMessage, parseMessage, HeheChatMessage } from '../commons/message';
 import { TwitchDrawer } from '../components/twitch/twitchview';
-import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser } from '../components/chat/mod/modactions';
+import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, shoutoutUser, modUser, unmodUser, vipUser, unvipUser } from '../components/chat/mod/modactions';
 import { ProfileBarDrawer } from '../components/profile/profilebar';
 import { Storage } from '../components/chat/chatstorage';
 import { AlertSystem } from '../components/alerts/alertplayer';
@@ -253,8 +253,13 @@ export function ChatPage() {
         deleteMessage,
         timeoutUser,
         banUser,
+        unbanUser,
         shoutoutUser,
-        raidUser
+        raidUser,
+        modUser,
+        unmodUser,
+        vipUser,
+        unvipUser
     };
 
     const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);

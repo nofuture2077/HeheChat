@@ -1,6 +1,6 @@
 import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
 import { useContext, useEffect, useState } from "react";
-import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset } from '@mantine/core';
+import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge } from '@mantine/core';
 import { IconArrowsRight } from '@tabler/icons-react';
 import { OverlayDrawer } from '../../../pages/Chat.page';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
@@ -20,7 +20,7 @@ export const ModDrawer: OverlayDrawer = {
 
 export interface ModViewProps {
     msg: HeheChatMessage;
-    modActions: ModActions
+    modActions: ModActions;
 }
 
 export function ModView(props: ModViewProps) {
@@ -31,6 +31,7 @@ export function ModView(props: ModViewProps) {
     const [userInfo, setUserInfo] = useState<any>(undefined);
     const [showTimeoutModal, setShowTimeoutModal] = useState(false);
     const [showBanModal, setShowBanModal] = useState(false);
+    const login = useContext(LoginContextContext);
 
     useEffect(() => {
         getUserInfo(channel, username).then((info) => {
@@ -38,13 +39,24 @@ export function ModView(props: ModViewProps) {
         })
     }, [channel, username]);
 
+    const isBroadcaster = login.user?.name === channel;
+    const isTargetMod = userInfo?.user?.mod;
+    const isTargetVIP = userInfo?.user?.vip;
+    const isTargetBroadcaster = username === channel;
+    const canTimeout = (isBroadcaster && !isTargetBroadcaster) || (!isBroadcaster && !isTargetMod && !isTargetBroadcaster);
+    const canModifyRoles = isBroadcaster && !isTargetBroadcaster;
 
     const modActions: ModActions = {
         deleteMessage: () => {},
         timeoutUser: () => {},
         banUser: () => {},
+        unbanUser: () => {},
         shoutoutUser: () => {},
-        raidUser: () => {}
+        raidUser: () => {},
+        modUser: () => {},
+        unmodUser: () => {},
+        vipUser: () => {},
+        unvipUser: () => {}
     };
 
     return (
@@ -58,14 +70,18 @@ export function ModView(props: ModViewProps) {
                         className={styles.avatar}
                     />
                     <div className={styles.userDetails}>
-                        <h2>{userDisplayName}</h2>
+                        <Group>
+                            <h2>{userDisplayName}</h2>
+                            {isTargetBroadcaster && <Badge color="violet">Broadcaster</Badge>}
+                            {isTargetMod && <Badge color="green">Mod</Badge>}
+                            {isTargetVIP && <Badge color="blue">VIP</Badge>}
+                        </Group>
                         <p className={styles.username}>@{username}</p>
                         <p className={styles.createdAt}>
-                            Konto am {userInfo?.user?.created_at ? formatDate(new Date(userInfo.user.created_at)) : ''} erstellt
+                            Account created on {userInfo?.user?.created_at ? formatDate(new Date(userInfo.user.created_at)) : ''}
                         </p>
                     </div>
                 </div>
-                
             </div>
 
             <div className={styles.messages}>
@@ -81,13 +97,43 @@ export function ModView(props: ModViewProps) {
                         modActions={modActions}
                     />);
                 })}
-
             </div>
 
-            <Stack className={styles.actions}>
-                <Button variant="default" size="sm" onClick={() => setShowTimeoutModal(true)}>Timeout</Button>
-                <Button color="red" size="sm" onClick={() => setShowBanModal(true)}>Ban</Button>
-            </Stack>
+            {canTimeout && (
+                <Stack className={styles.actions}>
+                    <Button variant="default" size="sm" onClick={() => setShowTimeoutModal(true)}>Timeout</Button>
+                    <Button color="red" size="sm" onClick={() => setShowBanModal(true)}>Ban</Button>
+                    {userInfo?.user?.banned && (
+                        <Button color="green" size="sm" onClick={() => props.modActions.unbanUser(channelId, userInfo.user.id)}>
+                            Unban
+                        </Button>
+                    )}
+                    {canModifyRoles && (
+                        <>
+                            {!isTargetMod && !isTargetVIP && (
+                                <Group grow>
+                                    <Button color="green" size="sm" onClick={() => props.modActions.modUser(channelId, userInfo.user.id)}>
+                                        Make Mod
+                                    </Button>
+                                    <Button color="blue" size="sm" onClick={() => props.modActions.vipUser(channelId, userInfo.user.id)}>
+                                        Make VIP
+                                    </Button>
+                                </Group>
+                            )}
+                            {isTargetMod && (
+                                <Button color="orange" size="sm" onClick={() => props.modActions.unmodUser(channelId, userInfo.user.id)}>
+                                    Remove Mod
+                                </Button>
+                            )}
+                            {isTargetVIP && (
+                                <Button color="orange" size="sm" onClick={() => props.modActions.unvipUser(channelId, userInfo.user.id)}>
+                                    Remove VIP
+                                </Button>
+                            )}
+                        </>
+                    )}
+                </Stack>
+            )}
 
             {showTimeoutModal && (
                 <TimeoutView
@@ -113,6 +159,7 @@ export function ModView(props: ModViewProps) {
         </div>
     );
 }
+
 const durations = [60, 600, 3600, 86400, 604800];
 export function TimeoutView(props: {
     userId: string,
