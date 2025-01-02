@@ -7,8 +7,9 @@
     overflow: hidden;
     cursor: pointer;
     background: linear-gradient(to right, var(--mantine-color-skyblue-9), var(--mantine-color-paleviolet-5));
-    border: 1px solid #333;
+    border: 1px solid light-dark(#ddd, #333);;
     transition: all 1s ease-out;
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
 }
 
 .content {
@@ -45,4 +46,8 @@
     100% {
         opacity: 0.8;
     }
+}
+
+.goldenkappa {
+    background: linear-gradient(135deg, #eba73c, #d69122, #bf7600)
 }

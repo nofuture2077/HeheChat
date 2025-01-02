@@ -13,6 +13,7 @@ interface HypetrainProps extends PinProps {
     progress: number;
     goal: number;
     state?: 'active' | 'ended';
+    isGoldenKappaTrain: boolean;
 }
 
 export function Hypetrain(props: HypetrainProps) {
@@ -34,7 +35,9 @@ export function Hypetrain(props: HypetrainProps) {
       return null;
     }
 
-    return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={props.onClick} className={htClasses.hypetrain}>
+    const prefix = props.isGoldenKappaTrain ? 'Golden Kappa ' : '';
+
+    return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={props.onClick} className={[htClasses.hypetrain, props.isGoldenKappaTrain ? htClasses.goldenkappa : ''].join(' ')}>
       <div 
         style={{ width: `${100 - progress}%` }} 
         className={`${htClasses.progress} ${props.state === 'ended' ? htClasses.completed : ''}`}
@@ -44,7 +47,7 @@ export function Hypetrain(props: HypetrainProps) {
           <Group gap='xs'>
             <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
             <Text fw={900}>
-              {props.state === 'ended' ? "Hype Train Completed!" : "Hype Train"}
+              {props.state === 'ended' ? prefix + "Hype Train Completed!" : prefix + "Hype Train"}
             </Text>
             <Badge color={props.state === 'ended' ? "purple" : "pink"}>LVL {props.level}</Badge>
           </Group>
