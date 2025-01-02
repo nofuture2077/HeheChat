@@ -5,6 +5,7 @@ import { IconLink } from '@tabler/icons-react';
 import { useEffect, useContext, useState } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 import { generateGUID } from '@/commons/helper';
+import { LOGIN_SCOPES, AUTH_VERSION } from '@/commons/login';
 import PubSub from 'pubsub-js'
 
 function getQueryVariable(query: String, variable: String): string | undefined {
@@ -17,8 +18,6 @@ function getQueryVariable(query: String, variable: String): string | undefined {
     }
     console.log('Query variable %s not found', variable);
   }
-
-const AUTH_VERSION = 12;
 
 export default function Login() {
     const loginContext = useContext(LoginContextContext);
@@ -73,45 +72,7 @@ export default function Login() {
 
     const authUrl = import.meta.env.VITE_BACKEND_URL + "/twitchauth";
 
-    let scope = [
-        "bits:read",
-        "channel:bot",
-        "channel:manage:predictions",
-        "channel:manage:raids",
-        "channel:manage:redemptions",
-        "channel:manage:ads",
-        "channel:read:goals",
-        "channel:read:hype_train",
-        "channel:read:polls",
-        "channel:read:predictions",
-        "channel:read:redemptions",
-        "channel:read:subscriptions",
-        "channel:read:vips",
-        "channel:read:ads",
-        "channel:edit:commercial",
-        "channel:manage:broadcast",
-        "channel:moderate",
-        "chat:edit",
-        "chat:read",
-        "clips:edit",
-        "moderator:manage:announcements",
-        "moderator:manage:blocked_terms",
-        "moderator:manage:chat_messages",
-        "moderator:manage:banned_users",
-        "moderator:manage:unban_requests",
-        "moderator:manage:chat_settings",
-        "moderator:manage:warnings",
-        "moderator:read:moderators",
-        "moderator:read:vips",
-        "moderator:read:chatters",
-        "moderator:read:followers",
-        "moderator:read:shield_mode",
-        "moderator:read:shoutouts",
-        "user:bot",
-        "user:read:moderated_channels",
-        "user:read:chat",
-        "user:write:chat"
-    ].map(encodeURIComponent).join('+');
+    let scope = LOGIN_SCOPES.map(encodeURIComponent).join('+');
     
     const onClick = () => {
         const state = generateGUID();

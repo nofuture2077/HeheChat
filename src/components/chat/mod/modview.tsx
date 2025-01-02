@@ -1,26 +1,119 @@
-import { OverlayDrawer } from '../../../pages/Chat.page'
-import { Fieldset, TextInput, Button, Group, Modal, Text, Stack } from '@mantine/core';
-import { useContext, useState } from "react";
 import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
-import { formatDuration } from '../../../commons/helper';
-import { ChannelPicker } from "../ChannelPicker";
+import { useContext, useEffect, useState } from "react";
+import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset } from '@mantine/core';
 import { IconArrowsRight } from '@tabler/icons-react';
+import { OverlayDrawer } from '../../../pages/Chat.page';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
-import { HeheChatMessage } from '../../../commons/message';
+import { HeheChatMessage, parseMessage } from '../../../commons/message';
+import { getUserInfo, ModActions } from './modactions';
+import styles from './modview.module.css';
+import { formatTime, formatDate, formatDuration } from '../../../commons/helper';
+import { ChannelPicker } from '../ChannelPicker';
+import { ChatMessageComp } from '../ChatMessage';
 
 export const ModDrawer: OverlayDrawer = {
     name: 'mod',
     component: ModView,
-    size: 'md',
+    size: 'xl',
     position: 'bottom'
 }
 
-export function ModView(props: { msg: HeheChatMessage }) {
-    return <><h1>MODS</h1><span>{props.msg.text}</span></>
+export interface ModViewProps {
+    msg: HeheChatMessage;
+    modActions: ModActions
 }
 
-const durations = [60, 600, 3600, 86400, 604800];
+export function ModView(props: ModViewProps) {
+    const channel = props.msg.target.slice(1);
+    const channelId = props.msg.channelId;
+    const username = props.msg.userInfo.userName;
+    const userDisplayName = props.msg.userInfo.displayName;
+    const [userInfo, setUserInfo] = useState<any>(undefined);
+    const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+    const [showBanModal, setShowBanModal] = useState(false);
 
+    useEffect(() => {
+        getUserInfo(channel, username).then((info) => {
+            setUserInfo(info);
+        })
+    }, [channel, username]);
+
+
+    const modActions: ModActions = {
+        deleteMessage: () => {},
+        timeoutUser: () => {},
+        banUser: () => {},
+        shoutoutUser: () => {},
+        raidUser: () => {}
+    };
+
+    return (
+        <div className={styles.container}>
+            <div className={styles.userInfo}>
+                <div className={styles.userHeader}>
+                    <Avatar
+                        src={userInfo?.user?.profile_image_url}
+                        size={80}
+                        radius={80}
+                        className={styles.avatar}
+                    />
+                    <div className={styles.userDetails}>
+                        <h2>{userDisplayName}</h2>
+                        <p className={styles.username}>@{username}</p>
+                        <p className={styles.createdAt}>
+                            Konto am {userInfo?.user?.created_at ? formatDate(new Date(userInfo.user.created_at)) : ''} erstellt
+                        </p>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div className={styles.messages}>
+                {(userInfo?.messages || []).map((msg:any) => msg.message).map((rawLine:string) => {
+                    const msg = parseMessage(rawLine) as HeheChatMessage;
+                    return (<ChatMessageComp 
+                        msg={msg}
+                        deletedMessages={{}}
+                        moderatedChannel={{}}
+                        setReplyMsg={() => {}}
+                        hideReply={true}
+                        openModView={() => {}}
+                        modActions={modActions}
+                    />);
+                })}
+
+            </div>
+
+            <Stack className={styles.actions}>
+                <Button variant="default" size="sm" onClick={() => setShowTimeoutModal(true)}>Timeout</Button>
+                <Button color="red" size="sm" onClick={() => setShowBanModal(true)}>Ban</Button>
+            </Stack>
+
+            {showTimeoutModal && (
+                <TimeoutView
+                    userId={userInfo?.user?.id}
+                    userName={username}
+                    channelId={channelId}
+                    channelName={channel}
+                    timeoutUser={props.modActions.timeoutUser}
+                    close={() => setShowTimeoutModal(false)}
+                />
+            )}
+
+            {showBanModal && (
+                <BanView
+                    userId={userInfo?.user?.id}
+                    userName={username}
+                    channelId={channelId}
+                    channelName={channel}
+                    banUser={props.modActions.banUser}
+                    close={() => setShowBanModal(false)}
+                />
+            )}
+        </div>
+    );
+}
+const durations = [60, 600, 3600, 86400, 604800];
 export function TimeoutView(props: {
     userId: string,
     userName: string,
@@ -28,7 +121,7 @@ export function TimeoutView(props: {
     channelName: string,
     timeoutUser: (channelId: string, userId: string, duration: number, reason: string) => void,
     close: () => void;
-}) {
+}): JSX.Element {
     const [reason, setReason] = useState("");
     const [duration, setDuration] = useState<number>(600);
 
@@ -47,7 +140,8 @@ export function TimeoutView(props: {
                     }}>Timeout</Button>
                 </Group>
             </Fieldset>
-        </Modal>);
+        </Modal>
+    );
 }
 
 export function BanView(props: {
@@ -57,7 +151,7 @@ export function BanView(props: {
     channelName: string,
     banUser: (channelId: string, userId: string, reason: string) => void,
     close: () => void;
-}) {
+}): JSX.Element {
     const [reason, setReason] = useState("");
 
     return (
@@ -72,7 +166,8 @@ export function BanView(props: {
                     }}>Ban</Button>
                 </Group>
             </Fieldset>
-        </Modal>);
+        </Modal>
+    );
 }
 
 export function RaidView(props: {
@@ -80,7 +175,7 @@ export function RaidView(props: {
     initialTo?: string;
     raidChannel: (from: string, to: string) => void,
     close: () => void;
-}) {
+}): JSX.Element {
     const [raidFrom, setRaidFrom] = useState(props.initialFrom);
     const [raidTo, setRaidTo] = useState(props.initialTo);
     const login = useContext(LoginContextContext);
@@ -115,5 +210,6 @@ export function RaidView(props: {
                     }}>Raid</Button>
                 </Group>
             </Fieldset>
-        </Modal>);
+        </Modal>
+    );
 }

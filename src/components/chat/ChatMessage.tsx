@@ -3,7 +3,7 @@ import classes from './ChatMessage.module.css';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { LoginContext } from '../../commons/login';
 import { useContext, useState, useRef, useCallback, useEffect } from 'react';
-import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconDotsCircleHorizontal } from '@tabler/icons-react';
+import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconUser } from '@tabler/icons-react';
 import { Text, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { TimeoutView, BanView } from './mod/modview';
@@ -227,6 +227,16 @@ export function ChatMessageComp(props: ChatMessageProps) {
                 tooltip: 'Ban'
             }
         );
+    }
+
+    if (config.modToolsEnabled) {
+        radialActions.push({
+            icon: <IconUser size={48} />,
+            onClick: () => {
+                props.openModView(props.msg);
+            },
+            tooltip: 'User'
+        });
     }
 
     if (!props.hideReply && config.chatEnabled) {

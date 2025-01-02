@@ -1,0 +1,83 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--mantine-color-dark-7);
+  border-radius: var(--mantine-radius-md);
+}
+
+.userInfo {
+  padding: 1rem;
+  border-bottom: 1px solid var(--mantine-color-dark-4);
+}
+
+.userHeader {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.userDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.userDetails h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.username {
+  margin: 0;
+  color: var(--mantine-color-dimmed);
+  font-size: 0.9rem;
+}
+
+.createdAt {
+  margin: 0;
+  color: var(--mantine-color-dimmed);
+  font-size: 0.9rem;
+}
+
+.stats {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statValue {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: var(--mantine-color-dimmed);
+}
+
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.actions {
+  padding: 1rem;
+  border-top: 1px solid var(--mantine-color-dark-4);
+  display: flex;
+  gap: 0.5rem;
+}

@@ -1,6 +1,14 @@
 import { useViewportSize } from '@mantine/hooks';
 import { useEffect } from 'react';
 
+export function param(key: string, value: string) {
+    return [key, value].join("=");
+}
+
+export function query(params: string[]) {
+    return params.join("&");
+}
+
 export function toMap<A, K>(arr: A[], func1: (el: A) => K) {
     return arr.reduce((acc, el) => {
         acc.set(func1(el), el);
@@ -75,6 +83,13 @@ export function formatTime(date: Date): string {
     if (minutes < 10) minutes = '0' + minutes;
 
     return `${hours}:${minutes}`;
+}
+
+export function formatDate(date: Date): string {
+    const day = date.getDate();
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    return `${day}. ${month} ${year}`;
 }
 
 export function formatMinuteSeconds(seconds: number): string {

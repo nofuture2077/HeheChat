@@ -1,4 +1,5 @@
 import PubSub from 'pubsub-js';
+import { query, param } from '@/commons/helper';
 
 export type ModActionType = 'delete' | 'timeout' | 'ban';
 
@@ -18,8 +19,13 @@ export const shoutoutUser =  (channelId: string, targetUserId: string) => {
     PubSub.publish('WSSEND', {type: 'shoutoutUser', channelId, targetUserId});
 };
 
-export const raidUser =  (channelIdFrom: string, channelIdTo: string) => {
+export const raidUser = (channelIdFrom: string, channelIdTo: string) => {
     PubSub.publish('WSSEND', {type: 'raidUser', channelIdFrom, channelIdTo});
+};
+
+export const getUserInfo = (channel: string, username: string) => {
+    const state = localStorage.getItem('hehe-token_state') || '';
+    return fetch(import.meta.env.VITE_BACKEND_URL + "/api/user?" + query([param("state", state), param("channel", channel), param("username", username)])).then(res => res.json());
 };
 
 export interface ModActions {
