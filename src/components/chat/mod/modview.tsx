@@ -4,12 +4,13 @@ import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge, 
 import { IconArrowsRight, IconX } from '@tabler/icons-react';
 import { OverlayDrawer } from '../../../pages/Chat.page';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
-import { HeheChatMessage, parseMessage } from '../../../commons/message';
+import { HeheMessage, SystemMessage, isSystemMessageType, HeheChatMessage, parseMessage } from '@/commons/message';
 import { getUserInfo, ModActions } from './modactions';
 import styles from './modview.module.css';
-import { formatTime, formatDate, formatDuration } from '../../../commons/helper';
+import { formatDate, formatDuration } from '../../../commons/helper';
 import { ChannelPicker } from '../ChannelPicker';
 import { ChatMessageComp } from '../ChatMessage';
+import { SystemMessageComp } from '../systemmessage';
 
 export const ModDrawer: OverlayDrawer = {
     name: 'mod',
@@ -104,7 +105,10 @@ export function ModView(props: ModViewProps) {
             <div className={styles.messages}>
                 <ScrollArea h="45vh" type="never" w="100vw" viewportRef={messageDiv}>
                 {(userInfo?.messages || []).reverse().map((msg:any) => msg.message).map((rawLine:string) => {
-                    const msg = parseMessage(rawLine) as HeheChatMessage;
+                    const msg = parseMessage(rawLine) as HeheMessage;
+                    if (isSystemMessageType(msg)) {
+                        return <SystemMessageComp key={"system-" + msg.id} msg={msg as SystemMessage} modActions={modActions} moderatedChannel={{}}/>;
+                    }
                     return (<ChatMessageComp 
                         msg={msg}
                         key={msg.id}
