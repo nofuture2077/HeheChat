@@ -42,6 +42,14 @@ export function ModView(props: ModViewProps) {
     const canModifyRoles = isBroadcaster && !isTargetBroadcaster;
     const messageDiv = useRef<HTMLDivElement>(null);
 
+    const reloadUserInfo = () => {
+        setTimeout(() => {
+            getUserInfo(channel, username).then((info) => {
+                setUserInfo(info);
+            });
+        }, 1000);
+    };
+
     const modActions: ModActions = {
         deleteMessage: () => {},
         timeoutUser: () => {},
@@ -116,7 +124,10 @@ export function ModView(props: ModViewProps) {
                     <Button variant="default" size="sm" onClick={() => setShowTimeoutModal(true)}>Timeout</Button>
                     <Button color="red" size="sm" onClick={() => setShowBanModal(true)}>Ban</Button>
                     {userInfo?.user?.banned && (
-                        <Button color="green" size="sm" onClick={() => props.modActions.unbanUser(channelId, userInfo.user.id)}>
+                        <Button color="green" size="sm" onClick={() => {
+                            props.modActions.unbanUser(channelId, userInfo.user.id);
+                            reloadUserInfo();
+                        }}>
                             Unban
                         </Button>
                     )}
@@ -124,21 +135,33 @@ export function ModView(props: ModViewProps) {
                         <>
                             {!isTargetMod && !isTargetVIP && (
                                 <>
-                                    <Button key="make-mod" color="green" size="sm" onClick={() => props.modActions.modUser(channelId, userInfo.user.id)}>
+                                    <Button key="make-mod" color="green" size="sm" onClick={() => {
+                                        props.modActions.modUser(channelId, userInfo.user.id);
+                                        reloadUserInfo();
+                                    }}>
                                         Make Mod
                                     </Button>
-                                    <Button key="make-vip" color="blue" size="sm" onClick={() => props.modActions.vipUser(channelId, userInfo.user.id)}>
+                                    <Button key="make-vip" color="blue" size="sm" onClick={() => {
+                                        props.modActions.vipUser(channelId, userInfo.user.id);
+                                        reloadUserInfo();
+                                    }}>
                                         Make VIP
                                     </Button>
                                 </>
                             )}
                             {isTargetMod && (
-                                <Button color="orange" key="remove-mod" size="sm" onClick={() => props.modActions.unmodUser(channelId, userInfo.user.id)}>
+                                <Button color="orange" key="remove-mod" size="sm" onClick={() => {
+                                    props.modActions.unmodUser(channelId, userInfo.user.id);
+                                    reloadUserInfo();
+                                }}>
                                     Remove Mod
                                 </Button>
                             )}
                             {isTargetVIP && (
-                                <Button color="orange" key="remove-vip" size="sm" onClick={() => props.modActions.unvipUser(channelId, userInfo.user.id)}>
+                                <Button color="orange" key="remove-vip" size="sm" onClick={() => {
+                                    props.modActions.unvipUser(channelId, userInfo.user.id);
+                                    reloadUserInfo();
+                                }}>
                                     Remove VIP
                                 </Button>
                             )}
@@ -153,7 +176,10 @@ export function ModView(props: ModViewProps) {
                     userName={username}
                     channelId={channelId}
                     channelName={channel}
-                    timeoutUser={props.modActions.timeoutUser}
+                    timeoutUser={(channelId, userId, duration, reason) => {
+                        props.modActions.timeoutUser(channelId, userId, duration, reason);
+                        reloadUserInfo();
+                    }}
                     close={() => setShowTimeoutModal(false)}
                 />
             )}
@@ -164,7 +190,10 @@ export function ModView(props: ModViewProps) {
                     userName={username}
                     channelId={channelId}
                     channelName={channel}
-                    banUser={props.modActions.banUser}
+                    banUser={(channelId, userId, reason) => {
+                        props.modActions.banUser(channelId, userId, reason);
+                        reloadUserInfo();
+                    }}
                     close={() => setShowBanModal(false)}
                 />
             )}
