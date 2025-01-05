@@ -20,19 +20,19 @@ export const unbanUser = (channelId: string, targetUserId: string) => {
 }
 
 export const modUser = (channelId: string, targetUserId: string) => {
-    PubSub.publish('WSSEND', {type: 'modUser', channelId, targetUserId});
+    PubSub.publish('WSSEND', {type: 'addMod', channelId, targetUserId});
 }
 
 export const unmodUser = (channelId: string, targetUserId: string) => {
-    PubSub.publish('WSSEND', {type: 'unmodUser', channelId, targetUserId});
+    PubSub.publish('WSSEND', {type: 'removeMod', channelId, targetUserId});
 }
 
 export const vipUser = (channelId: string, targetUserId: string) => {
-    PubSub.publish('WSSEND', {type: 'vipUser', channelId, targetUserId});
+    PubSub.publish('WSSEND', {type: 'addVip', channelId, targetUserId});
 }
 
 export const unvipUser = (channelId: string, targetUserId: string) => {
-    PubSub.publish('WSSEND', {type: 'unvipUser', channelId, targetUserId});
+    PubSub.publish('WSSEND', {type: 'removeVip', channelId, targetUserId});
 }
 
 export const shoutoutUser = (channelId: string, targetUserId: string) => {
