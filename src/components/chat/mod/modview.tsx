@@ -1,6 +1,6 @@
 import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
-import { useContext, useEffect, useState } from "react";
-import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge } from '@mantine/core';
+import { useContext, useEffect, useState, useRef } from "react";
+import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge, ScrollArea } from '@mantine/core';
 import { IconArrowsRight } from '@tabler/icons-react';
 import { OverlayDrawer } from '../../../pages/Chat.page';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
@@ -33,18 +33,13 @@ export function ModView(props: ModViewProps) {
     const [showBanModal, setShowBanModal] = useState(false);
     const login = useContext(LoginContextContext);
 
-    useEffect(() => {
-        getUserInfo(channel, username).then((info) => {
-            setUserInfo(info);
-        })
-    }, [channel, username]);
-
     const isBroadcaster = login.user?.name === channel;
     const isTargetMod = userInfo?.user?.mod;
     const isTargetVIP = userInfo?.user?.vip;
     const isTargetBroadcaster = username === channel;
     const canTimeout = (isBroadcaster && !isTargetBroadcaster) || (!isBroadcaster && !isTargetMod && !isTargetBroadcaster);
     const canModifyRoles = isBroadcaster && !isTargetBroadcaster;
+    const messageDiv = useRef<HTMLDivElement>(null);
 
     const modActions: ModActions = {
         deleteMessage: () => {},
@@ -58,6 +53,17 @@ export function ModView(props: ModViewProps) {
         vipUser: () => {},
         unvipUser: () => {}
     };
+
+    useEffect(() => {
+        getUserInfo(channel, username).then((info) => {
+            setUserInfo(info);
+            setTimeout(() => {
+                messageDiv.current!.scrollTo({ top: messageDiv.current!.scrollHeight });
+                console.log('scroll');
+            }, 0);
+        })
+    }, [channel, username]);
+    console.log('render');
 
     return (
         <div className={styles.container}>
@@ -85,10 +91,12 @@ export function ModView(props: ModViewProps) {
             </div>
 
             <div className={styles.messages}>
-                {(userInfo?.messages || []).map((msg:any) => msg.message).map((rawLine:string) => {
+                <ScrollArea h="50vh" type="never" w="100vw" viewportRef={messageDiv}>
+                {(userInfo?.messages || []).reverse().map((msg:any) => msg.message).map((rawLine:string) => {
                     const msg = parseMessage(rawLine) as HeheChatMessage;
                     return (<ChatMessageComp 
                         msg={msg}
+                        key={msg.id}
                         deletedMessages={{}}
                         moderatedChannel={{}}
                         setReplyMsg={() => {}}
@@ -97,6 +105,7 @@ export function ModView(props: ModViewProps) {
                         modActions={modActions}
                     />);
                 })}
+                </ScrollArea>
             </div>
 
             {canTimeout && (

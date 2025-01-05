@@ -271,7 +271,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
 export function canModerate(msg: HeheChatMessage, channel: string, moderatedChannel: {[id: string]: boolean }, login: LoginContext) {
     const isModerator = moderatedChannel[channel];
     const isBroadcaster = channel === login.user?.name;
-    const chatterIsMod = msg.userInfo.isMod;
+    const chatterIsMod = msg.userInfo?.isMod || false;
     const chatterIsBroadcaster = channel === msg.userInfo.userName;
     const canMod = (isModerator || isBroadcaster) && !chatterIsMod && !chatterIsBroadcaster;
     return canMod;
