@@ -1,7 +1,7 @@
 import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
 import { useContext, useEffect, useState, useRef } from "react";
 import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge, ScrollArea } from '@mantine/core';
-import { IconArrowsRight } from '@tabler/icons-react';
+import { IconArrowsRight, IconX } from '@tabler/icons-react';
 import { OverlayDrawer } from '../../../pages/Chat.page';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
 import { HeheChatMessage, parseMessage } from '../../../commons/message';
@@ -19,6 +19,7 @@ export const ModDrawer: OverlayDrawer = {
 }
 
 export interface ModViewProps {
+    close: () => void;
     msg: HeheChatMessage;
     modActions: ModActions;
 }
@@ -66,7 +67,7 @@ export function ModView(props: ModViewProps) {
 
     return (
         <div className={styles.container}>
-            <div className={styles.userInfo}>
+            <Group className={styles.userInfo} justify='space-between' p='md' align='flex-start'>
                 <div className={styles.userHeader}>
                     <Avatar
                         src={userInfo?.user?.profile_image_url}
@@ -87,10 +88,13 @@ export function ModView(props: ModViewProps) {
                         </p>
                     </div>
                 </div>
-            </div>
+                <Button onClick={props.close} variant='subtle' color='primary'>
+                    <IconX />
+                </Button>
+            </Group>
 
             <div className={styles.messages}>
-                <ScrollArea h="50vh" type="never" w="100vw" viewportRef={messageDiv}>
+                <ScrollArea h="45vh" type="never" w="100vw" viewportRef={messageDiv}>
                 {(userInfo?.messages || []).reverse().map((msg:any) => msg.message).map((rawLine:string) => {
                     const msg = parseMessage(rawLine) as HeheChatMessage;
                     return (<ChatMessageComp 
