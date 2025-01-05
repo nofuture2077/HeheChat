@@ -34,8 +34,8 @@ export function ModView(props: ModViewProps) {
     const login = useContext(LoginContextContext);
 
     const isBroadcaster = login.user?.name === channel;
-    const isTargetMod = userInfo?.user?.mod;
-    const isTargetVIP = userInfo?.user?.vip;
+    const isTargetMod = userInfo?.mod;
+    const isTargetVIP = userInfo?.vip;
     const isTargetBroadcaster = username === channel;
     const canTimeout = (isBroadcaster && !isTargetBroadcaster) || (!isBroadcaster && !isTargetMod && !isTargetBroadcaster);
     const canModifyRoles = isBroadcaster && !isTargetBroadcaster;
@@ -63,7 +63,6 @@ export function ModView(props: ModViewProps) {
             }, 0);
         })
     }, [channel, username]);
-    console.log('render');
 
     return (
         <div className={styles.container}>
@@ -109,7 +108,7 @@ export function ModView(props: ModViewProps) {
             </div>
 
             {canTimeout && (
-                <Stack className={styles.actions}>
+                <Stack className={styles.actions} align="center">
                     <Button variant="default" size="sm" onClick={() => setShowTimeoutModal(true)}>Timeout</Button>
                     <Button color="red" size="sm" onClick={() => setShowBanModal(true)}>Ban</Button>
                     {userInfo?.user?.banned && (
@@ -120,22 +119,22 @@ export function ModView(props: ModViewProps) {
                     {canModifyRoles && (
                         <>
                             {!isTargetMod && !isTargetVIP && (
-                                <Group grow>
-                                    <Button color="green" size="sm" onClick={() => props.modActions.modUser(channelId, userInfo.user.id)}>
+                                <>
+                                    <Button key="make-mod" color="green" size="sm" onClick={() => props.modActions.modUser(channelId, userInfo.user.id)}>
                                         Make Mod
                                     </Button>
-                                    <Button color="blue" size="sm" onClick={() => props.modActions.vipUser(channelId, userInfo.user.id)}>
+                                    <Button key="make-vip" color="blue" size="sm" onClick={() => props.modActions.vipUser(channelId, userInfo.user.id)}>
                                         Make VIP
                                     </Button>
-                                </Group>
+                                </>
                             )}
                             {isTargetMod && (
-                                <Button color="orange" size="sm" onClick={() => props.modActions.unmodUser(channelId, userInfo.user.id)}>
+                                <Button color="orange" key="remove-mod" size="sm" onClick={() => props.modActions.unmodUser(channelId, userInfo.user.id)}>
                                     Remove Mod
                                 </Button>
                             )}
                             {isTargetVIP && (
-                                <Button color="orange" size="sm" onClick={() => props.modActions.unvipUser(channelId, userInfo.user.id)}>
+                                <Button color="orange" key="remove-vip" size="sm" onClick={() => props.modActions.unvipUser(channelId, userInfo.user.id)}>
                                     Remove VIP
                                 </Button>
                             )}
