@@ -272,7 +272,7 @@ export function canModerate(msg: HeheChatMessage, channel: string, moderatedChan
     const isModerator = moderatedChannel[channel];
     const isBroadcaster = channel === login.user?.name;
     const chatterIsMod = msg.userInfo?.isMod || false;
-    const chatterIsBroadcaster = channel === msg.userInfo.userName;
+    const chatterIsBroadcaster = channel === msg.userInfo?.userName;
     const canMod = (isModerator || isBroadcaster) && !chatterIsMod && !chatterIsBroadcaster;
     return canMod;
 }
