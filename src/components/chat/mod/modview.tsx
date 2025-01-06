@@ -38,6 +38,7 @@ export function ModView(props: ModViewProps) {
     const isBroadcaster = login.user?.name === channel;
     const isTargetMod = userInfo?.mod;
     const isTargetVIP = userInfo?.vip;
+    const isTargetBanned = !!userInfo?.ban;
     const isTargetBroadcaster = username === channel;
     const canTimeout = (isBroadcaster && !isTargetBroadcaster) || (!isBroadcaster && !isTargetMod && !isTargetBroadcaster);
     const canModifyRoles = isBroadcaster && !isTargetBroadcaster;
@@ -131,7 +132,7 @@ export function ModView(props: ModViewProps) {
 
             {canTimeout && (
                 <Stack className={styles.actions} align="center">
-                    {userInfo?.user?.ban ? (
+                    {isTargetBanned ? (
                         <Button  key="unban-btn" color="green" size="sm" onClick={() => {
                             props.modActions.unbanUser(channelId, userInfo.user.id);
                             reloadUserInfo();
@@ -146,7 +147,7 @@ export function ModView(props: ModViewProps) {
                     )}
                     {canModifyRoles && (
                         <>
-                            {!isTargetMod && !isTargetVIP && (
+                            {!isTargetMod && !isTargetVIP && !isTargetBanned && (
                                 <>
                                     <Button key="make-mod" color="green" size="sm" onClick={() => {
                                         props.modActions.modUser(channelId, userInfo.user.id);
