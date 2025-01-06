@@ -5,6 +5,7 @@ import { Textarea, ActionIcon, rem, Flex, Stack } from '@mantine/core'
 import { IconSend, IconX } from '@tabler/icons-react';
 import { HeheChatMessage } from '../../commons/message';
 import { ChatMessageComp } from './ChatMessage';
+import classes from './ChatMessage.module.css';
 
 export function ChatInput(props: { close: () => void, replyToMsg?: HeheChatMessage, setReplyMsg: (msg?: HeheChatMessage) => void }) {
     const config = useContext(ConfigContext);
@@ -34,7 +35,7 @@ export function ChatInput(props: { close: () => void, replyToMsg?: HeheChatMessa
         unvipUser: () => { }
     };
     return (
-        <Stack gap={0}>
+        <Stack gap={0} className={classes.chatInput}>
             {props.replyToMsg ? (<ChatMessageComp msg={props.replyToMsg} openModView={() => { }} moderatedChannel={{}} hideReply={true} deletedMessages={{}} setReplyMsg={props.setReplyMsg} modActions={modActions} />) : null}
             <Flex w="100%" justify="space-between" gap={'md'} pl={'md'} pr={'xl'}
                 align="center" m='xs'>
