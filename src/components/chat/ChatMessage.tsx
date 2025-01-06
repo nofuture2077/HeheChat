@@ -198,7 +198,6 @@ export function ChatMessageComp(props: ChatMessageProps) {
     if (config.modToolsEnabled) {
         radialActions.push({
             icon: <IconUser size={48} />,
-            disabled: !canMod,
             onClick: () => {
                 props.openModView(props.msg);
             },
