@@ -10,7 +10,7 @@ import styles from './modview.module.css';
 import { formatDate, formatDuration, formatDateWithTime } from '../../../commons/helper';
 import { ChannelPicker } from '../ChannelPicker';
 import { ChatMessageComp } from '../ChatMessage';
-import { SystemMessageComp } from '../systemmessage';
+import _ from "underscore";
 
 export const ModDrawer: OverlayDrawer = {
     name: 'mod',
@@ -63,6 +63,8 @@ export function ModView(props: ModViewProps) {
 
     const followDate = userInfo?.follow?.followed_at ? formatDate(new Date(userInfo?.follow?.followed_at)) : '';
     const banMessage = formatBanMessage(userInfo, username);
+    const messages = (userInfo?.messages || []).reverse();
+    const messageGroups = _.groupBy(messages, (msg) => formatDate(new Date(Number(msg.date))));
 
     const reloadUserInfo = () => {
         setTimeout(() => {
@@ -103,6 +105,7 @@ export function ModView(props: ModViewProps) {
             <div key={msg.id}>
                 <ChatMessageComp 
                     msg={msg}
+                    forceTimestamp
                     deletedMessages={{}}
                     moderatedChannel={{}}
                     setReplyMsg={() => {}}
@@ -150,8 +153,13 @@ export function ModView(props: ModViewProps) {
 
             <div className={styles.messages}>
                 <ScrollArea h="100%" type="never" w="100vw" viewportRef={messageDiv}>
-                {(userInfo?.messages || []).reverse().map((msg:any) => msg.message).map(renderMessage)}
-                {banMessage && <div className={styles.banMessage}>{banMessage}</div>}
+                    {Object.entries(messageGroups).map(([date, groupMessages]) => (
+                        <div key={date}>
+                            <Text className={styles.dateHeader}>{date}</Text>
+                            {groupMessages.map((msg: any) => renderMessage(msg.message))}
+                        </div>
+                    ))}
+                    {banMessage && <div className={styles.banMessage}>{banMessage}</div>}
                 </ScrollArea>
             </div>
 

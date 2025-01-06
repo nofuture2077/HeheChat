@@ -22,6 +22,7 @@ interface ChatMessageProps {
     moderatedChannel: {[id: string]: boolean };
     setReplyMsg: (msg?: HeheChatMessage) => void;
     hideReply?: boolean;
+    forceTimestamp?: boolean;
     openModView: (channel: string, channelId: string, username: string) => void;
     modActions: ModActions;
 }
@@ -245,7 +246,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
             >
                 {badge}
                 {(config.showProfilePicture && !props.hideReply) ? <span key='channel' className={classes.channel}>{emotes.getLogo(channel)}</span>: null}
-                {config.showTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
+                {config.showTimestamp || props.forceTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
                 <span className={classes.badges}>{Object.entries(props.msg.userInfo.badges).map((entry, index) =>  getBadge(config, emotes, channel, entry.join(','), index.toString()))}</span>
                 <span className={classes.username} style={{color: adjustedColor}}>{props.msg.userInfo.displayName}</span>
                 <span>: </span>
