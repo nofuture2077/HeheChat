@@ -85,6 +85,10 @@ export function formatTime(date: Date): string {
     return `${hours}:${minutes}`;
 }
 
+export function formatDateWithTime(date: Date): string {
+    return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+
 export function formatDate(date: Date): string {
     const day = date.getDate();
     const month = date.toLocaleString('en-US', { month: 'long' });

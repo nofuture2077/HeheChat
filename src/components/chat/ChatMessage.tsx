@@ -15,6 +15,7 @@ import { ChatEmotes } from '../../commons/emotes';
 import { EmoteComponent } from '../emote/emote';
 import { HeheChatMessage, ParsedMessagePart } from '../../commons/message';
 import { RadialDial } from '../radialdial/RadialDial';
+import { isDisabled } from '@testing-library/user-event/dist/types/utils';
 
 interface ChatMessageProps {
     msg: HeheChatMessage;
@@ -22,7 +23,7 @@ interface ChatMessageProps {
     moderatedChannel: {[id: string]: boolean };
     setReplyMsg: (msg?: HeheChatMessage) => void;
     hideReply?: boolean;
-    openModView: (msg: HeheChatMessage) => void;
+    openModView: (channel: string, channelId: string, username: string) => void;
     modActions: ModActions;
 }
 
@@ -198,8 +199,9 @@ export function ChatMessageComp(props: ChatMessageProps) {
     if (config.modToolsEnabled) {
         radialActions.push({
             icon: <IconUser size={48} />,
+            isDisabled: !isModerator,
             onClick: () => {
-                props.openModView(props.msg);
+                props.openModView(props.msg.target.slice(1), props.msg.channelId, props.msg.userInfo?.userName);
             },
             tooltip: 'User'
         });
@@ -276,3 +278,10 @@ export function canModerate(msg: HeheChatMessage, channel: string, moderatedChan
     const canMod = (isModerator || isBroadcaster) && !chatterIsMod && !chatterIsBroadcaster;
     return canMod;
 }
+
+export function isModerator(msg: HeheChatMessage, channel: string, moderatedChannel: {[id: string]: boolean }, login: LoginContext) {
+    const isModerator = moderatedChannel[channel];
+    const isBroadcaster = channel === login.user?.name;
+    return (isModerator || isBroadcaster);
+}
+

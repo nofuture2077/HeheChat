@@ -244,8 +244,8 @@ export function ChatPage() {
         }
     }, [chatMessages, shouldScroll]);
 
-    const openModView = (msg: HeheChatMessage) => {
-        ModDrawer.props = { msg };
+    const openModView = (channel: string, channelId: string, username: string) => {
+        ModDrawer.props = { channel, channelId, username };
         setDrawer(ModDrawer);
         drawerHandler.open()
     }

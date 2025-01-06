@@ -7,7 +7,7 @@ interface ChatProps {
     messages: HeheMessage[]
     setReplyMsg: (msg?: HeheChatMessage) => void;
     deletedMessages: {[id: string]: boolean };
-    openModView: (msg: HeheChatMessage) => void;
+    openModView: (channel: string, channelId: string, username: string) => void;
     moderatedChannel: {[id: string]: boolean };
     modActions: ModActions;
 }

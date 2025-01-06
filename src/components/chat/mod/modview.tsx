@@ -4,10 +4,10 @@ import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge, 
 import { IconArrowsRight, IconX } from '@tabler/icons-react';
 import { OverlayDrawer } from '../../../pages/Chat.page';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
-import { HeheMessage, SystemMessage, isSystemMessageType, HeheChatMessage, parseMessage } from '@/commons/message';
+import { HeheMessage, SystemMessage, isSystemMessageType, HeheChatMessage, parseMessage } from '../../../commons/message';
 import { getUserInfo, ModActions } from './modactions';
 import styles from './modview.module.css';
-import { formatDate, formatDuration } from '../../../commons/helper';
+import { formatDate, formatDuration, formatDateWithTime } from '../../../commons/helper';
 import { ChannelPicker } from '../ChannelPicker';
 import { ChatMessageComp } from '../ChatMessage';
 import { SystemMessageComp } from '../systemmessage';
@@ -21,15 +21,32 @@ export const ModDrawer: OverlayDrawer = {
 
 export interface ModViewProps {
     close: () => void;
-    msg: HeheChatMessage;
+    channel: string;
+    channelId: string;
+    username: string;
     modActions: ModActions;
 }
 
+function formatBanMessage(userInfo: any, username: string): string | null {
+    if (!userInfo?.ban?.user_id) return null;
+
+    const moderator = userInfo.ban.moderator_login || 'Nofuture2077';
+    const banDate = new Date(userInfo.ban.created_at);
+    const endDate = userInfo.ban.end_time ? new Date(userInfo.ban.end_time) : null;
+
+    if (endDate) {
+        const duration = Math.ceil((endDate.getTime() - banDate.getTime()) / (1000 * 60 * 60 * 24)) + 'd';
+        return `${username} was timeouted by ${moderator} for ${duration} (until ${formatDate(endDate)} ${formatDateWithTime(endDate)})`;
+    } else {
+        return `${username} was banned by ${moderator} on ${formatDate(banDate)} ${formatDateWithTime(banDate)}`;
+    }
+}
+
 export function ModView(props: ModViewProps) {
-    const channel = props.msg.target.slice(1);
-    const channelId = props.msg.channelId;
-    const username = props.msg.userInfo.userName;
-    const userDisplayName = props.msg.userInfo.displayName;
+    const channel = props.channel;
+    const channelId = props.channelId;
+    const username = props.username;
+
     const [userInfo, setUserInfo] = useState<any>(undefined);
     const [showTimeoutModal, setShowTimeoutModal] = useState(false);
     const [showBanModal, setShowBanModal] = useState(false);
@@ -45,6 +62,7 @@ export function ModView(props: ModViewProps) {
     const messageDiv = useRef<HTMLDivElement>(null);
 
     const followDate = userInfo?.follow?.followed_at ? formatDate(new Date(userInfo?.follow?.followed_at)) : '';
+    const banMessage = formatBanMessage(userInfo, username);
 
     const reloadUserInfo = () => {
         setTimeout(() => {
@@ -76,6 +94,32 @@ export function ModView(props: ModViewProps) {
         })
     }, [channel, username]);
 
+    const renderMessage = (rawLine: string) => {
+        const msg = parseMessage(rawLine) as HeheMessage;
+        if (isSystemMessageType(msg)) {
+            return (
+                <div key={"system-" + msg.id}>
+                    <SystemMessageComp msg={msg as SystemMessage} modActions={modActions} moderatedChannel={{}}/>
+                    {banMessage && <div className={styles.banMessage}>{banMessage}</div>}
+                </div>
+            );
+        }
+        return (
+            <div key={msg.id}>
+                <ChatMessageComp 
+                    msg={msg}
+                    deletedMessages={{}}
+                    moderatedChannel={{}}
+                    setReplyMsg={() => {}}
+                    hideReply={true}
+                    openModView={() => {}}
+                    modActions={modActions}
+                />
+                {banMessage && <div className={styles.banMessage}>{banMessage}</div>}
+            </div>
+        );
+    };
+
     return (
         <div className={styles.container}>
             <Stack className={styles.userInfo} justify='space-between' p='md' align='stretch'>
@@ -88,7 +132,7 @@ export function ModView(props: ModViewProps) {
                             radius={80}
                             className={styles.avatar}
                         />
-                            <h2>{userDisplayName}</h2>
+                            <h2>{userInfo?.user?.display_name}</h2>
                             {isTargetBroadcaster && <Badge color="violet">Broadcaster</Badge>}
                             {isTargetMod && <Badge color="green">Mod</Badge>}
                             {isTargetVIP && <Badge color="pink">VIP</Badge>}
@@ -98,36 +142,21 @@ export function ModView(props: ModViewProps) {
                         <IconX />
                     </Button>
                 </Group>
-                <div>
-                    <p className={styles.createdAt}>
-                        Account created on {userInfo?.user?.created_at ? formatDate(new Date(userInfo.user.created_at)) : ''}
-                    </p>
+                <Stack align='center' gap="0">
                     {followDate ?
                         (<p className={styles.follow}>
                             Followed since {followDate}
                         </p>) : <p></p>
                     }
-                </div>
+                    <p className={styles.createdAt}>
+                        {userInfo?.user?.created_at ? 'Account created on ' + formatDate(new Date(userInfo.user.created_at)) : ''}
+                    </p>
+                </Stack>
             </Stack>
 
             <div className={styles.messages}>
                 <ScrollArea h="45vh" type="never" w="100vw" viewportRef={messageDiv}>
-                {(userInfo?.messages || []).reverse().map((msg:any) => msg.message).map((rawLine:string) => {
-                    const msg = parseMessage(rawLine) as HeheMessage;
-                    if (isSystemMessageType(msg)) {
-                        return <SystemMessageComp key={"system-" + msg.id} msg={msg as SystemMessage} modActions={modActions} moderatedChannel={{}}/>;
-                    }
-                    return (<ChatMessageComp 
-                        msg={msg}
-                        key={msg.id}
-                        deletedMessages={{}}
-                        moderatedChannel={{}}
-                        setReplyMsg={() => {}}
-                        hideReply={true}
-                        openModView={() => {}}
-                        modActions={modActions}
-                    />);
-                })}
+                {(userInfo?.messages || []).reverse().map((msg:any) => msg.message).map(renderMessage)}
                 </ScrollArea>
             </div>
 
@@ -140,7 +169,7 @@ export function ModView(props: ModViewProps) {
                         }}>
                             Unban
                         </Button>
-                    ) : (
+                    ) : userInfo && (
                         <>
                             <Button key="timeout-btn" variant="default" size="sm" onClick={() => setShowTimeoutModal(true)}>Timeout</Button>
                             <Button  key="ban-btn" color="red" size="sm" onClick={() => setShowBanModal(true)}>Ban</Button>
