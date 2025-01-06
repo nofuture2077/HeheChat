@@ -78,36 +78,37 @@ export function ModView(props: ModViewProps) {
 
     return (
         <div className={styles.container}>
-            <Group className={styles.userInfo} justify='space-between' p='md' align='flex-start'>
-                <div className={styles.userHeader}>
-                    <Avatar
-                        src={userInfo?.user?.profile_image_url}
-                        size={80}
-                        radius={80}
-                        className={styles.avatar}
-                    />
-                    <div className={styles.userDetails}>
-                        <Group>
+            <Stack className={styles.userInfo} justify='space-between' p='md' align='stretch'>
+                <Group justify='space-between' align='flex-start'>
+                    <div style={{width: 62}}></div>
+                    <Stack align='center' className={styles.userDetails}>
+                        <Avatar
+                            src={userInfo?.user?.profile_image_url}
+                            size={80}
+                            radius={80}
+                            className={styles.avatar}
+                        />
                             <h2>{userDisplayName}</h2>
                             {isTargetBroadcaster && <Badge color="violet">Broadcaster</Badge>}
                             {isTargetMod && <Badge color="green">Mod</Badge>}
                             {isTargetVIP && <Badge color="pink">VIP</Badge>}
-                        </Group>
                         <p className={styles.username}>@{username}</p>
-                        <p className={styles.createdAt}>
-                            Account created on {userInfo?.user?.created_at ? formatDate(new Date(userInfo.user.created_at)) : ''}
-                        </p>
-                        {followDate && 
-                            (<p className={styles.follow}>
-                                Followed since {followDate}
-                            </p>)
-                        }
-                    </div>
+                    </Stack>
+                    <Button onClick={props.close} variant='subtle' color='primary'>
+                        <IconX />
+                    </Button>
+                </Group>
+                <div>
+                    <p className={styles.createdAt}>
+                        Account created on {userInfo?.user?.created_at ? formatDate(new Date(userInfo.user.created_at)) : ''}
+                    </p>
+                    {followDate ?
+                        (<p className={styles.follow}>
+                            Followed since {followDate}
+                        </p>) : <p></p>
+                    }
                 </div>
-                <Button onClick={props.close} variant='subtle' color='primary'>
-                    <IconX />
-                </Button>
-            </Group>
+            </Stack>
 
             <div className={styles.messages}>
                 <ScrollArea h="45vh" type="never" w="100vw" viewportRef={messageDiv}>
