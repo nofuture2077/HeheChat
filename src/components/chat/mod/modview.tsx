@@ -97,11 +97,7 @@ export function ModView(props: ModViewProps) {
     const renderMessage = (rawLine: string) => {
         const msg = parseMessage(rawLine) as HeheMessage;
         if (isSystemMessageType(msg)) {
-            return (
-                <div key={"system-" + msg.id}>
-                    <SystemMessageComp msg={msg as SystemMessage} modActions={modActions} moderatedChannel={{}}/>
-                </div>
-            );
+            return null;
         }
         return (
             <div key={msg.id}>
