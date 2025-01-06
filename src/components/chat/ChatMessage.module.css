@@ -105,7 +105,7 @@
     display: none !important;
 }
 
-.hideReply {
+.chatInput .hideReply {
     padding-left: 34px;
     background: none !important;
     padding-top: 8px;
