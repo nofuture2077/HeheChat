@@ -21,11 +21,6 @@
   margin: 0;
 }
 
-.userInfo {
-  padding: 1rem;
-  border-bottom: 1px solid var(--mantine-color-dark-4);
-}
-
 .username {
   margin: 0;
   color: var(--mantine-color-dimmed);
@@ -41,6 +36,8 @@
 .messages {
   flex: 1;
   overflow-y: auto;
+  border-top: 1px solid var(--mantine-color-dark-4);
+  border-bottom: 1px solid var(--mantine-color-dark-4);
 }
 
 .banMessage {
@@ -49,10 +46,6 @@
   margin-top: 4px;
   font-style: italic;
   text-align: center;
-}
-
-.messages {
-  border-bottom: 1px solid var(--mantine-color-dark-4);
 }
 
 .actions {

@@ -119,8 +119,8 @@ export function ModView(props: ModViewProps) {
     };
 
     return (
-        <Stack className={styles.container} justify='space-between' h="100%">
-            <Stack className={styles.userInfo} justify='space-between' p='md' align='stretch'>
+        <Stack className={styles.container} justify='space-between' h="100%" gap="xs">
+            <Stack className={styles.userInfo} justify='space-between' align='stretch'>
                 <Group justify='space-between' align='flex-start'>
                     <div style={{width: 62}}></div>
                     <Stack align='center' className={styles.userDetails}>
@@ -153,7 +153,7 @@ export function ModView(props: ModViewProps) {
             </Stack>
 
             <div className={styles.messages}>
-                <ScrollArea h="300px" type="never" w="100vw" viewportRef={messageDiv}>
+                <ScrollArea h="100%" type="never" w="100vw" viewportRef={messageDiv}>
                 {(userInfo?.messages || []).reverse().map((msg:any) => msg.message).map(renderMessage)}
                 {banMessage && <div className={styles.banMessage}>{banMessage}</div>}
                 </ScrollArea>
