@@ -43,6 +43,8 @@ export function ModView(props: ModViewProps) {
     const canModifyRoles = isBroadcaster && !isTargetBroadcaster;
     const messageDiv = useRef<HTMLDivElement>(null);
 
+    const followDate = userInfo?.follow?.followed_at ? formatDate(new Date(userInfo?.follow?.followed_at)) : '';
+
     const reloadUserInfo = () => {
         setTimeout(() => {
             getUserInfo(channel, username).then((info) => {
@@ -69,7 +71,6 @@ export function ModView(props: ModViewProps) {
             setUserInfo(info);
             setTimeout(() => {
                 messageDiv.current!.scrollTo({ top: messageDiv.current!.scrollHeight });
-                console.log('scroll');
             }, 0);
         })
     }, [channel, username]);
@@ -89,12 +90,17 @@ export function ModView(props: ModViewProps) {
                             <h2>{userDisplayName}</h2>
                             {isTargetBroadcaster && <Badge color="violet">Broadcaster</Badge>}
                             {isTargetMod && <Badge color="green">Mod</Badge>}
-                            {isTargetVIP && <Badge color="blue">VIP</Badge>}
+                            {isTargetVIP && <Badge color="pink">VIP</Badge>}
                         </Group>
                         <p className={styles.username}>@{username}</p>
                         <p className={styles.createdAt}>
                             Account created on {userInfo?.user?.created_at ? formatDate(new Date(userInfo.user.created_at)) : ''}
                         </p>
+                        {followDate && 
+                            (<p className={styles.follow}>
+                                Followed since {followDate}
+                            </p>)
+                        }
                     </div>
                 </div>
                 <Button onClick={props.close} variant='subtle' color='primary'>
@@ -125,15 +131,18 @@ export function ModView(props: ModViewProps) {
 
             {canTimeout && (
                 <Stack className={styles.actions} align="center">
-                    <Button variant="default" size="sm" onClick={() => setShowTimeoutModal(true)}>Timeout</Button>
-                    <Button color="red" size="sm" onClick={() => setShowBanModal(true)}>Ban</Button>
-                    {userInfo?.user?.banned && (
-                        <Button color="green" size="sm" onClick={() => {
+                    {userInfo?.user?.ban ? (
+                        <Button  key="unban-btn" color="green" size="sm" onClick={() => {
                             props.modActions.unbanUser(channelId, userInfo.user.id);
                             reloadUserInfo();
                         }}>
                             Unban
                         </Button>
+                    ) : (
+                        <>
+                            <Button key="timeout-btn" variant="default" size="sm" onClick={() => setShowTimeoutModal(true)}>Timeout</Button>
+                            <Button  key="ban-btn" color="red" size="sm" onClick={() => setShowBanModal(true)}>Ban</Button>
+                        </>
                     )}
                     {canModifyRoles && (
                         <>
