@@ -51,9 +51,12 @@
   text-align: center;
 }
 
+.messages {
+  border-bottom: 1px solid var(--mantine-color-dark-4);
+}
+
 .actions {
   padding: 1rem;
-  border-top: 1px solid var(--mantine-color-dark-4);
   display: flex;
   gap: 1rem;
 

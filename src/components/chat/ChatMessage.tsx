@@ -108,6 +108,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const msgParts = props.msg.parts || [];
     const deleted = props.deletedMessages[props.msg.id];
     const canMod = canModerate(props.msg, channel, props.moderatedChannel, login);
+    const isMod = isModerator(props.msg, channel, props.moderatedChannel, login);
     const [timeoutModalOpened, timeoutModalHandler] = useDisclosure(false);
     const [banModalOpened, banModalHandler] = useDisclosure(false);
 
@@ -198,7 +199,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
     if (config.modToolsEnabled) {
         radialActions.push({
             icon: <IconUser size={48} />,
-            isDisabled: !isModerator,
+            isDisabled: !isMod,
             onClick: () => {
                 props.openModView(props.msg.target.slice(1), props.msg.channelId, props.msg.userInfo?.userName);
             },

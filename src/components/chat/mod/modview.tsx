@@ -119,7 +119,7 @@ export function ModView(props: ModViewProps) {
     };
 
     return (
-        <div className={styles.container}>
+        <Stack className={styles.container} justify='space-between' h="100%">
             <Stack className={styles.userInfo} justify='space-between' p='md' align='stretch'>
                 <Group justify='space-between' align='flex-start'>
                     <div style={{width: 62}}></div>
@@ -240,7 +240,7 @@ export function ModView(props: ModViewProps) {
                     close={() => setShowBanModal(false)}
                 />
             )}
-        </div>
+        </Stack>
     );
 }
 

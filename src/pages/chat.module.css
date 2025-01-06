@@ -1,3 +1,7 @@
 .dialog section {
     overflow: visible;
 }
+
+.dialog section > div {
+    height: 100%;
+}
