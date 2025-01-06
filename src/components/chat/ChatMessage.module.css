@@ -121,3 +121,9 @@
 .radialContainer > * {
     pointer-events: auto;
 }
+
+.time {
+    display: inline-block;
+    width: 3em;
+    text-align: center;
+}
