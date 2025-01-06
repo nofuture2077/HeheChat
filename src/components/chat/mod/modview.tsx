@@ -32,11 +32,11 @@ function formatBanMessage(userInfo: any, username: string): string | null {
 
     const moderator = userInfo.ban.moderator_login || 'Nofuture2077';
     const banDate = new Date(userInfo.ban.created_at);
-    const endDate = userInfo.ban.end_time ? new Date(userInfo.ban.end_time) : null;
+    const endDate = userInfo.ban.expires_at ? new Date(userInfo.ban.expires_at) : null;
 
     if (endDate) {
-        const duration = Math.ceil((endDate.getTime() - banDate.getTime()) / (1000 * 60 * 60 * 24)) + 'd';
-        return `${username} was timeouted by ${moderator} for ${duration} (until ${formatDate(endDate)} ${formatDateWithTime(endDate)})`;
+        const duration = (endDate.getTime() - banDate.getTime());
+        return `${username} was timeouted by ${moderator} for ${formatDuration(duration)} (until ${formatDate(endDate)} ${formatDateWithTime(endDate)})`;
     } else {
         return `${username} was banned by ${moderator} on ${formatDate(banDate)} ${formatDateWithTime(banDate)}`;
     }
