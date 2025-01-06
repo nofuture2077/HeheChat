@@ -15,7 +15,7 @@ import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { HeheMessage, parseMessage, HeheChatMessage } from '../commons/message';
 import { TwitchDrawer } from '../components/twitch/twitchview';
-import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser } from '../components/chat/mod/modactions';
+import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, shoutoutUser, modUser, unmodUser, vipUser, unvipUser } from '../components/chat/mod/modactions';
 import { ProfileBarDrawer } from '../components/profile/profilebar';
 import { Storage } from '../components/chat/chatstorage';
 import { AlertSystem } from '../components/alerts/alertplayer';
@@ -25,6 +25,7 @@ import { UserCardDrawer } from '../components/login/usercard';
 import { PinManager } from '../components/pinned/pinmanager';
 import { useViewportWidthCallback } from '../commons/helper';
 import { getDimension } from '../components/twitch/twitchplayer';
+import classes from './chat.module.css'
 
 export type OverlayDrawer = {
     name: string;
@@ -243,8 +244,8 @@ export function ChatPage() {
         }
     }, [chatMessages, shouldScroll]);
 
-    const openModView = (msg: HeheChatMessage) => {
-        ModDrawer.props = { msg };
+    const openModView = (channel: string, channelId: string, username: string) => {
+        ModDrawer.props = { channel, channelId, username };
         setDrawer(ModDrawer);
         drawerHandler.open()
     }
@@ -253,8 +254,13 @@ export function ChatPage() {
         deleteMessage,
         timeoutUser,
         banUser,
+        unbanUser,
         shoutoutUser,
-        raidUser
+        raidUser,
+        modUser,
+        unmodUser,
+        vipUser,
+        unvipUser
     };
 
     const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);
@@ -284,8 +290,8 @@ export function ChatPage() {
                     </Stack>
                 </Affix>
 
-                <Drawer zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
-                    {drawer ? <drawer.component height="100vh" modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props} openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }} ></drawer.component> : null}
+                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
+                    {drawer ? <drawer.component style={{overflow: 'visible'}} height="100vh" modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props} openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }} ></drawer.component> : null}
                 </Drawer>
                 {(drawerOpen || shouldScroll) ? null : (
                     <Affix position={{ bottom: 10 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>

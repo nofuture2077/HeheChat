@@ -4,9 +4,14 @@ import { useForceUpdate } from '@mantine/hooks';
 import { ConfigContext } from '@/ApplicationContext';
 import { ModActionType } from '@/components/chat/mod/modactions'
 
-const modActions: ModActionType[] = ['ban', 'timeout', 'delete'];
+const modActions: ModActionType[] = ['ban', 'timeout', 'delete', 'mod', 'unmod', 'vip', 'unvip', 'unban'];
 
 const Messages: Record<ModActionType, string> = {
+    "mod": "Moderator added",
+    "unmod": "Moderator removed",
+    "vip": "VIP added",
+    "unvip": "VIP removed",
+    "unban": "Unban",
     "ban": "Banned Users",
     "timeout": "Timeouted Users",
     "delete": "Deleted Messages"

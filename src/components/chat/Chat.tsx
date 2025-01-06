@@ -7,7 +7,7 @@ interface ChatProps {
     messages: HeheMessage[]
     setReplyMsg: (msg?: HeheChatMessage) => void;
     deletedMessages: {[id: string]: boolean };
-    openModView: (msg: HeheChatMessage) => void;
+    openModView: (channel: string, channelId: string, username: string) => void;
     moderatedChannel: {[id: string]: boolean };
     modActions: ModActions;
 }
@@ -15,7 +15,7 @@ interface ChatProps {
 export function Chat(props: ChatProps) {
     return props.messages.map(msg => {
         if (isSystemMessageType(msg)) {
-            return <SystemMessageComp key={msg.id} msg={msg as SystemMessage} modActions={props.modActions} moderatedChannel={props.moderatedChannel}/>;
+            return <SystemMessageComp key={"system-" + msg.id} msg={msg as SystemMessage} modActions={props.modActions} moderatedChannel={props.moderatedChannel}/>;
         }
         const chatMsg = (msg as HeheChatMessage);
         return <ChatMessageComp key={msg.id} msg={chatMsg} openModView={props.openModView} moderatedChannel={props.moderatedChannel} modActions={props.modActions} deletedMessages={props.deletedMessages} setReplyMsg={props.setReplyMsg}/>

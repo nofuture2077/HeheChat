@@ -22,7 +22,7 @@ interface ChatMessageProps {
     moderatedChannel: {[id: string]: boolean };
     setReplyMsg: (msg?: HeheChatMessage) => void;
     hideReply?: boolean;
-    openModView: (msg: HeheChatMessage) => void;
+    openModView: (channel: string, channelId: string, username: string) => void;
     modActions: ModActions;
 }
 
@@ -108,6 +108,8 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const msgParts = props.msg.parts || [];
     const deleted = props.deletedMessages[props.msg.id];
     const canMod = canModerate(props.msg, channel, props.moderatedChannel, login);
+    const isMod = isModerator(props.msg, channel, props.moderatedChannel, login);
+
     const [timeoutModalOpened, timeoutModalHandler] = useDisclosure(false);
     const [banModalOpened, banModalHandler] = useDisclosure(false);
 
@@ -195,6 +197,17 @@ export function ChatMessageComp(props: ChatMessageProps) {
         );
     }
 
+    if (config.modToolsEnabled) {
+        radialActions.push({
+            icon: <IconUser size={48} />,
+            disabled: !isMod,
+            onClick: () => {
+                props.openModView(props.msg.target.slice(1), props.msg.channelId, props.msg.userInfo?.userName);
+            },
+            tooltip: 'User'
+        });
+    }
+
     if (!props.hideReply && config.chatEnabled) {
         radialActions.push(
             {
@@ -261,8 +274,15 @@ export function ChatMessageComp(props: ChatMessageProps) {
 export function canModerate(msg: HeheChatMessage, channel: string, moderatedChannel: {[id: string]: boolean }, login: LoginContext) {
     const isModerator = moderatedChannel[channel];
     const isBroadcaster = channel === login.user?.name;
-    const chatterIsMod = msg.userInfo.isMod;
-    const chatterIsBroadcaster = channel === msg.userInfo.userName;
+    const chatterIsMod = msg.userInfo?.isMod || false;
+    const chatterIsBroadcaster = channel === msg.userInfo?.userName;
     const canMod = (isModerator || isBroadcaster) && !chatterIsMod && !chatterIsBroadcaster;
     return canMod;
 }
+
+export function isModerator(msg: HeheChatMessage, channel: string, moderatedChannel: {[id: string]: boolean }, login: LoginContext) {
+    const isModerator = moderatedChannel[channel];
+    const isBroadcaster = channel === login.user?.name;
+    return (isModerator || isBroadcaster);
+}
+
