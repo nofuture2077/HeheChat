@@ -100,7 +100,6 @@ export function ModView(props: ModViewProps) {
             return (
                 <div key={"system-" + msg.id}>
                     <SystemMessageComp msg={msg as SystemMessage} modActions={modActions} moderatedChannel={{}}/>
-                    {banMessage && <div className={styles.banMessage}>{banMessage}</div>}
                 </div>
             );
         }
@@ -115,7 +114,6 @@ export function ModView(props: ModViewProps) {
                     openModView={() => {}}
                     modActions={modActions}
                 />
-                {banMessage && <div className={styles.banMessage}>{banMessage}</div>}
             </div>
         );
     };
@@ -157,6 +155,7 @@ export function ModView(props: ModViewProps) {
             <div className={styles.messages}>
                 <ScrollArea h="45vh" type="never" w="100vw" viewportRef={messageDiv}>
                 {(userInfo?.messages || []).reverse().map((msg:any) => msg.message).map(renderMessage)}
+                {banMessage && <div className={styles.banMessage}>{banMessage}</div>}
                 </ScrollArea>
             </div>
 
