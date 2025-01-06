@@ -15,7 +15,6 @@ import { ChatEmotes } from '../../commons/emotes';
 import { EmoteComponent } from '../emote/emote';
 import { HeheChatMessage, ParsedMessagePart } from '../../commons/message';
 import { RadialDial } from '../radialdial/RadialDial';
-import { isDisabled } from '@testing-library/user-event/dist/types/utils';
 
 interface ChatMessageProps {
     msg: HeheChatMessage;
