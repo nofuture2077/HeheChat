@@ -281,24 +281,21 @@ export default function App() {
     }
 
     const setSystemMessageInChat = (type: SystemMessageMainType, val: boolean) => {
-        setProfile((profile) => {
-            profile.config.systemMessageInChat[type] = val;
-            return profile;
-        });
+        const sm = profile.config.systemMessageInChat;
+        sm[type] = val;
+        updateConfig('systemMessageInChat', sm);
     }
 
     const setHideEvents = (type: SystemMessageMainType, val: boolean) => {
-        setProfile((profile) => {
-            profile.config.hideEvents[type] = val;
-            return profile;
-        });
+        const he = profile.config.hideEvents;
+        he[type] = val;
+        updateConfig('hideEvents', he);
     }
 
-    const setDeactivatedAlerts = (id: string, val: boolean) => {
-        setProfile((profile) => {
-            profile.config.deactivatedAlerts[id] = val;
-            return profile;
-        });
+    const setDeactivatedAlerts = (type: string, val: boolean) => {
+        const da = profile.config.deactivatedAlerts;
+        da[type] = val;
+        updateConfig('deactivatedAlerts', da);
     }
 
     const loadReceivedShares = async () => {
