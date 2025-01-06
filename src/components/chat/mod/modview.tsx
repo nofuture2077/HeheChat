@@ -15,7 +15,7 @@ import { SystemMessageComp } from '../systemmessage';
 export const ModDrawer: OverlayDrawer = {
     name: 'mod',
     component: ModView,
-    size: 'xl',
+    size: 700,
     position: 'bottom'
 }
 
@@ -153,14 +153,14 @@ export function ModView(props: ModViewProps) {
             </Stack>
 
             <div className={styles.messages}>
-                <ScrollArea h="45vh" type="never" w="100vw" viewportRef={messageDiv}>
+                <ScrollArea h="300px" type="never" w="100vw" viewportRef={messageDiv}>
                 {(userInfo?.messages || []).reverse().map((msg:any) => msg.message).map(renderMessage)}
                 {banMessage && <div className={styles.banMessage}>{banMessage}</div>}
                 </ScrollArea>
             </div>
 
             {canTimeout && (
-                <Stack className={styles.actions} align="center">
+                <Stack className={styles.actions} align="center" gap="sm">
                     {isTargetBanned ? (
                         <Button  key="unban-btn" color="green" size="sm" onClick={() => {
                             props.modActions.unbanUser(channelId, userInfo.user.id);
