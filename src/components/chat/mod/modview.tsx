@@ -57,7 +57,7 @@ export function ModView(props: ModViewProps) {
     const isTargetVIP = userInfo?.vip;
     const isTargetBanned = !!userInfo?.ban?.user_id;
     const isTargetBroadcaster = username === channel;
-    const canTimeout = (isBroadcaster && !isTargetBroadcaster) || (!isBroadcaster && !isTargetMod && !isTargetBroadcaster);
+    const canTimeout = (isBroadcaster ? !isTargetBroadcaster : (!isTargetMod && !isTargetBroadcaster)) && userInfo?.mod !== undefined;
     const canModifyRoles = isBroadcaster && !isTargetBroadcaster;
     const messageDiv = useRef<HTMLDivElement>(null);
 
