@@ -44,7 +44,8 @@ export const LOGIN_SCOPES = [
     "user:read:moderated_channels",
     "user:read:subscriptions",
     "user:read:chat",
-    "user:write:chat"
+    "user:write:chat",
+    "user:read:emotes"
 ];
 
 export interface LoginContextData {

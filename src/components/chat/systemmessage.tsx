@@ -38,7 +38,7 @@ const messages = {
     'sub_Prime': '${username} subscribed with prime for ${amount:whole} months///${text}',
     'follow': '${username} just followed',
     'cheer': '${username} cheered ${amount:whole} bits///${text}',
-    'donation': '${username} donated ${amount} EURO: ${text}',
+    'donation': '${username} donated ${amount} EURO///${text}',
     'sevenTVAdded': '${username} added new Emote ${emote} ${emote}',
     'sevenTVRemoved': '${username} removed Emote ${emote}'
 };
