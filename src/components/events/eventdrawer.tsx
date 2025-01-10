@@ -40,7 +40,7 @@ const messages: Record<EventType, string> = {
     'sub_Prime': 'Sub with prime for ${amount:whole} months',
     'follow': 'Just followed',
     'cheer': 'Cheered ${amount:whole} bits',
-    'donation': "Donated ${amount:decimal} ${text}",
+    'donation': "Donated ${amount:decimal}",
     'channelPointRedemption': 'Channelpoints: ${rewardTitle}'
 }
 
