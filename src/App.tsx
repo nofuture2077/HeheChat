@@ -69,7 +69,8 @@ export default function App() {
     const [chatEmotes, setChatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
     const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE, guid: generateGUID()});
     const [profiles, setProfiles] = useState<Profile[]>([]);
-    const workerRef = useRef<Worker>();
+    const backendWorkerRef = useRef<Worker>();
+    const seventvWorkerRef = useRef<Worker>();
 
     useDidUpdate(() => {
         if (!profile.guid) {
@@ -102,15 +103,27 @@ export default function App() {
             }
         }, (err) => console.error(err));
 
-        workerRef.current = new Worker(new URL('./components/webworker/webworker.ts', import.meta.url), { type: 'module' });
+        backendWorkerRef.current = new Worker(new URL('./components/webworker/backendworker.ts', import.meta.url), { type: 'module' });
+        seventvWorkerRef.current = new Worker(new URL('./components/webworker/seventvworker.ts', import.meta.url), { type: 'module' });
 
         PubSub.subscribe("WSSEND", (msg, data) => {
             data.state = localStorage.getItem('hehe-token_state') || '';
-            workerRef.current!.postMessage({type: "SEND", data});
+            backendWorkerRef.current!.postMessage({type: "SEND", data});
         });
 
-        workerRef.current.addEventListener("message", (msg: MessageEvent) => {
+        PubSub.subscribe("WSSEND7TV", (msg, data) => {
+            seventvWorkerRef.current!.postMessage({type: "SEND", data});
+        });
+
+
+        backendWorkerRef.current.addEventListener("message", (msg: MessageEvent) => {
             PubSub.publish("WS-" + msg.data.type, msg.data.data);
+        });
+
+        seventvWorkerRef.current.addEventListener("message", (msg: MessageEvent) => {
+            if (msg.data.type === 'seventTV') {
+                PubSub.publish("WS-seventTV", msg.data.data);
+            }
         });
 
         loadReceivedShares();
@@ -122,7 +135,8 @@ export default function App() {
 
         return () => {
             const stopMessage = { type: 'STOP' };
-            workerRef.current?.postMessage(stopMessage);
+            backendWorkerRef.current?.postMessage(stopMessage);
+            seventvWorkerRef.current?.postMessage(stopMessage);
         }
     }, []);
 

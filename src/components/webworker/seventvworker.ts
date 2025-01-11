@@ -1,49 +1,10 @@
+/* eslint-disable no-restricted-globals */
 
-var backendWebsocket: WebSocket | undefined;
-var sevenTVWebsocket: WebSocket | undefined;
-
-var backEndIsReady: (value?: unknown) => void;
-var backendReady = new Promise((resolve) => {
-    backEndIsReady = resolve;
-});
-
-var seventTVIsReady: (value?: unknown) => void;
-var seventTVReady = new Promise((resolve) => {
+let sevenTVWebsocket: WebSocket | undefined;
+let seventTVIsReady: (value?: unknown) => void;
+let seventTVReady = new Promise((resolve) => {
     seventTVIsReady = resolve;
 });
-
-
-var initRequest: any | undefined;
-
-function connectToBackend() {
-    backendWebsocket = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
-    backendWebsocket.onopen = function () {
-        backEndIsReady();
-        console.log("Websocket to backend opened")
-        if (initRequest) {
-            backendWebsocket?.send(JSON.stringify(initRequest));
-        }
-    };
-
-    backendWebsocket.onmessage = (event: MessageEvent) => {
-        const data = JSON.parse(event.data);
-        self.postMessage(data);
-    };
-
-    backendWebsocket.onclose = function (e) {
-        console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
-        setTimeout(function () {
-            connectToBackend();
-        }, 1000);
-    };
-
-    backendWebsocket.onerror = function (err: Event) {
-        console.error('Socket encountered error. Closing socket');
-        backendWebsocket?.close();
-    };
-}
-
-connectToBackend();
 
 function connectToSevenTV() {
     sevenTVWebsocket = new WebSocket('wss://events.7tv.io/v3');
@@ -120,20 +81,13 @@ self.onmessage = async (e) => {
 
     switch (type) {
         case 'SEND':
-            if (data.type === 'subscribe') {
-                initRequest = data;
-            }
             if (data.type === 'sevenTVSubscribe') {
                 subscribeToSeventTVUpdates(data.userId, data.objectId);
-                return;
             }
-            await backendReady;
-            backendWebsocket?.send(JSON.stringify(data));
             break;
         case 'STOP':
             close();
             break;
-
         default:
             break;
     }
