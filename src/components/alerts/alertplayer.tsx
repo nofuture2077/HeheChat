@@ -121,6 +121,7 @@ class AlertPlayer {
                 return;
             }
             const audio = new Audio(src);
+            audio.crossOrigin = "anonymous";
             audio.onloadedmetadata = () => {
                 resolve({
                     duration: audio.duration,
