@@ -314,7 +314,7 @@ class AlertPlayer {
 
         if (eventData.audioUrl) {
             this.startPlaying();
-            this.getAudioInfo(eventData.audioUrl).then((audioInfo) => {
+            this.getAudioInfo(`${BASE_URL}/blerp/audio?url?${encodeURI(eventData.audioUrl)}`).then((audioInfo) => {
                 PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration});
                 this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
             }, onError);
