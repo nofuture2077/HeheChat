@@ -39,6 +39,7 @@ const messages = {
     'follow': '${username} just followed',
     'cheer': '${username} cheered ${amount:whole} bits///${text}',
     'donation': '${username} donated ${amount} EURO///${text}',
+    'blerp': '${username} played Blerp ${audioTitle}',
     'sevenTVAdded': '${username} added new Emote ${emote} ${emote}',
     'sevenTVRemoved': '${username} removed Emote ${emote}'
 };

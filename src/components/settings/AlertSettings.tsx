@@ -6,7 +6,7 @@ import { AlertSystem } from '../../components/alerts/alertplayer'
 import { IconLink } from '@tabler/icons-react'
 import { SystemMessageMainType } from '../../commons/message';
 
-const hideEventsValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'channelPointRedemption'];
+const hideEventsValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'channelPointRedemption', 'blerp'];
 
 const Messages: Record<string, string> = {
     'sub': 'Subscriptions',
@@ -16,7 +16,8 @@ const Messages: Record<string, string> = {
     "follow": "Follows",
     "donation": "Donations",
     "cheer": "Bit-Donations",
-    "channelPointRedemption": "Channel Points"
+    "channelPointRedemption": "Channel Points",
+    "blerp": "Blerps"
 };
 
 

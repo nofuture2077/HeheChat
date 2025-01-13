@@ -298,6 +298,28 @@ class AlertPlayer {
     }
  
     async showNotification(item: Event) {
+        const eventData = this.getEventData(item.text);
+
+        const onEnd = () => {
+            console.log('Stop Playing');
+            this.stopPlaying();
+            PubSub.publish('AlertPlayer-update');
+        }
+
+        const onError = (reason: any) => {
+            console.log('Error while Playing', reason);
+            this.stopPlaying();
+            PubSub.publish('AlertPlayer-update');
+        }
+
+        if (eventData.audioUrl) {
+            this.startPlaying();
+            this.getAudioInfo(eventData.audioUrl).then((audioInfo) => {
+                PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration});
+                this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
+            }, onError);
+            return;
+        }
         const alertConfig = this.alertConfig[item.channel];
         if (!alertConfig && !item.eventAlert) {
             console.log('No alertconfig set');
@@ -322,9 +344,7 @@ class AlertPlayer {
             text: item.text
         };
 
-        const ttsText = item.text;
-        const eventData = this.getEventData(item.text);
-        if (ttsText && eventData.text) {
+        if (eventData && eventData.text) {
             vars.text = this.parsedPartsToText(eventData.text.parts || eventData.text);
         }
         const state = localStorage.getItem('hehe-token_state') || '';
@@ -347,17 +367,6 @@ class AlertPlayer {
                 console.log('Visuell', text, headline);
 
                 PubSub.publish('WSSEND', {type: 'alert', data: {image: alert.visual?.element, headline, text, duration: duration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout}});
-            }
-            const onEnd = () => {
-                console.log('Stop Playing');
-                this.stopPlaying();
-                PubSub.publish('AlertPlayer-update');
-            }
-
-            const onError = (reason: any) => {
-                console.log('Error while Playing', reason);
-                this.stopPlaying();
-                PubSub.publish('AlertPlayer-update');
             }
 
             this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(onEnd, onError);
