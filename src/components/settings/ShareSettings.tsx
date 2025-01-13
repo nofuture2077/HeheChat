@@ -11,6 +11,13 @@ interface EditorData {
     name: string;
 }
 
+function extractBlerpRoom(input: string): string {
+    const regex = /\/([^\/]+)$/;
+    const match = input.match(regex);
+    return match ? match[1] : input;
+  }
+  
+
 export function ShareSettings() {
     const config = useContext(ConfigContext);
     const [shares, setShares] = useState<string[]>(config.shares);
@@ -48,7 +55,8 @@ export function ShareSettings() {
         setPallyggChannel(channel || '');
     };
 
-    const updateBlerp = (roomId: string) => {
+    const updateBlerp = (input: string) => {
+        const roomId = extractBlerpRoom(input);
         fetch(import.meta.env.VITE_BACKEND_URL + "/blerp/set?state=" + state + "&roomId=" + roomId);
         setBlerpKey(roomId || '');
     };
