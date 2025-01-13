@@ -53,6 +53,7 @@ class AlertPlayer {
         this.mainAudio = new Audio(silence);
         this.mainAudio.autoplay = true;
         this.mainAudio.loop = true;
+        this.mainAudio.crossOrigin = "anonymous";
 
         this.mainAudioSource = this.audioContext.createMediaElementSource(this.mainAudio);
         this.mainAudioSource.connect(this.mainAudioGain);
@@ -121,7 +122,6 @@ class AlertPlayer {
                 return;
             }
             const audio = new Audio(src);
-            audio.crossOrigin = "anonymous";
             audio.onloadedmetadata = () => {
                 resolve({
                     duration: audio.duration,
