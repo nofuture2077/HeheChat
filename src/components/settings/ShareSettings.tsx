@@ -30,7 +30,7 @@ export function ShareSettings() {
         });
 
         fetch(import.meta.env.VITE_BACKEND_URL + "/blerp/get?state=" + state).then(res => res.json()).then((data) => {
-            setBlerpKey(data.apikey || '');
+            setBlerpKey(data.roomid || '');
         });
 
         fetch(import.meta.env.VITE_BACKEND_URL + "/elevenlabs/get?state=" + state).then(res => res.json()).then((data) => {
