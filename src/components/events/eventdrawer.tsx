@@ -85,13 +85,13 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
     const forceUpdate = useForceUpdate();
 
     useEffect(() => {
-        const ignored: string[] = Object.keys(config.systemMessageInChat).filter(
+        const ignored: string[] = Object.keys(config.hideEvents).filter(
             // @ts-ignore
             (key: string) => config.hideEvents[key]
         );
         
         EventStorage?.load(config.channels, ignored).then((events) => {
-            setEvents(events.filter(event => config.systemMessageInChat[EventTypeMapping[event.eventtype] as EventMainType]));
+            setEvents(events);
             setLoad(false);
         });
 
