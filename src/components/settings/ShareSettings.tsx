@@ -11,6 +11,13 @@ interface EditorData {
     name: string;
 }
 
+function extractBlerpRoom(input: string): string {
+    const regex = /\/([^\/]+)$/;
+    const match = input.match(regex);
+    return match ? match[1] : input;
+  }
+  
+
 export function ShareSettings() {
     const config = useContext(ConfigContext);
     const [shares, setShares] = useState<string[]>(config.shares);
@@ -18,6 +25,7 @@ export function ShareSettings() {
     const [streamelementsJWT, setStreamelementsJWT] = useState<string>("");
     const [pallyggApiKey, setPallyggApiKey] = useState<string>("");
     const [pallyggChannel, setPallyggChannel] = useState<string>("");
+    const [blerpKey, setBlerpKey] = useState<string>("");
     const [editors, setEditors] = useState<EditorData[]>([]);
 
     const state = localStorage.getItem('hehe-token_state') || '';
@@ -26,6 +34,10 @@ export function ShareSettings() {
         fetch(import.meta.env.VITE_BACKEND_URL + "/pallygg/get?state=" + state).then(res => res.json()).then((data) => {
             setPallyggApiKey(data.apikey || '');
             setPallyggChannel(data.channel || '');
+        });
+
+        fetch(import.meta.env.VITE_BACKEND_URL + "/blerp/get?state=" + state).then(res => res.json()).then((data) => {
+            setBlerpKey(data.roomid || '');
         });
 
         fetch(import.meta.env.VITE_BACKEND_URL + "/elevenlabs/get?state=" + state).then(res => res.json()).then((data) => {
@@ -41,6 +53,12 @@ export function ShareSettings() {
         fetch(import.meta.env.VITE_BACKEND_URL + "/pallygg/set?state=" + state + "&apikey=" + apikey + "&channel=" + channel);
         setPallyggApiKey(apikey || '');
         setPallyggChannel(channel || '');
+    };
+
+    const updateBlerp = (input: string) => {
+        const roomId = extractBlerpRoom(input);
+        fetch(import.meta.env.VITE_BACKEND_URL + "/blerp/set?state=" + state + "&roomId=" + roomId);
+        setBlerpKey(roomId || '');
     };
 
     const updateStreamelements = (jwt: string) => {
@@ -126,6 +144,9 @@ export function ShareSettings() {
             <TextInput label="API Key" placeholder="" value={elevenLabsApiKey} onChange={(ev) => updateElevenLabs(ev.target.value)} />
         </Fieldset>
 
+        <Fieldset legend="Blerp Config" variant="filled">
+            <TextInput label="API Key" placeholder="" value={blerpKey} onChange={(ev) => updateBlerp(ev.target.value)} />
+        </Fieldset>
     </Stack>
     )
 }

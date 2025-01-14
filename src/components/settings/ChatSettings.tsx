@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
 import { SystemMessageMainType } from '../../commons/message';
 
-const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'streamOnline', 'streamOffline', 'channelPointRedemption'];
+const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'streamOnline', 'streamOffline', 'channelPointRedemption', 'blerp'];
 const seventTVMessages: SystemMessageMainType[] = ['sevenTVAdded', 'sevenTVRemoved'];
 
 const Messages: Record<string, string> = {
@@ -19,7 +19,8 @@ const Messages: Record<string, string> = {
     "streamOffline": "Offline Message",
     "channelPointRedemption": "Channel Points",
     "sevenTVAdded": "New 7TV Emotes",
-    "sevenTVRemoved": "Removed 7TV Emotes"
+    "sevenTVRemoved": "Removed 7TV Emotes",
+    "blerp": "Blerps"
 };
 
 export function ChatSettings() {

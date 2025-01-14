@@ -1,6 +1,6 @@
 import classes from './eventdrawer.module.css'
 import { Title, Button, Group, Box, Text, ThemeIcon, ScrollArea, ActionIcon } from '@mantine/core';
-import { IconX, IconGiftFilled, IconCoinBitcoinFilled, IconReload, IconUserHeart, IconSparkles, IconMoneybag, IconPlant, IconCheck } from '@tabler/icons-react';
+import { IconX, IconGiftFilled, IconCoinBitcoinFilled, IconReload, IconUserHeart, IconSparkles, IconMoneybag, IconPlant, IconCheck, IconBellRinging } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { EventStorage, EventData } from './eventstorage';
 import { ConfigContext } from '@/ApplicationContext';
@@ -41,6 +41,7 @@ const messages: Record<EventType, string> = {
     'follow': 'Just followed',
     'cheer': 'Cheered ${amount:whole} bits',
     'donation': "Donated ${amount:decimal}",
+    'blerp': "Blerp ${audioTitle}",
     'channelPointRedemption': 'Channelpoints: ${rewardTitle}'
 }
 
@@ -59,6 +60,7 @@ const icons: Record<EventType, ReactElementLike> = {
     'follow': <IconUserHeart/>,
     'cheer': <IconCoinBitcoinFilled/>,
     'donation': <IconMoneybag/>,
+    'blerp': <IconBellRinging/>,
     'channelPointRedemption': <IconPlant/>
 }
 
@@ -83,13 +85,13 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
     const forceUpdate = useForceUpdate();
 
     useEffect(() => {
-        const ignored: string[] = Object.keys(config.systemMessageInChat).filter(
+        const ignored: string[] = Object.keys(config.hideEvents).filter(
             // @ts-ignore
             (key: string) => config.hideEvents[key]
         );
         
         EventStorage?.load(config.channels, ignored).then((events) => {
-            setEvents(events.filter(event => config.systemMessageInChat[EventTypeMapping[event.eventtype] as EventMainType]));
+            setEvents(events);
             setLoad(false);
         });
 

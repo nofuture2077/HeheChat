@@ -49,7 +49,7 @@ export async function get7TVEmotes(userId: string, username: string) {
         }));
 
     emoteSetUserNameMap[user.emote_set.id] = username;
-    PubSub.publish("WSSEND", { type: "sevenTVSubscribe", objectId: user.emote_set.id, userId: user.id });
+    PubSub.publish("WSSEND7TV", { type: "sevenTVSubscribe", objectId: user.emote_set.id, userId: user.id });
     const emotes = toMap(user.emote_set.emotes, e => e.name);
     return emotes;
 }
