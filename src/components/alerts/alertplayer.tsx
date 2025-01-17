@@ -366,8 +366,8 @@ class AlertPlayer {
             const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
             PubSub.publish('AlertPlayer-update', {duration});
             if (alert.visual) {
-                const headline = _.template(alert.visual?.headline || "")(vars);
-                const text = this.cleanMessage(_.template(alert.visual?.text || "")(vars));
+                const headline = formatString(alert.visual?.headline || "", vars);
+                const text = this.cleanMessage(formatString(alert.visual?.text || "", vars));
 
                 console.log('Visuell', text, headline);
 
