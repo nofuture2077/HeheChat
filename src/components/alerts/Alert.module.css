@@ -1,42 +1,4 @@
-.yellow :global(span.highlight) {
-  color: rgb(255, 241, 51);
-}
-
-.green :global(span.highlight) {
-  color: rgb(51, 255, 65);
-}
-
-.red :global(span.highlight) {
-  color: rgb(255, 51, 51);
-}
-
-.blue :global(span.highlight) {
-  color: rgb(58, 51, 255);
-}
-
-.orange :global(span.highlight) {
-  color: rgb(255, 173, 51);
-}
-
-.pink :global(span.highlight) {
-  color: #f39;
-}
-
-.teal :global(span.highlight) {
-  color: rgb(51, 255, 197);
-}
-
-:global(span.highlight) {
-  color: #333;
-}
-
-:global(span.highlight span) {
-  position: relative;
-  top: 5px;
-  display: inline-block;
-  animation: bounce 0.3s ease infinite alternate;
-}
-
+/* Base styles */
 .alertContainer {
   display: flex;
   flex-direction: column;
@@ -46,37 +8,121 @@
   text-transform: uppercase;
   visibility: hidden;
   height: 100vh;
+  width: 100%;
+  position: fixed;
 }
 
-.alertContainer.left {
+/* Position classes */
+.top {
+  top: 0;
   justify-content: flex-start;
+  padding-top: 2rem;
 }
 
-.alertContainer.center {
-  justify-content: space-around;
+.middle {
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-.alertContainer.right {
+.bottom {
+  bottom: 0;
   justify-content: flex-end;
+  padding-bottom: 2rem;
 }
 
+.left {
+  align-items: flex-start;
+  padding-left: 2rem;
+}
+
+.center {
+  align-items: center;
+}
+
+.right {
+  align-items: flex-end;
+  padding-right: 2rem;
+}
+
+/* Layout classes for text alignment */
+.align-left .text {
+  text-align: left;
+}
+
+.align-center .text {
+  text-align: center;
+}
+
+.align-right .text {
+  text-align: right;
+}
+
+/* Layout classes for headline sizes */
+.headline-xs .text p:first-child { font-size: 1.25rem; }
+.headline-sm .text p:first-child { font-size: 1.5rem; }
+.headline-md .text p:first-child { font-size: 2rem; }
+.headline-lg .text p:first-child { font-size: 2.5rem; }
+.headline-xl .text p:first-child { font-size: 3rem; }
+
+/* Layout classes for text sizes */
+.text-xs .text p:last-child { font-size: 0.875rem; }
+.text-sm .text p:last-child { font-size: 1rem; }
+.text-md .text p:last-child { font-size: 1.25rem; }
+.text-lg .text p:last-child { font-size: 1.5rem; }
+.text-xl .text p:last-child { font-size: 1.75rem; }
+
+/* Base text styles */
 .text {
-  font-size: 24px;
-  line-height: 36px;
   color: white;
   text-shadow: 2px 2px 2px #333;
   font-weight: 900;
   letter-spacing: 5px;
   display: flex;
-  align-items: center;
   flex-direction: column;
-  text-align: center;
+  max-width: 80%;
 }
 
-.text > p {
-  max-width: 60%;
+/* Layout classes for highlight colors */
+.yellow :global(span.highlight) { color: rgb(255, 241, 51); }
+.green :global(span.highlight) { color: rgb(51, 255, 65); }
+.red :global(span.highlight) { color: rgb(255, 51, 51); }
+.blue :global(span.highlight) { color: rgb(58, 51, 255); }
+.orange :global(span.highlight) { color: rgb(255, 173, 51); }
+.pink :global(span.highlight) { color: #f39; }
+.teal :global(span.highlight) { color: rgb(51, 255, 197); }
+
+/* Layout classes for highlight animations */
+.effect-bounce :global(span.highlight span) {
+  position: relative;
+  top: 5px;
+  display: inline-block;
+  animation: bounce 0.3s ease infinite alternate;
 }
 
+.effect-wave :global(span.highlight span) {
+  position: relative;
+  display: inline-block;
+  animation: wave 0.5s ease infinite alternate;
+}
+
+.effect-shake :global(span.highlight span) {
+  position: relative;
+  display: inline-block;
+  animation: shake 0.5s ease infinite;
+}
+
+.effect-pulse :global(span.highlight span) {
+  display: inline-block;
+  animation: pulse 1s ease infinite;
+}
+
+.effect-glitch :global(span.highlight span) {
+  position: relative;
+  display: inline-block;
+  animation: glitch 0.3s ease infinite;
+}
+
+/* Animation delays for character-by-character effects */
 :global(span.highlight span:nth-child(2)) { animation-delay: 0.1s; }
 :global(span.highlight span:nth-child(3)) { animation-delay: 0.2s; }
 :global(span.highlight span:nth-child(4)) { animation-delay: 0.3s; }
@@ -91,10 +137,35 @@
 :global(span.highlight span:nth-child(13)) { animation-delay: 0.7s; }
 :global(span.highlight span:nth-child(14)) { animation-delay: 0.8s; }
 
+/* Animations */
 @keyframes bounce {
-  100% {
-    top: -5px;
-  }
+  100% { top: -5px; }
+}
+
+@keyframes wave {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-10px); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
 }
 
 .visible {
