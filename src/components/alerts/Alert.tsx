@@ -6,6 +6,21 @@ interface AlertConfigs {
   [key: string]: EventAlertConfig;
 }
 
+// Define all possible classes for reference
+const AVAILABLE_CLASSES = {
+  position: {
+    vertical: ['top', 'middle', 'bottom'],
+    horizontal: ['left', 'center', 'right']
+  },
+  layout: {
+    alignment: ['align-left', 'align-center', 'align-right'],
+    headlineSizes: ['headline-xs', 'headline-sm', 'headline-md', 'headline-lg', 'headline-xl'],
+    textSizes: ['text-xs', 'text-sm', 'text-md', 'text-lg', 'text-xl'],
+    effects: ['effect-bounce', 'effect-wave', 'effect-shake', 'effect-pulse', 'effect-glitch'],
+    colors: ['yellow', 'green', 'red', 'blue', 'orange', 'pink', 'teal']
+  }
+};
+
 function getQueryVariable(query: string, variable: string): string | undefined {
   const vars = query.split('&');
   for (const pair of vars) {
@@ -59,6 +74,51 @@ export default function Alert() {
   const showAlert = (alert: VisualAlert) => {
     setCurrentAlert(alert);
     setIsVisible(true);
+
+    // Log all available classes
+    console.log('Available Alert Classes:', {
+      position: {
+        description: 'Use in position prop as "vertical horizontal", e.g. "top center"',
+        vertical: AVAILABLE_CLASSES.position.vertical,
+        horizontal: AVAILABLE_CLASSES.position.horizontal,
+        examples: [
+          'top left',
+          'middle center',
+          'bottom right'
+        ]
+      },
+      layout: {
+        description: 'Use in layout prop, can combine multiple with spaces',
+        alignment: AVAILABLE_CLASSES.layout.alignment,
+        headlineSizes: AVAILABLE_CLASSES.layout.headlineSizes,
+        textSizes: AVAILABLE_CLASSES.layout.textSizes,
+        effects: AVAILABLE_CLASSES.layout.effects,
+        colors: AVAILABLE_CLASSES.layout.colors,
+        examples: [
+          'headline-xl text-lg align-center effect-bounce yellow',
+          'headline-md text-sm align-left effect-wave blue',
+          'headline-lg text-md align-right effect-glitch pink'
+        ]
+      }
+    });
+
+    // Log current alert classes
+    const positionClasses = (alert.position?.split(' ') || []).map(p => styles[p]);
+    const layoutClasses = (alert.layout?.split(' ') || []).map(l => styles[l]);
+    
+    console.log('Current Alert Classes:', {
+      position: alert.position,
+      positionClasses,
+      layout: alert.layout,
+      layoutClasses,
+      finalClasses: [
+        styles.alertContainer,
+        styles.visible,
+        ...positionClasses,
+        ...layoutClasses
+      ].filter(Boolean).join(' ')
+    });
+
     setTimeout(() => {
       setIsVisible(false);
     }, alert.duration);
