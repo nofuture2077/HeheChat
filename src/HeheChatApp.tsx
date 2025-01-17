@@ -64,7 +64,7 @@ async function saveProfiles(active: string, profiles: string[]): Promise<any> {
 const onMessageHandlers: MessageHandler[] = [];
 var onMessageHandlerIndex = 0;
 
-export default function App() {
+export default function HeheChat() {
     const [loginContext, setLoginContext] = useState<LoginContext>(DEFAULT_LOGIN_CONTEXT);
     const [chatEmotes, setChatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
     const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE, guid: generateGUID()});
@@ -91,13 +91,13 @@ export default function App() {
                 profileData.config.raidTargets ??= [];
                 profileData.config.hideEvents ??= DEFAULT_CONFIG.hideEvents;
                 setProfile(profileData);
-                AlertSystem.updateConfig(profileData.config);
+                AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);
                 loadProfilesFromServer().then(r => {
                     setProfiles(_.sortBy(r.profiles, item => order.indexOf(item.guid)) || [profileData]);
                 });
             } else {
-                AlertSystem.updateConfig(profile.config);
+                AlertSystem.updateProfile(profile);
                 setProfile(profile);
                 setProfiles([profile]);
             }
@@ -151,7 +151,7 @@ export default function App() {
             obj.guid === profile.guid ? profile : obj
         );
         setProfiles(updatedArray);
-        AlertSystem.updateConfig(profile.config);
+        AlertSystem.updateProfile(profile);
     }, [profile])
 
     const updateConfig = (key: ConfigKey, value: any) => {
