@@ -21,6 +21,47 @@ const AVAILABLE_CLASSES = {
   }
 };
 
+// Get style references for all available classes
+const CLASS_STYLES = {
+  base: {
+    alertContainer: styles.alertContainer,
+    visible: styles.visible,
+    text: styles.text
+  },
+  position: {
+    vertical: AVAILABLE_CLASSES.position.vertical.reduce((acc, cls) => ({
+      ...acc,
+      [cls]: styles[cls]
+    }), {}),
+    horizontal: AVAILABLE_CLASSES.position.horizontal.reduce((acc, cls) => ({
+      ...acc,
+      [cls]: styles[cls]
+    }), {})
+  },
+  layout: {
+    alignment: AVAILABLE_CLASSES.layout.alignment.reduce((acc, cls) => ({
+      ...acc,
+      [cls]: styles[cls]
+    }), {}),
+    headlineSizes: AVAILABLE_CLASSES.layout.headlineSizes.reduce((acc, cls) => ({
+      ...acc,
+      [cls]: styles[cls]
+    }), {}),
+    textSizes: AVAILABLE_CLASSES.layout.textSizes.reduce((acc, cls) => ({
+      ...acc,
+      [cls]: styles[cls]
+    }), {}),
+    effects: AVAILABLE_CLASSES.layout.effects.reduce((acc, cls) => ({
+      ...acc,
+      [cls]: styles[cls]
+    }), {}),
+    colors: AVAILABLE_CLASSES.layout.colors.reduce((acc, cls) => ({
+      ...acc,
+      [cls]: styles[cls]
+    }), {})
+  }
+};
+
 function getQueryVariable(query: string, variable: string): string | undefined {
   const vars = query.split('&');
   for (const pair of vars) {
@@ -75,12 +116,22 @@ export default function Alert() {
     setCurrentAlert(alert);
     setIsVisible(true);
 
-    // Log all available classes
+    // Log all available classes with their style references
     console.log('Available Alert Classes:', {
+      base: {
+        description: 'Base classes used by the component',
+        classes: CLASS_STYLES.base
+      },
       position: {
         description: 'Use in position prop as "vertical horizontal", e.g. "top center"',
-        vertical: AVAILABLE_CLASSES.position.vertical,
-        horizontal: AVAILABLE_CLASSES.position.horizontal,
+        vertical: {
+          available: AVAILABLE_CLASSES.position.vertical,
+          styles: CLASS_STYLES.position.vertical
+        },
+        horizontal: {
+          available: AVAILABLE_CLASSES.position.horizontal,
+          styles: CLASS_STYLES.position.horizontal
+        },
         examples: [
           'top left',
           'middle center',
@@ -89,11 +140,26 @@ export default function Alert() {
       },
       layout: {
         description: 'Use in layout prop, can combine multiple with spaces',
-        alignment: AVAILABLE_CLASSES.layout.alignment,
-        headlineSizes: AVAILABLE_CLASSES.layout.headlineSizes,
-        textSizes: AVAILABLE_CLASSES.layout.textSizes,
-        effects: AVAILABLE_CLASSES.layout.effects,
-        colors: AVAILABLE_CLASSES.layout.colors,
+        alignment: {
+          available: AVAILABLE_CLASSES.layout.alignment,
+          styles: CLASS_STYLES.layout.alignment
+        },
+        headlineSizes: {
+          available: AVAILABLE_CLASSES.layout.headlineSizes,
+          styles: CLASS_STYLES.layout.headlineSizes
+        },
+        textSizes: {
+          available: AVAILABLE_CLASSES.layout.textSizes,
+          styles: CLASS_STYLES.layout.textSizes
+        },
+        effects: {
+          available: AVAILABLE_CLASSES.layout.effects,
+          styles: CLASS_STYLES.layout.effects
+        },
+        colors: {
+          available: AVAILABLE_CLASSES.layout.colors,
+          styles: CLASS_STYLES.layout.colors
+        },
         examples: [
           'headline-xl text-lg align-center effect-bounce yellow',
           'headline-md text-sm align-left effect-wave blue',
