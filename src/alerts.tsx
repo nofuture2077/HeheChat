@@ -1,4 +1,21 @@
 import ReactDOM from 'react-dom/client';
-import Alert from './components/alerts/Alert';
+import BrowserSource from './components/alerts/BrowserSource';
 
-ReactDOM.createRoot(document.getElementById('alert')!).render(<Alert />);
+function getQueryVariable(query: string, variable: string): string | undefined {
+  const vars = query.split('&');
+  for (const pair of vars) {
+    const [key, value] = pair.split('=');
+    if (decodeURIComponent(key) === variable) {
+      return decodeURIComponent(value);
+    }
+  }
+  console.log('Query variable %s not found', variable);
+}
+
+// Extract token from hash
+const query = window.location.hash.substring(1);
+const token = getQueryVariable(query, "token");
+
+ReactDOM.createRoot(document.getElementById('alert')!).render(
+  <BrowserSource token={token} />
+);
