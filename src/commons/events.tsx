@@ -110,3 +110,13 @@ export type Event = {
     amount2?: number;
     eventAlert?: EventAlert;
 }
+
+export interface VisualAlert {
+    text: string;
+    headline: string;
+    image?: string;
+    duration: number;
+    channel: string;
+    position?: string;
+    layout?: string;
+}

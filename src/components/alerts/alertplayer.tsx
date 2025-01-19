@@ -1,10 +1,11 @@
-import { Event, EventAlertConfig, Base64FileReference, Base64File, EventAlert, EventMainType, EventTypeMapping } from "@/commons/events";
-import _ from "underscore";
+import { Event, EventAlertConfig, Base64FileReference, Base64File, EventAlert, EventMainType, EventTypeMapping, VisualAlert } from "@/commons/events";
 
 import { Config } from "@/commons/config";
+import { Profile } from "@/commons/profile";
 import { formatString } from "@/commons/helper";
 import { silence } from "./silence";
 import PubSub from 'pubsub-js';
+import _ from "underscore";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -29,6 +30,7 @@ class AlertPlayer {
     alertConfig: Record<string, EventAlertConfig> = {};
     preventBoxDisconnect?: (() => void) & _.Cancelable;
     config?: Config;
+    profile?: Profile;
     currentlyPlaying?: Event;
     skipCurrent: boolean = false;
     ttsExtra?: number;
@@ -219,7 +221,9 @@ class AlertPlayer {
         });
     }
 
-    updateConfig(config: Config) {
+    updateProfile(profile: Profile) {
+        this.profile = profile;
+        const config = profile.config;
         console.log('update config', config)
         this.config = config;
     }
@@ -362,12 +366,14 @@ class AlertPlayer {
             const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
             PubSub.publish('AlertPlayer-update', {duration});
             if (alert.visual) {
-                const headline = _.template(alert.visual?.headline || "")(vars);
-                const text = this.cleanMessage(_.template(alert.visual?.text || "")(vars));
+                const headline = formatString(alert.visual?.headline || "", vars);
+                const text = this.cleanMessage(formatString(alert.visual?.text || "", vars));
 
                 console.log('Visuell', text, headline);
 
-                PubSub.publish('WSSEND', {type: 'alert', data: {image: alert.visual?.element, headline, text, duration: duration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout}});
+                const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: duration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
+
+                PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
             }
 
             this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(onEnd, onError);
