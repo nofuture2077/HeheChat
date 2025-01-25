@@ -1,9 +1,5 @@
 import { EventType } from "@/commons/events"
 
-export interface EventStorage {
-    store: (event: EventData) => Promise<void>;
-    load: (channels: string[], ignored: string[]) => Promise<EventData[]>;
-}
 
 export interface EventData {
     id: number;
@@ -15,6 +11,11 @@ export interface EventData {
     text?: string;
     amount?: number;
     amount2?: number;
+}
+
+export interface EventStorage {
+    store: (event: EventData) => Promise<void>;
+    load: (channels: string[], ignored: string[]) => Promise<EventData[]>;
 }
 
 class RemoteEventStorage implements EventStorage {
@@ -32,5 +33,5 @@ class RemoteEventStorage implements EventStorage {
     }
 }
 
+export const EventStorage = new RemoteEventStorage(import.meta.env.VITE_BACKEND_URL);
 
-export const EventStorage = import.meta.env.VITE_BACKEND_URL ? new RemoteEventStorage(import.meta.env.VITE_BACKEND_URL) : null;

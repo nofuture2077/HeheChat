@@ -6,6 +6,7 @@ import { formatString } from "@/commons/helper";
 import { silence } from "./silence";
 import PubSub from 'pubsub-js';
 import _ from "underscore";
+import { AlertConfig } from "@/components/events/alertconfigstorage";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -199,7 +200,7 @@ class AlertPlayer {
         return "";
     }
 
-    addNewChannels(channels: string[]) {
+    async addNewChannels(channels: string[]) {
         const newChannels: string[] = [];
         (channels || []).forEach(channel => {
             if (!this.alertConfig[channel]) {
@@ -209,16 +210,20 @@ class AlertPlayer {
         if (!newChannels.length) {
             return;
         }
-        this.loadAlertConfig(newChannels);
+        await this.loadAlertConfig(newChannels);
     }
 
-    loadAlertConfig(channels: string[]) {
-        const state = localStorage.getItem('hehe-token_state') || '';
-        fetch(BASE_URL + '/event/config?' + [['channels', channels.join(',')].join('='), ['state', state].join('=')].join('&')).then(res => res.json()).then(data => {
-            channels.forEach(channel => {
-                this.alertConfig[channel] = data[channel];
-            });
-        });
+    async loadAlertConfig(channels: string[]) {
+        try {
+            for (const channel of channels) {
+                const config = await AlertConfig?.getConfig(channel);
+                if (config) {
+                    this.alertConfig[channel] = config;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading alert config:', error);
+        }
     }
 
     updateProfile(profile: Profile) {
