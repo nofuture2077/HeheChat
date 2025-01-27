@@ -24,11 +24,14 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
       if (data.type === 'profile') {
         const profile = data.profile;
         setProfile(profile);
+        AlertSystem.updateProfile(profile);
       }
 
       if (data.type === 'sharedata') {
         const profile = data.profile;
         setProfile(profile);
+        AlertSystem.updateProfile(profile);
+        
         // Publish alert configs
         PubSub.publish('ALERT_CONFIG', data.shares);
 
