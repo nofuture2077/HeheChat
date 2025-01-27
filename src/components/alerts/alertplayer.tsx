@@ -386,7 +386,7 @@ class AlertPlayer {
                 const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: duration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
 
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
-                PubSub.publish('ALERT_SHOW', { data: visualAlert });
+                PubSub.publish('ALERT_SHOW', visualAlert);
             }
 
             this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(onEnd, onError);
