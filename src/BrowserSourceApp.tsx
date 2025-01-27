@@ -15,10 +15,7 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
 
   useEffect(() => {
     // Initialize the worker
-    backendWorkerRef.current = new Worker(
-      new URL('../webworker/backendworker.ts', import.meta.url),
-      { type: 'module' }
-    );
+    backendWorkerRef.current = new Worker(new URL('./components/webworker/backendworker.ts', import.meta.url), { type: 'module' });
 
     // Set up message handler
     backendWorkerRef.current.onmessage = (event) => {
