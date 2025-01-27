@@ -25,7 +25,7 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
         const profile = data.profile;
         setProfile(profile);
       }
-      
+
       if (data.type === 'sharedata') {
         const profile = data.profile;
         setProfile(profile);
@@ -40,7 +40,7 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
         PubSub.publish('ALERT_SHOW', data.data);
       }
 
-      if (data.type === 'event') {
+      if (data.type === 'event' || data.type === 'replayevent') {
         const event = data.data;
         if (AlertSystem.shouldBePlayedInBrowsersource(event)) {
           AlertSystem.addEvent(event);

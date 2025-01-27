@@ -3,7 +3,7 @@ import { Title, Button, Group, Box, Text, ThemeIcon, ScrollArea, ActionIcon } fr
 import { IconX, IconGiftFilled, IconCoinBitcoinFilled, IconReload, IconUserHeart, IconSparkles, IconMoneybag, IconPlant, IconCheck, IconBellRinging } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { EventStorage, EventData } from './eventstorage';
-import { ConfigContext } from '@/ApplicationContext';
+import { ConfigContext, ProfileContext } from '@/ApplicationContext';
 import { InfoCard, InfoCardSkeleton } from '../infocard/infocard';
 import { formatString } from "@/commons/helper";
 import { getEventStyle } from '@/components/events/eventhelper';
@@ -102,6 +102,7 @@ function getIcon(event: EventData, key: string) {
 
 export function EventDrawerView(props: EventDrawerViewProperties) {
     const config = useContext(ConfigContext);
+    const profile = useContext(ProfileContext);
     const [events, setEvents] = useState<EventData[]>([]);
     const [load, setLoad] = useState(true);
     const [checkedEvents, setCheckedEvents] = useState<Dictionary<boolean>>({});
@@ -130,7 +131,9 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
     }, []);
 
     const replayEvent = (data: EventData) => {
-        // TODO replay in Browser Source
+        if (AlertSystem.shouldBePlayedInBrowsersource(data) && !checkedEvents[data.id]) {
+            PubSub.publish('WSSEND', {type: 'replayevent', data: data, profile: profile.guid });
+        }
         if (AlertSystem.shouldBePlayedInApp(data) && !checkedEvents[data.id]) {
             AlertSystem.addEvent(data);
         }
