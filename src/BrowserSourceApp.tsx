@@ -9,6 +9,12 @@ interface BrowserSourceProps {
   token: string | undefined;
 }
 
+window.addEventListener("click", () => {
+  if (!AlertSystem.status()) {
+      AlertSystem.initialize();
+  } 
+}); 
+
 export default function BrowserSource({ token }: BrowserSourceProps) {
   const backendWorkerRef = useRef<Worker>();
   const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE});
@@ -28,10 +34,11 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
       }
 
       if (data.type === 'sharedata') {
+        AlertSystem.initialize();
         const profile = data.profile;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
-        
+
         // Publish alert configs
         PubSub.publish('ALERT_CONFIG', data.shares);
 
