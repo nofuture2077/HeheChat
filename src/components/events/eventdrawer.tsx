@@ -130,6 +130,7 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
     }, []);
 
     const replayEvent = (data: EventData) => {
+        // TODO replay in Browser Source
         if (AlertSystem.shouldBePlayedInApp(data) && !checkedEvents[data.id]) {
             AlertSystem.addEvent(data);
         }
@@ -162,7 +163,7 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
                 <div className={classes.reverse}>
                     {load ? <>{[1,2,3].map(x => <InfoCardSkeleton key={'event' + x}/>)}</> : null}
                     {!load && events.length === 0 ? <Text key='event-noevents' pt='xl' size='xl' ta="center" fw={500}>No Events to show.</Text> : null}
-                    {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} date={event.date} text={formatEventText(event)} left={getIcon(event, 'infocard-left')} onClick={() => replayEvent(event)} right={<ActionIcon disabled={!AlertSystem.shouldBePlayedInApp(event)} variant='transparent' key={'infocard-right'}>
+                    {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} date={event.date} text={formatEventText(event)} left={getIcon(event, 'infocard-left')} onClick={() => replayEvent(event)} right={<ActionIcon disabled={!AlertSystem.shouldBePlayedInApp(event) && !AlertSystem.shouldBePlayedInBrowsersource(event)} variant='transparent' key={'infocard-right'}>
                         {(checkedEvents[event.id] ? <IconCheck/> : <IconReload/>)}
                     </ActionIcon>}/>)}
                 </div>

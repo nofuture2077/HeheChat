@@ -32,7 +32,7 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
         // Publish alert configs
         PubSub.publish('ALERT_CONFIG', data.shares);
 
-        PubSub.publish("WSSEND", { type: "subscribe", source: "Browsersource", channels: Object.fromEntries(profile.config.channels.map((key: string) => [key, true])) });
+        PubSub.publish("WSSEND", { type: "SEND", data: { source: "Browsersource", channels: Object.fromEntries(profile.config.channels.map((key: string) => [key, true])) }});
       }
       
       if (data.type === 'alert') {
