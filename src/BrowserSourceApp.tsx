@@ -31,7 +31,6 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
         const profile = data.profile;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
-        AlertSystem.addNewChannels(profile.config.channels);
       }
 
       if (data.type === 'sharedata') {
@@ -39,7 +38,7 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
         const profile = data.profile;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
-        AlertSystem.addNewChannels(profile.config.channels);
+        AlertSystem.alertConfig = data.shares;
 
         // Publish alert configs
         PubSub.publish('ALERT_CONFIG', data.shares);
