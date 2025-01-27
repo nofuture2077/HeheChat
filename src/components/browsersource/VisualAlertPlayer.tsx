@@ -8,7 +8,7 @@ interface HighlightedTextProps {
 }
 
 function HighlightedText({ text }: HighlightedTextProps) {
-  const parts = text.split(/##(.*?)##/);
+  const parts = text ? text.split(/##(.*?)##/) : [];
   return (
     <>
       {parts.map((part, index) => {
