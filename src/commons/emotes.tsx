@@ -188,7 +188,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         const emoteData = channelEmotes?.sevenTVEmotes?.get(text)?.data;
         
         if (emoteData) {
-            return <EmoteComponent key={key} imageUrl={`${emoteData.host.url}/${emoteData.host.files[1].name}`} largeImageUrl={`${emoteData.host.url}/${emoteData.host.files[3].name}`} name={text} type='7 TV'/>;
+            return <EmoteComponent key={key} imageUrl={`${emoteData.host.url}/${emoteData.host.files[1].name}`} largeImageUrl={`${emoteData.host.url}/${emoteData.host.files[3].name}`} name={text} marginL={emoteData.flags ? '-1.5em' : undefined} type='7 TV'/>;
         }
         return text;
     },
