@@ -62,10 +62,11 @@ class AlertPlayer {
         this.mainAudioSource.connect(this.mainAudioGain);
     }
 
-    async googleTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
+    async googleTTS(msg: string, channel: string, voice: string, state: string, sink: string): Promise<string> {
         const params = new URLSearchParams({
             text: encodeURIComponent(msg),
             state,
+            sink,
             voice,
             channel
         });
@@ -74,10 +75,11 @@ class AlertPlayer {
         return data.audioContent;
     }
 
-    async aiTTS(msg: string, channel: string, voice: string, state: string): Promise<string> {
+    async aiTTS(msg: string, channel: string, voice: string, state: string, sink: string): Promise<string> {
         const params = new URLSearchParams({
             text: encodeURIComponent(msg),
             state,
+            sink,
             voice,
             channel
         });
@@ -176,10 +178,14 @@ class AlertPlayer {
     }
 
     cleanMessage(message: string) {
-        return cheerPrefixesRegExp.reduce(
+        // First clean cheer prefixes
+        var cleanedMessage = cheerPrefixesRegExp.reduce(
             (accumulator, prefix) => accumulator.replaceAll(prefix, ""),
             message
         );
+        // Then remove URLs
+        cleanedMessage = cleanedMessage.replace(/https?:\/\/[^\s]+/g, "");
+        return cleanedMessage;
     }
 
     setTTSExtra(extra: number) {
@@ -233,9 +239,9 @@ class AlertPlayer {
         this.config = config;
     }
 
-    async tts(ttsMessage: string, channel: string, voice: string, voiceType: string, state: string) {
+    async tts(ttsMessage: string, channel: string, voice: string, voiceType: string, state: string, sink: string) {
         
-        const audioData = voiceType === 'ai' ? await this.aiTTS(ttsMessage, channel, voice, state) : await this.googleTTS(ttsMessage, channel, voice, state);
+        const audioData = voiceType === 'ai' ? await this.aiTTS(ttsMessage, channel, voice, state, sink) : await this.googleTTS(ttsMessage, channel, voice, state, sink);
         if (!audioData) {
             return undefined;
         }
@@ -358,12 +364,13 @@ class AlertPlayer {
             vars.text = this.parsedPartsToText(eventData.text.parts || eventData.text);
         }
         const state = localStorage.getItem('hehe-token_state') || '';
+        const sink = localStorage.getItem('hehe-sink') || '';
         this.startPlaying();
         console.log('Start playing');
         this.currentlyPlaying = item;
         const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", vars));
         try {
-            const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state) : undefined;
+            const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state, sink) : undefined;
             const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
 
             console.log('Audio', ttsAudio, jingleAudio);
@@ -379,6 +386,7 @@ class AlertPlayer {
                 const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: duration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
 
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
+                PubSub.publish('ALERT_SHOW', { data: visualAlert });
             }
 
             this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(onEnd, onError);
@@ -393,12 +401,24 @@ class AlertPlayer {
         return this.queue.length - this.index;
     }
 
-    shouldBePlayed(item: Event): boolean {
+    shouldBePlayedInApp(item: Event): boolean {
         if (!this.config) {
             console.error('Adding event but config not set', item);
             return false;
         }
         const sbp = this.config!.playAlerts && this.config!.receivedShares.includes(item.channel) && this.config!.activatedShares.includes(item.channel);
+        if (!sbp) {
+            console.debug('Will not play alerts', this.config, item);
+        }
+        return sbp;
+    }
+
+    shouldBePlayedInBrowsersource(item: Event): boolean {
+        if (!this.config) {
+            console.error('Adding event but config not set', item);
+            return false;
+        }
+        const sbp = this.config!.browserSourceAudio && this.config!.receivedShares.includes(item.channel) && this.config!.activatedShares.includes(item.channel);
         if (!sbp) {
             console.debug('Will not play alerts', this.config, item);
         }

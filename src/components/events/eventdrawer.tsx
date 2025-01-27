@@ -64,10 +64,33 @@ const icons: Record<EventType, ReactElementLike> = {
     'channelPointRedemption': <IconPlant/>
 }
 
-export function formatEventText(event: EventData) {
-    const additionalData = event.text ? JSON.parse(event.text) : {};
-    const msg = formatString(messages[event.eventtype as EventType], {...event, ...additionalData});
-    return msg;
+export function formatEventText(event: EventData): string {
+    if (!event || typeof event !== 'object') {
+        return 'Invalid event data';
+    }
+
+    let additionalData = {};
+    if (event.text) {
+        try {
+            if (typeof event.text === 'string') {
+                additionalData = JSON.parse(event.text);
+            } else {
+                console.error('Event text is not a string:', event.text);
+            }
+        } catch (error) {
+            console.error('Failed to parse event text:', error);
+        }
+    }
+
+    const eventType = event.eventtype as EventType;
+    const messageTemplate = messages[eventType];
+    
+    if (!messageTemplate) {
+        console.warn(`Unknown event type: ${eventType}`);
+        return `${event.username} triggered ${eventType}`;
+    }
+
+    return formatString(messageTemplate, {...event, ...additionalData});
 }
 
 function getIcon(event: EventData, key: string) {
@@ -107,7 +130,7 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
     }, []);
 
     const replayEvent = (data: EventData) => {
-        if (AlertSystem.shouldBePlayed(data) && !checkedEvents[data.id]) {
+        if (AlertSystem.shouldBePlayedInApp(data) && !checkedEvents[data.id]) {
             AlertSystem.addEvent(data);
         }
         setCheckedEvents(ev => {
@@ -139,7 +162,7 @@ export function EventDrawerView(props: EventDrawerViewProperties) {
                 <div className={classes.reverse}>
                     {load ? <>{[1,2,3].map(x => <InfoCardSkeleton key={'event' + x}/>)}</> : null}
                     {!load && events.length === 0 ? <Text key='event-noevents' pt='xl' size='xl' ta="center" fw={500}>No Events to show.</Text> : null}
-                    {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} date={event.date} text={formatEventText(event)} left={getIcon(event, 'infocard-left')} onClick={() => replayEvent(event)} right={<ActionIcon disabled={!AlertSystem.shouldBePlayed(event)} variant='transparent' key={'infocard-right'}>
+                    {events.map((event, i)=> <InfoCard key={'event' + i} channel={event.channel} name={event.username} date={event.date} text={formatEventText(event)} left={getIcon(event, 'infocard-left')} onClick={() => replayEvent(event)} right={<ActionIcon disabled={!AlertSystem.shouldBePlayedInApp(event)} variant='transparent' key={'infocard-right'}>
                         {(checkedEvents[event.id] ? <IconCheck/> : <IconReload/>)}
                     </ActionIcon>}/>)}
                 </div>

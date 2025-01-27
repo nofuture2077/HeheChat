@@ -66,20 +66,31 @@ export function AlertSettings() {
     const marks = [-250, -0, 250, 500].map(x => ({ value: x, label: x + "ms" }));
     return (
         <Stack mt={30} mb={30} gap={30}>
-            {sink ? (<>
-                <Text span inline key={'browser-source-label'}>Browsersource (visual only) <Anchor inline key={'browser-source-link'} href={import.meta.env.VITE_SINK_URL + "#token=" + sink} target="_blank"><IconLink /></Anchor></Text>
-                
-            </>) : null}
-            <Fieldset legend="Play Alerts" variant="filled" key="playalerts">
+            <Fieldset legend="HeheChat App" variant="filled" key="playalerts">
                 <Stack>
                     <Switch checked={config.playAlerts} onChange={(event) => { config.setPlayAlerts(event.currentTarget.checked); forceUpdate() }} label="Play Alerts" size="lg" />
+                </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Browser Source" variant="filled" key="browser-source">
+                <Stack>
+                    <Switch checked={config.browserSourceAudio} onChange={(event) => { config.setBrowserSourceAudio(event.currentTarget.checked); }}  label="Audio Alerts (*)" size="lg" />
+                    <Text fs="italic" size='14px'>You should only enable "Play Alerts" OR "Audio Alerts" in Browsersource</Text>
+                    {sink ? (<>
+                        <Text span inline key={'browser-source-label'}>Link for OBS <Anchor inline key={'browser-source-link'} href={import.meta.env.VITE_SINK_URL + "#token=" + sink} target="_blank"><IconLink /></Anchor></Text>
+                    </>) : null}
+                </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Alert Channels" variant="filled" key="alert-channel">
+                <Stack>
                     {config.channels.map(channel => <Switch key={channel} checked={isActive(channel)} disabled={!hasShare(channel)} label={channel + (hasShare(channel) ? '' : ' *')} onChange={(event) => { changeActive(channel, event.currentTarget.checked); forceUpdate() }} size="lg" />)}
                     <Text fs="italic" size='14px'>(*) No Permission - Ask other Streams to share their alerts with you.</Text>
                 </Stack>
             </Fieldset>
 
 
-            {Object.keys(AlertSystem.alertConfig).map(channel => {
+            {Object.keys(AlertSystem.alertConfig).filter(isActive).map(channel => {
                 if (!AlertSystem.alertConfig[channel] || !config.channels.includes(channel)) {
                     return null;
                 }
