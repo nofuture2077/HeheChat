@@ -76,7 +76,7 @@ export default function VisualAlertPlayer() {
     isVisible && styles.visible,
     ...(currentAlert.position?.split(' ') || []).map(p => styles[p]),
     ...(currentAlert.layout?.split(' ') || []).map(l => styles[l])
-  ].filter(Boolean).join(' ');
+  ].filter(Boolean).concat(styles['font-bangers']).join(' ');
 
   return (
     <div className={containerClasses}>

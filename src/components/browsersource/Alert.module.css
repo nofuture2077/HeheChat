@@ -57,6 +57,18 @@
   text-align: right;
 }
 
+.font-bangers .text p:first-child {
+  font-family: "Bangers", serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-bangers .text p:last-child {
+  font-family: "Bangers", serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
 /* Layout classes for headline sizes */
 .headline-xs .text p:first-child { font-size: 1.25rem; }
 .headline-sm .text p:first-child { font-size: 1.5rem; }
