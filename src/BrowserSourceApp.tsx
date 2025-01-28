@@ -53,7 +53,7 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
 
       if (data.type === 'event' || data.type === 'replayevent') {
         const event = data.data;
-        if (AlertSystem.shouldBePlayedInBrowsersource(event)) {
+        if (AlertSystem.shouldBePlayedInBrowsersource(event) || event.force) {
           AlertSystem.addEvent(event);
         }
       }
