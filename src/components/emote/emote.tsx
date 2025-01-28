@@ -6,9 +6,10 @@ export interface EmoteComponentProps {
   largeImageUrl: string;
   name: string;
   type: string;
+  marginL?: string;
 }
 
-export const EmoteComponent: React.FC<EmoteComponentProps> = ({ imageUrl, largeImageUrl, name, type }) => {
+export const EmoteComponent: React.FC<EmoteComponentProps> = ({ imageUrl, largeImageUrl, name, type, marginL }) => {
   return (
     <Tooltip color="gray"
       withArrow
@@ -25,7 +26,7 @@ export const EmoteComponent: React.FC<EmoteComponentProps> = ({ imageUrl, largeI
         </Stack>
       }
     >
-      <Image src={imageUrl} alt={name} w='auto' h='1.5em' display='inline' />
+      <Image src={imageUrl} alt={name} w='auto' h='1.5em' style={{marginLeft: marginL}} display='inline' />
     </Tooltip>
   );
 };

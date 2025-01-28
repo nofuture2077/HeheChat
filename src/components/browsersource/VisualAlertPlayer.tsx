@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import styles from './Alert.module.css';
+import styles from './VisualAlertPlayer.module.css';
 import { VisualAlert, EventAlertConfig } from '@/commons/events';
 import PubSub from 'pubsub-js';
 
@@ -8,7 +8,7 @@ interface HighlightedTextProps {
 }
 
 function HighlightedText({ text }: HighlightedTextProps) {
-  const parts = text.split(/##(.*?)##/);
+  const parts = text ? text.split(/##(.*?)##/) : [];
   return (
     <>
       {parts.map((part, index) => {
@@ -75,7 +75,9 @@ export default function VisualAlertPlayer() {
     styles.alertContainer,
     isVisible && styles.visible,
     ...(currentAlert.position?.split(' ') || []).map(p => styles[p]),
-    ...(currentAlert.layout?.split(' ') || []).map(l => styles[l])
+    ...(currentAlert.layout?.split(' ') || []).map(l => styles[l]),
+    // Support for font classes like 'font-headline-bangers font-text-molle'
+    ...(currentAlert.layout?.split(' ').filter(l => l.startsWith('font-')) || []).map(f => styles[f])
   ].filter(Boolean).join(' ');
 
   return (

@@ -175,7 +175,7 @@ export function ChatPage() {
         });
 
         const eventSub = PubSub.subscribe("WS-event", (msg, data: Event) => {
-            if (AlertSystem.shouldBePlayed(data)) {
+            if (AlertSystem.shouldBePlayedInApp(data)) {
                 AlertSystem.addEvent(data);
             }
         });
@@ -211,7 +211,7 @@ export function ChatPage() {
         });
         const state = localStorage.getItem('hehe-token_state') || '';
         AlertSystem.addNewChannels(config.channels);
-        PubSub.publish("WSSEND", { type: "subscribe", state, channels: Object.fromEntries(config.channels.map(key => [key, true])) });
+        PubSub.publish("WSSEND", { type: "subscribe", source: "HeheChat App", state, channels: Object.fromEntries(config.channels.map(key => [key, true])) });
 
         return () => {
             PubSub.unsubscribe(msgSub);

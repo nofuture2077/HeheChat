@@ -1,5 +1,5 @@
 import ReactDOM from 'react-dom/client';
-import BrowserSource from './components/alerts/BrowserSource';
+import BrowserSource from './BrowserSourceApp';
 
 function getQueryVariable(query: string, variable: string): string | undefined {
   const vars = query.split('&');
@@ -15,7 +15,6 @@ function getQueryVariable(query: string, variable: string): string | undefined {
 // Extract token from hash
 const query = window.location.hash.substring(1);
 const token = getQueryVariable(query, "token");
+localStorage.setItem('hehe-sink', token || '');
 
-ReactDOM.createRoot(document.getElementById('alert')!).render(
-  <BrowserSource token={token} />
-);
+ReactDOM.createRoot(document.getElementById('alert')!).render(<BrowserSource token={token} />);

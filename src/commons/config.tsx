@@ -29,6 +29,8 @@ export interface ConfigData {
     modToolsEnabled: boolean;
     raidTargets: string[];
     playAlerts: boolean;
+    browserSourceAudio: boolean;
+    browserSourceVisual: boolean;
     systemMessageInChat: Partial<Record<SystemMessageMainType, boolean>>,
     hideEvents: Partial<Record<SystemMessageMainType, boolean>>,
     receivedShares: string[],
@@ -78,6 +80,8 @@ export interface Config extends ConfigData {
     setHideShoutout: (val: boolean) => void;
     setHideRaid: (val: boolean) => void;
     setHideAdBreak: (val: boolean) => void;
+    setBrowserSourceAudio: (val: boolean) => void;
+    setBrowserSourceVisual: (val: boolean) => void;
     setFreeTTS: (val: string[]) => void;
     setShortcuts: (val: ShortCut[]) => void;
 }
@@ -108,6 +112,8 @@ export const DEFAULT_CONFIG: Config = {
     hideShoutout: false,
     hideRaid: false,
     hideAdBreak: false,
+    browserSourceAudio: false,
+    browserSourceVisual: true,
     systemMessageInChat: {
         sub: true,
         subgift: true,
@@ -173,4 +179,6 @@ export const DEFAULT_CONFIG: Config = {
     loadShares: () => {},
     setFreeTTS: (val: string[]) => {},
     setShortcuts: (val: ShortCut[]) => {},
+    setBrowserSourceAudio: (val) => {},
+    setBrowserSourceVisual: (val) => {},
 };

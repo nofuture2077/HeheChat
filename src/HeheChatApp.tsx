@@ -187,6 +187,9 @@ export default function HeheChat() {
     const setHideAdBreak = (value: boolean) => updateConfig('hideAdBreak', value);
     const setHideShoutout = (value: boolean) => updateConfig('hideShoutout', value);
     const setShortcuts = (value: ShortCut[]) => updateConfig('shortcuts', value);
+    const setBrowserSourceAudio = (value: boolean) => updateConfig('browserSourceAudio', value);
+    const setBrowserSourceVisual = (value: boolean) => updateConfig('browserSourceVisual', value);
+
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
             return profile.config.chatChannel;
@@ -371,7 +374,9 @@ export default function HeheChat() {
         onMessage,
         off,
         fireMessage,
-        setShortcuts
+        setShortcuts,
+        setBrowserSourceAudio,
+        setBrowserSourceVisual
     };
 
     const appLogin = {
