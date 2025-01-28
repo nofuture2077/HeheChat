@@ -248,7 +248,7 @@ class AlertPlayer {
         return await this.getAudioInfo('data:audio/mp3;base64,' + audioData);
     }
 
-    getAlert(event: Event, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
+    getAlert(event: Event, eventData: any, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
         if (event.eventAlert) {
             return event.eventAlert;
         }
@@ -260,7 +260,6 @@ class AlertPlayer {
         const exactAlerts: Record<number, EventAlert[]> = {};
         const minAlerts: Record<number, EventAlert[]> = {};
         const matchesAlerts: EventAlert[] = [];
-        const eventData = event.text ? JSON.parse(event.text) : {};
 
         alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
             const amount = Number(alert.specifier.amount || 0);
@@ -341,7 +340,7 @@ class AlertPlayer {
             console.log('No alertconfig set');
             return;
         }
-        const alert = this.getAlert(item, alertConfig, this.config!);
+        const alert = this.getAlert(item, eventData, alertConfig, this.config!);
 
         if (!alert) {
             PubSub.publish('AlertPlayer-update', {text: 'No Alert for Event'});

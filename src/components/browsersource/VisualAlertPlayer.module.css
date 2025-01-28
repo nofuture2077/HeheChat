@@ -57,14 +57,26 @@
   text-align: right;
 }
 
-.font-bangers .text p:first-child {
+.font-headline-bangers .text p:first-child {
   font-family: "Bangers", serif;
   font-weight: 600;
   font-style: normal;
 }
 
-.font-bangers .text p:last-child {
+.font-text-bangers .text p:last-child {
   font-family: "Bangers", serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-molle .text p:first-child {
+  font-family: "Molle", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-molle .text p:last-child {
+  font-family: "Molle", cursive;
   font-weight: 300;
   font-style: normal;
 }
