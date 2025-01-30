@@ -87,11 +87,11 @@ body, html {
   font-style: normal;
 }
 
-.image-xs { width: 10vw; }
-.image-sm { width: 20vw; }
-.image-md { width: 30vw; }
-.image-lg { width: 50vw; }
-.image-xl { width: 100vw; }
+.image-xs .image { width: 10vw; }
+.image-sm .image { width: 20vw; }
+.image-md .image { width: 30vw; }
+.image-lg .image { width: 50vw; }
+.image-xl .image { width: 100vw; }
 
 /* Layout classes for headline sizes */
 .headline-xs .text p:first-child { font-size: 1.25rem; }

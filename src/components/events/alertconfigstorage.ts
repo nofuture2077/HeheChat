@@ -59,7 +59,7 @@ export class AlertConfigStorage {
         try {
             const state = localStorage.getItem('hehe-token_state') || '';
             const sink = localStorage.getItem('hehe-sink') || '';
-            const response = await fetch(this.baseUrl + '/event/config/meta?' + [['channels', channel].join('='), ['state', state].join('='), ['sink', sink].join('=')].join('&'));
+            const response = await fetch(this.baseUrl + '/event/config/meta?' + [['channels', channel].join('='), ['state', state].join('='), ['sink', sink].join('='), ['t', Date.now()].join('=')].join('&'));
             if (!response.ok) throw new Error('Failed to fetch config meta');
             return await response.json().then(r => r[channel]);
         } catch (error) {
@@ -72,7 +72,7 @@ export class AlertConfigStorage {
         try {
             const state = localStorage.getItem('hehe-token_state') || '';
             const sink = localStorage.getItem('hehe-sink') || '';
-            const response = await fetch(this.baseUrl + '/event/config?' + [['channels', channel].join('='), ['state', state].join('='), ['sink', sink].join('=')].join('&'));
+            const response = await fetch(this.baseUrl + '/event/config?' + [['channels', channel].join('='), ['state', state].join('='), ['sink', sink].join('='), ['t', Date.now()].join('=')].join('&'));
             if (!response.ok) throw new Error('Failed to fetch full config');
             return await response.json().then(r => r[channel]);
         } catch (error) {
