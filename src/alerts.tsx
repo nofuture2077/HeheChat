@@ -15,6 +15,7 @@ function getQueryVariable(query: string, variable: string): string | undefined {
 // Extract token from hash
 const query = window.location.hash.substring(1);
 const token = getQueryVariable(query, "token");
+const preview = !!getQueryVariable(query, "preview");
 localStorage.setItem('hehe-sink', token || '');
 
-ReactDOM.createRoot(document.getElementById('alert')!).render(<BrowserSource token={token} />);
+ReactDOM.createRoot(document.getElementById('alert')!).render(<BrowserSource token={token} preview={preview}/>);
