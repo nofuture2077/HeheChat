@@ -7,6 +7,7 @@ import { AlertSystem } from './components/alerts/alertplayer';
 
 interface BrowserSourceProps {
   token: string | undefined;
+  preview: boolean;
 }
 
 window.addEventListener("click", () => {
@@ -15,7 +16,7 @@ window.addEventListener("click", () => {
   } 
 }); 
 
-export default function BrowserSource({ token }: BrowserSourceProps) {
+export default function BrowserSource({ token, preview }: BrowserSourceProps) {
   const backendWorkerRef = useRef<Worker>();
   const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE});
 
@@ -38,10 +39,7 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
         const profile = data.profile;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
-        AlertSystem.alertConfig = data.shares;
-
-        // Publish alert configs
-        PubSub.publish('ALERT_CONFIG', data.shares);
+        AlertSystem.addNewChannels(profile.config.channels);
 
         backendWorkerRef.current?.postMessage({ type: "SEND", data: { source: "Browsersource", channels: Object.fromEntries(profile.config.channels.map((key: string) => [key, true])) }});
       }
@@ -53,7 +51,7 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
 
       if (data.type === 'event' || data.type === 'replayevent') {
         const event = data.data;
-        if (AlertSystem.shouldBePlayedInBrowsersource(event) || event.force) {
+        if (AlertSystem.shouldBePlayedInBrowsersource(event) || (preview && data.force)) {
           AlertSystem.addEvent(event);
         }
       }
@@ -68,12 +66,18 @@ export default function BrowserSource({ token }: BrowserSourceProps) {
       }
     });
 
+    const alertConfigSub = PubSub.subscribe("WS-alertConfig", (msg, data) => {
+      console.log('Alertconfig was updated for: ', data.channel);
+      AlertSystem.loadAlertConfig([data.channel]);
+    });
+
     // Cleanup worker on unmount
     return () => {
       if (backendWorkerRef.current) {
         backendWorkerRef.current.postMessage({ type: 'STOP' });
         backendWorkerRef.current.terminate();
       }
+      PubSub.unsubscribe(alertConfigSub);
     };
   }, [token]);
 

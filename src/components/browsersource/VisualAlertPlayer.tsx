@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import styles from './VisualAlertPlayer.module.css';
-import { VisualAlert, EventAlertConfig } from '@/commons/events';
+import { VisualAlert } from '@/commons/events';
+import { AlertSystem } from '../alerts/alertplayer';
 import PubSub from 'pubsub-js';
 
 interface HighlightedTextProps {
@@ -30,13 +31,12 @@ function HighlightedText({ text }: HighlightedTextProps) {
 }
 
 export default function VisualAlertPlayer() {
-  const [alertConfigs, setAlertConfigs] = useState<{ [key: string]: EventAlertConfig }>({});
   const [currentAlert, setCurrentAlert] = useState<VisualAlert | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   const getImage = (ref: string, channel: string) => {
-    if (alertConfigs?.[channel]?.data?.files?.[ref]) {
-      const file = alertConfigs[channel].data.files[ref];
+    if (AlertSystem.alertConfig?.[channel]?.data?.files?.[ref]) {
+      const file = AlertSystem.alertConfig[channel].data.files[ref];
       return `data:${file.mime};base64,${file.data}`;
     }
     return "";
@@ -52,11 +52,6 @@ export default function VisualAlertPlayer() {
   };
 
   useEffect(() => {
-    // Subscribe to alert config updates
-    const configToken = PubSub.subscribe('ALERT_CONFIG', (_, data) => {
-      setAlertConfigs(data);
-    });
-
     // Subscribe to new alerts
     const alertToken = PubSub.subscribe('ALERT_SHOW', (_, data) => {
       showAlert(data);
@@ -64,7 +59,6 @@ export default function VisualAlertPlayer() {
 
     // Cleanup subscriptions
     return () => {
-      PubSub.unsubscribe(configToken);
       PubSub.unsubscribe(alertToken);
     };
   }, []);
@@ -84,6 +78,7 @@ export default function VisualAlertPlayer() {
     <div className={containerClasses}>
       {currentAlert.image && (
         <img 
+          className={styles.image}
           src={getImage(currentAlert.image, currentAlert.channel)} 
           alt="Alert" 
         />

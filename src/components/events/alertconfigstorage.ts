@@ -58,7 +58,8 @@ export class AlertConfigStorage {
     async getConfigMeta(channel: string): Promise<AlertConfigMeta | null> {
         try {
             const state = localStorage.getItem('hehe-token_state') || '';
-            const response = await fetch(this.baseUrl + '/event/config/meta?' + [['channels', channel].join('='), ['state', state].join('=')].join('&'));
+            const sink = localStorage.getItem('hehe-sink') || '';
+            const response = await fetch(this.baseUrl + '/event/config/meta?' + [['channels', channel].join('='), ['state', state].join('='), ['sink', sink].join('=')].join('&'));
             if (!response.ok) throw new Error('Failed to fetch config meta');
             return await response.json().then(r => r[channel]);
         } catch (error) {
@@ -70,7 +71,8 @@ export class AlertConfigStorage {
     async getFullConfig(channel: string): Promise<any> {
         try {
             const state = localStorage.getItem('hehe-token_state') || '';
-            const response = await fetch(this.baseUrl + '/event/config?' + [['channels', channel].join('='), ['state', state].join('=')].join('&'));
+            const sink = localStorage.getItem('hehe-sink') || '';
+            const response = await fetch(this.baseUrl + '/event/config?' + [['channels', channel].join('='), ['state', state].join('='), ['sink', sink].join('=')].join('&'));
             if (!response.ok) throw new Error('Failed to fetch full config');
             return await response.json().then(r => r[channel]);
         } catch (error) {
@@ -125,7 +127,6 @@ export class AlertConfigStorage {
             // Check if we have a cached version
             meta.channel = channel;
             const cached = await this.getCachedConfig(channel);
-            console.log(cached, meta);
             // If we have a cached version and the hash matches, use it
             if (cached && cached.meta.hash === meta.hash) {
                 return cached.config;
