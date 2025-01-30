@@ -80,7 +80,6 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
         backendWorkerRef.current.postMessage({ type: 'STOP' });
         backendWorkerRef.current.terminate();
       }
-      PubSub.unsubscribe(alertConfigSub);
     };
   }, [token]);
 
