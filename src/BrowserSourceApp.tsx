@@ -39,9 +39,12 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
         const profile = data.profile;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
-        AlertSystem.addNewChannels(profile.config.channels);
-
-        backendWorkerRef.current?.postMessage({ type: "SEND", data: { source: "Browsersource", channels: Object.fromEntries(profile.config.channels.map((key: string) => [key, true])) }});
+        const channels = profile.config?.channels || [];
+        if (!channels) {
+          return;
+        }
+        AlertSystem.addNewChannels(channels);
+        backendWorkerRef.current?.postMessage({ type: "SEND", data: { source: "Browsersource", channels: Object.fromEntries(channels.map((key: string) => [key, true])) }});
       }
       
       if (data.type === 'alert') {
@@ -55,6 +58,11 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
           AlertSystem.addEvent(event);
         }
       }
+
+      if (data.type === 'alertConfig') {
+        console.log('Alertconfig was updated for: ', data.channel);
+        AlertSystem.loadAlertConfig([data.channel]);
+      }
     };
 
     // Send initial subscription message
@@ -64,11 +72,6 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
         type: 'sink',
         token
       }
-    });
-
-    const alertConfigSub = PubSub.subscribe("WS-alertConfig", (msg, data) => {
-      console.log('Alertconfig was updated for: ', data.channel);
-      AlertSystem.loadAlertConfig([data.channel]);
     });
 
     // Cleanup worker on unmount
