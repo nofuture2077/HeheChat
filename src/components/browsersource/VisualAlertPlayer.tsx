@@ -33,6 +33,7 @@ function HighlightedText({ text }: HighlightedTextProps) {
 export default function VisualAlertPlayer() {
   const [currentAlert, setCurrentAlert] = useState<VisualAlert | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [timestamp, setTimestamp] = useState(0);
 
   const getImage = (ref: string, channel: string) => {
     if (AlertSystem.alertConfig?.[channel]?.data?.files?.[ref]) {
@@ -55,6 +56,7 @@ export default function VisualAlertPlayer() {
     // Subscribe to new alerts
     const alertToken = PubSub.subscribe('ALERT_SHOW', (_, data) => {
       showAlert(data);
+      setTimestamp(Date.now());
     });
 
     // Cleanup subscriptions
@@ -81,6 +83,7 @@ export default function VisualAlertPlayer() {
           className={styles.image}
           src={getImage(currentAlert.image, currentAlert.channel)} 
           alt="Alert" 
+          key={"image-" + timestamp}
         />
       )}
       <div className={styles.text}>
