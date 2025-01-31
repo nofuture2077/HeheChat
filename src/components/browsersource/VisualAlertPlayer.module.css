@@ -122,6 +122,11 @@ body, html {
   max-width: 80%;
 }
 
+.text-dark .text { 
+  color: #111; 
+  text-shadow: 2px 2px 2px #ddd;
+}
+
 /* Layout classes for highlight colors */
 .yellow :global(span.highlight) { color: rgb(255, 241, 51); }
 .green :global(span.highlight) { color: rgb(51, 255, 65); }
@@ -130,6 +135,7 @@ body, html {
 .orange :global(span.highlight) { color: rgb(255, 173, 51); }
 .pink :global(span.highlight) { color: #f39; }
 .teal :global(span.highlight) { color: rgb(51, 255, 197); }
+.violett :global(span.highlight) { color: rgb(136, 51, 255); }
 
 /* Layout classes for highlight animations */
 .effect-bounce :global(span.highlight span) {

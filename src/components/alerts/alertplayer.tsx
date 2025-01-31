@@ -248,6 +248,16 @@ class AlertPlayer {
         return await this.getAudioInfo('data:audio/mp3;base64,' + audioData);
     }
 
+    async wait(duration: number, minDuration: number): Promise<void> {
+        return new Promise((resolve) => {
+            if (duration < minDuration) {
+                this.preciseTimer(resolve, (minDuration-duration) * 1000);
+            } else {
+                resolve();
+            }
+        });
+    }
+
     getAlert(event: Event, eventData: any, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
         if (event.eventAlert) {
             return event.eventAlert;
@@ -375,6 +385,7 @@ class AlertPlayer {
             console.log('Audio', ttsAudio, jingleAudio);
     
             const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
+            const minDuration = Math.max(duration, 2);
             PubSub.publish('AlertPlayer-update', {duration});
             if (alert.visual) {
                 const headline = formatString(alert.visual?.headline || "", vars);
@@ -382,13 +393,13 @@ class AlertPlayer {
 
                 console.log('Visuell', text, headline);
 
-                const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: duration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
+                const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: minDuration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
 
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
                 PubSub.publish('ALERT_SHOW', visualAlert);
             }
 
-            this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(onEnd, onError);
+            this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(() => this.wait(duration, minDuration)).then(onEnd, onError);
         } catch (err) {
             console.error(err);
             this.stopPlaying();
