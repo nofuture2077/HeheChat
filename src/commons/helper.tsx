@@ -22,6 +22,36 @@ export function generateGUID(): string {
     );
 }
 
+// Levenshtein distance function
+export function levenshtein(a: string, b: string) {
+    const tmp = [];
+    let i, j, alen = a.length, blen = b.length, cost;
+
+    if (alen === 0) return blen;
+    if (blen === 0) return alen;
+
+    for (i = 0; i <= alen; i++) {
+        tmp[i] = [i];
+    }
+
+    for (j = 0; j <= blen; j++) {
+        tmp[0][j] = j;
+    }
+
+    for (i = 1; i <= alen; i++) {
+        for (j = 1; j <= blen; j++) {
+            cost = (a[i - 1] === b[j - 1]) ? 0 : 1;
+            tmp[i][j] = Math.min(
+                tmp[i - 1][j] + 1,         // Deletion
+                tmp[i][j - 1] + 1,         // Insertion
+                tmp[i - 1][j - 1] + cost   // Substitution
+            );
+        }
+    }
+
+    return tmp[alen][blen];
+}
+
 import humanizeDuration, { HumanizerOptions } from "humanize-duration"
 
 const shortEnglishHumanizer = humanizeDuration.humanizer({
