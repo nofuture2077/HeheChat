@@ -54,7 +54,7 @@ export const getUserId = async (username: string) => {
 
 export const getUserInfo = async (channel: string, username: string) => {
     const state = localStorage.getItem('hehe-token_state') || '';
-    return fetch(import.meta.env.VITE_BACKEND_URL + "/api/user?" + query([param("state", state), param("username", username)])).then(res => res.json());
+    return fetch(import.meta.env.VITE_BACKEND_URL + "/api/user?" + query([param("state", state), param("channel", channel), param("username", username)])).then(res => res.json());
 };
 
 export interface ModActions {
