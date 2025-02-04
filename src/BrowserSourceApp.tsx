@@ -34,8 +34,8 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
       }
 
       if (data.type === 'setdelay') {
-        AlertSystem.setJingleExtra(data.data.jingleExtra);
-        AlertSystem.setTTSExtra(data.data.ttsExtra);
+        AlertSystem.setJingleExtra(data.jingleExtra);
+        AlertSystem.setTTSExtra(data.ttsExtra);
         backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "setdelayresponse", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
         return;
       }
