@@ -4,7 +4,7 @@ import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge, 
 import { IconArrowsRight, IconX } from '@tabler/icons-react';
 import { OverlayDrawer } from '../../../pages/Chat.page';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
-import { HeheMessage, SystemMessage, isSystemMessageType, HeheChatMessage, parseMessage } from '../../../commons/message';
+import { HeheMessage, isSystemMessageType, parseMessage } from '../../../commons/message';
 import { getUserInfo, ModActions } from './modactions';
 import styles from './modview.module.css';
 import { formatDate, formatDuration, formatDateWithTime } from '../../../commons/helper';
@@ -30,7 +30,7 @@ export interface ModViewProps {
 function formatBanMessage(userInfo: any, username: string): string | null {
     if (!userInfo?.ban?.user_id) return null;
 
-    const moderator = userInfo.ban.moderator_login || 'Nofuture2077';
+    const moderator = userInfo.ban.moderator_login;
     const banDate = new Date(userInfo.ban.created_at);
     const endDate = userInfo.ban.expires_at ? new Date(userInfo.ban.expires_at) : null;
 
@@ -84,7 +84,8 @@ export function ModView(props: ModViewProps) {
         modUser: () => {},
         unmodUser: () => {},
         vipUser: () => {},
-        unvipUser: () => {}
+        unvipUser: () => {},
+        unraid: () => {}
     };
 
     useEffect(() => {

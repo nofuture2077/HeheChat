@@ -28,6 +28,18 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
     backendWorkerRef.current.onmessage = (event) => {
       const data = event.data;
 
+      if (data.type === 'delayinfo') {
+        backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "delayinfo", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
+        return;
+      }
+
+      if (data.type === 'setdelay') {
+        AlertSystem.setJingleExtra(data.jingleExtra);
+        AlertSystem.setTTSExtra(data.ttsExtra);
+        backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "setdelayresponse", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
+        return;
+      }
+
       if (data.type === 'profile') {
         const profile = data.profile;
         setProfile(profile);
@@ -44,7 +56,7 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
           return;
         }
         AlertSystem.addNewChannels(channels);
-        backendWorkerRef.current?.postMessage({ type: "SEND", data: { source: "Browsersource", channels: Object.fromEntries(channels.map((key: string) => [key, true])) }});
+        backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "subscribe", source: "Browsersource", token, channels: Object.fromEntries(channels.map((key: string) => [key, true])) }});
       }
       
       if (data.type === 'alert') {

@@ -25,8 +25,6 @@ export function AlertSettings() {
     const config = useContext(ConfigContext);
     const forceUpdate = useForceUpdate();
     const [sink, setSink] = useState<string | undefined>(undefined);
-    const [ttsExtra, setTTSExtra] = useState<number>(AlertSystem.ttsExtra || 0);
-    const [jingleExtra, setJingleExtra] = useState<number>(AlertSystem.jingleExtra || 0);
     const hasShare = (channel: string) => config.receivedShares.includes(channel);
     const isActive = (channel: string) => config.activatedShares.includes(channel);
 
@@ -37,15 +35,6 @@ export function AlertSettings() {
             setSink(data.sink);
         });
     }, []);
-
-    useEffect(() => {
-        if (AlertSystem.ttsExtra !== ttsExtra) {
-            AlertSystem.setTTSExtra(ttsExtra);
-        }
-        if (AlertSystem.jingleExtra !== jingleExtra) {
-            AlertSystem.setJingleExtra(jingleExtra);
-        }
-    }, [ttsExtra, jingleExtra])
 
     const changeActive = (channel: string, active: boolean) => {
         const activatedShares = config.activatedShares;
@@ -116,9 +105,9 @@ export function AlertSettings() {
             <Fieldset legend="Alert Delay" variant="filled" key="tts-delay">
                 <Stack>
                     <Text size="sm">Jingle</Text>
-                    <Slider w="calc(100% - 20px)" m="10" value={jingleExtra} onChange={setJingleExtra} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
+                    <Slider w="calc(100% - 20px)" m="10" value={AlertSystem.jingleExtra} onChange={(extra) => { AlertSystem.setJingleExtra(extra); forceUpdate(); }} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
                     <Text size="sm">Text to Speech</Text>
-                    <Slider w="calc(100% - 20px)" m="10" value={ttsExtra} onChange={setTTSExtra} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
+                    <Slider w="calc(100% - 20px)" m="10" value={AlertSystem.ttsExtra} onChange={(extra) => { AlertSystem.setTTSExtra(extra); forceUpdate(); }} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
                 </Stack>
             </Fieldset>
         </Stack>)

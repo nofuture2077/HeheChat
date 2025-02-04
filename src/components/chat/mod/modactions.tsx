@@ -43,9 +43,18 @@ export const raidUser = (channelIdFrom: string, channelIdTo: string) => {
     PubSub.publish('WSSEND', {type: 'raidUser', channelIdFrom, channelIdTo});
 };
 
-export const getUserInfo = (channel: string, username: string) => {
+export const unraid = (channelIdFrom: string) => {
+    PubSub.publish('WSSEND', {type: 'unraid', channelIdFrom});
+};
+
+export const getUserId = async (username: string) => {
     const state = localStorage.getItem('hehe-token_state') || '';
-    return fetch(import.meta.env.VITE_BACKEND_URL + "/api/user?" + query([param("state", state), param("channel", channel), param("username", username)])).then(res => res.json());
+    return fetch(import.meta.env.VITE_BACKEND_URL + "/api/user/id?" + query([param("state", state), param("username", username)])).then(res => res.json());
+};
+
+export const getUserInfo = async (channel: string, username: string) => {
+    const state = localStorage.getItem('hehe-token_state') || '';
+    return fetch(import.meta.env.VITE_BACKEND_URL + "/api/user?" + query([param("state", state), param("username", username)])).then(res => res.json());
 };
 
 export interface ModActions {
@@ -55,6 +64,7 @@ export interface ModActions {
     unbanUser: (channelId: string, userId: string) => void;
     shoutoutUser: (channelId: string, userId: string) => void;
     raidUser: (fromChannelId: string, toChannelId: string) => void;
+    unraid: (fromChannelId: string) => void;
     modUser: (channelId: string, userId: string) => void;
     unmodUser: (channelId: string, userId: string) => void;
     vipUser: (channelId: string, userId: string) => void;
