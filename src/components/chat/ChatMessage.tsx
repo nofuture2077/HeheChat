@@ -143,6 +143,26 @@ export function ChatMessageComp(props: ChatMessageProps) {
     );
 
     const radialActions = [];
+
+
+    if (!props.hideReply && config.chatEnabled) {
+        radialActions.push(
+            {
+                icon: <IconCopy size={48} />,
+                onClick: () => {
+                    navigator.clipboard.writeText(props.msg.text);
+                },
+                tooltip: 'Copy'
+            },
+            {
+                icon: <IconArrowBackUp size={48} />,
+                onClick: () => {
+                    props.setReplyMsg(props.msg);
+                },
+                tooltip: 'Reply'
+            }
+        );
+    }
     
     if (canMod && config.modToolsEnabled) {
         radialActions.push(
@@ -207,25 +227,6 @@ export function ChatMessageComp(props: ChatMessageProps) {
             },
             tooltip: 'User'
         });
-    }
-
-    if (!props.hideReply && config.chatEnabled) {
-        radialActions.push(
-            {
-                icon: <IconCopy size={48} />,
-                onClick: () => {
-                    navigator.clipboard.writeText(props.msg.text);
-                },
-                tooltip: 'Copy'
-            },
-            {
-                icon: <IconArrowBackUp size={48} />,
-                onClick: () => {
-                    props.setReplyMsg(props.msg);
-                },
-                tooltip: 'Reply'
-            }
-        );
     }
 
     const msgClasses = [classes.msg];
