@@ -139,8 +139,8 @@ export default function HeheChat() {
         });
     
         const psSetDelay = PubSub.subscribe("WS-setdelay", (msg, data) => {
-            AlertSystem.setJingleExtra(data.jingleExtra);
-            AlertSystem.setTTSExtra(data.ttsExtra);
+            AlertSystem.setJingleExtra(data.data.jingleExtra);
+            AlertSystem.setTTSExtra(data.data.ttsExtra);
             backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "setdelayresponse", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
             return;
         });
