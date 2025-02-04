@@ -127,3 +127,9 @@
     width: 3em;
     text-align: center;
 }
+
+.power_ups_gigantified_emote {
+    display: block;
+    height: 6rem;
+    margin: 0.2rem;
+}

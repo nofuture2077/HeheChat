@@ -66,10 +66,10 @@ const wordMapper = (word: string, channel: string, partIndex: number, index: num
     return emotes.getEmote(channel, word, partIndex + "_" + index);
 }
 
-export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: string, config: Config, emotes: ChatEmotes, login: LoginContext) {
+export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: string, large: boolean, config: Config, emotes: ChatEmotes, login: LoginContext) {
     return parsedParts.map((part, partIndex) => {
         switch (part.type) {
-            case 'emote': return <EmoteComponent key={partIndex} imageUrl={buildEmoteImageUrl(part.emote?.id! || part.id || '')} largeImageUrl={buildEmoteImageUrl(part.emote?.id! || part.id || '', {size: '2.0'})} name={part.text} type='Twitch'/>;
+            case 'emote': return <EmoteComponent key={partIndex} imageUrl={buildEmoteImageUrl(part.emote?.id! || part.id || '')} largeImageUrl={buildEmoteImageUrl(part.emote?.id! || part.id || '', {size: '2.0'})} name={part.text} large={large} type='Twitch'/>;
             case 'cheermote': {
                 if (part.cheermote?.bits) {
                     const cheerEmote = emotes.getCheerEmote(channel, part.cheermote?.prefix || '', part.cheermote?.bits || 0);
@@ -234,7 +234,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
     deleted && msgClasses.push(classes.deleted);
     props.msg.isFirst && msgClasses.push(classes.first);
     props.msg.isHighlight && msgClasses.push(classes.highlight);
-
+    const largeEmote = props.msg.msgType === 'power_ups_gigantified_emote';
     const badge = props.msg.isFirst ? <span className={classes.firstBadge} key="first-badge">FIRST MESSAGE</span> : props.msg.isHighlight ? <span className={classes.highlightBadge} key="highlight-badge">HIGHLIGHT</span> : null;
 
     return (
@@ -251,7 +251,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
                 <span className={classes.badges}>{Object.entries(props.msg.userInfo.badges).map((entry, index) =>  getBadge(config, emotes, channel, entry.join(','), index.toString()))}</span>
                 <span className={classes.username} style={{color: adjustedColor}}>{props.msg.userInfo.displayName}</span>
                 <span>: </span>
-                <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, config, emotes, login)}</span>
+                <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, largeEmote, config, emotes, login)}</span>
             </div>
             
             {menuPosition && (
