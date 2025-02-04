@@ -128,7 +128,7 @@
     text-align: center;
 }
 
-.power_ups_gigantified_emote {
+.power_ups_gigantified_emote .emote img {
     display: block;
     height: 6rem;
     margin: 0.2rem;

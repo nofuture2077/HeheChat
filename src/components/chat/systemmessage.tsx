@@ -87,6 +87,6 @@ export function SystemMessageComp(props: SystemMessageProps) {
                 <Text key="msg-main" fw={700} {...style} style={{fontSize: config.fontSize}} span>
                     {joinWithSpace(textParts[0].split(" ").map((value, index, array) => wordMapper(eventType, value, index, array)))}{actions}
                 </Text>
-                {textParts.length === 2 ? <Text key="msg-second" fw={500} style={{fontSize: config.fontSize}}>{parsedPartsToHtml(msgParts, channel, config, emotes, login)}</Text>: null}
+                {textParts.length === 2 ? <Text key="msg-second" fw={500} style={{fontSize: config.fontSize}}>{parsedPartsToHtml(msgParts, channel, false, config, emotes, login)}</Text>: null}
         </div>;
 }
