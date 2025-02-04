@@ -106,12 +106,12 @@ export default function HeheChat() {
         backendWorkerRef.current = new Worker(new URL('./components/webworker/backendworker.ts', import.meta.url), { type: 'module' });
         seventvWorkerRef.current = new Worker(new URL('./components/webworker/seventvworker.ts', import.meta.url), { type: 'module' });
 
-        PubSub.subscribe("WSSEND", (msg, data) => {
+        const psWSSend = PubSub.subscribe("WSSEND", (msg, data) => {
             data.state = localStorage.getItem('hehe-token_state') || '';
             backendWorkerRef.current!.postMessage({type: "SEND", data});
         });
 
-        PubSub.subscribe("WSSEND7TV", (msg, data) => {
+        const ps7TV = PubSub.subscribe("WSSEND7TV", (msg, data) => {
             seventvWorkerRef.current!.postMessage({type: "SEND", data});
         });
 
@@ -128,15 +128,32 @@ export default function HeheChat() {
 
         loadReceivedShares();
 
-        PubSub.subscribe("WS-alertConfig", (msg, data) => {
+        const psAlertConfig = PubSub.subscribe("WS-alertConfig", (msg, data) => {
             console.log('Alertconfig was updated for: ', data.channel);
             AlertSystem.loadAlertConfig([data.channel]);
+        });
+
+        const psDelayInfo = PubSub.subscribe("WS-delayinfo", (msg, data) => {
+            backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "delayinfo", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
+            return;
+        });
+    
+        const psSetDelay = PubSub.subscribe("WS-setdelay", (msg, data) => {
+            AlertSystem.setJingleExtra(data.jingleExtra);
+            AlertSystem.setTTSExtra(data.ttsExtra);
+            backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "setdelayresponse", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
+            return;
         });
 
         return () => {
             const stopMessage = { type: 'STOP' };
             backendWorkerRef.current?.postMessage(stopMessage);
             seventvWorkerRef.current?.postMessage(stopMessage);
+            PubSub.unsubscribe(psAlertConfig);
+            PubSub.unsubscribe(psDelayInfo);
+            PubSub.unsubscribe(psSetDelay);
+            PubSub.unsubscribe(psWSSend);
+            PubSub.unsubscribe(ps7TV);
         }
     }, []);
 

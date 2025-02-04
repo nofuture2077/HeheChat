@@ -15,7 +15,7 @@ import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { HeheMessage, parseMessage, HeheChatMessage } from '../commons/message';
 import { TwitchDrawer } from '../components/twitch/twitchview';
-import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, shoutoutUser, modUser, unmodUser, vipUser, unvipUser } from '../components/chat/mod/modactions';
+import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, shoutoutUser, modUser, unmodUser, vipUser, unvipUser, unraid } from '../components/chat/mod/modactions';
 import { ProfileBarDrawer } from '../components/profile/profilebar';
 import { Storage } from '../components/chat/chatstorage';
 import { AlertSystem } from '../components/alerts/alertplayer';
@@ -260,7 +260,8 @@ export function ChatPage() {
         modUser,
         unmodUser,
         vipUser,
-        unvipUser
+        unvipUser,
+        unraid
     };
 
     const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);
@@ -305,7 +306,7 @@ export function ChatPage() {
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
             <AppShell.Footer >
-                {config.chatEnabled ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : null}
+                {config.chatEnabled ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView}/></div> : null}
             </AppShell.Footer>
         </AppShell>
     );

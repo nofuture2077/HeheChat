@@ -46,6 +46,7 @@ export class HeheChatMessage {
     channelId: string;
     isFirst?: boolean;
     isHighlight?: boolean;
+    msgType?: string;
 
     constructor(
         id: string,
@@ -56,7 +57,8 @@ export class HeheChatMessage {
         userInfo: UserInfo,
         channelId: string,
         isFirst?: boolean,
-        isHighlight?: boolean
+        isHighlight?: boolean,
+        msgType?: string
     ) {
         this.id = id;
         this.text = text;
@@ -67,6 +69,7 @@ export class HeheChatMessage {
         this.channelId = channelId;
         this.isFirst = isFirst;
         this.isHighlight = isHighlight;
+        this.msgType = msgType;
     }
 
     static deserialize(json: string): HeheChatMessage {
@@ -80,7 +83,8 @@ export class HeheChatMessage {
             data.userInfo,
             data.channelId,
             data.isFirst,
-            data.isHighlight
+            data.isHighlight,
+            data.msgType
         );
     }
 }
