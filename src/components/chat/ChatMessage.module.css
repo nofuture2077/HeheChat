@@ -129,7 +129,7 @@
 }
 
 .power_ups_gigantified_emote .text img {
-    display: block;
-    height: 6rem;
-    margin: 0.2rem;
+    display: block !important;
+    height: 6rem !important;
+    margin: 0.2rem !important;
 }
