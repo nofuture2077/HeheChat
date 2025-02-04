@@ -229,6 +229,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
     }
 
     const msgClasses = [classes.msg];
+    props.msg.msgType && msgClasses.push(classes[props.msg.msgType]);
     props.hideReply && msgClasses.push(classes.hideReply);
     deleted && msgClasses.push(classes.deleted);
     props.msg.isFirst && msgClasses.push(classes.first);
