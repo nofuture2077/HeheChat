@@ -191,7 +191,8 @@ export function ChatInput(props: ChatInputProps) {
                             placeholder={props.replyToMsg ? ("Reply to " + props.replyToMsg.userInfo.displayName + " in " + chatChannel) : ("Chat in " + chatChannel)}
                             rightSectionWidth={42}
                             onKeyDown={event => {
-                                if (event.key === "Enter" && !combobox.dropdownOpened) {
+                                console.log(event);
+                                if (event.key === "Enter") {
                                     sendMessage(inputText, false);
                                     event.preventDefault();
                                     return false;

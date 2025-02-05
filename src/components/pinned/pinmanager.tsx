@@ -378,9 +378,9 @@ export function PinManager() {
                     type: 'raid',
                     id: generateGUID(),
                     channel: d.broadcasterName,
-                    endTime: new Date(Date.now() + 0),
+                    endTime: new Date(Date.now()),
                     data: {
-                        broadcasterName: d.broadcasterName,
+                        broadcasterName: d.channel,
                         targetChannelName: d.targetChannelName,
                         viewers: 0
                     }

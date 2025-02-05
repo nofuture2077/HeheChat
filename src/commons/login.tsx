@@ -2,7 +2,7 @@ import { StaticAuthProvider, AuthProvider } from '@twurple/auth';
 import { ApiClient, HelixUser, HelixModeratedChannel } from '@twurple/api';
 import { toMap } from '@/commons/helper';
 
-export const AUTH_VERSION = 13;
+export const AUTH_VERSION = 14;
 
 export const LOGIN_SCOPES = [
     "bits:read",
