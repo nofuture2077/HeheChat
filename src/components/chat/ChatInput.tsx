@@ -14,7 +14,8 @@ interface ChatInputProps {
     replyToMsg?: HeheChatMessage, 
     setReplyMsg: (msg?: HeheChatMessage) => void,
     openModView: (channel: string, channelId: string, username: string) => void;
-    modActions: ModActions
+    modActions: ModActions;
+    usernames: string[];
 }
 
 export function ChatInput(props: ChatInputProps) {
@@ -137,26 +138,90 @@ export function ChatInput(props: ChatInputProps) {
             props.close();
     }
 
-    const filteredCommands = (() => {
-        const channelId = emotes.getChannelId(config.getChatChannel() || '');
-        const isBroadcasterStatus = isBroadcaster(channelId);
-        const isModeratorStatus = isModerator(channelId);
+    interface ComboboxItem {
+        value: string;
+        label: string;
+    }
 
-        const availableCommands = commands.filter(cmd => {
-            if (cmd.value === '/raid') {
-                return isBroadcasterStatus;
-            }
-            if (cmd.value === '/unraid') {
+    const getFilteredItems = (): ComboboxItem[] => {
+        const words = inputText.split(' ');
+        const currentWord = words[words.length - 1];
+        
+        // Handle command autocomplete
+        if (currentWord.startsWith('/')) {
+            const channelId = emotes.getChannelId(config.getChatChannel() || '');
+            const isBroadcasterStatus = isBroadcaster(channelId);
+            const isModeratorStatus = isModerator(channelId);
+
+            const availableCommands = commands.filter(cmd => {
+                if (cmd.value === '/raid') {
+                    return isBroadcasterStatus;
+                }
+                if (cmd.value === '/unraid') {
+                    return isBroadcasterStatus || isModeratorStatus;
+                }
                 return isBroadcasterStatus || isModeratorStatus;
-            }
-            return isBroadcasterStatus || isModeratorStatus;
-        });
+            });
 
-        return availableCommands.filter(cmd => 
-            cmd.value.toLowerCase().includes(inputText.toLowerCase()) ||
-            cmd.label.toLowerCase().includes(inputText.toLowerCase())
-        );
-    })();
+            return availableCommands
+                .filter(cmd => cmd.value.toLowerCase().includes(currentWord.toLowerCase()))
+                .map(cmd => ({ value: cmd.value, label: cmd.label }));
+        }
+        
+        // Handle username autocomplete for @ mentions
+        if (currentWord.includes('@')) {
+            // If the word is just @ or ends with @, show all usernames
+            if (currentWord === '@' || currentWord.endsWith('@')) {
+                return props.usernames
+                    .slice(0, 5)
+                    .map(username => ({ value: '@' + username, label: '@' + username }));
+            }
+            
+            // Otherwise filter based on text after @
+            const filterText = currentWord.split('@')[1] || '';
+            return props.usernames
+                .filter(username => 
+                    username.toLowerCase().includes(filterText.toLowerCase())
+                )
+                .slice(0, 5)
+                .map(username => ({ value: '@' + username, label: '@' + username }));
+        }
+        
+        // Handle username autocomplete for commands that expect usernames
+        const commandMatch = words[0];
+        if (commandMatch?.startsWith('/')) {
+            const commandDef = commands.find(cmd => cmd.value === commandMatch);
+            if (commandDef?.label.includes('[username]')) {
+                // Don't show usernames if we're still typing the command
+                if (words.length === 1 && currentWord === commandMatch) {
+                    return [];
+                }
+                
+                // Show all usernames if we're right after the command and there's a space
+                if (inputText.endsWith(' ')) {
+                    return props.usernames
+                        .slice(0, 5)
+                        .map(username => ({ value: username, label: username }));
+                }
+                
+                // Filter usernames based on input after command
+                if (words.length > 1) {
+                    const filterText = currentWord;
+                    
+                    return props.usernames
+                        .filter(username => 
+                            !filterText || username.toLowerCase().includes(filterText.toLowerCase())
+                        )
+                        .slice(0, 5)
+                        .map(username => ({ value: username, label: username }));
+                }
+            }
+        }
+        
+        return [];
+    };
+
+    const filtered = getFilteredItems();
 
     return (
         <Stack gap={0} className={classes.chatInput}>
@@ -166,7 +231,17 @@ export function ChatInput(props: ChatInputProps) {
                 <Combobox
                     store={combobox}
                     onOptionSubmit={(value) => {
-                        setInputText(value);
+                        const words = inputText.split(' ');
+                        const currentWord = words[words.length - 1];
+                        
+                        // Replace only the last word with the selected value and add a space
+                        if (words.length > 1) {
+                            words[words.length - 1] = value;
+                            setInputText(words.join(' ') + ' ');
+                        } else {
+                            setInputText(value + ' ');
+                        }
+                        
                         combobox.closeDropdown();
                     }}
                 >
@@ -176,7 +251,10 @@ export function ChatInput(props: ChatInputProps) {
                             onChange={(event) => {
                                 const newValue = event.currentTarget.value;
                                 setInputText(newValue);
-                                if (newValue.startsWith('/') && filteredCommands.length) {
+                                
+                                const items = getFilteredItems();
+
+                                if (items.length > 0) {
                                     combobox.openDropdown();
                                 } else {
                                     combobox.closeDropdown();
@@ -191,7 +269,6 @@ export function ChatInput(props: ChatInputProps) {
                             placeholder={props.replyToMsg ? ("Reply to " + props.replyToMsg.userInfo.displayName + " in " + chatChannel) : ("Chat in " + chatChannel)}
                             rightSectionWidth={42}
                             onKeyDown={event => {
-                                console.log(event);
                                 if (event.key === "Enter") {
                                     sendMessage(inputText, false);
                                     event.preventDefault();
@@ -210,15 +287,16 @@ export function ChatInput(props: ChatInputProps) {
                         />
                     </Combobox.Target>
 
-                    <Combobox.Dropdown hidden={!inputText.startsWith('/')}>
+                    {filtered.length ? 
+                    (<Combobox.Dropdown>
                         <Combobox.Options>
-                            {filteredCommands.slice(0, 5).map((command) => (
-                                <Combobox.Option value={command.value} key={command.value}>
-                                    {command.label}
+                            {filtered.map((item: ComboboxItem) => (
+                                <Combobox.Option value={item.value} key={item.value}>
+                                    {item.label}
                                 </Combobox.Option>
                             ))}
                         </Combobox.Options>
-                    </Combobox.Dropdown>
+                    </Combobox.Dropdown>) : null}
                 </Combobox>
             </Flex>
         </Stack>

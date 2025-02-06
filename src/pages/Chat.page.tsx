@@ -42,6 +42,7 @@ export function ChatPage() {
     const config = useContext(ConfigContext);
     const profile = useContext(ProfileContext);
     const [chatMessages, setChatMessages] = useThrottledState<HeheMessage[]>([], 500);
+    const [usernames, setUsernames] = useState<Set<string>>(new Set());
     const [shouldScroll, setShouldScroll] = useState(true);
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
@@ -86,6 +87,11 @@ export function ChatPage() {
         }
         if (msg.id && messageIndex.has(msg.id)) {
             return;
+        }
+        
+        // Track username from new messages
+        if (msg.type === 'chat') {
+            setUsernames(prev => new Set([...prev, msg.userInfo.userName.toLowerCase()]));
         }
         if (msg instanceof HeheChatMessage && msg.text.startsWith("!tts") && (config.freeTTS || []).includes(user)) {
             const message = msg.text.split("!tts")[1];
@@ -183,6 +189,7 @@ export function ChatPage() {
 
         Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
             const msgs = rawMessages.map(parseMessage);
+            setUsernames(new Set(msgs.filter(msg => msg.type === 'chat').map(msg => msg.userInfo.userName.toLowerCase())));
             setChatMessages(msgs);
         });
 
@@ -227,6 +234,7 @@ export function ChatPage() {
         if (networkStatus.online && documentVisible) {
             Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
                 const msgs = rawMessages.map(parseMessage);
+                setUsernames(new Set(msgs.filter(msg => msg.type === 'chat').map(msg => msg.userInfo.userName.toLowerCase())));
                 setChatMessages(msgs);
             });
         }
@@ -306,7 +314,7 @@ export function ChatPage() {
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
             <AppShell.Footer >
-                {config.chatEnabled ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView}/></div> : null}
+                {config.chatEnabled ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView} usernames={Array.from(usernames)}/></div> : null}
             </AppShell.Footer>
         </AppShell>
     );
