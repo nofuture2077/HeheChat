@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { ChannelPicker } from './ChannelPicker';
 import { Textarea, ActionIcon, rem, Flex, Stack, Combobox, useCombobox } from '@mantine/core'
@@ -22,6 +22,21 @@ export function ChatInput(props: ChatInputProps) {
     const config = useContext(ConfigContext);
     const emotes = useContext(ChatEmotesContext);
     const [inputText, setInputText] = useState<string>('');
+    const [messageHistory, setMessageHistory] = useState<string[]>([]);
+    const [historyIndex, setHistoryIndex] = useState<number>(-1);
+
+    // Load message history from localStorage on component mount
+    useEffect(() => {
+        const savedHistory = localStorage.getItem('hehe-chatMessageHistory');
+        if (savedHistory) {
+            setMessageHistory(JSON.parse(savedHistory));
+        }
+    }, []);
+
+    // Save message history to localStorage whenever it changes
+    useEffect(() => {
+        localStorage.setItem('hehe-chatMessageHistory', JSON.stringify(messageHistory));
+    }, [messageHistory]);
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption()
     });
@@ -119,6 +134,12 @@ export function ChatInput(props: ChatInputProps) {
 
     const chatChannel = config.getChatChannel();
     const sendMessage = async (text: string, close: boolean) => {
+        // Add message to history if it's not empty and different from the last message
+        if (text.trim() && (messageHistory.length === 0 || messageHistory[messageHistory.length - 1] !== text)) {
+            // Keep only the last 20 messages
+            const newHistory = [...messageHistory, text].slice(-20);
+            setMessageHistory(newHistory);
+        }
         if (text.startsWith('/')) {
             if (await executeCommand(text)) {
                 setInputText('');
@@ -271,8 +292,30 @@ export function ChatInput(props: ChatInputProps) {
                             onKeyDown={event => {
                                 if (event.key === "Enter") {
                                     sendMessage(inputText, false);
+                                    setHistoryIndex(-1);
                                     event.preventDefault();
                                     return false;
+                                } else if (event.key === "ArrowUp") {
+                                    event.preventDefault();
+                                    if (messageHistory.length > 0) {
+                                        const newIndex = historyIndex === -1 ? 
+                                            messageHistory.length - 1 : 
+                                            Math.max(0, historyIndex - 1);
+                                        setHistoryIndex(newIndex);
+                                        setInputText(messageHistory[newIndex]);
+                                    }
+                                } else if (event.key === "ArrowDown") {
+                                    event.preventDefault();
+                                    if (historyIndex >= 0) {
+                                        const newIndex = historyIndex + 1;
+                                        if (newIndex >= messageHistory.length) {
+                                            setHistoryIndex(-1);
+                                            setInputText('');
+                                        } else {
+                                            setHistoryIndex(newIndex);
+                                            setInputText(messageHistory[newIndex]);
+                                        }
+                                    }
                                 }
                             }}
                             leftSection={props.replyToMsg ?
