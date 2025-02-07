@@ -187,5 +187,5 @@ export const DEFAULT_CONFIG: Config = {
     setBrowserSourceVisual: (val) => {},
 };
 
-export const DB_VERSION = 3;
+export const DB_VERSION = 4;
 export const DB_NAME = 'HeheChat';
