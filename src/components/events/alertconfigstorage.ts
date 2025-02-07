@@ -5,7 +5,13 @@ const STORE_NAME = 'alertConfig';
 
 const alertConfigSchema: StoreSchema = {
     name: STORE_NAME,
-    keyPath: 'meta.channel'
+    keyPath: 'meta.channel',
+    indexes: [
+        {
+            name: 'channel',
+            keyPath: 'meta.channel'
+        }
+    ]
 };
 
 class AlertConfigStorage extends BaseStorage<EventAlertConfig> {
