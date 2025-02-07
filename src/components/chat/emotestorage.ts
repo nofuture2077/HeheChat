@@ -14,10 +14,22 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 export class EmoteStorage {
     private db: IDBDatabase | null = null;
     private dbInitialized: Promise<void>;
+    private cleanupScheduled = false;
 
     constructor() {
         this.dbInitialized = this.initDB();
-        this.cleanExpiredEmotes(); // Clean expired emotes on initialization
+        // Schedule cleanup instead of blocking initialization
+        this.scheduleCleanup();
+    }
+
+    private scheduleCleanup() {
+        if (this.cleanupScheduled) return;
+        this.cleanupScheduled = true;
+        // Run cleanup after initialization completes
+        this.dbInitialized.then(() => {
+            this.cleanExpiredEmotes();
+            this.cleanupScheduled = false;
+        }).catch(console.error);
     }
 
     private async initDB(): Promise<void> {
@@ -57,26 +69,25 @@ export class EmoteStorage {
     }
 
     private async getStore(mode: IDBTransactionMode = 'readonly'): Promise<IDBObjectStore> {
-        try {
-            await this.dbInitialized;
-            if (!this.db) {
-                throw new Error('Database not initialized');
+        if (!this.db) {
+            try {
+                await this.dbInitialized;
+            } catch (error) {
+                console.error('Error waiting for DB initialization:', error);
+                // Only try to re-initialize if really needed
+                await this.initDB();
             }
-            if (!this.db.objectStoreNames.contains(STORE_NAME)) {
-                throw new Error(`Store ${STORE_NAME} not found`);
-            }
-            const transaction = this.db.transaction(STORE_NAME, mode);
-            return transaction.objectStore(STORE_NAME);
-        } catch (error) {
-            console.error('Error getting store:', error);
-            // Re-initialize database on error
-            await this.initDB();
+            
             if (!this.db) {
                 throw new Error('Database initialization failed');
             }
-            const transaction = this.db.transaction(STORE_NAME, mode);
-            return transaction.objectStore(STORE_NAME);
         }
+
+        if (!this.db.objectStoreNames.contains(STORE_NAME)) {
+            throw new Error(`Store ${STORE_NAME} not found`);
+        }
+
+        return this.db.transaction(STORE_NAME, mode).objectStore(STORE_NAME);
     }
 
     private async cleanExpiredEmotes(): Promise<void> {
