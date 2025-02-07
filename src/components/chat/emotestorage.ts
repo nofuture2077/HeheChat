@@ -15,163 +15,79 @@ export class EmoteStorage {
     private db: IDBDatabase | null = null;
     private dbInitialized: Promise<void>;
     private cleanupScheduled = false;
-    private initializationAttempts = 0;
-    private readonly MAX_INIT_ATTEMPTS = 3;
-    private initPromise: Promise<void>;
-    private initResolve!: () => void;
-    private initReject!: (error: Error) => void;
 
     constructor() {
-        // Create a promise that we can resolve/reject from anywhere
-        this.initPromise = new Promise<void>((resolve, reject) => {
-            this.initResolve = resolve;
-            this.initReject = reject;
-        });
-        // Start initialization in background
         this.dbInitialized = this.initDB();
-        this.dbInitialized.then(() => {
-            this.initResolve();
-            // Schedule cleanup after successful initialization
-            this.scheduleCleanup();
-        }).catch(error => {
-            console.error('Initial database initialization failed:', error);
-            this.initReject(error instanceof Error ? error : new Error('Unknown initialization error'));
-        });
+        // Schedule cleanup instead of blocking initialization
+        this.scheduleCleanup();
     }
 
     private scheduleCleanup() {
         if (this.cleanupScheduled) return;
         this.cleanupScheduled = true;
-        // Run cleanup in background
-        Promise.resolve().then(() => {
-            this.cleanExpiredEmotes().catch(console.error).finally(() => {
-                this.cleanupScheduled = false;
-            });
-        });
+        // Run cleanup after initialization completes
+        this.dbInitialized.then(() => {
+            this.cleanExpiredEmotes();
+            this.cleanupScheduled = false;
+        }).catch(console.error);
     }
 
     private async initDB(): Promise<void> {
-        if (this.initializationAttempts >= this.MAX_INIT_ATTEMPTS) {
-            throw new Error('Max database initialization attempts reached');
-        }
-        this.initializationAttempts++;
 
-        try {
-            await new Promise<void>((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-                request.onerror = () => {
-                    console.error("Error opening IndexedDB:", request.error);
-                    reject(request.error);
-                };
+            request.onerror = () => {
+                console.error("Error opening IndexedDB:", request.error);
+                reject(request.error);
+            };
 
-                request.onblocked = () => {
-                    console.error("Database blocked, closing other connections");
-                    reject(new Error("Database blocked"));
-                };
+            request.onupgradeneeded = (event) => {
+                console.log('Database upgrade needed, creating store...');
+                const db = (event.target as IDBOpenDBRequest).result;
+                
+                // Always recreate the store during upgrade
+                if (db.objectStoreNames.contains(STORE_NAME)) {
+                    db.deleteObjectStore(STORE_NAME);
+                }
+                db.createObjectStore(STORE_NAME, { keyPath: 'userId' });
+            };
 
-                request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
-                    console.log('Database upgrade needed, creating store...');
-                    const db = (event.target as IDBOpenDBRequest).result;
-                    
-                    // Always recreate the store during upgrade
-                    if (db.objectStoreNames.contains(STORE_NAME)) {
-                        db.deleteObjectStore(STORE_NAME);
-                    }
-                    db.createObjectStore(STORE_NAME, { keyPath: 'userId' });
-                };
-
-                request.onsuccess = (event: Event) => {
-                    const db = (event.target as IDBOpenDBRequest).result;
-                    
-                    // Handle connection errors
-                    db.onerror = (event) => {
-                        console.error("Database error:", event);
-                    };
-                    
-                    // Verify store exists
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.close();
-                        reject(new Error(`Store ${STORE_NAME} not found after initialization`));
-                        return;
-                    }
-                    
-                    this.db = db;
-                    this.initializationAttempts = 0; // Reset counter on success
-                    resolve();
-                };
-            });
-        } catch (error) {
-            // If initialization fails, try to recover by deleting the database and trying again
-            if (this.initializationAttempts < this.MAX_INIT_ATTEMPTS) {
-                console.log('Attempting database recovery...');
-                await new Promise<void>((resolve, reject) => {
-                    const deleteRequest = indexedDB.deleteDatabase(DB_NAME);
-                    deleteRequest.onerror = () => reject(deleteRequest.error);
-                    deleteRequest.onsuccess = () => resolve();
-                });
-                return this.initDB(); // Recursive call for retry
-            }
-            throw error;
-        }
+            request.onsuccess = () => {
+                this.db = request.result;
+                console.log('Database initialized successfully');
+                
+                // Verify store exists
+                if (!this.db.objectStoreNames.contains(STORE_NAME)) {
+                    reject(new Error(`Store ${STORE_NAME} not found after initialization`));
+                    return;
+                }
+                
+                resolve();
+            };
+        });
     }
 
     private async getStore(mode: IDBTransactionMode = 'readonly'): Promise<IDBObjectStore> {
-        // Wait for initialization without blocking
-        const initPromise = this.dbInitialized.catch(async error => {
-            console.error('Database initialization failed, attempting recovery in background');
-            // Start recovery in background
-            this.dbInitialized = this.initDB();
+        if (!this.db) {
             try {
                 await this.dbInitialized;
-                this.initResolve();
             } catch (error) {
-                this.initReject(error instanceof Error ? error : new Error('Unknown recovery error'));
-                throw error;
+                console.error('Error waiting for DB initialization:', error);
+                // Only try to re-initialize if really needed
+                await this.initDB();
             }
-        });
-
-        // Return null for store operations if database isn't ready
-        try {
-            await initPromise;
-        } catch (error) {
-            console.error('Could not initialize database:', error);
-            return Promise.reject(error);
+            
+            if (!this.db) {
+                throw new Error('Database initialization failed');
+            }
         }
 
-        if (!this.db) {
-            return Promise.reject(new Error('Database not initialized'));
+        if (!this.db.objectStoreNames.contains(STORE_NAME)) {
+            throw new Error(`Store ${STORE_NAME} not found`);
         }
 
-        const db = this.db as IDBDatabase;
-        // Verify object store exists
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-            // Start recovery in background
-            db.close();
-            this.db = null;
-            this.dbInitialized = this.initDB();
-            this.dbInitialized.then(() => {
-                this.initResolve();
-            }).catch(error => {
-                this.initReject(error instanceof Error ? error : new Error('Unknown store error'));
-            });
-            return Promise.reject(new Error('Store not found, recovery started'));
-        }
-
-        try {
-            const transaction = db.transaction(STORE_NAME, mode);
-            return transaction.objectStore(STORE_NAME);
-        } catch (error) {
-            // Start recovery in background
-            this.db = null;
-            this.dbInitialized = this.initDB();
-            this.dbInitialized.then(() => {
-                this.initResolve();
-            }).catch(error => {
-                this.initReject(error instanceof Error ? error : new Error('Unknown transaction error'));
-            });
-            return Promise.reject(error);
-        }
+        return this.db.transaction(STORE_NAME, mode).objectStore(STORE_NAME);
     }
 
     private async cleanExpiredEmotes(): Promise<void> {
@@ -191,7 +107,6 @@ export class EmoteStorage {
             };
         } catch (error) {
             console.error('Error cleaning expired emotes:', error);
-            // Don't throw error for background cleanup operations
         }
     }
 
@@ -211,8 +126,7 @@ export class EmoteStorage {
             });
         } catch (error) {
             console.error('Error storing user emotes:', error);
-            // Don't throw error for storage operations
-            return Promise.resolve();
+            throw error;
         }
     }
 
@@ -240,8 +154,7 @@ export class EmoteStorage {
             });
         } catch (error) {
             console.error('Error clearing user emotes:', error);
-            // Don't throw error for deletion operations
-            return Promise.resolve();
+            throw error;
         }
     }
 }
