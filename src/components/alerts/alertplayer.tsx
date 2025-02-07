@@ -240,7 +240,6 @@ class AlertPlayer {
     updateProfile(profile: Profile) {
         this.profile = profile;
         const config = profile.config;
-        console.log('update config', config)
         this.config = config;
     }
 

@@ -1,7 +1,4 @@
-import { DB_VERSION, DB_NAME } from "@/commons/config";
-
-// Constants for IndexedDB
-const STORE_NAME = 'alertConfigs';
+import { Database, ALERT_CONFIG_STORE } from "@/commons/database";
 
 interface AlertConfigMeta {
     hash: string;
@@ -16,43 +13,14 @@ interface AlertConfig {
 
 
 export class AlertConfigStorage {
-    private db: IDBDatabase | null = null;
     private baseUrl: string;
-    private dbInitialized: Promise<void>;
 
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
-        this.dbInitialized = this.initDB();
-    }
-
-    private initDB(): Promise<void> {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-            request.onerror = () => {
-                console.error("Error opening IndexedDB");
-                reject(request.error);
-            };
-
-            request.onupgradeneeded = (event) => {
-                const db = (event.target as IDBOpenDBRequest).result;
-                if (!db.objectStoreNames.contains(STORE_NAME)) {
-                    db.createObjectStore(STORE_NAME, { keyPath: 'meta.channel' });
-                }
-            };
-
-            request.onsuccess = () => {
-                this.db = request.result;
-                resolve();
-            };
-        });
     }
 
     private async getStore(mode: IDBTransactionMode = 'readonly'): Promise<IDBObjectStore> {
-        await this.dbInitialized;
-        if (!this.db) throw new Error('Database not initialized');
-        const transaction = this.db.transaction(STORE_NAME, mode);
-        return transaction.objectStore(STORE_NAME);
+        return Database.getStore(ALERT_CONFIG_STORE, mode);
     }
 
     async getConfigMeta(channel: string): Promise<AlertConfigMeta | null> {
