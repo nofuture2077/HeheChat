@@ -310,10 +310,27 @@ export function ChatInput(props: ChatInputProps) {
                             rightSectionWidth={42}
                             onKeyDown={event => {
                                 if (event.key === "Enter") {
-                                    sendMessage(inputText, false);
-                                    setHistoryIndex(-1);
-                                    event.preventDefault();
-                                    return false;
+                                    // If combobox is open with exactly one option, select it
+                                    if (combobox.dropdownOpened && filtered.length === 1) {
+                                        const value = filtered[0].value;
+                                        const words = inputText.split(' ');
+                                        if (words.length > 1) {
+                                            words[words.length - 1] = value;
+                                            setInputText(words.join(' ') + ' ');
+                                        } else {
+                                            setInputText(value + ' ');
+                                        }
+                                        combobox.closeDropdown();
+                                        event.preventDefault();
+                                        return false;
+                                    }
+                                    // Only send message if combobox is closed
+                                    if (!combobox.dropdownOpened) {
+                                        sendMessage(inputText, false);
+                                        setHistoryIndex(-1);
+                                        event.preventDefault();
+                                        return false;
+                                    }
                                 } else if (event.key === "ArrowUp") {
                                     event.preventDefault();
                                     if (messageHistory.length > 0) {
