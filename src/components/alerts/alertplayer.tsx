@@ -422,7 +422,7 @@ class AlertPlayer {
         }
         const sbp = this.config!.playAlerts && this.config!.receivedShares.includes(item.channel) && this.config!.activatedShares.includes(item.channel);
         if (!sbp) {
-            console.debug('Will not play alerts', this.config, item);
+            // console.debug('Will not play alerts', this.config, item);
         }
         return sbp;
     }
@@ -434,7 +434,7 @@ class AlertPlayer {
         }
         const sbp = this.config!.browserSourceAudio && this.config!.receivedShares.includes(item.channel) && this.config!.activatedShares.includes(item.channel);
         if (!sbp) {
-            console.debug('Will not play alerts', this.config, item);
+            // console.debug('Will not play alerts', this.config, item);
         }
         return sbp;
     }
