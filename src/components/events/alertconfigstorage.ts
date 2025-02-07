@@ -15,22 +15,14 @@ interface AlertConfig {
 }
 
 
-const NETWORK_TIMEOUT = 5000; // 5 second timeout for network requests
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache duration
-const pendingRequests = new Map<string, Promise<any>>();
-
 export class AlertConfigStorage {
     private db: IDBDatabase | null = null;
     private baseUrl: string;
     private dbInitialized: Promise<void>;
-    private lastFetch: Map<string, number> = new Map();
 
     constructor(baseUrl: string) {
         this.baseUrl = baseUrl;
-        this.dbInitialized = this.initDB().catch(error => {
-            console.error('Failed to initialize database:', error);
-            return Promise.reject(error);
-        });
+        this.dbInitialized = this.initDB();
     }
 
     private initDB(): Promise<void> {
@@ -63,98 +55,30 @@ export class AlertConfigStorage {
         return transaction.objectStore(STORE_NAME);
     }
 
-    private async fetchWithTimeout(url: string): Promise<Response> {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), NETWORK_TIMEOUT);
-        
-        try {
-            const response = await fetch(url, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            return response;
-        } catch (error) {
-            clearTimeout(timeoutId);
-            throw error;
-        }
-    }
-
-    private getRequestUrl(endpoint: string, channel: string): string {
-        const state = localStorage.getItem('hehe-token_state') || '';
-        const sink = localStorage.getItem('hehe-sink') || '';
-        return this.baseUrl + endpoint + '?' + [
-            ['channels', channel].join('='),
-            ['state', state].join('='),
-            ['sink', sink].join('='),
-            ['t', Date.now()].join('=')
-        ].join('&');
-    }
-
     async getConfigMeta(channel: string): Promise<AlertConfigMeta | null> {
-        const cacheKey = `meta_${channel}`;
-        const lastFetchTime = this.lastFetch.get(cacheKey) || 0;
-        
-        // Return existing promise if request is pending
-        const pending = pendingRequests.get(cacheKey);
-        if (pending) return pending;
-
-        // Check if we should use cache
-        if (Date.now() - lastFetchTime < CACHE_DURATION) {
-            try {
-                const cached = await this.getCachedConfig(channel);
-                if (cached?.meta) return cached.meta;
-            } catch (error) {
-                console.warn('Error reading cache:', error);
-            }
+        try {
+            const state = localStorage.getItem('hehe-token_state') || '';
+            const sink = localStorage.getItem('hehe-sink') || '';
+            const response = await fetch(this.baseUrl + '/event/config/meta?' + [['channels', channel].join('='), ['state', state].join('='), ['sink', sink].join('='), ['t', Date.now()].join('=')].join('&'));
+            if (!response.ok) throw new Error('Failed to fetch config meta');
+            return await response.json().then(r => r[channel]);
+        } catch (error) {
+            console.error('Error fetching config meta:', error);
+            return null;
         }
-
-        const fetchPromise = (async () => {
-            try {
-                const response = await this.fetchWithTimeout(
-                    this.getRequestUrl('/event/config/meta', channel)
-                );
-                if (!response.ok) throw new Error('Failed to fetch config meta');
-                const result = await response.json();
-                this.lastFetch.set(cacheKey, Date.now());
-                return result[channel];
-            } catch (error) {
-                console.error('Error fetching config meta:', error);
-                // Try to return cached meta on error
-                const cached = await this.getCachedConfig(channel);
-                return cached?.meta || null;
-            } finally {
-                pendingRequests.delete(cacheKey);
-            }
-        })();
-
-        pendingRequests.set(cacheKey, fetchPromise);
-        return fetchPromise;
     }
 
     async getFullConfig(channel: string): Promise<any> {
-        const cacheKey = `config_${channel}`;
-        const pending = pendingRequests.get(cacheKey);
-        if (pending) return pending;
-
-        const fetchPromise = (async () => {
-            try {
-                const response = await this.fetchWithTimeout(
-                    this.getRequestUrl('/event/config', channel)
-                );
-                if (!response.ok) throw new Error('Failed to fetch full config');
-                const result = await response.json();
-                return result[channel];
-            } catch (error) {
-                console.error('Error fetching full config:', error);
-                // Try to return cached config on error
-                const cached = await this.getCachedConfig(channel);
-                if (!cached) throw error;
-                return cached.config;
-            } finally {
-                pendingRequests.delete(cacheKey);
-            }
-        })();
-
-        pendingRequests.set(cacheKey, fetchPromise);
-        return fetchPromise;
+        try {
+            const state = localStorage.getItem('hehe-token_state') || '';
+            const sink = localStorage.getItem('hehe-sink') || '';
+            const response = await fetch(this.baseUrl + '/event/config?' + [['channels', channel].join('='), ['state', state].join('='), ['sink', sink].join('='), ['t', Date.now()].join('=')].join('&'));
+            if (!response.ok) throw new Error('Failed to fetch full config');
+            return await response.json().then(r => r[channel]);
+        } catch (error) {
+            console.error('Error fetching full config:', error);
+            throw error;
+        }
     }
 
     async getCachedConfig(channel: string): Promise<{config: any, meta: AlertConfigMeta} | null> {
@@ -196,39 +120,28 @@ export class AlertConfigStorage {
 
     async getConfig(channel: string): Promise<any> {
         try {
-            // Try to get cached config first
-            const cached = await this.getCachedConfig(channel);
-            
-            // Get meta data from server (with built-in caching)
+            // First, get the meta data from the server
             const meta = await this.getConfigMeta(channel);
-            if (!meta) {
-                // If no meta available, return cached config or null
-                return cached?.config || null;
-            }
+            if (!meta) return;
 
+            // Check if we have a cached version
             meta.channel = channel;
-            
-            // Use cached version if hash matches
-            if (cached?.meta.hash === meta.hash) {
+            const cached = await this.getCachedConfig(channel);
+            // If we have a cached version and the hash matches, use it
+            if (cached && cached.meta.hash === meta.hash) {
                 return cached.config;
             }
 
-            // Fetch full config if needed
+            // Otherwise, fetch the full config
             const fullConfig = await this.getFullConfig(channel);
-            if (fullConfig) {
-                fullConfig.meta.channel = channel;
-                // Store in background, don't block
-                this.storeConfig(fullConfig, meta).catch(console.error);
-                return fullConfig;
-            }
+            fullConfig.meta.channel = channel;
+            // Store the new config in IndexedDB
+            await this.storeConfig(fullConfig, meta);
 
-            // Fallback to cached version if fetch failed
-            return cached?.config || null;
+            return fullConfig;
         } catch (error) {
             console.error('Error in getConfig:', error);
-            // Return cached version on error
-            const cached = await this.getCachedConfig(channel);
-            return cached?.config || null;
+            throw error;
         }
     }
 }

@@ -28,7 +28,6 @@ import { getDimension } from '../components/twitch/twitchplayer';
 import { EmoteStore } from '../components/chat/emotestorage';
 import { getRawData } from '@twurple/common';
 import classes from './chat.module.css'
-import { DEFAULT_CHAT_EMOTES } from '@/commons/emotes';
 
 export type OverlayDrawer = {
     name: string;
@@ -199,13 +198,15 @@ export function ChatPage() {
         if (loginContext.user) {
             const userId = loginContext.user.id;
             EmoteStore.getUserEmotes(userId).then(async (userEmotes) => {
+                console.log("useremote", userEmotes);
                 if (!userEmotes || Date.now() - userEmotes.timestamp > 24 * 60 * 60 * 1000) { // Refresh if older than 24h
+                    console.log("load useremote");
                     const api = loginContext.getApiClient();
                     
                     const userEmotesResult = (await api.chat.getUserEmotesPaginated(userId).getAll()).map(getRawData);
+                    console.log("userEmotesResult", userEmotesResult);
 
                     await EmoteStore.storeUserEmotes(userId, userEmotesResult);
-                    DEFAULT_CHAT_EMOTES.updateUserEmote(userId);
                 }
             });
         }
