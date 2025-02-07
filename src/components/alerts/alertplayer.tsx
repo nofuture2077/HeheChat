@@ -6,7 +6,7 @@ import { formatString } from "@/commons/helper";
 import { silence } from "./silence";
 import PubSub from 'pubsub-js';
 import _ from "underscore";
-import { AlertConfigStore } from "@/components/events/alertconfigstorage";
+import { AlertConfig } from "@/components/events/alertconfigstorage";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -227,7 +227,7 @@ class AlertPlayer {
     async loadAlertConfig(channels: string[]) {
         try {
             for (const channel of channels) {
-                const config = await AlertConfigStore.getConfig(channel);
+                const config = await AlertConfig?.getConfig(channel);
                 if (config) {
                     this.alertConfig[channel] = config;
                 }
