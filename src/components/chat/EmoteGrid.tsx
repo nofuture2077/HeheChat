@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
+import { ConfigContext } from '../../ApplicationContext';
 import { Grid, Paper, Text, ScrollArea } from '@mantine/core';
 import { EmoteComponent } from '@/components/emote/emote';
 import styles from './EmoteGrid.module.css';
@@ -12,11 +13,12 @@ interface EmoteGridProps {
 
 export function EmoteGrid({ channel, searchText, onEmoteSelect, emoteList }: EmoteGridProps) {
     const [visible, setVisible] = useState(false);
+    const config = useContext(ConfigContext);
 
     useEffect(() => {
-        // Only show grid if search text is more than 2 characters
-        setVisible(searchText.length > 1);
-    }, [searchText]);
+        // Only show grid if search text is more than 2 characters and emote dialog is not disabled
+        setVisible(searchText.length > 1 && !config.disableEmoteDialog);
+    }, [searchText, config.disableEmoteDialog]);
 
     if (!visible || !channel || emoteList.size === 0) return null;
 

@@ -203,6 +203,7 @@ export default function HeheChat() {
     const setHideRaid = (value: boolean) => updateConfig('hideRaid', value);
     const setHideAdBreak = (value: boolean) => updateConfig('hideAdBreak', value);
     const setHideShoutout = (value: boolean) => updateConfig('hideShoutout', value);
+    const setDisableEmoteDialog = (value: boolean) => updateConfig('disableEmoteDialog', value);
     const setShortcuts = (value: ShortCut[]) => updateConfig('shortcuts', value);
     const setBrowserSourceAudio = (value: boolean) => updateConfig('browserSourceAudio', value);
     const setBrowserSourceVisual = (value: boolean) => updateConfig('browserSourceVisual', value);
@@ -392,6 +393,7 @@ export default function HeheChat() {
         off,
         fireMessage,
         setShortcuts,
+        setDisableEmoteDialog,
         setBrowserSourceAudio,
         setBrowserSourceVisual
     };

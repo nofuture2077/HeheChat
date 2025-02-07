@@ -25,6 +25,7 @@ export interface ConfigData {
     hideShoutout: boolean;
     hideRaid: boolean;
     hideAdBreak: boolean;
+    disableEmoteDialog: boolean;
     fontSize: number;
     modToolsEnabled: boolean;
     raidTargets: string[];
@@ -80,6 +81,7 @@ export interface Config extends ConfigData {
     setHideShoutout: (val: boolean) => void;
     setHideRaid: (val: boolean) => void;
     setHideAdBreak: (val: boolean) => void;
+    setDisableEmoteDialog: (val: boolean) => void;
     setBrowserSourceAudio: (val: boolean) => void;
     setBrowserSourceVisual: (val: boolean) => void;
     setFreeTTS: (val: string[]) => void;
@@ -112,6 +114,7 @@ export const DEFAULT_CONFIG: Config = {
     hideShoutout: false,
     hideRaid: false,
     hideAdBreak: false,
+    disableEmoteDialog: false,
     browserSourceAudio: false,
     browserSourceVisual: true,
     systemMessageInChat: {
@@ -168,6 +171,7 @@ export const DEFAULT_CONFIG: Config = {
     setHideShoutout: (val) => {},
     setHideRaid: (val) => {},
     setHideAdBreak: (val) => {},
+    setDisableEmoteDialog: (val) => {},
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => {},
     setHideEvents: (type: SystemMessageMainType, val: boolean) => {},
     setDeactivatedAlerts: (id: string, val: boolean) => {},
