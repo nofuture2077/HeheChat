@@ -6,7 +6,9 @@ import { useEffect, useContext, useState } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 import { generateGUID } from '@/commons/helper';
 import { LOGIN_SCOPES, AUTH_VERSION } from '@/commons/login';
+import { EmoteStore } from '@/components/chat/emotestorage';
 import PubSub from 'pubsub-js'
+import { DEFAULT_CHAT_EMOTES } from '@/commons/emotes'
 
 function getQueryVariable(query: String, variable: String): string | undefined {
     var vars = query.split('&');
@@ -37,7 +39,9 @@ export default function Login() {
             const authProvider = new StaticAuthProvider(loginContext.clientId, tokenStored || token || '');
             const api = new ApiClient({authProvider});
             api.getTokenInfo().then((tokenInfo) => {
-                api.users.getAuthenticatedUser({id: tokenInfo.userId || ''}).then((user) => {
+                const userId = tokenInfo.userId || '';
+                DEFAULT_CHAT_EMOTES.updateUserEmote(userId);
+                api.users.getAuthenticatedUser({id: userId}).then((user) => {
                     loginContext.setUser(user);
                 });
 
@@ -64,6 +68,10 @@ export default function Login() {
                 localStorage.removeItem('hehe-token');
                 localStorage.removeItem('hehe-token_state');
                 loginContext.setAccessToken(undefined);
+                // Clear emote cache on logout/token error
+                if (loginContext.user) {
+                    EmoteStore.clearUserEmotes(loginContext.user.id).catch(console.error);
+                }
                 const redirectUrl = encodeURI(window.location.origin + window.location.pathname.replace("index.html", ""));
                 document.location = redirectUrl;
             });

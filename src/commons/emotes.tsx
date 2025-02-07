@@ -3,6 +3,7 @@ import { toMap } from '@/commons/helper';
 import { EmoteComponent } from '@/components/emote/emote';
 import PubSub from 'pubsub-js';
 import { SystemMessage } from './message';
+import { EmoteStore } from '@/components/chat/emotestorage';
 
 interface sevenTVEmote {
     name: string;
@@ -60,6 +61,7 @@ export async function getBadgesAndEmotes(context: LoginContext, userId: string) 
     const channelEmotes = await api.chat.getChannelEmotes(userId);
     const channelBadges = await api.chat.getChannelBadges(userId);
 
+
     return {
         channelBadges,
         channelEmotes
@@ -108,8 +110,6 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
 }
 
 export async function getGlobalBadgesAndEmotesByNames(context: LoginContext) {
-    const api = context.getApiClient();
-
     const { channelBadges, channelEmotes } = await getGlobalBadgesAndEmotes(context);
 
     return {
@@ -135,7 +135,8 @@ export interface ChatEmotes {
     getCheerEmote: (channel: string, name: string, bits: number) => any;
     getLogo: (channel: string) => any;
     getChannelId: (channel: string) => string;
-    getEmoteList: (channel: string, user: string, filter: string) => Map<string, any[]>;
+    getEmoteList: (channel: string, filter: string) => Map<string, any[]>;
+    updateUserEmote: (userid: string) => Promise<void>;
 }
 const LOADING_CHAT_EMOTES: {[key: string]: boolean} = {};
 const LOADING_PROFILES: {[key: string]: boolean} = {};
@@ -144,6 +145,13 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     emotes: new Map(),
     update: async (context, channels) => {
         DEFAULT_CHAT_EMOTES.emotes = await getBadgesAndEmotesByNames(context, channels);
+    },
+    updateUserEmote: async (userid: string) => {
+        const userEmotesData = await EmoteStore.getUserEmotes(userid);
+        if (userEmotesData) {
+            const userEmotesMap = new Map(userEmotesData.emotes.map(emote => [emote.name, emote]));
+            DEFAULT_CHAT_EMOTES.emotes.set("user", userEmotesMap);
+        }
     },
     updateChannel: async (context, channel) => {
         if ((DEFAULT_CHAT_EMOTES.emotes.has(channel) && DEFAULT_CHAT_EMOTES.emotes.get(channel).emotes) || LOADING_CHAT_EMOTES[channel]) {
@@ -219,13 +227,34 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         return DEFAULT_CHAT_EMOTES.emotes.get(channel)?.user?.id || '';
     },
 
-    getEmoteList: (channel: string, user: string, filter: string) => {
+    getEmoteList: (channel: string, filter: string) => {
         const emoteList = new Map<string, any[]>();
         const lowerFilter = filter.toLowerCase();
 
         // Get channel emotes
         const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
         const globalEmotes = DEFAULT_CHAT_EMOTES.emotes.get('global');
+        const userEmotes = DEFAULT_CHAT_EMOTES.emotes.get('user');
+        // Add user-specific Twitch emotes first
+        if (userEmotes && userEmotes.size > 0) {
+            
+            const entries = Array.from(userEmotes.entries()) as [string, any][];
+            const userEmotesData = entries
+                .filter(entry => entry[0].toLowerCase().includes(lowerFilter))
+                .map(entry => ({
+                    name: entry[0],
+                    data: {
+                        ...entry[1],
+                        getImageUrl(scale: number) {
+                            return `https://static-cdn.jtvnw.net/emoticons/v2/${entry[1].id}/default/dark/2.0`;
+                        }
+                    },
+                    type: 'Twitch'
+                }));
+            if (userEmotesData.length > 0) {
+                emoteList.set("User Emotes", userEmotesData);
+            }
+        }
 
         // Add sevenTV emotes
         if (channelEmotes?.sevenTVEmotes) {
@@ -256,23 +285,6 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 emoteList.set('Global', globals);
             }
         }
-
-        // Add channel-specific Twitch emotes
-        /*
-        if (channelEmotes?.channelEmotes) {
-            const entries = Array.from(channelEmotes.channelEmotes.entries()) as [string, any][];
-            const twitchEmotes = entries
-                .filter(entry => entry[0].toLowerCase().includes(lowerFilter))
-                .map(entry => ({
-                    name: entry[0],
-                    data: entry[1],
-                    type: `Twitch-${channel}`
-                }));
-            if (twitchEmotes.length > 0) {
-                emoteList.set(`Twitch-${channel}`, twitchEmotes);
-            }
-        }
-            */
 
         return emoteList;
     }

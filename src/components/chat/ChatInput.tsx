@@ -1,7 +1,8 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useMemo } from 'react';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { ChannelPicker } from './ChannelPicker';
-import { Textarea, ActionIcon, rem, Flex, Stack, Combobox, useCombobox } from '@mantine/core'
+import { Textarea, ActionIcon, rem, Flex, Stack, Combobox, useCombobox } from '@mantine/core';
+import { EmoteGrid } from './EmoteGrid';
 import { IconSend, IconX } from '@tabler/icons-react';
 import { HeheChatMessage } from '../../commons/message';
 import { ChatMessageComp } from './ChatMessage';
@@ -243,6 +244,24 @@ export function ChatInput(props: ChatInputProps) {
     };
 
     const filtered = getFilteredItems();
+    
+    // Get the current word being typed
+    const currentWord = useMemo(() => {
+        const words = inputText.split(' ');
+        return words[words.length - 1];
+    }, [inputText]);
+
+    // Get filtered emote list
+    const filteredEmotes = useMemo(() => {
+        if (!chatChannel || currentWord.length < 2) return new Map();
+        return emotes.getEmoteList(chatChannel, currentWord);
+    }, [chatChannel, currentWord, emotes]);
+
+    const handleEmoteSelect = (emoteName: string) => {
+        const words = inputText.split(' ');
+        words[words.length - 1] = emoteName;
+        setInputText(words.join(' ') + ' ');
+    };
 
     return (
         <Stack gap={0} className={classes.chatInput}>
@@ -341,6 +360,12 @@ export function ChatInput(props: ChatInputProps) {
                         </Combobox.Options>
                     </Combobox.Dropdown>) : null}
                 </Combobox>
+                <EmoteGrid
+                    channel={chatChannel || ''}
+                    searchText={currentWord}
+                    onEmoteSelect={handleEmoteSelect}
+                    emoteList={filteredEmotes}
+                />
             </Flex>
         </Stack>
     );

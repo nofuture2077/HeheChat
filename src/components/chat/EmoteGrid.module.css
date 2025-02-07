@@ -1,0 +1,34 @@
+.container {
+  position: absolute;
+  bottom: calc(100%);
+  left: 0;
+  right: 0;
+  max-height: 400px;
+  z-index: 300;
+  background-color: #1A1A1A;
+  overflow: hidden;
+}
+
+.scrollArea {
+  height: 100%;
+}
+
+.categoryTitle {
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: white;
+}
+
+.emoteContainer {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.emoteContainer:hover {
+  background-color: #2A2A2A;
+}

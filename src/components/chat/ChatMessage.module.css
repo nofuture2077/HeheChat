@@ -105,6 +105,13 @@
     display: none !important;
 }
 
+.chatInput {
+    position: relative;
+    background-color: light-dark(#ffffff, #1A1A1A);
+    border-radius: 8px;
+    padding: 4px;
+}
+
 .chatInput .hideReply {
     padding-left: 34px;
     background: none !important;

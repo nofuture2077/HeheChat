@@ -25,6 +25,8 @@ import { UserCardDrawer } from '../components/login/usercard';
 import { PinManager } from '../components/pinned/pinmanager';
 import { useViewportWidthCallback } from '../commons/helper';
 import { getDimension } from '../components/twitch/twitchplayer';
+import { EmoteStore } from '../components/chat/emotestorage';
+import { getRawData } from '@twurple/common';
 import classes from './chat.module.css'
 
 export type OverlayDrawer = {
@@ -193,6 +195,22 @@ export function ChatPage() {
             setChatMessages(msgs);
         });
 
+        if (loginContext.user) {
+            const userId = loginContext.user.id;
+            EmoteStore.getUserEmotes(userId).then(async (userEmotes) => {
+                console.log("useremote", userEmotes);
+                if (!userEmotes || Date.now() - userEmotes.timestamp > 24 * 60 * 60 * 1000) { // Refresh if older than 24h
+                    console.log("load useremote");
+                    const api = loginContext.getApiClient();
+                    
+                    const userEmotesResult = (await api.chat.getUserEmotesPaginated(userId).getAll()).map(getRawData);
+                    console.log("userEmotesResult", userEmotesResult);
+
+                    await EmoteStore.storeUserEmotes(userId, userEmotesResult);
+                }
+            });
+        }
+
         (loginContext.moderatedChannels || []).forEach(mC => {
             emotes.updateUserInfo(loginContext, mC.name);
         });
@@ -226,7 +244,7 @@ export function ChatPage() {
             PubSub.unsubscribe(modEventSub);
             config.off(chatHandler);
         };
-    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS]);
+    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, loginContext.user]);
 
     useDidUpdate(() => {
         setOnline(networkStatus.online);

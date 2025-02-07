@@ -1,6 +1,6 @@
+import { DB_VERSION, DB_NAME } from "@/commons/config";
+
 // Constants for IndexedDB
-const DB_NAME = 'HeheChat';
-const DB_VERSION = 2;
 const STORE_NAME = 'alertConfigs';
 
 interface AlertConfigMeta {

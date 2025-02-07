@@ -182,3 +182,6 @@ export const DEFAULT_CONFIG: Config = {
     setBrowserSourceAudio: (val) => {},
     setBrowserSourceVisual: (val) => {},
 };
+
+export const DB_VERSION = 3;
+export const DB_NAME = 'HeheChat';
