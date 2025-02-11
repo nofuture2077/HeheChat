@@ -253,7 +253,7 @@ export function ChatInput(props: ChatInputProps) {
 
     // Get filtered emote list
     const filteredEmotes = useMemo(() => {
-        if (!chatChannel || currentWord.length < 2) return new Map();
+        if (!chatChannel || currentWord.length < 3) return new Map();
         return emotes.getEmoteList(chatChannel, currentWord);
     }, [chatChannel, currentWord, emotes]);
 

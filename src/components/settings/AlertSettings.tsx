@@ -1,4 +1,5 @@
 import { Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput } from '@mantine/core';
+import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
@@ -55,16 +56,28 @@ export function AlertSettings() {
     const marks = [-250, -0, 250, 500].map(x => ({ value: x, label: x + "ms" }));
     return (
         <Stack mt={30} mb={30} gap={30}>
-            <Fieldset legend="HeheChat App" variant="filled" key="playalerts">
+            <Fieldset legend="Alert Sound Output" variant="filled" key="alert-output">
                 <Stack>
-                    <Switch checked={config.playAlerts} onChange={(event) => { config.setPlayAlerts(event.currentTarget.checked); forceUpdate() }} label="Play Alerts" size="lg" />
-                </Stack>
-            </Fieldset>
-
-            <Fieldset legend="Browser Source" variant="filled" key="browser-source">
-                <Stack>
-                    <Switch checked={config.browserSourceAudio} onChange={(event) => { config.setBrowserSourceAudio(event.currentTarget.checked); }}  label="Audio Alerts (*)" size="lg" />
-                    <Text fs="italic" size='14px'>You should only enable "Play Alerts" OR "Audio Alerts" in Browsersource</Text>
+                    <GradientSegmentedControl
+                        data={[
+                            { label: 'None', value: 'none' },
+                            { label: 'Obs', value: 'obs' },
+                            { label: 'Hehe', value: 'app' }
+                        ]}
+                        value={
+                            config.playAlerts
+                                ? 'app'
+                                : config.browserSourceAudio
+                                    ? 'obs'
+                                    : 'none'
+                        }
+                        setValue={(value: string) => {
+                            config.setPlayAlerts(value === 'app');
+                            config.setBrowserSourceAudio(value === 'obs');
+                            forceUpdate();
+                        }}
+                    />
+                    <Text fs="italic" size='14px'>Select where alert sounds should be played</Text>
                     {sink ? (<>
                         <Text span inline key={'browser-source-label'}>Link for OBS <Anchor inline key={'browser-source-link'} href={import.meta.env.VITE_SINK_URL + "#token=" + sink} target="_blank"><IconLink /></Anchor></Text>
                     </>) : null}

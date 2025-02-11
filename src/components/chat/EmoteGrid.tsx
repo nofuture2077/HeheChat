@@ -17,7 +17,7 @@ export function EmoteGrid({ channel, searchText, onEmoteSelect, emoteList }: Emo
 
     useEffect(() => {
         // Only show grid if search text is more than 2 characters and emote dialog is not disabled
-        setVisible(searchText.length > 1 && !config.disableEmoteDialog);
+        setVisible(searchText.length > 2 && !config.disableEmoteDialog);
     }, [searchText, config.disableEmoteDialog]);
 
     if (!visible || !channel || emoteList.size === 0) return null;
