@@ -2,7 +2,7 @@
 
 ## Overview
 
-HeheChat is a powerful Twitch streaming companion application designed to enhance streamers' and viewers' experience with comprehensive chat, alert, and stream management features.
+Best Twitch Chat and Alerts Companion App both for IRL and Desktp streaming.
 
 ## Features
 
