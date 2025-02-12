@@ -266,8 +266,7 @@ export function ChatInput(props: ChatInputProps) {
     return (
         <Stack gap={0} className={classes.chatInput}>
             {props.replyToMsg ? (<ChatMessageComp msg={props.replyToMsg} openModView={() => { }} moderatedChannel={{}} hideReply={true} deletedMessages={{}} setReplyMsg={props.setReplyMsg} modActions={props.modActions} />) : null}
-            <Flex w="100%" justify="space-between" gap={'md'} pl={'md'} pr={'xl'}
-                align="center" m='xs'>
+            <Flex justify="space-between" gap={'md'} align="center" m="6px 12px 22px 12px">
                 <Combobox
                     store={combobox}
                     onOptionSubmit={(value) => {
