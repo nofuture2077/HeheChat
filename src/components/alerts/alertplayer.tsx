@@ -39,7 +39,7 @@ class AlertPlayer {
 
     constructor() {
         setInterval(() => this.checkQueue(), 1000);
-        this.ttsExtra = Number(localStorage.getItem('hehechat-ttsExtra') || '0') || 160;
+        this.ttsExtra = Number(localStorage.getItem('hehechat-ttsExtra') || '0') || 0;
         this.jingleExtra = Number(localStorage.getItem('hehechat-jingleExtra') || '0') || 0;
     }
 
