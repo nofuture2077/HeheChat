@@ -107,15 +107,19 @@ class AlertPlayer {
             
             const { audio, duration } = audioInfo;
             
-            this.mainAudio!.onloadedmetadata = () => {
-                this.mainAudio!.currentTime = 0;
+            const handlePlaying = () => {
                 this.preciseTimer(resolve, (duration * 1000) + extra);
+                this.mainAudio!.removeEventListener('playing', handlePlaying);
             };
 
             audio.onerror = () => {
                 reject("Audio playback error");
+                this.mainAudio!.removeEventListener('playing', handlePlaying);
             };
+
+            this.mainAudio!.addEventListener('playing', handlePlaying);
             this.mainAudio!.volume = volume;
+            this.mainAudio!.currentTime = 0;
             this.mainAudio!.src = audio.src;
         });
     }
