@@ -4,6 +4,7 @@ import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { ProfileContext } from './ApplicationContext';
 import VisualAlertPlayer from './components/browsersource/VisualAlertPlayer';
 import { AlertSystem } from './components/alerts/alertplayer';
+import { initializeStoragePatches } from './commons/patches';
 
 interface BrowserSourceProps {
   token: string | undefined;
@@ -19,6 +20,11 @@ window.addEventListener("click", () => {
 export default function BrowserSource({ token, preview }: BrowserSourceProps) {
   const backendWorkerRef = useRef<Worker>();
   const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE});
+
+  // Run storage patches on app initialization
+  useEffect(() => {
+    initializeStoragePatches();
+  }, []);
 
   useEffect(() => {
     // Initialize the worker

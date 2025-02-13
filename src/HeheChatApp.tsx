@@ -2,6 +2,7 @@ import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
 import { useDidUpdate } from '@mantine/hooks';
 import { useEffect, useState, useRef } from 'react';
+import { initializeStoragePatches } from './commons/patches';
 import { Router } from './Router';
 import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext } from './ApplicationContext';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
@@ -65,6 +66,11 @@ const onMessageHandlers: MessageHandler[] = [];
 var onMessageHandlerIndex = 0;
 
 export default function HeheChat() {
+    // Run storage patches on app initialization
+    useEffect(() => {
+        initializeStoragePatches();
+    }, []);
+
     const [loginContext, setLoginContext] = useState<LoginContext>(DEFAULT_LOGIN_CONTEXT);
     const [chatEmotes, setChatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
     const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE, guid: generateGUID()});
