@@ -88,6 +88,7 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
       type: 'SEND',
       data: {
         type: 'sink',
+        source: 'Browsersource',
         token
       }
     });
