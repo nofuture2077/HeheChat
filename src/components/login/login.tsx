@@ -21,7 +21,12 @@ function getQueryVariable(query: String, variable: String): string | undefined {
     console.log('Query variable %s not found', variable);
   }
 
-export default function Login() {
+interface LoginProps {
+    color1: string;
+    color2: string;
+}
+
+export default function Login(props: LoginProps) {
     const loginContext = useContext(LoginContextContext);
     const hash = window.location.hash.substring(1);
     const authVersion: string | null = localStorage.getItem('hehe-auth-version');
@@ -95,12 +100,12 @@ export default function Login() {
     return (<Button
             component="a"
             disabled={(!!(token || tokenStored) && !waitover)}
-            size='xl'
+            size='lg'
             radius="xl"
             variant='gradient'
-            gradient={{ from: 'var(--mantine-color-skyblue-8)', to: 'var(--mantine-color-paleviolet-6)', deg: 135 }}
+            gradient={{ from: props.color1, to: props.color2, deg: 45 }}
             onClick={onClick}
-            rightSection={<IconLink size={32} />}>    
+            rightSection={<IconLink size={24} />}>    
             Login with Twitch
         </Button> );
 }

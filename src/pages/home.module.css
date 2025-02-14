@@ -1,15 +1,28 @@
 .layout {
     width: 100%;
-    max-width: 100%;
-    padding-bottom: 100px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    gap: 2rem;
 }
 
-.hero {
-    color: #fff;
-    background-image: linear-gradient(20deg, var(--mantine-color-skyblue-8), var(--mantine-color-paleviolet-5));
-    min-height: 200px;
+.logosmall {
     width: 100%;
-    clip-path: polygon(100% 87%, 0 100%, 0 0, 100% 0);
-    max-width: 100%;
-    opacity: 0.8;
+    max-width: 80px;
+}
+
+.logo {
+    width: 100%;
+    max-width: 250px;
+}
+
+.nofuture {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
 }
