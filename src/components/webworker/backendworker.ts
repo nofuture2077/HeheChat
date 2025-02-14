@@ -43,11 +43,11 @@ self.onmessage = async (e) => {
 
     switch (type) {
         case 'SEND':
+            await backendReady;
             if ((data.type === "subscribe" && data.source === "HeheChat App") || 
                 (data.type === "sink" && data.source === "Browsersource") ) {
                 initRequest = data;
             }
-            await backendReady;
             backendWebsocket?.send(JSON.stringify(data));
             break;
         case 'STOP':
