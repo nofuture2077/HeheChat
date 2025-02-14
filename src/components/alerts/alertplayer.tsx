@@ -407,7 +407,7 @@ class AlertPlayer {
                 PubSub.publish('ALERT_SHOW', visualAlert);
             }
 
-            this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(this.endAudio).then(() => this.wait(duration, minDuration)).then(onEnd, onError);
+            this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(() => this.endAudio()).then(() => this.wait(duration, minDuration)).then(onEnd, onError);
         } catch (err) {
             console.error(err);
             this.stopPlaying();
