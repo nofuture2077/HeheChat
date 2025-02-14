@@ -1,5 +1,9 @@
 import { EventType } from '@/commons/events';
 
+// #EABFCB mod events
+// #EAEFD3 stream events
+// #B3C0A4 dono
+
 export function getEventStyle(event: {eventtype: EventType, amount?: number}, style: any) {
     style.color = "light-dark(black, white)"
     style.variant = 'subtle';

@@ -1,11 +1,11 @@
 .profile {
     margin: 8px;
     &:hover {
-        background-color: light-dark(var(--mantine-color-cyan-5), var(--mantine-color-orange-6));
+        background-color: #DB32BC;
         cursor: pointer;
     }
     &.active {
-        background-color: light-dark(var(--mantine-color-cyan-2), var(--mantine-color-orange-9));
+        background-color: #ff1493;
     }
 }
 

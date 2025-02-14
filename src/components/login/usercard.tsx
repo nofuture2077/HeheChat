@@ -50,7 +50,6 @@ export function UserCard(props: UserCardProps) {
                 radius="xl"
                 variant='gradient'
                 onClick={() => logout(loginContext)}
-                gradient={{ from: 'red', to: 'orange', deg: 135 }}
                 rightSection={<IconUnlink size={32} />}>    
                 Logout
             </Button>
