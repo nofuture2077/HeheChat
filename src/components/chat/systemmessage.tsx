@@ -84,7 +84,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
     return <div className={[classes.msg, classes[props.msg.subType]].join(' ')}>
                 {config.showProfilePicture ? <span className={classes.logo}>{emotes.getLogo(props.msg.data.channel)}</span> : null}
                 {config.showTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)} </span> : null}
-                <Text {...style} key="msg-main" fw={700} style={{fontSize: config.fontSize}} span>
+                <Text {...style} key="msg-main" fw={700} style={{fontSize: config.fontSize, color: "light-dark(black, white);"}} span>
                     {joinWithSpace(textParts[0].split(" ").map((value, index, array) => wordMapper(eventType, value, index, array)))}{actions}
                 </Text>
                 {textParts.length === 2 ? <Text key="msg-second" fw={500} style={{fontSize: config.fontSize}}>{parsedPartsToHtml(msgParts, channel, false, config, emotes, login)}</Text>: null}

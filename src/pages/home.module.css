@@ -21,7 +21,7 @@
 
 .nofuture {
     position: absolute;
-    bottom: 20px;
+    bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
     width: 120px;
