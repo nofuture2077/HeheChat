@@ -15,38 +15,38 @@ export function getEventStyle(event: {eventtype: EventType, amount?: number}, st
 }
     if (event.eventtype.startsWith('subgift_')) {
         if ((event.amount || 0) >= 5) {
-            style.color = "light-dark(#520974, orange)";
+            style.color = "light-dark(#520974, #fffe52)";
         }
         if ((event.amount || 0) >= 10) {
-            style.color = 'cyan';
+            style.color = "light-dark(#52ecff, #52ecff)";
         }
         if ((event.amount || 0) >= 20) {
             style.variant = 'gradient';
-            style.gradient = { from: 'orange', to: 'cyan', deg: 90 };
+            style.gradient = { from: '#DB32BC', to: '#ff1493', deg: 45 };
         }
     }
     if (event.eventtype === 'cheer') {
         if ((event.amount || 0) >= 500) {
-            style.color = "light-dark(#520974, orange)";
+            style.color = "light-dark(rgb(229, 82, 255),rgb(229, 82, 255))";
         }
         if ((event.amount || 0) >= 1000) {
-            style.color = 'cyan';
+            style.color = "light-dark(#52ecff, #52ecff)";
         }
         if ((event.amount || 0) >= 5000) {
             style.variant = 'gradient';
-            style.gradient = { from: 'orange', to: 'cyan', deg: 90 };
+            style.gradient = { from: '#52ecff', to: 'rgb(229, 82, 255)', deg: 45 };
         }
     }
     if (event.eventtype === 'raid') {
         if ((event.amount || 0) >= 100) {
-            style.color = "light-dark(#520974, orange)";
+            style.color = "light-dark(#520974, #fffe52)";
         }
         if ((event.amount || 0) >= 500) {
-            style.color = 'cyan';
+            style.color = "light-dark(#52ecff, #52ecff)";
         }
         if ((event.amount || 0) >= 1000) {
             style.variant = 'gradient';
-            style.gradient = { from: 'orange', to: 'cyan', deg: 90 };
+            style.gradient = { from: '#fffe52', to: '#52ecff', deg: 45 };
         }
     }
 }

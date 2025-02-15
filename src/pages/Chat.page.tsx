@@ -3,6 +3,7 @@ import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext }
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon, Badge, Stack, Group } from '@mantine/core';
 import { Chat } from '../components/chat/Chat';
+import { MobileAppPrompt } from '../components/chat/MobileAppPrompt';
 import { ShortcutView } from '../components/shortcuts/ShortcutView';
 import { IconMessagePause } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
@@ -309,6 +310,7 @@ export function ChatPage() {
             </AppShell.Header>
 
             <AppShell.Main>
+                <MobileAppPrompt />
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
                         {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}

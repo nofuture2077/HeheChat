@@ -18,7 +18,7 @@ export type SystemMessageProps = {
 }
 
 const messages = {
-    'delete': 'A messages from ${username}',
+    'delete': 'A messages from ${username} was deleted',
     'timeout': '${username} was timeouted for ${duration:duration}',
     'ban': '${username} was banned',
     'streamOnline': '${channel} just went Live',

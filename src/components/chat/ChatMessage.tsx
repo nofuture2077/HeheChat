@@ -130,7 +130,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
             }
         },
         {
-            threshold: 500,
+            threshold: 1000,
             onCancel: () => {
                 setMenuPosition(null);
             },
