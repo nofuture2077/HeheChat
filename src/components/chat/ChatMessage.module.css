@@ -42,7 +42,7 @@
     .highlightBadge {
         font-size: 10px;
         position: absolute;
-        color: light-dark(rgb(18, 0, 53), rgb(100, 185, 255));
+        color: #3273dbb0;
         margin-left: 0%;
         right: 10px;
         top: -4px;
