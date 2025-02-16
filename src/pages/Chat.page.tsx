@@ -16,6 +16,7 @@ import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { HeheMessage, parseMessage, HeheChatMessage } from '../commons/message';
 import { TwitchDrawer } from '../components/twitch/twitchview';
+import { StreamInfoDrawer } from '../components/twitch/streaminfo';
 import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, shoutoutUser, modUser, unmodUser, vipUser, unvipUser, unraid } from '../components/chat/mod/modactions';
 import { ProfileBarDrawer } from '../components/profile/profilebar';
 import { Storage } from '../components/chat/chatstorage';
@@ -320,7 +321,17 @@ export function ChatPage() {
                 </Affix>
 
                 <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
-                    {drawer ? <drawer.component style={{overflow: 'visible'}} height="100vh" modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props} openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }} ></drawer.component> : null}
+                    {drawer ? <drawer.component 
+                        style={{overflow: 'visible'}} 
+                        height="100vh" 
+                        modActions={modActions} 
+                        close={drawerHandler.close} 
+                        openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} 
+                        openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }}
+                        openDrawer={(drawer: OverlayDrawer) => { setDrawer(drawer); drawerHandler.open() }}
+                        {...drawer.props} 
+                        openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }}
+                    ></drawer.component> : null}
                 </Drawer>
                 {(drawerOpen || shouldScroll) ? null : (
                     <Affix position={{ bottom: 10 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>
