@@ -15,7 +15,10 @@
 }
 
 .msg.deleted {
-    opacity: 0.5;
+    opacity: 0.3;
+    text-decoration: line-through;
+    text-decoration-thickness: 3px;
+    text-decoration-color: #ff3afc;
 }
 
 .msg.first {

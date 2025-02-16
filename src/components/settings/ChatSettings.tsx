@@ -1,4 +1,4 @@
-import { TagsInput, Switch, Stack, Select, Fieldset } from '@mantine/core';
+import { TagsInput, Switch, Stack, Select, Fieldset, Space, Text } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
@@ -31,6 +31,12 @@ export function ChatSettings() {
         <Stack mt={30} mb={30} gap={30}>
             <Fieldset legend="Channelnames" variant='filled'>
                 <TagsInput placeholder="" value={config.channels} onChange={(channels) => config.setChannels(channels.map(c => c.toLowerCase().substring(0, 25).trim()))}></TagsInput>
+            </Fieldset>
+
+            <Fieldset legend="!tts Users" variant="filled" key="free-tts">
+                <TagsInput placeholder="" value={config.freeTTS} onChange={(freeTTS) => config.setFreeTTS(freeTTS.map(c => c.toLowerCase().substring(0, 50).trim()))}></TagsInput>
+                <Space h="xs" />
+                <Text fs="italic" size='14px'>Users in this list can use e.g. "!tts Forget your phone" in chat. You can give this to thrustful moderators, friends or management for emergency cases.</Text>
             </Fieldset>
 
             <Fieldset legend="Ignored Users" variant='filled'>

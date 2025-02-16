@@ -111,10 +111,6 @@ export function AlertSettings() {
                 </Stack>
             </Fieldset>
 
-            <Fieldset legend="Free TTS User" variant="filled" key="free-tts">
-                <TagsInput placeholder="" value={config.freeTTS} onChange={(freeTTS) => config.setFreeTTS(freeTTS.map(c => c.toLowerCase().substring(0, 50).trim()))}></TagsInput>
-            </Fieldset>
-
             <Fieldset legend="Alert Delay" variant="filled" key="tts-delay">
                 <Stack>
                     <Text size="sm">Jingle</Text>
