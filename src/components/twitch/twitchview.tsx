@@ -34,7 +34,7 @@ export function TwitchView(props: TwitchViewProps) {
     const [raidTargetStreams, setRaidTargetStreams] = useState<HelixStream[]>([]);
     const [activeTab, setActiveTab] = useState<string | null>('live');
     const [raidModalOpenend, raidModalHandler] = useDisclosure(false);
-    const [initialRaidTarget, setInitialRaidTarget] = useState<string | undefined>();
+    const [initialRaidTarget, setInitialRaidTarget] = useState<HelixStream | undefined>();
 
     useEffect(() => {
         setLoadStreams(true);
@@ -97,7 +97,7 @@ export function TwitchView(props: TwitchViewProps) {
                         {loadStream ? [1, 2, 3].map((x) => (<StreamCardPlaceholder key={x} />)) : null}
                         {!loadStream && raidTargetStreams.length === 0 ? <Text pt='xl' size='xl' ta="center" fw={500}>No Streams for raid right now.</Text> : null}
                         {raidTargetStreams.map(stream => (<StreamCard stream={stream} key={stream.id} hideViewers={config.hideViewers || (config.hideOwnViewers && stream.userName === login.user?.name)} onClick={(stream) => {
-                            setInitialRaidTarget(stream.userName);
+                            setInitialRaidTarget(stream);
                             raidModalHandler.open();
                         }}/>))}
                     </SimpleGrid>

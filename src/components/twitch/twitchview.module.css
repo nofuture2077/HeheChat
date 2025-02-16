@@ -9,4 +9,13 @@
 
 .main {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.streams {
+    padding-bottom: 10px;
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
 }

@@ -1,6 +1,6 @@
 import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
 import { useContext, useEffect, useState, useRef } from "react";
-import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge, ScrollArea } from '@mantine/core';
+import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge, ScrollArea, Image } from '@mantine/core';
 import { IconArrowsRight, IconX } from '@tabler/icons-react';
 import { OverlayDrawer } from '../../../pages/Chat.page';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
@@ -10,6 +10,7 @@ import styles from './modview.module.css';
 import { formatDate, formatDuration, formatDateWithTime } from '../../../commons/helper';
 import { ChannelPicker } from '../ChannelPicker';
 import { ChatMessageComp } from '../ChatMessage';
+import { HelixStream } from '@twurple/api';
 import _ from "underscore";
 
 export const ModDrawer: OverlayDrawer = {
@@ -308,15 +309,29 @@ export function BanView(props: {
 
 export function RaidView(props: {
     initialFrom?: string;
-    initialTo?: string;
+    initialTo?: HelixStream;
     raidChannel: (from: string, to: string) => void,
     close: () => void;
 }): JSX.Element {
     const [raidFrom, setRaidFrom] = useState(props.initialFrom);
-    const [raidTo, setRaidTo] = useState(props.initialTo);
+    const [raidTo, setRaidTo] = useState<HelixStream | undefined>(props.initialTo);
+    const [profilePicture, setProfilePicture] = useState<string>("");
     const login = useContext(LoginContextContext);
     const config = useContext(ConfigContext);
     const emotes = useContext(ChatEmotesContext);
+
+    useEffect(() => {
+        if (raidTo?.userId) {
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/twitch/users/${raidTo.userId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.profile_image_url) {
+                        setProfilePicture(data.profile_image_url);
+                    }
+                })
+                .catch(console.error);
+        }
+    }, [raidTo]);
 
     return (
         <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
@@ -330,16 +345,16 @@ export function RaidView(props: {
                     <IconArrowsRight />
 
                     <Stack align="center" w="35%">
-                        <ChannelPicker channels={config.raidTargets} value={raidTo} onChange={setRaidTo} />
-                        <Text>{raidTo}</Text>
+                        <Image src={profilePicture} width="32" height="32"/>
+                        <Text>{raidTo?.userName}</Text>
                     </Stack>
                 </Group>
-                <Group justify="flex-end" mt="md">
+                <Group justify="space-between" mt="md">
                     <Button onClick={props.close}>Cancel</Button>
-                    <Button color='primary' disabled={!raidFrom || !raidTo} onClick={() => {
+                    <Button variant='gradient' disabled={!raidFrom || !raidTo} onClick={() => {
                         if (raidFrom && raidTo) {
                             const raidFromId = emotes.getChannelId(raidFrom);
-                            const raidToId = emotes.getChannelId(raidTo);
+                            const raidToId = raidTo.userId;
                             props.raidChannel(raidFromId, raidToId);
                             props.close();
                         }
