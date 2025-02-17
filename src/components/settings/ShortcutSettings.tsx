@@ -140,7 +140,7 @@ export function ShortcutSettings() {
                     <Text fs='italic'>Input can be used to set the streammarkers name. Confirm makes sure that a shortcut is only executed after confirmation.</Text>
                     <Group justify="space-between" mt="md">
                         <Button variant="light" onClick={resetForm}>Cancel</Button>
-                        <Button onClick={handleSave}>{editingShortcut ? 'Update' : 'Add'}</Button>
+                        <Button variant="gradient" onClick={handleSave}>{editingShortcut ? 'Update' : 'Add'}</Button>
                     </Group>
                 </Stack>
             </Modal>

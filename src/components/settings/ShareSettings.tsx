@@ -109,7 +109,7 @@ export function ShareSettings() {
             <Text fs="italic" size='14px'>* Share your alerts with other Streams so they can use your sounds. Be aware: If you use AI-TTS shared alerts will count against your Quota from elevenlabs</Text>
         </Fieldset>
 
-        <Fieldset legend="Editor Tokens" variant="filled">
+        <Fieldset legend="Alert-Editor Token" variant="filled">
             <Table>
                 <Table.Thead>
                     <Table.Tr>

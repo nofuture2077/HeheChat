@@ -41,6 +41,14 @@ export function ChatSettings() {
 
             <Fieldset legend="Ignored Users" variant='filled'>
                 <TagsInput placeholder="" value={config.ignoredUsers} onChange={(users) => config.setIgnoredUsers(users.map(u => u.toLowerCase().substring(0, 25).trim()))}></TagsInput>
+                <Space h="xs" />
+                <Text fs="italic" size='14px'>Messages from this users (e.g. bots) will not show in your Chat.</Text>
+            </Fieldset>
+
+            <Fieldset legend="Raid Targets" variant="filled">
+                <TagsInput placeholder="" value={config.raidTargets} onChange={(targets) => config.setRaidTargets(targets.map(c => c.toLowerCase().substring(0, 25).trim()))}></TagsInput>
+                <Space h="xs" />
+                <Text fs="italic" size='14px'>List of potential raid targets. You will see who is online in raid view</Text>
             </Fieldset>
 
             <Fieldset legend="Messages" variant='filled'>
@@ -67,15 +75,6 @@ export function ChatSettings() {
                     <Switch checked={config.hideAdBreak} onChange={(event) => config.setHideAdBreak(event.currentTarget.checked)} label="Hide Ad Break" size="lg" />
                     <Switch checked={config.disableEmoteDialog} onChange={(event) => config.setDisableEmoteDialog(event.currentTarget.checked)} label="Disable Emote Dialog" size="lg" />
                 </Stack>
-            </Fieldset>
-
-            <Fieldset legend="Twitch Player"  variant='filled'>
-                <Select
-                    label="Video Quality"
-                    data={['auto', 'source', '1080p60', '1080p', '720p60', '720p', '480p', '360p', '160p']}
-                    value={config.videoQuality}
-                    onChange={(value) => config.setVideoQuality(value || '480p')}
-                />
             </Fieldset>
 
             <Fieldset legend="Event Messages" variant='filled'>

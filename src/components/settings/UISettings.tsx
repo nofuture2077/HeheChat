@@ -1,4 +1,4 @@
-import { Slider, Stack, TextInput, Button, ActionIcon, Modal, Fieldset, Group } from '@mantine/core';
+import { Slider, Stack, TextInput, Button, ActionIcon, Modal, Fieldset, Group, Select } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { ColorSchemeToggle } from '../colorscheme/colorscheme';
 import { useContext, useState } from 'react';
@@ -42,6 +42,15 @@ export function UISettings(props: UISettingProperties) {
 
             <Fieldset legend="Font Size" variant='filled'>
                 <Slider w="calc(100% - 20px)" m="10" value={config.fontSize} onChange={config.setFontSize} min={14} max={26} label={(value) => `${value} px`} marks={marks} />
+            </Fieldset>
+
+            <Fieldset legend="Twitch Player"  variant='filled'>
+                <Select
+                    label="Video Quality"
+                    data={['auto', 'source', '1080p60', '1080p', '720p60', '720p', '480p', '360p', '160p']}
+                    value={config.videoQuality}
+                    onChange={(value) => config.setVideoQuality(value || '480p')}
+                />
             </Fieldset>
 
             <Fieldset legend="Color Mode" variant='filled'>

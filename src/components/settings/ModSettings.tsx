@@ -31,11 +31,5 @@ export function ModSettings() {
                     {modActions.map(eventType => <Switch key={eventType} checked={config.systemMessageInChat[eventType]} onChange={(event) => {config.setSystemMessageInChat(eventType, event.currentTarget.checked);forceUpdate();}} label={Messages[eventType]} size="lg"/>)}
                 </Stack>  
             </Fieldset>
-
-            <Fieldset legend="Raid Targets" variant="filled">
-                <TagsInput placeholder="" value={config.raidTargets} onChange={(targets) => config.setRaidTargets(targets.map(c => c.toLowerCase().substring(0, 25).trim()))}></TagsInput>
-                <Space h="xs" />
-                <Text fs="italic" size='14px'>List of potential raid targets. You will see who is online in raid view</Text>
-            </Fieldset>
         </Stack>)
 }

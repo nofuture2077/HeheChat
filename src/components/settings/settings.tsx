@@ -26,7 +26,7 @@ const mainLinksMockdata = [
   { icon: IconMessageChatbot, label: 'Chat' },
   { icon: IconSword, label: 'Mod' },
   { icon: IconBell, label: 'Alerts' },
-  { icon: IconShare, label: 'Share' },
+  { icon: IconShare, label: 'Connect' },
   { icon: IconKeyboard, label: 'Shortcuts' }
 ];
 
@@ -78,7 +78,7 @@ export function Settings(props: SettingsProperties) {
         return <ModSettings />;
       case 'Alerts':
         return <AlertSettings />;
-      case 'Share':
+      case 'Connect':
         return <ShareSettings />;
       case 'Shortcuts':
         return <ShortcutSettings />;

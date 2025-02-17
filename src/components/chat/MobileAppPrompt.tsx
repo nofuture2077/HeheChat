@@ -22,7 +22,7 @@ function getInstallInstructions() {
     if (userAgent.includes('CriOS')) { // Chrome on iOS
       return "Tap the three dots (⋮) in the top-right corner, then select 'Share...' → 'Add to Home Screen'";
     }
-    return "Tap the share button (□↑) in the bottom toolbar, then select 'Add to Home Screen'";
+    return "Tap the share button (↑) in the bottom toolbar, then select 'Add to Home Screen'";
   }
   if (os === 'Android') {
     return "Tap the three dots (⋮) in the top-right corner, then select 'Add to Home screen'";
