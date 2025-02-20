@@ -54,7 +54,7 @@ export default function ReplayApp({ token }: ReplayAppProps) {
 
     const wssendSub = PubSub.subscribe("WSSEND", (msg, data) => {
         data.sink = token;
-        backendWorkerRef.current?.postMessage(JSON.stringify({type: "SEND", data }));
+        backendWorkerRef.current?.postMessage({type: "SEND", data });
     });
 
     // Send initial subscription message
