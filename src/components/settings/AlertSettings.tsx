@@ -80,6 +80,7 @@ export function AlertSettings() {
                     <Text fs="italic" size='14px'>Select where alert sounds should be played</Text>
                     {sink ? (<>
                         <Text span inline key={'browser-source-label'}>Link for OBS <Anchor inline key={'browser-source-link'} href={import.meta.env.VITE_SINK_URL + "#token=" + sink} target="_blank"><IconLink /></Anchor></Text>
+                        <Text span inline key={'browser-source-label'}>Replay Widget <Anchor inline key={'browser-widget-link'} href={import.meta.env.VITE_REPLAY_URL + "#token=" + sink} target="_blank"><IconLink /></Anchor></Text>
                     </>) : null}
                 </Stack>
             </Fieldset>
