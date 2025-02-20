@@ -49,6 +49,7 @@ export default function VisualAlertPlayer() {
 
     setTimeout(() => {
       setIsVisible(false);
+      setCurrentAlert(null);
     }, alert.duration);
   };
 
