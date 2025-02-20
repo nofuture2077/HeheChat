@@ -45,6 +45,7 @@ self.onmessage = async (e) => {
         case 'SEND':
             await backendReady;
             if ((data.type === "subscribe" && data.source === "HeheChat App") || 
+                (data.type === "sink" && data.source === "Replay App") || 
                 (data.type === "sink" && data.source === "Browsersource") ) {
                 initRequest = data;
             }

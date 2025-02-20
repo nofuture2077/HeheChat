@@ -8,6 +8,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
+        replay: './replay.html',
         alert: './alert.html'
       }
     }
