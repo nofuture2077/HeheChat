@@ -87,6 +87,66 @@ body, html {
   font-style: normal;
 }
 
+.font-headline-fjallaone .text p:first-child {
+  font-family: "Fjalla One", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-fjallaone .text p:last-child {
+  font-family: "Fjalla One", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-ericaone .text p:first-child {
+  font-family: "Erica One", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-ericaone .text p:last-child {
+  font-family: "Erica One", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-daysone .text p:first-child {
+  font-family: "Days One", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-daysone .text p:last-child {
+  font-family: "Days One", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-ultra .text p:first-child {
+  font-family: "Ultra", serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-ultra .text p:last-child {
+  font-family: "Ultra", serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-pressstart2p .text p:first-child {
+  font-family: "Press Start 2P", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-pressstart2p .text p:last-child {
+  font-family: "Press Start 2P", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
 .image-xs .image { width: 10vw; }
 .image-sm .image { width: 20vw; }
 .image-md .image { width: 30vw; }
