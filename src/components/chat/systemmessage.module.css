@@ -6,6 +6,8 @@
     width: 100vw;
     word-wrap: break-word;
     overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
 
     >.action {
         max-width: 100vw;
