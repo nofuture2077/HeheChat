@@ -397,10 +397,10 @@ export function PinManager() {
                     hidden: false,
                     type: 'shoutout',
                     id: generateGUID(),
-                    channel: d.broadcasterName,
+                    channel: d.channel,
                     endTime: new Date(Date.now() + SHOUTOUT_DURATION),
                     data: {
-                        broadcasterName: d.broadcasterName,
+                        broadcasterName: d.channel,
                         targetUserName: d.targetUserName,
                         viewerCount: d.viewerCount,
                         moderatorName: d.moderatorName
@@ -417,7 +417,7 @@ export function PinManager() {
                     hidden: false,
                     type: 'adbreak',
                     id: generateGUID(),
-                    channel: d.broadcasterName,
+                    channel: d.channel,
                     endTime: new Date(Date.now() + d.durationSeconds * 1000),
                     data: {}
                 };

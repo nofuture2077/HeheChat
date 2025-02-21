@@ -5,6 +5,8 @@ import { ProfileContext } from './ApplicationContext';
 import VisualAlertPlayer from './components/browsersource/VisualAlertPlayer';
 import { AlertSystem } from './components/alerts/alertplayer';
 import { initializeStoragePatches } from './commons/patches';
+import { useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
+
 
 interface BrowserSourceProps {
   token: string | undefined;
@@ -20,11 +22,19 @@ window.addEventListener("click", () => {
 export default function BrowserSource({ token, preview }: BrowserSourceProps) {
   const backendWorkerRef = useRef<Worker>();
   const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE});
+  const documentVisible = useDocumentVisibility();
+  const networkStatus = useNetwork();
 
   // Run storage patches on app initialization
   useEffect(() => {
     initializeStoragePatches();
   }, []);
+
+  useDidUpdate(() => {
+      if (!AlertSystem.status()) {
+          AlertSystem.initialize();
+      } 
+  }, [documentVisible, networkStatus.online]);
 
   useEffect(() => {
     // Initialize the worker
