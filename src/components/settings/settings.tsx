@@ -34,7 +34,7 @@ export const SettingsDrawer: OverlayDrawer = {
   name: 'settings',
   component: Settings,
   size: 440,
-  position: 'left',
+  position: 'right',
 }
 
 export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts' | 'Share' | 'Shortcuts';
@@ -98,15 +98,15 @@ export function Settings(props: SettingsProperties) {
         </Button>
       </div>
       <div className={classes.wrapper}>
-        <div className={classes.aside}>
-          <div>
-            {mainLinks}
-          </div>
-        </div>
         <div className={classes.main}>
           <ScrollArea h="calc(100vh - 126px)" maw="100%" className={classes.active} scrollbars="y">
             {renderSwitch(active)}
           </ScrollArea>
+        </div>
+        <div className={classes.aside}>
+          <div>
+            {mainLinks}
+          </div>
         </div>
       </div>
       <div className={classes.footer}>

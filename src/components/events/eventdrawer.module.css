@@ -9,3 +9,11 @@
     display: flex;
     flex-direction: column-reverse;
 }
+
+.header {
+    background-color: var(--mantine-color-body);
+}
+
+nav {
+    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+}

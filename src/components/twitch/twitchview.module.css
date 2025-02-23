@@ -19,3 +19,7 @@
     max-height: calc(100vh - 150px);
     overflow-y: auto;
 }
+
+.header {
+    background-color: var(--mantine-color-body);
+}

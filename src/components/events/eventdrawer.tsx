@@ -19,7 +19,7 @@ export interface EventDrawerViewProperties {
 export function EventDrawerView(props: EventDrawerViewProperties) {
     return (
         <nav className={classes.navbar}>
-            <Group justify='space-between' p='md'>
+            <Group justify='space-between' p='md' className={classes.header}>
                 <Title order={4}>
                     Alerts
                 </Title>

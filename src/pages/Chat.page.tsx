@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '../ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
-import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon, Badge, Stack, Group } from '@mantine/core';
+import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack } from '@mantine/core';
 import { Chat } from '../components/chat/Chat';
 import { MobileAppPrompt } from '../components/chat/MobileAppPrompt';
 import { ShortcutView } from '../components/shortcuts/ShortcutView';
@@ -16,7 +16,6 @@ import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { HeheMessage, parseMessage, HeheChatMessage } from '../commons/message';
 import { TwitchDrawer } from '../components/twitch/twitchview';
-import { StreamInfoDrawer } from '../components/twitch/streaminfo';
 import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, shoutoutUser, modUser, unmodUser, vipUser, unvipUser, unraid } from '../components/chat/mod/modactions';
 import { ProfileBarDrawer } from '../components/profile/profilebar';
 import { Storage } from '../components/chat/chatstorage';
@@ -323,7 +322,7 @@ export function ChatPage() {
                 <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
                     {drawer ? <drawer.component 
                         style={{overflow: 'visible'}} 
-                        height="100vh" 
+                        height="calc(var(--vh, 1vh) * 100)" 
                         modActions={modActions} 
                         close={drawerHandler.close} 
                         openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} 
