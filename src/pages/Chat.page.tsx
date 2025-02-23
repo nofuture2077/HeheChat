@@ -322,7 +322,7 @@ export function ChatPage() {
                 <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
                     {drawer ? <drawer.component 
                         style={{overflow: 'visible'}} 
-                        height="calc(var(--vh, 1vh) * 100)" 
+                        height="100dvh" 
                         modActions={modActions} 
                         close={drawerHandler.close} 
                         openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} 
