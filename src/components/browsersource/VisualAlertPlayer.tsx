@@ -13,18 +13,21 @@ function HighlightedText({ text }: HighlightedTextProps) {
   return (
     <>
       {parts.map((part, index) => {
+        // Replace spaces with non-breaking spaces
+        const processedPart = part.replace(/ /g, '\u00A0');
+        
         // Every odd index is highlighted text (inside ##)
         if (index % 2 === 1) {
           return (
             <span key={index} className="highlight">
-              {part.split('').map((char, charIndex) => (
+              {processedPart.split('').map((char, charIndex) => (
                 <span key={`${index}-${charIndex}`}>{char}</span>
               ))}
             </span>
           );
         }
         // Every even index is regular text
-        return part;
+        return processedPart;
       })}
     </>
   );
