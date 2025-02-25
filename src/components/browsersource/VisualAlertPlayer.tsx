@@ -79,17 +79,19 @@ export default function VisualAlertPlayer() {
 
   return (
     <div className={containerClasses}>
-      {currentAlert.image && (
-        <img 
-          className={styles.image}
-          src={getImage(currentAlert.image, currentAlert.channel)} 
-          alt="Alert" 
-          key={"image-" + timestamp}
-        />
-      )}
-      <div className={styles.text}>
-        <p><HighlightedText text={currentAlert.headline} /></p>
-        <p>{currentAlert.text}</p>
+      <div className={styles.contentWrapper}>
+        {currentAlert.image && (
+          <img 
+            className={styles.image}
+            src={getImage(currentAlert.image, currentAlert.channel)} 
+            alt="Alert" 
+            key={"image-" + timestamp}
+          />
+        )}
+        <div className={styles.text}>
+          <p><HighlightedText text={currentAlert.headline} /></p>
+          <p>{currentAlert.text}</p>
+        </div>
       </div>
     </div>
   );
