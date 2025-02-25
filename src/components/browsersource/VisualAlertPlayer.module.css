@@ -216,7 +216,6 @@ body, html {
   letter-spacing: 5px;
   display: flex;
   flex-direction: column;
-  max-width: 80%;
 }
 
 .text-dark .text { 
