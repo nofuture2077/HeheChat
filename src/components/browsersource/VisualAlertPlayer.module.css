@@ -26,7 +26,10 @@ body, html {
 .top {
   top: 0;
   justify-content: flex-start;
-  padding-top: 2rem;
+
+  .contentWrapper {
+    padding-top: 2rem;
+  }
 }
 
 .middle {
@@ -37,12 +40,17 @@ body, html {
 .bottom {
   bottom: 0;
   justify-content: flex-end;
-  padding-bottom: 2rem;
+
+  .contentWrapper {
+    padding-bottom: 2rem;
+  }
 }
 
 .left {
   align-items: flex-start;
-  padding-left: 2rem;
+  .contentWrapper {
+    padding-left: 2rem;
+  }
 }
 
 .center {
@@ -51,7 +59,10 @@ body, html {
 
 .right {
   align-items: flex-end;
-  padding-right: 2rem;
+
+  .contentWrapper {
+    padding-right: 2rem;
+  }
 }
 
 /* Layout classes for text alignment */
