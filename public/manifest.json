@@ -6,6 +6,8 @@
     "background_color": "#242424",
     "display": "standalone",
     "start_url": "/",
+    "gcm_sender_id": "103953800507",
+    "permissions": ["notifications", "push"],
     "icons": [
       {
         "src": "android-chrome-192x192.png",

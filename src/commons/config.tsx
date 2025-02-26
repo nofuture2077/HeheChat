@@ -3,6 +3,24 @@ import { ShortCut } from './shortcuts';
 
 export type MessageHandler = {id?: number, handle: (channel: string, text: string, replyTo?: string) => void};
 
+export type NotificationSettingType = 'streamStart' | 'chatMention' | 'raid';
+
+// Channel-specific notification settings
+export interface ChannelNotificationSettings {
+    enabled: boolean;
+    channelId: string;
+    channelName: string;
+}
+
+export interface NotificationSettings {
+    streamStart?: boolean;
+    chatMention?: boolean;
+    raid?: boolean;
+    // Channel-specific notification settings
+    streamStartChannels?: ChannelNotificationSettings[];
+    chatMentionChannels?: ChannelNotificationSettings[];
+}
+
 export interface ConfigData {
     channels: string[];
     showVideo: boolean;
@@ -39,7 +57,8 @@ export interface ConfigData {
     shares: string[],
     freeTTS: string[],
     deactivatedAlerts: Record<string, boolean>,
-    shortcuts: ShortCut[]
+    shortcuts: ShortCut[],
+    notificationSettings?: NotificationSettings
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -86,6 +105,8 @@ export interface Config extends ConfigData {
     setBrowserSourceVisual: (val: boolean) => void;
     setFreeTTS: (val: string[]) => void;
     setShortcuts: (val: ShortCut[]) => void;
+    setNotificationSetting?: (type: NotificationSettingType, val: boolean) => void;
+    setChannelNotificationSetting?: (type: 'streamStartChannels' | 'chatMentionChannels', channels: ChannelNotificationSettings[]) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {

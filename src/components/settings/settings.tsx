@@ -8,7 +8,8 @@ import {
   IconChevronRight,
   IconBell,
   IconShare,
-  IconKeyboard
+  IconKeyboard,
+  IconBellRinging
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
@@ -19,6 +20,7 @@ import { LoginContextContext } from '@/ApplicationContext';
 import { AlertSettings } from './AlertSettings';
 import { ShareSettings } from './ShareSettings';
 import { ShortcutSettings } from './ShortcutSettings';
+import { NotificationSettings } from './NotificationSettings';
 import { OverlayDrawer } from '@/pages/Chat.page';
 
 const mainLinksMockdata = [
@@ -26,6 +28,7 @@ const mainLinksMockdata = [
   { icon: IconMessageChatbot, label: 'Chat' },
   { icon: IconSword, label: 'Mod' },
   { icon: IconBell, label: 'Alerts' },
+  { icon: IconBellRinging, label: 'Notifications' },
   { icon: IconShare, label: 'Connect' },
   { icon: IconKeyboard, label: 'Shortcuts' }
 ];
@@ -37,7 +40,7 @@ export const SettingsDrawer: OverlayDrawer = {
   position: 'right',
 }
 
-export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts' | 'Share' | 'Shortcuts';
+export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts' | 'Notifications' | 'Connect' | 'Shortcuts';
 
 export interface SettingsProperties {
   close: () => void;
@@ -78,6 +81,8 @@ export function Settings(props: SettingsProperties) {
         return <ModSettings />;
       case 'Alerts':
         return <AlertSettings />;
+      case 'Notifications':
+        return <NotificationSettings />;
       case 'Connect':
         return <ShareSettings />;
       case 'Shortcuts':
