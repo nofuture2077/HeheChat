@@ -68,6 +68,13 @@ Comprehensive settings panels:
 - `yarn build`: Production build
 - `yarn test`: Run test suite
 
+### Development Environment
+
+1. Copy `.env.example` to `.env`
+2. Configure your environment variables:
+   - `VITE_CLIENT_ID`: Your Twitch application client ID
+   - `VITE_BYPASS_LOGIN`: Set to 'true' to bypass Twitch login in development mode
+
 ## Contributing
 
 Please read CONTRIBUTING.md for details on our code of conduct and the process for submitting pull requests.

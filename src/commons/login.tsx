@@ -68,12 +68,34 @@ export interface LoginContext extends LoginContextData {
 export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
     clientId: import.meta.env.VITE_CLIENT_ID,
     isLoggedIn: () => {
+        // Allow bypassing login in development mode
+        if (import.meta.env.DEV && import.meta.env.VITE_BYPASS_LOGIN === 'true') {
+            return true;
+        }
         return !!DEFAULT_LOGIN_CONTEXT.accessToken;
     },
     getAuthProvider: () => {
+        // Use mock auth provider in development mode
+        if (import.meta.env.DEV && import.meta.env.VITE_BYPASS_LOGIN === 'true') {
+            return new StaticAuthProvider(DEFAULT_LOGIN_CONTEXT.clientId, 'mock_token');
+        }
         return new StaticAuthProvider(DEFAULT_LOGIN_CONTEXT.clientId, DEFAULT_LOGIN_CONTEXT.accessToken || '');
     },
     getApiClient: () => {
+        // Return mock API client in development mode
+        if (import.meta.env.DEV && import.meta.env.VITE_BYPASS_LOGIN === 'true') {
+            const mockClient = new ApiClient({ authProvider: DEFAULT_LOGIN_CONTEXT.getAuthProvider()});
+            // Override methods that might be called during development
+            // @ts-ignore - We're intentionally creating a mock
+            mockClient.users = {
+                getUsersByNames: async () => [{
+                    name: 'dev_user',
+                    displayName: 'Development User',
+                    id: '123456789'
+                }]
+            };
+            return mockClient;
+        }
         return new ApiClient({ authProvider: DEFAULT_LOGIN_CONTEXT.getAuthProvider()});
     },
     setAccessToken: () => {},

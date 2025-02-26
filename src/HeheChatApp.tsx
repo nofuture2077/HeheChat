@@ -18,6 +18,7 @@ import { theme } from './theme';
 import { AlertSystem } from './components/alerts/alertplayer';
 import { ShortCut } from './commons/shortcuts';
 import _ from 'underscore';
+import { MockService } from '@/mocks/service';
 
 window.addEventListener("click", () => {
     if (!AlertSystem.status()) {
@@ -28,6 +29,9 @@ window.addEventListener("click", () => {
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 async function storeProfile(profile: Profile): Promise<any> {
+    if (MockService.isEnabled()) {
+        return MockService.storeProfile(profile);
+    }
     const token = localStorage.getItem('hehe-token_state') || '';
     return fetch(BASE_URL + "/profile?" + [["token", token].join("="), ["guid", profile.guid].join("=")].join("&"), {
         method: 'PUT',
@@ -36,26 +40,42 @@ async function storeProfile(profile: Profile): Promise<any> {
 }
 
 async function loadProfileFromServer(guid: String): Promise<Profile> {
+    if (MockService.isEnabled()) {
+        const profile = await MockService.loadProfile(guid.toString());
+        return profile || {...DEFAULT_PROFILE, guid: guid.toString()};
+    }
     const token = localStorage.getItem('hehe-token_state') || '';
     return fetch(BASE_URL + "/profile?" + [["token", token].join("="), ["guid", guid].join("=")].join("&")).then(res => res.json());
 }
 
 async function deleteProfileFromServer(guid: String): Promise<any> {
+    if (MockService.isEnabled()) {
+        return MockService.deleteProfile(guid.toString());
+    }
     const token = localStorage.getItem('hehe-token_state') || '';
     return fetch(BASE_URL + "/profile?" + [["token", token].join("="), ["guid", guid].join("=")].join("&"), {method: 'DELETE'});
 }
 
 async function loadProfilesFromServer(): Promise<{profiles: Profile[]}> {
+    if (MockService.isEnabled()) {
+        return MockService.loadProfilesList();
+    }
     const token = localStorage.getItem('hehe-token_state') || '';
     return fetch(BASE_URL + "/profile/list?" + [["token", token].join("=")].join("&")).then(res => res.json());
 }
 
 async function loadProfiles(): Promise<{active?: string, profiles: string}> {
+    if (MockService.isEnabled()) {
+        return MockService.loadProfiles();
+    }
     const token = localStorage.getItem('hehe-token_state') || '';
     return fetch(BASE_URL + "/profiles/list?" + [["token", token].join("=")].join("&")).then(res => res.json());
 }
 
 async function saveProfiles(active: string, profiles: string[]): Promise<any> {
+    if (MockService.isEnabled()) {
+        return MockService.saveProfiles(active);
+    }
     const token = localStorage.getItem('hehe-token_state') || '';
     return fetch(BASE_URL + "/profiles/list?" + [["token", token].join("="), ["active", active].join("="), ["profiles", profiles.join(',')].join("=")].join("&"), {
         method: 'PUT'
@@ -134,6 +154,11 @@ export default function HeheChat() {
 
         loadReceivedShares();
 
+        // Start mock message generator if mock environment is enabled
+        if (MockService.isEnabled() && profile.config.channels.length) {
+            MockService.startMockMessages(profile.config.channels);
+        }
+
         const psAlertConfig = PubSub.subscribe("WS-alertConfig", (msg, data) => {
             console.log('Alertconfig was updated for: ', data.channel);
             AlertSystem.loadAlertConfig([data.channel]);
@@ -160,6 +185,9 @@ export default function HeheChat() {
             PubSub.unsubscribe(psSetDelay);
             PubSub.unsubscribe(psWSSend);
             PubSub.unsubscribe(ps7TV);
+            
+            // Stop mock message generator
+            MockService.stopMockMessages();
         }
     }, []);
 
@@ -175,7 +203,17 @@ export default function HeheChat() {
         );
         setProfiles(updatedArray);
         AlertSystem.updateProfile(profile);
-    }, [profile])
+    }, [profile]);
+
+    // Restart mock messages when channels change
+    useEffect(() => {
+        if (MockService.isEnabled()) {
+            MockService.stopMockMessages();
+            if (profile.config.channels.length) {
+                MockService.startMockMessages(profile.config.channels);
+            }
+        }
+    }, [profile.config.channels]);
 
     const updateConfig = (key: ConfigKey, value: any) => {
         setProfile((profile) => {
@@ -249,13 +287,16 @@ export default function HeheChat() {
     }
 
     const isLoggedIn = () => {
-        return !!loginContext.accessToken;
+        return MockService.isEnabled() || !!loginContext.accessToken;
     }
+
     const getAuthProvider = () => {
         return new StaticAuthProvider(loginContext.clientId, loginContext.accessToken || '');
     };
+
     const getApiClient = () => {
-        return new ApiClient({ authProvider: getAuthProvider() });
+        const client = new ApiClient({ authProvider: getAuthProvider() });
+        return MockService.createApiClient(client, loginContext.clientId);
     };
 
     const onMessage = (handler: MessageHandler) => {
@@ -340,18 +381,33 @@ export default function HeheChat() {
     }
 
     const loadReceivedShares = async () => {
+        if (MockService.isEnabled()) {
+            const shares = await MockService.loadReceivedShares();
+            updateConfig('receivedShares', shares);
+            return;
+        }
         const share = localStorage.getItem('hehe-token_state') || '';
         const data: {shares: string[]} = await fetch(BASE_URL + "/shares?state=" + share).then(res => res.json());
         updateConfig('receivedShares', data.shares);
     }
 
     const loadShares = async () => {
+        if (MockService.isEnabled()) {
+            const shares = await MockService.loadShares();
+            updateConfig('shares', shares);
+            return;
+        }
         const share = localStorage.getItem('hehe-token_state') || '';
         const data: {shares: string[]} = await fetch(BASE_URL + "/shares/get?state=" + share).then(res => res.json());
         updateConfig('shares', data.shares);
     }
 
     const setShares = async (value: string[]) => {
+        if (MockService.isEnabled()) {
+            await MockService.setShares(value);
+            updateConfig('shares', value);
+            return;
+        }
         const share = localStorage.getItem('hehe-token_state') || '';
         const data: {shares: string[]} = await fetch(BASE_URL + "/shares/set?state=" + share + "&channels=" + value.join(',')).then(res => res.json());
         updateConfig('shares', data.shares);
