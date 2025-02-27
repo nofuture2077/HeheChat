@@ -1,5 +1,5 @@
 // Service Worker for Push Notifications
-const CACHE_NAME = 'hehe-chat-cache-v2';
+const CACHE_NAME = 'hehe-chat-cache-v3';
 
 // Install event - cache static assets
 self.addEventListener('install', (event) => {
