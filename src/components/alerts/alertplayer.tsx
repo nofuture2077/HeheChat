@@ -60,6 +60,26 @@ class AlertPlayer {
 
         this.mainAudioSource = this.audioContext.createMediaElementSource(this.mainAudio);
         this.mainAudioSource.connect(this.mainAudioGain);
+        
+        // Set media session metadata for album cover and artist info
+        if ('mediaSession' in navigator) {
+            this.updateMediaSessionMetadata();
+        }
+    }
+
+    updateMediaSessionMetadata() {
+        if (!('mediaSession' in navigator) || !this.mainAudio) return;
+        
+        const profileName = this.profile?.name || 'HeheChat';
+        
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'Alert Sound',
+            artist: profileName,
+            album: profileName,
+            artwork: [
+                { src: '/logo.png', sizes: '512x512', type: 'image/png' }
+            ]
+        });
     }
 
     async googleTTS(msg: string, channel: string, voice: string, state: string, sink: string): Promise<string> {
@@ -121,6 +141,11 @@ class AlertPlayer {
             this.mainAudio!.volume = volume;
             this.mainAudio!.currentTime = 0;
             this.mainAudio!.src = audio.src;
+            
+            // Update media session metadata when playing new audio
+            if ('mediaSession' in navigator) {
+                this.updateMediaSessionMetadata();
+            }
         });
     }
 
@@ -245,6 +270,11 @@ class AlertPlayer {
         this.profile = profile;
         const config = profile.config;
         this.config = config;
+        
+        // Update media session metadata when profile changes
+        if ('mediaSession' in navigator && this.mainAudio) {
+            this.updateMediaSessionMetadata();
+        }
     }
 
     async tts(ttsMessage: string, channel: string, voice: string, voiceType: string, state: string, sink: string) {
