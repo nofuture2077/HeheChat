@@ -415,6 +415,26 @@ export default function HeheChat() {
 
     const setActivatedShares = (value: string[]) => updateConfig('activatedShares', value);
     
+    // Send notification settings to the backend
+    const sendNotificationSettingsToBackend = async (settings: any) => {
+        try {
+            const token = localStorage.getItem('hehe-token_state') || '';
+            const response = await fetch(`${BASE_URL}/push/settings?token=${token}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ settings }),
+            });
+            
+            if (!response.ok) {
+                console.error('Failed to update notification settings on server');
+            }
+        } catch (error) {
+            console.error('Error sending notification settings to server:', error);
+        }
+    };
+
     const setNotificationSetting = (type: NotificationSettingType, value: boolean) => {
         const settings = profile.config.notificationSettings || {
             streamStart: true,
@@ -423,6 +443,9 @@ export default function HeheChat() {
         };
         settings[type] = value;
         updateConfig('notificationSettings', settings);
+        
+        // Send updated settings to backend
+        sendNotificationSettingsToBackend(settings);
     };
     
     const setChannelNotificationSetting = (type: 'streamStartChannels' | 'chatMentionChannels', channels: ChannelNotificationSettings[]) => {
@@ -433,6 +456,9 @@ export default function HeheChat() {
         };
         settings[type] = channels;
         updateConfig('notificationSettings', settings);
+        
+        // Send updated settings to backend
+        sendNotificationSettingsToBackend(settings);
     };
 
     const appConfig = {
