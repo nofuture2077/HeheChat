@@ -369,44 +369,12 @@ export function NotificationSettings() {
               disabled={!isSubscribed}
             />
             
-            {config.notificationSettings?.streamStart && (
-              <ChannelNotificationList
-                type="streamStart"
-                isSubscribed={isSubscribed}
-                disabled={!config.notificationSettings?.streamStart}
-              />
-            )}
-          </Stack>
-          
-          <Divider my="xs" />
-          
-          {/* Chat Mention Notifications */}
-          <Stack>
-            <Switch
-              label="Chat Mention Notifications"
-              checked={config.notificationSettings?.chatMention ?? true}
-              onChange={(event) => config.setNotificationSetting?.('chatMention', event.currentTarget.checked)}
-              disabled={!isSubscribed}
+            <ChannelNotificationList
+              type="streamStart"
+              isSubscribed={isSubscribed}
+              disabled={!config.notificationSettings?.streamStart}
             />
-            
-            {config.notificationSettings?.chatMention && (
-              <ChannelNotificationList
-                type="chatMention"
-                isSubscribed={isSubscribed}
-                disabled={!config.notificationSettings?.chatMention}
-              />
-            )}
           </Stack>
-          
-          <Divider my="xs" />
-          
-          {/* Raid Notifications */}
-          <Switch
-            label="Raid Notifications"
-            checked={config.notificationSettings?.raid ?? true}
-            onChange={(event) => config.setNotificationSetting?.('raid', event.currentTarget.checked)}
-            disabled={!isSubscribed}
-          />
         </Stack>
         
         {isSubscribed && (
