@@ -8,7 +8,7 @@ import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext }
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
-import { ChannelNotificationSettings, ConfigKey, DEFAULT_CONFIG, MessageHandler, NotificationSettingType } from './commons/config';
+import { ConfigKey, DEFAULT_CONFIG, MessageHandler, NotificationSettingType } from './commons/config';
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { generateGUID } from './commons/helper';
@@ -448,7 +448,7 @@ export default function HeheChat() {
         sendNotificationSettingsToBackend(settings);
     };
     
-    const setChannelNotificationSetting = (type: 'streamStartChannels' | 'chatMentionChannels', channels: ChannelNotificationSettings[]) => {
+    const setChannelNotificationSetting = (type: 'streamStartChannels' | 'chatMentionChannels', channels: string[]) => {
         const settings = profile.config.notificationSettings || {
             streamStart: true,
             chatMention: true,

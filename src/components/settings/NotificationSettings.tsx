@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react';
 import { Button, Switch, Text, Stack, Group, Alert, Paper, Title, Divider, List, Code, Accordion, Checkbox, TextInput, Badge, TagsInput } from '@mantine/core';
 import { IconBellRinging, IconBellOff, IconAlertCircle, IconPlus } from '@tabler/icons-react';
 import { ConfigContext } from '@/ApplicationContext';
-import { ChannelNotificationSettings, NotificationSettingType } from '@/commons/config';
+import { NotificationSettingType } from '@/commons/config';
 
 // Channel notification list component
 interface ChannelNotificationListProps {
@@ -13,7 +13,7 @@ interface ChannelNotificationListProps {
 
 function ChannelNotificationList({ type, isSubscribed, disabled }: ChannelNotificationListProps) {
   const config = useContext(ConfigContext);
-  const [channels, setChannels] = useState<ChannelNotificationSettings[]>([]);
+  const [channels, setChannels] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
   // Load channels from config
@@ -25,68 +25,23 @@ function ChannelNotificationList({ type, isSubscribed, disabled }: ChannelNotifi
     }
   }, [config.notificationSettings, type]);
   
-  // Get channel names for TagsInput
-  const getChannelValues = () => {
-    return channels
-      .filter(channel => channel.enabled)
-      .map(channel => channel.channelName);
-  };
-  
   // Update channels when tags change
   const handleTagsChange = (values: string[]) => {
     if (disabled || !isSubscribed) return;
     
     setIsLoading(true);
     try {
-      // Create a map of existing channels for quick lookup
-      const existingChannels = new Map(
-        channels.map(channel => [channel.channelName.toLowerCase(), channel])
-      );
+      // Transform channel names: trim whitespace and convert to lowercase
+      const normalizedValues = values.map(channel => channel.trim().toLowerCase());
       
-      // Create updated channels list
-      const updatedChannels: ChannelNotificationSettings[] = [];
-      
-      // First add all enabled channels from the tags
-      values.forEach(channelName => {
-        const lowerName = channelName.toLowerCase();
-        const existing = existingChannels.get(lowerName);
-        
-        if (existing) {
-          // Use existing channel with enabled set to true
-          updatedChannels.push({
-            ...existing,
-            enabled: true
-          });
-        } else {
-          // Create new channel
-          updatedChannels.push({
-            enabled: true,
-            channelId: `id_${lowerName}`,
-            channelName: channelName
-          });
-        }
-      });
-      
-      // Then add all disabled channels that weren't in the tags
-      channels.forEach(channel => {
-        const lowerName = channel.channelName.toLowerCase();
-        if (!values.some(v => v.toLowerCase() === lowerName)) {
-          // This channel was removed from tags, add it as disabled
-          updatedChannels.push({
-            ...channel,
-            enabled: false
-          });
-        }
-      });
-      
-      // Update the notification settings in the config using the new function
+      // Update the notification settings in the config
       if (type === 'streamStart' && config.setChannelNotificationSetting) {
-        config.setChannelNotificationSetting('streamStartChannels', updatedChannels);
+        config.setChannelNotificationSetting('streamStartChannels', normalizedValues);
       } else if (type === 'chatMention' && config.setChannelNotificationSetting) {
-        config.setChannelNotificationSetting('chatMentionChannels', updatedChannels);
+        config.setChannelNotificationSetting('chatMentionChannels', normalizedValues);
       }
       
-      setChannels(updatedChannels);
+      setChannels(normalizedValues);
     } catch (error) {
       console.error('Error updating channels:', error);
     } finally {
@@ -100,7 +55,7 @@ function ChannelNotificationList({ type, isSubscribed, disabled }: ChannelNotifi
       
       <TagsInput
         placeholder="Type a channel name and press Enter"
-        value={getChannelValues()}
+        value={channels}
         onChange={handleTagsChange}
         disabled={disabled || !isSubscribed}
         clearable

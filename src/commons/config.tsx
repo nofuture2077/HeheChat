@@ -5,20 +5,13 @@ export type MessageHandler = {id?: number, handle: (channel: string, text: strin
 
 export type NotificationSettingType = 'streamStart' | 'chatMention' | 'raid';
 
-// Channel-specific notification settings
-export interface ChannelNotificationSettings {
-    enabled: boolean;
-    channelId: string;
-    channelName: string;
-}
-
 export interface NotificationSettings {
     streamStart?: boolean;
     chatMention?: boolean;
     raid?: boolean;
     // Channel-specific notification settings
-    streamStartChannels?: ChannelNotificationSettings[];
-    chatMentionChannels?: ChannelNotificationSettings[];
+    streamStartChannels?: string[];
+    chatMentionChannels?: string[];
 }
 
 export interface ConfigData {
@@ -106,7 +99,7 @@ export interface Config extends ConfigData {
     setFreeTTS: (val: string[]) => void;
     setShortcuts: (val: ShortCut[]) => void;
     setNotificationSetting?: (type: NotificationSettingType, val: boolean) => void;
-    setChannelNotificationSetting?: (type: 'streamStartChannels' | 'chatMentionChannels', channels: ChannelNotificationSettings[]) => void;
+    setChannelNotificationSetting?: (type: 'streamStartChannels' | 'chatMentionChannels', channels: string[]) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
