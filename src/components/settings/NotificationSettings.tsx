@@ -32,7 +32,9 @@ function ChannelNotificationList({ type, isSubscribed, disabled }: ChannelNotifi
     setIsLoading(true);
     try {
       // Transform channel names: trim whitespace and convert to lowercase
-      const normalizedValues = values.map(channel => channel.trim().toLowerCase());
+      const normalizedValues = values
+        .filter(channel => typeof channel === 'string') // Ensure we only have string values
+        .map(channel => channel.trim().toLowerCase());
       
       // Update the notification settings in the config
       if (type === 'streamStart' && config.setChannelNotificationSetting) {
