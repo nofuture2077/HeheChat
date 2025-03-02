@@ -1,6 +1,7 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Menu, Image } from '@mantine/core';
 import { ChatEmotesContext } from '@/ApplicationContext';
+import classes from './ChannelPicker.module.css';
 
 export interface ChannelPickerProps {
   channels: string[];
@@ -11,6 +12,13 @@ export interface ChannelPickerProps {
 
 export function ChannelPicker(props: ChannelPickerProps) {
     const chatEmotes = useContext(ChatEmotesContext);
+    const [isFirefox, setIsFirefox] = useState(false);
+
+    // Detect Firefox browser
+    useEffect(() => {
+        const userAgent = navigator.userAgent.toLowerCase();
+        setIsFirefox(userAgent.includes('firefox'));
+    }, []);
 
     const items = props.channels.map((item) => (
       <Menu.Item
@@ -20,14 +28,34 @@ export function ChannelPicker(props: ChannelPickerProps) {
         m={12}
         onClick={() => {props.onChange(item)}}
         key={item}
+        className={classes.menuItem}
       >
         <Image src={chatEmotes.getLogo(item)?.props.src} width={32} height={32} style={{borderRadius: 16}}/>
-    </Menu.Item>
+      </Menu.Item>
     ));
+    
     return (
-      <Menu withinPortal disabled={props.disabled}>
+      <Menu 
+        withinPortal={!isFirefox} // Disable portal for Firefox
+        disabled={props.disabled}
+        position="bottom-start"
+        shadow="md"
+        zIndex={1000} // Ensure high z-index for expanded mode
+      >
         <Menu.Target>
-            {props.value ? <Image src={chatEmotes.getLogo(props.value)?.props.src} width={32} height={32} style={{borderRadius: 16}}/> : <Image width={32} height={32} style={{borderRadius: 16}}/>}
+            {props.value ? 
+              <Image 
+                src={chatEmotes.getLogo(props.value)?.props.src} 
+                width={32} 
+                height={32} 
+                style={{borderRadius: 16}}
+              /> : 
+              <Image 
+                width={32} 
+                height={32} 
+                style={{borderRadius: 16}}
+              />
+            }
         </Menu.Target>
         <Menu.Dropdown>{items}</Menu.Dropdown>
       </Menu>

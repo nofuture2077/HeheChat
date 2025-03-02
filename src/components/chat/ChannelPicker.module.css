@@ -1,9 +1,26 @@
 
 
-  .menuItem {
-    padding: 4px 8px;
-    margin: 0;
-    >.mantine-Menu-itemSection:where([data-position='left']) {
-        margin-inline-end: 0 !important;
-    }
+.menuItem {
+  padding: 4px 8px;
+  margin: 0;
+  >.mantine-Menu-itemSection:where([data-position='left']) {
+      margin-inline-end: 0 !important;
   }
+}
+
+/* Firefox-specific styles */
+@-moz-document url-prefix() {
+  .menuItem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Ensure dropdown is visible in expanded mode */
+  :global(.mantine-Menu-dropdown) {
+    z-index: 9999 !important;
+    position: absolute !important;
+    visibility: visible !important;
+    display: block !important;
+  }
+}
