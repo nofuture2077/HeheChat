@@ -434,14 +434,18 @@ export default function HeheChat() {
             console.error('Error sending notification settings to server:', error);
         }
     };
-
-    const setNotificationSetting = (type: NotificationSettingType, value: boolean) => {
+    
+    // This function is kept for backward compatibility but now only handles channel arrays
+    const setNotificationSetting = (type: NotificationSettingType, value: boolean | string[]) => {
         const settings = profile.config.notificationSettings || {
-            streamStart: true,
-            chatMention: true,
-            raid: true
+            streamStartChannels: [],
+            chatMentionChannels: []
         };
-        settings[type] = value;
+        
+        if (Array.isArray(value)) {
+            settings[type] = value;
+        }
+        
         updateConfig('notificationSettings', settings);
         
         // Send updated settings to backend
@@ -450,10 +454,10 @@ export default function HeheChat() {
     
     const setChannelNotificationSetting = (type: 'streamStartChannels' | 'chatMentionChannels', channels: string[]) => {
         const settings = profile.config.notificationSettings || {
-            streamStart: true,
-            chatMention: true,
-            raid: true
+            streamStartChannels: [],
+            chatMentionChannels: []
         };
+        
         settings[type] = channels;
         updateConfig('notificationSettings', settings);
         

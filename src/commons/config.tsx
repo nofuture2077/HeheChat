@@ -3,12 +3,9 @@ import { ShortCut } from './shortcuts';
 
 export type MessageHandler = {id?: number, handle: (channel: string, text: string, replyTo?: string) => void};
 
-export type NotificationSettingType = 'streamStart' | 'chatMention' | 'raid';
+export type NotificationSettingType = 'streamStartChannels' | 'chatMentionChannels';
 
 export interface NotificationSettings {
-    streamStart?: boolean;
-    chatMention?: boolean;
-    raid?: boolean;
     // Channel-specific notification settings
     streamStartChannels?: string[];
     chatMentionChannels?: string[];

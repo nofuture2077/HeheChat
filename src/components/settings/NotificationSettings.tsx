@@ -1,33 +1,29 @@
 import { useState, useEffect, useContext } from 'react';
-import { Button, Switch, Text, Stack, Group, Alert, Paper, Title, Divider, List, Code, Accordion, Checkbox, TextInput, Badge, TagsInput } from '@mantine/core';
-import { IconBellRinging, IconBellOff, IconAlertCircle, IconPlus } from '@tabler/icons-react';
+import { Button, Text, Stack, Group, Alert, Title, Divider, TagsInput } from '@mantine/core';
+import { IconBellRinging, IconBellOff, IconAlertCircle } from '@tabler/icons-react';
 import { ConfigContext } from '@/ApplicationContext';
-import { NotificationSettingType } from '@/commons/config';
 
 // Channel notification list component
 interface ChannelNotificationListProps {
-  type: 'streamStart' | 'chatMention';
+  type: 'streamStartChannels' | 'chatMentionChannels';
   isSubscribed: boolean;
-  disabled: boolean;
+  title: string;
+  description: string;
 }
 
-function ChannelNotificationList({ type, isSubscribed, disabled }: ChannelNotificationListProps) {
+function ChannelNotificationList({ type, isSubscribed, title, description }: ChannelNotificationListProps) {
   const config = useContext(ConfigContext);
   const [channels, setChannels] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
   // Load channels from config
   useEffect(() => {
-    if (type === 'streamStart') {
-      setChannels(config.notificationSettings?.streamStartChannels || []);
-    } else if (type === 'chatMention') {
-      setChannels(config.notificationSettings?.chatMentionChannels || []);
-    }
+    setChannels(config.notificationSettings?.[type] || []);
   }, [config.notificationSettings, type]);
   
   // Update channels when tags change
   const handleTagsChange = (values: string[]) => {
-    if (disabled || !isSubscribed) return;
+    if (!isSubscribed) return;
     
     setIsLoading(true);
     try {
@@ -37,10 +33,8 @@ function ChannelNotificationList({ type, isSubscribed, disabled }: ChannelNotifi
         .map(channel => channel.trim().toLowerCase());
       
       // Update the notification settings in the config
-      if (type === 'streamStart' && config.setChannelNotificationSetting) {
-        config.setChannelNotificationSetting('streamStartChannels', normalizedValues);
-      } else if (type === 'chatMention' && config.setChannelNotificationSetting) {
-        config.setChannelNotificationSetting('chatMentionChannels', normalizedValues);
+      if (config.setChannelNotificationSetting) {
+        config.setChannelNotificationSetting(type, normalizedValues);
       }
       
       setChannels(normalizedValues);
@@ -53,22 +47,18 @@ function ChannelNotificationList({ type, isSubscribed, disabled }: ChannelNotifi
   
   return (
     <Stack>
-      <Text size="sm" fw={500}>Channels</Text>
+      <Text size="sm" fw={500}>{title}</Text>
       
       <TagsInput
         placeholder="Type a channel name and press Enter"
         value={channels}
         onChange={handleTagsChange}
-        disabled={disabled || !isSubscribed}
+        disabled={!isSubscribed}
         clearable
         maxDropdownHeight={200}
       />
       
-      <Text size="xs" c="dimmed">
-        {type === 'streamStart'
-          ? 'If no channels are specified, you will receive notifications for all channels you follow.'
-          : 'If no channels are specified, you will receive notifications for mentions in all channels.'}
-      </Text>
+      <Text size="xs" c="dimmed">{description}</Text>
     </Stack>
   );
 }
@@ -318,20 +308,22 @@ export function NotificationSettings() {
         
         <Stack>
           {/* Stream Start Notifications */}
-          <Stack>
-            <Switch
-              label="Stream Start Notifications"
-              checked={config.notificationSettings?.streamStart ?? true}
-              onChange={(event) => config.setNotificationSetting?.('streamStart', event.currentTarget.checked)}
-              disabled={!isSubscribed}
-            />
-            
-            <ChannelNotificationList
-              type="streamStart"
-              isSubscribed={isSubscribed}
-              disabled={!config.notificationSettings?.streamStart}
-            />
-          </Stack>
+          <ChannelNotificationList
+            type="streamStartChannels"
+            isSubscribed={isSubscribed}
+            title="Stream Start Notifications"
+            description="Add channels to receive notifications when they go live. If no channels are specified, you won't receive stream start notifications."
+          />
+          
+          <Divider my="sm" />
+          
+          {/* Chat Mention Notifications */}
+          <ChannelNotificationList
+            type="chatMentionChannels"
+            isSubscribed={isSubscribed}
+            title="Chat Mention Notifications"
+            description="Add channels to receive notifications when you're mentioned in chat. If no channels are specified, you won't receive chat mention notifications."
+          />
         </Stack>
         
         {isSubscribed && (
