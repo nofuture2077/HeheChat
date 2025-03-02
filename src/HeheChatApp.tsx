@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { initializeStoragePatches } from './commons/patches';
 import { Router } from './Router';
 import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext } from './ApplicationContext';
+import { PremiumProvider } from './components/premium';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
@@ -540,7 +541,9 @@ export default function HeheChat() {
                 <ProfileContext.Provider value={appProfile}>
                     <LoginContextContext.Provider value={appLogin}>
                         <ChatEmotesContext.Provider value={chatEmotes}>
-                            <Router />
+                            <PremiumProvider>
+                                <Router />
+                            </PremiumProvider>
                         </ChatEmotesContext.Provider>
                     </LoginContextContext.Provider>
                 </ProfileContext.Provider>

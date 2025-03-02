@@ -9,19 +9,21 @@ import {
   IconBell,
   IconShare,
   IconKeyboard,
-  IconUserUp
+  IconUserUp,
+  IconCrown
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
 import { UISettings } from './UISettings';
 import { ModSettings } from './ModSettings';
 import { InfoCard } from '../infocard/infocard';
-import { LoginContextContext } from '@/ApplicationContext';
+import { LoginContextContext, PremiumContext } from '@/ApplicationContext';
 import { AlertSettings } from './AlertSettings';
 import { ShareSettings } from './ShareSettings';
 import { ShortcutSettings } from './ShortcutSettings';
 import { NotificationSettings } from './NotificationSettings';
 import { OverlayDrawer } from '@/pages/Chat.page';
+import { PremiumSettings } from '../premium';
 
 const mainLinksMockdata = [
   { icon: IconHome2, label: 'General' },
@@ -31,6 +33,7 @@ const mainLinksMockdata = [
   { icon: IconShare, label: 'Connect' },
   { icon: IconKeyboard, label: 'Shortcuts' },
   { icon: IconUserUp, label: 'Notifications' },
+  { icon: IconCrown, label: 'Premium' },
 ];
 
 export const SettingsDrawer: OverlayDrawer = {
@@ -40,7 +43,7 @@ export const SettingsDrawer: OverlayDrawer = {
   position: 'right',
 }
 
-export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts' | 'Notifications' | 'Connect' | 'Shortcuts';
+export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts' | 'Notifications' | 'Connect' | 'Shortcuts' | 'Premium';
 
 export interface SettingsProperties {
   close: () => void;
@@ -87,6 +90,8 @@ export function Settings(props: SettingsProperties) {
         return <ShareSettings />;
       case 'Shortcuts':
         return <ShortcutSettings />;
+      case 'Premium':
+        return <PremiumSettings />;
       default:
         return null;
     }

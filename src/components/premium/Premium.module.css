@@ -1,0 +1,99 @@
+.premiumBadge {
+  background: linear-gradient(45deg, var(--mantine-color-yellow-6), var(--mantine-color-orange-6));
+  color: var(--mantine-color-white);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.premiumBadge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.premiumDetails {
+  margin-bottom: 1.5rem;
+}
+
+.premiumDetailsCard {
+  background: linear-gradient(135deg, var(--mantine-color-dark-7), var(--mantine-color-dark-8));
+  border: 1px solid var(--mantine-color-dark-5);
+  margin-bottom: 1rem;
+}
+
+.premiumDetailsHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.premiumIcon {
+  color: var(--mantine-color-yellow-5);
+  margin-right: 0.5rem;
+}
+
+.redeemCodeForm {
+  margin-bottom: 1.5rem;
+}
+
+.redeemCodeInput {
+  text-transform: uppercase;
+}
+
+.paypalContainer {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.paypalButton {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.successMessage {
+  color: var(--mantine-color-teal-6);
+  margin-top: 0.5rem;
+}
+
+.errorMessage {
+  color: var(--mantine-color-red-6);
+  margin-top: 0.5rem;
+}
+
+.loadingOverlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.premiumHistoryItem {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--mantine-color-dark-4);
+}
+
+.premiumHistoryItem:last-child {
+  border-bottom: none;
+}
+
+.premiumFeatureList {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.premiumFeatureItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.premiumFeatureIcon {
+  color: var(--mantine-color-teal-5);
+  margin-right: 0.5rem;
+}

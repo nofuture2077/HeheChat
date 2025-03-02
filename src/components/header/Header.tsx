@@ -3,7 +3,7 @@ import { useDisclosure, useInterval } from '@mantine/hooks';
 import classes from './Header.module.css';
 import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
-import { ConfigContext, ProfileContext } from '@/ApplicationContext';
+import { ConfigContext, ProfileContext, PremiumContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
 import { HeaderLogo } from './HeaderLogo';
 import { TwitchPlayer } from '@/components/twitch/twitchplayer'
@@ -24,6 +24,7 @@ export function Header(props: {
     const config = useContext(ConfigContext);
     const [opened] = useDisclosure(false);
     const profile = useContext(ProfileContext);
+    const premium = useContext(PremiumContext);
     const [alertsActive, setAlertsActive] = useState<boolean>(false);
 
     const interval = useInterval(() => {
@@ -47,7 +48,7 @@ export function Header(props: {
     return (
         <Stack gap={0}>
             <Container className={classes.inner}>
-                <Button fw={300} p={0} variant='transparent' color='primary' size='lg' onClick={props.openProfileBar} leftSection={<HeaderLogo height={28}/>}><Text fw={700}>HEHE</Text><Text fw={300}>Chat</Text></Button>
+                <Button fw={300} p={0} variant='transparent' color='primary' size='lg' onClick={props.openProfileBar} leftSection={<HeaderLogo height={28}/>}><Text fw={700}>HEHE</Text><Text fw={300}>Chat{premium.isPremium ? ' Pro' : ''}</Text></Button>
                 <div></div>
                 <div className={classes.rightGroup}>
                     <ActionIcon variant='transparent' color='primary' size='44px' onClick={() => props.openSettings()}>
