@@ -18,7 +18,14 @@ function ChannelNotificationList({ type, isSubscribed, title, description }: Cha
   
   // Load channels from config
   useEffect(() => {
-    setChannels(config.notificationSettings?.[type] || []);
+    // Ensure the data is a string array
+    const data = config.notificationSettings?.[type];
+    if (Array.isArray(data) && data.every(item => typeof item === 'string')) {
+      setChannels(data);
+    } else {
+      console.warn(`Expected string array for ${type}, got:`, data);
+      setChannels([]);
+    }
   }, [config.notificationSettings, type]);
   
   // Update channels when tags change
@@ -29,8 +36,7 @@ function ChannelNotificationList({ type, isSubscribed, title, description }: Cha
     try {
       // Transform channel names: trim whitespace and convert to lowercase
       const normalizedValues = values
-        .filter(channel => typeof channel === 'string') // Ensure we only have string values
-        .map(channel => channel.trim().toLowerCase());
+        .map(channel => channel.toLowerCase().substring(0, 25).trim());
       
       // Update the notification settings in the config
       if (config.setChannelNotificationSetting) {
