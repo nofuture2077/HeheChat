@@ -6,6 +6,7 @@ export interface PremiumData {
   subscriptionType: string | null;
   daysRemaining: number | null;
   status: string | null;
+  loading?: boolean;
 }
 
 export interface Premium extends PremiumData {
@@ -21,13 +22,15 @@ export const DEFAULT_PREMIUM: Premium = {
   subscriptionType: null,
   daysRemaining: null,
   status: null,
+  loading: false,
   checkPremiumStatus: async () => false,
   getPremiumDetails: async () => ({
     isPremium: false,
     expiresAt: null,
     subscriptionType: null,
     daysRemaining: null,
-    status: null
+    status: null,
+    loading: false
   }),
   redeemCode: async () => ({ success: false, message: 'Not implemented' }),
   processPayment: async () => ({ success: false, message: 'Not implemented' })

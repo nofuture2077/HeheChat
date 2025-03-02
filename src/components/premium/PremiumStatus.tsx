@@ -11,26 +11,13 @@ interface PremiumStatusProps {
 
 export const PremiumStatus: React.FC<PremiumStatusProps> = ({ showText = true, onClick }) => {
   const premium = useContext(PremiumContext);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkStatus = async () => {
-      try {
-        await premium.checkPremiumStatus();
-      } catch (error) {
-        console.error('Error checking premium status:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkStatus();
-  }, [premium]);
-
-  if (loading) {
+  // Don't show anything while loading
+  if (premium.loading) {
     return null;
   }
 
+  // Use the premium context directly instead of making a separate API call
   if (!premium.isPremium) {
     return null;
   }

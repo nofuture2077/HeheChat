@@ -10,25 +10,9 @@ interface PremiumDetailsProps {
 
 export const PremiumDetails: React.FC<PremiumDetailsProps> = ({ compact = false }) => {
   const premium = useContext(PremiumContext);
-  const [loading, setLoading] = useState(true);
-  const [details, setDetails] = useState<any>(null);
 
-  useEffect(() => {
-    const loadDetails = async () => {
-      try {
-        const result = await premium.getPremiumDetails();
-        setDetails(result);
-      } catch (error) {
-        console.error('Error loading premium details:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDetails();
-  }, [premium]);
-
-  if (loading) {
+  // Show loading state if premium data is still loading
+  if (premium.loading) {
     return (
       <div className={classes.premiumDetails}>
         <Group justify="center" p="md">
@@ -39,7 +23,8 @@ export const PremiumDetails: React.FC<PremiumDetailsProps> = ({ compact = false 
     );
   }
 
-  if (!details || !premium.isPremium) {
+  // Use the premium context directly instead of making a separate API call
+  if (!premium.isPremium) {
     return (
       <div className={classes.premiumDetails}>
         <Text>No active subscription</Text>
