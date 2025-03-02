@@ -356,7 +356,17 @@ export function ChatInput(props: ChatInputProps) {
                             leftSection={props.replyToMsg ?
                                 (<ActionIcon variant="subtle" onClick={() => { props.setReplyMsg(undefined) }}>
                                     <IconX style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-                                </ActionIcon>) : <ChannelPicker onChange={(item) => { props.setReplyMsg(undefined); config.setChatChannel(item) }} channels={config.channels} value={chatChannel} />}
+                                </ActionIcon>) : 
+                                <div className={classes.channelPickerWrapper}>
+                                    <ChannelPicker 
+                                        onChange={(item) => { 
+                                            props.setReplyMsg(undefined); 
+                                            config.setChatChannel(item) 
+                                        }} 
+                                        channels={config.channels} 
+                                        value={chatChannel} 
+                                    />
+                                </div>}
                             rightSection={
                                 <ActionIcon size={32} radius="xl" variant="transparent" color='primary' onClick={() => { sendMessage(inputText, false) }}>
                                     <IconSend style={{ width: rem(18), height: rem(18) }} stroke={1.5} />

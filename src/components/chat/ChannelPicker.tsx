@@ -48,12 +48,14 @@ export function ChannelPicker(props: ChannelPickerProps) {
                 src={chatEmotes.getLogo(props.value)?.props.src} 
                 width={32} 
                 height={32} 
-                style={{borderRadius: 16}}
+                style={{borderRadius: 16, display: 'block'}}
+                className={classes.channelImage}
               /> : 
               <Image 
                 width={32} 
                 height={32} 
-                style={{borderRadius: 16}}
+                style={{borderRadius: 16, display: 'block'}}
+                className={classes.channelImage}
               />
             }
         </Menu.Target>
