@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { UnstyledButton, Tooltip, Title, rem, Button, Box, Avatar, ScrollArea } from '@mantine/core';
+import { UnstyledButton, Tooltip, Title, rem, Button, Avatar, ScrollArea } from '@mantine/core';
 import {
   IconHome2,
   IconX,
@@ -9,7 +9,7 @@ import {
   IconBell,
   IconShare,
   IconKeyboard,
-  IconBellRinging
+  IconUserUp
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
@@ -28,9 +28,9 @@ const mainLinksMockdata = [
   { icon: IconMessageChatbot, label: 'Chat' },
   { icon: IconSword, label: 'Mod' },
   { icon: IconBell, label: 'Alerts' },
-  { icon: IconBellRinging, label: 'Notifications' },
   { icon: IconShare, label: 'Connect' },
-  { icon: IconKeyboard, label: 'Shortcuts' }
+  { icon: IconKeyboard, label: 'Shortcuts' },
+  { icon: IconUserUp, label: 'Notifications' },
 ];
 
 export const SettingsDrawer: OverlayDrawer = {

@@ -1,17 +1,18 @@
 import { useState, useEffect, useContext } from 'react';
-import { Button, Text, Stack, Group, Alert, Title, Divider, TagsInput } from '@mantine/core';
+import { Button, Text, Stack, Group, Alert, Title, Divider, TagsInput, Fieldset } from '@mantine/core';
 import { IconBellRinging, IconBellOff, IconAlertCircle } from '@tabler/icons-react';
 import { ConfigContext } from '@/ApplicationContext';
 
 // Channel notification list component
 interface ChannelNotificationListProps {
-  type: 'streamStartChannels' | 'chatMentionChannels';
+  type: 'streamStartChannels' | 'chatMentionChannels' | 'chatMentionUsers';
   isSubscribed: boolean;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
+  disabled?: boolean;
 }
 
-function ChannelNotificationList({ type, isSubscribed, title, description }: ChannelNotificationListProps) {
+function ChannelNotificationList({ type, isSubscribed, title, description, disabled }: ChannelNotificationListProps) {
   const config = useContext(ConfigContext);
   const [channels, setChannels] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,18 +54,18 @@ function ChannelNotificationList({ type, isSubscribed, title, description }: Cha
   
   return (
     <Stack>
-      <Text size="sm" fw={500}>{title}</Text>
+      <Fieldset legend={title} variant='filled'>
+        <TagsInput
+          placeholder="Type a channel name and press Enter"
+          value={channels}
+          onChange={handleTagsChange}
+          disabled={!isSubscribed || disabled}
+          clearable
+          maxDropdownHeight={200}
+        />
+      </Fieldset>
       
-      <TagsInput
-        placeholder="Type a channel name and press Enter"
-        value={channels}
-        onChange={handleTagsChange}
-        disabled={!isSubscribed}
-        clearable
-        maxDropdownHeight={200}
-      />
-      
-      <Text size="xs" c="dimmed">{description}</Text>
+      {description && <Text size="xs" c="dimmed">{description}</Text>}
     </Stack>
   );
 }
@@ -310,7 +311,7 @@ export function NotificationSettings() {
         
         <Divider />
         
-        <Title order={4}>Notification Settings</Title>
+        <Title order={4}>Stream Start</Title>
         
         <Stack>
           {/* Stream Start Notifications */}
@@ -323,13 +324,26 @@ export function NotificationSettings() {
           
           <Divider my="sm" />
           
+          <Title order={4}>Mentioned in Chat</Title>
+
           {/* Chat Mention Notifications */}
+          <Text fs={"italic"} size='xs' c='dimmed'>Chat Mentions will be an upcoming feature of HeheChat Pro</Text>
+
           <ChannelNotificationList
             type="chatMentionChannels"
             isSubscribed={isSubscribed}
-            title="Chat Mention Notifications"
+            title="Chat Mention in Channels"
+            disabled={true}
+          />
+
+          <ChannelNotificationList
+            type="chatMentionUsers"
+            isSubscribed={isSubscribed}
+            disabled={true}
+            title="Mentioned by Users"
             description="Add channels to receive notifications when you're mentioned in chat. If no channels are specified, you won't receive chat mention notifications."
           />
+
         </Stack>
         
         {isSubscribed && (

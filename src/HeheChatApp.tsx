@@ -439,6 +439,7 @@ export default function HeheChat() {
     const setNotificationSetting = (type: NotificationSettingType, value: boolean | string[]) => {
         const settings = profile.config.notificationSettings || {
             streamStartChannels: [],
+            chatMentionUsers: [],
             chatMentionChannels: []
         };
         
@@ -452,7 +453,7 @@ export default function HeheChat() {
         sendNotificationSettingsToBackend(settings);
     };
     
-    const setChannelNotificationSetting = (type: 'streamStartChannels' | 'chatMentionChannels', channels: string[]) => {
+    const setChannelNotificationSetting = (type: 'streamStartChannels' | 'chatMentionChannels' | 'chatMentionUsers', channels: string[]) => {
         const settings = profile.config.notificationSettings || {
             streamStartChannels: [],
             chatMentionChannels: []
