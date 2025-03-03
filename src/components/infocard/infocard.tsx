@@ -13,6 +13,7 @@ export interface InfoCardProperties {
   date: number;
   left?: ReactElementLike;
   right?: ReactElementLike;
+  showPremium?: boolean;
   onClick?: () => void;
 }
 
@@ -28,7 +29,7 @@ export function InfoCard(props: InfoCardProperties) {
               <Text size="sm" fw={700} className={classes.username}>
                 {props.name}
               </Text>
-              <PremiumStatus showText={false} />
+              {props.showPremium && <PremiumStatus showText={false} />}
             </Group>
             <Text fw={500} c="dimmed" size="sm">
               {timeSince(props.date)}
