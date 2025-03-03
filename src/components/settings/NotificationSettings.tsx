@@ -336,10 +336,10 @@ export function NotificationSettings() {
               </Text>
             </div>
             <Switch
-              checked={config.notificationSettings?.chat_mention || false}
+              checked={config.notificationSettings?.chatMention || false}
               onChange={(event) => {
                 if (config.setNotificationSetting) {
-                  config.setNotificationSetting('chat_mention', event.currentTarget.checked);
+                  config.setNotificationSetting('chatMention', event.currentTarget.checked);
                 }
               }}
               disabled={!isSubscribed || !premium.isPremium}
@@ -351,7 +351,7 @@ export function NotificationSettings() {
             isSubscribed={isSubscribed}
             title="Chat Mention in Channels"
             description="Add channels to receive mentions from. If no channels are specified, you'll receive mentions from all channels."
-            disabled={!isSubscribed || !premium.isPremium || !config.notificationSettings?.chat_mention}
+            disabled={!isSubscribed || !premium.isPremium || !config.notificationSettings?.chatMention}
           />
 
           <ChannelNotificationList
@@ -359,7 +359,7 @@ export function NotificationSettings() {
             isSubscribed={isSubscribed}
             title="Only Receive Mentions from Specific Users"
             description="Add usernames to only receive mentions from specific users. If no users are specified, you'll receive mentions from all users."
-            disabled={!isSubscribed || !premium.isPremium || !config.notificationSettings?.chat_mention}
+            disabled={!isSubscribed || !premium.isPremium || !config.notificationSettings?.chatMention}
           />
 
         </Stack>

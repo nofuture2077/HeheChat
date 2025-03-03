@@ -442,11 +442,11 @@ export default function HeheChat() {
             streamStartChannels: [],
             chatMentionUsers: [],
             chatMentionChannels: [],
-            chat_mention: false
+            chatMention: false
         };
         
         // Handle different types of settings
-        if (type === 'chat_mention') {
+        if (type === 'chatMention') {
             // For boolean settings
             settings[type] = value as boolean;
         } else if (Array.isArray(value)) {
