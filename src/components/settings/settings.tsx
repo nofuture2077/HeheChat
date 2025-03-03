@@ -108,15 +108,15 @@ export function Settings(props: SettingsProperties) {
         </Button>
       </div>
       <div className={classes.wrapper}>
-        <div className={classes.main}>
-          <ScrollArea h="calc(100vh - 126px)" maw="100%" className={classes.active} scrollbars="y">
-            {renderSwitch(active)}
-          </ScrollArea>
-        </div>
         <div className={classes.aside}>
           <div>
             {mainLinks}
           </div>
+        </div>
+        <div className={classes.main}>
+          <ScrollArea h="calc(100vh - 126px)" maw="100%" className={classes.active} scrollbars="y">
+            {renderSwitch(active)}
+          </ScrollArea>
         </div>
       </div>
       <div className={classes.footer}>

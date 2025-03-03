@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
-import { Button, Text, Stack, Group, Alert, Title, Divider, TagsInput, Fieldset } from '@mantine/core';
+import { Button, Text, Stack, Group, Alert, Title, Divider, TagsInput, Fieldset, Switch, Space } from '@mantine/core';
 import { IconBellRinging, IconBellOff, IconAlertCircle } from '@tabler/icons-react';
-import { ConfigContext } from '@/ApplicationContext';
+import { ConfigContext, PremiumContext } from '@/ApplicationContext';
 
 // Channel notification list component
 interface ChannelNotificationListProps {
@@ -95,6 +95,7 @@ export function NotificationSettings() {
   const [error, setError] = useState<string | null>(null);
   const [vapidPublicKey, setVapidPublicKey] = useState<string | null>(null);
   const config = useContext(ConfigContext);
+  const premium = useContext(PremiumContext);
 
   // Check if push notifications are supported
   useEffect(() => {
@@ -326,22 +327,39 @@ export function NotificationSettings() {
           
           <Title order={4}>Mentioned in Chat</Title>
 
-          {/* Chat Mention Notifications */}
-          <Text fs={"italic"} size='xs' c='dimmed'>Chat Mentions will be an upcoming feature of HeheChat Pro</Text>
+          {/* Master toggle for chat mentions */}
+          <Group justify="space-between" mt="xs">
+            <div>
+              <Text fw={500}>Enable Chat Mention Notifications</Text>
+              <Text size="xs" c="dimmed">
+                Receive notifications when you're mentioned in chat
+              </Text>
+            </div>
+            <Switch
+              checked={config.notificationSettings?.chat_mention || false}
+              onChange={(event) => {
+                if (config.setNotificationSetting) {
+                  config.setNotificationSetting('chat_mention', event.currentTarget.checked);
+                }
+              }}
+              disabled={!isSubscribed || !premium.isPremium}
+            />
+          </Group>
 
           <ChannelNotificationList
             type="chatMentionChannels"
             isSubscribed={isSubscribed}
             title="Chat Mention in Channels"
-            disabled={true}
+            description="Add channels to receive mentions from. If no channels are specified, you'll receive mentions from all channels."
+            disabled={!isSubscribed || !premium.isPremium || !config.notificationSettings?.chat_mention}
           />
 
           <ChannelNotificationList
             type="chatMentionUsers"
             isSubscribed={isSubscribed}
-            disabled={true}
-            title="Mentioned by Users"
-            description="Add channels to receive notifications when you're mentioned in chat. If no channels are specified, you won't receive chat mention notifications."
+            title="Only Receive Mentions from Specific Users"
+            description="Add usernames to only receive mentions from specific users. If no users are specified, you'll receive mentions from all users."
+            disabled={!isSubscribed || !premium.isPremium || !config.notificationSettings?.chat_mention}
           />
 
         </Stack>
@@ -352,6 +370,7 @@ export function NotificationSettings() {
             <Title order={4}>Device Information</Title>
             <Text size="sm">This device is registered to receive notifications.</Text>
             <Text size="xs" c="dimmed">Device Type: {/Mobi|Android/i.test(navigator.userAgent) ? 'Mobile' : 'Desktop'}</Text>
+            <Space/>
           </>
         )}
     </Stack>

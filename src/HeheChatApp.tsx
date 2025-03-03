@@ -436,15 +436,21 @@ export default function HeheChat() {
         }
     };
     
-    // This function is kept for backward compatibility but now only handles channel arrays
+    // Handle both boolean and string array notification settings
     const setNotificationSetting = (type: NotificationSettingType, value: boolean | string[]) => {
         const settings = profile.config.notificationSettings || {
             streamStartChannels: [],
             chatMentionUsers: [],
-            chatMentionChannels: []
+            chatMentionChannels: [],
+            chat_mention: false
         };
         
-        if (Array.isArray(value)) {
+        // Handle different types of settings
+        if (type === 'chat_mention') {
+            // For boolean settings
+            settings[type] = value as boolean;
+        } else if (Array.isArray(value)) {
+            // For array settings (channels and users)
             settings[type] = value;
         }
         

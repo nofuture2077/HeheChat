@@ -3,13 +3,15 @@ import { ShortCut } from './shortcuts';
 
 export type MessageHandler = {id?: number, handle: (channel: string, text: string, replyTo?: string) => void};
 
-export type NotificationSettingType = 'streamStartChannels' | 'chatMentionChannels' | 'chatMentionUsers';
+export type NotificationSettingType = 'streamStartChannels' | 'chatMentionChannels' | 'chatMentionUsers' | 'chat_mention';
 
 export interface NotificationSettings {
     // Channel-specific notification settings
     streamStartChannels?: string[];
     chatMentionChannels?: string[];
     chatMentionUsers?: string[];
+    // Global notification settings
+    chat_mention?: boolean;
 }
 
 export interface ConfigData {
