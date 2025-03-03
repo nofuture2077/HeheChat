@@ -50,8 +50,7 @@ export interface ConfigData {
     shares: string[],
     freeTTS: string[],
     deactivatedAlerts: Record<string, boolean>,
-    shortcuts: ShortCut[],
-    notificationSettings?: NotificationSettings
+    shortcuts: ShortCut[]
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -98,8 +97,6 @@ export interface Config extends ConfigData {
     setBrowserSourceVisual: (val: boolean) => void;
     setFreeTTS: (val: string[]) => void;
     setShortcuts: (val: ShortCut[]) => void;
-    setNotificationSetting?: (type: NotificationSettingType, val: boolean) => void;
-    setChannelNotificationSetting?: (type: 'streamStartChannels' | 'chatMentionChannels' | 'chatMentionUsers', channels: string[]) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {

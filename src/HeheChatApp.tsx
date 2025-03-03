@@ -9,7 +9,7 @@ import { PremiumProvider } from './components/premium';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
-import { ConfigKey, DEFAULT_CONFIG, MessageHandler, NotificationSettingType } from './commons/config';
+import { ConfigKey, DEFAULT_CONFIG, MessageHandler } from './commons/config';
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { generateGUID } from './commons/helper';
@@ -416,62 +416,7 @@ export default function HeheChat() {
 
     const setActivatedShares = (value: string[]) => updateConfig('activatedShares', value);
     
-    // Send notification settings to the backend
-    const sendNotificationSettingsToBackend = async (settings: any) => {
-        try {
-            const token = localStorage.getItem('hehe-token_state') || '';
-            const response = await fetch(`${BASE_URL}/push/settings?token=${token}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ settings }),
-            });
-            
-            if (!response.ok) {
-                console.error('Failed to update notification settings on server');
-            }
-        } catch (error) {
-            console.error('Error sending notification settings to server:', error);
-        }
-    };
-    
-    // Handle both boolean and string array notification settings
-    const setNotificationSetting = (type: NotificationSettingType, value: boolean | string[]) => {
-        const settings = profile.config.notificationSettings || {
-            streamStartChannels: [],
-            chatMentionUsers: [],
-            chatMentionChannels: [],
-            chatMention: false
-        };
-        
-        // Handle different types of settings
-        if (type === 'chatMention') {
-            // For boolean settings
-            settings[type] = value as boolean;
-        } else if (Array.isArray(value)) {
-            // For array settings (channels and users)
-            settings[type] = value;
-        }
-        
-        updateConfig('notificationSettings', settings);
-        
-        // Send updated settings to backend
-        sendNotificationSettingsToBackend(settings);
-    };
-    
-    const setChannelNotificationSetting = (type: 'streamStartChannels' | 'chatMentionChannels' | 'chatMentionUsers', channels: string[]) => {
-        const settings = profile.config.notificationSettings || {
-            streamStartChannels: [],
-            chatMentionChannels: []
-        };
-        
-        settings[type] = channels;
-        updateConfig('notificationSettings', settings);
-        
-        // Send updated settings to backend
-        sendNotificationSettingsToBackend(settings);
-    };
+    // These functions have been removed as notification settings are now handled directly in the NotificationSettings component
 
     const appConfig = {
         ...profile.config,
@@ -515,9 +460,7 @@ export default function HeheChat() {
         setShortcuts,
         setDisableEmoteDialog,
         setBrowserSourceAudio,
-        setBrowserSourceVisual,
-        setNotificationSetting,
-        setChannelNotificationSetting
+        setBrowserSourceVisual
     };
 
     const appLogin = {

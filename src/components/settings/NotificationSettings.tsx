@@ -1,7 +1,64 @@
 import { useState, useEffect, useContext } from 'react';
 import { Button, Text, Stack, Group, Alert, Title, Divider, TagsInput, Fieldset, Switch, Space } from '@mantine/core';
 import { IconBellRinging, IconBellOff, IconAlertCircle } from '@tabler/icons-react';
-import { ConfigContext, PremiumContext } from '@/ApplicationContext';
+import { PremiumContext } from '@/ApplicationContext';
+import { NotificationSettings as NotificationSettingsType, NotificationSettingType } from '@/commons/config';
+
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+// Send notification settings to the backend
+const sendNotificationSettingsToBackend = async (settings: NotificationSettingsType) => {
+  try {
+    const token = localStorage.getItem('hehe-token_state') || '';
+    const response = await fetch(`${BASE_URL}/push/settings?token=${token}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ settings }),
+    });
+    
+    if (!response.ok) {
+      console.error('Failed to update notification settings on server');
+    }
+  } catch (error) {
+    console.error('Error sending notification settings to server:', error);
+  }
+};
+
+// Fetch notification settings from the backend
+const fetchNotificationSettings = async (): Promise<NotificationSettingsType> => {
+  try {
+    const token = localStorage.getItem('hehe-token_state') || '';
+    const response = await fetch(`${BASE_URL}/push/settings?token=${token}`);
+    
+    if (!response.ok) {
+      console.error('Failed to fetch notification settings from server');
+      return {
+        streamStartChannels: [],
+        chatMentionChannels: [],
+        chatMentionUsers: [],
+        chatMention: false
+      };
+    }
+    
+    const data = await response.json();
+    return data.settings || {
+      streamStartChannels: [],
+      chatMentionChannels: [],
+      chatMentionUsers: [],
+      chatMention: false
+    };
+  } catch (error) {
+    console.error('Error fetching notification settings from server:', error);
+    return {
+      streamStartChannels: [],
+      chatMentionChannels: [],
+      chatMentionUsers: [],
+      chatMention: false
+    };
+  }
+};
 
 // Channel notification list component
 interface ChannelNotificationListProps {
@@ -10,24 +67,25 @@ interface ChannelNotificationListProps {
   title?: string;
   description?: string;
   disabled?: boolean;
+  settings: NotificationSettingsType;
+  onSettingsChange: (settings: NotificationSettingsType) => void;
 }
 
-function ChannelNotificationList({ type, isSubscribed, title, description, disabled }: ChannelNotificationListProps) {
-  const config = useContext(ConfigContext);
+function ChannelNotificationList({ type, isSubscribed, title, description, disabled, settings, onSettingsChange }: ChannelNotificationListProps) {
   const [channels, setChannels] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Load channels from config
+  // Load channels from settings
   useEffect(() => {
     // Ensure the data is a string array
-    const data = config.notificationSettings?.[type];
+    const data = settings[type];
     if (Array.isArray(data) && data.every(item => typeof item === 'string')) {
       setChannels(data);
     } else {
       console.warn(`Expected string array for ${type}, got:`, data);
       setChannels([]);
     }
-  }, [config.notificationSettings, type]);
+  }, [settings, type]);
   
   // Update channels when tags change
   const handleTagsChange = (values: string[]) => {
@@ -39,10 +97,9 @@ function ChannelNotificationList({ type, isSubscribed, title, description, disab
       const normalizedValues = values
         .map(channel => channel.toLowerCase().substring(0, 25).trim());
       
-      // Update the notification settings in the config
-      if (config.setChannelNotificationSetting) {
-        config.setChannelNotificationSetting(type, normalizedValues);
-      }
+      // Update the notification settings
+      const updatedSettings = { ...settings, [type]: normalizedValues };
+      onSettingsChange(updatedSettings);
       
       setChannels(normalizedValues);
     } catch (error) {
@@ -94,10 +151,15 @@ export function NotificationSettings() {
   const [permissionStatus, setPermissionStatus] = useState<NotificationPermission | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [vapidPublicKey, setVapidPublicKey] = useState<string | null>(null);
-  const config = useContext(ConfigContext);
+  const [settings, setSettings] = useState<NotificationSettingsType>({
+    streamStartChannels: [],
+    chatMentionChannels: [],
+    chatMentionUsers: [],
+    chatMention: false
+  });
   const premium = useContext(PremiumContext);
 
-  // Check if push notifications are supported
+  // Check if push notifications are supported and load settings
   useEffect(() => {
     const supported = 'serviceWorker' in navigator && 'PushManager' in window;
     setNotificationsSupported(supported);
@@ -123,13 +185,15 @@ export function NotificationSettings() {
       
       // Fetch the VAPID public key from the server
       fetchVapidPublicKey();
+      
+      // Load notification settings from the backend
+      fetchNotificationSettings().then(setSettings);
     }
   }, []);
 
   // Fetch the VAPID public key from the server
   const fetchVapidPublicKey = async () => {
     try {
-      const BASE_URL = import.meta.env.VITE_BACKEND_URL;
       const token = localStorage.getItem('hehe-token_state') || '';
       const response = await fetch(`${BASE_URL}/push/vapidPublicKey?token=${token}`);
       
@@ -209,7 +273,6 @@ export function NotificationSettings() {
   // Send the subscription to the server
   const sendSubscriptionToServer = async (subscription: PushSubscription) => {
     try {
-      const BASE_URL = import.meta.env.VITE_BACKEND_URL;
       const token = localStorage.getItem('hehe-token_state') || '';
       
       const response = await fetch(`${BASE_URL}/push/subscribe?token=${token}`, {
@@ -237,7 +300,6 @@ export function NotificationSettings() {
   // Send the unsubscription to the server
   const sendUnsubscriptionToServer = async (subscription: PushSubscription) => {
     try {
-      const BASE_URL = import.meta.env.VITE_BACKEND_URL;
       const token = localStorage.getItem('hehe-token_state') || '';
       
       const response = await fetch(`${BASE_URL}/push/unsubscribe?token=${token}`, {
@@ -258,6 +320,12 @@ export function NotificationSettings() {
       console.error('Error sending unsubscription to server:', err);
       throw new Error('Failed to unregister from notification server');
     }
+  };
+
+  // Handle settings changes
+  const handleSettingsChange = (updatedSettings: NotificationSettingsType) => {
+    setSettings(updatedSettings);
+    sendNotificationSettingsToBackend(updatedSettings);
   };
 
   // If push notifications are not supported, show a message
@@ -321,6 +389,8 @@ export function NotificationSettings() {
             isSubscribed={isSubscribed}
             title="Stream Start Notifications"
             description="Add channels to receive notifications when they go live. If no channels are specified, you won't receive stream start notifications."
+            settings={settings}
+            onSettingsChange={handleSettingsChange}
           />
           
           <Divider my="sm" />
@@ -336,11 +406,10 @@ export function NotificationSettings() {
               </Text>
             </div>
             <Switch
-              checked={config.notificationSettings?.chatMention || false}
+              checked={settings.chatMention || false}
               onChange={(event) => {
-                if (config.setNotificationSetting) {
-                  config.setNotificationSetting('chatMention', event.currentTarget.checked);
-                }
+                const updatedSettings = { ...settings, chatMention: event.currentTarget.checked };
+                handleSettingsChange(updatedSettings);
               }}
               disabled={!isSubscribed || !premium.isPremium}
             />
@@ -351,7 +420,9 @@ export function NotificationSettings() {
             isSubscribed={isSubscribed}
             title="Chat Mention in Channels"
             description="Add channels to receive mentions from. If no channels are specified, you'll receive mentions from all channels."
-            disabled={!isSubscribed || !premium.isPremium || !config.notificationSettings?.chatMention}
+            disabled={!isSubscribed || !premium.isPremium || !settings.chatMention}
+            settings={settings}
+            onSettingsChange={handleSettingsChange}
           />
 
           <ChannelNotificationList
@@ -359,7 +430,9 @@ export function NotificationSettings() {
             isSubscribed={isSubscribed}
             title="Only Receive Mentions from Specific Users"
             description="Add usernames to only receive mentions from specific users. If no users are specified, you'll receive mentions from all users."
-            disabled={!isSubscribed || !premium.isPremium || !config.notificationSettings?.chatMention}
+            disabled={!isSubscribed || !premium.isPremium || !settings.chatMention}
+            settings={settings}
+            onSettingsChange={handleSettingsChange}
           />
 
         </Stack>
