@@ -31,7 +31,7 @@ export function AlertStatusIndicator(_props: AlertStatusIndicatorProps) {
     width: '12px',
     height: '12px',
     borderRadius: '50%',
-    backgroundColor: 'red',
+    backgroundColor: '#DB32BC',
     zIndex: 9999, // Ensure it's above other elements
   };
 
