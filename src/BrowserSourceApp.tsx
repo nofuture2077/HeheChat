@@ -37,6 +37,17 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
       } 
   }, [documentVisible, networkStatus.online]);
 
+  // Check and initialize AlertSystem every 5 seconds
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      if (!AlertSystem.status()) {
+        AlertSystem.initialize();
+      }
+    }, 5000); // 5 seconds interval
+
+    return () => clearInterval(intervalId); // Cleanup on unmount
+  }, []);
+
   useEffect(() => {
     // Initialize the worker
     backendWorkerRef.current = new Worker(new URL('./components/webworker/backendworker.ts', import.meta.url), { type: 'module' });
@@ -83,10 +94,6 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
 
       if (data.type === 'event' || data.type === 'replayevent') {
         const event = data.data;
-
-        if (!AlertSystem.status()) {
-          AlertSystem.initialize();
-        }
 
         if ((AlertSystem.shouldBePlayedInBrowsersource(event) && !event.force) || (preview && event.force)) {
           AlertSystem.addEvent(event);
