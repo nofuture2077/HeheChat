@@ -97,7 +97,6 @@ export default function HeheChat() {
     const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE, guid: generateGUID()});
     const [profiles, setProfiles] = useState<Profile[]>([]);
     const backendWorkerRef = useRef<Worker>();
-    const seventvWorkerRef = useRef<Worker>();
 
     useDidUpdate(() => {
         if (!profile.guid) {
@@ -131,26 +130,15 @@ export default function HeheChat() {
         }, (err) => console.error(err));
 
         backendWorkerRef.current = new Worker(new URL('./components/webworker/backendworker.ts', import.meta.url), { type: 'module' });
-        seventvWorkerRef.current = new Worker(new URL('./components/webworker/seventvworker.ts', import.meta.url), { type: 'module' });
 
         const psWSSend = PubSub.subscribe("WSSEND", (msg, data) => {
             data.state = localStorage.getItem('hehe-token_state') || '';
             backendWorkerRef.current!.postMessage({type: "SEND", data});
         });
 
-        const ps7TV = PubSub.subscribe("WSSEND7TV", (msg, data) => {
-            seventvWorkerRef.current!.postMessage({type: "SEND", data});
-        });
-
 
         backendWorkerRef.current.addEventListener("message", (msg: MessageEvent) => {
             PubSub.publish("WS-" + msg.data.type, msg.data.data);
-        });
-
-        seventvWorkerRef.current.addEventListener("message", (msg: MessageEvent) => {
-            if (msg.data.type === 'seventTV') {
-                PubSub.publish("WS-seventTV", msg.data.data);
-            }
         });
 
         loadReceivedShares();
@@ -180,12 +168,10 @@ export default function HeheChat() {
         return () => {
             const stopMessage = { type: 'STOP' };
             backendWorkerRef.current?.postMessage(stopMessage);
-            seventvWorkerRef.current?.postMessage(stopMessage);
             PubSub.unsubscribe(psAlertConfig);
             PubSub.unsubscribe(psDelayInfo);
             PubSub.unsubscribe(psSetDelay);
             PubSub.unsubscribe(psWSSend);
-            PubSub.unsubscribe(ps7TV);
             
             // Stop mock message generator
             MockService.stopMockMessages();

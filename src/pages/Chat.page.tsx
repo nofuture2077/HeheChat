@@ -138,19 +138,21 @@ export function ChatPage() {
             const messagesToDelete = chatMessages.filter(m => m._prefix?.user === username).map(m => m.id);
             setDeletedMessages((dM) => dM.concat(messagesToDelete));
         }
+        console.log(eventname, data);
+        if (data.eventtype === "seventv_emote_add") {
+            const d = JSON.parse(data.text);
+            PubSub.publish('Update-seventTV', {type: "add", data: d})
+        }
+        if (data.eventtype === "seventv_emote_remove") {
+            const d = JSON.parse(data.text);
+            PubSub.publish('Update-seventTV', {type: "remove", data: d})
+        }
     }, [chatMessages]);
 
     useViewportWidthCallback(() => {
         const [w, h] = getDimension();
         setVideoHeight(h);
     });
-
-    useEffect(() => {
-        const modEventSub = PubSub.subscribe("WS-modevent", onModEvent);
-        return () => {
-            PubSub.unsubscribe(modEventSub);
-        };
-    }, [onModEvent]);
 
     useEffect(() => {
         forceUpdate();

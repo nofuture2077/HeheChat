@@ -2,7 +2,6 @@ import { LoginContext, getUserdata } from '@/commons/login';
 import { toMap } from '@/commons/helper';
 import { EmoteComponent } from '@/components/emote/emote';
 import PubSub from 'pubsub-js';
-import { SystemMessage } from './message';
 import { EmoteStore } from '@/components/chat/emotestorage';
 
 interface sevenTVEmote {
@@ -50,7 +49,6 @@ export async function get7TVEmotes(userId: string, username: string) {
         }));
 
     emoteSetUserNameMap[user.emote_set.id] = username;
-    PubSub.publish("WSSEND7TV", { type: "sevenTVSubscribe", objectId: user.emote_set.id, userId: user.id });
     const emotes = toMap(user.emote_set.emotes, e => e.name);
     return emotes;
 }
@@ -290,29 +288,14 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     }
 }
 
-PubSub.subscribe('WS-seventTV', (m, data) => {
+PubSub.subscribe('Update-seventTV', (m, data) => {
+    
     if (data.type === 'add') {
-        const username = data.user;
-        const channel = emoteSetUserNameMap[data.emoteSetId];
-        DEFAULT_CHAT_EMOTES.emotes.get(channel).sevenTVEmotes.set(data.emote.name, data.emote);
-        const message = new SystemMessage(channel, {
-            type: 'sevenTVAdded',
-            channel,
-            username,
-            emote: data.emote.name
-        }, new Date(), "sevenTVAdded", "", "").rawLine;
-        PubSub.publish("WS-msg", {message, username});
+        const channel = emoteSetUserNameMap[data.data.emoteSetId];
+        DEFAULT_CHAT_EMOTES.emotes.get(channel)?.sevenTVEmotes?.set(data.data.emote, data.data.emoteData);
     }
     if (data.type === 'remove') {
-        const username = data.user;
-        const channel = emoteSetUserNameMap[data.emoteSetId];
-        DEFAULT_CHAT_EMOTES.emotes.get(channel).sevenTVEmotes.delete(data.emote.name);
-        const message = new SystemMessage(channel, {
-            type: 'sevenTVRemoved',
-            channel,
-            username,
-            emote: data.emote.name
-        }, new Date(), "sevenTVRemoved", "", "").rawLine;
-        PubSub.publish("WS-msg", {message, username});
+        const channel = emoteSetUserNameMap[data.data.emoteSetId];
+        DEFAULT_CHAT_EMOTES.emotes.get(channel)?.sevenTVEmotes?.delete(data.data.emote);
     }
 })

@@ -40,8 +40,8 @@ const messages = {
     'cheer': '${username} cheered ${amount:whole} bits///${text}',
     'donation': '${username} donated ${amount} EURO///${text}',
     'blerp': '${username} played Blerp ${audioTitle}',
-    'sevenTVAdded': '${username} added new Emote ${emote} ${emote}',
-    'sevenTVRemoved': '${username} removed Emote ${emote}'
+    'seventv_emote_add': '${username} added new Emote ${emote} ${emote}',
+    'seventv_emote_remove': '${username} removed Emote ${emote}'
 };
 
 export function SystemMessageComp(props: SystemMessageProps) {
@@ -57,7 +57,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const eventType = props.msg.data.type as EventType;
 
     const wordMapper = (type: string, word: string, index: number, arr: string[]) => {
-        if ((type === 'sevenTVAdded') && index === arr.length - 2) {
+        if ((type === 'seventv_emote_add') && index === arr.length - 2) {
             return emotes.getEmote(props.msg.data.channel, word, props.msg.id);
         }
         return word;

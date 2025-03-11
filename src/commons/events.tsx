@@ -36,8 +36,8 @@ export const EventTypeMapping: Record<string, string> = {
     'streamOffline': 'streamOffline',
     'channelPointRedemption': 'channelPointRedemption',
     'blerp': 'blerp',
-    'sevenTVAdded': 'sevenTVAdded',
-    'sevenTVRemoved': 'sevenTVRemoved'
+    'seventv_emote_add': 'sevenTVAdded',
+    'seventv_emote_remove': 'sevenTVRemoved'
 };
 
 export type EventAlertMeta = {
