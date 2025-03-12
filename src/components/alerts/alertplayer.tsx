@@ -58,6 +58,11 @@ class AlertPlayer {
         this.mainAudio.loop = true;
         this.mainAudio.crossOrigin = "anonymous";
 
+        if (this.mainAudio.setAttribute) {
+            this.mainAudio.setAttribute('webkit-playsinline', 'true');
+            this.mainAudio.setAttribute('playsinline', 'true');
+        }
+
         this.mainAudioSource = this.audioContext.createMediaElementSource(this.mainAudio);
         this.mainAudioSource.connect(this.mainAudioGain);
         
