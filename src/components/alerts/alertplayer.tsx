@@ -120,37 +120,49 @@ class AlertPlayer {
             
             const { duration, audioBuffer, audioUrl } = audioInfo;
             
-            // Stop any currently playing source
-            if (this.currentSource) {
-                try {
-                    this.currentSource.stop();
-                    this.currentSource.disconnect();
-                } catch (e) {
-                    // Ignore errors if source was already stopped
-                }
-            }
+            // Clean up any existing audio source
+            this.cleanupCurrentSource();
             
             // Create a new gain node for this specific audio
             const gainNode = this.audioContext.createGain();
             gainNode.gain.value = this.muted ? 0 : volume;
             gainNode.connect(this.audioContext.destination);
             
+            // Setup error handling for unexpected interruptions
+            const handleInterruption = () => {
+                console.log("Audio playback interrupted");
+                this.cleanupCurrentSource();
+                this.playing = false; // Reset playing state
+                resolve(); // Resolve the promise to allow queue to continue
+            };
+            
             if (audioBuffer) {
-                // Play from decoded buffer
-                const source = this.audioContext.createBufferSource();
-                source.buffer = audioBuffer;
-                source.connect(gainNode);
-                
-                this.currentSource = source;
-                source.onended = () => {
-                    setTimeout(() => resolve(), extra);
-                };
-                
-                source.start();
-                
-                // Update media session metadata when playing new audio
-                if ('mediaSession' in navigator) {
-                    this.updateMediaSessionMetadata();
+                try {
+                    // Play from decoded buffer
+                    const source = this.audioContext.createBufferSource();
+                    source.buffer = audioBuffer;
+                    source.connect(gainNode);
+                    
+                    this.currentSource = source;
+                    
+                    // Handle normal completion
+                    source.onended = () => {
+                        this.cleanupCurrentSource();
+                        setTimeout(() => resolve(), extra);
+                    };
+                    
+                    // AudioBufferSourceNode doesn't have onerror event
+                    // We'll rely on try-catch for error handling
+                    
+                    source.start();
+                    
+                    // Update media session metadata when playing new audio
+                    if ('mediaSession' in navigator) {
+                        this.updateMediaSessionMetadata();
+                    }
+                } catch (err) {
+                    console.error("Error starting audio playback:", err);
+                    handleInterruption();
                 }
             } else if (audioUrl) {
                 // Fetch and decode the audio if we only have a URL
@@ -168,25 +180,36 @@ class AlertPlayer {
                             return;
                         }
                         
-                        const source = this.audioContext!.createBufferSource();
-                        source.buffer = decodedData;
-                        source.connect(gainNode);
-                        
-                        this.currentSource = source;
-                        source.onended = () => {
-                            setTimeout(() => resolve(), extra);
-                        };
-                        
-                        source.start();
-                        
-                        // Update media session metadata
-                        if ('mediaSession' in navigator) {
-                            this.updateMediaSessionMetadata();
+                        try {
+                            const source = this.audioContext!.createBufferSource();
+                            source.buffer = decodedData;
+                            source.connect(gainNode);
+                            
+                            this.currentSource = source;
+                            
+                            // Handle normal completion
+                            source.onended = () => {
+                                this.cleanupCurrentSource();
+                                setTimeout(() => resolve(), extra);
+                            };
+                            
+                            // AudioBufferSourceNode doesn't have onerror event
+                            // We'll rely on try-catch for error handling
+                            
+                            source.start();
+                            
+                            // Update media session metadata
+                            if ('mediaSession' in navigator) {
+                                this.updateMediaSessionMetadata();
+                            }
+                        } catch (err) {
+                            console.error("Error starting audio playback:", err);
+                            handleInterruption();
                         }
                     })
                     .catch(err => {
                         console.error("Error fetching or decoding audio:", err);
-                        reject(err);
+                        handleInterruption();
                     });
             } else {
                 resolve(); // No audio to play
@@ -268,45 +291,37 @@ class AlertPlayer {
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 1;
     }
 
-    stopPlaying() {
-        this.playing = false;
-        this.paused = false;
+    // Helper method to safely clean up the current audio source
+    private cleanupCurrentSource() {
         if (this.currentSource) {
             try {
+                this.currentSource.onended = null; // Remove event listener
                 this.currentSource.stop();
                 this.currentSource.disconnect();
             } catch (e) {
                 // Ignore errors if source was already stopped
+                console.log("Error cleaning up audio source:", e);
             }
             this.currentSource = undefined;
         }
+    }
+
+    stopPlaying() {
+        this.playing = false;
+        this.paused = false;
+        this.skipCurrent = false; // Reset skip flag
+        this.cleanupCurrentSource();
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
     }
 
     endAudio() {
-        if (this.currentSource) {
-            try {
-                this.currentSource.stop();
-                this.currentSource.disconnect();
-            } catch (e) {
-                // Ignore errors if source was already stopped
-            }
-            this.currentSource = undefined;
-        }
+        this.cleanupCurrentSource();
         return Promise.resolve();
     }
 
     skip() {
         this.skipCurrent = true;
-        if (this.currentSource) {
-            try {
-                this.currentSource.stop();
-                this.currentSource.disconnect();
-            } catch (e) {
-                // Ignore errors if source was already stopped
-            }
-            this.currentSource = undefined;
-        }
+        this.cleanupCurrentSource();
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
     }
 
@@ -474,6 +489,7 @@ class AlertPlayer {
             PubSub.publish('AlertPlayer-update');
         }
 
+        try {
             // eventData.audioUrl is used for blerps
             if (eventData.audioUrl) {
                 // Check if blerps are deactivated in the config
@@ -490,6 +506,11 @@ class AlertPlayer {
                 }, onError);
                 return;
             }
+        } catch (err) {
+            console.error("Error processing blerp:", err);
+            onError(err);
+            return;
+        }
         const alertConfig = this.alertConfig[item.channel];
         if (!alertConfig && !item.eventAlert) {
             console.log('No alertconfig set');
@@ -544,7 +565,25 @@ class AlertPlayer {
                 PubSub.publish('ALERT_SHOW', visualAlert);
             }
 
-            this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(() => this.endAudio()).then(() => this.wait(duration, minDuration)).then(onEnd, onError);
+            // Chain audio playback with proper error handling
+            this.playAudio(0.8, jingleAudio, this.jingleExtra || 0)
+                .then(() => {
+                    if (this.skipCurrent) throw new Error("Playback skipped");
+                    return this.playAudio(1.0, ttsAudio, this.ttsExtra || 0);
+                })
+                .then(() => {
+                    if (this.skipCurrent) throw new Error("Playback skipped");
+                    return this.endAudio();
+                })
+                .then(() => {
+                    if (this.skipCurrent) throw new Error("Playback skipped");
+                    return this.wait(duration, minDuration);
+                })
+                .then(onEnd)
+                .catch(err => {
+                    console.error("Error in audio chain:", err);
+                    onError(err);
+                });
         } catch (err) {
             console.error(err);
             this.stopPlaying();
@@ -587,21 +626,33 @@ class AlertPlayer {
     }
     
     checkQueue() {
+        // Don't process queue if we're already playing, paused, or not initialized
         if (this.playing || this.paused || !this.config || !this.status()) {
             return;
         }
     
+        // Check if we've processed all items in the queue
         if (this.index >= this.queue.length) {
             return;
         }
     
+        // Get the next item from the queue
         const item = this.queue[this.index++];
     
         if (!item) {
             return;
         }
+        
+        // Reset state before playing new item
+        this.skipCurrent = false;
+        
         console.log("Play Event", item);
-        this.showNotification(item);
+        this.showNotification(item).catch(err => {
+            console.error("Error showing notification:", err);
+            // Make sure we reset the playing state so the queue can continue
+            this.stopPlaying();
+            PubSub.publish('AlertPlayer-update');
+        });
     }
 }
 
