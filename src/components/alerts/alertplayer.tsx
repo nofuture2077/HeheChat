@@ -41,66 +41,14 @@ class AlertPlayer {
         setInterval(() => this.checkQueue(), 1000);
         this.ttsExtra = Number(localStorage.getItem('hehechat-ttsExtra') || '0') || 0;
         this.jingleExtra = Number(localStorage.getItem('hehechat-jingleExtra') || '0') || 0;
-        
-        // Add visibility change listener to handle browser tab/app switching
-        if (typeof document !== 'undefined') {
-            document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
-        }
-    }
-    
-    // Handle visibility changes (browser tab/app switching)
-    private handleVisibilityChange() {
-        if (document.visibilityState === 'visible') {
-            console.log('App became visible, checking audio context state');
-            this.ensureAudioContext();
-        } else {
-            console.log('App hidden, may need to reset audio state on return');
-            // If we're currently playing something, mark it as potentially interrupted
-            if (this.playing) {
-                this.stopPlaying();
-            }
-        }
-    }
-    
-    // Ensure AudioContext is in the correct state
-    private ensureAudioContext() {
-        if (!this.audioContext) {
-            console.log('AudioContext not initialized, creating new one');
-            this.initialize();
-            return;
-        }
-        
-        if (this.audioContext.state === 'suspended') {
-            console.log('AudioContext suspended, resuming');
-            this.audioContext.resume().catch(err => {
-                console.error('Failed to resume AudioContext:', err);
-                // If resume fails, try recreating the AudioContext
-                this.initialize();
-            });
-        } else if (this.audioContext.state === 'closed') {
-            console.log('AudioContext closed, creating new one');
-            this.initialize();
-        }
     }
 
     status(): boolean {
-        // Check if AudioContext exists and is in a usable state
-        // For iOS, we consider 'suspended' as valid since we can resume it
-        return this.audioContext !== undefined && 
-               (this.audioContext.state === 'running' || this.audioContext.state === 'suspended');
+        return this.audioContext !== undefined && this.audioContext.state === 'running';
     }
 
     initialize() {
         console.log('Alert system initialized');
-        // Close existing context if it exists
-        if (this.audioContext) {
-            try {
-                this.audioContext.close();
-            } catch (e) {
-                console.error('Error closing existing AudioContext:', e);
-            }
-        }
-        
         this.audioContext = new (window.AudioContext)();
         this.mainAudioGain = this.audioContext.createGain();
         this.mainAudioGain.gain.value = 0;
@@ -165,27 +113,9 @@ class AlertPlayer {
 
     async playAudio(volume: number, audioInfo: AudioInfo | undefined, extra: number): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (!audioInfo || this.skipCurrent) {
+            if (!audioInfo || this.skipCurrent || !this.audioContext) {
                 resolve();
                 return;
-            }
-            
-            // Ensure AudioContext is ready before playing
-            this.ensureAudioContext();
-            
-            if (!this.audioContext || (this.audioContext.state !== 'running' && this.audioContext.state !== 'suspended')) {
-                console.error('AudioContext not available or in invalid state:', this.audioContext?.state);
-                resolve();
-                return;
-            }
-            
-            // If AudioContext is suspended, try to resume it
-            if (this.audioContext.state === 'suspended') {
-                this.audioContext.resume().catch(err => {
-                    console.error('Failed to resume AudioContext:', err);
-                    resolve(); // Resolve to allow queue to continue
-                    return;
-                });
             }
             
             const { duration, audioBuffer, audioUrl } = audioInfo;
@@ -243,21 +173,15 @@ class AlertPlayer {
                         }
                         return response.arrayBuffer();
                     })
-                    .then(arrayBuffer => {
-                        // Check if AudioContext is still valid
-                        if (!this.audioContext) {
-                            throw new Error('AudioContext no longer available');
-                        }
-                        return this.audioContext.decodeAudioData(arrayBuffer);
-                    })
+                    .then(arrayBuffer => this.audioContext!.decodeAudioData(arrayBuffer))
                     .then(decodedData => {
-                        if (this.skipCurrent || !this.audioContext) {
+                        if (this.skipCurrent) {
                             resolve();
                             return;
                         }
                         
                         try {
-                            const source = this.audioContext.createBufferSource();
+                            const source = this.audioContext!.createBufferSource();
                             source.buffer = decodedData;
                             source.connect(gainNode);
                             
@@ -295,9 +219,6 @@ class AlertPlayer {
 
     async getAudioInfo(src: string): Promise<AudioInfo | undefined> {
         return new Promise((resolve, reject) => {
-            // Ensure AudioContext is ready
-            this.ensureAudioContext();
-            
             if (!src || !this.audioContext) {
                 resolve(undefined);
                 return;
@@ -344,11 +265,7 @@ class AlertPlayer {
 
     resume() {
         this.paused = false;
-        if (this.audioContext?.state === 'suspended') {
-            this.audioContext.resume().catch(err => {
-                console.error('Failed to resume AudioContext:', err);
-            });
-        }
+        this.audioContext?.resume();
     }
 
     mute() {
@@ -371,10 +288,6 @@ class AlertPlayer {
     startPlaying() {
         this.skipCurrent = false;
         this.playing = true;
-        
-        // Ensure AudioContext is ready before starting playback
-        this.ensureAudioContext();
-        
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 1;
     }
 
@@ -713,9 +626,6 @@ class AlertPlayer {
     }
     
     checkQueue() {
-        // Ensure AudioContext is in the correct state before processing queue
-        this.ensureAudioContext();
-        
         // Don't process queue if we're already playing, paused, or not initialized
         if (this.playing || this.paused || !this.config || !this.status()) {
             return;
