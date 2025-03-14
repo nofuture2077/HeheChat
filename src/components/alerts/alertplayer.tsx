@@ -12,7 +12,8 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 interface AudioInfo {
     duration: number;
-    audio: HTMLAudioElement;
+    audioBuffer?: AudioBuffer;
+    audioUrl?: string;
 }
 
 let cheerPrefixes = ['Cheer', 'BibleThump', 'cheerwhal', 'Corgo', 'uni', 'ShowLove', 'Party', 'SeemsGood', 'Pride', 'Kappa', 'FrankerZ', 'HeyGuys', 'DansGame', 'EleGiggle', 'TriHard', 'Kreygasm', '4Head', 'SwiftRage', 'NotLikeThis', 'FailFish', 'VoHiYo', 'PJSalt', 'MrDestructoid', 'bday', 'RIPCheer', 'Shamrock'];
@@ -21,8 +22,7 @@ let cheerPrefixesRegExp = cheerPrefixes.map(x => new RegExp(`\\b${x}\\d+\\b`, "g
 class AlertPlayer {
     audioContext?: AudioContext;
     mainAudioGain?: GainNode;
-    mainAudio?: HTMLAudioElement;
-    mainAudioSource?: MediaElementAudioSourceNode;
+    currentSource?: AudioBufferSourceNode;
     playing: boolean = false;
     paused: boolean = false;
     muted: boolean = false;
@@ -53,18 +53,6 @@ class AlertPlayer {
         this.mainAudioGain = this.audioContext.createGain();
         this.mainAudioGain.gain.value = 0;
         this.mainAudioGain.connect(this.audioContext.destination);
-        this.mainAudio = new Audio(silence);
-        this.mainAudio.autoplay = true;
-        this.mainAudio.loop = true;
-        this.mainAudio.crossOrigin = "anonymous";
-
-        if (this.mainAudio.setAttribute) {
-            this.mainAudio.setAttribute('webkit-playsinline', 'true');
-            this.mainAudio.setAttribute('playsinline', 'true');
-        }
-
-        this.mainAudioSource = this.audioContext.createMediaElementSource(this.mainAudio);
-        this.mainAudioSource.connect(this.mainAudioGain);
         
         // Set media session metadata for album cover and artist info
         if ('mediaSession' in navigator) {
@@ -73,7 +61,7 @@ class AlertPlayer {
     }
 
     updateMediaSessionMetadata() {
-        if (!('mediaSession' in navigator) || !this.mainAudio) return;
+        if (!('mediaSession' in navigator)) return;
         
         const profileName = this.profile?.name || 'HeheChat';
         
@@ -125,51 +113,125 @@ class AlertPlayer {
 
     async playAudio(volume: number, audioInfo: AudioInfo | undefined, extra: number): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (!audioInfo || this.skipCurrent) {
+            if (!audioInfo || this.skipCurrent || !this.audioContext) {
                 resolve();
                 return;
             }
             
-            const { audio, duration } = audioInfo;
+            const { duration, audioBuffer, audioUrl } = audioInfo;
             
-            const handlePlaying = () => {
-                this.preciseTimer(resolve, (duration * 1000) + extra);
-                this.mainAudio!.removeEventListener('playing', handlePlaying);
-            };
-
-            audio.onerror = () => {
-                reject("Audio playback error");
-                this.mainAudio!.removeEventListener('playing', handlePlaying);
-            };
-
-            this.mainAudio!.addEventListener('playing', handlePlaying);
-            this.mainAudio!.volume = volume;
-            this.mainAudio!.currentTime = 0;
-            this.mainAudio!.src = audio.src;
+            // Stop any currently playing source
+            if (this.currentSource) {
+                try {
+                    this.currentSource.stop();
+                    this.currentSource.disconnect();
+                } catch (e) {
+                    // Ignore errors if source was already stopped
+                }
+            }
             
-            // Update media session metadata when playing new audio
-            if ('mediaSession' in navigator) {
-                this.updateMediaSessionMetadata();
+            // Create a new gain node for this specific audio
+            const gainNode = this.audioContext.createGain();
+            gainNode.gain.value = this.muted ? 0 : volume;
+            gainNode.connect(this.audioContext.destination);
+            
+            if (audioBuffer) {
+                // Play from decoded buffer
+                const source = this.audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(gainNode);
+                
+                this.currentSource = source;
+                source.onended = () => {
+                    setTimeout(() => resolve(), extra);
+                };
+                
+                source.start();
+                
+                // Update media session metadata when playing new audio
+                if ('mediaSession' in navigator) {
+                    this.updateMediaSessionMetadata();
+                }
+            } else if (audioUrl) {
+                // Fetch and decode the audio if we only have a URL
+                fetch(audioUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.arrayBuffer();
+                    })
+                    .then(arrayBuffer => this.audioContext!.decodeAudioData(arrayBuffer))
+                    .then(decodedData => {
+                        if (this.skipCurrent) {
+                            resolve();
+                            return;
+                        }
+                        
+                        const source = this.audioContext!.createBufferSource();
+                        source.buffer = decodedData;
+                        source.connect(gainNode);
+                        
+                        this.currentSource = source;
+                        source.onended = () => {
+                            setTimeout(() => resolve(), extra);
+                        };
+                        
+                        source.start();
+                        
+                        // Update media session metadata
+                        if ('mediaSession' in navigator) {
+                            this.updateMediaSessionMetadata();
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error fetching or decoding audio:", err);
+                        reject(err);
+                    });
+            } else {
+                resolve(); // No audio to play
             }
         });
     }
 
     async getAudioInfo(src: string): Promise<AudioInfo | undefined> {
         return new Promise((resolve, reject) => {
-            if (!src) {
+            if (!src || !this.audioContext) {
                 resolve(undefined);
                 return;
             }
-            const audio = new Audio(src);
-            audio.onloadedmetadata = () => {
+            
+            // For data URLs, decode directly
+            if (src.startsWith('data:')) {
+                // Convert base64 to array buffer
+                const base64 = src.split(',')[1];
+                const binaryString = atob(base64);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                
+                // Decode the audio data
+                this.audioContext.decodeAudioData(bytes.buffer)
+                    .then(buffer => {
+                        resolve({
+                            duration: buffer.duration,
+                            audioBuffer: buffer
+                        });
+                    })
+                    .catch(err => {
+                        console.error("Error decoding audio data:", err);
+                        reject(err);
+                    });
+            } else {
+                // For remote URLs, just store the URL and duration will be determined when fetched
+                // This avoids CORS issues with remote audio files
                 resolve({
-                    duration: audio.duration,
-                    audio
+                    duration: 0, // Will be updated when actually played
+                    audioUrl: src
                 });
-            };
-            audio.onerror = () => {
-                reject(new Error("Failed to load audio metadata"));
-            };
+            }
         });
     }
 
@@ -186,6 +248,13 @@ class AlertPlayer {
     mute() {
         this.muted = true;
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
+        if (this.currentSource) {
+            const gainNode = this.audioContext!.createGain();
+            gainNode.gain.value = 0;
+            this.currentSource.disconnect();
+            this.currentSource.connect(gainNode);
+            gainNode.connect(this.audioContext!.destination);
+        }
     }
 
     unmute() {
@@ -202,17 +271,42 @@ class AlertPlayer {
     stopPlaying() {
         this.playing = false;
         this.paused = false;
-        this.mainAudio!.src = silence;
+        if (this.currentSource) {
+            try {
+                this.currentSource.stop();
+                this.currentSource.disconnect();
+            } catch (e) {
+                // Ignore errors if source was already stopped
+            }
+            this.currentSource = undefined;
+        }
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
     }
 
     endAudio() {
-        this.mainAudio!.src = silence;
+        if (this.currentSource) {
+            try {
+                this.currentSource.stop();
+                this.currentSource.disconnect();
+            } catch (e) {
+                // Ignore errors if source was already stopped
+            }
+            this.currentSource = undefined;
+        }
         return Promise.resolve();
     }
 
     skip() {
         this.skipCurrent = true;
+        if (this.currentSource) {
+            try {
+                this.currentSource.stop();
+                this.currentSource.disconnect();
+            } catch (e) {
+                // Ignore errors if source was already stopped
+            }
+            this.currentSource = undefined;
+        }
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
     }
 
@@ -277,7 +371,7 @@ class AlertPlayer {
         this.config = config;
         
         // Update media session metadata when profile changes
-        if ('mediaSession' in navigator && this.mainAudio) {
+        if ('mediaSession' in navigator) {
             this.updateMediaSessionMetadata();
         }
     }
@@ -380,21 +474,22 @@ class AlertPlayer {
             PubSub.publish('AlertPlayer-update');
         }
 
-        // eventData.audioUrl is used for blerps
-        if (eventData.audioUrl) {
-            // Check if blerps are deactivated in the config
-            if (this.config?.deactivatedAlerts["blerp"]) {
-                console.log('Blerp alert skipped - deactivated in settings');
+            // eventData.audioUrl is used for blerps
+            if (eventData.audioUrl) {
+                // Check if blerps are deactivated in the config
+                if (this.config?.deactivatedAlerts["blerp"]) {
+                    console.log('Blerp alert skipped - deactivated in settings');
+                    return;
+                }
+                
+                this.startPlaying();
+                // Direct access to blerp audio without proxy
+                this.getAudioInfo(eventData.audioUrl).then((audioInfo) => {
+                    PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration || 5}); // Default to 5 seconds if duration unknown
+                    this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
+                }, onError);
                 return;
             }
-            
-            this.startPlaying();
-            this.getAudioInfo(`${BASE_URL}/blerp/audio?url=${encodeURIComponent(eventData.audioUrl)}`).then((audioInfo) => {
-                PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration});
-                this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
-            }, onError);
-            return;
-        }
         const alertConfig = this.alertConfig[item.channel];
         if (!alertConfig && !item.eventAlert) {
             console.log('No alertconfig set');
