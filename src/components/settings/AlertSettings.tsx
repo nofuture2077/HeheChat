@@ -99,6 +99,18 @@ export function AlertSettings() {
                 }
                 return <Fieldset key={"Alerts-" + channel} legend={"Alerts " + channel} variant="filled">
                     <Stack key={"alert-config-" + channel}>
+                        {/* Add blerp alert option */}
+                        <Switch 
+                            disabled={!isActive(channel)} 
+                            checked={!config.deactivatedAlerts["blerp"]} 
+                            onChange={(event) => { 
+                                config.setDeactivatedAlerts("blerp", !event.currentTarget.checked); 
+                                forceUpdate(); 
+                            }} 
+                            key="blerp" 
+                            label="Blerps" 
+                            size="lg" 
+                        />
                         {Object.values(AlertSystem.alertConfig[channel].data?.alerts || []).reduce((accumulator, value) => accumulator.concat(value), []).map((alert) => {
                             return <Switch disabled={!isActive(channel)} checked={!config.deactivatedAlerts[alert.id]} onChange={(event) => { config.setDeactivatedAlerts(alert.id, !event.currentTarget.checked); forceUpdate() }} key={alert.id} label={alert.name} size="lg" />
                         })}
@@ -108,7 +120,10 @@ export function AlertSettings() {
 
             <Fieldset legend="Hide Events" variant='filled'>
                 <Stack>
-                    {hideEventsValues.map(eventType => <Switch key={eventType} checked={config.hideEvents[eventType]} onChange={(event) => { config.setHideEvents(eventType, event.currentTarget.checked); forceUpdate(); }} label={Messages[eventType]} size="lg" />)}
+                    {hideEventsValues.map(eventType => <Switch key={eventType} checked={config.hideEvents[eventType]} onChange={(event) => { 
+                        config.setHideEvents(eventType, event.currentTarget.checked); 
+                        forceUpdate(); 
+                    }} label={Messages[eventType]} size="lg" />)}
                 </Stack>
             </Fieldset>
 

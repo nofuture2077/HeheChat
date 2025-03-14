@@ -380,7 +380,14 @@ class AlertPlayer {
             PubSub.publish('AlertPlayer-update');
         }
 
+        // eventData.audioUrl is used for blerps
         if (eventData.audioUrl) {
+            // Check if blerps are deactivated in the config
+            if (this.config?.deactivatedAlerts["blerp"]) {
+                console.log('Blerp alert skipped - deactivated in settings');
+                return;
+            }
+            
             this.startPlaying();
             this.getAudioInfo(`${BASE_URL}/blerp/audio?url=${encodeURIComponent(eventData.audioUrl)}`).then((audioInfo) => {
                 PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration});
