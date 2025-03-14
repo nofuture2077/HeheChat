@@ -170,6 +170,21 @@ body, html {
 .image-lg .image { width: 50vw; }
 .image-xl .image { width: 100vw; }
 
+.image-fixed-bottom .image  {
+  position: absolute;
+  bottom: 0px;
+}
+
+.image-fixed-left .image {
+  position: absolute;
+  left: 0px;
+}
+
+.image-fixed-right .image {
+  position: absolute;
+  right: 0px;
+}
+
 .image-xs .text p {
   max-width: 20vw;
 }
