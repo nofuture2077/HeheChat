@@ -4,8 +4,9 @@ import { useDidUpdate } from '@mantine/hooks';
 import { useEffect, useState, useRef } from 'react';
 import { initializeStoragePatches } from './commons/patches';
 import { Router } from './Router';
-import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext } from './ApplicationContext';
-import { PremiumProvider } from './components/premium';
+import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext, PremiumContext } from './ApplicationContext';
+import { Premium, DEFAULT_PREMIUM } from './commons/premium';
+import * as premiumApi from './api/premium';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
@@ -96,6 +97,10 @@ export default function HeheChat() {
     const [chatEmotes, setChatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
     const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE, guid: generateGUID()});
     const [profiles, setProfiles] = useState<Profile[]>([]);
+    const [premium, setPremium] = useState<Premium>({
+        ...DEFAULT_PREMIUM,
+        loading: true
+    });
     const backendWorkerRef = useRef<Worker>();
 
     useDidUpdate(() => {
@@ -110,6 +115,7 @@ export default function HeheChat() {
     }, [profile])
 
     useEffect(() => {
+        // Load profiles
         loadProfiles().then(async (data) => {
             if (data.active) {
                 const profileData = await loadProfileFromServer(data.active);
@@ -128,6 +134,58 @@ export default function HeheChat() {
                 setProfiles([profile]);
             }
         }, (err) => console.error(err));
+        
+        // Load premium data
+        const loadPremiumData = async () => {
+            if (!isLoggedIn()) {
+                setPremium(prev => ({ 
+                    ...prev, 
+                    isPremium: false,
+                    loading: false
+                }));
+                return;
+            }
+            
+            setPremium(prev => ({ ...prev, loading: true }));
+            
+            try {
+                const token = localStorage.getItem('hehe-token_state') || '';
+                
+                // First check status
+                const statusResult = await premiumApi.fetchPremiumStatus(token);
+                const isPremium = statusResult.premium;
+                
+                // If premium, also fetch details
+                if (isPremium) {
+                    const details = await premiumApi.fetchPremiumDetails(token);
+                    
+                    setPremium(prev => ({
+                        ...prev,
+                        isPremium: details.isActive,
+                        expiresAt: details.expires_at,
+                        subscriptionType: details.subscription_type,
+                        daysRemaining: details.daysRemaining,
+                        status: details.status,
+                        loading: false
+                    }));
+                } else {
+                    setPremium(prev => ({ 
+                        ...prev, 
+                        isPremium: false,
+                        loading: false
+                    }));
+                }
+            } catch (error) {
+                console.error('Error fetching premium data:', error);
+                setPremium(prev => ({ 
+                    ...prev, 
+                    isPremium: false,
+                    loading: false
+                }));
+            }
+        };
+        
+        loadPremiumData();
 
         backendWorkerRef.current = new Worker(new URL('./components/webworker/backendworker.ts', import.meta.url), { type: 'module' });
 
@@ -459,6 +517,189 @@ export default function HeheChat() {
         setModeratedChannels
     };
 
+    // Refresh premium data when login state changes
+    useEffect(() => {
+        const refreshPremiumData = async () => {
+            if (!isLoggedIn()) {
+                setPremium(prev => ({ 
+                    ...prev, 
+                    isPremium: false,
+                    loading: false
+                }));
+                return;
+            }
+            
+            setPremium(prev => ({ ...prev, loading: true }));
+            
+            try {
+                const token = localStorage.getItem('hehe-token_state') || '';
+                
+                // First check status
+                const statusResult = await premiumApi.fetchPremiumStatus(token);
+                const isPremium = statusResult.premium;
+                
+                // If premium, also fetch details
+                if (isPremium) {
+                    const details = await premiumApi.fetchPremiumDetails(token);
+                    
+                    setPremium(prev => ({
+                        ...prev,
+                        isPremium: details.isActive,
+                        expiresAt: details.expires_at,
+                        subscriptionType: details.subscription_type,
+                        daysRemaining: details.daysRemaining,
+                        status: details.status,
+                        loading: false
+                    }));
+                } else {
+                    setPremium(prev => ({ 
+                        ...prev, 
+                        isPremium: false,
+                        loading: false
+                    }));
+                }
+            } catch (error) {
+                console.error('Error refreshing premium data:', error);
+                setPremium(prev => ({ 
+                    ...prev, 
+                    isPremium: false,
+                    loading: false
+                }));
+            }
+        };
+        
+        refreshPremiumData();
+    }, [loginContext.accessToken]);
+    
+    const checkPremiumStatus = async (): Promise<boolean> => {
+        if (!loginContext.isLoggedIn()) {
+            return false;
+        }
+        
+        try {
+            const token = localStorage.getItem('hehe-token_state') || '';
+            const statusResult = await premiumApi.fetchPremiumStatus(token);
+            const isPremium = statusResult.premium;
+            
+            setPremium(prev => ({ 
+                ...prev, 
+                isPremium,
+                loading: false
+            }));
+            
+            return isPremium;
+        } catch (error) {
+            console.error('Error checking premium status:', error);
+            setPremium(prev => ({ 
+                ...prev, 
+                isPremium: false,
+                loading: false
+            }));
+            return false;
+        }
+    };
+    
+    const getPremiumDetails = async (): Promise<any> => {        
+        setPremium(prev => ({ ...prev, loading: true }));
+        
+        try {
+            const token = localStorage.getItem('hehe-token_state') || '';
+            
+            // First check status
+            const statusResult = await premiumApi.fetchPremiumStatus(token);
+            const isPremium = statusResult.premium;
+            
+            // If premium, also fetch details
+            if (isPremium) {
+                const details = await premiumApi.fetchPremiumDetails(token);
+                
+                const premiumDetails = {
+                    isPremium: details.isActive,
+                    expiresAt: details.expires_at,
+                    subscriptionType: details.subscription_type,
+                    daysRemaining: details.daysRemaining,
+                    status: details.status
+                };
+                
+                setPremium(prev => ({
+                    ...prev,
+                    ...premiumDetails,
+                    loading: false
+                }));
+                
+                return premiumDetails;
+            } else {
+                setPremium(prev => ({ 
+                    ...prev, 
+                    isPremium: false,
+                    loading: false
+                }));
+                
+                return {
+                    isPremium: false,
+                    expiresAt: null,
+                    subscriptionType: null,
+                    daysRemaining: null,
+                    status: null
+                };
+            }
+        } catch (error) {
+            console.error('Error fetching premium details:', error);
+            
+            setPremium(prev => ({ 
+                ...prev, 
+                isPremium: false,
+                loading: false
+            }));
+            
+            return {
+                isPremium: false,
+                expiresAt: null,
+                subscriptionType: null,
+                daysRemaining: null,
+                status: null
+            };
+        }
+    };
+    
+    const redeemCode = async (code: string): Promise<{ success: boolean; message: string }> => {
+        try {
+            const token = localStorage.getItem('hehe-token_state') || '';
+            const result = await premiumApi.redeemCode(token, code);
+            console.log(result);
+            if (result.success) {
+                // Refresh premium status
+                await getPremiumDetails();
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('Error redeeming code:', error);
+            return { success: false, message: 'An error occurred while redeeming the code' };
+        }
+    };
+    
+    const processPayment = async (paymentData: any): Promise<{ success: boolean; message: string }> => {
+        if (!loginContext.isLoggedIn() || !loginContext.accessToken) {
+            return { success: false, message: 'You must be logged in to process a payment' };
+        }
+
+        try {
+            const token = localStorage.getItem('hehe-token_state') || '';
+            const result = await premiumApi.processPayPalPayment(token, paymentData);
+            
+            if (result.success) {
+                // Refresh premium status
+                await getPremiumDetails();
+            }
+            
+            return result;
+        } catch (error) {
+            console.error('Error processing payment:', error);
+            return { success: false, message: 'An error occurred while processing the payment' };
+        }
+    };
+
     const appProfile = {
         ...profile,
         listProfiles,
@@ -468,7 +709,15 @@ export default function HeheChat() {
         switchProfile,
         deleteProfile,
         setProfiles
-    }
+    };
+    
+    const appPremium = {
+        ...premium,
+        checkPremiumStatus,
+        getPremiumDetails,
+        redeemCode,
+        processPayment
+    };
 
     return (
         <MantineProvider defaultColorScheme="auto" theme={theme}>
@@ -476,9 +725,9 @@ export default function HeheChat() {
                 <ProfileContext.Provider value={appProfile}>
                     <LoginContextContext.Provider value={appLogin}>
                         <ChatEmotesContext.Provider value={chatEmotes}>
-                            <PremiumProvider>
+                            <PremiumContext.Provider value={appPremium}>
                                 <Router />
-                            </PremiumProvider>
+                            </PremiumContext.Provider>
                         </ChatEmotesContext.Provider>
                     </LoginContextContext.Provider>
                 </ProfileContext.Provider>

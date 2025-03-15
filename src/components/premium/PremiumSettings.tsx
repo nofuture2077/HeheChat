@@ -53,46 +53,32 @@ export const PremiumSettings: React.FC = () => {
 
       <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
-          {premium.isPremium ? (
-            <>
               <Tabs.Tab value="details" leftSection={<IconCrown size="0.8rem" />}>
                 Status
               </Tabs.Tab>
-              <Tabs.Tab value="history" leftSection={<IconHistory size="0.8rem" />}>
-                History
-              </Tabs.Tab>
-            </>
-          ) : (
-            <>
               <Tabs.Tab value="redeem" leftSection={<IconTicket size="0.8rem" />}>
                 Redeem
               </Tabs.Tab>
               <Tabs.Tab value="paypal" leftSection={<IconBrandPaypal size="0.8rem" />}>
                 Buy
               </Tabs.Tab>
-            </>
-          )}
+              <Tabs.Tab value="history" leftSection={<IconHistory size="0.8rem" />}>
+                
+              </Tabs.Tab>
         </Tabs.List>
 
-        {premium.isPremium ? (
-          <>
-            <Tabs.Panel value="details" pt="xs">
-              <PremiumDetails />
-            </Tabs.Panel>
-            <Tabs.Panel value="history" pt="xs">
-              <Text>Subscription history will be displayed here.</Text>
-            </Tabs.Panel>
-          </>
-        ) : (
-          <>
-            <Tabs.Panel value="redeem" pt="xs">
-              <RedeemCode onSuccess={handleSuccess} />
-            </Tabs.Panel>
-            <Tabs.Panel value="paypal" pt="xs">
-              <PayPalSubscription onSuccess={handleSuccess} />
-            </Tabs.Panel>
-          </>
-        )}
+        <Tabs.Panel value="details" pt="xs">
+          <PremiumDetails />
+        </Tabs.Panel>
+        <Tabs.Panel value="history" pt="xs">
+          <Text>Subscription history will be displayed here.</Text>
+        </Tabs.Panel>
+        <Tabs.Panel value="redeem" pt="xs">
+          <RedeemCode onSuccess={handleSuccess} />
+        </Tabs.Panel>
+        <Tabs.Panel value="paypal" pt="xs">
+          <PayPalSubscription onSuccess={handleSuccess} />
+        </Tabs.Panel>
       </Tabs>
     </Stack>
   );

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useContext, useState } from 'react';
 import { TextInput, Button, Text, Card, Title, Group } from '@mantine/core';
 import { IconTicket, IconCheck, IconX } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
@@ -11,48 +11,29 @@ interface RedeemCodeProps {
 export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
   const premium = useContext(PremiumContext);
   const [code, setCode] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // Use a ref to track if the component is mounted
-  const isMounted = useRef(true);
-
-  // Set up the cleanup function when component unmounts
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    premium.loading = true;
     setError(null);
-    setSuccess(null);
 
     try {
       const result = await premium.redeemCode(code);
-      
-      // Only update state if component is still mounted
-      if (isMounted.current) {
         if (result.success) {
           setSuccess(result.message);
           setCode('');
-          setLoading(false); // Ensure loading is set to false before callback
+          premium.loading = false;
           if (onSuccess) onSuccess(result);
         } else {
           setError(result.message);
-          setLoading(false);
+          premium.loading = false;
         }
-      }
     } catch (error) {
-      // Only update state if component is still mounted
-      if (isMounted.current) {
         setError('An error occurred while redeeming the code');
         console.error('Error redeeming code:', error);
-        setLoading(false);
-      }
+        premium.loading = false;
     }
   };
 
@@ -72,7 +53,7 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
           value={code}
           onChange={(e) => setCode(e.target.value.toUpperCase())}
           className={classes.redeemCodeInput}
-          disabled={loading}
+          disabled={premium.loading}
           required
         />
         
@@ -80,7 +61,7 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
           type="submit" 
           fullWidth 
           mt="md" 
-          loading={loading}
+          loading={premium.loading}
           disabled={!code.trim()}
         >
           Redeem
