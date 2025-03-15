@@ -47,6 +47,11 @@ class AlertPlayer {
         return this.audioContext !== undefined && this.audioContext.state === 'running';
     }
 
+    interrupted(): boolean {
+        //@ts-ignore
+        return this.audioContext !== undefined && this.audioContext.state === 'interrupted';
+    }
+
     initialize() {
         console.log('Alert system initialized');
         this.audioContext = new (window.AudioContext)();
@@ -626,6 +631,11 @@ class AlertPlayer {
     }
     
     checkQueue() {
+        if (this.interrupted()) {
+            this.stopPlaying();
+            PubSub.publish('AlertPlayer-update');
+            return;
+        }
         // Don't process queue if we're already playing, paused, or not initialized
         if (this.playing || this.paused || !this.config || !this.status()) {
             return;
