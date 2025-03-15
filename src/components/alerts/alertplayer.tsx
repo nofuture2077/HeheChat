@@ -7,6 +7,7 @@ import { silence } from "./silence";
 import PubSub from 'pubsub-js';
 import _ from "underscore";
 import { AlertConfig } from "@/components/events/alertconfigstorage";
+import { formatEventText } from "@/components/events/eventlist";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -271,6 +272,16 @@ class AlertPlayer {
     resume() {
         this.paused = false;
         this.audioContext?.resume();
+        
+        // If we have a current source, ensure it continues playing
+        if (this.currentSource && this.playing) {
+            // Publish an update to refresh the UI
+            PubSub.publish('AlertPlayer-update', {
+                text: this.currentlyPlaying ? 
+                    this.currentlyPlaying.username + " - " + formatEventText(this.currentlyPlaying) : 
+                    'Playing'
+            });
+        }
     }
 
     mute() {
@@ -288,6 +299,21 @@ class AlertPlayer {
     unmute() {
         this.muted = false;
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 1;
+        
+        // If there's a current source playing, reconnect it with proper gain
+        if (this.currentSource && this.playing) {
+            // Create a new gain node with proper volume
+            const gainNode = this.audioContext!.createGain();
+            gainNode.gain.value = 1; // Set to full volume
+            
+            // Disconnect from any existing connections and reconnect
+            this.currentSource.disconnect();
+            this.currentSource.connect(gainNode);
+            gainNode.connect(this.audioContext!.destination);
+            
+            // Update UI to reflect unmuted state
+            PubSub.publish('AlertPlayer-update');
+        }
     }
 
     startPlaying() {
@@ -328,6 +354,14 @@ class AlertPlayer {
         this.skipCurrent = true;
         this.cleanupCurrentSource();
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
+        
+        // Reset playing state to allow the queue to continue
+        this.playing = false;
+        
+        // Update UI to reflect skipped state
+        PubSub.publish('AlertPlayer-update', {
+            text: 'Skipped'
+        });
     }
 
     cleanMessage(message: string) {
@@ -636,8 +670,20 @@ class AlertPlayer {
             PubSub.publish('AlertPlayer-update');
             return;
         }
-        // Don't process queue if we're already playing, paused, or not initialized
-        if (this.playing || this.paused || !this.config || !this.status()) {
+        
+        // If we're paused, don't process the queue
+        if (this.paused) {
+            return;
+        }
+        
+        // If we're playing but don't have a current source, we might have finished playing
+        // or encountered an error. Reset the playing state so we can continue with the queue.
+        if (this.playing && !this.currentSource) {
+            this.playing = false;
+        }
+        
+        // Don't process queue if we're already playing or not initialized
+        if (this.playing || !this.config || !this.status()) {
             return;
         }
     
