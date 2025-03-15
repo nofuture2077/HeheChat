@@ -2,9 +2,9 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Stack, Title, Tabs, Text, Group, Divider } from '@mantine/core';
 import { IconCrown, IconTicket, IconBrandPaypal, IconHistory } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
-import { PremiumDetails } from './PremiumDetails';
-import { RedeemCode } from './RedeemCode';
-import { PayPalSubscription } from './PayPalSubscription';
+import { PremiumDetails } from '../premium/PremiumDetails';
+import { RedeemCode } from '../premium/RedeemCode';
+import { PayPalSubscription } from '../premium/PayPalSubscription';
 import classes from './Premium.module.css';
 
 export const PremiumSettings: React.FC = () => {

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Card, Title, Text, Group, Loader } from '@mantine/core';
 import { IconBrandPaypal, IconCheck, IconX } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
@@ -72,6 +72,16 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  // Use a ref to track if the component is mounted
+  const isMounted = useRef(true);
+
+  // Set up the cleanup function when component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const handlePayPalSuccess = async (details: any, data: any) => {
     setLoading(true);
@@ -87,17 +97,25 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
       };
       
       const result = await premium.processPayment(paymentData);
-      if (result.success) {
-        setSuccess(result.message);
-        if (onSuccess) onSuccess(result);
-      } else {
-        setError(result.message);
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        if (result.success) {
+          setSuccess(result.message);
+          setLoading(false); // Ensure loading is set to false before callback
+          if (onSuccess) onSuccess(result);
+        } else {
+          setError(result.message);
+          setLoading(false);
+        }
       }
     } catch (error) {
-      setError('An error occurred while processing the payment');
-      console.error('Error processing payment:', error);
-    } finally {
-      setLoading(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('An error occurred while processing the payment');
+        console.error('Error processing payment:', error);
+        setLoading(false);
+      }
     }
   };
 

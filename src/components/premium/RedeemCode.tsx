@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { TextInput, Button, Text, Card, Title, Group } from '@mantine/core';
 import { IconTicket, IconCheck, IconX } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
@@ -15,6 +15,16 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Use a ref to track if the component is mounted
+  const isMounted = useRef(true);
+
+  // Set up the cleanup function when component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -23,18 +33,26 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
 
     try {
       const result = await premium.redeemCode(code);
-      if (result.success) {
-        setSuccess(result.message);
-        setCode('');
-        if (onSuccess) onSuccess(result);
-      } else {
-        setError(result.message);
+      
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        if (result.success) {
+          setSuccess(result.message);
+          setCode('');
+          setLoading(false); // Ensure loading is set to false before callback
+          if (onSuccess) onSuccess(result);
+        } else {
+          setError(result.message);
+          setLoading(false);
+        }
       }
     } catch (error) {
-      setError('An error occurred while redeeming the code');
-      console.error('Error redeeming code:', error);
-    } finally {
-      setLoading(false);
+      // Only update state if component is still mounted
+      if (isMounted.current) {
+        setError('An error occurred while redeeming the code');
+        console.error('Error redeeming code:', error);
+        setLoading(false);
+      }
     }
   };
 
