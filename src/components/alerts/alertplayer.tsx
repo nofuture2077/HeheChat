@@ -7,12 +7,14 @@ import { silence } from "./silence";
 import PubSub from 'pubsub-js';
 import _ from "underscore";
 import { AlertConfig } from "@/components/events/alertconfigstorage";
+import { formatEventText } from "@/components/events/eventlist";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 interface AudioInfo {
     duration: number;
-    audio: HTMLAudioElement;
+    audioBuffer?: AudioBuffer;
+    audioUrl?: string;
 }
 
 let cheerPrefixes = ['Cheer', 'BibleThump', 'cheerwhal', 'Corgo', 'uni', 'ShowLove', 'Party', 'SeemsGood', 'Pride', 'Kappa', 'FrankerZ', 'HeyGuys', 'DansGame', 'EleGiggle', 'TriHard', 'Kreygasm', '4Head', 'SwiftRage', 'NotLikeThis', 'FailFish', 'VoHiYo', 'PJSalt', 'MrDestructoid', 'bday', 'RIPCheer', 'Shamrock'];
@@ -21,8 +23,7 @@ let cheerPrefixesRegExp = cheerPrefixes.map(x => new RegExp(`\\b${x}\\d+\\b`, "g
 class AlertPlayer {
     audioContext?: AudioContext;
     mainAudioGain?: GainNode;
-    mainAudio?: HTMLAudioElement;
-    mainAudioSource?: MediaElementAudioSourceNode;
+    currentSource?: AudioBufferSourceNode;
     playing: boolean = false;
     paused: boolean = false;
     muted: boolean = false;
@@ -47,24 +48,17 @@ class AlertPlayer {
         return this.audioContext !== undefined && this.audioContext.state === 'running';
     }
 
+    interrupted(): boolean {
+        //@ts-ignore
+        return this.audioContext !== undefined && this.audioContext.state === 'interrupted';
+    }
+
     initialize() {
         console.log('Alert system initialized');
         this.audioContext = new (window.AudioContext)();
         this.mainAudioGain = this.audioContext.createGain();
         this.mainAudioGain.gain.value = 0;
         this.mainAudioGain.connect(this.audioContext.destination);
-        this.mainAudio = new Audio(silence);
-        this.mainAudio.autoplay = true;
-        this.mainAudio.loop = true;
-        this.mainAudio.crossOrigin = "anonymous";
-
-        if (this.mainAudio.setAttribute) {
-            this.mainAudio.setAttribute('webkit-playsinline', 'true');
-            this.mainAudio.setAttribute('playsinline', 'true');
-        }
-
-        this.mainAudioSource = this.audioContext.createMediaElementSource(this.mainAudio);
-        this.mainAudioSource.connect(this.mainAudioGain);
         
         // Set media session metadata for album cover and artist info
         if ('mediaSession' in navigator) {
@@ -73,7 +67,7 @@ class AlertPlayer {
     }
 
     updateMediaSessionMetadata() {
-        if (!('mediaSession' in navigator) || !this.mainAudio) return;
+        if (!('mediaSession' in navigator)) return;
         
         const profileName = this.profile?.name || 'HeheChat';
         
@@ -125,51 +119,148 @@ class AlertPlayer {
 
     async playAudio(volume: number, audioInfo: AudioInfo | undefined, extra: number): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (!audioInfo || this.skipCurrent) {
+            if (!audioInfo || this.skipCurrent || !this.audioContext) {
                 resolve();
                 return;
             }
             
-            const { audio, duration } = audioInfo;
+            const { duration, audioBuffer, audioUrl } = audioInfo;
             
-            const handlePlaying = () => {
-                this.preciseTimer(resolve, (duration * 1000) + extra);
-                this.mainAudio!.removeEventListener('playing', handlePlaying);
-            };
-
-            audio.onerror = () => {
-                reject("Audio playback error");
-                this.mainAudio!.removeEventListener('playing', handlePlaying);
-            };
-
-            this.mainAudio!.addEventListener('playing', handlePlaying);
-            this.mainAudio!.volume = volume;
-            this.mainAudio!.currentTime = 0;
-            this.mainAudio!.src = audio.src;
+            // Clean up any existing audio source
+            this.cleanupCurrentSource();
             
-            // Update media session metadata when playing new audio
-            if ('mediaSession' in navigator) {
-                this.updateMediaSessionMetadata();
+            // Create a new gain node for this specific audio
+            const gainNode = this.audioContext.createGain();
+            gainNode.gain.value = this.muted ? 0 : volume;
+            gainNode.connect(this.audioContext.destination);
+            
+            // Setup error handling for unexpected interruptions
+            const handleInterruption = () => {
+                console.log("Audio playback interrupted");
+                this.cleanupCurrentSource();
+                this.playing = false; // Reset playing state
+                resolve(); // Resolve the promise to allow queue to continue
+            };
+            
+            if (audioBuffer) {
+                try {
+                    // Play from decoded buffer
+                    const source = this.audioContext.createBufferSource();
+                    source.buffer = audioBuffer;
+                    source.connect(gainNode);
+                    
+                    this.currentSource = source;
+                    
+                    // Handle normal completion
+                    source.onended = () => {
+                        this.cleanupCurrentSource();
+                        setTimeout(() => resolve(), extra);
+                    };
+                    
+                    // AudioBufferSourceNode doesn't have onerror event
+                    // We'll rely on try-catch for error handling
+                    
+                    source.start();
+                    
+                    // Update media session metadata when playing new audio
+                    if ('mediaSession' in navigator) {
+                        this.updateMediaSessionMetadata();
+                    }
+                } catch (err) {
+                    console.error("Error starting audio playback:", err);
+                    handleInterruption();
+                }
+            } else if (audioUrl) {
+                // Fetch and decode the audio if we only have a URL
+                fetch(audioUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.arrayBuffer();
+                    })
+                    .then(arrayBuffer => this.audioContext!.decodeAudioData(arrayBuffer))
+                    .then(decodedData => {
+                        if (this.skipCurrent) {
+                            resolve();
+                            return;
+                        }
+                        
+                        try {
+                            const source = this.audioContext!.createBufferSource();
+                            source.buffer = decodedData;
+                            source.connect(gainNode);
+                            
+                            this.currentSource = source;
+                            
+                            // Handle normal completion
+                            source.onended = () => {
+                                this.cleanupCurrentSource();
+                                setTimeout(() => resolve(), extra);
+                            };
+                            
+                            // AudioBufferSourceNode doesn't have onerror event
+                            // We'll rely on try-catch for error handling
+                            
+                            source.start();
+                            
+                            // Update media session metadata
+                            if ('mediaSession' in navigator) {
+                                this.updateMediaSessionMetadata();
+                            }
+                        } catch (err) {
+                            console.error("Error starting audio playback:", err);
+                            handleInterruption();
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error fetching or decoding audio:", err);
+                        handleInterruption();
+                    });
+            } else {
+                resolve(); // No audio to play
             }
         });
     }
 
     async getAudioInfo(src: string): Promise<AudioInfo | undefined> {
         return new Promise((resolve, reject) => {
-            if (!src) {
+            if (!src || !this.audioContext) {
                 resolve(undefined);
                 return;
             }
-            const audio = new Audio(src);
-            audio.onloadedmetadata = () => {
+            
+            // For data URLs, decode directly
+            if (src.startsWith('data:')) {
+                // Convert base64 to array buffer
+                const base64 = src.split(',')[1];
+                const binaryString = atob(base64);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
+                }
+                
+                // Decode the audio data
+                this.audioContext.decodeAudioData(bytes.buffer)
+                    .then(buffer => {
+                        resolve({
+                            duration: buffer.duration,
+                            audioBuffer: buffer
+                        });
+                    })
+                    .catch(err => {
+                        console.error("Error decoding audio data:", err);
+                        reject(err);
+                    });
+            } else {
+                // For remote URLs, just store the URL and duration will be determined when fetched
+                // This avoids CORS issues with remote audio files
                 resolve({
-                    duration: audio.duration,
-                    audio
+                    duration: 0, // Will be updated when actually played
+                    audioUrl: src
                 });
-            };
-            audio.onerror = () => {
-                reject(new Error("Failed to load audio metadata"));
-            };
+            }
         });
     }
 
@@ -181,16 +272,48 @@ class AlertPlayer {
     resume() {
         this.paused = false;
         this.audioContext?.resume();
+        
+        // If we have a current source, ensure it continues playing
+        if (this.currentSource && this.playing) {
+            // Publish an update to refresh the UI
+            PubSub.publish('AlertPlayer-update', {
+                text: this.currentlyPlaying ? 
+                    this.currentlyPlaying.username + " - " + formatEventText(this.currentlyPlaying) : 
+                    'Playing'
+            });
+        }
     }
 
     mute() {
         this.muted = true;
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
+        if (this.currentSource) {
+            const gainNode = this.audioContext!.createGain();
+            gainNode.gain.value = 0;
+            this.currentSource.disconnect();
+            this.currentSource.connect(gainNode);
+            gainNode.connect(this.audioContext!.destination);
+        }
     }
 
     unmute() {
         this.muted = false;
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 1;
+        
+        // If there's a current source playing, reconnect it with proper gain
+        if (this.currentSource && this.playing) {
+            // Create a new gain node with proper volume
+            const gainNode = this.audioContext!.createGain();
+            gainNode.gain.value = 1; // Set to full volume
+            
+            // Disconnect from any existing connections and reconnect
+            this.currentSource.disconnect();
+            this.currentSource.connect(gainNode);
+            gainNode.connect(this.audioContext!.destination);
+            
+            // Update UI to reflect unmuted state
+            PubSub.publish('AlertPlayer-update');
+        }
     }
 
     startPlaying() {
@@ -199,21 +322,46 @@ class AlertPlayer {
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 1;
     }
 
+    // Helper method to safely clean up the current audio source
+    private cleanupCurrentSource() {
+        if (this.currentSource) {
+            try {
+                this.currentSource.onended = null; // Remove event listener
+                this.currentSource.stop();
+                this.currentSource.disconnect();
+            } catch (e) {
+                // Ignore errors if source was already stopped
+                console.log("Error cleaning up audio source:", e);
+            }
+            this.currentSource = undefined;
+        }
+    }
+
     stopPlaying() {
         this.playing = false;
         this.paused = false;
-        this.mainAudio!.src = silence;
+        this.skipCurrent = false; // Reset skip flag
+        this.cleanupCurrentSource();
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
     }
 
     endAudio() {
-        this.mainAudio!.src = silence;
+        this.cleanupCurrentSource();
         return Promise.resolve();
     }
 
     skip() {
         this.skipCurrent = true;
+        this.cleanupCurrentSource();
         if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
+        
+        // Reset playing state to allow the queue to continue
+        this.playing = false;
+        
+        // Update UI to reflect skipped state
+        PubSub.publish('AlertPlayer-update', {
+            text: 'Skipped'
+        });
     }
 
     cleanMessage(message: string) {
@@ -277,7 +425,7 @@ class AlertPlayer {
         this.config = config;
         
         // Update media session metadata when profile changes
-        if ('mediaSession' in navigator && this.mainAudio) {
+        if ('mediaSession' in navigator) {
             this.updateMediaSessionMetadata();
         }
     }
@@ -380,12 +528,26 @@ class AlertPlayer {
             PubSub.publish('AlertPlayer-update');
         }
 
-        if (eventData.audioUrl) {
-            this.startPlaying();
-            this.getAudioInfo(`${BASE_URL}/blerp/audio?url=${encodeURIComponent(eventData.audioUrl)}`).then((audioInfo) => {
-                PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration});
-                this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
-            }, onError);
+        try {
+            // eventData.audioUrl is used for blerps
+            if (eventData.audioUrl) {
+                // Check if blerps are deactivated in the config
+                if (this.config?.deactivatedAlerts["blerp"]) {
+                    console.log('Blerp alert skipped - deactivated in settings');
+                    return;
+                }
+                
+                this.startPlaying();
+                // Direct access to blerp audio without proxy
+                this.getAudioInfo(eventData.audioUrl).then((audioInfo) => {
+                    PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration || 5}); // Default to 5 seconds if duration unknown
+                    this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
+                }, onError);
+                return;
+            }
+        } catch (err) {
+            console.error("Error processing blerp:", err);
+            onError(err);
             return;
         }
         const alertConfig = this.alertConfig[item.channel];
@@ -442,7 +604,25 @@ class AlertPlayer {
                 PubSub.publish('ALERT_SHOW', visualAlert);
             }
 
-            this.playAudio(0.8, jingleAudio, this.jingleExtra || 0).then(() => this.playAudio(1.0, ttsAudio, this.ttsExtra || 0)).then(() => this.endAudio()).then(() => this.wait(duration, minDuration)).then(onEnd, onError);
+            // Chain audio playback with proper error handling
+            this.playAudio(0.8, jingleAudio, this.jingleExtra || 0)
+                .then(() => {
+                    if (this.skipCurrent) throw new Error("Playback skipped");
+                    return this.playAudio(1.0, ttsAudio, this.ttsExtra || 0);
+                })
+                .then(() => {
+                    if (this.skipCurrent) throw new Error("Playback skipped");
+                    return this.endAudio();
+                })
+                .then(() => {
+                    if (this.skipCurrent) throw new Error("Playback skipped");
+                    return this.wait(duration, minDuration);
+                })
+                .then(onEnd)
+                .catch(err => {
+                    console.error("Error in audio chain:", err);
+                    onError(err);
+                });
         } catch (err) {
             console.error(err);
             this.stopPlaying();
@@ -485,21 +665,50 @@ class AlertPlayer {
     }
     
     checkQueue() {
-        if (this.playing || this.paused || !this.config || !this.status()) {
+        if (this.interrupted()) {
+            this.stopPlaying();
+            PubSub.publish('AlertPlayer-update');
+            return;
+        }
+        
+        // If we're paused, don't process the queue
+        if (this.paused) {
+            return;
+        }
+        
+        // If we're playing but don't have a current source, we might have finished playing
+        // or encountered an error. Reset the playing state so we can continue with the queue.
+        if (this.playing && !this.currentSource) {
+            this.playing = false;
+        }
+        
+        // Don't process queue if we're already playing or not initialized
+        if (this.playing || !this.config || !this.status()) {
             return;
         }
     
+        // Check if we've processed all items in the queue
         if (this.index >= this.queue.length) {
             return;
         }
     
+        // Get the next item from the queue
         const item = this.queue[this.index++];
     
         if (!item) {
             return;
         }
+        
+        // Reset state before playing new item
+        this.skipCurrent = false;
+        
         console.log("Play Event", item);
-        this.showNotification(item);
+        this.showNotification(item).catch(err => {
+            console.error("Error showing notification:", err);
+            // Make sure we reset the playing state so the queue can continue
+            this.stopPlaying();
+            PubSub.publish('AlertPlayer-update');
+        });
     }
 }
 
