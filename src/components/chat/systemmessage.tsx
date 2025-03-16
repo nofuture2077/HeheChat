@@ -70,7 +70,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const style = {variant: 'color', width: '100%'};
     
     const eventMainType = EventTypeMapping[eventType] as SystemMessageMainType;
-    if (!config.systemMessageInChat[eventMainType]) {
+    if (props.msg.data.type !== 'announcement' && !config.systemMessageInChat[eventMainType]) {
         return;
     }
     getEventStyle({eventtype: eventType, amount: Number(props.msg.data.amount)}, style);
