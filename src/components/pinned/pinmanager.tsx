@@ -165,7 +165,7 @@ export function PinManager() {
                     id: d.id, 
                     channel: d.channel, 
                     endTime: new Date(Date.parse(d.expiryDate)), 
-                    data: {level: d.level, progress: d.progress, goal: d.goal},
+                    data: {level: d.level, progress: d.progress, goal: d.goal, isGoldenKappaTrain: d.isGoldenKappaTrain},
                     state: 'active'
                 };
                 upsertPin(pin);
@@ -185,7 +185,8 @@ export function PinManager() {
                     data: {
                         level: d.level,
                         progress: 100,  // Show full progress in final state
-                        goal: d.total
+                        goal: d.total, 
+                        isGoldenKappaTrain: d.isGoldenKappaTrain
                     },
                     state: 'ended'
                 };
@@ -202,7 +203,7 @@ export function PinManager() {
                     id: d.id, 
                     channel: d.channel, 
                     endTime: new Date(Date.parse(d.expiryDate)), 
-                    data: {level: d.level, progress: d.progress, goal: d.goal},
+                    data: {level: d.level, progress: d.progress, goal: d.goal, isGoldenKappaTrain: d.isGoldenKappaTrain},
                     state: 'active'
                 };
                 upsertPin(pin);

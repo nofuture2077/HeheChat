@@ -11,30 +11,29 @@ interface RedeemCodeProps {
 export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
   const premium = useContext(PremiumContext);
   const [code, setCode] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    premium.loading = true;
     setError(null);
-    setSuccess(null);
 
     try {
       const result = await premium.redeemCode(code);
-      if (result.success) {
-        setSuccess(result.message);
-        setCode('');
-        if (onSuccess) onSuccess(result);
-      } else {
-        setError(result.message);
-      }
+        if (result.success) {
+          setSuccess(result.message);
+          setCode('');
+          premium.loading = false;
+          if (onSuccess) onSuccess(result);
+        } else {
+          setError(result.message);
+          premium.loading = false;
+        }
     } catch (error) {
-      setError('An error occurred while redeeming the code');
-      console.error('Error redeeming code:', error);
-    } finally {
-      setLoading(false);
+        setError('An error occurred while redeeming the code');
+        console.error('Error redeeming code:', error);
+        premium.loading = false;
     }
   };
 
@@ -54,7 +53,7 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
           value={code}
           onChange={(e) => setCode(e.target.value.toUpperCase())}
           className={classes.redeemCodeInput}
-          disabled={loading}
+          disabled={premium.loading}
           required
         />
         
@@ -62,7 +61,7 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
           type="submit" 
           fullWidth 
           mt="md" 
-          loading={loading}
+          loading={premium.loading}
           disabled={!code.trim()}
         >
           Redeem
