@@ -39,6 +39,7 @@ const messages = {
     'follow': '${username} just followed',
     'cheer': '${username} cheered ${amount:whole} bits///${text}',
     'donation': '${username} donated ${amount} EURO///${text}',
+    'announcement': 'Chat Announcement///${text}',
     'blerp': '${username} played Blerp ${audioTitle}',
     'seventv_emote_add': '${username} added new Emote ${emote} ${emote}',
     'seventv_emote_remove': '${username} removed Emote ${emote}'
