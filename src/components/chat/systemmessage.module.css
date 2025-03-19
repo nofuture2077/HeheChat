@@ -30,7 +30,7 @@
     }
 }
 
-.raid {
+.raid, .announcement {
     background-color: #db32bcb0;
 }
 
@@ -50,6 +50,22 @@
     background-color: #3248db80;
 }
 
-.seventv_emote_add, .seventv_emote_remove, .announcement {
+.seventv_emote_add, .seventv_emote_remove {
+    background-color: #9532dbd4;
+}
+
+.announcement.BLUE {
+    background-color: #3248db80;
+}
+
+.announcement.GREEN {
+    background-color: #32db3980;
+}
+
+.announcement.ORANGE {
+    background-color: #e6622180;
+}
+
+.announcement.PURPLE {
     background-color: #9532dbd4;
 }
