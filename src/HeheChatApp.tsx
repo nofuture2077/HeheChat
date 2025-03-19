@@ -369,7 +369,7 @@ export default function HeheChat() {
         if (!name) {
             return false;
         }
-        if (name.length > 12) {
+        if (name.length > 25) {
             return false;
         }
         for (var i = 0; i < profiles.length;i++) {
