@@ -54,18 +54,18 @@
     background-color: #9532dbd4;
 }
 
-.announcement.BLUE {
-    background-color: #3248db80;
+.BLUE {
+    background-color: #3248db80 !important;
 }
 
-.announcement.GREEN {
-    background-color: #32db3980;
+.GREEN {
+    background-color: #32db3980 !important;
 }
 
-.announcement.ORANGE {
-    background-color: #e6622180;
+.ORANGE {
+    background-color: #e6622180 !important;
 }
 
-.announcement.PURPLE {
-    background-color: #9532dbd4;
+.PURPLE {
+    background-color: #9532dbd4 !important;
 }
