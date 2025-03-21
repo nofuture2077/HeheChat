@@ -515,15 +515,18 @@ class AlertPlayer {
  
     async showNotification(item: Event) {
         const eventData = this.getEventData(item.text);
+        let alertFullyProcessed = false;
 
         const onEnd = () => {
             console.log('Stop Playing');
+            alertFullyProcessed = true;
             this.stopPlaying();
             PubSub.publish('AlertPlayer-update');
         }
 
         const onError = (reason: any) => {
             console.log('Error while Playing', reason);
+            alertFullyProcessed = true;
             this.stopPlaying();
             PubSub.publish('AlertPlayer-update');
         }
@@ -605,16 +608,26 @@ class AlertPlayer {
             }
 
             // Chain audio playback with proper error handling
+            console.log("Starting jingle playback");
             this.playAudio(0.8, jingleAudio, this.jingleExtra || 0)
                 .then(() => {
+                    console.log("Jingle playback completed, starting TTS");
                     if (this.skipCurrent) throw new Error("Playback skipped");
+                    
+                    // Handle case where TTS audio is undefined
+                    if (!ttsAudio) {
+                        console.log("No TTS audio available, skipping TTS part but continuing alert");
+                        return Promise.resolve(); // Skip TTS part but continue chain
+                    }
                     return this.playAudio(1.0, ttsAudio, this.ttsExtra || 0);
                 })
                 .then(() => {
+                    console.log("TTS playback completed");
                     if (this.skipCurrent) throw new Error("Playback skipped");
                     return this.endAudio();
                 })
                 .then(() => {
+                    console.log("Audio ended, waiting for minimum duration");
                     if (this.skipCurrent) throw new Error("Playback skipped");
                     return this.wait(duration, minDuration);
                 })
@@ -666,6 +679,7 @@ class AlertPlayer {
     
     checkQueue() {
         if (this.interrupted()) {
+            console.log("Audio context interrupted, stopping playback");
             this.stopPlaying();
             PubSub.publish('AlertPlayer-update');
             return;
@@ -679,7 +693,17 @@ class AlertPlayer {
         // If we're playing but don't have a current source, we might have finished playing
         // or encountered an error. Reset the playing state so we can continue with the queue.
         if (this.playing && !this.currentSource) {
-            this.playing = false;
+            console.log("Playing state with no current source detected - resetting playing state");
+            // Add a small delay before resetting the playing state to avoid race conditions
+            // where the audio source is being set up but not yet assigned to currentSource
+            setTimeout(() => {
+                // Double-check that we still don't have a current source
+                if (this.playing && !this.currentSource) {
+                    console.log("Still no current source after delay, resetting playing state");
+                    this.playing = false;
+                }
+            }, 100);
+            return; // Wait for the next check cycle to continue
         }
         
         // Don't process queue if we're already playing or not initialized
