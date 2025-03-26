@@ -714,22 +714,6 @@ class AlertPlayer {
             return;
         }
         
-        // If we're playing but don't have a current source, we might have finished playing
-        // or encountered an error. Reset the playing state so we can continue with the queue.
-        if (this.playing && !this.currentSource) {
-            console.log("Playing state with no current source detected - resetting playing state");
-            // Add a small delay before resetting the playing state to avoid race conditions
-            // where the audio source is being set up but not yet assigned to currentSource
-            setTimeout(() => {
-                // Double-check that we still don't have a current source
-                if (this.playing && !this.currentSource) {
-                    console.log("Still no current source after delay, resetting playing state");
-                    this.playing = false;
-                }
-            }, 500);
-            return; // Wait for the next check cycle to continue
-        }
-        
         // Don't process queue if we're already playing or not initialized
         if (this.playing || !this.config || !this.status()) {
             return;
