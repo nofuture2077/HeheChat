@@ -726,7 +726,7 @@ class AlertPlayer {
                     console.log("Still no current source after delay, resetting playing state");
                     this.playing = false;
                 }
-            }, 100);
+            }, 500);
             return; // Wait for the next check cycle to continue
         }
         
