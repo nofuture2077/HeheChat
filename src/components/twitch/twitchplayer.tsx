@@ -29,6 +29,7 @@ interface TwitchEmbedConstructor {
         autoplay?: boolean;
         layout?: string;
         muted?: boolean;
+        storage?: { enabled: boolean };
     }): TwitchEmbed;
 }
 
@@ -109,7 +110,8 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
             parent: [window.location.hostname],
             autoplay: true,
             layout: "video",
-            muted: true
+            muted: true,
+            storage: { enabled: true }
         };
 
         const embed = new window.Twitch.Embed(containerId, options);
