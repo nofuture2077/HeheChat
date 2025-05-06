@@ -1,12 +1,18 @@
 import { useEffect, useState } from 'react';
 import { AlertSystem } from './alertplayer';
+import { Tooltip } from '@mantine/core';
 
-interface AlertStatusIndicatorProps {
-  // Optional props can be added here if needed
+export interface AlertStatusIndicatorProps {
+  connectionStatus?: {
+    status: string;
+    reconnectAttempts: number;
+    lastHeartbeat: string | null;
+  };
 }
 
-export function AlertStatusIndicator(_props: AlertStatusIndicatorProps) {
+export function AlertStatusIndicator(props: AlertStatusIndicatorProps) {
   const [isAlertSystemRunning, setIsAlertSystemRunning] = useState<boolean>(AlertSystem.status());
+  const { connectionStatus } = props;
 
   useEffect(() => {
     // Check the alert system status periodically
@@ -18,22 +24,80 @@ export function AlertStatusIndicator(_props: AlertStatusIndicatorProps) {
     return () => clearInterval(intervalId);
   }, []);
 
-  // If the alert system is running, don't show the indicator
-  if (isAlertSystemRunning) {
-    return null;
-  }
-
-  // Style for the red dot indicator
-  const indicatorStyle: React.CSSProperties = {
+  // Base style for the indicator dots
+  const baseIndicatorStyle: React.CSSProperties = {
     position: 'fixed',
-    bottom: '10px',
-    right: '10px',
     width: '12px',
     height: '12px',
     borderRadius: '50%',
-    backgroundColor: '#DB32BC',
     zIndex: 9999, // Ensure it's above other elements
   };
 
-  return <div style={indicatorStyle} title="Alert System is not running" />;
+  // Alert system indicator
+  const alertIndicatorStyle: React.CSSProperties = {
+    ...baseIndicatorStyle,
+    bottom: '10px',
+    right: '10px',
+    backgroundColor: isAlertSystemRunning ? 'transparent' : '#DB32BC',
+    display: isAlertSystemRunning ? 'none' : 'block',
+  };
+
+  // Connection status indicator
+  const connectionIndicatorStyle: React.CSSProperties = {
+    ...baseIndicatorStyle,
+    bottom: '10px',
+    right: '30px', // Position to the left of the alert indicator
+    backgroundColor: getConnectionStatusColor(connectionStatus?.status),
+    display: connectionStatus ? 'block' : 'none',
+  };
+
+  // Get tooltip text for connection status
+  const getConnectionTooltip = () => {
+    if (!connectionStatus) return '';
+    
+    const { status, reconnectAttempts, lastHeartbeat } = connectionStatus;
+    let tooltipText = `Connection: ${status}`;
+    
+    if (status === 'DISCONNECTED' || status === 'RECONNECTING') {
+      tooltipText += `, Reconnect attempts: ${reconnectAttempts}`;
+    }
+    
+    if (lastHeartbeat) {
+      tooltipText += `, Last heartbeat: ${new Date(lastHeartbeat).toLocaleTimeString()}`;
+    }
+    
+    return tooltipText;
+  };
+
+  return (
+    <>
+      {!isAlertSystemRunning && (
+        <Tooltip label="Alert System is not running">
+          <div style={alertIndicatorStyle} />
+        </Tooltip>
+      )}
+      
+      {connectionStatus && (
+        <Tooltip label={getConnectionTooltip()}>
+          <div style={connectionIndicatorStyle} />
+        </Tooltip>
+      )}
+    </>
+  );
+}
+
+// Helper function to determine the color based on connection status
+function getConnectionStatusColor(status?: string): string {
+  switch (status) {
+    case 'CONNECTED':
+      return '#4CAF50'; // Green
+    case 'CONNECTING':
+      return '#FFC107'; // Yellow
+    case 'RECONNECTING':
+      return '#FF9800'; // Orange
+    case 'DISCONNECTED':
+      return '#F44336'; // Red
+    default:
+      return '#9E9E9E'; // Grey for unknown status
+  }
 }

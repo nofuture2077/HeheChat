@@ -48,6 +48,17 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
     return () => clearInterval(intervalId); // Cleanup on unmount
   }, []);
 
+  // Track connection status
+  const [connectionStatus, setConnectionStatus] = useState<{
+    status: string;
+    reconnectAttempts: number;
+    lastHeartbeat: string | null;
+  }>({
+    status: 'CONNECTING',
+    reconnectAttempts: 0,
+    lastHeartbeat: null
+  });
+
   useEffect(() => {
     // Initialize the worker
     backendWorkerRef.current = new Worker(new URL('./components/webworker/backendworker.ts', import.meta.url), { type: 'module' });
@@ -55,6 +66,16 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
     // Set up message handler
     backendWorkerRef.current.onmessage = (event) => {
       const data = event.data;
+
+      // Handle connection status updates
+      if (data.type === 'connectionStatus') {
+        setConnectionStatus({
+          status: ['CONNECTING', 'CONNECTED', 'DISCONNECTED', 'RECONNECTING'][data.status] || 'UNKNOWN',
+          reconnectAttempts: data.reconnectAttempts,
+          lastHeartbeat: data.lastHeartbeat
+        });
+        return;
+      }
 
       if (data.type === 'delayinfo') {
         backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "delayinfo", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
@@ -125,9 +146,17 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
     };
   }, [token]);
 
+  // Force reconnection if network status changes or document becomes visible
+  useEffect(() => {
+    if (networkStatus.online && documentVisible && backendWorkerRef.current) {
+      console.log("Network or visibility changed, forcing reconnection");
+      backendWorkerRef.current.postMessage({ type: 'RECONNECT' });
+    }
+  }, [networkStatus.online, documentVisible]);
+
   return (<ProfileContext.Provider value={profile}>
     <VisualAlertPlayer />
-    <AlertStatusIndicator />
+    <AlertStatusIndicator connectionStatus={connectionStatus} />
   </ProfileContext.Provider>);
    
 }

@@ -1,6 +1,6 @@
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
-import { useDidUpdate } from '@mantine/hooks';
+import { useDidUpdate, useNetwork, useDocumentVisibility } from '@mantine/hooks';
 import { useEffect, useState, useRef } from 'react';
 import { initializeStoragePatches } from './commons/patches';
 import { Router } from './Router';
@@ -102,6 +102,21 @@ export default function HeheChat() {
         loading: true
     });
     const backendWorkerRef = useRef<Worker>();
+    
+    // Track connection status
+    const [connectionStatus, setConnectionStatus] = useState<{
+        status: string;
+        reconnectAttempts: number;
+        lastHeartbeat: string | null;
+    }>({
+        status: 'CONNECTING',
+        reconnectAttempts: 0,
+        lastHeartbeat: null
+    });
+    
+    // Get network status and document visibility at component level
+    const networkStatus = useNetwork();
+    const documentVisible = useDocumentVisibility();
 
     useDidUpdate(() => {
         if (!profile.guid) {
@@ -194,8 +209,18 @@ export default function HeheChat() {
             backendWorkerRef.current!.postMessage({type: "SEND", data});
         });
 
-
         backendWorkerRef.current.addEventListener("message", (msg: MessageEvent) => {
+            // Handle connection status updates
+            if (msg.data.type === 'connectionStatus') {
+                setConnectionStatus({
+                    status: ['CONNECTING', 'CONNECTED', 'DISCONNECTED', 'RECONNECTING'][msg.data.status] || 'UNKNOWN',
+                    reconnectAttempts: msg.data.reconnectAttempts,
+                    lastHeartbeat: msg.data.lastHeartbeat
+                });
+                return;
+            }
+            
+            // Forward all other messages to PubSub
             PubSub.publish("WS-" + msg.data.type, msg.data.data);
         });
 
@@ -223,6 +248,18 @@ export default function HeheChat() {
             return;
         });
 
+        // Set up a listener for network/visibility changes
+        const handleNetworkOrVisibilityChange = () => {
+            if (networkStatus.online && documentVisible && backendWorkerRef.current) {
+                console.log("Network or visibility changed, forcing reconnection");
+                backendWorkerRef.current.postMessage({ type: 'RECONNECT' });
+            }
+        };
+        
+        // Initial setup
+        window.addEventListener('online', handleNetworkOrVisibilityChange);
+        document.addEventListener('visibilitychange', handleNetworkOrVisibilityChange);
+
         return () => {
             const stopMessage = { type: 'STOP' };
             backendWorkerRef.current?.postMessage(stopMessage);
@@ -230,6 +267,10 @@ export default function HeheChat() {
             PubSub.unsubscribe(psDelayInfo);
             PubSub.unsubscribe(psSetDelay);
             PubSub.unsubscribe(psWSSend);
+            
+            // Remove event listeners
+            window.removeEventListener('online', handleNetworkOrVisibilityChange);
+            document.removeEventListener('visibilitychange', handleNetworkOrVisibilityChange);
             
             // Stop mock message generator
             MockService.stopMockMessages();
