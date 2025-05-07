@@ -56,6 +56,9 @@ function connectToBackend() {
     connectionState = ConnectionState.CONNECTING;
     console.log(`Connecting to backend (attempt ${reconnectAttempts + 1})...`);
     
+    // Report status immediately when connecting
+    reportStatus();
+    
     try {
         backendWebsocket = new WebSocket(import.meta.env.VITE_BACKEND_URL.replace("https://", "wss://").replace("http://", "ws://"));
         
@@ -72,6 +75,9 @@ function connectToBackend() {
             
             // Initialize the heartbeat timestamp
             lastHeartbeatReceived = Date.now();
+            
+            // Report status immediately when connected
+            reportStatus();
         };
 
         backendWebsocket.onmessage = (event: MessageEvent) => {
@@ -103,6 +109,9 @@ function connectToBackend() {
             connectionState = ConnectionState.DISCONNECTED;
             console.log(`Socket is closed. Reconnect will be attempted in ${getReconnectDelay()}ms.`, e.reason);
             
+            // Report status immediately when disconnected
+            reportStatus();
+            
             // Schedule reconnection with exponential backoff
             reconnectAttempts++;
             reconnectTimeout = setTimeout(() => {
@@ -112,11 +121,20 @@ function connectToBackend() {
 
         backendWebsocket.onerror = function (err: Event) {
             console.error('Socket encountered error:', err);
+            // Set state to reconnecting since we'll try to reconnect
+            connectionState = ConnectionState.RECONNECTING;
+            
+            // Report status immediately when there's an error
+            reportStatus();
+            
             // The onclose handler will be called after this
         };
     } catch (error) {
         connectionState = ConnectionState.DISCONNECTED;
         console.error("Error creating WebSocket:", error);
+        
+        // Report status immediately when there's an error
+        reportStatus();
         
         // Schedule reconnection
         reconnectAttempts++;
@@ -165,6 +183,11 @@ self.onmessage = async (e) => {
         case 'RECONNECT':
             // Force reconnection
             console.log("Forcing reconnection to backend");
+            connectionState = ConnectionState.RECONNECTING;
+            
+            // Report status immediately when reconnecting
+            reportStatus();
+            
             if (backendWebsocket) {
                 backendWebsocket.close();
             }
@@ -197,5 +220,5 @@ function reportStatus() {
     });
 }
 
-// Report status periodically
-setInterval(reportStatus, 5000);
+// Report status periodically (every second to match AlertStatusIndicator check interval)
+setInterval(reportStatus, 1000);

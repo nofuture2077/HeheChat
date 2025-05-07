@@ -38,7 +38,15 @@ export type OverlayDrawer = {
     props?: any;
 }
 
-export function ChatPage() {
+interface ChatPageProps {
+    connectionStatus?: {
+        status: string;
+        reconnectAttempts: number;
+        lastHeartbeat: string | null;
+    };
+}
+
+export function ChatPage({ connectionStatus }: ChatPageProps) {
     const viewport = useRef<HTMLDivElement>(null);
     const footer = useRef<HTMLDivElement>(null);
     const { width, height } = useViewportSize();
@@ -106,7 +114,7 @@ export function ChatPage() {
                 date: Date.now(),
                 text: message,
                 eventAlert: {
-                    name: 'defaul',
+                    name: 'default',
                     id: Date.now() + "",
                     type: 'raid',
                     specifier: {
@@ -308,6 +316,7 @@ export function ChatPage() {
                     showShortcutsToggle={!!(config.shortcuts && config.shortcuts.length)}
                     currentClipId={currentClipId}
                     setCurrentClipId={setCurrentClipId}
+                    connectionStatus={connectionStatus}
                 />
             </AppShell.Header>
 

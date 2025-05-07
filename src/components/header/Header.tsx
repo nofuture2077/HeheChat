@@ -1,15 +1,16 @@
-import { Container, ActionIcon, Button, Text, Stack, Indicator } from '@mantine/core';
-import { useDisclosure, useInterval } from '@mantine/hooks';
+import { Container, ActionIcon, Button, Text, Stack } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
 import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard } from '@tabler/icons-react';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { ConfigContext, ProfileContext, PremiumContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
 import { HeaderLogo } from './HeaderLogo';
 import { TwitchPlayer } from '@/components/twitch/twitchplayer'
 import { TwitchClipsPlayer } from '@/components/twitch/twitchclipsplayer';
 
-import { AlertSystem } from '../alerts/alertplayer';
+import { AlertStatusIndicator } from '../alerts/AlertStatusIndicator';
+import { ConnectionStatusIndicator } from '../alerts/ConnectionStatusIndicator';
 
 export function Header(props: {
     openSettings: (tab?: SettingsTab) => void,
@@ -20,40 +21,53 @@ export function Header(props: {
     showShortcutsToggle: boolean,
     currentClipId: string | null,
     setCurrentClipId: (currentClipId: string | null) => void,
+    connectionStatus?: {
+        status: string;
+        reconnectAttempts: number;
+        lastHeartbeat: string | null;
+    },
 }) {
     const config = useContext(ConfigContext);
     const [opened] = useDisclosure(false);
     const profile = useContext(ProfileContext);
     const premium = useContext(PremiumContext);
-    const [alertsActive, setAlertsActive] = useState<boolean>(false);
-
-    const interval = useInterval(() => {
-        const active = AlertSystem.status();
-        setAlertsActive(active);
-    }, 5 * 1000);
-
     useEffect(() => {
-        interval.start();
-
         const clipSub = PubSub.subscribe("CLIP-CLICK", (msg: any, data: { clipId: string }) => {
             props.setCurrentClipId(data.clipId);
         });
 
         return () => {
             PubSub.unsubscribe(clipSub);
-            interval.stop();
         };
-    });
+    }, []);
 
     return (
         <Stack gap={0}>
+            <style>
+                {`.mantine-Button-label {
+                    overflow: visible;
+                }`}
+            </style>
             <Container className={classes.inner}>
-                <Button fw={300} p={0} variant='transparent' color='primary' size='lg' onClick={props.openProfileBar} leftSection={<HeaderLogo height={28}/>}><Text fw={700}>HEHE</Text><Text fw={300}>Chat{premium.isPremium ? ' Pro' : ''}</Text></Button>
+                
+                <Button fw={300} p={0} style={{overflow: 'visible'}} variant='transparent' color='primary' size='lg' onClick={props.openProfileBar} leftSection={<HeaderLogo height={28}/>}>
+                    
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Text fw={700}>HEHE</Text>
+                            <Text fw={300}>Chat{premium.isPremium ? ' Pro' : ''}</Text>
+                        </div>
+                    
+                </Button>
+                
                 <div></div>
                 <div className={classes.rightGroup}>
+                    
                     <ActionIcon variant='transparent' color='primary' size='44px' onClick={() => props.openSettings()}>
-                        <IconSettings />
+                        <ConnectionStatusIndicator connectionStatus={props.connectionStatus}>
+                            <IconSettings />
+                        </ConnectionStatusIndicator>
                     </ActionIcon>
+                    
                     {props.showShortcutsToggle ? 
                         (<ActionIcon variant='transparent' color='primary' onClick={props.toggleShortcuts}  size='44px'>
                             <IconKeyboard/>
@@ -61,9 +75,9 @@ export function Header(props: {
                     : null}
 
                     <ActionIcon variant='transparent' color='primary' size='44px' onClick={props.openEvents}>
-                        <Indicator size={8} offset={2} color={alertsActive ? 'green' : 'red'} processing={!alertsActive} disabled={!config.playAlerts}>
-                            <IconBell  />
-                        </Indicator>
+                        <AlertStatusIndicator>
+                            <IconBell />
+                        </AlertStatusIndicator>
                     </ActionIcon>
                     <ActionIcon variant='transparent' color='primary' size='44px' onClick={props.openTwitch}>
                         <IconBrandTwitch/>

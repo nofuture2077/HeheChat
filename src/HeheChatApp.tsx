@@ -18,6 +18,8 @@ import PubSub from 'pubsub-js';
 import { SystemMessageMainType } from './commons/message';
 import { theme } from './theme';
 import { AlertSystem } from './components/alerts/alertplayer';
+import { AlertStatusIndicator } from './components/alerts/AlertStatusIndicator';
+import { ConnectionStatusIndicator } from './components/alerts/ConnectionStatusIndicator';
 import { ShortCut } from './commons/shortcuts';
 import _ from 'underscore';
 import { MockService } from '@/mocks/service';
@@ -767,7 +769,7 @@ export default function HeheChat() {
                     <LoginContextContext.Provider value={appLogin}>
                         <ChatEmotesContext.Provider value={chatEmotes}>
                             <PremiumContext.Provider value={appPremium}>
-                                <Router />
+                                <Router connectionStatus={connectionStatus} />
                             </PremiumContext.Provider>
                         </ChatEmotesContext.Provider>
                     </LoginContextContext.Provider>

@@ -5,6 +5,7 @@ import { ProfileContext } from './ApplicationContext';
 import VisualAlertPlayer from './components/browsersource/VisualAlertPlayer';
 import { AlertSystem } from './components/alerts/alertplayer';
 import { AlertStatusIndicator } from './components/alerts/AlertStatusIndicator';
+import { ConnectionStatusIndicator } from './components/alerts/ConnectionStatusIndicator';
 import { initializeStoragePatches } from './commons/patches';
 import { useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
 
@@ -156,7 +157,8 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
 
   return (<ProfileContext.Provider value={profile}>
     <VisualAlertPlayer />
-    <AlertStatusIndicator connectionStatus={connectionStatus} />
+    <AlertStatusIndicator />
+    <ConnectionStatusIndicator connectionStatus={connectionStatus} />
   </ProfileContext.Provider>);
    
 }
