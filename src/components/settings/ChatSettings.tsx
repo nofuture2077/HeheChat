@@ -36,7 +36,7 @@ export function ChatSettings() {
             <Fieldset legend="!tts Users" variant="filled" key="free-tts">
                 <TagsInput placeholder="" value={config.freeTTS} onChange={(freeTTS) => config.setFreeTTS(freeTTS.map(c => c.toLowerCase().substring(0, 50).trim()))}></TagsInput>
                 <Space h="xs" />
-                <Text fs="italic" size='14px'>Users in this list can use e.g. "!tts Forget your phone" in chat. You can give this to thrustful moderators, friends or management for emergency cases.</Text>
+                <Text fs="italic" size='14px'>Users in this list can use e.g. "!tts Forget your phone" in chat. You can give this to thrustful moderators, friends or management for emergency cases. "all" gives everyone free tts</Text>
             </Fieldset>
 
             <Fieldset legend="Ignored Users" variant='filled'>
