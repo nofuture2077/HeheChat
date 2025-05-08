@@ -19,7 +19,6 @@ export function ConnectionStatusIndicator(props: ConnectionStatusIndicatorProps)
 
   // Log when connectionStatus prop changes
   useEffect(() => {
-    console.log('ConnectionStatusIndicator: connectionStatus changed', connectionStatus);
     setLocalConnectionStatus(connectionStatus);
   }, [connectionStatus]);
 
