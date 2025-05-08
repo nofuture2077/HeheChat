@@ -133,7 +133,9 @@ class AlertPlayer {
             
             // Create a new gain node for this specific audio
             const gainNode = this.audioContext.createGain();
-            gainNode.gain.value = this.muted ? 0 : volume;
+            // Apply the alert boost from config if available
+            const boostFactor = this.config?.alertBoost || 1.0;
+            gainNode.gain.value = this.muted ? 0 : (volume * boostFactor);
             gainNode.connect(this.audioContext.destination);
             
             // Setup error handling for unexpected interruptions
@@ -306,7 +308,9 @@ class AlertPlayer {
         if (this.currentSource && this.playing) {
             // Create a new gain node with proper volume
             const gainNode = this.audioContext!.createGain();
-            gainNode.gain.value = 1; // Set to full volume
+            // Apply the alert boost from config if available
+            const boostFactor = this.config?.alertBoost || 1.0;
+            gainNode.gain.value = boostFactor; // Apply volume boost
             
             // Disconnect from any existing connections and reconnect
             this.currentSource.disconnect();
@@ -321,7 +325,11 @@ class AlertPlayer {
     startPlaying() {
         this.skipCurrent = false;
         this.playing = true;
-        if (this.mainAudioGain) this.mainAudioGain.gain.value = 1;
+        if (this.mainAudioGain) {
+            // Apply the alert boost from config if available
+            const boostFactor = this.config?.alertBoost || 1.0;
+            this.mainAudioGain.gain.value = boostFactor;
+        }
     }
 
     // Helper method to safely clean up the current audio source

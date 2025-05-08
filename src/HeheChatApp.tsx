@@ -339,6 +339,7 @@ export default function HeheChat() {
     const setShortcuts = (value: ShortCut[]) => updateConfig('shortcuts', value);
     const setBrowserSourceAudio = (value: boolean) => updateConfig('browserSourceAudio', value);
     const setBrowserSourceVisual = (value: boolean) => updateConfig('browserSourceVisual', value);
+    const setAlertBoost = (value: number) => updateConfig('alertBoost', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -547,7 +548,8 @@ export default function HeheChat() {
         setShortcuts,
         setDisableEmoteDialog,
         setBrowserSourceAudio,
-        setBrowserSourceVisual
+        setBrowserSourceVisual,
+        setAlertBoost
     };
 
     const appLogin = {

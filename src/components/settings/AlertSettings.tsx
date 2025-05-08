@@ -135,5 +135,30 @@ export function AlertSettings() {
                     <Slider w="calc(100% - 20px)" m="10" value={AlertSystem.ttsExtra} onChange={(extra) => { AlertSystem.setTTSExtra(extra); forceUpdate(); }} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
                 </Stack>
             </Fieldset>
+
+            <Fieldset legend="Alert Volume Boost" variant="filled" key="alert-boost">
+                <Stack>
+                    <Text size="sm">Volume Boost</Text>
+                    <Slider 
+                        w="calc(100% - 20px)" 
+                        m="10" 
+                        value={config.alertBoost} 
+                        onChange={(value) => { config.setAlertBoost(value); forceUpdate(); }} 
+                        min={0.1} 
+                        max={5.0} 
+                        step={0.1}
+                        label={(value) => `${value.toFixed(1)}x`} 
+                        marks={[
+                            { value: 0.5, label: '0.5x' },
+                            { value: 1.0, label: '1.0x' },
+                            { value: 2.0, label: '2.0x' },
+                            { value: 3.0, label: '3.0x' },
+                            { value: 4.0, label: '4.0x' },
+                            { value: 5.0, label: '5.0x' }
+                        ]} 
+                    />
+                    <Text fs="italic" size='14px'>Adjust the volume boost for all alert sounds</Text>
+                </Stack>
+            </Fieldset>
         </Stack>)
 }
