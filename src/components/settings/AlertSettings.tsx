@@ -85,6 +85,9 @@ export function AlertSettings() {
         const state = localStorage.getItem('hehe-token_state') || '';
         fetch(import.meta.env.VITE_BACKEND_URL + '/alert/editor?state=' + state).then(res => res.json()).then((data) => {
             setEditors(data);
+            if (!data.length) {
+                createEditor('Default');
+            }
         });
     }
 
@@ -156,24 +159,27 @@ export function AlertSettings() {
                 </Stack>
             </Fieldset>
             
-            <Fieldset legend="Alert-Editor Token" variant="filled">
+            <Fieldset legend="Alert Editor" variant="filled">
                 <Table>
                     <Table.Thead>
                         <Table.Tr>
-                            <Table.Th></Table.Th>
-                            <Table.Th>Name</Table.Th>
                             <Table.Th>Link</Table.Th>
+                            <Table.Th>Name</Table.Th>
+                            <Table.Th></Table.Th>
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>{editors.map(element => <Table.Tr key={element.id}>
-                        <Table.Td><ActionIcon variant="subtle" onClick={() => deleteEditor(element.token)}><IconTrash /></ActionIcon></Table.Td>
-                        <Table.Td>{element.name}</Table.Td>
                         <Table.Td><Anchor href={import.meta.env.VITE_EDITOR_URL + "?token=" + element.token} target="_blank"><IconLink /></Anchor></Table.Td>
+                        <Table.Td>{element.name}</Table.Td>
+                        <Table.Td><ActionIcon variant="subtle" onClick={() => deleteEditor(element.token)}><IconTrash /></ActionIcon></Table.Td>
                     </Table.Tr>)}</Table.Tbody>
                 </Table>
 
                 <Space h="xs" />
-                <ActionIcon color='primary' onClick={() => editorModalHandler.open()}><IconPlus /></ActionIcon>
+                <Group gap="xs">
+                    <ActionIcon color='primary' onClick={() => editorModalHandler.open()}><IconPlus /></ActionIcon>
+                    <Text size="sm">Create Alert Editor</Text>
+                </Group>
                 <CreateEditorModal opened={editorModalOpened} close={editorModalHandler.close} createEditor={createEditor} />
             </Fieldset>
             
