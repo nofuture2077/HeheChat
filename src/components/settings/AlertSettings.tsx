@@ -1,11 +1,19 @@
-import { Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput } from '@mantine/core';
+import { Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space } from '@mantine/core';
 import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 import { AlertSystem } from '../../components/alerts/alertplayer'
-import { IconLink, IconRepeat } from '@tabler/icons-react'
+import { IconLink, IconRepeat, IconPlus, IconTrash } from '@tabler/icons-react'
 import { SystemMessageMainType } from '../../commons/message';
+
+interface EditorData {
+    id: string;
+    userid: string;
+    channelname: string;
+    token: string;
+    name: string;
+}
 
 const hideEventsValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'channelPointRedemption', 'blerp'];
 
@@ -26,6 +34,8 @@ export function AlertSettings() {
     const config = useContext(ConfigContext);
     const forceUpdate = useForceUpdate();
     const [sink, setSink] = useState<string | undefined>(undefined);
+    const [shares, setShares] = useState<string[]>(config.shares);
+    const [editors, setEditors] = useState<EditorData[]>([]);
     const hasShare = (channel: string) => config.receivedShares.includes(channel);
     const isActive = (channel: string) => config.activatedShares.includes(channel);
 
@@ -35,7 +45,36 @@ export function AlertSettings() {
         fetch(import.meta.env.VITE_BACKEND_URL + "/sink/get?state=" + state).then(res => res.json()).then((data) => {
             setSink(data.sink);
         });
+        
+        loadEditors();
     }, []);
+    
+    const loadEditors = () => {
+        const state = localStorage.getItem('hehe-token_state') || '';
+        fetch(import.meta.env.VITE_BACKEND_URL + '/alert/editor?state=' + state).then(res => res.json()).then((data) => {
+            setEditors(data);
+        });
+    }
+
+    const createEditor = (name: string) => {
+        const state = localStorage.getItem('hehe-token_state') || '';
+        fetch(import.meta.env.VITE_BACKEND_URL + '/alert/editor?state=' + state + '&name=' + encodeURIComponent(name), { method: 'PUT' }).then(res => res.json()).then((data) => {
+            setEditors(data);
+        });
+    }
+
+    const deleteEditor = (token: string) => {
+        const state = localStorage.getItem('hehe-token_state') || '';
+        fetch(import.meta.env.VITE_BACKEND_URL + '/alert/editor?state=' + state + '&token=' + encodeURIComponent(token), { method: 'DELETE' }).then(res => res.json()).then((data) => {
+            setEditors(data);
+        });
+    }
+    
+    useEffect(() => {
+        if (shares != config.shares) {
+            config.setShares(shares);
+        }
+    }, [shares]);
 
     const changeActive = (channel: string, active: boolean) => {
         const activatedShares = config.activatedShares;
@@ -83,6 +122,34 @@ export function AlertSettings() {
                         <Text span inline key={'browser-source-label'}>Replay Widget <Anchor inline key={'browser-widget-link'} href={import.meta.env.VITE_REPLAY_URL + "#token=" + sink} target="_blank"><IconRepeat /></Anchor></Text>
                     </>) : null}
                 </Stack>
+            </Fieldset>
+            
+            <Fieldset legend="Alert-Editor Token" variant="filled">
+                <Table>
+                    <Table.Thead>
+                        <Table.Tr>
+                            <Table.Th></Table.Th>
+                            <Table.Th>Name</Table.Th>
+                            <Table.Th>Key</Table.Th>
+                            <Table.Th></Table.Th>
+                        </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>{editors.map(element => <Table.Tr key={element.id}>
+                        <Table.Td><ActionIcon variant="subtle" onClick={() => deleteEditor(element.token)}><IconTrash /></ActionIcon></Table.Td>
+                        <Table.Td>{element.name}</Table.Td>
+                        <Table.Td>...{element.token.slice(-4)}</Table.Td>
+                        <Table.Td><Anchor href={import.meta.env.VITE_EDITOR_URL + "?token=" + element.token} target="_blank"><IconLink /></Anchor></Table.Td>
+                    </Table.Tr>)}</Table.Tbody>
+                </Table>
+
+                <Space h="xs" />
+                <ActionIcon color='primary' onClick={() => createEditor("Share")}><IconPlus /></ActionIcon>
+            </Fieldset>
+            
+            <Fieldset legend="Share Alerts with" variant="filled">
+                <TagsInput placeholder="" value={config.shares} onChange={(shares) => setShares(shares.map(c => c.toLowerCase().substring(0, 25).trim()))}></TagsInput>
+                <Space h="xs" />
+                <Text fs="italic" size='14px'>* Share your alerts with other Streams so they can use your sounds. Be aware: If you use AI-TTS shared alerts will count against your Quota from elevenlabs</Text>
             </Fieldset>
 
             <Fieldset legend="Alert Channels" variant="filled" key="alert-channel">

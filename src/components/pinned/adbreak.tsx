@@ -26,7 +26,6 @@ export function AdBreak(props: AdBreakProps) {
       intervalRef.current = window.setInterval(() => {
         const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
         setRemaining(remaining);
-        console.log('tick');
       }, 1000);
       
       // Clean up the interval when the component unmounts
