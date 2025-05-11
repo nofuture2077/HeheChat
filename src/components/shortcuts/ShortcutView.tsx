@@ -67,15 +67,12 @@ export function ShortcutView() {
 
     const handleConfirm = () => {
         if (activeShortcut) {
-            if (activeShortcut.input) {
-                const shortcutWithParams = {
-                    ...activeShortcut,
-                    params: [inputValue]
-                };
-                shortcutHandler.handle(shortcutWithParams, loginContext.user?.id || '', inputValue);
-            } else {
-                shortcutHandler.handle(activeShortcut, loginContext.user?.id || '', inputValue);
-            }
+            const shortcutWithParams = {
+                ...activeShortcut,
+                params: [inputValue]
+            };
+            shortcutHandler.handle(shortcutWithParams, loginContext.user?.id || '', activeShortcut.params[0] ? (activeShortcut.params[0] + " " + inputValue) : inputValue);
+
             setCheckedShortcuts(prev => ({
                 ...prev,
                 [activeShortcut.id]: true
