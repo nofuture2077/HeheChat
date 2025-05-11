@@ -1,6 +1,6 @@
-import { Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space } from '@mantine/core';
+import { Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space, Modal, Group, Button } from '@mantine/core';
 import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
-import { useForceUpdate } from '@mantine/hooks';
+import { useForceUpdate, useDisclosure } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 import { AlertSystem } from '../../components/alerts/alertplayer'
@@ -30,12 +30,44 @@ const Messages: Record<string, string> = {
 };
 
 
+function CreateEditorModal({ opened, close, createEditor }: { opened: boolean, close: () => void, createEditor: (name: string) => void }) {
+    const [editorName, setEditorName] = useState("");
+
+    return (
+        <Modal zIndex={400} opened={opened} onClose={close} withCloseButton={false}>
+            <Fieldset legend={'Create new Editor Token'}>
+                <TextInput 
+                    label="Editor Name" 
+                    placeholder="Enter a name for this editor" 
+                    value={editorName} 
+                    onChange={(ev) => setEditorName(ev.target.value)} 
+                />
+                <Group justify="flex-end" mt="md">
+                    <Button onClick={close}>Cancel</Button>
+                    <Button 
+                        color='primary' 
+                        disabled={!editorName.trim()} 
+                        onClick={() => {
+                            createEditor(editorName.trim());
+                            setEditorName("");
+                            close();
+                        }}
+                    >
+                        Create
+                    </Button>
+                </Group>
+            </Fieldset>
+        </Modal>
+    );
+}
+
 export function AlertSettings() {
     const config = useContext(ConfigContext);
     const forceUpdate = useForceUpdate();
     const [sink, setSink] = useState<string | undefined>(undefined);
     const [shares, setShares] = useState<string[]>(config.shares);
     const [editors, setEditors] = useState<EditorData[]>([]);
+    const [editorModalOpened, editorModalHandler] = useDisclosure(false);
     const hasShare = (channel: string) => config.receivedShares.includes(channel);
     const isActive = (channel: string) => config.activatedShares.includes(channel);
 
@@ -130,20 +162,19 @@ export function AlertSettings() {
                         <Table.Tr>
                             <Table.Th></Table.Th>
                             <Table.Th>Name</Table.Th>
-                            <Table.Th>Key</Table.Th>
-                            <Table.Th></Table.Th>
+                            <Table.Th>Link</Table.Th>
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>{editors.map(element => <Table.Tr key={element.id}>
                         <Table.Td><ActionIcon variant="subtle" onClick={() => deleteEditor(element.token)}><IconTrash /></ActionIcon></Table.Td>
                         <Table.Td>{element.name}</Table.Td>
-                        <Table.Td>...{element.token.slice(-4)}</Table.Td>
                         <Table.Td><Anchor href={import.meta.env.VITE_EDITOR_URL + "?token=" + element.token} target="_blank"><IconLink /></Anchor></Table.Td>
                     </Table.Tr>)}</Table.Tbody>
                 </Table>
 
                 <Space h="xs" />
-                <ActionIcon color='primary' onClick={() => createEditor("Share")}><IconPlus /></ActionIcon>
+                <ActionIcon color='primary' onClick={() => editorModalHandler.open()}><IconPlus /></ActionIcon>
+                <CreateEditorModal opened={editorModalOpened} close={editorModalHandler.close} createEditor={createEditor} />
             </Fieldset>
             
             <Fieldset legend="Share Alerts with" variant="filled">
