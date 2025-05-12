@@ -44,6 +44,7 @@ export interface ConfigData {
     browserSourceAudio: boolean;
     browserSourceVisual: boolean;
     alertBoost: number;
+    visualAlertDelay: number;
     systemMessageInChat: Partial<Record<SystemMessageMainType, boolean>>,
     hideEvents: Partial<Record<SystemMessageMainType, boolean>>,
     receivedShares: string[],
@@ -77,6 +78,7 @@ export interface Config extends ConfigData {
     setRaidTargets: (val: string[]) => void;
     setPlayAlerts: (val: boolean) => void;
     setAlertBoost: (val: number) => void;
+    setVisualAlertDelay: (val: number) => void;
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => void;
     setHideEvents: (type: SystemMessageMainType, val: boolean) => void;
     loadReceivedShares: () => void;
@@ -120,6 +122,7 @@ export const DEFAULT_CONFIG: Config = {
     raidTargets: [],
     playAlerts: false,
     alertBoost: 1.0,
+    visualAlertDelay: 8,
     hideViewers: false,
     hideOwnViewers: false,
     hideHypetrain: false,
@@ -200,6 +203,7 @@ export const DEFAULT_CONFIG: Config = {
     setBrowserSourceAudio: (val) => {},
     setBrowserSourceVisual: (val) => {},
     setAlertBoost: (val) => {},
+    setVisualAlertDelay: (val) => {},
 };
 
 export const DB_VERSION = 8;

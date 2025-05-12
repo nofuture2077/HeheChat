@@ -612,8 +612,22 @@ class AlertPlayer {
 
                 const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: minDuration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
 
+                // Get the visual alert delay from config (in seconds)
+                const visualAlertDelay = this.config?.visualAlertDelay || 0;
+                
+                // Send to backend immediately (this doesn't affect display timing)
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
-                PubSub.publish('ALERT_SHOW', visualAlert);
+                
+                // Delay the visual alert based on the visualAlertDelay setting
+                if (visualAlertDelay <= 0) {
+                    // For negative or zero delay, show visual immediately
+                    PubSub.publish('ALERT_SHOW', visualAlert);
+                } else {
+                    // For positive delay, wait before showing visual
+                    setTimeout(() => {
+                        PubSub.publish('ALERT_SHOW', visualAlert);
+                    }, visualAlertDelay * 1000);
+                }
             }
 
             // Chain audio playback with proper error handling

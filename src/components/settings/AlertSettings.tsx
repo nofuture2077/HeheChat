@@ -237,6 +237,24 @@ export function AlertSettings() {
                     <Slider w="calc(100% - 20px)" m="10" value={AlertSystem.jingleExtra} onChange={(extra) => { AlertSystem.setJingleExtra(extra); forceUpdate(); }} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
                     <Text size="sm">Text to Speech</Text>
                     <Slider w="calc(100% - 20px)" m="10" value={AlertSystem.ttsExtra} onChange={(extra) => { AlertSystem.setTTSExtra(extra); forceUpdate(); }} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
+                    <Text size="sm">Visual Alert (seconds)</Text>
+                    <Slider 
+                        w="calc(100% - 20px)" 
+                        m="10" 
+                        value={config.visualAlertDelay} 
+                        onChange={(value) => { config.setVisualAlertDelay(value); forceUpdate(); }} 
+                        min={0} 
+                        max={15} 
+                        step={1}
+                        label={(value) => `${value}s`} 
+                        marks={[
+                            { value: 0, label: '0s' },
+                            { value: 5, label: '5s' },
+                            { value: 10, label: '10s' },
+                            { value: 15, label: '15s' }
+                        ]} 
+                    />
+                    <Text fs="italic" size='14px'>Adjust the timing of visual alerts relative to audio alerts</Text>
                 </Stack>
             </Fieldset>
 

@@ -18,8 +18,6 @@ import PubSub from 'pubsub-js';
 import { SystemMessageMainType } from './commons/message';
 import { theme } from './theme';
 import { AlertSystem } from './components/alerts/alertplayer';
-import { AlertStatusIndicator } from './components/alerts/AlertStatusIndicator';
-import { ConnectionStatusIndicator } from './components/alerts/ConnectionStatusIndicator';
 import { ShortCut } from './commons/shortcuts';
 import _ from 'underscore';
 import { MockService } from '@/mocks/service';
@@ -139,6 +137,7 @@ export default function HeheChat() {
                 profileData.config.channels ??= [];
                 profileData.config.raidTargets ??= [];
                 profileData.config.hideEvents ??= DEFAULT_CONFIG.hideEvents;
+                profileData.config.visualAlertDelay ??= 8;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);
@@ -340,6 +339,7 @@ export default function HeheChat() {
     const setBrowserSourceAudio = (value: boolean) => updateConfig('browserSourceAudio', value);
     const setBrowserSourceVisual = (value: boolean) => updateConfig('browserSourceVisual', value);
     const setAlertBoost = (value: number) => updateConfig('alertBoost', value);
+    const setVisualAlertDelay = (value: number) => updateConfig('visualAlertDelay', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -549,7 +549,8 @@ export default function HeheChat() {
         setDisableEmoteDialog,
         setBrowserSourceAudio,
         setBrowserSourceVisual,
-        setAlertBoost
+        setAlertBoost,
+        setVisualAlertDelay
     };
 
     const appLogin = {
