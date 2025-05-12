@@ -580,6 +580,7 @@ class AlertPlayer {
         console.log('Play alert with config', item, alert);
 
         const vars:any = {
+            ...eventData,
             ...item,
             amount: Number(item.amount),
             amount2: Number(item.amount2)
