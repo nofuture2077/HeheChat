@@ -19,7 +19,7 @@ import { ModSettings } from './ModSettings';
 import { InfoCard } from '../infocard/infocard';
 import { LoginContextContext, PremiumContext } from '@/ApplicationContext';
 import { AlertSettings } from './AlertSettings';
-import { ShareSettings } from './ShareSettings';
+import { ConnectSettings } from './ConnectSettings';
 import { ShortcutSettings } from './ShortcutSettings';
 import { NotificationSettings } from './NotificationSettings';
 import { OverlayDrawer } from '@/pages/Chat.page';
@@ -87,7 +87,7 @@ export function Settings(props: SettingsProperties) {
       case 'Notifications':
         return <NotificationSettings />;
       case 'Connect':
-        return <ShareSettings />;
+        return <ConnectSettings />;
       case 'Shortcuts':
         return <ShortcutSettings />;
       case 'Premium':

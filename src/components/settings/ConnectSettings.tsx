@@ -1,4 +1,5 @@
-import { TextInput, Fieldset, Stack } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, ActionIcon } from '@mantine/core';
+import { IconCopy } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 
 function extractBlerpRoom(input: string): string {
@@ -7,12 +8,14 @@ function extractBlerpRoom(input: string): string {
     return match ? match[1] : input;
 }
 
-export function ShareSettings() {
+export function ConnectSettings() {
     const [elevenLabsApiKey, setElevenLabsApiKey] = useState<string>("");
     const [streamelementsJWT, setStreamelementsJWT] = useState<string>("");
     const [pallyggApiKey, setPallyggApiKey] = useState<string>("");
     const [pallyggChannel, setPallyggChannel] = useState<string>("");
     const [blerpKey, setBlerpKey] = useState<string>("");
+    const [kofiVerificationToken, setKofiVerificationToken] = useState<string>("");
+    const [kofiWebhookUrl, setKofiWebhookUrl] = useState<string>("");
 
     const state = localStorage.getItem('hehe-token_state') || '';
 
@@ -32,6 +35,14 @@ export function ShareSettings() {
 
         fetch(import.meta.env.VITE_BACKEND_URL + "/streamelements/get?state=" + state).then(res => res.json()).then((data) => {
             setStreamelementsJWT(data.jwt || '');
+        });
+
+        fetch(import.meta.env.VITE_BACKEND_URL + "/kofi/get?state=" + state).then(res => res.json()).then((data) => {
+            setKofiVerificationToken(data.verification_token || '');
+        });
+
+        fetch(import.meta.env.VITE_BACKEND_URL + "/kofi/webhook-url?state=" + state).then(res => res.json()).then((data) => {
+            setKofiWebhookUrl(data.webhook_url || '');
         });
     }, []);
 
@@ -57,6 +68,11 @@ export function ShareSettings() {
         setElevenLabsApiKey(apikey || '');
     };
 
+    const updateKofi = (verificationToken: string) => {
+        fetch(import.meta.env.VITE_BACKEND_URL + "/kofi/set?state=" + state + "&verification_token=" + verificationToken);
+        setKofiVerificationToken(verificationToken || '');
+    };
+
     return (<Stack mt={30} mb={30} gap={30}>
 
         <Fieldset legend="Streamelements Config" variant="filled">
@@ -74,6 +90,37 @@ export function ShareSettings() {
 
         <Fieldset legend="Blerp Config" variant="filled">
             <TextInput label="API Key" placeholder="" value={blerpKey} onChange={(ev) => updateBlerp(ev.target.value)} />
+        </Fieldset>
+
+        <Fieldset legend="Ko-fi Integration" variant="filled">
+            <Text size="sm" mb={10}>
+                To integrate Ko-fi with HeheChat, follow these steps:
+                <ol>
+                    <li>Copy the webhook URL below</li>
+                    <li>Go to <a href="https://ko-fi.com/manage/webhooks" target="_blank" rel="noopener noreferrer">Ko-fi Webhook Settings</a></li>
+                    <li>Paste the URL in the "Webhook URL" field on Ko-fi</li>
+                    <li>Save the settings on Ko-fi</li>
+                    <li>Copy the "Verification Token" provided by Ko-fi</li>
+                    <li>Paste it in the field below</li>
+                </ol>
+            </Text>
+            <TextInput 
+                label="Webhook URL" 
+                placeholder="" 
+                value={kofiWebhookUrl} 
+                readOnly 
+                rightSection={
+                    <ActionIcon onClick={() => navigator.clipboard.writeText(kofiWebhookUrl)}>
+                        <IconCopy size="1rem" />
+                    </ActionIcon>
+                }
+            />
+            <TextInput 
+                label="Verification Token" 
+                placeholder="Enter the verification token from Ko-fi" 
+                value={kofiVerificationToken} 
+                onChange={(ev) => updateKofi(ev.target.value)} 
+            />
         </Fieldset>
     </Stack>
     )

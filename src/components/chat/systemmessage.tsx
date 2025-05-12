@@ -42,7 +42,10 @@ const messages = {
     'announcement': 'Chat Announcement///${text}',
     'blerp': '${username} played Blerp ${audioTitle}',
     'seventv_emote_add': '${username} added new Emote ${emote} ${emote}',
-    'seventv_emote_remove': '${username} removed Emote ${emote}'
+    'seventv_emote_remove': '${username} removed Emote ${emote}',
+    'kofishop': '${username} bought something on ko-fi',
+    'kofidono': '${username} donated ${amount}${currency} on ko-fi',
+    'kofisub': '${username} subed on ko-fi'
 };
 
 export function SystemMessageComp(props: SystemMessageProps) {
