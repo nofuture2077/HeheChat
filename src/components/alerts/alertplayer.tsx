@@ -580,11 +580,9 @@ class AlertPlayer {
         console.log('Play alert with config', item, alert);
 
         const vars:any = {
-            username: item.username,
-            usernameTo: item.usernameTo,
+            ...item,
             amount: Number(item.amount),
-            amount2: Number(item.amount2),
-            text: item.text
+            amount2: Number(item.amount2)
         };
 
         if (eventData && eventData.text) {
