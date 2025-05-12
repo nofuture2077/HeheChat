@@ -44,7 +44,7 @@ const messages = {
     'seventv_emote_add': '${username} added new Emote ${emote} ${emote}',
     'seventv_emote_remove': '${username} removed Emote ${emote}',
     'kofishop': '${username} bought something on ko-fi',
-    'kofidono': '${username} donated ${amount}${currency} on ko-fi',
+    'kofidono': '${username} donated ${amount}${currency:currency} on ko-fi',
     'kofisub': '${username} subed on ko-fi'
 };
 

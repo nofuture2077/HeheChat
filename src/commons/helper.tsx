@@ -152,12 +152,31 @@ export const formatDuration = (duration: number) => {
     return shortEnglishHumanizer(duration, { largest: 1 });
 }
 
+export function formatCurrency(value: string): string {
+    const currencyMap: Record<string, string> = {
+        'USD': '$',
+        'EUR': '€',
+        'GBP': '£',
+        'JPY': '¥',
+        'CNY': '¥',
+        'INR': '₹',
+        'RUB': '₽',
+        'KRW': '₩',
+        'BRL': 'R$',
+        'CAD': 'C$',
+        'AUD': 'A$',
+        'CHF': 'CHF'
+    };
+    return currencyMap[value] || value;
+}
+
 const formatFunctions: { [key: string]: (value: any) => string } = {
     whole: (value: number) => Number(value).toFixed(0),
     decimal: (value: number) => Number(value).toFixed(2),
     uppercase: (value: string) => value.toUpperCase(),
     lowercase: (value: string) => value.toLowerCase(),
     duration: (value: string) => formatDuration(Number(value) * 1000),
+    currency: (value: string) => formatCurrency(value),
 };
 
 export function formatString(messageTemplate: string, args: Record<string, any>): string {

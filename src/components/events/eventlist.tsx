@@ -39,7 +39,7 @@ const messages: Record<EventType, string> = {
     'blerp': "Blerp ${audioTitle}",
     'channelPointRedemption': 'Channelpoints: ${rewardTitle}',
     'kofishop': '${username} bought something on ko-fi',
-    'kofidono': '${username} donated ${amount}${currency} on ko-fi',
+    'kofidono': '${username} donated ${amount}${currency:currency} on ko-fi',
     'kofisub': '${username} subed on ko-fi'
 }
 
