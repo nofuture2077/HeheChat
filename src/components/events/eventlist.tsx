@@ -10,7 +10,7 @@ import { EventType } from '@/commons/events';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { Dictionary } from 'underscore';
 import { useForceUpdate } from '@mantine/hooks';
-import { IconGiftFilled, IconCoinBitcoinFilled, IconUserHeart, IconSparkles, IconMoneybag, IconPlant, IconBellRinging } from '@tabler/icons-react';
+import { IconGiftFilled, IconCoinBitcoinFilled, IconUserHeart, IconSparkles, IconMoneybag, IconPlant, IconBellRinging, IconAffiliate } from '@tabler/icons-react';
 import { formatString } from "@/commons/helper";
 import { ReactElementLike } from 'prop-types';
 
@@ -37,7 +37,10 @@ const messages: Record<EventType, string> = {
     'cheer': 'Cheered ${amount:whole} bits',
     'donation': "Donated ${amount:decimal}",
     'blerp': "Blerp ${audioTitle}",
-    'channelPointRedemption': 'Channelpoints: ${rewardTitle}'
+    'channelPointRedemption': 'Channelpoints: ${rewardTitle}',
+    'kofishop': '${username} bought something on ko-fi',
+    'kofidono': '${username} donated ${amount}${currency} on ko-fi',
+    'kofisub': '${username} subed on ko-fi'
 }
 
 export const icons: Record<EventType, ReactElementLike> = {
@@ -56,7 +59,10 @@ export const icons: Record<EventType, ReactElementLike> = {
     'cheer': <IconCoinBitcoinFilled/>,
     'donation': <IconMoneybag/>,
     'blerp': <IconBellRinging/>,
-    'channelPointRedemption': <IconPlant/>
+    'channelPointRedemption': <IconPlant/>,
+    'kofishop': <IconAffiliate/>,
+    'kofidono': <IconAffiliate/>,
+    'kofisub': <IconAffiliate/>
 }
 
 export function formatEventText(event: EventData): string {
