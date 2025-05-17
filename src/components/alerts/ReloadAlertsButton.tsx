@@ -34,9 +34,9 @@ export function ReloadAlertsButton() {
   // Handle button click
   const handleClick = () => {
     // Initialize the alert system
-    if (!isAlertSystemRunning) {
-      AlertSystem.initialize();
-    }
+    if (!AlertSystem.status()) {
+        AlertSystem.initialize();
+    } 
     
     // Hide the button
     setIsVisible(false);

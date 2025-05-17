@@ -96,7 +96,9 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
       }
 
       if (data.type === 'sharedata') {
-        AlertSystem.initialize();
+        if (!AlertSystem.status()) {
+            AlertSystem.initialize();
+        } 
         const profile = data.profile;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
