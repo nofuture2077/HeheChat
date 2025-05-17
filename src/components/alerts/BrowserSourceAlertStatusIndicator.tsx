@@ -33,7 +33,7 @@ export function BrowserSourceAlertStatusIndicator(_props: BrowserSourceAlertStat
     width: '12px',
     height: '12px',
     borderRadius: '50%',
-    backgroundColor: '#DB32BC',
+    backgroundColor: '#ff1493',
     zIndex: 9999, // Ensure it's above other elements
   };
 

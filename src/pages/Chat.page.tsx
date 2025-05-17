@@ -20,6 +20,7 @@ import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, s
 import { ProfileBarDrawer } from '../components/profile/profilebar';
 import { Storage } from '../components/chat/chatstorage';
 import { AlertSystem } from '../components/alerts/alertplayer';
+import { ReloadAlertsButton } from '../components/alerts/ReloadAlertsButton';
 import { toMap } from '../commons/helper';
 import { Event } from '../commons/events';
 import { UserCardDrawer } from '../components/login/usercard';
@@ -325,8 +326,10 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
                         {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}
+                        
                         {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                         <PinManager/>
+                        <ReloadAlertsButton />
                     </Stack>
                 </Affix>
 
