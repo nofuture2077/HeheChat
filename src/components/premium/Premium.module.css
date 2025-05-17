@@ -15,8 +15,6 @@
 }
 
 .premiumDetailsCard {
-  background: linear-gradient(135deg, var(--mantine-color-dark-7), var(--mantine-color-dark-8));
-  border: 1px solid var(--mantine-color-dark-5);
   margin-bottom: 1rem;
 }
 

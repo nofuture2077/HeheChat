@@ -52,7 +52,7 @@ export const PremiumDetails: React.FC<PremiumDetailsProps> = ({ compact = false 
 
   return (
     <div className={classes.premiumDetails}>
-      <Card className={classes.premiumDetailsCard} p="md">
+      <Card className={classes.premiumDetailsCard} p="md" withBorder>
         <div className={classes.premiumDetailsHeader}>
           <IconCrown className={classes.premiumIcon} size={24} />
           <Title order={4}>HeheChat Pro Subscription</Title>
