@@ -105,34 +105,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         if (msg.type === 'chat') {
             setUsernames(prev => new Set([...prev, msg.userInfo.userName.toLowerCase()]));
         }
-        if (msg instanceof HeheChatMessage && msg.text.startsWith("!tts") && ((config.freeTTS || []).includes(user) || (config.freeTTS || []).includes('all'))) {
-            const message = msg.text.split("!tts")[1];
-            AlertSystem.addEvent({
-                id: Date.now(),
-                channel: msg.channelId || '',
-                username: user, 
-                eventtype: 'raid',
-                date: Date.now(),
-                text: message,
-                eventAlert: {
-                    name: 'default',
-                    id: Date.now() + "",
-                    type: 'raid',
-                    specifier: {
-                        type: 'matches'
-                    },
-                    restriction: 'none',
-                    audio: {
-                        tts: {
-                            text: message,
-                            voiceType: 'google',
-                            voiceSpecifier: 'adam',
-                            voiceParams: {}
-                        }
-                    }
-                }
-            });
-        }
+
         setChatMessages((prevMessages) => prevMessages.concat(msg).slice((prevMessages.length % 2) ? 0 : (-1 * maxMessages + 1)));
     };
 

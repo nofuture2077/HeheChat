@@ -461,6 +461,9 @@ class AlertPlayer {
 
     getAlert(event: Event, eventData: any, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
         if (event.eventAlert) {
+            if (!((config.freeTTS || []).includes(event.username) || (config.freeTTS || []).includes('all'))) {
+                return undefined;
+            }
             return event.eventAlert;
         }
         const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
