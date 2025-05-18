@@ -45,7 +45,8 @@ const messages = {
     'seventv_emote_remove': '${username} removed Emote ${emote}',
     'kofishop': '${username} bought something on ko-fi',
     'kofidono': '${username} donated ${amount}${currency:currency} on ko-fi',
-    'kofisub': '${username} subed on ko-fi with tier ${tier}'
+    'kofisub': '${username} subed on ko-fi with tier ${tier}',
+    'tts': '${username} triggered tts'
 };
 
 export function SystemMessageComp(props: SystemMessageProps) {

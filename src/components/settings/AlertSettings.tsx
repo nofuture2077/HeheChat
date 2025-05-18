@@ -15,7 +15,7 @@ interface EditorData {
     name: string;
 }
 
-const hideEventsValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'channelPointRedemption', 'blerp'];
+const hideEventsValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'channelPointRedemption', 'blerp', 'tts'];
 
 const Messages: Record<string, string> = {
     'sub': 'Subscriptions',
@@ -26,7 +26,8 @@ const Messages: Record<string, string> = {
     "donation": "Donations",
     "cheer": "Bit-Donations",
     "channelPointRedemption": "Channel Points",
-    "blerp": "Blerps"
+    "blerp": "Blerps",
+    "tts": "!tts Events"
 };
 
 

@@ -10,7 +10,7 @@ import { EventType } from '@/commons/events';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { Dictionary } from 'underscore';
 import { useForceUpdate } from '@mantine/hooks';
-import { IconGiftFilled, IconCoinBitcoinFilled, IconUserHeart, IconSparkles, IconMoneybag, IconPlant, IconBellRinging, IconAffiliate } from '@tabler/icons-react';
+import { IconGiftFilled, IconCoinBitcoinFilled, IconUserHeart, IconSparkles, IconMoneybag, IconPlant, IconBellRinging, IconAffiliate, IconSpeakerphone } from '@tabler/icons-react';
 import { formatString } from "@/commons/helper";
 import { ReactElementLike } from 'prop-types';
 
@@ -40,7 +40,8 @@ const messages: Record<EventType, string> = {
     'channelPointRedemption': 'Channelpoints: ${rewardTitle}',
     'kofishop': '${username} bought something on ko-fi',
     'kofidono': '${username} donated ${amount}${currency:currency} on ko-fi',
-    'kofisub': '${username} subed on ko-fi'
+    'kofisub': '${username} subed on ko-fi',
+    'tts': '${username} triggered tts',
 }
 
 export const icons: Record<EventType, ReactElementLike> = {
@@ -62,7 +63,8 @@ export const icons: Record<EventType, ReactElementLike> = {
     'channelPointRedemption': <IconPlant/>,
     'kofishop': <IconAffiliate/>,
     'kofidono': <IconAffiliate/>,
-    'kofisub': <IconAffiliate/>
+    'kofisub': <IconAffiliate/>,
+    'tts': <IconSpeakerphone/>
 }
 
 export function formatEventText(event: EventData): string {
