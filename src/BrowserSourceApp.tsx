@@ -112,7 +112,9 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
       
       if (data.type === 'alert') {
         // Publish alert data
-        PubSub.publish('ALERT_SHOW', data.data);
+        setTimeout(() => {
+          PubSub.publish('ALERT_SHOW', data.data);
+        }, profile.config.visualAlertDelay * 1000);
       }
 
       if (data.type === 'event' || data.type === 'replayevent') {

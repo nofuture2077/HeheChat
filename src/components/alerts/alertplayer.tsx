@@ -621,16 +621,7 @@ class AlertPlayer {
                 // Send to backend immediately (this doesn't affect display timing)
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
                 
-                // Delay the visual alert based on the visualAlertDelay setting
-                if (visualAlertDelay <= 0) {
-                    // For negative or zero delay, show visual immediately
-                    PubSub.publish('ALERT_SHOW', visualAlert);
-                } else {
-                    // For positive delay, wait before showing visual
-                    setTimeout(() => {
-                        PubSub.publish('ALERT_SHOW', visualAlert);
-                    }, visualAlertDelay * 1000);
-                }
+                PubSub.publish('ALERT_SHOW', visualAlert);
             }
 
             // Chain audio playback with proper error handling

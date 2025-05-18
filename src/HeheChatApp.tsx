@@ -137,7 +137,7 @@ export default function HeheChat() {
                 profileData.config.channels ??= [];
                 profileData.config.raidTargets ??= [];
                 profileData.config.hideEvents ??= DEFAULT_CONFIG.hideEvents;
-                profileData.config.visualAlertDelay ??= 8;
+                profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);
