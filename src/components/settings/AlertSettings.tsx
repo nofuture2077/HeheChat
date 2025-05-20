@@ -69,8 +69,6 @@ export function AlertSettings() {
     const [shares, setShares] = useState<string[]>(config.shares);
     const [editors, setEditors] = useState<EditorData[]>([]);
     const [editorModalOpened, editorModalHandler] = useDisclosure(false);
-    const hasShare = (channel: string) => config.receivedShares.includes(channel);
-    const isActive = (channel: string) => config.activatedShares.includes(channel);
 
     useEffect(() => {
         const state = localStorage.getItem('hehe-token_state') || '';
@@ -80,6 +78,9 @@ export function AlertSettings() {
         });
         
         loadEditors();
+
+        config.loadReceivedShares();
+        config.loadShares();
     }, []);
     
     const loadEditors = () => {
@@ -192,13 +193,13 @@ export function AlertSettings() {
 
             <Fieldset legend="Alert Channels" variant="filled" key="alert-channel">
                 <Stack>
-                    {config.channels.map(channel => <Switch key={channel} checked={isActive(channel)} disabled={!hasShare(channel)} label={channel + (hasShare(channel) ? '' : ' *')} onChange={(event) => { changeActive(channel, event.currentTarget.checked); forceUpdate() }} size="lg" />)}
+                    {config.channels.map(channel => <Switch key={channel} checked={config.activatedShares.includes(channel)} disabled={!config.receivedShares.includes(channel)} label={channel + (config.receivedShares.includes(channel) ? '' : ' *')} onChange={(event) => { changeActive(channel, event.currentTarget.checked); forceUpdate() }} size="lg" />)}
                     <Text fs="italic" size='14px'>(*) No Permission - Ask other Streams to share their alerts with you.</Text>
                 </Stack>
             </Fieldset>
 
 
-            {Object.keys(AlertSystem.alertConfig).filter(isActive).map(channel => {
+            {Object.keys(AlertSystem.alertConfig).filter(channel => config.activatedShares.includes(channel)).map(channel => {
                 if (!AlertSystem.alertConfig[channel] || !config.channels.includes(channel)) {
                     return null;
                 }
@@ -206,7 +207,7 @@ export function AlertSettings() {
                     <Stack key={"alert-config-" + channel}>
                         {/* Add blerp alert option */}
                         <Switch 
-                            disabled={!isActive(channel)} 
+                            disabled={!config.activatedShares.includes(channel)} 
                             checked={!config.deactivatedAlerts["blerp"]} 
                             onChange={(event) => { 
                                 config.setDeactivatedAlerts("blerp", !event.currentTarget.checked); 
@@ -217,7 +218,7 @@ export function AlertSettings() {
                             size="lg" 
                         />
                         {Object.values(AlertSystem.alertConfig[channel].data?.alerts || []).reduce((accumulator, value) => accumulator.concat(value), []).map((alert) => {
-                            return <Switch disabled={!isActive(channel)} checked={!config.deactivatedAlerts[alert.id]} onChange={(event) => { config.setDeactivatedAlerts(alert.id, !event.currentTarget.checked); forceUpdate() }} key={alert.id} label={alert.name} size="lg" />
+                            return <Switch disabled={!config.activatedShares.includes(channel)} checked={!config.deactivatedAlerts[alert.id]} onChange={(event) => { config.setDeactivatedAlerts(alert.id, !event.currentTarget.checked); forceUpdate() }} key={alert.id} label={alert.name} size="lg" />
                         })}
                     </Stack>
                 </Fieldset>
