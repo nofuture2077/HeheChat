@@ -10,7 +10,8 @@ import {
   IconShare,
   IconKeyboard,
   IconUserUp,
-  IconCrown
+  IconCrown,
+  IconBrandDiscord
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
@@ -24,6 +25,7 @@ import { ShortcutSettings } from './ShortcutSettings';
 import { NotificationSettings } from './NotificationSettings';
 import { OverlayDrawer } from '@/pages/Chat.page';
 import { PremiumSettings } from '../premium';
+import { DiscordInfo } from './DiscordInfo';
 
 const mainLinksMockdata = [
   { icon: IconHome2, label: 'General' },
@@ -34,6 +36,7 @@ const mainLinksMockdata = [
   { icon: IconKeyboard, label: 'Shortcuts' },
   { icon: IconUserUp, label: 'Notifications' },
   { icon: IconCrown, label: 'Premium' },
+  { icon: IconBrandDiscord, label: 'Discord' },
 ];
 
 export const SettingsDrawer: OverlayDrawer = {
@@ -43,7 +46,7 @@ export const SettingsDrawer: OverlayDrawer = {
   position: 'right',
 }
 
-export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts' | 'Notifications' | 'Connect' | 'Shortcuts' | 'Premium';
+export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts' | 'Notifications' | 'Connect' | 'Shortcuts' | 'Premium' | 'Discord';
 
 export interface SettingsProperties {
   close: () => void;
@@ -92,6 +95,8 @@ export function Settings(props: SettingsProperties) {
         return <ShortcutSettings />;
       case 'Premium':
         return <PremiumSettings />;
+      case 'Discord':
+        return <DiscordInfo />;
       default:
         return null;
     }
