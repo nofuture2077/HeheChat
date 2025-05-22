@@ -20,7 +20,7 @@ export function DiscordInfo() {
             Connect with other HeheChat users, get the latest updates, and be part of our growing community.
           </Text>
           
-          <Box style={{ padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px' }}>
+          <Box style={{ padding: '15px', borderRadius: '8px' }} bg='light-dark(rgb(228, 228, 255),rgb(34, 34, 42))'>
             <Text size="sm" fw={500} mb={5}>
               In our Discord server you'll find:
             </Text>
