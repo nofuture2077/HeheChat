@@ -29,7 +29,7 @@ export function ProfileBar(props: ProfileBarProps) {
 
     const [profiles, setProfiles] = useState(activeProfile.listProfiles());
 
-    function handleOnDragEnd(result: DropResult) {
+    async function handleOnDragEnd(result: DropResult) {
         if (!result.destination) {
             return
         };
@@ -38,8 +38,16 @@ export function ProfileBar(props: ProfileBarProps) {
         const [reorderedItem] = items.splice(result.source.index, 1);
         items.splice(result.destination.index, 0, reorderedItem);
 
-        activeProfile.setProfiles(items);
-        setProfiles(items);
+        try {
+            // Update the profiles on the server first
+            await activeProfile.setProfiles(items);
+            // Then update local state
+            setProfiles(items);
+        } catch (error) {
+            console.error('Error updating profiles order:', error);
+            // Refresh the profiles list from the context to ensure consistency
+            setProfiles(activeProfile.listProfiles());
+        }
     }
 
     return <Stack h='100vh' gap={0} className={classes.profileBar}>
@@ -85,7 +93,15 @@ function ProfileComp(provided: DraggableProvided, profile: Profile, activeProfil
     const channels = profile.config.channels.slice(0, profile.config.channels.length === showChannels + 1 ? showChannels + 1 : showChannels);
     const more = profile.config.channels.length - channels.length;
     const isActive = profile.guid === activeProfile.guid;
-    return (<Paper ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={[classes.profile, isActive ? classes.active : undefined].join(' ')} key={'profile-' + profile.guid} shadow="xs" pt="xs" pb="xs" onClick={() => { activeProfile.switchProfile(profile.guid); close(); } }>
+    return (<Paper ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={[classes.profile, isActive ? classes.active : undefined].join(' ')} key={'profile-' + profile.guid} shadow="xs" pt="xs" pb="xs" onClick={async () => { 
+        try {
+            await activeProfile.switchProfile(profile.guid);
+            close();
+        } catch (error) {
+            console.error('Error switching profile:', error);
+            // Could add user notification here
+        }
+    } }>
         <Text m='auto' ta="center">{profile.name}</Text>
         <AvatarGroup spacing='md' style={{ justifyContent: 'center' }}>
             {channels.map((channel: string, i: number) => <Avatar src={emotes.getLogo(channel)?.props.src} key={channel + i} style={{ zIndex: 10 - i }}></Avatar>)}
@@ -107,9 +123,14 @@ export function CreateProfileView(props: {
                 <TextInput label="Profilename" placeholder="" value={profileName} onChange={(ev) => setProfileName(ev.target.value)} error={profileName && error} />
                 <Group justify="flex-end" mt="md">
                     <Button onClick={props.close}>Cancel</Button>
-                    <Button color='primary' disabled={error} onClick={() => {
-                        props.activeProfile.createProfile(profileName);
-                        props.close();
+                    <Button color='primary' disabled={error} onClick={async () => {
+                        try {
+                            await props.activeProfile.createProfile(profileName);
+                            props.close();
+                        } catch (error) {
+                            console.error('Error creating profile:', error);
+                            // Could add user notification here
+                        }
                     }}>Create</Button>
                 </Group>
             </Fieldset>

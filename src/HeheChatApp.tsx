@@ -95,7 +95,7 @@ export default function HeheChat() {
 
     const [loginContext, setLoginContext] = useState<LoginContext>(DEFAULT_LOGIN_CONTEXT);
     const [chatEmotes, setChatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
-    const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE, guid: generateGUID()});
+    const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE, guid: ''});
     const [profiles, setProfiles] = useState<Profile[]>([]);
     const [premium, setPremium] = useState<Premium>({
         ...DEFAULT_PREMIUM,
@@ -119,14 +119,24 @@ export default function HeheChat() {
     const documentVisible = useDocumentVisibility();
 
     useDidUpdate(() => {
-        if (!profile.guid) {
-            console.error("Saving profile without guid", profile);
-            return;
-        }
-        if (!profile.config.channels || !profile.config.channels.length) {
-            return;
-        }
-        storeProfile(profile);
+        const saveProfileToServer = async () => {
+            if (!profile.guid) {
+                console.error("Saving profile without guid", profile);
+                return;
+            }
+            if (!profile.config.channels || !profile.config.channels.length) {
+                return;
+            }
+            
+            try {
+                await storeProfile(profile);
+            } catch (error) {
+                console.error('Error saving profile to server:', error);
+                // Could add user notification here
+            }
+        };
+        
+        saveProfileToServer();
     }, [profile])
 
     useEffect(() => {
@@ -145,9 +155,21 @@ export default function HeheChat() {
                     setProfiles(_.sortBy(r.profiles, item => order.indexOf(item.guid)) || [profileData]);
                 });
             } else {
-                AlertSystem.updateProfile(profile);
-                setProfile(profile);
-                setProfiles([profile]);
+                // Only create a new profile if we don't have one
+                const newProfile = {...DEFAULT_PROFILE, name: 'default', guid: generateGUID()};
+                
+                try {
+                    // Save the new profile to the server
+                    await storeProfile(newProfile);
+                    // Update local state
+                    AlertSystem.updateProfile(newProfile);
+                    setProfile(newProfile);
+                    setProfiles([newProfile]);
+                    // Save the profile list
+                    await saveProfiles(newProfile.guid, [newProfile.guid]);
+                } catch (error) {
+                    console.error('Error creating initial profile:', error);
+                }
             }
         }, (err) => console.error(err));
         
@@ -279,9 +301,18 @@ export default function HeheChat() {
     }, []);
 
     useEffect(() => {
-        if (profiles.length) {
-            saveProfiles(profile.guid, profiles.map(p => p.guid));
-        }
+        const updateProfilesList = async () => {
+            if (profiles.length) {
+                try {
+                    await saveProfiles(profile.guid, profiles.map(p => p.guid));
+                } catch (error) {
+                    console.error('Error saving profiles list:', error);
+                    // Could add user notification here
+                }
+            }
+        };
+        
+        updateProfilesList();
     }, [profile, profiles]);
 
     useEffect(() => {
@@ -424,31 +455,71 @@ export default function HeheChat() {
         return true;
     }
 
-    const setProfileName = (name: string) => {
-        setProfile((profile) => {
+    const setProfileName = async (name: string) => {
+        try {
             const newProfile = { ...profile, name };
-            return newProfile;
-        });
-    };
-
-    const switchProfile = (guid: string) => {
-        const p = profiles.find(p => p.guid === guid);
-        if (p) {
-            setProfile(p);
+            // First save the updated profile to the server
+            await storeProfile(newProfile);
+            // Then update local state
+            setProfile(newProfile);
+        } catch (error) {
+            console.error('Error updating profile name:', error);
+            // Could add user notification here
         }
     };
 
-    const createProfile = (name: string, oldProfile?: Profile) => {
-        const guid = generateGUID();
-        const newProfile = {...DEFAULT_PROFILE, ...oldProfile, name, guid};
-        setProfile(newProfile);
-        setProfiles(profiles => profiles.concat(newProfile));
+    const switchProfile = async (guid: string) => {
+        const p = profiles.find(p => p.guid === guid);
+        if (p) {
+            try {
+                // First update the active profile on the server
+                await saveProfiles(guid, profiles.map(p => p.guid));
+                // Then update local state
+                setProfile(p);
+            } catch (error) {
+                console.error('Error switching profile:', error);
+                // Could add user notification here
+            }
+        }
     };
 
-    const deleteProfile = (guid: string) => {
-        deleteProfileFromServer(guid);
-        setProfiles(profiles => profiles.filter(p => p.guid !== guid));
-        setProfile(profiles[0])
+    const createProfile = async (name: string, oldProfile?: Profile) => {
+        const guid = generateGUID();
+        const newProfile = {...DEFAULT_PROFILE, ...oldProfile, name, guid};
+        
+        try {
+            // First save the new profile to the server
+            await storeProfile(newProfile);
+            // Then update local state
+            setProfile(newProfile);
+            setProfiles(profiles => profiles.concat(newProfile));
+            // Update the profiles list on the server
+            await saveProfiles(newProfile.guid, [...profiles.map(p => p.guid), newProfile.guid]);
+        } catch (error) {
+            console.error('Error creating profile:', error);
+            // Could add user notification here
+        }
+    };
+
+    const deleteProfile = async (guid: string) => {
+        try {
+            // First delete the profile from the server
+            await deleteProfileFromServer(guid);
+            
+            // Then update local state
+            const updatedProfiles = profiles.filter(p => p.guid !== guid);
+            setProfiles(updatedProfiles);
+            
+            // If we're deleting the active profile, switch to another one
+            if (profile.guid === guid && updatedProfiles.length > 0) {
+                setProfile(updatedProfiles[0]);
+                // Update the active profile on the server
+                await saveProfiles(updatedProfiles[0].guid, updatedProfiles.map(p => p.guid));
+            }
+        } catch (error) {
+            console.error('Error deleting profile:', error);
+            // Could add user notification here
+        }
     }
 
     const setSystemMessageInChat = (type: SystemMessageMainType, val: boolean) => {
@@ -746,6 +817,18 @@ export default function HeheChat() {
         }
     };
 
+    const updateProfilesList = async (newProfiles: Profile[]) => {
+        try {
+            // First save the profiles list to the server
+            await saveProfiles(profile.guid, newProfiles.map(p => p.guid));
+            // Then update local state
+            setProfiles(newProfiles);
+        } catch (error) {
+            console.error('Error updating profiles list:', error);
+            // Could add user notification here
+        }
+    };
+
     const appProfile = {
         ...profile,
         listProfiles,
@@ -754,7 +837,7 @@ export default function HeheChat() {
         createProfile,
         switchProfile,
         deleteProfile,
-        setProfiles
+        setProfiles: updateProfilesList
     };
     
     const appPremium = {
