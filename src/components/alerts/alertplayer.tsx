@@ -614,9 +614,6 @@ class AlertPlayer {
                 console.log('Visuell', text, headline);
 
                 const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: minDuration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
-
-                // Get the visual alert delay from config (in seconds)
-                const visualAlertDelay = this.config?.visualAlertDelay || 0;
                 
                 // Send to backend immediately (this doesn't affect display timing)
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });

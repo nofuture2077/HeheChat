@@ -221,7 +221,14 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         });
         const state = localStorage.getItem('hehe-token_state') || '';
         AlertSystem.addNewChannels(config.channels);
-        PubSub.publish("WSSEND", { type: "subscribe", source: "HeheChat App", state, channels: Object.fromEntries(config.channels.map(key => [key, true])) });
+        PubSub.publish("WSSEND", { 
+            type: "subscribe", 
+            source: "HeheChat App", 
+            profile: profile.guid,
+            profileName: profile.name,
+            state, 
+            channels: Object.fromEntries(config.channels.map(key => [key, true])) 
+        });
 
         return () => {
             PubSub.unsubscribe(msgSub);

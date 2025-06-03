@@ -90,7 +90,7 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
       }
 
       if (data.type === 'profile') {
-        const profile = data.profile;
+        const profile: Profile = data.profile;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
       }
@@ -107,7 +107,14 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
           return;
         }
         AlertSystem.addNewChannels(channels);
-        backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "subscribe", source: "Browsersource", token, channels: Object.fromEntries(channels.map((key: string) => [key, true])) }});
+        backendWorkerRef.current?.postMessage({ type: "SEND", data: { 
+          type: "subscribe", 
+          source: "Browsersource", 
+          profile: profile.guid,
+          profileName: profile.name,
+          token, 
+          channels: Object.fromEntries(channels.map((key: string) => [key, true])) 
+        }});
       }
       
       if (data.type === 'alert') {

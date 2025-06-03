@@ -32,12 +32,19 @@ export default function ReplayApp({ token }: ReplayAppProps) {
       const data = event.data;
 
       if (data.type === 'sharedata') {
-          const profile = data.profile;
+          const profile: Profile = data.profile;
           setProfile(profile);
           AlertSystem.updateProfile(profile);
 
           const channels = profile.config?.channels || [];
-          backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "subscribe", source: REPLAY_APP_NAME, token, channels: Object.fromEntries(channels.map((key: string) => [key, true])) }});
+          backendWorkerRef.current?.postMessage({ type: "SEND", data: { 
+            type: "subscribe", 
+            source: REPLAY_APP_NAME, 
+            profile: profile.guid,
+            profileName: profile.name,
+            token, 
+            channels: Object.fromEntries(channels.map((key: string) => [key, true])) 
+          }});
       }
 
       if (data.type === 'profile') {
