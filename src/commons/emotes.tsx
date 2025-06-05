@@ -174,11 +174,20 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
             let cheerEmotes;
             try {
                 const cheerEmotesData = await EmoteApiClient.getCheerEmotes(user.id);
-                // Ensure cheerEmotesData is valid before creating HelixCheermoteList
-                cheerEmotes = cheerEmotesData ? new HelixCheermoteList(cheerEmotesData) : new HelixCheermoteList({});
+                
+                // Ensure cheerEmotesData is valid
+                if (cheerEmotesData && typeof cheerEmotesData === 'object') {
+                    cheerEmotes = new HelixCheermoteList(cheerEmotesData);
+                } else {
+                    // Create a safe empty HelixCheermoteList with a valid structure
+                    const emptyCheerEmotes: Record<string, any> = {};
+                    cheerEmotes = new HelixCheermoteList(emptyCheerEmotes);
+                }
             } catch (error) {
                 console.error(`Error fetching cheer emotes for ${user.name}:`, error);
-                cheerEmotes = new HelixCheermoteList({});
+                // Create a safe empty HelixCheermoteList with a valid structure
+                const emptyCheerEmotes: Record<string, any> = {};
+                cheerEmotes = new HelixCheermoteList(emptyCheerEmotes);
             }
             
             return {
@@ -374,7 +383,11 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     getCheerEmotes: (channel: string) => {
         const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
         try {
-            return channelEmotes?.cheerEmotes?.getPossibleNames() || [];
+            // Make sure cheerEmotes exists and has the getPossibleNames method
+            if (channelEmotes?.cheerEmotes && typeof channelEmotes.cheerEmotes.getPossibleNames === 'function') {
+                return channelEmotes.cheerEmotes.getPossibleNames() || [];
+            }
+            return [];
         } catch (error) {
             console.error(`Error getting cheer emote names for ${channel}:`, error);
             return [];
@@ -384,7 +397,8 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     getCheerEmote: (channel: string, name: string, bits: number) => {
         const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
         try {
-            if (channelEmotes?.cheerEmotes) {
+            // Make sure cheerEmotes exists and has the getCheermoteDisplayInfo method
+            if (channelEmotes?.cheerEmotes && typeof channelEmotes.cheerEmotes.getCheermoteDisplayInfo === 'function') {
                 return channelEmotes.cheerEmotes.getCheermoteDisplayInfo(name, bits, { background: 'dark', scale: 2, state: 'animated' });
             }
         } catch (error) {
