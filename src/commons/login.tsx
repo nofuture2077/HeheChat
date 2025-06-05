@@ -111,8 +111,27 @@ export async function getUserId(context: LoginContext) {
 }
 
 export async function getUserdata(context: LoginContext, usernames: string[]) {
-    const api = context.getApiClient();
-    const users = (await api.users.getUsersByNames(usernames)).map(u => ({user: u}));
-
-    return toMap(users, u => u.user.name);
+    try {
+        const api = context.getApiClient();
+        const usersResponse = await api.users.getUsersByNames(usernames);
+        
+        // Ensure usersResponse is an array
+        if (!Array.isArray(usersResponse)) {
+            console.error('Expected users response to be an array but got:', typeof usersResponse);
+            return new Map();
+        }
+        
+        const users = usersResponse.map(u => ({user: u}));
+        
+        // Ensure users is an array before using toMap
+        if (Array.isArray(users) && users.length > 0) {
+            return toMap(users, u => u.user.name);
+        } else {
+            console.warn('No users found or empty array returned for usernames:', usernames);
+            return new Map();
+        }
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        return new Map();
+    }
 }

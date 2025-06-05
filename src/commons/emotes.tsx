@@ -314,10 +314,12 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             
             // Initialize the channel entry if it doesn't exist
             if (!DEFAULT_CHAT_EMOTES.emotes.has(channel)) {
+                // Create a safe empty HelixCheermoteList with a valid structure
+                const emptyCheerEmotes: Record<string, any> = {};
                 DEFAULT_CHAT_EMOTES.emotes.set(channel, {
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new HelixCheermoteList({}),
+                    cheerEmotes: new HelixCheermoteList(emptyCheerEmotes),
                     sevenTVEmotes: new Map()
                 });
             }
@@ -326,7 +328,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             const channelData = DEFAULT_CHAT_EMOTES.emotes.get(channel);
             
             // Update the user data if available
-            if (userData && userData.has(channel) && userData.get(channel)?.user) {
+            if (userData && userData instanceof Map && userData.has(channel) && userData.get(channel)?.user) {
                 channelData.user = userData.get(channel).user;
             } else {
                 // Set a default user object if no data is available
@@ -343,11 +345,13 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 channelData.user = { name: channel };
                 DEFAULT_CHAT_EMOTES.emotes.set(channel, channelData);
             } else {
+                // Create a safe empty HelixCheermoteList with a valid structure
+                const emptyCheerEmotes: Record<string, any> = {};
                 DEFAULT_CHAT_EMOTES.emotes.set(channel, {
                     user: { name: channel },
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new HelixCheermoteList({}),
+                    cheerEmotes: new HelixCheermoteList(emptyCheerEmotes),
                     sevenTVEmotes: new Map()
                 });
             }
