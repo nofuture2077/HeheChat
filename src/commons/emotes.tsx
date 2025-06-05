@@ -159,22 +159,38 @@ interface CheerEmoteTier {
 export async function getBadgesAndEmotesByNames(context: LoginContext, usernames: string[]) {
     try {
         const users = await EmoteApiClient.getUsersByNames(usernames);
+        
+        // Ensure users is an array
+        if (!Array.isArray(users)) {
+            console.error('Expected users to be an array but got:', typeof users);
+            return new Map();
+        }
 
         const data = await Promise.all(users.map(async (user: any) => {
             const { channelBadges, channelEmotes } = await getBadgesAndEmotes(context, user.id);
             const sevenTVEmotes = await get7TVEmotes(user.id, user.name);
-            const cheerEmotesData = await EmoteApiClient.getCheerEmotes(user.id);
-            const cheerEmotes = new HelixCheermoteList(cheerEmotesData);
+            
+            // Safely handle cheerEmotes
+            let cheerEmotes;
+            try {
+                const cheerEmotesData = await EmoteApiClient.getCheerEmotes(user.id);
+                // Ensure cheerEmotesData is valid before creating HelixCheermoteList
+                cheerEmotes = cheerEmotesData ? new HelixCheermoteList(cheerEmotesData) : new HelixCheermoteList({});
+            } catch (error) {
+                console.error(`Error fetching cheer emotes for ${user.name}:`, error);
+                cheerEmotes = new HelixCheermoteList({});
+            }
+            
             return {
                 user,
-                channelBadges: toMap(channelBadges as any[], (ba: any) => ba.id),
-                channelEmotes: toMap(channelEmotes as any[], (em: any) => em.name),
+                channelBadges: Array.isArray(channelBadges) ? toMap(channelBadges as any[], (ba: any) => ba.id) : new Map(),
+                channelEmotes: Array.isArray(channelEmotes) ? toMap(channelEmotes as any[], (em: any) => em.name) : new Map(),
                 cheerEmotes,
                 sevenTVEmotes
             }
         }));
 
-        return toMap(data, d => d.user.name);
+        return Array.isArray(data) ? toMap(data, d => d.user.name) : new Map();
     } catch (error) {
         console.error('Error fetching badges and emotes by names:', error);
         return new Map();
@@ -238,11 +254,25 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                     DEFAULT_CHAT_EMOTES.emotes.set('global', globalEmoteData);
                 }
             }
-            const emoteData = await getBadgesAndEmotesByNames(context, [channel]);
-            if (emoteData && emoteData.has(channel)) {
-                DEFAULT_CHAT_EMOTES.emotes.set(channel, emoteData.get(channel));
-            } else {
-                // Set a default empty object if no data is available
+            
+            // Safely handle emote data
+            try {
+                const emoteData = await getBadgesAndEmotesByNames(context, [channel]);
+                if (emoteData && emoteData instanceof Map && emoteData.has(channel)) {
+                    DEFAULT_CHAT_EMOTES.emotes.set(channel, emoteData.get(channel));
+                } else {
+                    // Set a default empty object if no data is available
+                    DEFAULT_CHAT_EMOTES.emotes.set(channel, {
+                        user: { name: channel },
+                        channelBadges: new Map(),
+                        channelEmotes: new Map(),
+                        cheerEmotes: new HelixCheermoteList({}),
+                        sevenTVEmotes: new Map()
+                    });
+                }
+            } catch (error) {
+                console.error(`Error getting badges and emotes for ${channel}:`, error);
+                // Set a default empty object if an error occurs
                 DEFAULT_CHAT_EMOTES.emotes.set(channel, {
                     user: { name: channel },
                     channelBadges: new Map(),
@@ -343,13 +373,22 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
 
     getCheerEmotes: (channel: string) => {
         const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
-        return channelEmotes?.cheerEmotes?.getPossibleNames() || [];
+        try {
+            return channelEmotes?.cheerEmotes?.getPossibleNames() || [];
+        } catch (error) {
+            console.error(`Error getting cheer emote names for ${channel}:`, error);
+            return [];
+        }
     },
 
     getCheerEmote: (channel: string, name: string, bits: number) => {
         const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
-        if (channelEmotes?.cheerEmotes) {
-            return channelEmotes.cheerEmotes.getCheermoteDisplayInfo(name, bits, { background: 'dark', scale: 2, state: 'animated' });
+        try {
+            if (channelEmotes?.cheerEmotes) {
+                return channelEmotes.cheerEmotes.getCheermoteDisplayInfo(name, bits, { background: 'dark', scale: 2, state: 'animated' });
+            }
+        } catch (error) {
+            console.error(`Error getting cheer emote for ${channel}, ${name}, ${bits}:`, error);
         }
         return `${name}${bits}`;
     },
