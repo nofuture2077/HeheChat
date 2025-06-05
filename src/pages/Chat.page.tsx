@@ -183,7 +183,6 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         if (loginContext.user) {
             const userId = loginContext.user.id;
             EmoteStore.getUserEmotes(userId).then(async (userEmotes) => {
-                console.log("useremote", userEmotes);
                 if (!userEmotes || Date.now() - userEmotes.timestamp > 24 * 60 * 60 * 1000) { // Refresh if older than 24h
                     console.log("load useremote");
                     const api = loginContext.getApiClient();

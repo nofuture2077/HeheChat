@@ -164,7 +164,7 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
             const { channelBadges, channelEmotes } = await getBadgesAndEmotes(context, user.id);
             const sevenTVEmotes = await get7TVEmotes(user.id, user.name);
             const cheerEmotesData = await EmoteApiClient.getCheerEmotes(user.id);
-            const cheerEmotes = new HelixCheermoteList(cheerEmotesData);
+            const cheerEmotes = new HelixCheermoteList(Object.values(cheerEmotesData) as any);
             return {
                 user,
                 channelBadges: toMap(channelBadges as any[], (ba: any) => ba.id),
