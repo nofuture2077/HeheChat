@@ -2,7 +2,7 @@ import { LoginContext, getUserdata } from '@/commons/login';
 import { toMap } from '@/commons/helper';
 import { EmoteComponent } from '@/components/emote/emote';
 import PubSub from 'pubsub-js';
-import { EmoteStore } from '@/components/chat/emotestorage';
+import { EmoteStore, EmotePrefix } from '@/components/chat/emotestorage';
 
 interface sevenTVEmote {
     name: string;
@@ -36,6 +36,18 @@ interface sevenTVUser {
 const emoteSetUserNameMap: Record<string, string> = {};
 
 export async function get7TVEmotes(userId: string, username: string) {
+    // Try to get from EmoteStore first
+    const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.SEVENTV, userId);
+    if (cachedEmotes) {
+        // Convert array back to Map
+        const emoteMap = new Map();
+        cachedEmotes.emotes.forEach(emote => {
+            emoteMap.set(emote.name, emote);
+        });
+        return emoteMap;
+    }
+
+    // If not in store, fetch from API
     const user: sevenTVUser = await fetch('https://7tv.io/v3/users/twitch/' + userId)
         .then(res => {
             if (!res.ok) {
@@ -50,15 +62,30 @@ export async function get7TVEmotes(userId: string, username: string) {
 
     emoteSetUserNameMap[user.emote_set.id] = username;
     const emotes = toMap(user.emote_set.emotes, e => e.name);
+    
+    // Store in EmoteStore for future use
+    await EmoteStore.storeEmotes(EmotePrefix.SEVENTV, userId, Array.from(emotes.values()));
+    
     return emotes;
 }
 
 export async function getBadgesAndEmotes(context: LoginContext, userId: string) {
-    const api = context.getApiClient();
+    // Try to get from EmoteStore first
+    const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.CHANNEL, userId);
+    if (cachedEmotes && cachedEmotes.emotes.length > 0) {
+        return {
+            channelBadges: cachedEmotes.emotes[0],
+            channelEmotes: cachedEmotes.emotes[1]
+        };
+    }
 
+    // If not in store, fetch from API
+    const api = context.getApiClient();
     const channelEmotes = await api.chat.getChannelEmotes(userId);
     const channelBadges = await api.chat.getChannelBadges(userId);
 
+    // Store in EmoteStore for future use
+    await EmoteStore.storeEmotes(EmotePrefix.CHANNEL, userId, [channelBadges, channelEmotes]);
 
     return {
         channelBadges,
@@ -67,10 +94,22 @@ export async function getBadgesAndEmotes(context: LoginContext, userId: string) 
 }
 
 export async function getGlobalBadgesAndEmotes(context: LoginContext) {
-    const api = context.getApiClient();
+    // Try to get from EmoteStore first
+    const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.GLOBAL, 'global');
+    if (cachedEmotes && cachedEmotes.emotes.length > 0) {
+        return {
+            channelBadges: cachedEmotes.emotes[0],
+            channelEmotes: cachedEmotes.emotes[1]
+        };
+    }
 
+    // If not in store, fetch from API
+    const api = context.getApiClient();
     const channelEmotes = await api.chat.getGlobalEmotes();
     const channelBadges = await api.chat.getGlobalBadges();
+
+    // Store in EmoteStore for future use
+    await EmoteStore.storeEmotes(EmotePrefix.GLOBAL, 'global', [channelBadges, channelEmotes]);
 
     return {
         channelBadges,
@@ -97,8 +136,8 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
         const cheerEmotes = await api.bits.getCheermotes(user.id);
         return {
             user,
-            channelBadges: toMap(channelBadges, ba => ba.id),
-            channelEmotes: toMap(channelEmotes, em => em.name),
+            channelBadges: toMap(channelBadges as any[], (ba: any) => ba.id),
+            channelEmotes: toMap(channelEmotes as any[], (em: any) => em.name),
             cheerEmotes: cheerEmotes,
             sevenTVEmotes
         }
@@ -116,9 +155,9 @@ export async function getGlobalBadgesAndEmotesByNames(context: LoginContext) {
             name: "global",
         },
         //@ts-ignore
-        channelBadges: toMap(channelBadges, ba => ba.id),
+        channelBadges: toMap(channelBadges as any[], (ba: any) => ba.id),
         //@ts-ignore
-        channelEmotes: toMap(channelEmotes, em => em.name)
+        channelEmotes: toMap(channelEmotes as any[], (em: any) => em.name)
     };
 }
 
@@ -145,7 +184,8 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         DEFAULT_CHAT_EMOTES.emotes = await getBadgesAndEmotesByNames(context, channels);
     },
     updateUserEmote: async (userid: string) => {
-        const userEmotesData = await EmoteStore.getUserEmotes(userid);
+        // Use the new EmotePrefix.USER prefix
+        const userEmotesData = await EmoteStore.getEmotes(EmotePrefix.USER, userid);
         if (userEmotesData) {
             const userEmotesMap = new Map(userEmotesData.emotes.map(emote => [emote.name, emote]));
             DEFAULT_CHAT_EMOTES.emotes.set("user", userEmotesMap);
