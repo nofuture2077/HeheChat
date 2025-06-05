@@ -247,7 +247,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                     user: { name: channel },
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new HelixCheermoteList({}),
+                    cheerEmotes: new HelixCheermoteList([] as any),
                     sevenTVEmotes: new Map()
                 });
             }
@@ -258,7 +258,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 user: { name: channel },
                 channelBadges: new Map(),
                 channelEmotes: new Map(),
-                cheerEmotes: new HelixCheermoteList({}),
+                cheerEmotes: new HelixCheermoteList([] as any),
                 sevenTVEmotes: new Map()
             });
         } finally {
@@ -278,7 +278,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 DEFAULT_CHAT_EMOTES.emotes.set(channel, {
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new HelixCheermoteList({}),
+                    cheerEmotes: new HelixCheermoteList([] as any),
                     sevenTVEmotes: new Map()
                 });
             }
@@ -308,7 +308,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                     user: { name: channel },
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new HelixCheermoteList({}),
+                    cheerEmotes: new HelixCheermoteList([] as any),
                     sevenTVEmotes: new Map()
                 });
             }
