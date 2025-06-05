@@ -70,7 +70,7 @@ export function Raid(props: RaidProps) {
                 </Text>
                 {canCancelRaid && (
                   <Button
-                    variant="danger"
+                    variant="filled" color="red"
                     leftSection={<IconX size="1.125rem" />}
                     onClick={() => unraid(channelId)}
                   >Cancel</Button>
