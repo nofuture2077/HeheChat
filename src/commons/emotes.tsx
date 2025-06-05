@@ -164,7 +164,7 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
             const { channelBadges, channelEmotes } = await getBadgesAndEmotes(context, user.id);
             const sevenTVEmotes = await get7TVEmotes(user.id, user.name);
             const cheerEmotesData = await EmoteApiClient.getCheerEmotes(user.id);
-            const cheerEmotes = new HelixCheermoteList(Object.values(cheerEmotesData) as any);
+            const cheerEmotes = new HelixCheermoteList(cheerEmotesData);
             return {
                 user,
                 channelBadges: toMap(channelBadges as any[], (ba: any) => ba.id),
@@ -247,7 +247,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                     user: { name: channel },
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new HelixCheermoteList([] as any),
+                    cheerEmotes: new HelixCheermoteList({}),
                     sevenTVEmotes: new Map()
                 });
             }
@@ -258,7 +258,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 user: { name: channel },
                 channelBadges: new Map(),
                 channelEmotes: new Map(),
-                cheerEmotes: new HelixCheermoteList([] as any),
+                cheerEmotes: new HelixCheermoteList({}),
                 sevenTVEmotes: new Map()
             });
         } finally {
@@ -278,7 +278,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 DEFAULT_CHAT_EMOTES.emotes.set(channel, {
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new HelixCheermoteList([] as any),
+                    cheerEmotes: new HelixCheermoteList({}),
                     sevenTVEmotes: new Map()
                 });
             }
@@ -308,7 +308,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                     user: { name: channel },
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new HelixCheermoteList([] as any),
+                    cheerEmotes: new HelixCheermoteList({}),
                     sevenTVEmotes: new Map()
                 });
             }
