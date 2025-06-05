@@ -3,6 +3,7 @@ import { toMap } from '@/commons/helper';
 import { EmoteComponent } from '@/components/emote/emote';
 import PubSub from 'pubsub-js';
 import { EmoteStore, EmotePrefix } from '@/components/chat/emotestorage';
+import { EmoteApiClient } from '@/api/emotes';
 
 interface sevenTVEmote {
     name: string;
@@ -47,26 +48,24 @@ export async function get7TVEmotes(userId: string, username: string) {
         return emoteMap;
     }
 
-    // If not in store, fetch from API
-    const user: sevenTVUser = await fetch('https://7tv.io/v3/users/twitch/' + userId)
-        .then(res => {
-            if (!res.ok) {
-                throw new Error(`HTTP error! Status: ${res.status}`);
-            }
-            return res.json();
-        }).catch(err => ({
-            emote_set: {
-                emotes: []
-            }
-        }));
-
-    emoteSetUserNameMap[user.emote_set.id] = username;
-    const emotes = toMap(user.emote_set.emotes, e => e.name);
-    
-    // Store in EmoteStore for future use
-    await EmoteStore.storeEmotes(EmotePrefix.SEVENTV, userId, Array.from(emotes.values()));
-    
-    return emotes;
+    // If not in store, fetch from backend API
+    try {
+        const data = await EmoteApiClient.get7TVEmotes(userId, username);
+        
+        if (data.emoteSetId) {
+            emoteSetUserNameMap[data.emoteSetId] = username;
+        }
+        
+        const emotes = toMap(data.emotes, (e: any) => e.name);
+        
+        // Store in EmoteStore for future use
+        await EmoteStore.storeEmotes(EmotePrefix.SEVENTV, userId, Array.from(emotes.values()));
+        
+        return emotes;
+    } catch (error) {
+        console.error('Error fetching 7TV emotes:', error);
+        return new Map();
+    }
 }
 
 export async function getBadgesAndEmotes(context: LoginContext, userId: string) {
@@ -79,17 +78,24 @@ export async function getBadgesAndEmotes(context: LoginContext, userId: string) 
         };
     }
 
-    // If not in store, fetch from API
-    const api = context.getApiClient();
-    const channelEmotes = await api.chat.getChannelEmotes(userId);
-    const channelBadges = await api.chat.getChannelBadges(userId);
+    // If not in store, fetch from backend API
+    try {
+        const data = await EmoteApiClient.getChannelBadgesAndEmotes(userId);
+        const { channelBadges, channelEmotes } = data;
 
-    // Store in EmoteStore for future use
-    await EmoteStore.storeEmotes(EmotePrefix.CHANNEL, userId, [channelBadges, channelEmotes]);
+        // Store in EmoteStore for future use
+        await EmoteStore.storeEmotes(EmotePrefix.CHANNEL, userId, [channelBadges, channelEmotes]);
 
-    return {
-        channelBadges,
-        channelEmotes
+        return {
+            channelBadges,
+            channelEmotes
+        };
+    } catch (error) {
+        console.error('Error fetching channel badges and emotes:', error);
+        return {
+            channelBadges: [],
+            channelEmotes: []
+        };
     }
 }
 
@@ -103,47 +109,49 @@ export async function getGlobalBadgesAndEmotes(context: LoginContext) {
         };
     }
 
-    // If not in store, fetch from API
-    const api = context.getApiClient();
-    const channelEmotes = await api.chat.getGlobalEmotes();
-    const channelBadges = await api.chat.getGlobalBadges();
+    // If not in store, fetch from backend API
+    try {
+        const data = await EmoteApiClient.getGlobalBadgesAndEmotes();
+        const { channelBadges, channelEmotes } = data;
 
-    // Store in EmoteStore for future use
-    await EmoteStore.storeEmotes(EmotePrefix.GLOBAL, 'global', [channelBadges, channelEmotes]);
+        // Store in EmoteStore for future use
+        await EmoteStore.storeEmotes(EmotePrefix.GLOBAL, 'global', [channelBadges, channelEmotes]);
 
-    return {
-        channelBadges,
-        channelEmotes
+        return {
+            channelBadges,
+            channelEmotes
+        };
+    } catch (error) {
+        console.error('Error fetching global badges and emotes:', error);
+        return {
+            channelBadges: [],
+            channelEmotes: []
+        };
     }
 }
 
-export async function getProfilesByNames(context: LoginContext, usernames: string[]) {
-    const api = context.getApiClient();
-
-    const users = await api.users.getUsersByNames(usernames);
-
-    return toMap(users, user => user.name);
-}
-
 export async function getBadgesAndEmotesByNames(context: LoginContext, usernames: string[]) {
-    const api = context.getApiClient();
+    try {
+        const users = await EmoteApiClient.getUsersByNames(usernames);
 
-    const users = await api.users.getUsersByNames(usernames);
+        const data = await Promise.all(users.map(async (user: any) => {
+            const { channelBadges, channelEmotes } = await getBadgesAndEmotes(context, user.id);
+            const sevenTVEmotes = await get7TVEmotes(user.id, user.name);
+            const cheerEmotes = await EmoteApiClient.getCheerEmotes(user.id);
+            return {
+                user,
+                channelBadges: toMap(channelBadges as any[], (ba: any) => ba.id),
+                channelEmotes: toMap(channelEmotes as any[], (em: any) => em.name),
+                cheerEmotes: cheerEmotes,
+                sevenTVEmotes
+            }
+        }));
 
-    const data = await Promise.all(users.map(async (user) => {
-        const { channelBadges, channelEmotes } = await getBadgesAndEmotes(context, user.id);
-        const sevenTVEmotes = await get7TVEmotes(user.id, user.name);
-        const cheerEmotes = await api.bits.getCheermotes(user.id);
-        return {
-            user,
-            channelBadges: toMap(channelBadges as any[], (ba: any) => ba.id),
-            channelEmotes: toMap(channelEmotes as any[], (em: any) => em.name),
-            cheerEmotes: cheerEmotes,
-            sevenTVEmotes
-        }
-    }));
-
-    return toMap(data, d => d.user.name);
+        return toMap(data, d => d.user.name);
+    } catch (error) {
+        console.error('Error fetching badges and emotes by names:', error);
+        return new Map();
+    }
 }
 
 export async function getGlobalBadgesAndEmotesByNames(context: LoginContext) {
@@ -192,27 +200,93 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         }
     },
     updateChannel: async (context, channel) => {
-        if ((DEFAULT_CHAT_EMOTES.emotes.has(channel) && DEFAULT_CHAT_EMOTES.emotes.get(channel).emotes) || LOADING_CHAT_EMOTES[channel]) {
+        if ((DEFAULT_CHAT_EMOTES.emotes.has(channel) && DEFAULT_CHAT_EMOTES.emotes.get(channel)?.emotes) || LOADING_CHAT_EMOTES[channel]) {
             return;
         }
         LOADING_CHAT_EMOTES[channel] = true;
-        if (Object.keys(LOADING_CHAT_EMOTES).length === 1) {
-            const globalEmoteData = await getGlobalBadgesAndEmotesByNames(context);
-            DEFAULT_CHAT_EMOTES.emotes.set('global', globalEmoteData);
+        try {
+            if (Object.keys(LOADING_CHAT_EMOTES).length === 1) {
+                const globalEmoteData = await getGlobalBadgesAndEmotesByNames(context);
+                if (globalEmoteData) {
+                    DEFAULT_CHAT_EMOTES.emotes.set('global', globalEmoteData);
+                }
+            }
+            const emoteData = await getBadgesAndEmotesByNames(context, [channel]);
+            if (emoteData && emoteData.has(channel)) {
+                DEFAULT_CHAT_EMOTES.emotes.set(channel, emoteData.get(channel));
+            } else {
+                // Set a default empty object if no data is available
+                DEFAULT_CHAT_EMOTES.emotes.set(channel, {
+                    user: { name: channel },
+                    channelBadges: new Map(),
+                    channelEmotes: new Map(),
+                    cheerEmotes: {},
+                    sevenTVEmotes: new Map()
+                });
+            }
+        } catch (error) {
+            console.error(`Error updating channel ${channel}:`, error);
+            // Set a default empty object if an error occurs
+            DEFAULT_CHAT_EMOTES.emotes.set(channel, {
+                user: { name: channel },
+                channelBadges: new Map(),
+                channelEmotes: new Map(),
+                cheerEmotes: {},
+                sevenTVEmotes: new Map()
+            });
+        } finally {
+            LOADING_CHAT_EMOTES[channel] = false;
         }
-        const emoteData = await getBadgesAndEmotesByNames(context, [channel]);
-        DEFAULT_CHAT_EMOTES.emotes.set(channel, emoteData.get(channel));
     },
     updateUserInfo: async (context, channel) => {
-        if ((DEFAULT_CHAT_EMOTES.emotes.has(channel) && DEFAULT_CHAT_EMOTES.emotes.get(channel).user) || LOADING_PROFILES[channel]) {
+        if ((DEFAULT_CHAT_EMOTES.emotes.has(channel) && DEFAULT_CHAT_EMOTES.emotes.get(channel)?.user) || LOADING_PROFILES[channel]) {
             return;
         }
         LOADING_PROFILES[channel] = true;
-        const userData = await getUserdata(context, [channel]);
-        if (DEFAULT_CHAT_EMOTES.emotes.has(channel) && userData.get(channel) && userData.get(channel).user) {
-            DEFAULT_CHAT_EMOTES.emotes.get(channel).user = userData.get(channel).user;
-        } else {
-            DEFAULT_CHAT_EMOTES.emotes.set(channel, {user: userData.get(channel) ? userData.get(channel).user : undefined});
+        try {
+            const userData = await getUserdata(context, [channel]);
+            
+            // Initialize the channel entry if it doesn't exist
+            if (!DEFAULT_CHAT_EMOTES.emotes.has(channel)) {
+                DEFAULT_CHAT_EMOTES.emotes.set(channel, {
+                    channelBadges: new Map(),
+                    channelEmotes: new Map(),
+                    cheerEmotes: {},
+                    sevenTVEmotes: new Map()
+                });
+            }
+            
+            // Get the current channel data
+            const channelData = DEFAULT_CHAT_EMOTES.emotes.get(channel);
+            
+            // Update the user data if available
+            if (userData && userData.has(channel) && userData.get(channel)?.user) {
+                channelData.user = userData.get(channel).user;
+            } else {
+                // Set a default user object if no data is available
+                channelData.user = { name: channel };
+            }
+            
+            // Update the channel data
+            DEFAULT_CHAT_EMOTES.emotes.set(channel, channelData);
+        } catch (error) {
+            console.error(`Error updating user info for ${channel}:`, error);
+            // Ensure the channel has at least a basic user object
+            if (DEFAULT_CHAT_EMOTES.emotes.has(channel)) {
+                const channelData = DEFAULT_CHAT_EMOTES.emotes.get(channel);
+                channelData.user = { name: channel };
+                DEFAULT_CHAT_EMOTES.emotes.set(channel, channelData);
+            } else {
+                DEFAULT_CHAT_EMOTES.emotes.set(channel, {
+                    user: { name: channel },
+                    channelBadges: new Map(),
+                    channelEmotes: new Map(),
+                    cheerEmotes: {},
+                    sevenTVEmotes: new Map()
+                });
+            }
+        } finally {
+            LOADING_PROFILES[channel] = false;
         }
     },
     getBadge: (channel: string, badgeData: string, key: string) => {
@@ -329,13 +403,26 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
 }
 
 PubSub.subscribe('Update-seventTV', (m, data) => {
-    
-    if (data.type === 'add') {
-        const channel = emoteSetUserNameMap[data.data.emoteSetId];
-        DEFAULT_CHAT_EMOTES.emotes.get(channel)?.sevenTVEmotes?.set(data.data.emote, data.data.emoteData);
-    }
-    if (data.type === 'remove') {
-        const channel = emoteSetUserNameMap[data.data.emoteSetId];
-        DEFAULT_CHAT_EMOTES.emotes.get(channel)?.sevenTVEmotes?.delete(data.data.emote);
+    try {
+        if (data.type === 'add') {
+            const channel = emoteSetUserNameMap[data.data.emoteSetId];
+            if (channel && DEFAULT_CHAT_EMOTES.emotes.has(channel)) {
+                const channelData = DEFAULT_CHAT_EMOTES.emotes.get(channel);
+                // Initialize sevenTVEmotes if it doesn't exist
+                if (!channelData.sevenTVEmotes) {
+                    channelData.sevenTVEmotes = new Map();
+                }
+                channelData.sevenTVEmotes.set(data.data.emote, data.data.emoteData);
+                DEFAULT_CHAT_EMOTES.emotes.set(channel, channelData);
+            }
+        }
+        if (data.type === 'remove') {
+            const channel = emoteSetUserNameMap[data.data.emoteSetId];
+            if (channel && DEFAULT_CHAT_EMOTES.emotes.has(channel) && DEFAULT_CHAT_EMOTES.emotes.get(channel)?.sevenTVEmotes) {
+                DEFAULT_CHAT_EMOTES.emotes.get(channel).sevenTVEmotes.delete(data.data.emote);
+            }
+        }
+    } catch (error) {
+        console.error('Error handling 7TV update:', error);
     }
 })
