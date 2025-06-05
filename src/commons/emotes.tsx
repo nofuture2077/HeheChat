@@ -1,4 +1,5 @@
 import { LoginContext, getUserdata } from '@/commons/login';
+import { HelixCheermoteList } from '@twurple/api';
 import { toMap } from '@/commons/helper';
 import { EmoteComponent } from '@/components/emote/emote';
 import PubSub from 'pubsub-js';
@@ -155,82 +156,6 @@ interface CheerEmoteTier {
     };
 }
 
-// Class for handling cheer emotes
-class CheerEmotes {
-    private tiers: Map<string, CheerEmoteTier[]> = new Map();
-    private prefixes: string[] = [];
-
-    constructor(cheerEmoteData: any) {
-        this.initializeFromData(cheerEmoteData);
-    }
-
-    private initializeFromData(data: any) {
-        if (!data || !data.actions) return;
-
-        // Process each cheer emote action
-        data.actions.forEach((action: any) => {
-            const prefix = action.prefix.toLowerCase();
-            this.prefixes.push(prefix);
-            
-            // Create tiers for this prefix
-            const tiers: CheerEmoteTier[] = action.tiers.map((tier: any) => ({
-                id: tier.id,
-                minBits: tier.minBits,
-                color: tier.color,
-                images: {
-                    dark: {
-                        animated: tier.images.dark.animated['2'],
-                        static: tier.images.dark.static['2']
-                    },
-                    light: {
-                        animated: tier.images.light.animated['2'],
-                        static: tier.images.light.static['2']
-                    }
-                }
-            }));
-            
-            // Sort tiers by minBits in descending order
-            tiers.sort((a, b) => b.minBits - a.minBits);
-            
-            this.tiers.set(prefix, tiers);
-        });
-    }
-
-    // Get all possible cheer emote names/prefixes
-    getPossibleNames(): string[] {
-        return [...this.prefixes];
-    }
-
-    // Get display info for a specific cheer emote
-    getCheermoteDisplayInfo(name: string, bits: number, options: { background: 'dark' | 'light', scale: number, state: 'animated' | 'static' }): CheermoteDisplayInfo {
-        const prefix = name.toLowerCase();
-        const tiers = this.tiers.get(prefix);
-        
-        if (!tiers || tiers.length === 0) {
-            // Return a default object if the prefix is not found
-            return {
-                url: '',
-                color: '#979797',
-                isAnimated: options.state === 'animated'
-            };
-        }
-        
-        // Find the appropriate tier for the bits amount
-        const tier = tiers.find(t => bits >= t.minBits) || tiers[tiers.length - 1];
-        
-        // Get the URL based on the options
-        const url = options.background === 'dark' 
-            ? (options.state === 'animated' ? tier.images.dark.animated : tier.images.dark.static)
-            : (options.state === 'animated' ? tier.images.light.animated : tier.images.light.static);
-        
-        return {
-            url,
-            color: tier.color,
-            isAnimated: options.state === 'animated'
-        };
-    }
-}
-
 export async function getBadgesAndEmotesByNames(context: LoginContext, usernames: string[]) {
     try {
         const users = await EmoteApiClient.getUsersByNames(usernames);
@@ -239,7 +164,7 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
             const { channelBadges, channelEmotes } = await getBadgesAndEmotes(context, user.id);
             const sevenTVEmotes = await get7TVEmotes(user.id, user.name);
             const cheerEmotesData = await EmoteApiClient.getCheerEmotes(user.id);
-            const cheerEmotes = new CheerEmotes(cheerEmotesData);
+            const cheerEmotes = new HelixCheermoteList(cheerEmotesData);
             return {
                 user,
                 channelBadges: toMap(channelBadges as any[], (ba: any) => ba.id),
@@ -322,7 +247,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                     user: { name: channel },
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new CheerEmotes({}),
+                    cheerEmotes: new HelixCheermoteList({}),
                     sevenTVEmotes: new Map()
                 });
             }
@@ -333,7 +258,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 user: { name: channel },
                 channelBadges: new Map(),
                 channelEmotes: new Map(),
-                cheerEmotes: new CheerEmotes({}),
+                cheerEmotes: new HelixCheermoteList({}),
                 sevenTVEmotes: new Map()
             });
         } finally {
@@ -353,7 +278,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 DEFAULT_CHAT_EMOTES.emotes.set(channel, {
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new CheerEmotes({}),
+                    cheerEmotes: new HelixCheermoteList({}),
                     sevenTVEmotes: new Map()
                 });
             }
@@ -383,7 +308,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                     user: { name: channel },
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new CheerEmotes({}),
+                    cheerEmotes: new HelixCheermoteList({}),
                     sevenTVEmotes: new Map()
                 });
             }
