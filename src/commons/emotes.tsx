@@ -1,5 +1,11 @@
 import { LoginContext, getUserdata } from '@/commons/login';
 import { HelixCheermoteList } from '@twurple/api';
+
+// Define a minimal interface for cheer emote data based on what HelixCheermoteList expects
+interface CheerEmoteData {
+    prefix: string;
+    // Add other properties as needed
+}
 import { toMap } from '@/commons/helper';
 import { EmoteComponent } from '@/components/emote/emote';
 import PubSub from 'pubsub-js';
@@ -176,8 +182,9 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
                 let cheerEmotes;
                 
                 // Create a safe empty HelixCheermoteList with a valid structure
-                const emptyCheerEmotes: Record<string, any> = {};
-                cheerEmotes = new HelixCheermoteList(emptyCheerEmotes);
+                // Create a safe empty HelixCheermoteList
+                // Use type assertion to satisfy TypeScript while still passing an empty array
+                cheerEmotes = new HelixCheermoteList([] as any);
                 
                 // Try to fetch channel badges and emotes
                 try {
@@ -201,10 +208,7 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
                 try {
                     const cheerEmotesData = await EmoteApiClient.getCheerEmotes(user.id);
                     
-                    // Ensure cheerEmotesData is valid
-                    if (cheerEmotesData && typeof cheerEmotesData === 'object') {
-                        cheerEmotes = new HelixCheermoteList(cheerEmotesData);
-                    }
+                    cheerEmotes = new HelixCheermoteList(Object.values(cheerEmotesData) as any);
                 } catch (error) {
                     console.error(`Error fetching cheer emotes for ${user.name}:`, error);
                     // Continue with empty HelixCheermoteList
@@ -224,7 +228,7 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
                     user,
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new HelixCheermoteList({}),
+                    cheerEmotes: new HelixCheermoteList([] as any),
                     sevenTVEmotes: new Map()
                 };
             }
@@ -376,7 +380,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 user: { name: channel },
                 channelBadges: new Map(),
                 channelEmotes: new Map(),
-                cheerEmotes: new HelixCheermoteList({}),
+                cheerEmotes: new HelixCheermoteList([] as any),
                 sevenTVEmotes: new Map()
             });
         }
@@ -449,9 +453,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             // 3. Cheer emotes
             try {
                 const cheerEmotesData = await EmoteApiClient.getCheerEmotes(user.id);
-                if (cheerEmotesData && typeof cheerEmotesData === 'object') {
-                    channelData.cheerEmotes = new HelixCheermoteList(cheerEmotesData);
-                }
+                channelData.cheerEmotes = new HelixCheermoteList(Object.values(cheerEmotesData) as any);
             } catch (error) {
                 console.error(`Error loading cheer emotes for ${channel}:`, error);
                 // Keep the default empty HelixCheermoteList
@@ -479,7 +481,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 user: { name: channel },
                 channelBadges: new Map(),
                 channelEmotes: new Map(),
-                cheerEmotes: new HelixCheermoteList({}),
+                cheerEmotes: new HelixCheermoteList([] as any),
                 sevenTVEmotes: new Map()
             });
         }
