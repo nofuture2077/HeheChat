@@ -38,6 +38,75 @@ interface sevenTVUser {
 
 const emoteSetUserNameMap: Record<string, string> = {};
 
+type CheermoteImageSet = {
+    [scale: string]: string;
+};
+
+type CheermoteImages = {
+    dark: {
+        animated: CheermoteImageSet;
+        static: CheermoteImageSet;
+    };
+    light: {
+        animated: CheermoteImageSet;
+        static: CheermoteImageSet;
+    };
+};
+
+interface CheermoteTier {
+    min_bits: number;
+    id: string;
+    color: string;
+    images: CheermoteImages;
+}
+
+interface Cheermote {
+    prefix: string;
+    tiers: CheermoteTier[];
+    can_cheer: boolean;
+    show_in_bits_card: boolean;
+}
+
+interface CheermoteData {
+    [prefix: string]: Cheermote;
+}
+
+type DisplayOptions = {
+    background: 'dark' | 'light';
+    scale: 1 | 1.5 | 2 | 3 | 4;
+    state: 'animated' | 'static';
+};
+
+type CheermoteDisplayInfo = {
+    url: string;
+    color: string;
+} | null;
+
+function getCheermoteDisplayInfo(
+    name: string,
+    bits: number,
+    options: DisplayOptions,
+    data: CheermoteData
+): CheermoteDisplayInfo {
+    const cheer = data[name];
+    if (!cheer) return null;
+
+    const { background, scale, state } = options;
+
+    // Find the correct tier
+    const tier = [...cheer.tiers].reverse().find(t => bits >= t.min_bits);
+    if (!tier) return null;
+
+    const imageSet = tier.images?.[background]?.[state];
+    const url = imageSet?.[scale.toString()];
+    if (!url) return null;
+
+    return {
+        url,
+        color: tier.color,
+    };
+}
+
 export async function get7TVEmotes(userId: string, username: string) {
     // Try to get from EmoteStore first
     const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.SEVENTV, userId);
@@ -198,7 +267,7 @@ export async function getBadgesAndEmotesByNames(usernames: string[]) {
                     user,
                     channelBadges: new Map(),
                     channelEmotes: new Map(),
-                    cheerEmotes: new HelixCheermoteList([] as any),
+                    cheerEmotes: new Map(),
                     sevenTVEmotes: new Map()
                 };
             }
@@ -302,7 +371,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 user: { name: channel },
                 channelBadges: new Map(),
                 channelEmotes: new Map(),
-                cheerEmotes: new HelixCheermoteList([] as any),
+                cheerEmotes: new Map(),
                 sevenTVEmotes: new Map()
             });
         }
@@ -375,7 +444,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             // 3. Cheer emotes
             try {
                 const cheerEmotesData = await EmoteApiClient.getCheerEmotes(user.id);
-                channelData.cheerEmotes = new HelixCheermoteList(Object.values(cheerEmotesData) as any);
+                channelData.cheerEmotes =  cheerEmotesData;
             } catch (error) {
                 console.error(`Error loading cheer emotes for ${channel}:`, error);
                 // Keep the default empty HelixCheermoteList
@@ -403,7 +472,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 user: { name: channel },
                 channelBadges: new Map(),
                 channelEmotes: new Map(),
-                cheerEmotes: new HelixCheermoteList([] as any),
+                cheerEmotes: new Map(),
                 sevenTVEmotes: new Map()
             });
         }
@@ -622,21 +691,9 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 return [];
             }
             
-            // Check if getPossibleNames method exists
-            if (typeof channelEmotes.cheerEmotes.getPossibleNames !== 'function') {
-                console.warn(`getPossibleNames is not a function for ${channel}`);
-                return [];
-            }
-            
             // Try to get the cheer emote names
             try {
-                const names = channelEmotes.cheerEmotes.getPossibleNames();
-                
-                // Validate names
-                if (!Array.isArray(names)) {
-                    console.warn(`Invalid cheer emote names for ${channel}: not an array`);
-                    return [];
-                }
+                const names = Object.keys(channelEmotes.cheerEmotes);         
                 
                 return names;
             } catch (namesError) {
@@ -678,32 +735,13 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             if (!channelEmotes?.cheerEmotes) {
                 return `${name}${bits}`;
             }
-            
-            // Check if getCheermoteDisplayInfo method exists
-            if (typeof channelEmotes.cheerEmotes.getCheermoteDisplayInfo !== 'function') {
-                console.warn(`getCheermoteDisplayInfo is not a function for ${channel}`);
-                return `${name}${bits}`;
-            }
-            
-            // Try to get the cheer emote display info
-            try {
-                const displayInfo = channelEmotes.cheerEmotes.getCheermoteDisplayInfo(name, bits, { 
+
+            return getCheermoteDisplayInfo(name, bits, { 
                     background: 'dark', 
                     scale: 2, 
                     state: 'animated' 
-                });
-                
-                // Validate display info
-                if (!displayInfo || typeof displayInfo !== 'object') {
-                    console.warn(`Invalid display info for ${name}${bits}`);
-                    return `${name}${bits}`;
-                }
-                
-                return displayInfo;
-            } catch (cheerError) {
-                console.error(`Error getting cheer emote display info for ${channel}, ${name}, ${bits}:`, cheerError);
-                return `${name}${bits}`;
-            }
+            }, channelEmotes.cheerEmotes);
+            
         } catch (error) {
             console.error(`Error getting cheer emote for ${channel}, ${name}, ${bits}:`, error);
             return `${name}${bits}`;
