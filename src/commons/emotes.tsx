@@ -266,22 +266,6 @@ export async function getGlobalEmotes() {
     }
 }
 
-export async function getGlobalBadgesAndEmotesByNames() {
-    const channelBadges = await getGlobalBadges();
-    const channelEmotes = await getGlobalEmotes();
-
-    return {
-        //@ts-ignore
-        user: {
-            name: "global",
-        },
-        //@ts-ignore
-        channelBadges: toMap(channelBadges as any[], (ba: any) => ba.id),
-        //@ts-ignore
-        channelEmotes: toMap(channelEmotes as any[], (em: any) => em.name)
-    };
-}
-
 export interface ChatEmotes {
     emotes: Map<string, any>,
     updateChannel: (channel: string) => Promise<void>;
@@ -367,16 +351,20 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             // Try to load global emotes if this is the first channel being loaded
             if (Object.keys(LOADING_CHAT_EMOTES).length === 1) {
                 try {
-                    const globalEmoteData = await getGlobalBadgesAndEmotesByNames();
+                    const globalBadgesData = await getGlobalBadges();
+                    const globalEmoteData = await getGlobalEmotes();
                     if (globalEmoteData) {
-                        DEFAULT_CHAT_EMOTES.emotes.set('global', globalEmoteData);
+                        DEFAULT_CHAT_EMOTES.emotes.set('global', {
+                            user: { name: 'global' },
+                            channelEmotes: toMap(globalEmoteData, (ba: any) => ba.name),
+                            channelBadges: toMap(globalBadgesData, (ba: any) => ba.id),
+                        });
                     }
                 } catch (error) {
                     console.error('Error loading global emotes:', error);
                     // Continue with empty global emotes
                     if (!DEFAULT_CHAT_EMOTES.emotes.has('global')) {
                         DEFAULT_CHAT_EMOTES.emotes.set('global', {
-                            user: { name: 'global' },
                             channelBadges: new Map(),
                             channelEmotes: new Map()
                         });
