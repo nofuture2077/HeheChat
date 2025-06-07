@@ -35,7 +35,7 @@ export const EmoteComponent: React.FC<EmoteComponentProps> = ({ imageUrl, largeI
 
 export const EmoteComponentSimple: React.FC<EmoteComponentProps> = ({ imageUrl, largeImageUrl, name, type, marginL, large }) => {
   return (
-      <img src={large ? largeImageUrl : imageUrl} alt={name} width='auto' height='1.5rem' style={{marginLeft: marginL, display: 'inline', verticalAlign: 'bottom'}}  />
+      <img src={large ? largeImageUrl : imageUrl} alt={name} style={{marginLeft: marginL, display: 'inline', verticalAlign: 'bottom', height: "1.5rem", width: "auto"}}  />
   );
 };
 
