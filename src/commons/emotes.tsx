@@ -633,8 +633,24 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             if (!DEFAULT_CHAT_EMOTES.emotes.has(channel)) {
                 return text;
             }
+
+            const large = true;
             
             const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
+
+            if (channelEmotes?.channelEmotes?.get(text)) {
+                const emote = channelEmotes?.channelEmotes?.get(text);
+                // return image node with emote
+                return <EmoteComponent key={key} imageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '1.0'})} largeImageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '2.0'})} name={text} large={large} type='Twitch'/>;
+            }
+
+            const globalEmotes = DEFAULT_CHAT_EMOTES.emotes.get('global');
+
+            if (globalEmotes?.emotes?.get(text)) {
+                const emote = globalEmotes?.emotes?.get(text);
+                // return image node with emote
+                return <EmoteComponent key={key} imageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '1.0'})} largeImageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '2.0'})} name={text} large={large} type='Twitch'/>;
+            }
             
             // Check if sevenTVEmotes exists
             if (!channelEmotes?.sevenTVEmotes) {
