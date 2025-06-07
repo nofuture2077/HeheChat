@@ -1,7 +1,7 @@
 import { getUserdata, LoginContext } from '@/commons/login';
 import { HelixCheermoteList } from '@twurple/api';
 import { toMap } from '@/commons/helper';
-import { EmoteComponent } from '@/components/emote/emote';
+import { EmoteComponentSimple, EmoteComponent } from '@/components/emote/emote';
 import PubSub from 'pubsub-js';
 import { EmoteStore, EmotePrefix } from '@/components/chat/emotestorage';
 import { EmoteApiClient } from '@/api/emotes';
@@ -561,7 +561,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         if (channelEmotes?.emotes?.get(text)) {
             const emote = channelEmotes?.emotes?.get(text);
             // return image node with emote
-            return <EmoteComponent key={key} imageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '1.0'})} largeImageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '2.0'})} name={text} large={large} type='Twitch'/>;
+            return <EmoteComponentSimple key={key} imageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '1.0'})} largeImageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '2.0'})} name={text} large={large} type='Twitch'/>;
         }
 
          const globalEmotes = DEFAULT_CHAT_EMOTES.emotes.get('global');
@@ -569,7 +569,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         if (globalEmotes?.emotes?.get(text)) {
             const emote = globalEmotes?.emotes?.get(text);
             // return image node with emote
-            return <EmoteComponent key={key} imageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '1.0'})} largeImageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '2.0'})} name={text} large={large} type='Twitch'/>;
+            return <EmoteComponentSimple key={key} imageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '1.0'})} largeImageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '2.0'})} name={text} large={large} type='Twitch'/>;
         }
 
         if (channelEmotes?.sevenTVEmotes) {
@@ -588,7 +588,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             }
             
             // Create the emote component
-            return <EmoteComponent 
+            return <EmoteComponentSimple 
                 key={key} 
                 imageUrl={`${emoteData.host.url}/${emoteData.host.files[1].name}`} 
                 largeImageUrl={`${emoteData.host.url}/${emoteData.host.files[3].name}`} 
