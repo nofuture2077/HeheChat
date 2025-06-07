@@ -3,13 +3,14 @@ import { formatTime, formatString } from '../../commons/helper';
 import { Text, ActionIcon } from "@mantine/core"
 import classes from './systemmessage.module.css';
 import { IconSpeakerphone } from '@tabler/icons-react';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../ApplicationContext';
 import { ModActions } from './mod/modactions';
 import { getEventStyle } from '../events/eventhelper';
 import { EventType, EventTypeMapping } from '../../commons/events';
 import { ParsedMessagePart } from "../../commons/message";
-import { parsedPartsToHtml, joinWithSpace } from './ChatMessage';
+import { joinWithSpace } from "../../commons/helper";
+import { parsedPartsToHtml } from './ChatMessage';
 
 export type SystemMessageProps = {
     msg: SystemMessage;
