@@ -78,8 +78,8 @@ type DisplayOptions = {
 };
 
 type CheermoteDisplayInfo = {
-    url: string;
-    color: string;
+    url?: string;
+    color?: string;
 } | null;
 
 function getCheermoteDisplayInfo(
@@ -89,17 +89,17 @@ function getCheermoteDisplayInfo(
     data: CheermoteData
 ): CheermoteDisplayInfo {
     const cheer = data[name];
-    if (!cheer) return null;
+    if (!cheer) return {};
 
     const { background, scale, state } = options;
 
     // Find the correct tier
     const tier = [...cheer.tiers].reverse().find(t => bits >= t.min_bits);
-    if (!tier) return null;
+    if (!tier) return {};
 
     const imageSet = tier.images?.[background]?.[state];
     const url = imageSet?.[scale.toString()];
-    if (!url) return null;
+    if (!url) return {};
 
     return {
         url,
