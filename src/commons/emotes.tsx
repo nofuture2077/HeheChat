@@ -357,7 +357,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                         DEFAULT_CHAT_EMOTES.emotes.set('global', {
                             user: { name: 'global' },
                             channelEmotes: toMap(globalEmoteData, (ba: any) => ba.name),
-                            channelBadges: toMap(globalBadgesData, (ba: any) => ba.id),
+                            channelBadges: toMap(globalBadgesData, (ba: any) => ba.set_id),
                         });
                     }
                 } catch (error) {
@@ -399,7 +399,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 const channelEmotes = await getChannelEmotes(user.id);
                 
                 channelData.channelBadges = Array.isArray(channelBadges) 
-                    ? toMap(channelBadges as any[], (ba: any) => ba.id) 
+                    ? toMap(channelBadges as any[], (ba: any) => ba.set_id) 
                     : new Map();
                 channelData.channelEmotes = Array.isArray(channelEmotes) 
                     ? toMap(channelEmotes as any[], (em: any) => em.name) 
