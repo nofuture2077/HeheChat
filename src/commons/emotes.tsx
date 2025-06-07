@@ -122,8 +122,8 @@ type BadgeSet = {
   versions: BadgeVersion[];
 };
 
-function getBadgeImageHtml(badges: BadgeSet[], setId: string, versionId: string): string | null {
-  const badgeSet = badges.find(b => b.set_id === setId);
+function getBadgeImageHtml(badges: Map<string, BadgeSet>, setId: string, versionId: string): string | null {
+  const badgeSet = badges.values().find(b => b.set_id === setId);
   if (!badgeSet) return null;
 
   const version = badgeSet.versions.find(v => v.id === versionId);
