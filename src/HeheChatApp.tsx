@@ -147,6 +147,7 @@ export default function HeheChat() {
                 profileData.config.channels ??= [];
                 profileData.config.raidTargets ??= [];
                 profileData.config.hideEvents ??= DEFAULT_CONFIG.hideEvents;
+                profileData.config.skipEmotesInTTS ??= true;
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
@@ -371,6 +372,7 @@ export default function HeheChat() {
     const setBrowserSourceVisual = (value: boolean) => updateConfig('browserSourceVisual', value);
     const setAlertBoost = (value: number) => updateConfig('alertBoost', value);
     const setVisualAlertDelay = (value: number) => updateConfig('visualAlertDelay', value);
+    const setSkipEmotesInTTS = (value: boolean) => updateConfig('skipEmotesInTTS', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -621,7 +623,8 @@ export default function HeheChat() {
         setBrowserSourceAudio,
         setBrowserSourceVisual,
         setAlertBoost,
-        setVisualAlertDelay
+        setVisualAlertDelay,
+        setSkipEmotesInTTS
     };
 
     const appLogin = {

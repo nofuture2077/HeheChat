@@ -239,6 +239,15 @@ export function AlertSettings() {
                     <Slider w="calc(100% - 20px)" m="10" value={AlertSystem.jingleExtra} onChange={(extra) => { AlertSystem.setJingleExtra(extra); forceUpdate(); }} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
                     <Text size="sm">Text to Speech</Text>
                     <Slider w="calc(100% - 20px)" m="10" value={AlertSystem.ttsExtra} onChange={(extra) => { AlertSystem.setTTSExtra(extra); forceUpdate(); }} min={-250} max={500} label={(value) => `${value}ms`} marks={marks} />
+                    <Switch 
+                        checked={config.skipEmotesInTTS} 
+                        onChange={(event) => { 
+                            config.setSkipEmotesInTTS(event.currentTarget.checked); 
+                            forceUpdate(); 
+                        }} 
+                        label="Skip emotes in TTS" 
+                        size="lg" 
+                    />
                     <Text size="sm">Visual Alert (seconds)</Text>
                     <Slider 
                         w="calc(100% - 20px)" 

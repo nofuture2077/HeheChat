@@ -8,6 +8,7 @@ import PubSub from 'pubsub-js';
 import _ from "underscore";
 import { AlertConfig } from "@/components/events/alertconfigstorage";
 import { formatEventText } from "@/components/events/eventlist";
+import { DEFAULT_CHAT_EMOTES } from "@/commons/emotes";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -382,6 +383,47 @@ class AlertPlayer {
         );
         // Then remove URLs
         cleanedMessage = cleanedMessage.replace(/https?:\/\/[^\s]+/g, "");
+
+        // Remove emotes if skipEmotesInTTS is enabled
+        if (this.config?.skipEmotesInTTS) {
+            // Get all channels
+            const channels = this.config.channels || [];
+            
+            // Split message into words
+            const words = cleanedMessage.split(/\s+/);
+            
+            // Filter out words that are emotes
+            const filteredWords = words.filter(word => {
+                // Skip empty words
+                if (!word.trim()) return true;
+                
+                // Check if word is an emote in any channel
+                for (const channel of channels) {
+                    if (!DEFAULT_CHAT_EMOTES.emotes.has(channel)) continue;
+                    
+                    const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
+                    
+                    // Check channel emotes
+                    if (channelEmotes?.channelEmotes?.get(word)) return false;
+                    
+                    // Check 7TV emotes
+                    if (channelEmotes?.sevenTVEmotes?.get(word)) return false;
+                }
+                
+                // Check global emotes
+                if (DEFAULT_CHAT_EMOTES.emotes.has('global')) {
+                    const globalEmotes = DEFAULT_CHAT_EMOTES.emotes.get('global');
+                    if (globalEmotes?.channelEmotes?.get(word)) return false;
+                }
+                
+                // Not an emote, keep the word
+                return true;
+            });
+            
+            // Join filtered words back into a string
+            cleanedMessage = filteredWords.join(' ');
+        }
+        
         return cleanedMessage;
     }
 

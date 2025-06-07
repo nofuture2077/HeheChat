@@ -45,6 +45,7 @@ export interface ConfigData {
     browserSourceVisual: boolean;
     alertBoost: number;
     visualAlertDelay: number;
+    skipEmotesInTTS: boolean;
     systemMessageInChat: Partial<Record<SystemMessageMainType, boolean>>,
     hideEvents: Partial<Record<SystemMessageMainType, boolean>>,
     receivedShares: string[],
@@ -79,6 +80,7 @@ export interface Config extends ConfigData {
     setPlayAlerts: (val: boolean) => void;
     setAlertBoost: (val: number) => void;
     setVisualAlertDelay: (val: number) => void;
+    setSkipEmotesInTTS: (val: boolean) => void;
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => void;
     setHideEvents: (type: SystemMessageMainType, val: boolean) => void;
     loadReceivedShares: () => void;
@@ -123,6 +125,7 @@ export const DEFAULT_CONFIG: Config = {
     playAlerts: false,
     alertBoost: 1.0,
     visualAlertDelay: 8,
+    skipEmotesInTTS: false,
     hideViewers: false,
     hideOwnViewers: false,
     hideHypetrain: false,
@@ -204,6 +207,7 @@ export const DEFAULT_CONFIG: Config = {
     setBrowserSourceVisual: (val) => {},
     setAlertBoost: (val) => {},
     setVisualAlertDelay: (val) => {},
+    setSkipEmotesInTTS: (val) => {},
 };
 
 export const DB_VERSION = 8;
