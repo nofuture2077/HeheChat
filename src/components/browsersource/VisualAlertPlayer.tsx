@@ -37,7 +37,7 @@ function HighlightedText({ text }: HighlightedTextProps) {
 }
 
 function formatText(text: string, emotes: ChatEmotes, channel: string) {
-  return joinWithSpace(text.split(' ').map((word, index) => emotes.checkEmote(word, "" + index, channel, true)));
+  return joinWithSpace(text.split(' ').map((word, index) => emotes.checkEmote(channel, word, "" + index, true)));
 }
 
 export default function VisualAlertPlayer() {
