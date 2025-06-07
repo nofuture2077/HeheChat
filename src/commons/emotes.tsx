@@ -1,16 +1,11 @@
-import { LoginContext, getUserdata } from '@/commons/login';
+import { getUserdata, LoginContext } from '@/commons/login';
 import { HelixCheermoteList } from '@twurple/api';
-
-// Define a minimal interface for cheer emote data based on what HelixCheermoteList expects
-interface CheerEmoteData {
-    prefix: string;
-    // Add other properties as needed
-}
 import { toMap } from '@/commons/helper';
 import { EmoteComponent } from '@/components/emote/emote';
 import PubSub from 'pubsub-js';
 import { EmoteStore, EmotePrefix } from '@/components/chat/emotestorage';
 import { EmoteApiClient } from '@/api/emotes';
+import { buildEmoteImageUrl } from '../commons/twitch';
 
 interface sevenTVEmote {
     name: string;
@@ -75,7 +70,7 @@ export async function get7TVEmotes(userId: string, username: string) {
     }
 }
 
-export async function getBadgesAndEmotes(context: LoginContext, userId: string) {
+export async function getBadgesAndEmotes(userId: string) {
     // Try to get from EmoteStore first
     const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.CHANNEL, userId);
     if (cachedEmotes && cachedEmotes.emotes.length > 0) {
@@ -106,7 +101,7 @@ export async function getBadgesAndEmotes(context: LoginContext, userId: string) 
     }
 }
 
-export async function getGlobalBadgesAndEmotes(context: LoginContext) {
+export async function getGlobalBadgesAndEmotes() {
     // Try to get from EmoteStore first
     const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.GLOBAL, 'global');
     if (cachedEmotes && cachedEmotes.emotes.length > 0) {
@@ -137,32 +132,7 @@ export async function getGlobalBadgesAndEmotes(context: LoginContext) {
     }
 }
 
-// Interface for CheermoteDisplayInfo returned by getCheermoteDisplayInfo
-interface CheermoteDisplayInfo {
-    url: string;
-    color: string;
-    backgroundColor?: string;
-    isAnimated: boolean;
-}
-
-// Interface for CheerEmoteTier
-interface CheerEmoteTier {
-    id: string;
-    minBits: number;
-    color: string;
-    images: {
-        dark: {
-            animated: string;
-            static: string;
-        };
-        light: {
-            animated: string;
-            static: string;
-        };
-    };
-}
-
-export async function getBadgesAndEmotesByNames(context: LoginContext, usernames: string[]) {
+export async function getBadgesAndEmotesByNames(usernames: string[]) {
     try {
         const users = await EmoteApiClient.getUsersByNames(usernames);
         
@@ -188,7 +158,7 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
                 
                 // Try to fetch channel badges and emotes
                 try {
-                    const result = await getBadgesAndEmotes(context, user.id);
+                    const result = await getBadgesAndEmotes(user.id);
                     channelBadges = result.channelBadges || [];
                     channelEmotes = result.channelEmotes || [];
                 } catch (error) {
@@ -241,8 +211,8 @@ export async function getBadgesAndEmotesByNames(context: LoginContext, usernames
     }
 }
 
-export async function getGlobalBadgesAndEmotesByNames(context: LoginContext) {
-    const { channelBadges, channelEmotes } = await getGlobalBadgesAndEmotes(context);
+export async function getGlobalBadgesAndEmotesByNames() {
+    const { channelBadges, channelEmotes } = await getGlobalBadgesAndEmotes();
 
     return {
         //@ts-ignore
@@ -258,11 +228,12 @@ export async function getGlobalBadgesAndEmotesByNames(context: LoginContext) {
 
 export interface ChatEmotes {
     emotes: Map<string, any>,
-    update: (context: LoginContext, channels: string[]) => Promise<void>;
-    updateChannel: (context: LoginContext, channel: string) => Promise<void>;
+    update: (channels: string[]) => Promise<void>;
+    updateChannel: (channel: string) => Promise<void>;
     updateUserInfo: (context: LoginContext, channel: string) => Promise<void>;
     getBadge: (channel: string, badge: string, key: string) => any;
     getEmote: (channel: string, word: string, key: string) => any;
+    checkEmote: (channel: string, word: string, key: string, large: boolean) => any;
     getCheerEmotes: (channel: string) => string[];
     getCheerEmote: (channel: string, name: string, bits: number) => any;
     getLogo: (channel: string) => any;
@@ -275,14 +246,8 @@ const LOADING_PROFILES: {[key: string]: boolean} = {};
 
 export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     emotes: new Map(),
-    update: async (context, channels) => {
-        try {
-            // Validate input
-            if (!context) {
-                console.warn('Invalid context: null or undefined');
-                return;
-            }
-            
+    update: async (channels) => {
+        try {            
             if (!channels || !Array.isArray(channels) || channels.length === 0) {
                 console.warn('Invalid channels array:', channels);
                 return;
@@ -304,7 +269,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             
             // Get emotes for all valid channels
             try {
-                const emotes = await getBadgesAndEmotesByNames(context, validChannels);
+                const emotes = await getBadgesAndEmotesByNames(validChannels);
                 
                 // Validate result
                 if (!(emotes instanceof Map)) {
@@ -368,7 +333,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             console.error(`Error updating user emotes for user ID ${userid}:`, error);
         }
     },
-    updateChannel: async (context, channel) => {
+    updateChannel: async (channel) => {
         if ((DEFAULT_CHAT_EMOTES.emotes.has(channel) && DEFAULT_CHAT_EMOTES.emotes.get(channel)?.emotes) || LOADING_CHAT_EMOTES[channel]) {
             return;
         }
@@ -389,7 +354,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             // Try to load global emotes if this is the first channel being loaded
             if (Object.keys(LOADING_CHAT_EMOTES).length === 1) {
                 try {
-                    const globalEmoteData = await getGlobalBadgesAndEmotesByNames(context);
+                    const globalEmoteData = await getGlobalBadgesAndEmotesByNames();
                     if (globalEmoteData) {
                         DEFAULT_CHAT_EMOTES.emotes.set('global', globalEmoteData);
                     }
@@ -429,7 +394,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             
             // 1. Channel badges and emotes
             try {
-                const { channelBadges, channelEmotes } = await getBadgesAndEmotes(context, user.id);
+                const { channelBadges, channelEmotes } = await getBadgesAndEmotes(user.id);
                 channelData.channelBadges = Array.isArray(channelBadges) 
                     ? toMap(channelBadges as any[], (ba: any) => ba.id) 
                     : new Map();
@@ -585,6 +550,55 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             console.error(`Error getting badge for ${badgeData}:`, error);
             return "";
         }
+    },
+    checkEmote: (channel: string, text: string, key: string, large: boolean) => {
+        if (!DEFAULT_CHAT_EMOTES.emotes.has(channel)) {
+            return text;
+        }
+        
+        const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
+
+        if (channelEmotes?.emotes?.get(text)) {
+            const emote = channelEmotes?.emotes?.get(text);
+            // return image node with emote
+            return <EmoteComponent key={key} imageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '1.0'})} largeImageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '2.0'})} name={text} large={large} type='Twitch'/>;
+        }
+
+         const globalEmotes = DEFAULT_CHAT_EMOTES.emotes.get('global');
+
+        if (globalEmotes?.emotes?.get(text)) {
+            const emote = globalEmotes?.emotes?.get(text);
+            // return image node with emote
+            return <EmoteComponent key={key} imageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '1.0'})} largeImageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '2.0'})} name={text} large={large} type='Twitch'/>;
+        }
+
+        if (channelEmotes?.sevenTVEmotes) {
+            const emote = channelEmotes.sevenTVEmotes.get(text);
+            if (!emote || !emote.data) {
+                return text;
+            }
+
+            const emoteData = emote.data;
+
+            // Validate emote data structure
+            if (!emoteData.host || !emoteData.host.url || !emoteData.host.files || 
+                !Array.isArray(emoteData.host.files) || emoteData.host.files.length < 4) {
+                console.warn(`Invalid emote data structure for ${text}:`, emoteData);
+                return text;
+            }
+            
+            // Create the emote component
+            return <EmoteComponent 
+                key={key} 
+                imageUrl={`${emoteData.host.url}/${emoteData.host.files[1].name}`} 
+                largeImageUrl={`${emoteData.host.url}/${emoteData.host.files[3].name}`} 
+                name={text} 
+                marginL={emoteData.flags ? '-1.5em' : undefined} 
+                type='7 TV'
+            />;
+        }
+
+        return text;
     },
 
     getEmote: (channel: string, text: string, key: string) => {

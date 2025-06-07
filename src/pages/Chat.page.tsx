@@ -216,7 +216,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         }, 5000);
 
         (config.channels || []).forEach(channel => {
-            emotes.updateChannel(loginContext, channel).then(forceUpdate);
+            emotes.updateChannel(channel).then(forceUpdate);
         });
         const state = localStorage.getItem('hehe-token_state') || '';
         AlertSystem.addNewChannels(config.channels);

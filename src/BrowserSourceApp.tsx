@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import PubSub from 'pubsub-js';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
-import { ProfileContext } from './ApplicationContext';
+import { ProfileContext, ChatEmotesContext } from './ApplicationContext';
 import VisualAlertPlayer from './components/browsersource/VisualAlertPlayer';
+import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { AlertSystem } from './components/alerts/alertplayer';
 import { BrowserSourceAlertStatusIndicator } from './components/alerts/BrowserSourceAlertStatusIndicator';
 import { initializeStoragePatches } from './commons/patches';
@@ -23,6 +24,7 @@ window.addEventListener("click", () => {
 export default function BrowserSource({ token, preview }: BrowserSourceProps) {
   const backendWorkerRef = useRef<Worker>();
   const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE});
+  const [chatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
   const documentVisible = useDocumentVisibility();
   const networkStatus = useNetwork();
 
@@ -93,6 +95,7 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
         const profile: Profile = data.profile;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
+        chatEmotes.update(profile.config.channels);
       }
 
       if (data.type === 'sharedata') {
@@ -166,7 +169,9 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
   }, [networkStatus.online, documentVisible]);
 
   return (<ProfileContext.Provider value={profile}>
-    <VisualAlertPlayer />
-    <BrowserSourceAlertStatusIndicator/>
+    <ChatEmotesContext.Provider value={chatEmotes}>
+      <VisualAlertPlayer />
+      <BrowserSourceAlertStatusIndicator/>
+    </ChatEmotesContext.Provider>
   </ProfileContext.Provider>);
 }

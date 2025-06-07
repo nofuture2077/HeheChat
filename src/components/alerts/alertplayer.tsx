@@ -525,6 +525,12 @@ class AlertPlayer {
             return part.text;
         }).join(' ');
     }
+
+    parsedPartsToParts(parsedParts: any[]) {
+        return parsedParts.map((part, partIndex) => {
+            return part.text;
+        }).join(' ');
+    }
  
     async showNotification(item: Event) {
         const eventData = this.getEventData(item.text);

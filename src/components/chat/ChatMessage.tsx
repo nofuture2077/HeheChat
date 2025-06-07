@@ -8,7 +8,7 @@ import { Text, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useLongPress } from "@uidotdev/usehooks";
 import { TimeoutView, BanView } from './mod/modview';
-import { formatTime, adjustColorForContrast } from '../../commons/helper';
+import { formatTime, adjustColorForContrast, joinWithSpace } from '../../commons/helper';
 import { ModActions } from './mod/modactions';
 import { Config, ConfigKey } from '../../commons/config';
 import { ChatEmotes } from '../../commons/emotes';
@@ -31,15 +31,6 @@ interface Position {
     x: number;
     y: number;
 }
-
-export const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] => {
-    return elements.reduce<React.ReactNode[]>((acc, elem, index) => {
-      if (index === 0) {
-        return [elem];
-      }
-      return [...acc, ' ', elem];
-    }, []);
-};
 
 const extractClipId = (url: string): string | null => {
     try {

@@ -1,8 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import styles from './VisualAlertPlayer.module.css';
 import { VisualAlert } from '@/commons/events';
 import { AlertSystem } from '../alerts/alertplayer';
+import { ChatEmotesContext } from '@/ApplicationContext';
 import PubSub from 'pubsub-js';
+import { ChatEmotes } from '@/commons/emotes';
+import { joinWithSpace } from '../../commons/helper';
 
 interface HighlightedTextProps {
   text: string;
@@ -33,8 +36,13 @@ function HighlightedText({ text }: HighlightedTextProps) {
   );
 }
 
+function formatText(text: string, emotes: ChatEmotes, channel: string) {
+  return joinWithSpace(text.split(' ').map((word, index) => emotes.checkEmote(word, "" + index, channel, true)));
+}
+
 export default function VisualAlertPlayer() {
   const [currentAlert, setCurrentAlert] = useState<VisualAlert | null>(null);
+  const chatEmotes = useContext(ChatEmotesContext);
   const [isVisible, setIsVisible] = useState(false);
   const [timestamp, setTimestamp] = useState(0);
 
@@ -93,7 +101,7 @@ export default function VisualAlertPlayer() {
         )}
         <div className={styles.text}>
           <p><HighlightedText text={currentAlert.headline} /></p>
-          <p>{currentAlert.text}</p>
+          <p>{formatText(currentAlert.text, chatEmotes, currentAlert.channel)}</p>
         </div>
       </div>
     </div>

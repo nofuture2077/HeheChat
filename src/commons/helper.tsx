@@ -293,3 +293,12 @@ export const adjustColorForContrast = (color: string, backgroundColor: string) =
     
     return `rgb(${r},${g},${b})`;
 };
+
+export const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] => {
+    return elements.reduce<React.ReactNode[]>((acc, elem, index) => {
+      if (index === 0) {
+        return [elem];
+      }
+      return [...acc, ' ', elem];
+    }, []);
+};
