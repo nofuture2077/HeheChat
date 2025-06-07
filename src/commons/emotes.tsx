@@ -228,7 +228,6 @@ export async function getGlobalBadgesAndEmotesByNames() {
 
 export interface ChatEmotes {
     emotes: Map<string, any>,
-    update: (channels: string[]) => Promise<void>;
     updateChannel: (channel: string) => Promise<void>;
     updateUserInfo: (context: LoginContext, channel: string) => Promise<void>;
     getBadge: (channel: string, badge: string, key: string) => any;
@@ -246,48 +245,6 @@ const LOADING_PROFILES: {[key: string]: boolean} = {};
 
 export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     emotes: new Map(),
-    update: async (channels) => {
-        try {            
-            if (!channels || !Array.isArray(channels) || channels.length === 0) {
-                console.warn('Invalid channels array:', channels);
-                return;
-            }
-            
-            // Filter out invalid channel names
-            const validChannels = channels.filter(channel => {
-                if (!channel || typeof channel !== 'string') {
-                    console.warn(`Invalid channel in array: ${channel}`);
-                    return false;
-                }
-                return true;
-            });
-            
-            if (validChannels.length === 0) {
-                console.warn('No valid channels to update');
-                return;
-            }
-            
-            // Get emotes for all valid channels
-            try {
-                const emotes = await getBadgesAndEmotesByNames(validChannels);
-                
-                // Validate result
-                if (!(emotes instanceof Map)) {
-                    console.error('Expected emotes to be a Map but got:', typeof emotes);
-                    return;
-                }
-                
-                // Update the emotes map
-                DEFAULT_CHAT_EMOTES.emotes = emotes;
-            } catch (emoteError) {
-                console.error('Error getting badges and emotes by names:', emoteError);
-                // Keep the existing emotes map
-            }
-        } catch (error) {
-            console.error('Error updating emotes:', error);
-            // Keep the existing emotes map
-        }
-    },
     updateUserEmote: async (userid: string) => {
         try {
             // Validate input

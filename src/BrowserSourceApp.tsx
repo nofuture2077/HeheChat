@@ -95,7 +95,9 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
         const profile: Profile = data.profile;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
-        chatEmotes.update(profile.config.channels);
+        (profile.config.channels || []).forEach((channel: string) => {
+            chatEmotes.updateChannel(channel);
+        });
       }
 
       if (data.type === 'sharedata') {
@@ -105,7 +107,9 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
         const profile = data.profile;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
-        chatEmotes.update(profile.config.channels);
+        (profile.config.channels || []).forEach((channel: string) => {
+            chatEmotes.updateChannel(channel);
+        });
         const channels = profile.config?.channels || [];
         if (!channels) {
           return;
