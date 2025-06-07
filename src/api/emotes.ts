@@ -20,26 +20,51 @@ export class EmoteApiClient {
   }
 
   /**
-   * Get channel badges and emotes
+   * Get channel badges
    * @param userId The Twitch user ID
-   * @returns The channel badges and emotes
+   * @returns The channel badges
    */
-  static async getChannelBadgesAndEmotes(userId: string) {
-    const response = await fetch(`${API_BASE_URL}/emotes/channel/${userId}`);
+  static async getChannelBadges(userId: string) {
+    const response = await fetch(`${API_BASE_URL}/badges/channel/${userId}`);
     if (!response.ok) {
-      throw new Error(`Failed to fetch channel badges and emotes: ${response.statusText}`);
+      throw new Error(`Failed to fetch channel badges: ${response.statusText}`);
     }
     return response.json();
   }
 
   /**
-   * Get global badges and emotes
-   * @returns The global badges and emotes
+   * Get channel emotes
+   * @param userId The Twitch user ID
+   * @returns The channel emotes
    */
-  static async getGlobalBadgesAndEmotes() {
+  static async getChannelEmotes(userId: string) {
+    const response = await fetch(`${API_BASE_URL}/emotes/channel/${userId}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch channel emotes: ${response.statusText}`);
+    }
+    return response.json();
+  }
+
+  /**
+   * Get global badges
+   * @returns The global badges
+   */
+  static async getGlobalBadges() {
+    const response = await fetch(`${API_BASE_URL}/badges/global`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch global badges: ${response.statusText}`);
+    }
+    return response.json();
+  }
+
+  /**
+   * Get global emotes
+   * @returns The global emotes
+   */
+  static async getGlobalEmotes() {
     const response = await fetch(`${API_BASE_URL}/emotes/global`);
     if (!response.ok) {
-      throw new Error(`Failed to fetch global badges and emotes: ${response.statusText}`);
+      throw new Error(`Failed to fetch global emotes: ${response.statusText}`);
     }
     return response.json();
   }

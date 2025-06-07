@@ -1,5 +1,4 @@
 import { getUserdata, LoginContext } from '@/commons/login';
-import { HelixCheermoteList } from '@twurple/api';
 import { toMap } from '@/commons/helper';
 import { EmoteComponentSimple, EmoteComponent } from '@/components/emote/emote';
 import PubSub from 'pubsub-js';
@@ -107,6 +106,32 @@ function getCheermoteDisplayInfo(
     };
 }
 
+type BadgeVersion = {
+  id: string;
+  image_url_1x: string;
+  image_url_2x: string;
+  image_url_4x: string;
+  title: string;
+  description: string;
+  click_action: string;
+  click_url: string;
+};
+
+type BadgeSet = {
+  set_id: string;
+  versions: BadgeVersion[];
+};
+
+function getBadgeImageHtml(badges: BadgeSet[], setId: string, versionId: string): string | null {
+  const badgeSet = badges.find(b => b.set_id === setId);
+  if (!badgeSet) return null;
+
+  const version = badgeSet.versions.find(v => v.id === versionId);
+  if (!version) return null;
+
+  return `<img alt="${version.title}" src="${version.image_url_2x}">`;
+}
+
 export async function get7TVEmotes(userId: string, username: string) {
     // Try to get from EmoteStore first
     const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.SEVENTV, userId);
@@ -139,149 +164,111 @@ export async function get7TVEmotes(userId: string, username: string) {
     }
 }
 
-export async function getBadgesAndEmotes(userId: string) {
+/**
+ * Get channel badges for a user
+ * @param userId The Twitch user ID
+ * @returns The channel badges
+ */
+export async function getChannelBadges(userId: string) {
     // Try to get from EmoteStore first
-    const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.CHANNEL, userId);
-    if (cachedEmotes && cachedEmotes.emotes.length > 0) {
-        return {
-            channelBadges: cachedEmotes.emotes[0],
-            channelEmotes: cachedEmotes.emotes[1]
-        };
+    const cachedBadges = await EmoteStore.getChannelBadges(userId);
+    if (cachedBadges?.emotes) {
+        return cachedBadges.emotes;
     }
-
+    
     // If not in store, fetch from backend API
     try {
-        const data = await EmoteApiClient.getChannelBadgesAndEmotes(userId);
-        const { channelBadges, channelEmotes } = data;
-
-        // Store in EmoteStore for future use
-        await EmoteStore.storeEmotes(EmotePrefix.CHANNEL, userId, [channelBadges, channelEmotes]);
-
-        return {
-            channelBadges,
-            channelEmotes
-        };
-    } catch (error) {
-        console.error('Error fetching channel badges and emotes:', error);
-        return {
-            channelBadges: [],
-            channelEmotes: []
-        };
-    }
-}
-
-export async function getGlobalBadgesAndEmotes() {
-    // Try to get from EmoteStore first
-    const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.GLOBAL, 'global');
-    if (cachedEmotes && cachedEmotes.emotes.length > 0) {
-        return {
-            channelBadges: cachedEmotes.emotes[0],
-            channelEmotes: cachedEmotes.emotes[1]
-        };
-    }
-
-    // If not in store, fetch from backend API
-    try {
-        const data = await EmoteApiClient.getGlobalBadgesAndEmotes();
-        const { channelBadges, channelEmotes } = data;
-
-        // Store in EmoteStore for future use
-        await EmoteStore.storeEmotes(EmotePrefix.GLOBAL, 'global', [channelBadges, channelEmotes]);
-
-        return {
-            channelBadges,
-            channelEmotes
-        };
-    } catch (error) {
-        console.error('Error fetching global badges and emotes:', error);
-        return {
-            channelBadges: [],
-            channelEmotes: []
-        };
-    }
-}
-
-export async function getBadgesAndEmotesByNames(usernames: string[]) {
-    try {
-        const users = await EmoteApiClient.getUsersByNames(usernames);
+        const badgesData = await EmoteApiClient.getChannelBadges(userId);
         
-        // Ensure users is an array
-        if (!Array.isArray(users)) {
-            console.error('Expected users to be an array but got:', typeof users);
-            return new Map();
-        }
-
-        // Process each user individually, so errors in one user don't affect others
-        const data = await Promise.all(users.map(async (user: any) => {
-            try {
-                // Create default empty structures for each emote type
-                let channelBadges: any[] = [];
-                let channelEmotes: any[] = [];
-                let sevenTVEmotes = new Map();
-                let cheerEmotes;
-                
-                // Create a safe empty HelixCheermoteList with a valid structure
-                // Create a safe empty HelixCheermoteList
-                // Use type assertion to satisfy TypeScript while still passing an empty array
-                cheerEmotes = new HelixCheermoteList([] as any);
-                
-                // Try to fetch channel badges and emotes
-                try {
-                    const result = await getBadgesAndEmotes(user.id);
-                    channelBadges = result.channelBadges || [];
-                    channelEmotes = result.channelEmotes || [];
-                } catch (error) {
-                    console.error(`Error fetching badges and emotes for ${user.name}:`, error);
-                    // Continue with empty arrays for badges and emotes
-                }
-                
-                // Try to fetch 7TV emotes
-                try {
-                    sevenTVEmotes = await get7TVEmotes(user.id, user.name);
-                } catch (error) {
-                    console.error(`Error fetching 7TV emotes for ${user.name}:`, error);
-                    // Continue with empty Map for 7TV emotes
-                }
-                
-                // Try to fetch cheer emotes
-                try {
-                    const cheerEmotesData = await EmoteApiClient.getCheerEmotes(user.id);
-                    
-                    cheerEmotes = new HelixCheermoteList(Object.values(cheerEmotesData) as any);
-                } catch (error) {
-                    console.error(`Error fetching cheer emotes for ${user.name}:`, error);
-                    // Continue with empty HelixCheermoteList
-                }
-                
-                return {
-                    user,
-                    channelBadges: Array.isArray(channelBadges) ? toMap(channelBadges as any[], (ba: any) => ba.id) : new Map(),
-                    channelEmotes: Array.isArray(channelEmotes) ? toMap(channelEmotes as any[], (em: any) => em.name) : new Map(),
-                    cheerEmotes,
-                    sevenTVEmotes
-                };
-            } catch (error) {
-                console.error(`Error processing emotes for user ${user.name}:`, error);
-                // Return a minimal valid object for this user to prevent the entire Promise.all from failing
-                return {
-                    user,
-                    channelBadges: new Map(),
-                    channelEmotes: new Map(),
-                    cheerEmotes: new Map(),
-                    sevenTVEmotes: new Map()
-                };
-            }
-        }));
-
-        return Array.isArray(data) ? toMap(data, d => d.user.name) : new Map();
+        // Store in EmoteStore
+        await EmoteStore.storeChannelBadges(userId, badgesData);
+        
+        return badgesData;
     } catch (error) {
-        console.error('Error fetching badges and emotes by names:', error);
-        return new Map();
+        console.error('Error fetching channel badges:', error);
+        return [];
+    }
+}
+
+/**
+ * Get channel emotes for a user
+ * @param userId The Twitch user ID
+ * @returns The channel emotes
+ */
+export async function getChannelEmotes(userId: string) {
+    // Try to get from EmoteStore first
+    const cachedEmotes = await EmoteStore.getChannelEmotes(userId);
+    if (cachedEmotes?.emotes) {
+        return cachedEmotes.emotes;
+    }
+
+    // If not in store, fetch from backend API
+    try {
+        const emotesData = await EmoteApiClient.getChannelEmotes(userId);
+        
+        // Store in EmoteStore
+        await EmoteStore.storeChannelEmotes(userId, emotesData);
+        
+        return emotesData;
+    } catch (error) {
+        console.error('Error fetching channel emotes:', error);
+        return [];
+    }
+}
+
+/**
+ * Get global badges
+ * @returns The global badges
+ */
+export async function getGlobalBadges() {
+    // Try to get from EmoteStore first
+    const cachedBadges = await EmoteStore.getGlobalBadges();
+    if (cachedBadges?.emotes) {
+        return cachedBadges.emotes;
+    }
+
+    // If not in store, fetch from backend API
+    try {
+        const badgesData = await EmoteApiClient.getGlobalBadges();
+        
+        // Store in EmoteStore
+        await EmoteStore.storeGlobalBadges(badgesData);
+        
+        return badgesData;
+    } catch (error) {
+        console.error('Error fetching global badges:', error);
+        return [];
+    }
+}
+
+/**
+ * Get global emotes
+ * @returns The global emotes
+ */
+export async function getGlobalEmotes() {
+    // Try to get from EmoteStore first
+    const cachedEmotes = await EmoteStore.getGlobalEmotes();
+    if (cachedEmotes?.emotes) {
+        return cachedEmotes.emotes;
+    }
+
+    // If not in store, fetch from backend API
+    try {
+        const emotesData = await EmoteApiClient.getGlobalEmotes();
+        
+        // Store in EmoteStore
+        await EmoteStore.storeGlobalEmotes(emotesData);
+        
+        return emotesData;
+    } catch (error) {
+        console.error('Error fetching global emotes:', error);
+        return [];
     }
 }
 
 export async function getGlobalBadgesAndEmotesByNames() {
-    const { channelBadges, channelEmotes } = await getGlobalBadgesAndEmotes();
+    const channelBadges = await getGlobalBadges();
+    const channelEmotes = await getGlobalEmotes();
 
     return {
         //@ts-ignore
@@ -420,7 +407,9 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             
             // 1. Channel badges and emotes
             try {
-                const { channelBadges, channelEmotes } = await getBadgesAndEmotes(user.id);
+                const channelBadges = await getChannelBadges(user.id);
+                const channelEmotes = await getChannelEmotes(user.id);
+                
                 channelData.channelBadges = Array.isArray(channelBadges) 
                     ? toMap(channelBadges as any[], (ba: any) => ba.id) 
                     : new Map();
@@ -531,43 +520,22 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
             
             // Try to get badge from channel badges first
-            let badgeInfo = null;
-            
-            // Check if channel badges exist and try to get the badge
             if (channelEmotes?.channelBadges) {
-                try {
-                    const channelBadge = channelEmotes.channelBadges.get(badge);
-                    if (channelBadge && typeof channelBadge.getVersion === 'function') {
-                        badgeInfo = channelBadge.getVersion(version);
-                    }
-                } catch (channelError) {
-                    console.error(`Error getting channel badge ${badge} version ${version}:`, channelError);
+                const channelBadge = getBadgeImageHtml(channelEmotes.channelBadges, badge, version);
+                if (channelBadge) {
+                    return channelBadge;
                 }
             }
             
             // If not found in channel badges, try global badges
-            if (!badgeInfo && DEFAULT_CHAT_EMOTES.emotes.has('global')) {
+            if (DEFAULT_CHAT_EMOTES.emotes.has('global')) {
                 const globalEmotes = DEFAULT_CHAT_EMOTES.emotes.get('global');
                 
                 if (globalEmotes?.channelBadges) {
-                    try {
-                        const globalBadge = globalEmotes.channelBadges.get(badge);
-                        if (globalBadge && typeof globalBadge.getVersion === 'function') {
-                            badgeInfo = globalBadge.getVersion(version);
-                        }
-                    } catch (globalError) {
-                        console.error(`Error getting global badge ${badge} version ${version}:`, globalError);
+                    const globalBadge = getBadgeImageHtml(globalEmotes.channelBadges, badge, version);
+                    if (globalBadge) {
+                        return globalBadge;
                     }
-                }
-            }
-            
-            // If badge info is found, create the image element
-            if (badgeInfo && typeof badgeInfo.getImageUrl === 'function') {
-                try {
-                    const imageUrl = badgeInfo.getImageUrl(2);
-                    return <img alt={badge} src={imageUrl} key={key} />;
-                } catch (imageError) {
-                    console.error(`Error getting image URL for badge ${badge} version ${version}:`, imageError);
                 }
             }
             

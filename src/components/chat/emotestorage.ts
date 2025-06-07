@@ -10,9 +10,12 @@ interface UserEmotes {
 // Emote type prefixes for storage
 export enum EmotePrefix {
     USER = "user_",
-    CHANNEL = "channel_",
-    GLOBAL = "global_",
-    SEVENTV = "7tv_"
+    SEVENTV = "7tv_",
+    // New split prefixes
+    CHANNEL_BADGES = "channel_badges_",
+    CHANNEL_EMOTES = "channel_emotes_",
+    GLOBAL_BADGES = "global_badges_",
+    GLOBAL_EMOTES = "global_emotes_"
 }
 
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
@@ -20,6 +23,70 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 export class EmoteStorage {
     constructor() {
         this.cleanExpiredEmotes(); // Clean expired emotes on initialization
+    }
+
+    /**
+     * Store channel badges
+     * @param userId The user ID
+     * @param badges The badges to store
+     */
+    async storeChannelBadges(userId: string, badges: any[]): Promise<void> {
+        return this.storeEmotes(EmotePrefix.CHANNEL_BADGES, userId, badges);
+    }
+
+    /**
+     * Get channel badges
+     * @param userId The user ID
+     */
+    async getChannelBadges(userId: string): Promise<UserEmotes | null> {
+        return this.getEmotes(EmotePrefix.CHANNEL_BADGES, userId);
+    }
+
+    /**
+     * Store channel emotes
+     * @param userId The user ID
+     * @param emotes The emotes to store
+     */
+    async storeChannelEmotes(userId: string, emotes: any[]): Promise<void> {
+        return this.storeEmotes(EmotePrefix.CHANNEL_EMOTES, userId, emotes);
+    }
+
+    /**
+     * Get channel emotes
+     * @param userId The user ID
+     */
+    async getChannelEmotes(userId: string): Promise<UserEmotes | null> {
+        return this.getEmotes(EmotePrefix.CHANNEL_EMOTES, userId);
+    }
+
+    /**
+     * Store global badges
+     * @param badges The badges to store
+     */
+    async storeGlobalBadges(badges: any[]): Promise<void> {
+        return this.storeEmotes(EmotePrefix.GLOBAL_BADGES, 'global', badges);
+    }
+
+    /**
+     * Get global badges
+     */
+    async getGlobalBadges(): Promise<UserEmotes | null> {
+        return this.getEmotes(EmotePrefix.GLOBAL_BADGES, 'global');
+    }
+
+    /**
+     * Store global emotes
+     * @param emotes The emotes to store
+     */
+    async storeGlobalEmotes(emotes: any[]): Promise<void> {
+        return this.storeEmotes(EmotePrefix.GLOBAL_EMOTES, 'global', emotes);
+    }
+
+    /**
+     * Get global emotes
+     */
+    async getGlobalEmotes(): Promise<UserEmotes | null> {
+        return this.getEmotes(EmotePrefix.GLOBAL_EMOTES, 'global');
     }
 
     private async getStore(mode: IDBTransactionMode = 'readonly'): Promise<IDBObjectStore> {
