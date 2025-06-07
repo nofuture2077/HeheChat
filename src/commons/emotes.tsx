@@ -122,14 +122,14 @@ type BadgeSet = {
   versions: BadgeVersion[];
 };
 
-function getBadgeImageHtml(badges: Map<string, BadgeSet>, setId: string, versionId: string): string | null {
+function getBadgeImageHtml(badges: Map<string, BadgeSet>, setId: string, versionId: string) {
   const badgeSet = badges.values().find(b => b.set_id === setId);
   if (!badgeSet) return null;
 
   const version = badgeSet.versions.find(v => v.id === versionId);
   if (!version) return null;
 
-  return `<img alt="${version.title}" src="${version.image_url_2x}">`;
+  return <img alt={version.title} src={version.image_url_2x}/>;
 }
 
 export async function get7TVEmotes(userId: string, username: string) {
