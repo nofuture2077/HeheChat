@@ -74,7 +74,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     const [shortcutsVisible, setShortcutsVisible] = useState(true);
     const [currentClipId, setCurrentClipId] = useState<string | null>(null);
     const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
-    const [notificationIds, setNotificationIds] = useState<string[]>([]);
+    const notificationIdsRef = useRef<string[]>([]);
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
         const viewportElement = viewport.current;
@@ -185,7 +185,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             const data: ConnectionsResponse = await response.json();
             
             // Clear previous notifications
-            notificationIds.forEach(id => notifications.hide(id));
+            notificationIdsRef.current.forEach((id: string) => notifications.hide(id));
             const newNotificationIds: string[] = [];
             
             if (!data || !data.connections || Object.keys(data.connections).length === 0) {
@@ -277,11 +277,11 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                 newNotificationIds.push(id);
             }
             
-            setNotificationIds(newNotificationIds);
+            notificationIdsRef.current = newNotificationIds;
         } catch (error) {
             console.error('Error checking connections:', error);
         }
-    }, [config.browserSourceAudio, profile.guid, notificationIds]);
+    }, [config.browserSourceAudio, profile.guid]);
 
     useEffect(() => {
         if (profile.name === 'default' && !config.channels.length) {
