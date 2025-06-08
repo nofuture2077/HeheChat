@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '../ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
-import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack } from '@mantine/core';
+import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, Alert } from '@mantine/core';
+import { IconAlertTriangle } from '@tabler/icons-react';
 import { Chat } from '../components/chat/Chat';
 import { MobileAppPrompt } from '../components/chat/MobileAppPrompt';
 import { ShortcutView } from '../components/shortcuts/ShortcutView';
@@ -71,6 +72,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     const [videoHeight, setVideoHeight] = useState(0);
     const [shortcutsVisible, setShortcutsVisible] = useState(true);
     const [currentClipId, setCurrentClipId] = useState<string | null>(null);
+    const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
         const viewportElement = viewport.current;
@@ -140,6 +142,61 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         forceUpdate();
     }, [replyMsg]);
 
+    // Define interface for connection object
+    interface Connection {
+        userId: string;
+        userName: string;
+        channels: string[];
+        source: string;
+        guid: string;
+        profile: string;
+        profileName: string;
+    }
+
+    // Function to check connections and show warnings if needed
+    const checkConnections = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('hehe-token_state') || '';
+            if (!token) return;
+            
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/connection?token=${token}`);
+            const data: { connections: Connection[] } = await response.json();
+            
+            if (!data.connections || !data.connections.length) {
+                setConnectionWarning(null);
+                return;
+            }
+            
+            // Check if user has set Alert Audio to Browsersource
+            if (config.browserSourceAudio) {
+                // Check if there's a Browsersource connection for the current profile
+                const hasBrowserSourceForCurrentProfile = data.connections.some(
+                    (conn: Connection) => conn.source === 'Browsersource' && conn.profile === profile.guid
+                );
+                
+                if (!hasBrowserSourceForCurrentProfile) {
+                    setConnectionWarning('You have set Alert Audio to Browsersource, but there is no Browsersource connected for this profile. Your alerts may not play correctly.');
+                    return;
+                }
+            }
+            
+            // Check if there's a Browsersource for a different profile
+            const browserSourceForDifferentProfile = data.connections.find(
+                (conn: Connection) => conn.source === 'Browsersource' && conn.profile !== profile.guid
+            );
+            
+            if (browserSourceForDifferentProfile) {
+                setConnectionWarning(`There is a Browsersource connected for profile "${browserSourceForDifferentProfile.profileName}". Make sure this is intended.`);
+                return;
+            }
+            
+            // No warnings needed
+            setConnectionWarning(null);
+        } catch (error) {
+            console.error('Error checking connections:', error);
+        }
+    }, [config.browserSourceAudio, profile.guid]);
+
     useEffect(() => {
         if (profile.name === 'default' && !config.channels.length) {
             setTimeout(() => {
@@ -151,6 +208,9 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             }, 2500);
         }
         config.loadShares();
+        
+        // Check connections when component mounts
+        checkConnections();
 
         return () => {
         }
@@ -255,6 +315,11 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         }, 2000);
     }, [documentVisible, networkStatus.online]);
 
+    // Check connections when profile changes or browserSourceAudio setting changes
+    useEffect(() => {
+        checkConnections();
+    }, [profile.guid, config.browserSourceAudio, checkConnections]);
+
     useEffect(() => {
         if (shouldScroll) {
             scrollToBottom();
@@ -305,6 +370,18 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
                         {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}
+                        
+                        {connectionWarning && (
+                            <Alert 
+                                icon={<IconAlertTriangle size="1rem" />} 
+                                title="Connection Warning" 
+                                color="yellow" 
+                                withCloseButton
+                                onClose={() => setConnectionWarning(null)}
+                            >
+                                {connectionWarning}
+                            </Alert>
+                        )}
                         
                         {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                         <PinManager/>
