@@ -1,5 +1,7 @@
 import '@mantine/core/styles.css';
+import '@mantine/notifications/styles.css';
 import { MantineProvider } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
 import { useDidUpdate, useNetwork, useDocumentVisibility } from '@mantine/hooks';
 import { useEffect, useState, useRef } from 'react';
 import { initializeStoragePatches } from './commons/patches';
@@ -853,6 +855,7 @@ export default function HeheChat() {
 
     return (
         <MantineProvider defaultColorScheme="auto" theme={theme}>
+            <Notifications position="top-right" limit={5} />
             <ConfigContext.Provider value={appConfig}>
                 <ProfileContext.Provider value={appProfile}>
                     <LoginContextContext.Provider value={appLogin}>

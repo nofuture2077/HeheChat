@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '../ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
-import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, Alert } from '@mantine/core';
-import { IconAlertTriangle } from '@tabler/icons-react';
+import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack } from '@mantine/core';
+import { IconAlertTriangle, IconDeviceDesktop, IconRepeat } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { Chat } from '../components/chat/Chat';
 import { MobileAppPrompt } from '../components/chat/MobileAppPrompt';
 import { ShortcutView } from '../components/shortcuts/ShortcutView';
@@ -73,6 +74,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     const [shortcutsVisible, setShortcutsVisible] = useState(true);
     const [currentClipId, setCurrentClipId] = useState<string | null>(null);
     const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
+    const [notificationIds, setNotificationIds] = useState<string[]>([]);
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
         const viewportElement = viewport.current;
@@ -142,15 +144,30 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         forceUpdate();
     }, [replyMsg]);
 
-    // Define interface for connection object
-    interface Connection {
+    // Define interfaces for the new connection data structure
+    interface ConnectionSocket {
         userId: string;
         userName: string;
         channels: string[];
-        source: string;
         guid: string;
-        profile: string;
+        state: string;
+    }
+    
+    interface SourceConnections {
+        [source: string]: ConnectionSocket[];
+    }
+    
+    interface ProfileConnection {
         profileName: string;
+        sources: SourceConnections;
+    }
+    
+    interface UserConnections {
+        [profileId: string]: ProfileConnection;
+    }
+    
+    interface ConnectionsResponse {
+        [username: string]: UserConnections;
     }
 
     // Function to check connections and show warnings if needed
@@ -160,42 +177,106 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             if (!token) return;
             
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/connection?token=${token}`);
-            const data: { connections: Connection[] } = await response.json();
+            const data: ConnectionsResponse = await response.json();
             
-            if (!data.connections || !data.connections.length) {
-                setConnectionWarning(null);
+            // Clear previous notifications
+            notificationIds.forEach(id => notifications.hide(id));
+            const newNotificationIds: string[] = [];
+            
+            if (!data || Object.keys(data).length === 0) {
                 return;
             }
             
+            // Check for Browsersource connections across all users and profiles
+            let hasBrowserSourceForCurrentProfile = false;
+            let browserSourceForDifferentProfileName = '';
+            let browserSourceConnectionsCount = 0;
+            let replayAppConnectionsCount = 0;
+            
+            // Iterate through all users and their profiles
+            Object.values(data).forEach(userConnections => {
+                // Check each profile
+                Object.entries(userConnections).forEach(([profileId, profileConnection]) => {
+                    // Check if this profile has Browsersource connections
+                    if (profileConnection.sources && profileConnection.sources['Browsersource']) {
+                        if (profileId === profile.guid) {
+                            hasBrowserSourceForCurrentProfile = true;
+                            browserSourceConnectionsCount = profileConnection.sources['Browsersource'].length;
+                        } else {
+                            browserSourceForDifferentProfileName = profileConnection.profileName;
+                        }
+                    }
+                    
+                    // Check if this profile has ReplayApp connections
+                    if (profileId === profile.guid && 
+                        profileConnection.sources && 
+                        profileConnection.sources['ReplayApp']) {
+                        replayAppConnectionsCount = profileConnection.sources['ReplayApp'].length;
+                    }
+                });
+            });
+            
             // Check if user has set Alert Audio to Browsersource
-            if (config.browserSourceAudio) {
-                // Check if there's a Browsersource connection for the current profile
-                const hasBrowserSourceForCurrentProfile = data.connections.some(
-                    (conn: Connection) => conn.source === 'Browsersource' && conn.profile === profile.guid
-                );
-                
-                if (!hasBrowserSourceForCurrentProfile) {
-                    setConnectionWarning('You have set Alert Audio to Browsersource, but there is no Browsersource connected for this profile. Your alerts may not play correctly.');
-                    return;
-                }
+            if (config.browserSourceAudio && !hasBrowserSourceForCurrentProfile) {
+                const id = `browsersource-warning-${Date.now()}`;
+                notifications.show({
+                    id,
+                    title: 'Connection Warning',
+                    message: 'You have set Alert Audio to Browsersource, but there is no Browsersource connected for this profile. Your alerts may not play correctly.',
+                    color: 'yellow',
+                    icon: <IconAlertTriangle size="1rem" />,
+                    autoClose: 10000,
+                });
+                newNotificationIds.push(id);
             }
             
             // Check if there's a Browsersource for a different profile
-            const browserSourceForDifferentProfile = data.connections.find(
-                (conn: Connection) => conn.source === 'Browsersource' && conn.profile !== profile.guid
-            );
-            
-            if (browserSourceForDifferentProfile) {
-                setConnectionWarning(`There is a Browsersource connected for profile "${browserSourceForDifferentProfile.profileName}". Make sure this is intended.`);
-                return;
+            if (browserSourceForDifferentProfileName) {
+                const id = `browsersource-different-profile-${Date.now()}`;
+                notifications.show({
+                    id,
+                    title: 'Connection Warning',
+                    message: `There is a Browsersource connected for profile "${browserSourceForDifferentProfileName}". Make sure this is intended.`,
+                    color: 'yellow',
+                    icon: <IconAlertTriangle size="1rem" />,
+                    autoClose: 10000,
+                });
+                newNotificationIds.push(id);
             }
             
-            // No warnings needed
-            setConnectionWarning(null);
+            // Show notifications for Browsersource connections
+            if (browserSourceConnectionsCount > 0) {
+                const id = `browsersource-connected-${Date.now()}`;
+                notifications.show({
+                    id,
+                    title: 'Browsersource Connected',
+                    message: `${browserSourceConnectionsCount} Browsersource connection(s) found for profile "${profile.name}"`,
+                    color: 'green',
+                    icon: <IconDeviceDesktop size="1rem" />,
+                    autoClose: 10000,
+                });
+                newNotificationIds.push(id);
+            }
+            
+            // Show notifications for ReplayApp connections
+            if (replayAppConnectionsCount > 0) {
+                const id = `replayapp-connected-${Date.now()}`;
+                notifications.show({
+                    id,
+                    title: 'ReplayApp Connected',
+                    message: `${replayAppConnectionsCount} ReplayApp connection(s) found for profile "${profile.name}"`,
+                    color: 'green',
+                    icon: <IconRepeat size="1rem" />,
+                    autoClose: 10000,
+                });
+                newNotificationIds.push(id);
+            }
+            
+            setNotificationIds(newNotificationIds);
         } catch (error) {
             console.error('Error checking connections:', error);
         }
-    }, [config.browserSourceAudio, profile.guid]);
+    }, [config.browserSourceAudio, profile.guid, notificationIds]);
 
     useEffect(() => {
         if (profile.name === 'default' && !config.channels.length) {
@@ -211,8 +292,15 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         
         // Check connections when component mounts
         checkConnections();
+        
+        // Set up periodic connection check (every 30 seconds)
+        // This ensures our warnings stay up-to-date if connections are removed on the backend
+        const connectionCheckInterval = setInterval(() => {
+            checkConnections();
+        }, 30000);
 
         return () => {
+            clearInterval(connectionCheckInterval);
         }
     }, []);
 
@@ -371,17 +459,6 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                     <Stack align='stretch' gap="md">
                         {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}
                         
-                        {connectionWarning && (
-                            <Alert 
-                                icon={<IconAlertTriangle size="1rem" />} 
-                                title="Connection Warning" 
-                                color="yellow" 
-                                withCloseButton
-                                onClose={() => setConnectionWarning(null)}
-                            >
-                                {connectionWarning}
-                            </Alert>
-                        )}
                         
                         {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                         <PinManager/>
