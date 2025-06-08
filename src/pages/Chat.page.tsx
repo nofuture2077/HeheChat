@@ -145,29 +145,34 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     }, [replyMsg]);
 
     // Define interfaces for the new connection data structure
-    interface ConnectionSocket {
+    interface ConnectionSource {
         userId: string;
         userName: string;
         channels: string[];
         guid: string;
-        state: string;
+        connectionStatus: any;
     }
     
-    interface SourceConnections {
-        [source: string]: ConnectionSocket[];
+    interface ProfileSources {
+        [sourceName: string]: ConnectionSource;
     }
     
     interface ProfileConnection {
         profileName: string;
-        sources: SourceConnections;
+        sources: ProfileSources;
     }
     
     interface UserConnections {
-        [profileId: string]: ProfileConnection;
+        [connectionId: string]: ProfileConnection;
+    }
+    
+    interface ConnectionsData {
+        [username: string]: UserConnections;
     }
     
     interface ConnectionsResponse {
-        [username: string]: UserConnections;
+        connection_count: number;
+        connections: ConnectionsData;
     }
 
     // Function to check connections and show warnings if needed
@@ -183,7 +188,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             notificationIds.forEach(id => notifications.hide(id));
             const newNotificationIds: string[] = [];
             
-            if (!data || Object.keys(data).length === 0) {
+            if (!data || !data.connections || Object.keys(data.connections).length === 0) {
                 return;
             }
             
@@ -193,25 +198,25 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             let browserSourceConnectionsCount = 0;
             let replayAppConnectionsCount = 0;
             
-            // Iterate through all users and their profiles
-            Object.values(data).forEach(userConnections => {
-                // Check each profile
-                Object.entries(userConnections).forEach(([profileId, profileConnection]) => {
+            // Iterate through all users and their connections
+            Object.values(data.connections).forEach(userConnections => {
+                // Check each connection (profile)
+                Object.entries(userConnections).forEach(([connectionId, profileConnection]) => {
                     // Check if this profile has Browsersource connections
                     if (profileConnection.sources && profileConnection.sources['Browsersource']) {
-                        if (profileId === profile.guid) {
+                        if (connectionId === profile.guid) {
                             hasBrowserSourceForCurrentProfile = true;
-                            browserSourceConnectionsCount = profileConnection.sources['Browsersource'].length;
+                            browserSourceConnectionsCount = 1; // Each connection represents one browsersource
                         } else {
                             browserSourceForDifferentProfileName = profileConnection.profileName;
                         }
                     }
                     
                     // Check if this profile has ReplayApp connections
-                    if (profileId === profile.guid && 
+                    if (connectionId === profile.guid && 
                         profileConnection.sources && 
                         profileConnection.sources['ReplayApp']) {
-                        replayAppConnectionsCount = profileConnection.sources['ReplayApp'].length;
+                        replayAppConnectionsCount = 1; // Each connection represents one replayapp
                     }
                 });
             });
