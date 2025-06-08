@@ -178,6 +178,9 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     // Function to check connections and show warnings if needed
     const checkConnections = useCallback(async () => {
         try {
+            if (!profile.config.browserSourceAudio) {
+                return;
+            }
             const token = localStorage.getItem('hehe-token_state') || '';
             if (!token) return;
             
@@ -258,7 +261,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                     message: `${browserSourceConnectionsCount} Browsersource connection(s) found for profile "${profile.name}"`,
                     color: 'green',
                     icon: <IconDeviceDesktop size="1rem" />,
-                    autoClose: 10000,
+                    autoClose: 3000,
                 });
                 newNotificationIds.push(id);
             }
@@ -272,7 +275,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                     message: `${replayAppConnectionsCount} ReplayApp connection(s) found for profile "${profile.name}"`,
                     color: 'green',
                     icon: <IconRepeat size="1rem" />,
-                    autoClose: 10000,
+                    autoClose: 3000,
                 });
                 newNotificationIds.push(id);
             }
