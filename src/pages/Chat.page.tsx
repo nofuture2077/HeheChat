@@ -178,7 +178,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     // Function to check connections and show warnings if needed
     const checkConnections = useCallback(async () => {
         try {
-            if (!config.checkBrowsersourceConnection) {
+            if (!config.checkBrowsersourceConnection && config.browserSourceAudio) {
                 return;
             }
             const token = localStorage.getItem('hehe-token_state') || '';
