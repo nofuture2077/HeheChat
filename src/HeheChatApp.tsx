@@ -150,6 +150,7 @@ export default function HeheChat() {
                 profileData.config.raidTargets ??= [];
                 profileData.config.hideEvents ??= DEFAULT_CONFIG.hideEvents;
                 profileData.config.skipEmotesInTTS ??= true;
+                profileData.config.checkBrowsersourceConnection ??= true;
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
@@ -372,6 +373,7 @@ export default function HeheChat() {
     const setShortcuts = (value: ShortCut[]) => updateConfig('shortcuts', value);
     const setBrowserSourceAudio = (value: boolean) => updateConfig('browserSourceAudio', value);
     const setBrowserSourceVisual = (value: boolean) => updateConfig('browserSourceVisual', value);
+    const setCheckBrowsersourceConnection = (value: boolean) => updateConfig('checkBrowsersourceConnection', value);
     const setAlertBoost = (value: number) => updateConfig('alertBoost', value);
     const setVisualAlertDelay = (value: number) => updateConfig('visualAlertDelay', value);
     const setSkipEmotesInTTS = (value: boolean) => updateConfig('skipEmotesInTTS', value);
@@ -624,6 +626,7 @@ export default function HeheChat() {
         setDisableEmoteDialog,
         setBrowserSourceAudio,
         setBrowserSourceVisual,
+        setCheckBrowsersourceConnection,
         setAlertBoost,
         setVisualAlertDelay,
         setSkipEmotesInTTS

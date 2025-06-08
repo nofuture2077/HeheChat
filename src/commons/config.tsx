@@ -43,6 +43,7 @@ export interface ConfigData {
     playAlerts: boolean;
     browserSourceAudio: boolean;
     browserSourceVisual: boolean;
+    checkBrowsersourceConnection: boolean;
     alertBoost: number;
     visualAlertDelay: number;
     skipEmotesInTTS: boolean;
@@ -101,6 +102,7 @@ export interface Config extends ConfigData {
     setDisableEmoteDialog: (val: boolean) => void;
     setBrowserSourceAudio: (val: boolean) => void;
     setBrowserSourceVisual: (val: boolean) => void;
+    setCheckBrowsersourceConnection: (val: boolean) => void;
     setFreeTTS: (val: string[]) => void;
     setShortcuts: (val: ShortCut[]) => void;
 }
@@ -137,6 +139,7 @@ export const DEFAULT_CONFIG: Config = {
     disableEmoteDialog: false,
     browserSourceAudio: false,
     browserSourceVisual: true,
+    checkBrowsersourceConnection: true,
     systemMessageInChat: {
         sub: true,
         subgift: true,
@@ -205,6 +208,7 @@ export const DEFAULT_CONFIG: Config = {
     setShortcuts: (val: ShortCut[]) => {},
     setBrowserSourceAudio: (val) => {},
     setBrowserSourceVisual: (val) => {},
+    setCheckBrowsersourceConnection: (val) => {},
     setAlertBoost: (val) => {},
     setVisualAlertDelay: (val) => {},
     setSkipEmotesInTTS: (val) => {},

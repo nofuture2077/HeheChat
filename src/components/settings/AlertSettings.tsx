@@ -158,6 +158,16 @@ export function AlertSettings() {
                         <Text span inline key={'browser-source-label'}>Link for OBS <Anchor inline key={'browser-source-link'} href={import.meta.env.VITE_SINK_URL + "#token=" + sink} target="_blank"><IconLink /></Anchor></Text>
                         <Text span inline key={'browser-source-label'}>Replay Widget <Anchor inline key={'browser-widget-link'} href={import.meta.env.VITE_REPLAY_URL + "#token=" + sink} target="_blank"><IconRepeat /></Anchor></Text>
                     </>) : null}
+                    <Switch 
+                        checked={config.checkBrowsersourceConnection} 
+                        onChange={(event) => { 
+                            config.setCheckBrowsersourceConnection(event.currentTarget.checked); 
+                            forceUpdate(); 
+                        }} 
+                        label="Check Browsersource Connection" 
+                        size="lg" 
+                    />
+                    <Text fs="italic" size='14px'>Show warnings when Browsersource is not connected but audio is set to OBS</Text>
                 </Stack>
             </Fieldset>
             

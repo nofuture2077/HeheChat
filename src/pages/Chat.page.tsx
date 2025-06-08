@@ -178,7 +178,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     // Function to check connections and show warnings if needed
     const checkConnections = useCallback(async () => {
         try {
-            if (!profile.config.browserSourceAudio) {
+            if (!config.checkBrowsersourceConnection) {
                 return;
             }
             const token = localStorage.getItem('hehe-token_state') || '';
@@ -284,7 +284,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         } catch (error) {
             console.error('Error checking connections:', error);
         }
-    }, [config.browserSourceAudio, profile.guid]);
+    }, [config.checkBrowsersourceConnection, config.browserSourceAudio, profile.guid]);
 
     useEffect(() => {
         if (profile.name === 'default' && !config.channels.length) {
