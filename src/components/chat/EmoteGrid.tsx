@@ -11,6 +11,10 @@ interface EmoteGridProps {
     emoteList: Map<string, any[]>;
 }
 
+function getImageUrl(id: string, scale: number) {
+    return `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/${scale}.0`;
+}
+
 export function EmoteGrid({ channel, searchText, onEmoteSelect, emoteList }: EmoteGridProps) {
     const [visible, setVisible] = useState(false);
     const config = useContext(ConfigContext);
@@ -39,8 +43,8 @@ export function EmoteGrid({ channel, searchText, onEmoteSelect, emoteList }: Emo
                                 onClick={() => onEmoteSelect(emote.name)}
                             >
                                 <EmoteComponent
-                                    imageUrl={emote.data?.host?.url ? `${emote.data.host.url}/${emote.data.host.files[1].name}` : emote.data?.getImageUrl(2)}
-                                    largeImageUrl={emote.data?.host?.url ? `${emote.data.host.url}/${emote.data.host.files[3].name}` : emote.data?.getImageUrl(4)}
+                                    imageUrl={emote.data?.host?.url ? `${emote.data.host.url}/${emote.data.host.files[1].name}` : emote.data?.getImageUrl ? emote.data?.getImageUrl(2) : getImageUrl(emote.data?.id, 2)}
+                                    largeImageUrl={emote.data?.host?.url ? `${emote.data.host.url}/${emote.data.host.files[3].name}` : emote.data?.getImageUrl ? emote.data?.getImageUrl(4) : getImageUrl(emote.data?.id, 4)}
                                     name={emote.name}
                                     type={emote.type}
                                 />
