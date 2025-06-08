@@ -284,7 +284,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         } catch (error) {
             console.error('Error checking connections:', error);
         }
-    }, [config.checkBrowsersourceConnection, config.browserSourceAudio, profile.guid]);
+    }, [config, profile]);
 
     useEffect(() => {
         if (profile.name === 'default' && !config.channels.length) {
