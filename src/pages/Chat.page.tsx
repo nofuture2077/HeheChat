@@ -297,19 +297,6 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             }, 2500);
         }
         config.loadShares();
-        
-        // Check connections when component mounts
-        checkConnections();
-        
-        // Set up periodic connection check (every 30 seconds)
-        // This ensures our warnings stay up-to-date if connections are removed on the backend
-        const connectionCheckInterval = setInterval(() => {
-            checkConnections();
-        }, 30000);
-
-        return () => {
-            clearInterval(connectionCheckInterval);
-        }
     }, []);
 
     useEffect(() => {
@@ -409,12 +396,15 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         setTimeout(() => {
             scrollToBottom();
         }, 2000);
+
+        // Check connections when component mounts
+        checkConnections();
     }, [documentVisible, networkStatus.online]);
 
     // Check connections when profile changes or browserSourceAudio setting changes
     useEffect(() => {
         checkConnections();
-    }, [profile.guid, config.browserSourceAudio, checkConnections]);
+    }, [profile.guid, config.browserSourceAudio]);
 
     useEffect(() => {
         if (shouldScroll) {
