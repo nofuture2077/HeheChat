@@ -164,7 +164,7 @@ export function AlertSettings() {
                             config.setCheckBrowsersourceConnection(event.currentTarget.checked); 
                             forceUpdate(); 
                         }} 
-                        label="Check Browsersource Connection" 
+                        label="Check OBS Connection" 
                         size="lg" 
                     />
                     <Text fs="italic" size='14px'>Show warnings when Browsersource is not connected but audio is set to OBS</Text>
