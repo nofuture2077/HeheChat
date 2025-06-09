@@ -375,7 +375,7 @@ class AlertPlayer {
         });
     }
 
-    cleanMessage(message: string) {
+    cleanMessage(message: string, filterTTS: boolean) {
         // First clean cheer prefixes
         var cleanedMessage = cheerPrefixesRegExp.reduce(
             (accumulator, prefix) => accumulator.replaceAll(prefix, ""),
@@ -385,7 +385,7 @@ class AlertPlayer {
         cleanedMessage = cleanedMessage.replace(/https?:\/\/[^\s]+/g, "");
 
         // Remove emotes if skipEmotesInTTS is enabled
-        if (this.config?.skipEmotesInTTS) {
+        if (filterTTS && this.config?.skipEmotesInTTS) {
             // Get all channels
             const channels = this.config.channels || [];
             
@@ -645,7 +645,7 @@ class AlertPlayer {
         this.startPlaying();
         console.log('Start playing');
         this.currentlyPlaying = item;
-        const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", vars));
+        const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", vars), true);
         try {
             const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state, sink) : undefined;
             const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
@@ -657,7 +657,7 @@ class AlertPlayer {
             PubSub.publish('AlertPlayer-update', {duration});
             if (alert.visual) {
                 const headline = formatString(alert.visual?.headline || "", vars);
-                const text = this.cleanMessage(formatString(alert.visual?.text || "", vars));
+                const text = this.cleanMessage(formatString(alert.visual?.text || "", vars), false);
 
                 console.log('Visuell', text, headline);
 
