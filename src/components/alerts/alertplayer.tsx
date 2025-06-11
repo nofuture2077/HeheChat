@@ -384,8 +384,8 @@ class AlertPlayer {
         // Then remove URLs
         cleanedMessage = cleanedMessage.replace(/https?:\/\/[^\s]+/g, "");
 
-        // Remove emotes if skipEmotesInTTS is enabled
-        if (filterTTS && this.config?.skipEmotesInTTS) {
+        // Remove emotes if any of the skip emote flags are enabled
+        if (filterTTS && (this.config?.skipEmotesInTTS || this.config?.skip7TVEmotesInTTS || this.config?.skipGlobalEmotesInTTS)) {
             // Get all channels
             const channels = this.config.channels || [];
             
@@ -403,20 +403,20 @@ class AlertPlayer {
                     
                     const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
                     
-                    // Check channel emotes
-                    if (channelEmotes?.channelEmotes?.get(word)) return false;
+                    // Check channel emotes (if skipEmotesInTTS is enabled)
+                    if (this.config?.skipEmotesInTTS && channelEmotes?.channelEmotes?.get(word)) return false;
                     
-                    // Check 7TV emotes
-                    if (channelEmotes?.sevenTVEmotes?.get(word)) return false;
+                    // Check 7TV emotes (if skip7TVEmotesInTTS is enabled)
+                    if (this.config?.skip7TVEmotesInTTS && channelEmotes?.sevenTVEmotes?.get(word)) return false;
                 }
                 
-                // Check global emotes
-                if (DEFAULT_CHAT_EMOTES.emotes.has('global')) {
+                // Check global emotes (if skipGlobalEmotesInTTS is enabled)
+                if (this.config?.skipGlobalEmotesInTTS && DEFAULT_CHAT_EMOTES.emotes.has('global')) {
                     const globalEmotes = DEFAULT_CHAT_EMOTES.emotes.get('global');
                     if (globalEmotes?.channelEmotes?.get(word)) return false;
                 }
                 
-                // Not an emote, keep the word
+                // Not an emote (or emote filtering not enabled for this type), keep the word
                 return true;
             });
             
@@ -562,13 +562,13 @@ class AlertPlayer {
         }
     }
 
-    parsedPartsToText(parsedParts: any[]) {
+    parsedPartsToTTSText(parsedParts: any[]) {
         return parsedParts.map((part, partIndex) => {
             return part.text;
         }).join(' ');
     }
 
-    parsedPartsToParts(parsedParts: any[]) {
+    parsedPartsToText(parsedParts: any[]) {
         return parsedParts.map((part, partIndex) => {
             return part.text;
         }).join(' ');
@@ -637,15 +637,16 @@ class AlertPlayer {
             amount2: Number(item.amount2)
         };
 
-        if (eventData && eventData.text) {
-            vars.text = this.parsedPartsToText(eventData.text.parts || eventData.text);
-        }
+
         const state = localStorage.getItem('hehe-token_state') || '';
         const sink = localStorage.getItem('hehe-sink') || '';
         this.startPlaying();
         console.log('Start playing');
         this.currentlyPlaying = item;
-        const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", vars), true);
+        const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", {
+            ...vars,
+            text: (eventData && eventData.text) ? this.parsedPartsToTTSText(eventData.text.parts || eventData.text) : undefined
+        }), true);
         try {
             const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state, sink) : undefined;
             const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
@@ -656,8 +657,15 @@ class AlertPlayer {
             const minDuration = Math.max(duration, 2);
             PubSub.publish('AlertPlayer-update', {duration});
             if (alert.visual) {
-                const headline = formatString(alert.visual?.headline || "", vars);
-                const text = this.cleanMessage(formatString(alert.visual?.text || "", vars), false);
+                const visualText = (eventData && eventData.text) ? this.parsedPartsToText(eventData.text.parts || eventData.text) : undefined
+                const headline = formatString(alert.visual?.headline || "", {
+                    ...vars,
+                    text: visualText
+                });
+                const text = this.cleanMessage(formatString(alert.visual?.text || "", {
+                    ...vars,
+                    text: visualText
+                }), false);
 
                 console.log('Visuell', text, headline);
 

@@ -6,6 +6,7 @@ import { ChatEmotesContext } from '@/ApplicationContext';
 import PubSub from 'pubsub-js';
 import { ChatEmotes } from '@/commons/emotes';
 import { joinWithSpace } from '../../commons/helper';
+import { EmoteComponentSimple } from '../emote/emote';
 
 interface HighlightedTextProps {
   text: string;
@@ -37,7 +38,13 @@ function HighlightedText({ text }: HighlightedTextProps) {
 }
 
 function formatText(text: string, emotes: ChatEmotes, channel: string) {
-  return joinWithSpace(text.split(' ').map((word, index) => emotes.checkEmote(channel, word, "" + index, true)));
+  return joinWithSpace(text.split(' ').map((word, index) => {
+      if (word.startsWith('image//')) {
+        const url = word.substring(5);
+        return <EmoteComponentSimple imageUrl={url} largeImageUrl={url} name='emote' type=''/>
+      }
+      return emotes.checkEmote(channel, word, "" + index, true);
+  }));
 }
 
 export default function VisualAlertPlayer() {

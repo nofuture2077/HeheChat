@@ -47,6 +47,8 @@ export interface ConfigData {
     alertBoost: number;
     visualAlertDelay: number;
     skipEmotesInTTS: boolean;
+    skip7TVEmotesInTTS: boolean;
+    skipGlobalEmotesInTTS: boolean;
     systemMessageInChat: Partial<Record<SystemMessageMainType, boolean>>,
     hideEvents: Partial<Record<SystemMessageMainType, boolean>>,
     receivedShares: string[],
@@ -82,6 +84,8 @@ export interface Config extends ConfigData {
     setAlertBoost: (val: number) => void;
     setVisualAlertDelay: (val: number) => void;
     setSkipEmotesInTTS: (val: boolean) => void;
+    setSkip7TVEmotesInTTS: (val: boolean) => void;
+    setSkipGlobalEmotesInTTS: (val: boolean) => void;
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => void;
     setHideEvents: (type: SystemMessageMainType, val: boolean) => void;
     loadReceivedShares: () => void;
@@ -128,6 +132,8 @@ export const DEFAULT_CONFIG: Config = {
     alertBoost: 1.0,
     visualAlertDelay: 8,
     skipEmotesInTTS: false,
+    skip7TVEmotesInTTS: false,
+    skipGlobalEmotesInTTS: false,
     hideViewers: false,
     hideOwnViewers: false,
     hideHypetrain: false,
@@ -212,6 +218,8 @@ export const DEFAULT_CONFIG: Config = {
     setAlertBoost: (val) => {},
     setVisualAlertDelay: (val) => {},
     setSkipEmotesInTTS: (val) => {},
+    setSkip7TVEmotesInTTS: (val) => {},
+    setSkipGlobalEmotesInTTS: (val) => {},
 };
 
 export const DB_VERSION = 8;

@@ -249,6 +249,24 @@ export function AlertSettings() {
                         label="Skip emotes in TTS" 
                         size="lg" 
                     />
+                    <Switch 
+                        checked={config.skip7TVEmotesInTTS} 
+                        onChange={(event) => { 
+                            config.setSkip7TVEmotesInTTS(event.currentTarget.checked); 
+                            forceUpdate(); 
+                        }} 
+                        label="Skip 7TV emotes in TTS" 
+                        size="lg" 
+                    />
+                    <Switch 
+                        checked={config.skipGlobalEmotesInTTS} 
+                        onChange={(event) => { 
+                            config.setSkipGlobalEmotesInTTS(event.currentTarget.checked); 
+                            forceUpdate(); 
+                        }} 
+                        label="Skip global emotes in TTS" 
+                        size="lg" 
+                    />
                 </Stack>
             </Fieldset>
 
