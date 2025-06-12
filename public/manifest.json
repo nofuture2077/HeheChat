@@ -5,17 +5,13 @@
     "theme_color": "#480356",
     "background_color": "#242424",
     "display": "standalone",
+    "orientation": "portrait-primary",
     "start_url": "/",
     "gcm_sender_id": "103953800507",
     "permissions": ["notifications", "push"],
     "icons": [
       {
-        "src": "android-chrome-192x192.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      },
-      {
-        "src": "android-chrome-512x512.png",
+        "src": "appicon_01.png",
         "sizes": "512x512",
         "type": "image/png"
       }
