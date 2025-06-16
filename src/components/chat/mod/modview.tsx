@@ -1,5 +1,5 @@
 import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
-import { useContext, useEffect, useState, useRef } from "react";
+import { useContext, useEffect, useState, useRef, useMemo } from "react";
 import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge, ScrollArea, Image } from '@mantine/core';
 import { IconArrowsRight, IconX } from '@tabler/icons-react';
 import { OverlayDrawer } from '../../../pages/Chat.page';
@@ -64,10 +64,18 @@ export function ModView(props: ModViewProps) {
 
     const followDate = userInfo?.follow?.followed_at ? formatDate(new Date(userInfo?.follow?.followed_at)) : '';
     const banMessage = formatBanMessage(userInfo, username);
-    const messages = (userInfo?.messages || []).reverse();
-    const messageGroups = _.groupBy(messages, (msg) => formatDate(new Date(Number(msg.date))));
+    
+    // Memoize messages to prevent unnecessary re-sorting on every render
+    const messages = useMemo(() => {
+        return (userInfo?.messages || []).slice().reverse();
+    }, [userInfo?.messages]);
+    
+    const messageGroups = useMemo(() => {
+        return _.groupBy(messages, (msg) => formatDate(new Date(Number(msg.date))));
+    }, [messages]);
 
     const reloadUserInfo = () => {
+        // Add a small delay to allow backend to process the moderation action
         setTimeout(() => {
             getUserInfo(channel, username).then((info) => {
                 setUserInfo(info);
