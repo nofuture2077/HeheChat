@@ -1,6 +1,7 @@
-import { TextInput, Fieldset, Stack, Text, ActionIcon } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, ActionIcon, Textarea } from '@mantine/core';
 import { IconCopy } from '@tabler/icons-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
+import { ProfileContext, ConfigContext } from '@/ApplicationContext';
 
 function extractBlerpRoom(input: string): string {
     const regex = /\/([^\/]+)$/;
@@ -16,7 +17,11 @@ export function ConnectSettings() {
     const [blerpKey, setBlerpKey] = useState<string>("");
     const [kofiVerificationToken, setKofiVerificationToken] = useState<string>("");
     const [kofiWebhookUrl, setKofiWebhookUrl] = useState<string>("");
+    const [fossbotCommand, setFossbotCommand] = useState<string>("");
+    const [fossbotLoading, setFossbotLoading] = useState<boolean>(false);
 
+    const profile = useContext(ProfileContext);
+    const config = useContext(ConfigContext);
     const state = localStorage.getItem('hehe-token_state') || '';
 
     useEffect(() => {
@@ -44,6 +49,25 @@ export function ConnectSettings() {
         fetch(import.meta.env.VITE_BACKEND_URL + "/kofi/webhook-url?state=" + state).then(res => res.json()).then((data) => {
             setKofiWebhookUrl(data.webhook_url || '');
         });
+
+        // Load Fossbot command
+        const chatChannel = config.getChatChannel();
+        if (chatChannel && profile.guid) {
+            setFossbotLoading(true);
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/event/bitalerts/fossabot?channel=${chatChannel}&profile=${profile.guid}`)
+                .then(res => res.json())
+                .then((data) => {
+                    setFossbotCommand(data.text || "Failed to load Fossbot command");
+                })
+                .catch(() => {
+                    setFossbotCommand("Error loading Fossbot command. Please try again later.");
+                })
+                .finally(() => {
+                    setFossbotLoading(false);
+                });
+        } else {
+            setFossbotCommand("Please set a chat channel and ensure you have a valid profile to generate the Fossbot command.");
+        }
     }, []);
 
     const updatePallyGG = (apikey: string, channel: string) => {
@@ -120,6 +144,29 @@ export function ConnectSettings() {
                 placeholder="Enter the verification token from Ko-fi" 
                 value={kofiVerificationToken} 
                 onChange={(ev) => updateKofi(ev.target.value)} 
+            />
+        </Fieldset>
+
+        <Fieldset legend="Fossbot Bit Alerts" variant="filled">
+            <Text size="sm" mb={10}>
+                Copy the command below and paste it into Fossbot to create a command that displays bit alerts triggered by your viewers. 
+                This command will show the top bit alerts sorted by amount.
+            </Text>
+            <Textarea
+                label="Fossbot Command"
+                placeholder={fossbotLoading ? "Loading..." : "Fossbot command will appear here"}
+                value={fossbotCommand}
+                readOnly
+                minRows={4}
+                maxRows={6}
+                rightSection={
+                    <ActionIcon 
+                        onClick={() => navigator.clipboard.writeText(fossbotCommand)}
+                        disabled={!fossbotCommand || fossbotLoading}
+                    >
+                        <IconCopy size="1rem" />
+                    </ActionIcon>
+                }
             />
         </Fieldset>
     </Stack>
