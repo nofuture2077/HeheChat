@@ -102,11 +102,6 @@ function ProfileComp(provided: DraggableProvided, profile: Profile, activeProfil
             // Could add user notification here
         }
     } }>
-        <Text m='auto' ta="center">{profile.name}</Text>
-        <AvatarGroup spacing='md' style={{ justifyContent: 'center' }}>
-            {channels.map((channel: string, i: number) => <Avatar src={emotes.getLogo(channel)?.props.src} key={channel + i} style={{ zIndex: 10 - i }}></Avatar>)}
-            {more ? <Avatar key="channelmore">+{more}</Avatar> : null}
-        </AvatarGroup>
     </Paper>);
 }
 

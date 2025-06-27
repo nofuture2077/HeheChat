@@ -63,6 +63,7 @@ export interface LoginContext extends LoginContextData {
     setAccessToken: (token: string | undefined) => void;
     setUser: (user: HelixUser) => void;
     setModeratedChannels: (channels: HelixModeratedChannel[]) => void;
+    isAdmin?: () => boolean;
 }
 
 export const DEFAULT_LOGIN_CONTEXT: LoginContext = {

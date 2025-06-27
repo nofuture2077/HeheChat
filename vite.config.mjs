@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         main: './index.html',
         replay: './replay.html',
+        admin: './admin.html',
         alert: './alert.html'
       }
     }

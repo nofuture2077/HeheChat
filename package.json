@@ -18,12 +18,15 @@
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.6.0",
+    "@mantine/charts": "^8.0.2",
     "@mantine/core": "8.0.2",
+    "@mantine/dates": "^8.0.2",
     "@mantine/hooks": "8.0.2",
     "@mantine/notifications": "^8.0.2",
     "@tabler/icons-react": "^3.10.0",
     "@twurple/api": "^7.1.0",
     "@uidotdev/usehooks": "^2.4.1",
+    "dayjs": "^1.11.13",
     "humanize-duration": "^3.32.1",
     "pg-format": "^1.0.4",
     "pubsub-js": "^1.9.4",
@@ -32,6 +35,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
     "react-twitch-embed-video": "^3.1.0",
+    "recharts": "^2.15.3",
     "underscore": "^1.13.7"
   },
   "devDependencies": {
