@@ -201,8 +201,7 @@ export function StreamAnalyticsChart(props: {channel: string, admin: boolean}) {
       h: 400,
       data,
       dataKey: 'time',
-      withLegend: true,
-      legendProps: { verticalAlign: 'bottom' as const, height: 50 }
+      withLegend: true
     };
 
     switch (chartType) {
@@ -214,7 +213,7 @@ export function StreamAnalyticsChart(props: {channel: string, admin: boolean}) {
               { name: 'viewer_count', label: 'Viewers', color: 'blue.6' },
               { name: 'message_count', label: 'Messages', color: 'green.6' },
               { name: 'sub_count', label: 'Subs', color: 'purple.6' },
-              { name: 'cheer_bits_total', label: 'Bits', color: 'orange.6' },
+              { name: 'cheer_count', label: 'Bits', color: 'orange.6' },
               { name: 'follow_count', label: 'Follows', color: 'pink.6' }
             ]}
           />
@@ -227,7 +226,7 @@ export function StreamAnalyticsChart(props: {channel: string, admin: boolean}) {
               { name: 'viewer_count', label: 'Viewers', color: 'blue.6' },
               { name: 'message_count', label: 'Messages', color: 'green.6' },
               { name: 'sub_count', label: 'Subs', color: 'purple.6' },
-              { name: 'cheer_bits_total', label: 'Bits', color: 'orange.6' },
+              { name: 'cheer_count', label: 'Bits', color: 'orange.6' },
               { name: 'follow_count', label: 'Follows', color: 'pink.6' }
             ]}
           />
@@ -239,10 +238,10 @@ export function StreamAnalyticsChart(props: {channel: string, admin: boolean}) {
             {...chartProps}
             series={[
               { name: 'viewer_count', label: 'Viewers', color: 'blue.6', type: 'line' },
-              { name: 'message_count', label: 'Messages', color: 'green.6', type: 'bar' },
-              { name: 'sub_count', label: 'Subs', color: 'purple.6', type: 'bar' },
-              { name: 'cheer_bits_total', label: 'Bits', color: 'orange.6', type: 'bar' },
-              { name: 'follow_count', label: 'Follows', color: 'pink.6', type: 'bar' }
+              { name: 'message_count', label: 'Messages', color: 'green.6', type: 'area' },
+              { name: 'sub_count', label: 'Subs', color: 'purple.6', type: 'bar', yAxisId: 'right' },
+              { name: 'cheer_count', label: 'Bits', color: 'orange.6', type: 'bar', yAxisId: 'right' },
+              { name: 'follow_count', label: 'Follows', color: 'pink.6', type: 'bar', yAxisId: 'right' }
             ]}
           />
         );
