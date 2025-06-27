@@ -24,6 +24,7 @@ function getQueryVariable(query: String, variable: String): string | undefined {
 interface LoginProps {
     color1: string;
     color2: string;
+    target: string;
 }
 
 export default function Login(props: LoginProps) {
@@ -83,7 +84,7 @@ export default function Login(props: LoginProps) {
         }
     }, [token]);
 
-    const authUrl = import.meta.env.VITE_BACKEND_URL + "/twitchauth";
+    const authUrl = import.meta.env.VITE_BACKEND_URL + props.target;
 
     let scope = LOGIN_SCOPES.map(encodeURIComponent).join('+');
     

@@ -76,7 +76,7 @@ export function AdminHomePage({ showAccessDenied = false }: AdminHomePageProps) 
             </Text>
           </Alert>
 
-          <Login color1="#9146FF" color2="#772CE8" />
+          <Login color1="#9146FF" color2="#772CE8" target='/twitchauthadmin'/>
         </Stack>
       </Center>
     </Container>

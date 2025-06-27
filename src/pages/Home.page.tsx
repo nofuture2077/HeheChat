@@ -20,7 +20,7 @@ export function HomePage() {
           </svg>
         </div>
       </Stack>
-      <Login color1="#DB32BC" color2="#ff1493"/>
+      <Login color1="#DB32BC" color2="#ff1493" target="/twitchauth"/>
       <div>
         <Image src={nofuture} className={classes.nofuture} />
       </div>
