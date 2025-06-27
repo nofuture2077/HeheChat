@@ -3,7 +3,7 @@ import { CompositeChart } from '@mantine/charts';
 import { Text, Stack, Alert, LoadingOverlay, Box } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
-import { AnalyticsApiClient, StreamAnalyticsData } from '@/api/analytics';
+import { AnalyticsApiClient, StreamAnalyticsData, fillMissingTimestamps } from '@/api/analytics';
 
 interface CompactChartDataPoint {
   time: string;
@@ -75,7 +75,14 @@ export function CompactAnalyticsChart({ channels, height = 120 }: CompactAnalyti
       );
 
       if (response.success && response.data.length > 0) {
-        const transformedData = transformData(response.data);
+        // Fill missing timestamps with zero values for better chart visualization
+        const filledData = fillMissingTimestamps(
+          response.data,
+          start,
+          now,
+          '1h'
+        );
+        const transformedData = transformData(filledData);
         setData(transformedData);
       } else {
         setData([]);

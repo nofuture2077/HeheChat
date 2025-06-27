@@ -56,6 +56,71 @@ export interface DateRangeResponse {
 }
 
 /**
+ * Utility function to fill missing timestamps in analytics data with zero values
+ * @param data Original analytics data array
+ * @param startTime Start timestamp (Unix seconds)
+ * @param endTime End timestamp (Unix seconds)
+ * @param interval Interval string ('1m', '5m', '15m', '30m', '1h', '6h', '12h', '1d')
+ * @returns Analytics data with filled timestamps
+ */
+export function fillMissingTimestamps(
+  data: StreamAnalyticsData[],
+  startTime: number,
+  endTime: number,
+  interval: '1m' | '5m' | '15m' | '30m' | '1h' | '6h' | '12h' | '1d'
+): StreamAnalyticsData[] {
+  if (data.length === 0) {
+    return [];
+  }
+
+  // Convert interval to seconds
+  const intervalSeconds = {
+    '1m': 60,
+    '5m': 5 * 60,
+    '15m': 15 * 60,
+    '30m': 30 * 60,
+    '1h': 60 * 60,
+    '6h': 6 * 60 * 60,
+    '12h': 12 * 60 * 60,
+    '1d': 24 * 60 * 60
+  }[interval];
+
+  // Create a map of existing data points for quick lookup
+  const dataMap = new Map<number, StreamAnalyticsData>();
+  data.forEach(item => {
+    dataMap.set(item.timestamp_minute, item);
+  });
+
+  // Generate all expected timestamps
+  const filledData: StreamAnalyticsData[] = [];
+  
+  // Align start time to interval boundary
+  const alignedStartTime = Math.floor(startTime / intervalSeconds) * intervalSeconds;
+  
+  for (let timestamp = alignedStartTime; timestamp <= endTime; timestamp += intervalSeconds) {
+    if (dataMap.has(timestamp)) {
+      // Use existing data point
+      filledData.push(dataMap.get(timestamp)!);
+    } else {
+      // Create zero-filled data point
+      filledData.push({
+        timestamp_minute: timestamp,
+        viewer_count: null, // Keep viewer_count as null since it represents "no data"
+        message_count: 0,
+        sub_count: 0,
+        cheer_count: 0,
+        cheer_bits_total: 0,
+        raid_count: 0,
+        raid_viewers_total: 0,
+        follow_count: 0
+      });
+    }
+  }
+
+  return filledData;
+}
+
+/**
  * API client for stream analytics operations
  */
 export class AnalyticsApiClient {

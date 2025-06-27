@@ -17,7 +17,7 @@ import { TextInput } from '@mantine/core';
 import { LineChart, AreaChart, CompositeChart } from '@mantine/charts';
 import { IconInfoCircle, IconTrendingUp, IconUsers, IconMessage, IconGift, IconBolt } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
-import { AnalyticsApiClient, StreamAnalyticsData, StreamAnalyticsSummary } from '@/api/analytics';
+import { AnalyticsApiClient, StreamAnalyticsData, StreamAnalyticsSummary, fillMissingTimestamps } from '@/api/analytics';
 
 interface ChartDataPoint {
   timestamp: string;
@@ -162,7 +162,14 @@ export function StreamAnalyticsChart(props: {channel: string, admin: boolean}) {
       );
 
       if (response.success) {
-        const transformedData = transformData(response.data);
+        // Fill missing timestamps with zero values for better chart visualization
+        const filledData = fillMissingTimestamps(
+          response.data,
+          start,
+          end,
+          interval as any
+        );
+        const transformedData = transformData(filledData);
         setData(transformedData);
         setSummary(response.summary || null);
       } else {
