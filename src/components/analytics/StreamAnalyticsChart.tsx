@@ -124,7 +124,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
       return;
     }
 
-    const token = '77c05a06-918a-4d76-b63c-072b6ea040cb';
+    const token = localStorage.getItem('hehe-token_state') || '';
     setLoading(true);
     setError(null);
 
@@ -137,7 +137,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
 
       // Determine appropriate interval based on stream duration
       let interval: '1m' | '5m' | '15m' | '30m' | '1h' | '6h' | '12h' | '1d' = '1h';
-      const durationMinutes = selectedStreamData.duration_minutes;
+      const durationMinutes = selectedStreamData.duration_seconds / 60;
       
       if (durationMinutes <= 60) {
         interval = '1m';
@@ -287,9 +287,9 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
     const selectedStreamData = streams.find(s => s.id?.toString() === selectedStream);
     if (!selectedStreamData) return null;
 
-    const formatDuration = (minutes: number) => {
-      const hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
+    const formatDuration = (seconds: number) => {
+      const hours = Math.floor(seconds / 3600);
+      const mins = seconds % 3600;
       return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
     };
 
@@ -313,7 +313,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
                 {formatDate(selectedStreamData.start_timestamp)}
               </Badge>
               <Badge leftSection={<IconClock size={12} />} variant="light">
-                {formatDuration(selectedStreamData.duration_minutes)}
+                {formatDuration(selectedStreamData.duration_seconds)}
               </Badge>
               <Badge leftSection={<IconUsers size={12} />} variant="light">
                 Peak: {selectedStreamData.peak_viewers.toLocaleString()}

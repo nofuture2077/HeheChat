@@ -60,7 +60,7 @@ export interface StreamInfo {
   title: string;
   start_timestamp: number;
   end_timestamp: number;
-  duration_minutes: number;
+  duration_seconds: number;
   peak_viewers: number;
   avg_viewers: number;
   total_messages: number;
