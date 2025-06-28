@@ -238,10 +238,10 @@ export class AnalyticsApiClient {
    */
   static async getStreams(
     channelname: string,
-    token: string,
     start: number,
     end: number
   ): Promise<StreamsResponse> {
+    const token = localStorage.getItem('hehe-token_state') || '';
     const params = new URLSearchParams({
       token: encodeURIComponent(token),
       channelname,
