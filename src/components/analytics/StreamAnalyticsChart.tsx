@@ -91,13 +91,12 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
   const fetchStreams = async (channelName: string) => {
     if (!channelName) return;
 
-    const token = '77c05a06-918a-4d76-b63c-072b6ea040cb';
     setStreamsLoading(true);
     setError(null);
 
     try {
       const { start, end } = getLast30DaysRange();
-      const response = await AnalyticsApiClient.getStreams(channelName, token, start, end);
+      const response = await AnalyticsApiClient.getStreams(channelName, start, end);
 
       if (response.success) {
         setStreams(response.streams);
