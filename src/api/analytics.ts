@@ -249,7 +249,7 @@ export class AnalyticsApiClient {
       end: end.toString()
     });
 
-    const response = await fetch(`https://stage.server.hehechat.io/api/streams?${params}`, {
+    const response = await fetch(`${API_BASE_URL}/api/streams?${params}`, {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
