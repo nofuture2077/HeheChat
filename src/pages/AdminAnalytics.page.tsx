@@ -191,14 +191,13 @@ export function AdminAnalyticsPage() {
                       </div>
                     )}
 
-                    {analyticsData.data && analyticsData.data.length > 0 && (
-                      <div>
-                        <Text fw={500} mb="md">Analytics Chart</Text>
-                        <StreamAnalyticsChart 
-                          channel={selectedChannel} admin
-                        />
-                      </div>
-                    )}
+                    <div>
+                      <Text fw={500} mb="md">Stream Analytics</Text>
+                      <StreamAnalyticsChart 
+                        channel={selectedChannel} 
+                        admin={true}
+                      />
+                    </div>
 
                     {analyticsData.metadata_changes && analyticsData.metadata_changes.length > 0 && (
                       <div>

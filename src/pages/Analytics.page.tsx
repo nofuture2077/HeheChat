@@ -5,7 +5,7 @@ export function AnalyticsPage() {
   return (
     <Container size="xl" py="md">
       <Title order={1} mb="lg">Stream Analytics</Title>
-      <StreamAnalyticsChart channel='knirpz' admin/>
+      <StreamAnalyticsChart admin={false} />
     </Container>
   );
 }

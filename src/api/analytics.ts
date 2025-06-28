@@ -55,6 +55,23 @@ export interface DateRangeResponse {
   latest_data: number;
 }
 
+export interface StreamInfo {
+  id: string;
+  title: string;
+  start_time: number;
+  end_time: number;
+  duration_minutes: number;
+  peak_viewers: number;
+  avg_viewers: number;
+  total_messages: number;
+}
+
+export interface StreamsResponse {
+  success: boolean;
+  channel: string;
+  streams: StreamInfo[];
+}
+
 /**
  * Utility function to fill missing timestamps in analytics data with zero values
  * @param data Original analytics data array
@@ -206,6 +223,42 @@ export class AnalyticsApiClient {
 
     if (!response.ok) {
       throw new Error(`Failed to fetch date range: ${response.statusText}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Get list of streams for a channel
+   * @param channelname Channel name
+   * @param token Authentication token
+   * @param start Start timestamp (Unix seconds)
+   * @param end End timestamp (Unix seconds)
+   * @returns List of streams
+   */
+  static async getStreams(
+    channelname: string,
+    token: string,
+    start: number,
+    end: number
+  ): Promise<StreamsResponse> {
+    const params = new URLSearchParams({
+      token: encodeURIComponent(token),
+      channelname,
+      start: start.toString(),
+      end: end.toString()
+    });
+
+    const response = await fetch(`https://stage.server.hehechat.io/api/streams?${params}`, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch streams: ${response.statusText}`);
     }
 
     return response.json();
