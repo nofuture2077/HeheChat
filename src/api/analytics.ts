@@ -56,7 +56,7 @@ export interface DateRangeResponse {
 }
 
 export interface StreamInfo {
-  id: string;
+  id: number;
   title: string;
   start_time: number;
   end_time: number;

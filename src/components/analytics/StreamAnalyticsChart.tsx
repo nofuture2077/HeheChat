@@ -91,7 +91,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
   const fetchStreams = async (channelName: string) => {
     if (!channelName) return;
 
-    const token = localStorage.getItem('hehe-token_state') || '';
+    const token = '77c05a06-918a-4d76-b63c-072b6ea040cb';
     setStreamsLoading(true);
     setError(null);
 
@@ -103,7 +103,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         setStreams(response.streams);
         // Auto-select the most recent stream if available
         if (response.streams.length > 0) {
-          setSelectedStream(response.streams[0].id);
+          setSelectedStream(response.streams[0].id.toString());
         }
       } else {
         setError('Failed to fetch streams data');
@@ -125,12 +125,12 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
       return;
     }
 
-    const token = localStorage.getItem('hehe-token_state') || '';
+    const token = '77c05a06-918a-4d76-b63c-072b6ea040cb';
     setLoading(true);
     setError(null);
 
     try {
-      const selectedStreamData = streams.find(s => s.id === streamId);
+      const selectedStreamData = streams.find(s => s.id.toString() === streamId);
       if (!selectedStreamData) {
         setError('Selected stream not found');
         return;
@@ -285,7 +285,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
   };
 
   const renderStreamInfo = () => {
-    const selectedStreamData = streams.find(s => s.id === selectedStream);
+    const selectedStreamData = streams.find(s => s.id.toString() === selectedStream);
     if (!selectedStreamData) return null;
 
     const formatDuration = (minutes: number) => {
@@ -354,7 +354,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
                 setData([]);
                 setSummary(null);
               }}
-              data={channels.map(channel => ({ value: channel, label: channel }))}
+              data={channels.length > 0 ? channels.map(channel => ({ value: channel, label: channel })) : []}
               searchable
               w={200}
               disabled={channelsLoading}
@@ -366,7 +366,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
               value={selectedStream}
               onChange={(value) => setSelectedStream(value || '')}
               data={streams.map(stream => ({
-                value: stream.id,
+                value: stream.id.toString(),
                 label: `${stream.title} (${new Date(stream.start_time * 1000).toLocaleDateString()})`
               }))}
               searchable
