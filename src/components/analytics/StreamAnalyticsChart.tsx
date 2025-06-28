@@ -98,18 +98,18 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
       const { start, end } = getLast30DaysRange();
       const response = await AnalyticsApiClient.getStreams(channelName, start, end);
 
-      if (response.success) {
+      if (response.success && response.streams) {
         setStreams(response.streams);
         // Auto-select the most recent stream if available
-        if (response.streams.length > 0) {
+        if (response.streams.length > 0 && response.streams[0]?.id != null) {
           setSelectedStream(response.streams[0].id.toString());
         }
       } else {
-        setError('Failed to fetch streams data');
+        console.error('Failed to fetch streams data:', response);
         setStreams([]);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch streams data');
+      console.error('Error fetching streams:', err);
       setStreams([]);
     } finally {
       setStreamsLoading(false);
@@ -120,7 +120,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
     if (!selectedChannel || !streamId) return;
 
     if (!premium.isPremium && !props.admin) {
-      setError('Premium subscription required for analytics');
+      console.error('Premium subscription required for analytics');
       return;
     }
 
@@ -129,9 +129,9 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
     setError(null);
 
     try {
-      const selectedStreamData = streams.find(s => s.id.toString() === streamId);
+      const selectedStreamData = streams.find(s => s.id?.toString() === streamId);
       if (!selectedStreamData) {
-        setError('Selected stream not found');
+        console.error('Selected stream not found:', streamId);
         return;
       }
 
@@ -173,10 +173,10 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         setData(transformedData);
         setSummary(response.summary || null);
       } else {
-        setError('Failed to fetch analytics data');
+        console.error('Failed to fetch analytics data:', response);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch analytics data');
+      console.error('Error fetching analytics:', err);
     } finally {
       setLoading(false);
     }
@@ -284,7 +284,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
   };
 
   const renderStreamInfo = () => {
-    const selectedStreamData = streams.find(s => s.id.toString() === selectedStream);
+    const selectedStreamData = streams.find(s => s.id?.toString() === selectedStream);
     if (!selectedStreamData) return null;
 
     const formatDuration = (minutes: number) => {
@@ -364,10 +364,13 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
               placeholder="Select a stream"
               value={selectedStream}
               onChange={(value) => setSelectedStream(value || '')}
-              data={streams.map(stream => ({
-                value: stream.id.toString(),
-                label: `${stream.title} (${new Date(stream.start_time * 1000).toLocaleDateString()})`
-              }))}
+              data={streams
+                .filter(stream => stream.id != null)
+                .map(stream => ({
+                  value: stream.id!.toString(),
+                  label: `${stream.title} (${new Date(stream.start_time * 1000).toLocaleDateString()})`
+                }))
+              }
               searchable
               w={400}
               disabled={!selectedChannel || streamsLoading || streams.length === 0}
@@ -390,13 +393,6 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
             </Alert>
           )}
 
-          {/* Error Display */}
-          {error && (
-            <Alert icon={<IconInfoCircle size={16} />} title="Error" color="red">
-              {error}
-            </Alert>
-          )}
-
           {/* Stream Info */}
           {renderStreamInfo()}
 
@@ -412,7 +408,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
           )}
 
           {/* No Stream Selected */}
-          {!selectedStream && selectedChannel && streams.length === 0 && !streamsLoading && !error && (
+          {!selectedStream && selectedChannel && streams.length === 0 && !streamsLoading && (
             <Alert icon={<IconInfoCircle size={16} />} title="No Streams" color="blue">
               No streams found for the selected channel in the last 30 days.
             </Alert>
