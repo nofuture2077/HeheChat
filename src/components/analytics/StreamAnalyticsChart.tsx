@@ -46,10 +46,6 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
   const [streams, setStreams] = useState<StreamInfo[]>([]);
   const [selectedStream, setSelectedStream] = useState<string>('');
 
-  const getToken = () => {
-    return '77c05a06-918a-4d76-b63c-072b6ea040cb';
-  };
-
   const getLast30DaysRange = () => {
     const now = Math.floor(Date.now() / 1000);
     const thirtyDaysAgo = now - (30 * 24 * 60 * 60);
@@ -95,7 +91,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
   const fetchStreams = async (channelName: string) => {
     if (!channelName) return;
 
-    const token = getToken();
+    const token = localStorage.getItem('hehe-token_state') || '';
     setStreamsLoading(true);
     setError(null);
 
@@ -129,7 +125,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
       return;
     }
 
-    const token = getToken();
+    const token = localStorage.getItem('hehe-token_state') || '';
     setLoading(true);
     setError(null);
 
