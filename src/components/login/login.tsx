@@ -25,6 +25,7 @@ interface LoginProps {
     color1: string;
     color2: string;
     target: string;
+    clientId: string;
 }
 
 export default function Login(props: LoginProps) {
@@ -42,7 +43,7 @@ export default function Login(props: LoginProps) {
         }, 5000);
 
         if (tokenStored || token) {
-            const authProvider = new StaticAuthProvider(loginContext.clientId, tokenStored || token || '');
+            const authProvider = new StaticAuthProvider(props.clientId, tokenStored || token || '');
             const api = new ApiClient({authProvider});
             api.getTokenInfo().then((tokenInfo) => {
                 const userId = tokenInfo.userId || '';
@@ -93,7 +94,7 @@ export default function Login(props: LoginProps) {
         localStorage.setItem('hehe-token_state', state);
 
         let responseType = encodeURIComponent('code');
-        let link = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${loginContext.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}`;
+        let link = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${props.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}`;
 
         window.location.href = link;
     };

@@ -53,9 +53,9 @@ export default function AdminApp(props: AdminAppProps) {
     const getAuthProvider = () => {
         // Use mock auth provider in development mode
         if (import.meta.env.DEV && import.meta.env.VITE_BYPASS_LOGIN === 'true') {
-            return new StaticAuthProvider(loginContext.clientId, 'mock_token');
+            return new StaticAuthProvider(loginContext.adminClientId, 'mock_token');
         }
-        return new StaticAuthProvider(loginContext.clientId, loginContext.accessToken || '');
+        return new StaticAuthProvider(loginContext.adminClientId, loginContext.accessToken || '');
     };
 
     const getApiClient = () => {

@@ -15,6 +15,7 @@ jobs:
       VITE_REPLAY_URL: https://stage.replay.hehechat.io
       VITE_ADMIN_URL: https://stage.admin.hehechat.io
       VITE_CLIENT_ID: 7tmrvoh4llxtx9yft7pwhtgbi61ba9
+      VITE_ADMIN_CLIENT_ID: zjttjwday68ycl72iyb7q5s0u02ply
       VITE_BUILDNUMBER: ${{ github.run_number }}
     runs-on: ubuntu-latest
 

@@ -50,6 +50,7 @@ export const LOGIN_SCOPES = [
 
 export interface LoginContextData {
     clientId: string;
+    adminClientId: string;
     accessToken?: string;
     userid?: string;
     user?: HelixUser;
@@ -68,6 +69,7 @@ export interface LoginContext extends LoginContextData {
 
 export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
     clientId: import.meta.env.VITE_CLIENT_ID,
+    adminClientId: import.meta.env.VITE_ADMIN_CLIENT_ID,
     isLoggedIn: () => {
         // Allow bypassing login in development mode
         if (import.meta.env.DEV && import.meta.env.VITE_BYPASS_LOGIN === 'true') {

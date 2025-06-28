@@ -76,7 +76,7 @@ export function AdminHomePage({ showAccessDenied = false }: AdminHomePageProps) 
             </Text>
           </Alert>
 
-          <Login color1="#9146FF" color2="#772CE8" target='/twitchauthadmin'/>
+          <Login color1="#9146FF" color2="#772CE8" target='/twitchauthadmin' clientId={import.meta.env.VITE_ADMIN_CLIENT_ID}/>
         </Stack>
       </Center>
     </Container>
