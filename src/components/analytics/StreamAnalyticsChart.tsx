@@ -11,8 +11,8 @@ import {
   Card,
   Grid,
   Badge,
-  Tooltip,
-  Box
+  Paper,
+  alpha
 } from '@mantine/core';
 import { CompositeChart } from '@mantine/charts';
 import { IconInfoCircle, IconTrendingUp, IconUsers, IconMessage, IconGift, IconBolt, IconClock, IconCalendar } from '@tabler/icons-react';
@@ -32,6 +32,29 @@ interface ChartDataPoint {
   raid_viewers_total: number;
   follow_count: number;
 }
+
+  interface ChartTooltipProps {
+    label: string;
+    payload: Record<string, any>[] | undefined;
+  }
+
+  function ChartTooltip({ label, payload }: ChartTooltipProps) {
+    if (!payload) return null;
+
+    return (
+      <Paper px="md" py="sm" withBorder shadow="md" radius="md">
+        <Text fw={500} mb={5}>
+          {label}
+        </Text>
+        {payload.map((item: any) => (
+          <Text key={item.name} c={alpha(item.color, 1)} fz="sm">
+            {item.name}: {item.value}
+          </Text>
+        ))}
+      </Paper>
+    );
+  }
+
 
 export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) {
   const premium = useContext(PremiumContext);
@@ -218,7 +241,10 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         data={data}
         dataKey="time"
         withLegend={true}
-        legendProps={{ verticalAlign: 'bottom' as const, height: 50 }}
+        legendProps={{ verticalAlign: 'bottom', height: 50 }}
+        tooltipProps={{
+          content: ({ label, payload }) => <ChartTooltip label={label} payload={payload} />,
+        }}
         series={[
           { name: 'viewer_count', label: 'Viewers', color: 'blue.6', type: 'line' },
           { name: 'message_count', label: 'Messages', color: 'green.6', type: 'area' },
@@ -260,7 +286,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
           <Card withBorder>
             <Group>
-              <IconMessage size={24} color="var(--mantine-color-purple-6)" />
+              <IconMessage size={24} color="var(--mantine-color-pink-6)" />
               <div>
                 <Text size="xs" c="dimmed">Total Messages</Text>
                 <Text size="lg" fw={700}>{summary.total_messages.toLocaleString()}</Text>
@@ -288,8 +314,9 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
     if (!selectedStreamData) return null;
 
     const formatDuration = (seconds: number) => {
-      const hours = Math.floor(seconds / 3600);
-      const mins = seconds % 3600;
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
       return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
     };
 
