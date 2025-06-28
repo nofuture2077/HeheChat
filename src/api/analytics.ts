@@ -31,8 +31,8 @@ export interface StreamMetadataChange {
 export interface StreamAnalyticsResponse {
   success: boolean;
   channel: string;
-  start_time: number;
-  end_time: number;
+  start_timestamp: number;
+  end_timestamp: number;
   interval: string;
   data: StreamAnalyticsData[];
   summary?: StreamAnalyticsSummary;

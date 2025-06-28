@@ -154,8 +154,8 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
       const response = await AnalyticsApiClient.getStreamAnalytics(
         selectedChannel,
         token,
-        selectedStreamData.start_time,
-        selectedStreamData.end_time,
+        selectedStreamData.start_timestamp,
+        selectedStreamData.end_timestamp,
         interval,
         true,
         false
@@ -165,8 +165,8 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         // Fill missing timestamps with zero values for better chart visualization
         const filledData = fillMissingTimestamps(
           response.data,
-          selectedStreamData.start_time,
-          selectedStreamData.end_time,
+          selectedStreamData.start_timestamp,
+          selectedStreamData.end_timestamp,
           interval
         );
         const transformedData = transformData(filledData, durationMinutes);
@@ -310,7 +310,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
             <Text fw={600} size="lg">{selectedStreamData.title}</Text>
             <Group gap="xs" mt="xs">
               <Badge leftSection={<IconCalendar size={12} />} variant="light">
-                {formatDate(selectedStreamData.start_time)}
+                {formatDate(selectedStreamData.start_timestamp)}
               </Badge>
               <Badge leftSection={<IconClock size={12} />} variant="light">
                 {formatDuration(selectedStreamData.duration_minutes)}
@@ -368,7 +368,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
                 .filter(stream => stream.id != null)
                 .map(stream => ({
                   value: stream.id!.toString(),
-                  label: `${stream.title} (${new Date(stream.start_time * 1000).toLocaleDateString()})`
+                  label: `${stream.title} (${new Date(stream.start_timestamp * 1000).toLocaleDateString()})`
                 }))
               }
               searchable
