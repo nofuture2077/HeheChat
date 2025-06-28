@@ -201,7 +201,8 @@ export function StreamAnalyticsChart(props: {channel: string, admin: boolean}) {
       h: 400,
       data,
       dataKey: 'time',
-      withLegend: true
+      withLegend: true,
+      legendProps: { verticalAlign: 'bottom' as const, height: 50 }
     };
 
     switch (chartType) {
