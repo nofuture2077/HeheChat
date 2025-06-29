@@ -48,7 +48,7 @@ interface ChartDataPoint {
         </Text>
         {payload.map((item: any) => (
           <Text key={item.name} c={alpha(item.color, 1)} fz="sm">
-            {item.name}: {item.value}
+            {item.label}: {item.value}
           </Text>
         ))}
       </Paper>
@@ -241,7 +241,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         data={data}
         dataKey="time"
         withLegend={true}
-        legendProps={{ verticalAlign: 'bottom', height: 50 }}
+        legendProps={{ verticalAlign: 'bottom', height: 50, layout: 'horizontal' }}
         tooltipProps={{
           content: ({ label, payload }) => <ChartTooltip label={label} payload={payload} />,
         }}
