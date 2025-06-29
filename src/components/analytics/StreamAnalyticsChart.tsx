@@ -33,28 +33,6 @@ interface ChartDataPoint {
   follow_count: number;
 }
 
-  interface ChartTooltipProps {
-    label: string;
-    payload: Record<string, any>[] | undefined;
-  }
-
-  function ChartTooltip({ label, payload }: ChartTooltipProps) {
-    if (!payload) return null;
-
-    return (
-      <Paper px="md" py="sm" withBorder shadow="md" radius="md">
-        <Text fw={500} mb={5}>
-          {label}
-        </Text>
-        {payload.map((item: any) => (
-          <Text key={item.name} c={alpha(item.color, 1)} fz="sm">
-            {item.label}: {item.value}
-          </Text>
-        ))}
-      </Paper>
-    );
-  }
-
 
 export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) {
   const premium = useContext(PremiumContext);
@@ -241,10 +219,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         data={data}
         dataKey="time"
         withLegend={true}
-        legendProps={{ verticalAlign: 'bottom', height: 50, layout: 'horizontal' }}
-        tooltipProps={{
-          content: ({ label, payload }) => <ChartTooltip label={label} payload={payload} />,
-        }}
+        legendProps={{ verticalAlign: 'bottom', height: 50 }}
         series={[
           { name: 'viewer_count', label: 'Viewers', color: 'blue.6', type: 'line' },
           { name: 'message_count', label: 'Messages', color: 'green.6', type: 'area' },
