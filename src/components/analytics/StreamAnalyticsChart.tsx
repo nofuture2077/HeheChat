@@ -220,6 +220,9 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         dataKey="time"
         withLegend={true}
         legendProps={{ verticalAlign: 'bottom', height: 50 }}
+        withRightYAxis
+        yAxisLabel="Viewers / Messages"
+        rightYAxisLabel="Subs / Bits / Follows"
         series={[
           { name: 'viewer_count', label: 'Viewers', color: 'blue.6', type: 'line' },
           { name: 'message_count', label: 'Messages', color: 'green.6', type: 'area' },
