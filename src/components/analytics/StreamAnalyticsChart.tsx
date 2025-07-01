@@ -102,8 +102,13 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
       if (response.success && response.streams) {
         setStreams(response.streams);
         // Auto-select the most recent stream if available
-        if (response.streams.length > 0 && response.streams[0]?.id != null) {
-          setSelectedStream(response.streams[0].id.toString());
+        if (response.streams.length > 0) {
+          const mostRecentStream = response.streams[0];
+          // Use ID if available, otherwise use start timestamp as identifier
+          const streamId = mostRecentStream.id !== null 
+            ? mostRecentStream.id.toString() 
+            : `active_${mostRecentStream.start_timestamp}`;
+          setSelectedStream(streamId);
         }
       } else {
         console.error('Failed to fetch streams data:', response);
@@ -130,7 +135,14 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
     setError(null);
 
     try {
-      const selectedStreamData = streams.find(s => s.id?.toString() === streamId);
+      // Find stream by matching the identifier format
+      const selectedStreamData = streams.find(s => {
+        const currentStreamId = s.id !== null 
+          ? s.id.toString() 
+          : `active_${s.start_timestamp}`;
+        return currentStreamId === streamId;
+      });
+
       if (!selectedStreamData) {
         console.error('Selected stream not found:', streamId);
         return;
@@ -288,7 +300,14 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
   };
 
   const renderStreamInfo = () => {
-    const selectedStreamData = streams.find(s => s.id?.toString() === selectedStream);
+    // Find stream by matching the identifier format
+    const selectedStreamData = streams.find(s => {
+      const currentStreamId = s.id !== null 
+        ? s.id.toString() 
+        : `active_${s.start_timestamp}`;
+      return currentStreamId === selectedStream;
+    });
+
     if (!selectedStreamData) return null;
 
     const formatDuration = (seconds: number) => {
@@ -312,7 +331,12 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
       <Card withBorder mb="md">
         <Group justify="space-between">
           <div>
-            <Text fw={600} size="lg">{selectedStreamData.title}</Text>
+            <Group gap="xs" mb="xs">
+              <Text fw={600} size="lg">{selectedStreamData.title}</Text>
+              {selectedStreamData.id === null && (
+                <Badge color="red" variant="filled" size="sm">LIVE</Badge>
+              )}
+            </Group>
             <Group gap="xs" mt="xs">
               <Badge leftSection={<IconCalendar size={12} />} variant="light">
                 {formatDate(selectedStreamData.start_timestamp)}
@@ -369,13 +393,22 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
               placeholder="Select a stream"
               value={selectedStream}
               onChange={(value) => setSelectedStream(value || '')}
-              data={streams
-                .filter(stream => stream.id != null)
-                .map(stream => ({
-                  value: stream.id!.toString(),
-                  label: `${stream.title} (${new Date(stream.start_timestamp * 1000).toLocaleDateString()})`
-                }))
-              }
+              data={streams.map(stream => {
+                // Use ID if available, otherwise use start timestamp as identifier
+                const streamId = stream.id !== null 
+                  ? stream.id.toString() 
+                  : `active_${stream.start_timestamp}`;
+                
+                // Add indicator for active streams (null ID)
+                const streamLabel = stream.id === null 
+                  ? `${stream.title} (${new Date(stream.start_timestamp * 1000).toLocaleDateString()}) - LIVE`
+                  : `${stream.title} (${new Date(stream.start_timestamp * 1000).toLocaleDateString()})`;
+                
+                return {
+                  value: streamId,
+                  label: streamLabel
+                };
+              })}
               searchable
               w={400}
               disabled={!selectedChannel || streamsLoading || streams.length === 0}
