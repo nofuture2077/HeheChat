@@ -137,7 +137,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
     try {
       // Find stream by matching the identifier format
       const selectedStreamData = streams.find(s => {
-        const currentStreamId = s.id !== null 
+        const currentStreamId = s.id
           ? s.id.toString() 
           : `active_${s.start_timestamp}`;
         return currentStreamId === streamId;
@@ -302,7 +302,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
   const renderStreamInfo = () => {
     // Find stream by matching the identifier format
     const selectedStreamData = streams.find(s => {
-      const currentStreamId = s.id !== null 
+      const currentStreamId = s.id
         ? s.id.toString() 
         : `active_${s.start_timestamp}`;
       return currentStreamId === selectedStream;
