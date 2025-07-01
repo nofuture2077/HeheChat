@@ -105,7 +105,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         if (response.streams.length > 0) {
           const mostRecentStream = response.streams[0];
           // Use ID if available, otherwise use start timestamp as identifier
-          const streamId = mostRecentStream.id !== null 
+          const streamId = mostRecentStream.id
             ? mostRecentStream.id.toString() 
             : `active_${mostRecentStream.start_timestamp}`;
           setSelectedStream(streamId);
@@ -395,7 +395,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
               onChange={(value) => setSelectedStream(value || '')}
               data={streams.map(stream => {
                 // Use ID if available, otherwise use start timestamp as identifier
-                const streamId = stream.id !== null 
+                const streamId = stream.id 
                   ? stream.id.toString() 
                   : `active_${stream.start_timestamp}`;
                 
