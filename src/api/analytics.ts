@@ -1,7 +1,7 @@
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export interface StreamAnalyticsData {
-  timestamp_minute: number;
+  timestamp_minute: number | string; // Allow both number and string to handle API inconsistencies
   viewer_count: number | null;
   message_count: number;
   sub_count: number;
@@ -105,7 +105,11 @@ export function fillMissingTimestamps(
   // Create a map of existing data points for quick lookup
   const dataMap = new Map<number, StreamAnalyticsData>();
   data.forEach(item => {
-    dataMap.set(item.timestamp_minute, item);
+    // Convert timestamp to number if it's a string
+    const timestamp = typeof item.timestamp_minute === 'string' 
+      ? parseInt(item.timestamp_minute, 10) 
+      : item.timestamp_minute;
+    dataMap.set(timestamp, item);
   });
 
   // Generate all expected timestamps
@@ -135,6 +139,27 @@ export function fillMissingTimestamps(
   }
 
   return filledData;
+}
+
+/**
+ * Normalize analytics data to ensure consistent types
+ * @param data Raw analytics data from API
+ * @returns Normalized analytics data
+ */
+export function normalizeAnalyticsData(data: any[]): StreamAnalyticsData[] {
+  return data.map(item => ({
+    timestamp_minute: typeof item.timestamp_minute === 'string' 
+      ? parseInt(item.timestamp_minute, 10) 
+      : item.timestamp_minute,
+    viewer_count: item.viewer_count,
+    message_count: item.message_count || 0,
+    sub_count: item.sub_count || 0,
+    cheer_count: item.cheer_count || 0,
+    cheer_bits_total: item.cheer_bits_total || 0,
+    raid_count: item.raid_count || 0,
+    raid_viewers_total: item.raid_viewers_total || 0,
+    follow_count: item.follow_count || 0
+  }));
 }
 
 /**

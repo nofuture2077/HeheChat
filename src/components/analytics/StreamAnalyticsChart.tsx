@@ -17,7 +17,7 @@ import {
 import { CompositeChart } from '@mantine/charts';
 import { IconInfoCircle, IconTrendingUp, IconUsers, IconMessage, IconGift, IconBolt, IconClock, IconCalendar } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
-import { AnalyticsApiClient, StreamAnalyticsData, StreamAnalyticsSummary, StreamInfo, fillMissingTimestamps } from '@/api/analytics';
+import { AnalyticsApiClient, StreamAnalyticsData, StreamAnalyticsSummary, StreamInfo, fillMissingTimestamps, normalizeAnalyticsData } from '@/api/analytics';
 import { useChannels } from '@/hooks/useChannels';
 
 interface ChartDataPoint {
@@ -75,18 +75,25 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
   };
 
   const transformData = (rawData: StreamAnalyticsData[], streamDuration: number): ChartDataPoint[] => {
-    return rawData.map(item => ({
-      timestamp: item.timestamp_minute.toString(),
-      time: formatTimestamp(item.timestamp_minute, streamDuration),
-      viewer_count: item.viewer_count,
-      message_count: item.message_count,
-      sub_count: item.sub_count,
-      cheer_count: item.cheer_count,
-      cheer_bits_total: item.cheer_bits_total,
-      raid_count: item.raid_count,
-      raid_viewers_total: item.raid_viewers_total,
-      follow_count: item.follow_count
-    }));
+    return rawData.map(item => {
+      // Convert timestamp to number if it's a string
+      const timestamp = typeof item.timestamp_minute === 'string' 
+        ? parseInt(item.timestamp_minute, 10) 
+        : item.timestamp_minute;
+      
+      return {
+        timestamp: timestamp.toString(),
+        time: formatTimestamp(timestamp, streamDuration),
+        viewer_count: item.viewer_count,
+        message_count: item.message_count,
+        sub_count: item.sub_count,
+        cheer_count: item.cheer_count,
+        cheer_bits_total: item.cheer_bits_total,
+        raid_count: item.raid_count,
+        raid_viewers_total: item.raid_viewers_total,
+        follow_count: item.follow_count
+      };
+    });
   };
 
   const fetchStreams = async (channelName: string) => {
@@ -175,14 +182,24 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
       );
 
       if (response.success) {
+        console.log('Raw API response data:', response.data);
+        
+        // Normalize the data to ensure consistent types
+        const normalizedData = normalizeAnalyticsData(response.data);
+        console.log('Normalized data:', normalizedData);
+        
         // Fill missing timestamps with zero values for better chart visualization
         const filledData = fillMissingTimestamps(
-          response.data,
+          normalizedData,
           selectedStreamData.start_timestamp,
           selectedStreamData.end_timestamp,
           interval
         );
+        console.log('Filled data:', filledData);
+        
         const transformedData = transformData(filledData, durationMinutes);
+        console.log('Transformed data for chart:', transformedData);
+        
         setData(transformedData);
         setSummary(response.summary || null);
       } else {
@@ -393,7 +410,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
               placeholder="Select a stream"
               value={selectedStream}
               onChange={(value) => setSelectedStream(value || '')}
-              data={streams.map(stream => {
+              data={[...streams].reverse().map(stream => {
                 // Use ID if available, otherwise use start timestamp as identifier
                 const streamId = stream.id 
                   ? stream.id.toString() 
