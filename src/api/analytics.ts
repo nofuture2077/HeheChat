@@ -19,6 +19,7 @@ export interface StreamAnalyticsSummary {
   total_messages: number;
   total_subs: number;
   total_bits: number;
+  total_follows: number;
 }
 
 export interface StreamMetadataChange {

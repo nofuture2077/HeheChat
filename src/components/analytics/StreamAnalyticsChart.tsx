@@ -266,9 +266,14 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
   const renderSummaryCards = () => {
     if (!summary) return null;
 
+    // Calculate messages per minute
+    const messagesPerMinute = summary.total_minutes > 0 
+      ? (summary.total_messages / summary.total_minutes).toFixed(1)
+      : '0.0';
+
     return (
       <Grid>
-        <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
           <Card withBorder>
             <Group>
               <IconUsers size={24} color="var(--mantine-color-blue-6)" />
@@ -279,7 +284,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
             </Group>
           </Card>
         </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
           <Card withBorder>
             <Group>
               <IconTrendingUp size={24} color="var(--mantine-color-green-6)" />
@@ -290,7 +295,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
             </Group>
           </Card>
         </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
           <Card withBorder>
             <Group>
               <IconMessage size={24} color="var(--mantine-color-pink-6)" />
@@ -301,13 +306,46 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
             </Group>
           </Card>
         </Grid.Col>
-        <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
+          <Card withBorder>
+            <Group>
+              <IconMessage size={24} color="var(--mantine-color-cyan-6)" />
+              <div>
+                <Text size="xs" c="dimmed">Messages/Min</Text>
+                <Text size="lg" fw={700}>{messagesPerMinute}</Text>
+              </div>
+            </Group>
+          </Card>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
           <Card withBorder>
             <Group>
               <IconBolt size={24} color="var(--mantine-color-orange-6)" />
               <div>
                 <Text size="xs" c="dimmed">Total Bits</Text>
                 <Text size="lg" fw={700}>{summary.total_bits.toLocaleString()}</Text>
+              </div>
+            </Group>
+          </Card>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
+          <Card withBorder>
+            <Group>
+              <IconGift size={24} color="var(--mantine-color-purple-6)" />
+              <div>
+                <Text size="xs" c="dimmed">Total Subs</Text>
+                <Text size="lg" fw={700}>{summary.total_subs.toLocaleString()}</Text>
+              </div>
+            </Group>
+          </Card>
+        </Grid.Col>
+        <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
+          <Card withBorder>
+            <Group>
+              <IconUsers size={24} color="var(--mantine-color-teal-6)" />
+              <div>
+                <Text size="xs" c="dimmed">Total Follows</Text>
+                <Text size="lg" fw={700}>{summary.total_follows?.toLocaleString() || '0'}</Text>
               </div>
             </Group>
           </Card>

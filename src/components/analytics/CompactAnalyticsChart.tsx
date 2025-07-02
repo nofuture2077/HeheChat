@@ -3,7 +3,7 @@ import { CompositeChart } from '@mantine/charts';
 import { Text, Stack, Alert, LoadingOverlay, Box } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
-import { AnalyticsApiClient, StreamAnalyticsData, fillMissingTimestamps } from '@/api/analytics';
+import { AnalyticsApiClient, StreamAnalyticsData, fillMissingTimestamps, normalizeAnalyticsData } from '@/api/analytics';
 
 interface CompactChartDataPoint {
   time: string;
@@ -38,13 +38,20 @@ export function CompactAnalyticsChart({ channels, height = 120 }: CompactAnalyti
   };
 
   const transformData = (rawData: StreamAnalyticsData[]): CompactChartDataPoint[] => {
-    return rawData.slice(-12).map(item => ({
-      time: formatTimestamp(item.timestamp_minute),
-      viewer_count: item.viewer_count || 0,
-      message_count: item.message_count,
-      sub_count: item.sub_count,
-      cheer_bits_total: item.cheer_bits_total
-    }));
+    return rawData.slice(-12).map(item => {
+      // Convert timestamp to number if it's a string
+      const timestamp = typeof item.timestamp_minute === 'string' 
+        ? parseInt(item.timestamp_minute, 10) 
+        : item.timestamp_minute;
+      
+      return {
+        time: formatTimestamp(timestamp),
+        viewer_count: item.viewer_count || 0,
+        message_count: item.message_count,
+        sub_count: item.sub_count,
+        cheer_bits_total: item.cheer_bits_total
+      };
+    });
   };
 
   const fetchAnalytics = async () => {
@@ -75,9 +82,12 @@ export function CompactAnalyticsChart({ channels, height = 120 }: CompactAnalyti
       );
 
       if (response.success && response.data.length > 0) {
+        // Normalize the data to ensure consistent types
+        const normalizedData = normalizeAnalyticsData(response.data);
+        
         // Fill missing timestamps with zero values for better chart visualization
         const filledData = fillMissingTimestamps(
-          response.data,
+          normalizedData,
           start,
           now,
           '1h'
