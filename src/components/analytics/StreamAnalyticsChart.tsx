@@ -255,7 +255,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         series={[
           { name: 'viewer_count', label: 'Viewers', color: 'blue.6', type: 'line' },
           { name: 'message_count', label: 'Messages', color: 'green.6', type: 'area' },
-          { name: 'sub_count', label: 'Subs', color: 'purple.6', type: 'bar', yAxisId: 'right' },
+          { name: 'sub_count', label: 'Subs', color: 'violet.6', type: 'bar', yAxisId: 'right' },
           { name: 'cheer_count', label: 'Bits', color: 'orange.6', type: 'bar', yAxisId: 'right' },
           { name: 'follow_count', label: 'Follows', color: 'pink.6', type: 'bar', yAxisId: 'right' }
         ]}
@@ -287,7 +287,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
           <Card withBorder>
             <Group>
-              <IconTrendingUp size={24} color="var(--mantine-color-green-6)" />
+              <IconTrendingUp size={24} color="var(--mantine-color-blue-6)" />
               <div>
                 <Text size="xs" c="dimmed">Peak Viewers</Text>
                 <Text size="lg" fw={700}>{summary.peak_viewers.toLocaleString()}</Text>
@@ -298,7 +298,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
           <Card withBorder>
             <Group>
-              <IconMessage size={24} color="var(--mantine-color-pink-6)" />
+              <IconMessage size={24} color="var(--mantine-color-green-6)" />
               <div>
                 <Text size="xs" c="dimmed">Total Messages</Text>
                 <Text size="lg" fw={700}>{summary.total_messages.toLocaleString()}</Text>
@@ -309,7 +309,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
           <Card withBorder>
             <Group>
-              <IconMessage size={24} color="var(--mantine-color-cyan-6)" />
+              <IconMessage size={24} color="var(--mantine-color-green-6)" />
               <div>
                 <Text size="xs" c="dimmed">Messages/Min</Text>
                 <Text size="lg" fw={700}>{messagesPerMinute}</Text>
@@ -331,7 +331,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
           <Card withBorder>
             <Group>
-              <IconGift size={24} color="var(--mantine-color-purple-6)" />
+              <IconGift size={24} color="var(--mantine-color-violet-6)" />
               <div>
                 <Text size="xs" c="dimmed">Total Subs</Text>
                 <Text size="lg" fw={700}>{summary.total_subs.toLocaleString()}</Text>
@@ -342,7 +342,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
         <Grid.Col span={{ base: 12, sm: 6, md: 4, lg: 3 }}>
           <Card withBorder>
             <Group>
-              <IconUsers size={24} color="var(--mantine-color-teal-6)" />
+              <IconUsers size={24} color="var(--mantine-color-pink-6)" />
               <div>
                 <Text size="xs" c="dimmed">Total Follows</Text>
                 <Text size="lg" fw={700}>{summary.total_follows?.toLocaleString() || '0'}</Text>
