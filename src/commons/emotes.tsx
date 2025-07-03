@@ -845,6 +845,35 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 console.error('Error getting channel emotes:', channelEmotesError);
             }
             
+            // Try to add channel-specific Twitch emotes
+            try {
+                const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
+                if (channelEmotes?.channelEmotes) {
+                    try {
+                        const entries = Array.from(channelEmotes.channelEmotes.entries()) as [string, any][];
+                        const channelTwitchEmotes = entries
+                            .filter(entry => entry[0].toLowerCase().includes(lowerFilter))
+                            .map(entry => ({
+                                name: entry[0],
+                                data: {
+                                    ...entry[1],
+                                    getImageUrl(scale: number) {
+                                        return `https://static-cdn.jtvnw.net/emoticons/v2/${entry[1].id}/default/dark/${scale}.0`;
+                                    }
+                                },
+                                type: 'Twitch'
+                            }));
+                        if (channelTwitchEmotes.length > 0) {
+                            emoteList.set('Channel Emotes', channelTwitchEmotes);
+                        }
+                    } catch (channelTwitchError) {
+                        console.error('Error processing channel Twitch emotes:', channelTwitchError);
+                    }
+                }
+            } catch (channelTwitchEmotesError) {
+                console.error('Error getting channel Twitch emotes:', channelTwitchEmotesError);
+            }
+
             // Try to add global emotes
             try {
                 const globalEmotes = DEFAULT_CHAT_EMOTES.emotes.get('global');
@@ -855,11 +884,16 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                             .filter(entry => entry[0].toLowerCase().includes(lowerFilter))
                             .map(entry => ({
                                 name: entry[0],
-                                data: entry[1],
-                                type: 'Global'
+                                data: {
+                                    ...entry[1],
+                                    getImageUrl(scale: number) {
+                                        return `https://static-cdn.jtvnw.net/emoticons/v2/${entry[1].id}/default/dark/${scale}.0`;
+                                    }
+                                },
+                                type: 'Twitch'
                             }));
                         if (globals.length > 0) {
-                            emoteList.set('Global', globals);
+                            emoteList.set('Global Emotes', globals);
                         }
                     } catch (globalError) {
                         console.error('Error processing global emotes:', globalError);

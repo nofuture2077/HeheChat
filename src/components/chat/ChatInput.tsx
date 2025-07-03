@@ -3,10 +3,11 @@ import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../App
 import { ChannelPicker } from './ChannelPicker';
 import { Textarea, ActionIcon, rem, Flex, Stack, Combobox, useCombobox } from '@mantine/core';
 import { EmoteGrid } from './EmoteGrid';
-import { IconSend, IconX } from '@tabler/icons-react';
+import { IconSend, IconX, IconMoodSmile } from '@tabler/icons-react';
 import { HeheChatMessage } from '../../commons/message';
 import { ChatMessageComp } from './ChatMessage';
 import classes from './ChatMessage.module.css';
+import inputClasses from './ChatInput.module.css';
 import { ModActions } from './mod/modactions';
 import { getUserId } from '@/components/chat/mod/modactions';
 
@@ -25,6 +26,8 @@ export function ChatInput(props: ChatInputProps) {
     const [inputText, setInputText] = useState<string>('');
     const [messageHistory, setMessageHistory] = useState<string[]>([]);
     const [historyIndex, setHistoryIndex] = useState<number>(-1);
+    const [isEmoteGridOpen, setIsEmoteGridOpen] = useState<boolean>(false);
+    const [manuallyClosedEmoteGrid, setManuallyClosedEmoteGrid] = useState<boolean>(false);
 
     // Load message history from localStorage on component mount
     useEffect(() => {
@@ -251,20 +254,64 @@ export function ChatInput(props: ChatInputProps) {
         return words[words.length - 1];
     }, [inputText]);
 
-    // Get filtered emote list
+    // Get filtered emote list - show when typing (3+ chars) OR when manually opened
     const filteredEmotes = useMemo(() => {
-        if (!chatChannel || currentWord.length < 3) return new Map();
+        if (!chatChannel) return new Map();
+        if (isEmoteGridOpen) {
+            // When manually opened, use the last typed word as filter (if it exists)
+            return emotes.getEmoteList(chatChannel, currentWord);
+        }
+        // When typing, show filtered emotes (3+ chars) but not if manually closed recently
+        if (manuallyClosedEmoteGrid || currentWord.length < 3) return new Map();
         return emotes.getEmoteList(chatChannel, currentWord);
-    }, [chatChannel, currentWord, emotes]);
+    }, [chatChannel, currentWord, emotes, isEmoteGridOpen, manuallyClosedEmoteGrid]);
 
     const handleEmoteSelect = (emoteName: string) => {
-        const words = inputText.split(' ');
-        words[words.length - 1] = emoteName;
-        setInputText(words.join(' ') + ' ');
+        if (isEmoteGridOpen) {
+            // When manually opened, replace the current word (if it exists) or append
+            const words = inputText.split(' ');
+            if (currentWord.length > 0) {
+                // Replace the current word
+                words[words.length - 1] = emoteName;
+                setInputText(words.join(' ') + ' ');
+            } else {
+                // Just append the emote
+                setInputText(inputText + emoteName + ' ');
+            }
+            setIsEmoteGridOpen(false);
+        } else {
+            // When typing, replace the current word
+            const words = inputText.split(' ');
+            words[words.length - 1] = emoteName;
+            setInputText(words.join(' ') + ' ');
+        }
     };
 
+    const toggleEmoteGrid = () => {
+        setIsEmoteGridOpen(!isEmoteGridOpen);
+        // Reset manually closed state when opening
+        if (!isEmoteGridOpen) {
+            setManuallyClosedEmoteGrid(false);
+        }
+    };
+
+    const handleEmoteGridClose = () => {
+        setIsEmoteGridOpen(false);
+        setManuallyClosedEmoteGrid(true);
+    };
+
+    // Reset manually closed state when input changes significantly
+    useEffect(() => {
+        if (manuallyClosedEmoteGrid) {
+            // Reset if the current word becomes empty or very short
+            if (currentWord.length < 2) {
+                setManuallyClosedEmoteGrid(false);
+            }
+        }
+    }, [currentWord, manuallyClosedEmoteGrid]);
+
     return (
-        <Stack gap={0} className={classes.chatInput}>
+        <Stack gap={0} className={inputClasses.chatInput}>
             {props.replyToMsg ? (<ChatMessageComp msg={props.replyToMsg} openModView={() => { }} moderatedChannel={{}} hideReply={true} deletedMessages={{}} setReplyMsg={props.setReplyMsg} modActions={props.modActions} />) : null}
             <Flex justify="space-between" gap={'md'} align="center" m="6px 12px 22px 12px">
                 <Combobox
@@ -306,7 +353,7 @@ export function ChatInput(props: ChatInputProps) {
                             minRows={1}
                             maxRows={3}
                             placeholder={props.replyToMsg ? ("Reply to " + props.replyToMsg.userInfo.displayName + " in " + chatChannel) : ("Chat in " + chatChannel)}
-                            rightSectionWidth={42}
+                            rightSectionWidth={84}
                             onKeyDown={event => {
                                 if (event.key === "Enter") {
                                     // If combobox is open with exactly one option, select it
@@ -357,7 +404,7 @@ export function ChatInput(props: ChatInputProps) {
                                 (<ActionIcon variant="subtle" onClick={() => { props.setReplyMsg(undefined) }}>
                                     <IconX style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
                                 </ActionIcon>) : 
-                                <div className={classes.channelPickerWrapper}>
+                                <div className={inputClasses.channelPickerWrapper}>
                                     <ChannelPicker 
                                         onChange={(item) => { 
                                             props.setReplyMsg(undefined); 
@@ -368,15 +415,26 @@ export function ChatInput(props: ChatInputProps) {
                                     />
                                 </div>}
                             rightSection={
-                                <ActionIcon size={32} radius="xl" variant="transparent" color='primary' onClick={() => { sendMessage(inputText, false) }}>
-                                    <IconSend style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
-                                </ActionIcon>
+                                <Flex gap={4} align="center">
+                                    <ActionIcon 
+                                        size={32} 
+                                        radius="xl" 
+                                        variant="transparent" 
+                                        color={isEmoteGridOpen ? 'primary' : 'gray'} 
+                                        onClick={toggleEmoteGrid}
+                                    >
+                                        <IconMoodSmile style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
+                                    </ActionIcon>
+                                    <ActionIcon size={32} radius="xl" variant="transparent" color='primary' onClick={() => { sendMessage(inputText, false) }}>
+                                        <IconSend style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
+                                    </ActionIcon>
+                                </Flex>
                             }
                         />
                     </Combobox.Target>
 
                     {filtered.length ? 
-                    (<Combobox.Dropdown>
+                    (<Combobox.Dropdown className={inputClasses.comboboxDropdown}>
                         <Combobox.Options>
                             {filtered.map((item: ComboboxItem) => (
                                 <Combobox.Option value={item.value} key={item.value}>
@@ -391,6 +449,8 @@ export function ChatInput(props: ChatInputProps) {
                     searchText={currentWord}
                     onEmoteSelect={handleEmoteSelect}
                     emoteList={filteredEmotes}
+                    isManuallyOpen={isEmoteGridOpen}
+                    onClose={handleEmoteGridClose}
                 />
             </Flex>
         </Stack>

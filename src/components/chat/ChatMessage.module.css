@@ -103,18 +103,6 @@
     display: none !important;
 }
 
-.chatInput {
-    position: relative;
-    background-color: light-dark(#ffffff, #1A1A1A);
-    border-radius: 8px;
-    padding: 4px;
-}
-
-.chatInput .hideReply {
-    padding-left: 34px;
-    background: none !important;
-    padding-top: 8px;
-}
 
 /* RadialDial positioning */
 .radialContainer {
@@ -137,32 +125,4 @@
     display: block !important;
     height: 6rem !important;
     margin: 0.2rem !important;
-}
-
-.channelPickerWrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-}
-
-/* Firefox-specific styles */
-@-moz-document url-prefix() {
-    .channelPickerWrapper {
-        display: block;
-        width: 32px;
-        height: 32px;
-        min-width: 32px;
-        min-height: 32px;
-    }
-    
-    .channelPickerWrapper img {
-        flex: none !important;
-        width: 32px !important;
-        height: 32px !important;
-        min-width: 32px !important;
-        min-height: 32px !important;
-        display: block !important;
-    }
 }

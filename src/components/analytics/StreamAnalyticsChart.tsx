@@ -107,10 +107,11 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
       const response = await AnalyticsApiClient.getStreams(channelName, start, end);
 
       if (response.success && response.streams) {
-        setStreams(response.streams);
+        const streams = response.streams.reverse();
+        setStreams(streams);
         // Auto-select the most recent stream if available
-        if (response.streams.length > 0) {
-          const mostRecentStream = response.streams[0];
+        if (streams.length > 0) {
+          const mostRecentStream = streams[0];
           // Use ID if available, otherwise use start timestamp as identifier
           const streamId = mostRecentStream.id
             ? mostRecentStream.id.toString() 
@@ -448,7 +449,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
               placeholder="Select a stream"
               value={selectedStream}
               onChange={(value) => setSelectedStream(value || '')}
-              data={[...streams].reverse().map(stream => {
+              data={[...streams].map(stream => {
                 // Use ID if available, otherwise use start timestamp as identifier
                 const streamId = stream.id 
                   ? stream.id.toString() 
