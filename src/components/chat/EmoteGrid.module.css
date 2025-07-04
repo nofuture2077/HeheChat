@@ -3,7 +3,7 @@
   bottom: calc(100% + 8px);
   left: 0;
   right: 0;
-  max-height: 400px;
+  max-height: 300px;
   z-index: 1000;
   background-color: #1A1A1A;
   overflow: hidden;
@@ -18,7 +18,7 @@
     bottom: calc(100% + 8px);
     left: 8px;
     right: 8px;
-    max-height: 50vh;
+    max-height: 40vh;
     z-index: 1001;
     /* Ensure it's visible above mobile keyboards */
     transform: translateZ(0);
@@ -26,8 +26,8 @@
   }
   
   .scrollArea {
-    height: 40vh;
-    max-height: 40vh;
+    height: 30vh;
+    max-height: 30vh;
   }
 }
 
