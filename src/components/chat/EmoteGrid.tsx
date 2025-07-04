@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useRef } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
 import { Grid, Paper, Text, ScrollArea, ActionIcon, Flex } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
