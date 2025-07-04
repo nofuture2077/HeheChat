@@ -14,11 +14,10 @@
 /* Mobile-specific styles */
 @media (max-width: 768px) {
   .container {
-    position: fixed;
-    top: 20vh;
+    position: absolute;
+    bottom: calc(100% + 8px);
     left: 8px;
     right: 8px;
-    bottom: auto;
     max-height: 50vh;
     z-index: 1001;
     /* Ensure it's visible above mobile keyboards */
@@ -29,19 +28,6 @@
   .scrollArea {
     height: 40vh;
     max-height: 40vh;
-  }
-}
-
-/* Alternative mobile positioning when keyboard is likely open */
-@media (max-width: 768px) and (max-height: 500px) {
-  .container {
-    top: 10vh;
-    max-height: 40vh;
-  }
-  
-  .scrollArea {
-    height: 30vh;
-    max-height: 30vh;
   }
 }
 
