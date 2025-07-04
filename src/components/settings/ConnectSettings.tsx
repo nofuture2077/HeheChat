@@ -100,20 +100,57 @@ export function ConnectSettings() {
     return (<Stack mt={30} mb={30} gap={30}>
 
         <Fieldset legend="Streamelements Config" variant="filled">
-            <TextInput label="JWT" placeholder="" value={streamelementsJWT} onChange={(ev) => updateStreamelements(ev.target.value)} />
+            <Text size="sm" mb={10}>
+                To connect StreamElements with HeheChat:
+                <ol>
+                    <li>Go to <a href="https://streamelements.com/dashboard" target="_blank" rel="noopener noreferrer">StreamElements Dashboard</a></li>
+                    <li>Login to your account</li>
+                    <li>Navigate to Dashboard → Profile → Channel Settings</li>
+                    <li>Copy the JWT token</li>
+                    <li>Paste it in the field below</li>
+                </ol>
+            </Text>
+            <TextInput label="JWT" placeholder="Enter your StreamElements JWT token" value={streamelementsJWT} onChange={(ev) => updateStreamelements(ev.target.value)} />
         </Fieldset>
 
         <Fieldset legend="Pally.gg Config" variant="filled">
-            <TextInput label="API Key" placeholder="" value={pallyggApiKey} onChange={(ev) => updatePallyGG(ev.target.value, pallyggChannel)} />
-            <TextInput label="Pally Slug" placeholder="" value={pallyggChannel} onChange={(ev) => updatePallyGG(pallyggApiKey, ev.target.value)} />
+            <Text size="sm" mb={10}>
+                To connect Pally.gg with HeheChat:
+                <ol>
+                    <li>Go to <a href="https://pally.gg" target="_blank" rel="noopener noreferrer">Pally.gg</a> and log into your account</li>
+                    <li>Create an API key in your account settings</li>
+                    <li>Create a campaign page with a custom slug</li>
+                    <li>Enter both the API key and campaign slug below</li>
+                </ol>
+            </Text>
+            <TextInput label="API Key" placeholder="Enter your Pally.gg API key" value={pallyggApiKey} onChange={(ev) => updatePallyGG(ev.target.value, pallyggChannel)} />
+            <TextInput label="Pally Slug" placeholder="Enter your campaign page slug" value={pallyggChannel} onChange={(ev) => updatePallyGG(pallyggApiKey, ev.target.value)} />
         </Fieldset>
 
         <Fieldset legend="Elevenlabs Config" variant="filled">
-            <TextInput label="API Key" placeholder="" value={elevenLabsApiKey} onChange={(ev) => updateElevenLabs(ev.target.value)} />
+            <Text size="sm" mb={10}>
+                To connect ElevenLabs with HeheChat:
+                <ol>
+                    <li>Go to <a href="https://elevenlabs.io" target="_blank" rel="noopener noreferrer">ElevenLabs</a> and log into your account</li>
+                    <li>Navigate to your profile settings</li>
+                    <li>Create an API key</li>
+                    <li>Copy the API key and paste it below</li>
+                </ol>
+            </Text>
+            <TextInput label="API Key" placeholder="Enter your ElevenLabs API key" value={elevenLabsApiKey} onChange={(ev) => updateElevenLabs(ev.target.value)} />
         </Fieldset>
 
         <Fieldset legend="Blerp Config" variant="filled">
-            <TextInput label="API Key" placeholder="" value={blerpKey} onChange={(ev) => updateBlerp(ev.target.value)} />
+            <Text size="sm" mb={10}>
+                To connect Blerp with HeheChat:
+                <ol>
+                    <li>Go to <a href="https://blerp.com/dashboard" target="_blank" rel="noopener noreferrer">Blerp Dashboard</a></li>
+                    <li>Navigate to OBS Browser Source section</li>
+                    <li>Copy the URL provided</li>
+                    <li>Paste the URL below (HeheChat will extract the room ID automatically)</li>
+                </ol>
+            </Text>
+            <TextInput label="Room URL/ID" placeholder="Enter Blerp room URL or ID" value={blerpKey} onChange={(ev) => updateBlerp(ev.target.value)} />
         </Fieldset>
 
         <Fieldset legend="Ko-fi Integration" variant="filled">

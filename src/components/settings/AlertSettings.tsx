@@ -4,8 +4,9 @@ import { useForceUpdate, useDisclosure } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 import { AlertSystem } from '../../components/alerts/alertplayer'
-import { IconLink, IconRepeat, IconPlus, IconTrash } from '@tabler/icons-react'
+import { IconLink, IconRepeat, IconPlus, IconTrash, IconCopy } from '@tabler/icons-react'
 import { SystemMessageMainType } from '../../commons/message';
+import { notifications } from '@mantine/notifications';
 
 interface EditorData {
     id: string;
@@ -130,6 +131,24 @@ export function AlertSettings() {
     };
 
     const marks = [-250, -0, 250, 500].map(x => ({ value: x, label: x + "ms" }));
+
+    const copyToClipboard = async (text: string, label: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            notifications.show({
+                title: 'Copied!',
+                message: `${label} URL copied to clipboard`,
+                color: 'green',
+            });
+        } catch (err) {
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to copy to clipboard',
+                color: 'red',
+            });
+        }
+    };
+
     return (
         <Stack mt={30} mb={30} gap={30}>
             <Fieldset legend="Alert Sound Output" variant="filled" key="alert-output">
@@ -155,8 +174,26 @@ export function AlertSettings() {
                     />
                     <Text fs="italic" size='14px'>Select where alert sounds should be played</Text>
                     {sink ? (<>
-                        <Text span inline key={'browser-source-label'}>Link for OBS <Anchor inline key={'browser-source-link'} href={import.meta.env.VITE_SINK_URL + "#token=" + sink} target="_blank"><IconLink /></Anchor></Text>
-                        <Text span inline key={'browser-source-label'}>Replay Widget <Anchor inline key={'browser-widget-link'} href={import.meta.env.VITE_REPLAY_URL + "#token=" + sink} target="_blank"><IconRepeat /></Anchor></Text>
+                        <Group gap="xs">
+                            <Text size="sm">OBS Browser Source</Text>
+                            <ActionIcon 
+                                variant="light" 
+                                color="blue"
+                                onClick={() => copyToClipboard(import.meta.env.VITE_SINK_URL + "#token=" + sink, "OBS Browser Source")}
+                            >
+                                <IconCopy size={16} />
+                            </ActionIcon>
+                        </Group>
+                        <Group gap="xs">
+                            <Text size="sm">Replay Widget</Text>
+                            <ActionIcon 
+                                variant="light" 
+                                color="green"
+                                onClick={() => copyToClipboard(import.meta.env.VITE_REPLAY_URL + "#token=" + sink, "Replay Widget")}
+                            >
+                                <IconCopy size={16} />
+                            </ActionIcon>
+                        </Group>
                     </>) : null}
                     <Switch 
                         checked={config.checkBrowsersourceConnection} 
@@ -177,13 +214,31 @@ export function AlertSettings() {
                         <Table.Tr>
                             <Table.Th>Link</Table.Th>
                             <Table.Th>Name</Table.Th>
+                            <Table.Th>Copy</Table.Th>
                             <Table.Th></Table.Th>
                         </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>{editors.map(element => <Table.Tr key={element.id}>
-                        <Table.Td><Anchor href={import.meta.env.VITE_EDITOR_URL + "?token=" + element.token} target="_blank"><IconLink /></Anchor></Table.Td>
+                        <Table.Td>
+                            <Anchor href={import.meta.env.VITE_EDITOR_URL + "?token=" + element.token} target="_blank">
+                                <IconLink />
+                            </Anchor>
+                        </Table.Td>
                         <Table.Td>{element.name}</Table.Td>
-                        <Table.Td><ActionIcon variant="subtle" onClick={() => deleteEditor(element.token)}><IconTrash /></ActionIcon></Table.Td>
+                        <Table.Td>
+                            <ActionIcon 
+                                variant="light" 
+                                color="blue"
+                                onClick={() => copyToClipboard(import.meta.env.VITE_EDITOR_URL + "?token=" + element.token, "Alert Editor")}
+                            >
+                                <IconCopy size={16} />
+                            </ActionIcon>
+                        </Table.Td>
+                        <Table.Td>
+                            <ActionIcon variant="subtle" onClick={() => deleteEditor(element.token)}>
+                                <IconTrash />
+                            </ActionIcon>
+                        </Table.Td>
                     </Table.Tr>)}</Table.Tbody>
                 </Table>
 

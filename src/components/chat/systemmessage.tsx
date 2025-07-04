@@ -39,7 +39,7 @@ const messages = {
     'sub_Prime': '${username} subscribed with prime for ${amount:whole} months///${text}',
     'follow': '${username} just followed',
     'cheer': '${username} cheered ${amount:whole} bits///${text}',
-    'donation': '${username} donated ${amount} EURO///${text}',
+    'donation': '${username} donated ${amount}${currency:currency}///${text}',
     'announcement': 'Chat Announcement///${text}',
     'blerp': '${username} played Blerp ${audioTitle}',
     'seventv_emote_add': '${username} added new Emote ${emote} ${emote}',

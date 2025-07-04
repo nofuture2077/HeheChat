@@ -420,7 +420,7 @@ export function ChatInput(props: ChatInputProps) {
                                         size={32} 
                                         radius="xl" 
                                         variant="transparent" 
-                                        color={isEmoteGridOpen ? 'primary' : 'gray'} 
+                                        color={'primary'} 
                                         onClick={toggleEmoteGrid}
                                     >
                                         <IconMoodSmile style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
