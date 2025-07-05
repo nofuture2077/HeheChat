@@ -167,7 +167,7 @@ export function formatCurrency(value: string): string {
         'AUD': 'A$',
         'CHF': 'CHF'
     };
-    return currencyMap[value] || value;
+    return currencyMap[value] || value || "";
 }
 
 const formatFunctions: { [key: string]: (value: any) => string } = {
