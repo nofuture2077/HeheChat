@@ -48,13 +48,6 @@ export function UserCard(props: UserCardProps) {
                 {loginContext.user?.description || ''}
             </Text>
             <Space h="lg"/>
-            <Stack gap="xs">
-                <Text m='auto' ta="center">{profile.name}</Text>
-                {(
-                    <CompactAnalyticsChart channels={profile.config.channels} height={80} />
-                )}
-            </Stack>
-            <Space h="lg"/>
             <Button
                 component="a"
                 size='md'
