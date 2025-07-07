@@ -317,7 +317,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         });
         const modEventSub = PubSub.subscribe("WS-modevent", onModEvent);
 
-        Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
+        Storage.load(config.channels, config.ignoredUsers, config.maxMessages).then(rawMessages => {
             const msgs = rawMessages.map(parseMessage);
             setUsernames(new Set(msgs.filter(msg => msg.type === 'chat').map(msg => msg.userInfo.userName.toLowerCase())));
             setChatMessages(msgs);
@@ -384,7 +384,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         setOnline(networkStatus.online);
         setShouldScroll(true);
         if (networkStatus.online && documentVisible) {
-            Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
+            Storage.load(config.channels, config.ignoredUsers, config.maxMessages).then(rawMessages => {
                 const msgs = rawMessages.map(parseMessage);
                 setUsernames(new Set(msgs.filter(msg => msg.type === 'chat').map(msg => msg.userInfo.userName.toLowerCase())));
                 setChatMessages(msgs);
