@@ -17,10 +17,10 @@ export function ConnectSettings() {
     const [blerpKey, setBlerpKey] = useState<string>("");
     const [kofiVerificationToken, setKofiVerificationToken] = useState<string>("");
     const [kofiWebhookUrl, setKofiWebhookUrl] = useState<string>("");
-    const [fossbotCommand, setFossbotCommand] = useState<string>("");
-    const [fossbotLoading, setFossbotLoading] = useState<boolean>(false);
-    const [fossbotSubgiftCommand, setFossbotSubgiftCommand] = useState<string>("");
-    const [fossbotSubgiftLoading, setFossbotSubgiftLoading] = useState<boolean>(false);
+    const [fossabotBitCommand, setFossabotBitCommand] = useState<string>("");
+    const [fossabotBitLoading, setFossabotBitLoading] = useState<boolean>(false);
+    const [fossabotSubgiftCommand, setFossabotSubgiftCommand] = useState<string>("");
+    const [fossabotSubgiftLoading, setFossabotSubgiftLoading] = useState<boolean>(false);
 
     const profile = useContext(ProfileContext);
     const config = useContext(ConfigContext);
@@ -52,38 +52,38 @@ export function ConnectSettings() {
             setKofiWebhookUrl(data.webhook_url || '');
         });
 
-        // Load Fossbot command
+        // Load Fossabot command
         const chatChannel = config.getChatChannel();
         if (chatChannel && profile.guid) {
-            setFossbotLoading(true);
+            setFossabotBitLoading(true);
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/event/bitalerts/fossabot?channel=${chatChannel}&profile=${profile.guid}`)
                 .then(res => res.json())
                 .then((data) => {
-                    setFossbotCommand(data.text || "Failed to load Fossbot command");
+                    setFossabotBitCommand(data.text || "Failed to load Fossabot command");
                 })
                 .catch(() => {
-                    setFossbotCommand("Error loading Fossbot command. Please try again later.");
+                    setFossabotBitCommand("Error loading Fossabot command. Please try again later.");
                 })
                 .finally(() => {
-                    setFossbotLoading(false);
+                    setFossabotBitLoading(false);
                 });
 
-            // Load Fossbot subgift command
-            setFossbotSubgiftLoading(true);
+            // Load Fossabot subgift command
+            setFossabotSubgiftLoading(true);
             fetch(`${import.meta.env.VITE_BACKEND_URL}/api/event/subalerts/fossabot?channel=${chatChannel}&profile=${profile.guid}`)
                 .then(res => res.json())
                 .then((data) => {
-                    setFossbotSubgiftCommand(data.text || "Failed to load Fossbot subgift command");
+                    setFossabotSubgiftCommand(data.text || "Failed to load Fossabot subgift command");
                 })
                 .catch(() => {
-                    setFossbotSubgiftCommand("Error loading Fossbot subgift command. Please try again later.");
+                    setFossabotSubgiftCommand("Error loading Fossabot subgift command. Please try again later.");
                 })
                 .finally(() => {
-                    setFossbotSubgiftLoading(false);
+                    setFossabotSubgiftLoading(false);
                 });
         } else {
-            setFossbotCommand("Please set a chat channel and ensure you have a valid profile to generate the Fossbot command.");
-            setFossbotSubgiftCommand("Please set a chat channel and ensure you have a valid profile to generate the Fossbot subgift command.");
+            setFossabotBitCommand("Please set a chat channel and ensure you have a valid profile to generate the Fossabot command.");
+            setFossabotSubgiftCommand("Please set a chat channel and ensure you have a valid profile to generate the Fossabot subgift command.");
         }
     }, []);
 
@@ -201,22 +201,22 @@ export function ConnectSettings() {
             />
         </Fieldset>
 
-        <Fieldset legend="Fossbot Bit Alerts" variant="filled">
+        <Fieldset legend="Fossabot Bit Alerts" variant="filled">
             <Text size="sm" mb={10}>
-                Copy the command below and paste it into Fossbot to create a command that displays bit alerts triggered by your viewers. 
+                Copy the command below and paste it into Fossabot to create a command that displays bit alerts triggered by your viewers. 
                 This command will show the top bit alerts sorted by amount.
             </Text>
             <Textarea
-                label="Fossbot Command"
-                placeholder={fossbotLoading ? "Loading..." : "Fossbot command will appear here"}
-                value={fossbotCommand}
+                label="Fossabot Command"
+                placeholder={fossabotBitLoading ? "Loading..." : "Fossabot command will appear here"}
+                value={fossabotBitCommand}
                 readOnly
                 minRows={4}
                 maxRows={6}
                 rightSection={
                     <ActionIcon 
-                        onClick={() => navigator.clipboard.writeText(fossbotCommand)}
-                        disabled={!fossbotCommand || fossbotLoading}
+                        onClick={() => navigator.clipboard.writeText(fossabotBitCommand)}
+                        disabled={!fossabotBitCommand || fossabotBitLoading}
                     >
                         <IconCopy size="1rem" />
                     </ActionIcon>
@@ -224,22 +224,22 @@ export function ConnectSettings() {
             />
         </Fieldset>
 
-        <Fieldset legend="Fossbot Subgift Alerts" variant="filled">
+        <Fieldset legend="Fossabot Subgift Alerts" variant="filled">
             <Text size="sm" mb={10}>
-                Copy the command below and paste it into Fossbot to create a command that displays subgift alerts triggered by your viewers. 
+                Copy the command below and paste it into Fossabot to create a command that displays subgift alerts triggered by your viewers. 
                 This command will show the top subgift alerts sorted by amount.
             </Text>
             <Textarea
-                label="Fossbot Subgift Command"
-                placeholder={fossbotSubgiftLoading ? "Loading..." : "Fossbot subgift command will appear here"}
-                value={fossbotSubgiftCommand}
+                label="Fossabot Subgift Command"
+                placeholder={fossabotSubgiftLoading ? "Loading..." : "Fossabot subgift command will appear here"}
+                value={fossabotSubgiftCommand}
                 readOnly
                 minRows={4}
                 maxRows={6}
                 rightSection={
                     <ActionIcon 
-                        onClick={() => navigator.clipboard.writeText(fossbotSubgiftCommand)}
-                        disabled={!fossbotSubgiftCommand || fossbotSubgiftLoading}
+                        onClick={() => navigator.clipboard.writeText(fossabotSubgiftCommand)}
+                        disabled={!fossabotSubgiftCommand || fossabotSubgiftLoading}
                     >
                         <IconCopy size="1rem" />
                     </ActionIcon>
