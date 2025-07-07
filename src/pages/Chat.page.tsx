@@ -570,7 +570,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                         {/* Chat Messages */}
                         <div className={classes.chatMessages} style={{ position: 'relative' }}>
                             {!shouldScroll && (
-                                <div style={{ position: 'absolute', bottom: '60px', right: '10px', zIndex: 10 }}>
+                                <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
                                     <Button size="xs" onClick={scrollToBottom} leftSection={<IconMessagePause size={14} />} variant="gradient" radius={"lg"}>New Messages</Button>
                                 </div>
                             )}
