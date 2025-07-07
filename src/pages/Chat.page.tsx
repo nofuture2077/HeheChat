@@ -568,11 +568,11 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                         </Stack>
 
                         {/* Chat Messages */}
-                        <div className={classes.chatMessages}>
+                        <div className={classes.chatMessages} style={{ position: 'relative' }}>
                             {!shouldScroll && (
-                                <Affix position={{ bottom: 60, right: 10 }}>
+                                <div style={{ position: 'absolute', bottom: '60px', right: '10px', zIndex: 10 }}>
                                     <Button size="xs" onClick={scrollToBottom} leftSection={<IconMessagePause size={14} />} variant="gradient" radius={"lg"}>New Messages</Button>
-                                </Affix>
+                                </div>
                             )}
                             <ScrollArea viewportRef={viewport} h="100%" type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
                                 <Space h={8}></Space>
