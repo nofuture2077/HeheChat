@@ -48,6 +48,12 @@ export function getDimension() {
     return [w, h];
 }
 
+export function getFullDimension() {
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
+    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+    return [vw, vh];
+}
+
 interface DebouncedFunction<T extends (...args: any[]) => any> {
     (...args: Parameters<T>): void;
     cancel: () => void;
@@ -80,6 +86,9 @@ function debounce<T extends (...args: any[]) => any>(
 }
 
 interface TwitchPlayerProps {
+    fullSize?: boolean;
+    customWidth?: number;
+    customHeight?: number;
 }
 
 export function TwitchPlayer(props: TwitchPlayerProps) {
@@ -88,10 +97,18 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
     const playerRef = useRef<TwitchEmbed | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const channel = config.getChatChannel();
-    const [dimensions, setDimensions] = useState(getDimension);
+    const [dimensions, setDimensions] = useState(() => {
+        if (props.fullSize) {
+            return getFullDimension();
+        }
+        return getDimension();
+    });
     const [hasStorageAccess, setHasStorageAccess] = useState(true);
-    const [w, h] = dimensions;
-    const containerId = 'twitch-embed';
+    
+    // Use custom dimensions if provided, otherwise use calculated dimensions
+    const w = props.customWidth || dimensions[0];
+    const h = props.customHeight || dimensions[1];
+    const containerId = props.fullSize ? 'twitch-embed-fullsize' : 'twitch-embed';
 
     // Request storage access for Twitch embed
     const requestStorageAccessForTwitch = useCallback(async () => {
