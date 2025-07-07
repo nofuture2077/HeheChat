@@ -1,4 +1,4 @@
-import { TagsInput, Switch, Stack, Select, Fieldset, Space, Text } from '@mantine/core';
+import { TagsInput, Switch, Stack, Select, Fieldset, Space, Text, Image, Alert } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
@@ -53,7 +53,21 @@ export function ChatSettings() {
             </Fieldset>
 
             <Fieldset legend="Messages" variant='filled'>
-                 <Select label="Max Messages" data={['100', '200', '500']} value={config.maxMessages + ''} onChange={(value) => config.setMaxMessages(Number(value))} />
+                 <Select label="Max Messages" data={['20', '40', '60', '100', '200', '500']} value={config.maxMessages + ''} onChange={(value) => config.setMaxMessages(Number(value))} />
+                 {config.maxMessages === 20 && (
+                     <Stack mt="md" align="center">
+                         <Alert color="green" title="🥒 You are now in Gurkenmodus 🥒" variant="filled">
+                         </Alert>
+                         <Image 
+                             src="/simon.avif" 
+                             alt="Simon in Gurkenmodus" 
+                             w={200} 
+                             h={200} 
+                             fit="contain"
+                             radius="md"
+                         />
+                     </Stack>
+                 )}
             </Fieldset>
 
             <Fieldset legend="Chat cosmetics" variant='filled'>
