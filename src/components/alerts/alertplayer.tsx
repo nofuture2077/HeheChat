@@ -91,13 +91,30 @@ class AlertPlayer {
                 if (audioContext.state !== 'running') {
                     console.warn('Audio context is not in running state:', audioContext.state);
                 }
+                
+                // Only set volume if the context is properly initialized and running
+                if (audioContext.state === 'running') {
+                    try {
+                        // Set global volume to 1.0 initially (will be controlled per-sound and by mute state)
+                        Howler.volume(1.0);
+                        console.log('Howler volume set to 1.0');
+                    } catch (err) {
+                        console.error('Failed to set Howler volume:', err);
+                    }
+                } else {
+                    console.warn('Skipping volume setting - audio context not running');
+                }
             } catch (error) {
                 console.error('Failed to create new Howler context:', error);
+                // Don't try to set volume if context creation failed
+                this.initialized = false;
+                return;
             }
+        } else {
+            console.error('AudioContext not supported');
+            this.initialized = false;
+            return;
         }
-        
-        // Set global volume to 0 initially
-        Howler.volume(0);
         
         // Set media session metadata for album cover and artist info
         if ('mediaSession' in navigator) {
@@ -208,10 +225,28 @@ class AlertPlayer {
             return undefined;
         }
         
-        return {
-            duration: 0, // HowlerJS will determine duration when loaded
-            audioUrl: src
-        };
+        return new Promise((resolve) => {
+            // Create a temporary Howl instance to get the duration
+            const tempSound = new Howl({
+                src: [src],
+                onload: () => {
+                    const duration = tempSound.duration();
+                    tempSound.unload(); // Clean up the temporary sound
+                    resolve({
+                        duration: duration || 0,
+                        audioUrl: src
+                    });
+                },
+                onloaderror: (id: any, error: any) => {
+                    console.error("Error loading audio for duration detection:", error);
+                    // Still return the audio info even if we can't get duration
+                    resolve({
+                        duration: 0,
+                        audioUrl: src
+                    });
+                }
+            });
+        });
     }
 
     pause() {
@@ -219,63 +254,74 @@ class AlertPlayer {
         if (this.currentSound) {
             this.currentSound.pause();
         }
-        // Suspend Howler context if available
-        if (Howler.ctx) {
-            Howler.ctx.suspend();
-        }
+        // Don't suspend the Howler context as it can cause audio node connection issues
+        console.log('Alert player paused');
     }
 
     resume() {
         this.paused = false;
         
-        // Resume Howler context if available
-        if (Howler.ctx) {
-            Howler.ctx.resume();
-        }
+        // Don't try to resume the Howler context directly as it can cause audio node issues
+        // Instead, let individual sounds handle their own context when they play
         
         // Resume current sound if it exists and was playing
         if (this.currentSound && this.playing) {
-            this.currentSound.play();
-            
-            // Publish an update to refresh the UI
-            PubSub.publish('AlertPlayer-update', {
-                text: this.currentlyPlaying ? 
-                    this.currentlyPlaying.username + " - " + formatEventText(this.currentlyPlaying) : 
-                    'Playing'
-            });
+            try {
+                this.currentSound.play();
+                
+                // Publish an update to refresh the UI
+                PubSub.publish('AlertPlayer-update', {
+                    text: this.currentlyPlaying ? 
+                        this.currentlyPlaying.username + " - " + formatEventText(this.currentlyPlaying) : 
+                        'Playing'
+                });
+            } catch (err) {
+                console.error('Error resuming current sound:', err);
+                // If we can't resume the current sound, clean it up and let the queue continue
+                this.cleanupCurrentSound();
+                this.playing = false;
+                PubSub.publish('AlertPlayer-update', {
+                    text: 'Resume failed, queue will continue'
+                });
+            }
         }
+        
+        console.log('Alert player resumed');
     }
 
     mute() {
         this.muted = true;
-        Howler.volume(0);
+        // Don't change global Howler volume - just set the muted flag
+        // Individual sounds will check this flag and set their volume to 0
         if (this.currentSound) {
             this.currentSound.volume(0);
         }
+        console.log('Alert player muted');
     }
 
     unmute() {
         this.muted = false;
         
-        // Apply the alert boost from config if available
-        const boostFactor = this.config?.alertBoost || 1.0;
-        Howler.volume(boostFactor);
-        
+        // If there's a current sound playing, restore its volume
         if (this.currentSound && this.playing) {
+            const boostFactor = this.config?.alertBoost || 1.0;
+            // Restore volume based on what type of sound is playing
+            // We'll need to track the original volume, but for now use a reasonable default
             this.currentSound.volume(boostFactor);
             
             // Update UI to reflect unmuted state
             PubSub.publish('AlertPlayer-update');
         }
+        console.log('Alert player unmuted');
     }
 
     startPlaying() {
         this.skipCurrent = false;
         this.playing = true;
         
-        // Apply the alert boost from config if available
-        const boostFactor = this.config?.alertBoost || 1.0;
-        Howler.volume(this.muted ? 0 : boostFactor);
+        // Don't manipulate global Howler volume here
+        // Individual sounds will handle their own volume based on mute state
+        console.log('Started playing, muted:', this.muted);
     }
 
     // Helper method to safely clean up the current sound
@@ -297,7 +343,8 @@ class AlertPlayer {
         this.paused = false;
         this.skipCurrent = false; // Reset skip flag
         this.cleanupCurrentSound();
-        Howler.volume(0);
+        // Don't set global volume to 0 here - let individual sounds control their own volume
+        // The global volume should remain at the level set by mute/unmute or initialization
     }
 
     endAudio() {
@@ -308,7 +355,7 @@ class AlertPlayer {
     skip() {
         this.skipCurrent = true;
         this.cleanupCurrentSound();
-        Howler.volume(0);
+        // Don't set global volume to 0 here - let individual sounds control their own volume
         
         // Reset playing state to allow the queue to continue
         this.playing = false;
