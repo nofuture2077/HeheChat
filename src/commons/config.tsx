@@ -165,7 +165,8 @@ export const DEFAULT_CONFIG: Config = {
         raid: false,
         follow: true,
         donation: false,
-        channelPointRedemption: true
+        channelPointRedemption: true,
+        hypetrain: true
     },
     receivedShares: [],
     activatedShares: [],
