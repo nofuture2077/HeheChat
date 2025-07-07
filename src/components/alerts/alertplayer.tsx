@@ -54,9 +54,47 @@ class AlertPlayer {
         return this.initialized && Howler.ctx && Howler.ctx.state === 'suspended';
     }
 
-    initialize() {
+    async initialize() {
         console.log('Alert system initialized');
         this.initialized = true;
+        
+        // Create new Howler context
+        if (typeof AudioContext !== 'undefined') {
+            try {
+                // Create a new audio context for Howler
+                const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                
+                // Set the new context on Howler
+                Howler.ctx = audioContext;
+                
+                // Ensure the context is in running state
+                if (audioContext.state === 'suspended') {
+                    try {
+                        await audioContext.resume();
+                        console.log('Howler audio context resumed to state:', audioContext.state);
+                    } catch (err) {
+                        console.error('Failed to resume Howler audio context:', err);
+                    }
+                } else if (audioContext.state !== 'running') {
+                    // Try to start the context if it's not running
+                    try {
+                        await audioContext.resume();
+                        console.log('Howler audio context started, state:', audioContext.state);
+                    } catch (err) {
+                        console.error('Failed to start Howler audio context:', err);
+                    }
+                }
+                
+                console.log('New Howler context created with state:', audioContext.state);
+                
+                // Verify the context is running
+                if (audioContext.state !== 'running') {
+                    console.warn('Audio context is not in running state:', audioContext.state);
+                }
+            } catch (error) {
+                console.error('Failed to create new Howler context:', error);
+            }
+        }
         
         // Set global volume to 0 initially
         Howler.volume(0);
