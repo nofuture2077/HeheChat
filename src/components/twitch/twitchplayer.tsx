@@ -89,6 +89,7 @@ interface TwitchPlayerProps {
     fullSize?: boolean;
     customWidth?: number;
     customHeight?: number;
+    muted?: boolean;
 }
 
 export function TwitchPlayer(props: TwitchPlayerProps) {
@@ -152,6 +153,8 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
             containerRef.current.innerHTML = '';
         }
 
+        const isMuted = props.muted !== undefined ? props.muted : true;
+
         const options = {
             width: w,
             height: h,
@@ -159,7 +162,7 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
             parent: [window.location.hostname],
             autoplay: true,
             layout: "video",
-            muted: true,
+            muted: isMuted,
             storage: { enabled: storageAccess }
         };
 
@@ -170,10 +173,10 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
             if (loginContext.accessToken) {
                 const player = embed.getPlayer();
                 player.setQuality(config.videoQuality);
-                player.setMuted(true);
+                player.setMuted(isMuted);
             }
         });
-    }, [channel, loginContext.accessToken, w, h, requestStorageAccessForTwitch]);
+    }, [channel, loginContext.accessToken, w, h, props.muted, requestStorageAccessForTwitch]);
 
     // Handle resize
     const handleResize = useCallback(
@@ -212,11 +215,12 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
     useEffect(() => {
         if (!channel || !playerRef.current) return;
 
+        const isMuted = props.muted !== undefined ? props.muted : true;
         const player = playerRef.current.getPlayer();
         player.setChannel(channel);
-        player.setMuted(true);
+        player.setMuted(isMuted);
         player.setQuality(config.videoQuality);
-    }, [channel]);
+    }, [channel, props.muted]);
 
     if (!channel) return null;
 

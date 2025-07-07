@@ -489,7 +489,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
 
     const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);
     const affixOffset = headerHeight + 15;
-    const isDesktopVideoMode = width > 768 && (config.showVideo || currentClipId);
+    const isDesktopVideoMode = config.desktopVideoMode && (config.showVideo || currentClipId);
 
     // Desktop video layout with side-by-side video and chat
     if (isDesktopVideoMode) {
@@ -514,7 +514,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                     {currentClipId ? (
                         <TwitchClipsPlayer clipId={currentClipId} onClose={() => setCurrentClipId(null)}/>
                     ) : config.showVideo ? (
-                        <TwitchPlayer fullSize={true} customWidth={width - chatWidth} customHeight={height}/>
+                        <TwitchPlayer fullSize={true} customWidth={width - chatWidth} customHeight={height} muted={false}/>
                     ) : null}
                 </div>
 

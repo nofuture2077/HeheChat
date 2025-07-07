@@ -17,6 +17,7 @@ export interface NotificationSettings {
 export interface ConfigData {
     channels: string[];
     showVideo: boolean;
+    desktopVideoMode: boolean;
     videoQuality: string;
     chatChannel?: string;
     chatEnabled: boolean;
@@ -94,6 +95,7 @@ export interface Config extends ConfigData {
     loadShares: () => void;
     setDeactivatedAlerts: (id: string, val: boolean) => void;
     setShowVideo: (val: boolean) => void;
+    setDesktopVideoMode: (val: boolean) => void;
     setVideoQuality: (val: string) => void;
     setHideViewers: (val: boolean) => void;
     setHideOwnViewers: (val: boolean) => void;
@@ -114,6 +116,7 @@ export interface Config extends ConfigData {
 export const DEFAULT_CONFIG: Config = {
     channels: [],
     showVideo: false,
+    desktopVideoMode: true,
     videoQuality: '480p',
     chatChannel: undefined,
     chatEnabled: true,
@@ -187,6 +190,7 @@ export const DEFAULT_CONFIG: Config = {
     setChatChannel: (channel: string) => {},
     setChatEnabled: (val: boolean) => {},
     setShowVideo: (val: boolean) => {},
+    setDesktopVideoMode: (val: boolean) => {},
     setVideoQuality: (val: string) => {},
     onMessage: (handler: MessageHandler) => ({handle: () => {}}),
     off: (handler: MessageHandler) => {},

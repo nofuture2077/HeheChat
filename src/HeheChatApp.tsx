@@ -153,6 +153,7 @@ export default function HeheChat() {
                 profileData.config.skip7TVEmotesInTTS ??= false;
                 profileData.config.skipGlobalEmotesInTTS ??= false;
                 profileData.config.checkBrowsersourceConnection ??= true;
+                profileData.config.desktopVideoMode ??= true;
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
@@ -359,6 +360,7 @@ export default function HeheChat() {
     const setModToolsEnabled = (value: boolean) => updateConfig('modToolsEnabled', value);
     const setPlayAlerts = (value: boolean) => updateConfig('playAlerts', value);
     const setShowVideo = (value: boolean) => updateConfig('showVideo', value);
+    const setDesktopVideoMode = (value: boolean) => updateConfig('desktopVideoMode', value);
     const setVideoQuality = (value: string) => updateConfig('videoQuality', value);
     const setRaidTargets = (value: string[]) => updateConfig('raidTargets', value);
     const setFreeTTS = (value: string[]) => updateConfig('freeTTS', value);
@@ -601,6 +603,7 @@ export default function HeheChat() {
         setChatEnabled,
         setChatChannel,
         setShowVideo,
+        setDesktopVideoMode,
         setVideoQuality,
         getChatChannel,
         setFontSize,
