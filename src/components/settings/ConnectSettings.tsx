@@ -19,6 +19,8 @@ export function ConnectSettings() {
     const [kofiWebhookUrl, setKofiWebhookUrl] = useState<string>("");
     const [fossbotCommand, setFossbotCommand] = useState<string>("");
     const [fossbotLoading, setFossbotLoading] = useState<boolean>(false);
+    const [fossbotSubgiftCommand, setFossbotSubgiftCommand] = useState<string>("");
+    const [fossbotSubgiftLoading, setFossbotSubgiftLoading] = useState<boolean>(false);
 
     const profile = useContext(ProfileContext);
     const config = useContext(ConfigContext);
@@ -65,8 +67,23 @@ export function ConnectSettings() {
                 .finally(() => {
                     setFossbotLoading(false);
                 });
+
+            // Load Fossbot subgift command
+            setFossbotSubgiftLoading(true);
+            fetch(`${import.meta.env.VITE_BACKEND_URL}/api/event/subalerts/fossabot?channel=${chatChannel}&profile=${profile.guid}`)
+                .then(res => res.json())
+                .then((data) => {
+                    setFossbotSubgiftCommand(data.text || "Failed to load Fossbot subgift command");
+                })
+                .catch(() => {
+                    setFossbotSubgiftCommand("Error loading Fossbot subgift command. Please try again later.");
+                })
+                .finally(() => {
+                    setFossbotSubgiftLoading(false);
+                });
         } else {
             setFossbotCommand("Please set a chat channel and ensure you have a valid profile to generate the Fossbot command.");
+            setFossbotSubgiftCommand("Please set a chat channel and ensure you have a valid profile to generate the Fossbot subgift command.");
         }
     }, []);
 
@@ -200,6 +217,29 @@ export function ConnectSettings() {
                     <ActionIcon 
                         onClick={() => navigator.clipboard.writeText(fossbotCommand)}
                         disabled={!fossbotCommand || fossbotLoading}
+                    >
+                        <IconCopy size="1rem" />
+                    </ActionIcon>
+                }
+            />
+        </Fieldset>
+
+        <Fieldset legend="Fossbot Subgift Alerts" variant="filled">
+            <Text size="sm" mb={10}>
+                Copy the command below and paste it into Fossbot to create a command that displays subgift alerts triggered by your viewers. 
+                This command will show the top subgift alerts sorted by amount.
+            </Text>
+            <Textarea
+                label="Fossbot Subgift Command"
+                placeholder={fossbotSubgiftLoading ? "Loading..." : "Fossbot subgift command will appear here"}
+                value={fossbotSubgiftCommand}
+                readOnly
+                minRows={4}
+                maxRows={6}
+                rightSection={
+                    <ActionIcon 
+                        onClick={() => navigator.clipboard.writeText(fossbotSubgiftCommand)}
+                        disabled={!fossbotSubgiftCommand || fossbotSubgiftLoading}
                     >
                         <IconCopy size="1rem" />
                     </ActionIcon>
