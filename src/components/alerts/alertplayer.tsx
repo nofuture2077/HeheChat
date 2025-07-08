@@ -42,7 +42,8 @@ class AlertPlayer {
         setInterval(() => this.checkQueue(), 1000);
         this.ttsExtra = Number(localStorage.getItem('hehechat-ttsExtra') || '0') || 0;
         this.jingleExtra = Number(localStorage.getItem('hehechat-jingleExtra') || '0') || 0;
-        // Removed the silence interval that was causing "Activate Alerts" to appear every 2 minutes
+        // Set up interval to check if queue is empty every 2 minutes
+        setInterval(() => this.playSilenceIfQueueEmpty(), 120000);
     }
 
     status(): boolean {
@@ -710,6 +711,28 @@ class AlertPlayer {
         console.log("Event added to the queue", item);
         PubSub.publish('AlertPlayer-update', {text: 'Event added'});
         this.queue.push(item);
+    }
+    
+    // Play silence sound if the queue is empty
+    playSilenceIfQueueEmpty() {
+        // Only play silence if we're not already playing something, we're initialized, and the queue is empty
+        if (!this.playing && this.config && this.status() && this.index >= this.queue.length) {
+            console.log("Queue is empty, playing silence sound");
+            this.getAudioInfo(silence).then((audioInfo) => {
+                if (audioInfo) {
+                    this.startPlaying();
+                    this.playAudio(0.01, audioInfo, 0).then(() => {
+                        console.log("Silence played successfully");
+                        this.stopPlaying();
+                    }).catch(err => {
+                        console.error("Error playing silence:", err);
+                        this.stopPlaying();
+                    });
+                }
+            }).catch(err => {
+                console.error("Error getting silence audio info:", err);
+            });
+        }
     }
 
     checkQueue() {
