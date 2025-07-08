@@ -9,20 +9,22 @@ import _ from "underscore";
 import { AlertConfig } from "@/components/events/alertconfigstorage";
 import { formatEventText } from "@/components/events/eventlist";
 import { DEFAULT_CHAT_EMOTES } from "@/commons/emotes";
-import { Howl, Howler } from 'howler';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 interface AudioInfo {
     duration: number;
-    audioUrl: string;
+    audioBuffer?: AudioBuffer;
+    audioUrl?: string;
 }
 
 let cheerPrefixes = ['Cheer', 'BibleThump', 'cheerwhal', 'Corgo', 'uni', 'ShowLove', 'Party', 'SeemsGood', 'Pride', 'Kappa', 'FrankerZ', 'HeyGuys', 'DansGame', 'EleGiggle', 'TriHard', 'Kreygasm', '4Head', 'SwiftRage', 'NotLikeThis', 'FailFish', 'VoHiYo', 'PJSalt', 'MrDestructoid', 'bday', 'RIPCheer', 'Shamrock'];
 let cheerPrefixesRegExp = cheerPrefixes.map(x => new RegExp(`\\b${x}\\d+\\b`, "gi"))
 
 class AlertPlayer {
-    currentSound?: Howl;
+    audioContext?: AudioContext;
+    mainAudioGain?: GainNode;
+    currentSource?: AudioBufferSourceNode;
     playing: boolean = false;
     paused: boolean = false;
     muted: boolean = false;
@@ -36,7 +38,6 @@ class AlertPlayer {
     skipCurrent: boolean = false;
     ttsExtra?: number;
     jingleExtra?: number;
-    initialized: boolean = false;
 
     constructor() {
         setInterval(() => this.checkQueue(), 1000);
@@ -47,49 +48,20 @@ class AlertPlayer {
     }
 
     status(): boolean {
-        return this.initialized && Howler.ctx && Howler.ctx.state === 'running';
+        return this.audioContext !== undefined && this.audioContext.state === 'running';
     }
 
     interrupted(): boolean {
-        return this.initialized && Howler.ctx && Howler.ctx.state === 'suspended';
+        //@ts-ignore
+        return this.audioContext !== undefined && this.audioContext.state === 'interrupted';
     }
 
-    async initialize() {
+    initialize() {
         console.log('Alert system initialized');
-        this.initialized = true;
-        
-        // Let Howler manage its own AudioContext - don't create a new one
-        if (typeof AudioContext !== 'undefined') {
-            try {
-                // Ensure Howler's context is in running state
-                if (Howler.ctx && Howler.ctx.state === 'suspended') {
-                    try {
-                        await Howler.ctx.resume();
-                        console.log('Howler audio context resumed to state:', Howler.ctx.state);
-                    } catch (err) {
-                        console.error('Failed to resume Howler audio context:', err);
-                    }
-                }
-                
-                // Set global volume to 1.0 initially (will be controlled per-sound and by mute state)
-                try {
-                    Howler.volume(1.0);
-                    console.log('Howler volume set to 1.0');
-                } catch (err) {
-                    console.error('Failed to set Howler volume:', err);
-                }
-                
-                console.log('Howler context state:', Howler.ctx ? Howler.ctx.state : 'not available');
-            } catch (error) {
-                console.error('Failed to initialize Howler:', error);
-                this.initialized = false;
-                return;
-            }
-        } else {
-            console.error('AudioContext not supported');
-            this.initialized = false;
-            return;
-        }
+        this.audioContext = new (window.AudioContext)();
+        this.mainAudioGain = this.audioContext.createGain();
+        this.mainAudioGain.gain.value = 0;
+        this.mainAudioGain.connect(this.audioContext.destination);
         
         // Set media session metadata for album cover and artist info
         if ('mediaSession' in navigator) {
@@ -139,177 +111,240 @@ class AlertPlayer {
     }
 
     private preciseTimer(callback: () => void, delay: number) {
-        setTimeout(callback, delay);
+        const audioBuffer = this.audioContext!.createBuffer(1, this.audioContext!.sampleRate * delay / 1000, this.audioContext!.sampleRate);
+        const source = this.audioContext!.createBufferSource();
+        source.buffer = audioBuffer;
+    
+        source.onended = callback;
+        source.connect(this.audioContext!.destination);
+        source.start();
     }
 
     async playAudio(volume: number, audioInfo: AudioInfo | undefined, extra: number): Promise<void> {
         return new Promise((resolve, reject) => {
-            if (!audioInfo || this.skipCurrent || !this.initialized) {
+            if (!audioInfo || this.skipCurrent || !this.audioContext) {
                 resolve();
                 return;
             }
             
-            const { audioUrl } = audioInfo;
+            const { duration, audioBuffer, audioUrl } = audioInfo;
             
-            // Clean up any existing audio
-            this.cleanupCurrentSound();
+            // Clean up any existing audio source
+            this.cleanupCurrentSource();
             
+            // Create a new gain node for this specific audio
+            const gainNode = this.audioContext.createGain();
             // Apply the alert boost from config if available
             const boostFactor = this.config?.alertBoost || 1.0;
-            const finalVolume = this.muted ? 0 : (volume * boostFactor);
+            gainNode.gain.value = this.muted ? 0 : (volume * boostFactor);
+            gainNode.connect(this.audioContext.destination);
             
-            // Create new Howl instance
-            this.currentSound = new Howl({
-                src: [audioUrl],
-                volume: finalVolume,
-                onend: () => {
-                    this.cleanupCurrentSound();
-                    setTimeout(() => resolve(), extra);
-                },
-                onloaderror: (id: any, error: any) => {
-                    console.error("Error loading audio:", error);
-                    this.cleanupCurrentSound();
-                    resolve(); // Resolve to allow queue to continue
-                },
-                onplayerror: (id: any, error: any) => {
-                    console.error("Error playing audio:", error);
-                    this.cleanupCurrentSound();
-                    resolve(); // Resolve to allow queue to continue
-                },
-                onload: () => {
-                    // Update media session metadata when audio loads
+            // Setup error handling for unexpected interruptions
+            const handleInterruption = () => {
+                console.log("Audio playback interrupted");
+                this.cleanupCurrentSource();
+                this.playing = false; // Reset playing state
+                resolve(); // Resolve the promise to allow queue to continue
+            };
+            
+            if (audioBuffer) {
+                try {
+                    // Play from decoded buffer
+                    const source = this.audioContext.createBufferSource();
+                    source.buffer = audioBuffer;
+                    source.connect(gainNode);
+                    
+                    this.currentSource = source;
+                    
+                    // Handle normal completion
+                    source.onended = () => {
+                        this.cleanupCurrentSource();
+                        setTimeout(() => resolve(), extra);
+                    };
+                    
+                    // AudioBufferSourceNode doesn't have onerror event
+                    // We'll rely on try-catch for error handling
+                    
+                    source.start();
+                    
+                    // Update media session metadata when playing new audio
                     if ('mediaSession' in navigator) {
                         this.updateMediaSessionMetadata();
                     }
+                } catch (err) {
+                    console.error("Error starting audio playback:", err);
+                    handleInterruption();
                 }
-            });
-            
-            // Play the sound
-            try {
-                this.currentSound.play();
-            } catch (err) {
-                console.error("Error starting audio playback:", err);
-                this.cleanupCurrentSound();
-                resolve();
+            } else if (audioUrl) {
+                // Fetch and decode the audio if we only have a URL
+                fetch(audioUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.arrayBuffer();
+                    })
+                    .then(arrayBuffer => this.audioContext!.decodeAudioData(arrayBuffer))
+                    .then(decodedData => {
+                        if (this.skipCurrent) {
+                            resolve();
+                            return;
+                        }
+                        
+                        try {
+                            const source = this.audioContext!.createBufferSource();
+                            source.buffer = decodedData;
+                            source.connect(gainNode);
+                            
+                            this.currentSource = source;
+                            
+                            // Handle normal completion
+                            source.onended = () => {
+                                this.cleanupCurrentSource();
+                                setTimeout(() => resolve(), extra);
+                            };
+                            
+                            // AudioBufferSourceNode doesn't have onerror event
+                            // We'll rely on try-catch for error handling
+                            
+                            source.start();
+                            
+                            // Update media session metadata
+                            if ('mediaSession' in navigator) {
+                                this.updateMediaSessionMetadata();
+                            }
+                        } catch (err) {
+                            console.error("Error starting audio playback:", err);
+                            handleInterruption();
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Error fetching or decoding audio:", err);
+                        handleInterruption();
+                    });
+            } else {
+                resolve(); // No audio to play
             }
         });
     }
 
     async getAudioInfo(src: string): Promise<AudioInfo | undefined> {
-        if (!src) {
-            return undefined;
-        }
-        
-        return new Promise((resolve) => {
-            // Create a temporary Howl instance to get the duration
-            const tempSound = new Howl({
-                src: [src],
-                onload: () => {
-                    const duration = tempSound.duration();
-                    tempSound.unload(); // Clean up the temporary sound
-                    resolve({
-                        duration: duration || 0,
-                        audioUrl: src
-                    });
-                },
-                onloaderror: (id: any, error: any) => {
-                    console.error("Error loading audio for duration detection:", error);
-                    // Still return the audio info even if we can't get duration
-                    resolve({
-                        duration: 0,
-                        audioUrl: src
-                    });
+        return new Promise((resolve, reject) => {
+            if (!src || !this.audioContext) {
+                resolve(undefined);
+                return;
+            }
+            
+            // For data URLs, decode directly
+            if (src.startsWith('data:')) {
+                // Convert base64 to array buffer
+                const base64 = src.split(',')[1];
+                const binaryString = atob(base64);
+                const len = binaryString.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binaryString.charCodeAt(i);
                 }
-            });
+                
+                // Decode the audio data
+                this.audioContext.decodeAudioData(bytes.buffer)
+                    .then(buffer => {
+                        resolve({
+                            duration: buffer.duration,
+                            audioBuffer: buffer
+                        });
+                    })
+                    .catch(err => {
+                        console.error("Error decoding audio data:", err);
+                        reject(err);
+                    });
+            } else {
+                // For remote URLs, just store the URL and duration will be determined when fetched
+                // This avoids CORS issues with remote audio files
+                resolve({
+                    duration: 0, // Will be updated when actually played
+                    audioUrl: src
+                });
+            }
         });
     }
 
     pause() {
         this.paused = true;
-        if (this.currentSound) {
-            this.currentSound.pause();
-        }
-        // Don't suspend the Howler context as it can cause audio node connection issues
-        console.log('Alert player paused');
+        this.audioContext?.suspend();
     }
 
     resume() {
         this.paused = false;
+        this.audioContext?.resume();
         
-        // Don't try to resume the Howler context directly as it can cause audio node issues
-        // Instead, let individual sounds handle their own context when they play
-        
-        // Resume current sound if it exists and was playing
-        if (this.currentSound && this.playing) {
-            try {
-                this.currentSound.play();
-                
-                // Publish an update to refresh the UI
-                PubSub.publish('AlertPlayer-update', {
-                    text: this.currentlyPlaying ? 
-                        this.currentlyPlaying.username + " - " + formatEventText(this.currentlyPlaying) : 
-                        'Playing'
-                });
-            } catch (err) {
-                console.error('Error resuming current sound:', err);
-                // If we can't resume the current sound, clean it up and let the queue continue
-                this.cleanupCurrentSound();
-                this.playing = false;
-                PubSub.publish('AlertPlayer-update', {
-                    text: 'Resume failed, queue will continue'
-                });
-            }
+        // If we have a current source, ensure it continues playing
+        if (this.currentSource && this.playing) {
+            // Publish an update to refresh the UI
+            PubSub.publish('AlertPlayer-update', {
+                text: this.currentlyPlaying ? 
+                    this.currentlyPlaying.username + " - " + formatEventText(this.currentlyPlaying) : 
+                    'Playing'
+            });
         }
-        
-        console.log('Alert player resumed');
     }
 
     mute() {
         this.muted = true;
-        // Don't change global Howler volume - just set the muted flag
-        // Individual sounds will check this flag and set their volume to 0
-        if (this.currentSound) {
-            this.currentSound.volume(0);
+        if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
+        if (this.currentSource) {
+            const gainNode = this.audioContext!.createGain();
+            gainNode.gain.value = 0;
+            this.currentSource.disconnect();
+            this.currentSource.connect(gainNode);
+            gainNode.connect(this.audioContext!.destination);
         }
-        console.log('Alert player muted');
     }
 
     unmute() {
         this.muted = false;
+        if (this.mainAudioGain) this.mainAudioGain.gain.value = 1;
         
-        // If there's a current sound playing, restore its volume
-        if (this.currentSound && this.playing) {
+        // If there's a current source playing, reconnect it with proper gain
+        if (this.currentSource && this.playing) {
+            // Create a new gain node with proper volume
+            const gainNode = this.audioContext!.createGain();
+            // Apply the alert boost from config if available
             const boostFactor = this.config?.alertBoost || 1.0;
-            // Restore volume based on what type of sound is playing
-            // We'll need to track the original volume, but for now use a reasonable default
-            this.currentSound.volume(boostFactor);
+            gainNode.gain.value = boostFactor; // Apply volume boost
+            
+            // Disconnect from any existing connections and reconnect
+            this.currentSource.disconnect();
+            this.currentSource.connect(gainNode);
+            gainNode.connect(this.audioContext!.destination);
             
             // Update UI to reflect unmuted state
             PubSub.publish('AlertPlayer-update');
         }
-        console.log('Alert player unmuted');
     }
 
     startPlaying() {
         this.skipCurrent = false;
         this.playing = true;
-        
-        // Don't manipulate global Howler volume here
-        // Individual sounds will handle their own volume based on mute state
-        console.log('Started playing, muted:', this.muted);
+        if (this.mainAudioGain) {
+            // Apply the alert boost from config if available
+            const boostFactor = this.config?.alertBoost || 1.0;
+            this.mainAudioGain.gain.value = boostFactor;
+        }
     }
 
-    // Helper method to safely clean up the current sound
-    private cleanupCurrentSound() {
-        if (this.currentSound) {
+    // Helper method to safely clean up the current audio source
+    private cleanupCurrentSource() {
+        if (this.currentSource) {
             try {
-                this.currentSound.stop();
-                this.currentSound.unload();
+                this.currentSource.onended = null; // Remove event listener
+                this.currentSource.stop();
+                this.currentSource.disconnect();
             } catch (e) {
-                // Ignore errors if sound was already stopped
-                console.log("Error cleaning up sound:", e);
+                // Ignore errors if source was already stopped
+                console.log("Error cleaning up audio source:", e);
             }
-            this.currentSound = undefined;
+            this.currentSource = undefined;
         }
     }
 
@@ -317,20 +352,19 @@ class AlertPlayer {
         this.playing = false;
         this.paused = false;
         this.skipCurrent = false; // Reset skip flag
-        this.cleanupCurrentSound();
-        // Don't set global volume to 0 here - let individual sounds control their own volume
-        // The global volume should remain at the level set by mute/unmute or initialization
+        this.cleanupCurrentSource();
+        if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
     }
 
     endAudio() {
-        this.cleanupCurrentSound();
+        this.cleanupCurrentSource();
         return Promise.resolve();
     }
 
     skip() {
         this.skipCurrent = true;
-        this.cleanupCurrentSound();
-        // Don't set global volume to 0 here - let individual sounds control their own volume
+        this.cleanupCurrentSource();
+        if (this.mainAudioGain) this.mainAudioGain.gain.value = 0;
         
         // Reset playing state to allow the queue to continue
         this.playing = false;
