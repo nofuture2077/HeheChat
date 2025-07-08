@@ -720,14 +720,31 @@ class AlertPlayer {
             console.log("Queue is empty, playing silence sound");
             this.getAudioInfo(silence).then((audioInfo) => {
                 if (audioInfo) {
-                    this.startPlaying();
-                    this.playAudio(0.01, audioInfo, 0).then(() => {
-                        console.log("Silence played successfully");
-                        this.stopPlaying();
-                    }).catch(err => {
-                        console.error("Error playing silence:", err);
-                        this.stopPlaying();
+                    // Play silence without affecting the playing state to avoid UI issues
+                    // Create a temporary Howl instance for silence
+                    const silenceSound = new Howl({
+                        src: [audioInfo.audioUrl],
+                        volume: this.muted ? 0 : 0.01,
+                        onend: () => {
+                            console.log("Silence played successfully");
+                            silenceSound.unload();
+                        },
+                        onloaderror: (id: any, error: any) => {
+                            console.error("Error loading silence audio:", error);
+                            silenceSound.unload();
+                        },
+                        onplayerror: (id: any, error: any) => {
+                            console.error("Error playing silence:", error);
+                            silenceSound.unload();
+                        }
                     });
+                    
+                    try {
+                        silenceSound.play();
+                    } catch (err) {
+                        console.error("Error starting silence playback:", err);
+                        silenceSound.unload();
+                    }
                 }
             }).catch(err => {
                 console.error("Error getting silence audio info:", err);

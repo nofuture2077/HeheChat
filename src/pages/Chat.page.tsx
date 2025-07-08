@@ -489,7 +489,8 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
 
     const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);
     const affixOffset = headerHeight + 15;
-    const isDesktopVideoMode = config.desktopVideoMode && (config.showVideo || currentClipId);
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    const isDesktopVideoMode = config.desktopVideoMode && (config.showVideo || currentClipId) && !isMobile;
 
     // Desktop video layout with side-by-side video and chat
     if (isDesktopVideoMode) {
