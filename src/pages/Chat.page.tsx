@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
-import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '../ApplicationContext';
+import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext, PremiumContext } from '../ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
-import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack } from '@mantine/core';
-import { IconAlertTriangle, IconDeviceDesktop, IconRepeat } from '@tabler/icons-react';
+import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, ActionIcon, Text } from '@mantine/core';
+import { IconAlertTriangle, IconDeviceDesktop, IconRepeat, IconMessagePause, IconSettings, IconKeyboard, IconBell, IconBrandTwitch } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { Chat } from '../components/chat/Chat';
 import { MobileAppPrompt } from '../components/chat/MobileAppPrompt';
 import { ShortcutView } from '../components/shortcuts/ShortcutView';
-import { IconMessagePause } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '../components/header/Header';
+import { HeaderLogo } from '../components/header/HeaderLogo';
 import { EventDrawer } from '../components/events/eventdrawer';
 import { ChatInput } from '../components/chat/ChatInput';
 import { HelixModeratedChannel } from '@twurple/api';
@@ -18,10 +18,14 @@ import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { HeheMessage, parseMessage, HeheChatMessage } from '../commons/message';
 import { TwitchDrawer } from '../components/twitch/twitchview';
+import { TwitchPlayer } from '../components/twitch/twitchplayer';
+import { TwitchClipsPlayer } from '../components/twitch/twitchclipsplayer';
 import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, shoutoutUser, modUser, unmodUser, vipUser, unvipUser, unraid } from '../components/chat/mod/modactions';
 import { ProfileBarDrawer } from '../components/profile/profilebar';
 import { Storage } from '../components/chat/chatstorage';
 import { AlertSystem } from '../components/alerts/alertplayer';
+import { AlertStatusIndicator } from '../components/alerts/AlertStatusIndicator';
+import { ConnectionStatusIndicator } from '../components/alerts/ConnectionStatusIndicator';
 import { ReloadAlertsButton } from '../components/alerts/ReloadAlertsButton';
 import { toMap } from '../commons/helper';
 import { Event } from '../commons/events';
@@ -55,6 +59,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     const { width, height } = useViewportSize();
     const config = useContext(ConfigContext);
     const profile = useContext(ProfileContext);
+    const premium = useContext(PremiumContext);
     const [chatMessages, setChatMessages] = useThrottledState<HeheMessage[]>([], 500);
     const [usernames, setUsernames] = useState<Set<string>>(new Set());
     const [shouldScroll, setShouldScroll] = useState(true);
@@ -75,6 +80,13 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     const [currentClipId, setCurrentClipId] = useState<string | null>(null);
     const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
     const notificationIdsRef = useRef<string[]>([]);
+    
+    // Chat width state with localStorage persistence
+    const [chatWidth, setChatWidth] = useState(() => {
+        const saved = localStorage.getItem('hehe-chat-width');
+        return saved ? parseInt(saved, 10) : 480;
+    });
+    const [isResizing, setIsResizing] = useState(false);
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
         const viewportElement = viewport.current;
@@ -432,9 +444,156 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         unraid
     };
 
+    // Resize handlers
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsResizing(true);
+    }, []);
+
+    const handleMouseMove = useCallback((e: MouseEvent) => {
+        if (!isResizing) return;
+        
+        const newWidth = width - e.clientX;
+        const clampedWidth = Math.max(300, Math.min(800, newWidth));
+        setChatWidth(clampedWidth);
+    }, [isResizing, width]);
+
+    const handleMouseUp = useCallback(() => {
+        if (isResizing) {
+            setIsResizing(false);
+            localStorage.setItem('hehe-chat-width', chatWidth.toString());
+        }
+    }, [isResizing, chatWidth]);
+
+    // Add event listeners for resize
+    useEffect(() => {
+        if (isResizing) {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        } else {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        };
+    }, [isResizing, handleMouseMove, handleMouseUp]);
+
     const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);
     const affixOffset = headerHeight + 15;
+    const isDesktopVideoMode = config.desktopVideoMode && (config.showVideo || currentClipId);
 
+    // Desktop video layout with side-by-side video and chat
+    if (isDesktopVideoMode) {
+        return (
+            <div className={classes.desktopVideoLayout}>
+                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
+                    {drawer ? <drawer.component 
+                        style={{overflow: 'visible'}} 
+                        height="100dvh" 
+                        modActions={modActions} 
+                        close={drawerHandler.close} 
+                        openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} 
+                        openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }}
+                        openDrawer={(drawer: OverlayDrawer) => { setDrawer(drawer); drawerHandler.open() }}
+                        {...drawer.props} 
+                        openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }}
+                    ></drawer.component> : null}
+                </Drawer>
+
+                {/* Video Section */}
+                <div className={classes.videoSection}>
+                    {currentClipId ? (
+                        <TwitchClipsPlayer clipId={currentClipId} onClose={() => setCurrentClipId(null)}/>
+                    ) : config.showVideo ? (
+                        <TwitchPlayer fullSize={true} customWidth={width - chatWidth} customHeight={height} muted={false}/>
+                    ) : null}
+                </div>
+
+                {/* Chat Section */}
+                <div className={classes.chatSection} style={{ width: chatWidth }}>
+                    {/* Resize Handle */}
+                    <div className={classes.resizeHandle} onMouseDown={handleMouseDown} />
+                    {/* Chat Header */}
+                    <div className={classes.chatHeader}>
+                        <Button fw={300} p={0} style={{overflow: 'visible'}} variant='transparent' color='primary' size='sm' onClick={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} leftSection={<HeaderLogo height={20}/>}>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <Text fw={700} size="sm">HEHE</Text>
+                                <Text fw={300} size="sm">Chat{premium.isPremium ? ' Pro' : ''}</Text>
+                            </div>
+                        </Button>
+                        
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                            <ActionIcon variant='transparent' color='primary' size='sm' onClick={() => { setDrawer({...SettingsDrawer}); drawerHandler.open() }}>
+                                <ConnectionStatusIndicator connectionStatus={connectionStatus}>
+                                    <IconSettings size={16} />
+                                </ConnectionStatusIndicator>
+                            </ActionIcon>
+                            
+                            {!!(config.shortcuts && config.shortcuts.length) && (
+                                <ActionIcon variant='transparent' color='primary' onClick={() => setShortcutsVisible(!shortcutsVisible)} size='sm'>
+                                    <IconKeyboard size={16}/>
+                                </ActionIcon>
+                            )}
+
+                            <ActionIcon variant='transparent' color='primary' size='sm' onClick={() => { setDrawer(EventDrawer); drawerHandler.open() }}>
+                                <AlertStatusIndicator>
+                                    <IconBell size={16} />
+                                </AlertStatusIndicator>
+                            </ActionIcon>
+                            <ActionIcon variant='transparent' color='primary' size='sm' onClick={() => { setDrawer(TwitchDrawer); drawerHandler.open() }}>
+                                <IconBrandTwitch size={16}/>
+                            </ActionIcon>
+                        </div>
+                    </div>
+
+                    {/* Chat Content */}
+                    <div className={classes.chatContent}>
+                        <MobileAppPrompt />
+                        
+                        {/* Status indicators */}
+                        <Stack align='stretch' gap="xs" p="xs">
+                            {!online ? <Badge color="red" size="sm">No internet connection...</Badge> : null}
+                            {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
+                            <PinManager/>
+                            <ReloadAlertsButton />
+                        </Stack>
+
+                        {/* Chat Messages */}
+                        <div className={classes.chatMessages} style={{ position: 'relative' }}>
+                            {!shouldScroll && (
+                                <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
+                                    <Button size="xs" onClick={scrollToBottom} leftSection={<IconMessagePause size={14} />} variant="gradient" radius={"lg"}>New Messages</Button>
+                                </div>
+                            )}
+                            <ScrollArea viewportRef={viewport} h="100%" type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
+                                <Space h={8}></Space>
+                                <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
+                                <Space h={8}></Space>
+                            </ScrollArea>
+                        </div>
+
+                        {/* Chat Input */}
+                        {config.chatEnabled && (
+                            <div className={classes.chatInput}>
+                                <ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView} usernames={Array.from(usernames)}/>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Original layout for mobile or when video is not shown
     return (
         <AppShell>
             <AppShell.Header>

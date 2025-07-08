@@ -58,55 +58,30 @@ class AlertPlayer {
         console.log('Alert system initialized');
         this.initialized = true;
         
-        // Create new Howler context
+        // Let Howler manage its own AudioContext - don't create a new one
         if (typeof AudioContext !== 'undefined') {
             try {
-                // Create a new audio context for Howler
-                const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-                
-                // Set the new context on Howler
-                Howler.ctx = audioContext;
-                
-                // Ensure the context is in running state
-                if (audioContext.state === 'suspended') {
+                // Ensure Howler's context is in running state
+                if (Howler.ctx && Howler.ctx.state === 'suspended') {
                     try {
-                        await audioContext.resume();
-                        console.log('Howler audio context resumed to state:', audioContext.state);
+                        await Howler.ctx.resume();
+                        console.log('Howler audio context resumed to state:', Howler.ctx.state);
                     } catch (err) {
                         console.error('Failed to resume Howler audio context:', err);
                     }
-                } else if (audioContext.state !== 'running') {
-                    // Try to start the context if it's not running
-                    try {
-                        await audioContext.resume();
-                        console.log('Howler audio context started, state:', audioContext.state);
-                    } catch (err) {
-                        console.error('Failed to start Howler audio context:', err);
-                    }
                 }
                 
-                console.log('New Howler context created with state:', audioContext.state);
-                
-                // Verify the context is running
-                if (audioContext.state !== 'running') {
-                    console.warn('Audio context is not in running state:', audioContext.state);
+                // Set global volume to 1.0 initially (will be controlled per-sound and by mute state)
+                try {
+                    Howler.volume(1.0);
+                    console.log('Howler volume set to 1.0');
+                } catch (err) {
+                    console.error('Failed to set Howler volume:', err);
                 }
                 
-                // Only set volume if the context is properly initialized and running
-                if (audioContext.state === 'running') {
-                    try {
-                        // Set global volume to 1.0 initially (will be controlled per-sound and by mute state)
-                        Howler.volume(1.0);
-                        console.log('Howler volume set to 1.0');
-                    } catch (err) {
-                        console.error('Failed to set Howler volume:', err);
-                    }
-                } else {
-                    console.warn('Skipping volume setting - audio context not running');
-                }
+                console.log('Howler context state:', Howler.ctx ? Howler.ctx.state : 'not available');
             } catch (error) {
-                console.error('Failed to create new Howler context:', error);
-                // Don't try to set volume if context creation failed
+                console.error('Failed to initialize Howler:', error);
                 this.initialized = false;
                 return;
             }

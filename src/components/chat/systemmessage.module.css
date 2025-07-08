@@ -2,16 +2,16 @@
     padding: 6px;
     text-align: center;
 
-    max-width: 100vw;
-    width: 100vw;
+    max-width: 100%;
+    width: 100%;
     word-wrap: break-word;
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
 
     >.action {
-        max-width: 100vw;
-        width: 100vw;
+        max-width: 100%;
+        width: 100%;
         display: flex;
         justify-content: center;
     }

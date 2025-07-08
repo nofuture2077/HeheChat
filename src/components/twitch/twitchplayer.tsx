@@ -48,6 +48,12 @@ export function getDimension() {
     return [w, h];
 }
 
+export function getFullDimension() {
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
+    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+    return [vw, vh];
+}
+
 interface DebouncedFunction<T extends (...args: any[]) => any> {
     (...args: Parameters<T>): void;
     cancel: () => void;
@@ -80,6 +86,10 @@ function debounce<T extends (...args: any[]) => any>(
 }
 
 interface TwitchPlayerProps {
+    fullSize?: boolean;
+    customWidth?: number;
+    customHeight?: number;
+    muted?: boolean;
 }
 
 export function TwitchPlayer(props: TwitchPlayerProps) {
@@ -88,10 +98,18 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
     const playerRef = useRef<TwitchEmbed | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const channel = config.getChatChannel();
-    const [dimensions, setDimensions] = useState(getDimension);
+    const [dimensions, setDimensions] = useState(() => {
+        if (props.fullSize) {
+            return getFullDimension();
+        }
+        return getDimension();
+    });
     const [hasStorageAccess, setHasStorageAccess] = useState(true);
-    const [w, h] = dimensions;
-    const containerId = 'twitch-embed';
+    
+    // Use custom dimensions if provided, otherwise use calculated dimensions
+    const w = props.customWidth || dimensions[0];
+    const h = props.customHeight || dimensions[1];
+    const containerId = props.fullSize ? 'twitch-embed-fullsize' : 'twitch-embed';
 
     // Request storage access for Twitch embed
     const requestStorageAccessForTwitch = useCallback(async () => {
@@ -135,6 +153,8 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
             containerRef.current.innerHTML = '';
         }
 
+        const isMuted = props.muted !== undefined ? props.muted : true;
+
         const options = {
             width: w,
             height: h,
@@ -142,7 +162,7 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
             parent: [window.location.hostname],
             autoplay: true,
             layout: "video",
-            muted: true,
+            muted: isMuted,
             storage: { enabled: storageAccess }
         };
 
@@ -153,10 +173,10 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
             if (loginContext.accessToken) {
                 const player = embed.getPlayer();
                 player.setQuality(config.videoQuality);
-                player.setMuted(true);
+                player.setMuted(isMuted);
             }
         });
-    }, [channel, loginContext.accessToken, w, h, requestStorageAccessForTwitch]);
+    }, [channel, loginContext.accessToken, w, h, props.muted, requestStorageAccessForTwitch]);
 
     // Handle resize
     const handleResize = useCallback(
@@ -195,11 +215,12 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
     useEffect(() => {
         if (!channel || !playerRef.current) return;
 
+        const isMuted = props.muted !== undefined ? props.muted : true;
         const player = playerRef.current.getPlayer();
         player.setChannel(channel);
-        player.setMuted(true);
+        player.setMuted(isMuted);
         player.setQuality(config.videoQuality);
-    }, [channel]);
+    }, [channel, props.muted]);
 
     if (!channel) return null;
 

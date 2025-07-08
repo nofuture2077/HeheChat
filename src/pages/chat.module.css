@@ -5,3 +5,99 @@
 .dialog section > div {
     height: 100%;
 }
+
+.desktopVideoLayout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.videoSection {
+    flex: 1;
+    background: #000;
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    min-width: 0;
+    padding: 0;
+}
+
+.videoSection > div {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+}
+
+.chatSection {
+    display: flex;
+    flex-direction: column;
+    background: var(--mantine-color-dark-8);
+    border-left: 1px solid var(--mantine-color-dark-4);
+    flex-shrink: 0;
+    position: relative;
+    min-width: 300px;
+    max-width: 800px;
+}
+
+.resizeHandle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: transparent;
+    cursor: col-resize;
+    z-index: 10;
+    transition: background-color 0.2s ease;
+}
+
+.resizeHandle:hover {
+    background: var(--mantine-color-blue-6);
+}
+
+.resizeHandle:active {
+    background: var(--mantine-color-blue-7);
+}
+
+.chatHeader {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--mantine-color-dark-4);
+    background: var(--mantine-color-dark-7);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+}
+
+.chatContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chatMessages {
+    flex: 1;
+    overflow: hidden;
+}
+
+.chatInput {
+    border-top: 1px solid var(--mantine-color-dark-4);
+    background: var(--mantine-color-dark-7);
+}
+
+@media (max-width: 768px) {
+    .desktopVideoLayout {
+        flex-direction: column;
+    }
+    
+    .chatSection {
+        width: 100%;
+        flex: 1;
+    }
+    
+    .videoSection {
+        height: auto;
+    }
+}
