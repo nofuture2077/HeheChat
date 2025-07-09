@@ -54,6 +54,8 @@ export class NewsApiClient {
    * @returns Active news messages
    */
   static async getActiveNews(): Promise<NewsResponse> {
+    console.log('Fetching news from:', `${API_BASE_URL}/api/news`);
+    
     const response = await fetch(`${API_BASE_URL}/api/news`, {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -62,11 +64,17 @@ export class NewsApiClient {
       }
     });
 
+    console.log('News API response status:', response.status, response.statusText);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('News API error response:', errorText);
       throw new Error(`Failed to fetch active news: ${response.statusText}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    console.log('News API response data:', data);
+    return data;
   }
 
   /**

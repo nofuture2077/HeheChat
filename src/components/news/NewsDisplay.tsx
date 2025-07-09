@@ -18,7 +18,8 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
     
     try {
       const data = await NewsApiClient.getActiveNews();
-      setNewsMessages(data.messages);
+      console.log('Fetched news data:', data);
+      setNewsMessages(data.messages || []);
     } catch (error) {
       console.error('Error fetching active news:', error);
     } finally {
@@ -76,14 +77,50 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
   };
 
   // Filter out dismissed messages and expired/inactive messages
-  const visibleMessages = newsMessages.filter(message => 
-    !dismissedMessages.has(message.id) && 
-    message.is_active && 
-    !isExpired(message.active_until)
-  );
+  const visibleMessages = newsMessages.filter(message => {
+    const isDismissed = dismissedMessages.has(message.id);
+    const isActive = message.is_active;
+    const isNotExpired = !isExpired(message.active_until);
+    
+    console.log(`Message ${message.id}: dismissed=${isDismissed}, active=${isActive}, notExpired=${isNotExpired}`);
+    
+    return !isDismissed && isActive && isNotExpired;
+  });
 
-  if (loading || visibleMessages.length === 0) {
-    return null;
+  console.log(`Total messages: ${newsMessages.length}, Visible messages: ${visibleMessages.length}`);
+
+  // Show debug info if there are messages but none are visible
+  if (!loading && newsMessages.length > 0 && visibleMessages.length === 0) {
+    return (
+      <div className={className}>
+        <Alert color="yellow" variant="light">
+          <Text size="sm">
+            Debug: {newsMessages.length} news messages found but none are visible. Check console for details.
+          </Text>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Always show something during development to verify component is rendering
+  if (loading) {
+    return (
+      <div className={className}>
+        <Alert color="blue" variant="light">
+          <Text size="sm">Loading news...</Text>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (visibleMessages.length === 0) {
+    return (
+      <div className={className}>
+        <Alert color="gray" variant="light">
+          <Text size="sm">No active news messages</Text>
+        </Alert>
+      </div>
+    );
   }
 
   return (
