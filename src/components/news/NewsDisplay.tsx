@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Alert, Stack, Text, CloseButton, Collapse, ActionIcon, Group } from '@mantine/core';
-import { IconNews, IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import { Notification, Stack, Text, Collapse, ActionIcon, Group } from '@mantine/core';
+import { IconNews, IconChevronDown, IconChevronUp, IconX } from '@tabler/icons-react';
 import { NewsApiClient, NewsMessage } from '../../api/news';
 
 interface NewsDisplayProps {
@@ -18,7 +18,6 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
     
     try {
       const data = await NewsApiClient.getActiveNews();
-      console.log('Fetched news data:', data);
       setNewsMessages(data.messages || []);
     } catch (error) {
       console.error('Error fetching active news:', error);
@@ -79,48 +78,15 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
   // Filter out dismissed messages and expired/inactive messages
   const visibleMessages = newsMessages.filter(message => {
     const isDismissed = dismissedMessages.has(message.id);
-    const isActive = message.is_active;
+    // If is_active is undefined, assume it's active (public endpoint only returns active messages)
+    const isActive = message.is_active !== false;
     const isNotExpired = !isExpired(message.active_until);
-    
-    console.log(`Message ${message.id}: dismissed=${isDismissed}, active=${isActive}, notExpired=${isNotExpired}`);
     
     return !isDismissed && isActive && isNotExpired;
   });
 
-  console.log(`Total messages: ${newsMessages.length}, Visible messages: ${visibleMessages.length}`);
-
-  // Show debug info if there are messages but none are visible
-  if (!loading && newsMessages.length > 0 && visibleMessages.length === 0) {
-    return (
-      <div className={className}>
-        <Alert color="yellow" variant="light">
-          <Text size="sm">
-            Debug: {newsMessages.length} news messages found but none are visible. Check console for details.
-          </Text>
-        </Alert>
-      </div>
-    );
-  }
-
-  // Always show something during development to verify component is rendering
-  if (loading) {
-    return (
-      <div className={className}>
-        <Alert color="blue" variant="light">
-          <Text size="sm">Loading news...</Text>
-        </Alert>
-      </div>
-    );
-  }
-
-  if (visibleMessages.length === 0) {
-    return (
-      <div className={className}>
-        <Alert color="gray" variant="light">
-          <Text size="sm">No active news messages</Text>
-        </Alert>
-      </div>
-    );
+  if (loading || visibleMessages.length === 0) {
+    return null;
   }
 
   return (
@@ -131,11 +97,11 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
           const isLongText = message.text.length > 200;
           
           return (
-            <Alert
+            <Notification
               key={message.id}
               icon={<IconNews size="1rem" />}
               title={
-                <Group justify="space-between" align="center" gap="xs">
+                <Group justify="space-between" align="center" gap="xs" style={{ width: '100%' }}>
                   <Text fw={500} size="sm">
                     {message.headline}
                   </Text>
@@ -149,19 +115,19 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
                         {isCollapsed ? <IconChevronDown size="0.8rem" /> : <IconChevronUp size="0.8rem" />}
                       </ActionIcon>
                     )}
-                    <CloseButton
+                    <ActionIcon
+                      variant="subtle"
                       size="sm"
                       onClick={() => dismissMessage(message.id)}
-                    />
+                    >
+                      <IconX size="0.8rem" />
+                    </ActionIcon>
                   </Group>
                 </Group>
               }
               color="blue"
-              variant="light"
-              styles={{
-                title: { width: '100%' },
-                body: { paddingTop: '0.5rem' }
-              }}
+              withCloseButton={false}
+              withBorder
             >
               <Collapse in={!isCollapsed || !isLongText}>
                 <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
@@ -177,7 +143,7 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
                   {message.text.substring(0, 200)}...
                 </Text>
               )}
-            </Alert>
+            </Notification>
           );
         })}
       </Stack>
