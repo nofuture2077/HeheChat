@@ -99,18 +99,19 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
           return (
             <Notification
               key={message.id}
-              icon={<IconNews size="1rem" />}
+              icon={<IconNews size="1.1rem" />}
               title={
-                <Group justify="space-between" align="center" gap="xs" style={{ width: '100%' }}>
-                  <Text fw={500} size="sm">
+                <Group justify="space-between" align="flex-start" gap="xs" style={{ width: '100%' }}>
+                  <Text fw={600} size="sm" style={{ flex: 1, lineHeight: 1.3 }}>
                     {message.headline}
                   </Text>
-                  <Group gap="xs">
+                  <Group gap="xs" style={{ flexShrink: 0 }}>
                     {isLongText && (
                       <ActionIcon
                         variant="subtle"
                         size="sm"
                         onClick={() => toggleCollapse(message.id)}
+                        style={{ opacity: 0.7 }}
                       >
                         {isCollapsed ? <IconChevronDown size="0.8rem" /> : <IconChevronUp size="0.8rem" />}
                       </ActionIcon>
@@ -119,6 +120,7 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
                       variant="subtle"
                       size="sm"
                       onClick={() => dismissMessage(message.id)}
+                      style={{ opacity: 0.7 }}
                     >
                       <IconX size="0.8rem" />
                     </ActionIcon>
@@ -128,18 +130,23 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
               color="blue"
               withCloseButton={false}
               withBorder
+              radius="md"
+              style={{
+                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.2)'
+              }}
             >
               <Collapse in={!isCollapsed || !isLongText}>
-                <Text size="sm" style={{ whiteSpace: 'pre-wrap' }}>
+                <Text size="sm" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
                   {message.text}
                 </Text>
-                <Text size="xs" c="dimmed" mt="xs">
-                  Posted: {formatDate(message.created_at)} • Expires: {formatDate(message.active_until)}
+                <Text size="xs" c="dimmed" mt="sm" style={{ opacity: 0.7 }}>
+                  Posted {formatDate(message.created_at)}
                 </Text>
               </Collapse>
               
               {isCollapsed && isLongText && (
-                <Text size="sm" c="dimmed" style={{ whiteSpace: 'pre-wrap' }}>
+                <Text size="sm" c="dimmed" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
                   {message.text.substring(0, 200)}...
                 </Text>
               )}
