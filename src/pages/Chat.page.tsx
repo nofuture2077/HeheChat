@@ -35,6 +35,7 @@ import { useViewportWidthCallback } from '../commons/helper';
 import { getDimension } from '../components/twitch/twitchplayer';
 import { EmoteStore } from '../components/chat/emotestorage';
 import { getRawData } from '@twurple/common';
+import { NewsDisplay } from '../components/news/NewsDisplay';
 import classes from './chat.module.css'
 
 export type OverlayDrawer = {
@@ -563,6 +564,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                         {/* Status indicators */}
                         <Stack align='stretch' gap="xs" p="xs">
                             {!online ? <Badge color="red" size="sm">No internet connection...</Badge> : null}
+                            <NewsDisplay />
                             {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                             <PinManager/>
                             <ReloadAlertsButton />
@@ -616,8 +618,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
                         {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}
-                        
-                        
+                        <NewsDisplay />
                         {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                         <PinManager/>
                         <ReloadAlertsButton />
