@@ -90,7 +90,7 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
   }
 
   return (
-    <Stack gap="sm" className={className} style={{ padding: '0 16px', maxWidth: '600px', margin: '0 auto' }}>
+    <Stack gap="xs" className={className} style={{ maxWidth: '400px', width: '100%', margin: '0 auto' }}>
       {visibleMessages.map((message) => {
         const isCollapsed = collapsedMessages.has(message.id);
         const isLongText = message.text.length > 200;
@@ -99,30 +99,22 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
           <Notification
             key={message.id}
             withBorder
-            color="grape"
+            color="pink"
+            style={{ width: '100%' }}
             title={
               <Group justify="space-between" align="center" gap="xs" style={{ width: '100%' }}>
                 <Text fw={500} size="sm" style={{ flex: 1 }}>
                   {message.headline}
                 </Text>
-                <Group gap="xs" style={{ flexShrink: 0 }}>
-                  {isLongText && (
-                    <ActionIcon
-                      variant="subtle"
-                      size="sm"
-                      onClick={() => toggleCollapse(message.id)}
-                    >
-                      {isCollapsed ? <IconChevronDown size="0.8rem" /> : <IconChevronUp size="0.8rem" />}
-                    </ActionIcon>
-                  )}
+                {isLongText && (
                   <ActionIcon
                     variant="subtle"
                     size="sm"
-                    onClick={() => dismissMessage(message.id)}
+                    onClick={() => toggleCollapse(message.id)}
                   >
-                    <IconX size="0.8rem" />
+                    {isCollapsed ? <IconChevronDown size="0.8rem" /> : <IconChevronUp size="0.8rem" />}
                   </ActionIcon>
-                </Group>
+                )}
               </Group>
             }
             onClose={() => dismissMessage(message.id)}
