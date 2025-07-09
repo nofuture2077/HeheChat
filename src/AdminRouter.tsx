@@ -1,11 +1,12 @@
 import { AdminHomePage } from './pages/AdminHome.page';
 import { AdminConnectionsPage } from './pages/AdminConnections.page';
 import { AdminAnalyticsPage } from './pages/AdminAnalytics.page';
+import { AdminNewsPage } from './pages/AdminNews.page';
 import { LoginContextContext } from './ApplicationContext';
 import { useContext, useState } from 'react';
 import { AppShell, Burger, Group, NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconDashboard, IconUsers, IconChartBar } from '@tabler/icons-react';
+import { IconDashboard, IconUsers, IconChartBar, IconNews } from '@tabler/icons-react';
 import { HeaderLogo } from './components/header/HeaderLogo';
 
 export function AdminRouter() {
@@ -29,6 +30,8 @@ export function AdminRouter() {
         return <AdminConnectionsPage />;
       case 'analytics':
         return <AdminAnalyticsPage />;
+      case 'news':
+        return <AdminNewsPage />;
       default:
         return <AdminConnectionsPage />; // Default to connections page
     }
@@ -68,6 +71,13 @@ export function AdminRouter() {
           leftSection={<IconChartBar size="1rem" />}
           active={activeSection === 'analytics'}
           onClick={() => setActiveSection('analytics')}
+        />
+        <NavLink
+          href="#"
+          label="News Management"
+          leftSection={<IconNews size="1rem" />}
+          active={activeSection === 'news'}
+          onClick={() => setActiveSection('news')}
         />
       </AppShell.Navbar>
 
