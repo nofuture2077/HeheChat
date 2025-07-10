@@ -348,6 +348,29 @@ class AlertPlayer {
         }
     }
 
+    // Handle audio context interruption with resume and fallback reinitialization
+    private handleAudioInterruption(): void {
+        console.log("Audio context interrupted, attempting to resume");
+        this.stopPlaying();
+        
+        // Try to resume the audio context
+        this.audioContext?.resume().then(() => {
+            console.log("Audio context resumed successfully");
+            PubSub.publish('AlertPlayer-update');
+        }).catch(err => {
+            console.error("Failed to resume audio context, reinitializing:", err);
+            // If resume fails, create a new audio context
+            try {
+                this.initialize();
+                console.log("Audio context reinitialized successfully");
+                PubSub.publish('AlertPlayer-update');
+            } catch (initErr) {
+                console.error("Failed to reinitialize audio context:", initErr);
+                PubSub.publish('AlertPlayer-update');
+            }
+        });
+    }
+
     stopPlaying() {
         this.playing = false;
         this.paused = false;
@@ -383,6 +406,24 @@ class AlertPlayer {
         );
         // Then remove URLs
         cleanedMessage = cleanedMessage.replace(/https?:\/\/[^\s]+/g, "");
+
+        // Replace multiple consecutive symbols with single instances
+        // This array can be easily expanded with other symbols that cause TTS issues
+        const symbolsToClean = [
+            { symbol: '.', regex: /\.{2,}/g },     // Multiple dots (..)
+            { symbol: '!', regex: /!{2,}/g },     // Multiple exclamation marks (!!!)
+            { symbol: '?', regex: /\?{2,}/g },    // Multiple question marks (???)
+            { symbol: ',', regex: /,{2,}/g },     // Multiple commas (,,,)
+            { symbol: ';', regex: /;{2,}/g },     // Multiple semicolons (;;;)
+            { symbol: ':', regex: /:{2,}/g },     // Multiple colons (:::)
+            { symbol: '-', regex: /-{2,}/g },     // Multiple dashes (---)
+            { symbol: '_', regex: /_{2,}/g },     // Multiple underscores (___)
+        ];
+
+        // Apply symbol cleaning
+        symbolsToClean.forEach(({ symbol, regex }) => {
+            cleanedMessage = cleanedMessage.replace(regex, symbol);
+        });
 
         // Remove emotes if any of the skip emote flags are enabled
         if (filterTTS && (this.config?.skipEmotesInTTS || this.config?.skip7TVEmotesInTTS || this.config?.skipGlobalEmotesInTTS)) {
@@ -771,10 +812,7 @@ class AlertPlayer {
 
     checkQueue() {
         if (this.interrupted()) {
-            console.log("Audio context interrupted, stopping playback");
-            this.stopPlaying();
-            PubSub.publish('AlertPlayer-update');
-            return;
+            return this.handleAudioInterruption();
         }
         
         // If we're paused, don't process the queue
