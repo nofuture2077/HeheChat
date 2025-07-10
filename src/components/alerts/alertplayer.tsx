@@ -406,6 +406,24 @@ class AlertPlayer {
         // Then remove URLs
         cleanedMessage = cleanedMessage.replace(/https?:\/\/[^\s]+/g, "");
 
+        // Replace multiple consecutive symbols with single instances
+        // This array can be easily expanded with other symbols that cause TTS issues
+        const symbolsToClean = [
+            { symbol: '.', regex: /\.{2,}/g },     // Multiple dots (..)
+            { symbol: '!', regex: /!{2,}/g },     // Multiple exclamation marks (!!!)
+            { symbol: '?', regex: /\?{2,}/g },    // Multiple question marks (???)
+            { symbol: ',', regex: /,{2,}/g },     // Multiple commas (,,,)
+            { symbol: ';', regex: /;{2,}/g },     // Multiple semicolons (;;;)
+            { symbol: ':', regex: /:{2,}/g },     // Multiple colons (:::)
+            { symbol: '-', regex: /-{2,}/g },     // Multiple dashes (---)
+            { symbol: '_', regex: /_{2,}/g },     // Multiple underscores (___)
+        ];
+
+        // Apply symbol cleaning
+        symbolsToClean.forEach(({ symbol, regex }) => {
+            cleanedMessage = cleanedMessage.replace(regex, symbol);
+        });
+
         // Remove emotes if any of the skip emote flags are enabled
         if (filterTTS && (this.config?.skipEmotesInTTS || this.config?.skip7TVEmotesInTTS || this.config?.skipGlobalEmotesInTTS)) {
             // Get all channels
