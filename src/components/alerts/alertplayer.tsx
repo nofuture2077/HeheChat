@@ -347,6 +347,29 @@ class AlertPlayer {
         }
     }
 
+    // Handle audio context interruption with resume and fallback reinitialization
+    private handleAudioInterruption(): void {
+        console.log("Audio context interrupted, attempting to resume");
+        this.stopPlaying();
+        
+        // Try to resume the audio context
+        this.audioContext?.resume().then(() => {
+            console.log("Audio context resumed successfully");
+            PubSub.publish('AlertPlayer-update');
+        }).catch(err => {
+            console.error("Failed to resume audio context, reinitializing:", err);
+            // If resume fails, create a new audio context
+            try {
+                this.initialize();
+                console.log("Audio context reinitialized successfully");
+                PubSub.publish('AlertPlayer-update');
+            } catch (initErr) {
+                console.error("Failed to reinitialize audio context:", initErr);
+                PubSub.publish('AlertPlayer-update');
+            }
+        });
+    }
+
     stopPlaying() {
         this.playing = false;
         this.paused = false;
@@ -748,10 +771,7 @@ class AlertPlayer {
 
     checkQueue() {
         if (this.interrupted()) {
-            console.log("Audio context interrupted, stopping playback");
-            this.stopPlaying();
-            PubSub.publish('AlertPlayer-update');
-            return;
+            return this.handleAudioInterruption();
         }
         
         // If we're paused, don't process the queue
