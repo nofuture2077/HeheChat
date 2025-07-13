@@ -13,6 +13,14 @@ interface ConnectionStatus {
     connected: boolean;
     channelname: string;
   };
+  blerp: {
+    connected: boolean;
+    channelname: string;
+  };
+  pallygg: {
+    connected: boolean;
+    channelname: string;
+  };
 }
 
 interface SourceData {
@@ -50,6 +58,10 @@ interface FlatConnection {
   sevenTVChannel: string;
   streamElementsConnected: boolean;
   streamElementsChannel: string;
+  blerpConnected: boolean;
+  blerpChannel: string;
+  pallyggConnected: boolean;
+  pallyggChannel: string;
 }
 
 export function AdminConnectionsPage() {
@@ -88,6 +100,10 @@ export function AdminConnectionsPage() {
               sevenTVChannel: sourceData.connectionStatus?.sevenTV?.channelname || 'N/A',
               streamElementsConnected: sourceData.connectionStatus?.streamelements?.connected || false,
               streamElementsChannel: sourceData.connectionStatus?.streamelements?.channelname || 'N/A',
+              blerpConnected: sourceData.connectionStatus?.blerp?.connected || false,
+              blerpChannel: sourceData.connectionStatus?.blerp?.channelname || 'N/A',
+              pallyggConnected: sourceData.connectionStatus?.pallygg?.connected || false,
+              pallyggChannel: sourceData.connectionStatus?.pallygg?.channelname || 'N/A',
             });
           });
         });
@@ -114,11 +130,50 @@ export function AdminConnectionsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const getConnectionStatusBadge = (connected: boolean) => (
-    <Badge color={connected ? 'green' : 'red'} variant="light" size="xs">
-      {connected ? 'Connected' : 'Disconnected'}
-    </Badge>
-  );
+  const getServiceLogo = (service: '7TV' | 'SE' | 'Blerp' | 'Pally', connected: boolean) => {
+    if (!connected) return null;
+    
+    const logoStyle = {
+      width: '20px',
+      height: '20px',
+      borderRadius: '4px',
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '8px',
+      fontWeight: 'bold',
+      color: 'white',
+      marginRight: '4px'
+    };
+
+    if (service === '7TV') {
+      return (
+        <div style={{ ...logoStyle, backgroundColor: '#1976d2' }}>
+          7TV
+        </div>
+      );
+    } else if (service === 'SE') {
+      return (
+        <div style={{ ...logoStyle, backgroundColor: '#00d4aa' }}>
+          SE
+        </div>
+      );
+    } else if (service === 'Blerp') {
+      return (
+        <div style={{ ...logoStyle, backgroundColor: '#ff6b35' }}>
+          BLERP
+        </div>
+      );
+    } else if (service === 'Pally') {
+      return (
+        <div style={{ ...logoStyle, backgroundColor: '#9c27b0' }}>
+          PALLY
+        </div>
+      );
+    }
+    
+    return null;
+  };
 
   const rows = connections.map((connection, index) => (
     <Table.Tr key={`${connection.username}-${connection.sessionId}-${connection.sourceName}-${index}`}>
@@ -143,18 +198,12 @@ export function AdminConnectionsPage() {
         </Group>
       </Table.Td>
       <Table.Td>
-        <Stack gap="xs">
-          <Group gap="xs">
-            <Text size="xs">7TV:</Text>
-            {getConnectionStatusBadge(connection.sevenTVConnected)}
-            <Text size="xs" c="dimmed">({connection.sevenTVChannel})</Text>
-          </Group>
-          <Group gap="xs">
-            <Text size="xs">SE:</Text>
-            {getConnectionStatusBadge(connection.streamElementsConnected)}
-            <Text size="xs" c="dimmed">({connection.streamElementsChannel})</Text>
-          </Group>
-        </Stack>
+        <Group gap="xs">
+          {getServiceLogo('7TV', connection.sevenTVConnected)}
+          {getServiceLogo('SE', connection.streamElementsConnected)}
+          {getServiceLogo('Blerp', connection.blerpConnected)}
+          {getServiceLogo('Pally', connection.pallyggConnected)}
+        </Group>
       </Table.Td>
       <Table.Td>
         <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
