@@ -1,5 +1,5 @@
-import { Container, Title, Text, Button, Alert, Stack, Table, Badge, LoadingOverlay, Card, Group, Accordion } from '@mantine/core';
-import { IconRefresh, IconAlertCircle, IconUsers, IconClock, IconWifi, IconDevices } from '@tabler/icons-react';
+import { Container, Title, Text, Button, Alert, Stack, Table, Badge, LoadingOverlay, Card, Group, Accordion, Anchor } from '@mantine/core';
+import { IconRefresh, IconAlertCircle, IconUsers, IconClock, IconWifi, IconDevices, IconExternalLink } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -125,7 +125,23 @@ export function AdminConnectionsPage() {
       <Table.Td>{connection.username}</Table.Td>
       <Table.Td>{connection.profileName}</Table.Td>
       <Table.Td>{connection.sourceName}</Table.Td>
-      <Table.Td>{connection.channels.join(', ')}</Table.Td>
+      <Table.Td>
+        <Group gap="xs" wrap="wrap">
+          {connection.channels.map((channel, channelIndex) => (
+            <Anchor
+              key={channelIndex}
+              href={`https://twitch.tv/${channel}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="sm"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+            >
+              {channel}
+              <IconExternalLink size="0.75rem" />
+            </Anchor>
+          ))}
+        </Group>
+      </Table.Td>
       <Table.Td>
         <Stack gap="xs">
           <Group gap="xs">
