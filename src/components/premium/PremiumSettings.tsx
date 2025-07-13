@@ -1,10 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Stack, Title, Tabs, Text, Group, Divider } from '@mantine/core';
-import { IconCrown, IconTicket, IconBrandPaypal, IconHistory } from '@tabler/icons-react';
+import { IconCrown, IconTicket, IconBrandPaypal, IconHistory, IconGift } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
 import { PremiumDetails } from '../premium/PremiumDetails';
 import { RedeemCode } from '../premium/RedeemCode';
 import { PayPalSubscription } from '../premium/PayPalSubscription';
+import { DonationPremium } from '../premium/DonationPremium';
 import classes from './Premium.module.css';
 
 export const PremiumSettings: React.FC = () => {
@@ -14,7 +15,7 @@ export const PremiumSettings: React.FC = () => {
 
   // Set initial tab based on premium status
   useEffect(() => {
-    setActiveTab(premium.isPremium ? 'details' : 'redeem');
+    setActiveTab(premium.isPremium ? 'details' : 'donate');
   }, [premium.isPremium]);
 
   const handleSuccess = () => {
@@ -53,20 +54,19 @@ export const PremiumSettings: React.FC = () => {
 
       <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
-              <Tabs.Tab value="details" leftSection={<IconCrown size="0.8rem" />}>
-                Status
-              </Tabs.Tab>
-              <Tabs.Tab value="redeem" leftSection={<IconTicket size="0.8rem" />}>
-                Redeem
-              </Tabs.Tab>
-              <Tabs.Tab value="paypal" leftSection={<IconBrandPaypal size="0.8rem" />}>
-                Buy
-              </Tabs.Tab>
-              <Tabs.Tab value="history" leftSection={<IconHistory size="0.8rem" />}>
-                
-              </Tabs.Tab>
+            <Tabs.Tab value="details" leftSection={<IconCrown size="1rem" />}>
+            </Tabs.Tab>
+            <Tabs.Tab value="donate" leftSection={<IconGift size="1rem" />}>
+            </Tabs.Tab>
+            <Tabs.Tab value="redeem" leftSection={<IconTicket size="1rem" />}>
+            </Tabs.Tab>
+            <Tabs.Tab value="history" leftSection={<IconHistory size="1rem" />}>
+            </Tabs.Tab>
         </Tabs.List>
 
+        <Tabs.Panel value="donate" pt="xs">
+          <DonationPremium />
+        </Tabs.Panel>
         <Tabs.Panel value="details" pt="xs">
           <PremiumDetails />
         </Tabs.Panel>
@@ -75,9 +75,6 @@ export const PremiumSettings: React.FC = () => {
         </Tabs.Panel>
         <Tabs.Panel value="redeem" pt="xs">
           <RedeemCode onSuccess={handleSuccess} />
-        </Tabs.Panel>
-        <Tabs.Panel value="paypal" pt="xs">
-          <PayPalSubscription onSuccess={handleSuccess} />
         </Tabs.Panel>
       </Tabs>
     </Stack>

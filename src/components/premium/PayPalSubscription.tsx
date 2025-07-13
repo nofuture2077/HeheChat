@@ -128,7 +128,7 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
         </Group>
       </Title>
       
-      <Text mb="md">Get HeheChat Pro for just $4.99 per month</Text>
+      <Text mb="md">Get HeheChat Pro for just $X.XX per month</Text>
       
       <div className={classes.paypalContainer}>
         {loading ? (
