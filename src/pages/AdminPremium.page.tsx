@@ -184,7 +184,7 @@ export function AdminPremiumPage() {
       
       if (historySearchUser.trim()) {
         // Search for specific user
-        url += `&user_id=${encodeURIComponent(historySearchUser.trim())}`;
+        url += `&username=${encodeURIComponent(historySearchUser.trim())}`;
       }
 
       const response = await fetch(url);
@@ -239,11 +239,11 @@ export function AdminPremiumPage() {
   const getActionTypeBadge = (actionType: string) => {
     switch (actionType) {
       case 'paypal_payment':
-        return <Badge color="blue" variant="light">PayPal</Badge>;
+        return <Badge color="purple" variant="light">PayPal</Badge>;
       case 'redeem_code':
         return <Badge color="green" variant="light">Code</Badge>;
       case 'donation':
-        return <Badge color="purple" variant="light">Donation</Badge>;
+        return <Badge color="blue" variant="light">Donation</Badge>;
       default:
         return <Badge color="gray" variant="light">{actionType}</Badge>;
     }
