@@ -2,11 +2,12 @@ import { AdminHomePage } from './pages/AdminHome.page';
 import { AdminConnectionsPage } from './pages/AdminConnections.page';
 import { AdminAnalyticsPage } from './pages/AdminAnalytics.page';
 import { AdminNewsPage } from './pages/AdminNews.page';
+import { AdminPremiumPage } from './pages/AdminPremium.page';
 import { LoginContextContext } from './ApplicationContext';
 import { useContext, useState } from 'react';
 import { AppShell, Burger, Group, NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconDashboard, IconUsers, IconChartBar, IconNews } from '@tabler/icons-react';
+import { IconDashboard, IconUsers, IconChartBar, IconNews, IconCrown } from '@tabler/icons-react';
 import { HeaderLogo } from './components/header/HeaderLogo';
 
 export function AdminRouter() {
@@ -32,6 +33,8 @@ export function AdminRouter() {
         return <AdminAnalyticsPage />;
       case 'news':
         return <AdminNewsPage />;
+      case 'premium':
+        return <AdminPremiumPage />;
       default:
         return <AdminConnectionsPage />; // Default to connections page
     }
@@ -78,6 +81,13 @@ export function AdminRouter() {
           leftSection={<IconNews size="1rem" />}
           active={activeSection === 'news'}
           onClick={() => setActiveSection('news')}
+        />
+        <NavLink
+          href="#"
+          label="Premium Management"
+          leftSection={<IconCrown size="1rem" />}
+          active={activeSection === 'premium'}
+          onClick={() => setActiveSection('premium')}
         />
       </AppShell.Navbar>
 
