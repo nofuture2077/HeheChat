@@ -1,5 +1,5 @@
-import { Container, Title, Text, Button, Alert, Stack, Table, Badge, LoadingOverlay, Card, Group, TextInput, Modal, NumberInput } from '@mantine/core';
-import { IconRefresh, IconAlertCircle, IconCrown, IconClock, IconPlus, IconCode, IconUsers } from '@tabler/icons-react';
+import { Container, Title, Text, Button, Alert, Stack, Table, Badge, LoadingOverlay, Card, Group, TextInput, Modal, NumberInput, Pagination } from '@mantine/core';
+import { IconRefresh, IconAlertCircle, IconCrown, IconClock, IconPlus, IconCode, IconUsers, IconHistory, IconSearch } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { LoginContextContext } from '@/ApplicationContext';
@@ -35,6 +35,20 @@ interface RedeemCodesResponse {
   codes: RedeemCode[];
 }
 
+interface HistoryEntry {
+  id: number;
+  user_id: string;
+  action_type: 'paypal_payment' | 'redeem_code' | 'donation';
+  details: string;
+  duration_days: number;
+  created_at: string;
+  username?: string;
+}
+
+interface HistoryResponse {
+  history: HistoryEntry[];
+}
+
 export function AdminPremiumPage() {
   const loginContext = useContext(LoginContextContext);
   const [premiumUsers, setPremiumUsers] = useState<PremiumUser[]>([]);
@@ -47,6 +61,14 @@ export function AdminPremiumPage() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [generateModalOpened, { open: openGenerateModal, close: closeGenerateModal }] = useDisclosure(false);
   const [generateDays, setGenerateDays] = useState<number>(30);
+  
+  // History state
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [historyLimit] = useState(10);
+  const [historySearchUser, setHistorySearchUser] = useState('');
 
   const getAdminToken = () => {
     return localStorage.getItem('hehe-token_state');
@@ -147,8 +169,46 @@ export function AdminPremiumPage() {
     }
   };
 
+  const fetchHistory = async () => {
+    const adminToken = getAdminToken();
+    if (!adminToken) {
+      setHistoryError('No admin token found');
+      return;
+    }
+
+    setHistoryLoading(true);
+    setHistoryError(null);
+    try {
+      const offset = (historyPage - 1) * historyLimit;
+      let url = `${BASE_URL}/admin/premium/history?token=${adminToken}&limit=${historyLimit}&offset=${offset}`;
+      
+      if (historySearchUser.trim()) {
+        // Search for specific user
+        url += `&user_id=${encodeURIComponent(historySearchUser.trim())}`;
+      }
+
+      const response = await fetch(url);
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('hehe-token_state');
+          loginContext.setAccessToken(undefined);
+          setHistoryError('Authentication failed. Please log in again.');
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data: HistoryResponse = await response.json();
+      setHistory(data.history || []);
+    } catch (error) {
+      setHistoryError(error instanceof Error ? error.message : 'Failed to fetch premium history');
+      console.error('Error fetching premium history:', error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
   const refreshAll = async () => {
-    await Promise.all([fetchPremiumUsers(), fetchRedeemCodes()]);
+    await Promise.all([fetchPremiumUsers(), fetchRedeemCodes(), fetchHistory()]);
   };
 
   useEffect(() => {
@@ -175,6 +235,35 @@ export function AdminPremiumPage() {
     const color = type === 'donation' ? 'blue' : 'purple';
     return <Badge color={color} variant="light">{type}</Badge>;
   };
+
+  const getActionTypeBadge = (actionType: string) => {
+    switch (actionType) {
+      case 'paypal_payment':
+        return <Badge color="blue" variant="light">PayPal</Badge>;
+      case 'redeem_code':
+        return <Badge color="green" variant="light">Code</Badge>;
+      case 'donation':
+        return <Badge color="purple" variant="light">Donation</Badge>;
+      default:
+        return <Badge color="gray" variant="light">{actionType}</Badge>;
+    }
+  };
+
+  const handleHistorySearch = () => {
+    setHistoryPage(1); // Reset to first page when searching
+    fetchHistory();
+  };
+
+  const handleHistoryPageChange = (page: number) => {
+    setHistoryPage(page);
+  };
+
+  // Effect to fetch history when page changes
+  useEffect(() => {
+    if (historyPage > 1) {
+      fetchHistory();
+    }
+  }, [historyPage]);
 
   const premiumUserRows = premiumUsers.map((user) => (
     <Table.Tr key={user.user_id}>
@@ -209,6 +298,24 @@ export function AdminPremiumPage() {
           {code.used ? 'Used' : 'Available'}
         </Badge>
       </Table.Td>
+    </Table.Tr>
+  ));
+
+  const historyRows = history.map((entry) => (
+    <Table.Tr key={entry.id}>
+      <Table.Td>{entry.username || entry.user_id}</Table.Td>
+      <Table.Td>{getActionTypeBadge(entry.action_type)}</Table.Td>
+      <Table.Td>
+        <Text size="sm" style={{ maxWidth: '300px', wordBreak: 'break-word' }}>
+          {entry.details}
+        </Text>
+      </Table.Td>
+      <Table.Td>
+        <Badge variant="outline" color="blue">
+          {entry.duration_days} days
+        </Badge>
+      </Table.Td>
+      <Table.Td>{formatDate(entry.created_at)}</Table.Td>
     </Table.Tr>
   ));
 
@@ -310,6 +417,131 @@ export function AdminPremiumPage() {
                   </Table.Thead>
                   <Table.Tbody>{premiumUserRows}</Table.Tbody>
                 </Table>
+              )}
+            </div>
+          </Card.Section>
+        </Card>
+
+        {/* Premium History Section */}
+        <Card withBorder>
+          <Card.Section p="md" withBorder>
+            <Group justify="space-between">
+              <Text fw={500}>
+                <Group gap="xs">
+                  <IconHistory size="1rem" />
+                  Premium History
+                </Group>
+              </Text>
+              <Badge size="lg" variant="light" color="orange">
+                {history.length} Records
+              </Badge>
+            </Group>
+          </Card.Section>
+
+          <Card.Section p="md" withBorder>
+            <Group gap="md">
+              <TextInput
+                placeholder="Search by user ID or username..."
+                value={historySearchUser}
+                onChange={(event) => setHistorySearchUser(event.currentTarget.value)}
+                leftSection={<IconSearch size="1rem" />}
+                style={{ flex: 1 }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    handleHistorySearch();
+                  }
+                }}
+              />
+              <Button
+                onClick={handleHistorySearch}
+                variant="light"
+                leftSection={<IconSearch size="1rem" />}
+              >
+                Search
+              </Button>
+              {historySearchUser && (
+                <Button
+                  onClick={() => {
+                    setHistorySearchUser('');
+                    setHistoryPage(1);
+                    fetchHistory();
+                  }}
+                  variant="subtle"
+                  color="gray"
+                >
+                  Clear
+                </Button>
+              )}
+            </Group>
+          </Card.Section>
+
+          <Card.Section>
+            <div style={{ position: 'relative' }}>
+              <LoadingOverlay visible={historyLoading} />
+              
+              {historyError && (
+                <Alert 
+                  icon={<IconAlertCircle size="1rem" />} 
+                  title="Error Loading Premium History" 
+                  color="red"
+                  variant="light"
+                  m="md"
+                >
+                  <Text>{historyError}</Text>
+                  <Button 
+                    size="xs" 
+                    variant="light" 
+                    mt="xs"
+                    onClick={fetchHistory}
+                  >
+                    Try Again
+                  </Button>
+                </Alert>
+              )}
+
+              {!historyError && history.length === 0 && !historyLoading && (
+                <Alert 
+                  icon={<IconHistory size="1rem" />} 
+                  title="No History Records" 
+                  color="blue"
+                  variant="light"
+                  m="md"
+                >
+                  <Text>
+                    {historySearchUser 
+                      ? `No history found for "${historySearchUser}".`
+                      : 'There are currently no premium history records.'
+                    }
+                  </Text>
+                </Alert>
+              )}
+
+              {!historyError && history.length > 0 && (
+                <>
+                  <Table striped highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>User</Table.Th>
+                        <Table.Th>Action</Table.Th>
+                        <Table.Th>Details</Table.Th>
+                        <Table.Th>Duration</Table.Th>
+                        <Table.Th>Date</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>{historyRows}</Table.Tbody>
+                  </Table>
+                  
+                  {history.length === historyLimit && (
+                    <Group justify="center" p="md">
+                      <Pagination
+                        value={historyPage}
+                        onChange={handleHistoryPageChange}
+                        total={Math.ceil(history.length / historyLimit) + 1} // Estimate, since we don't have total count
+                        size="sm"
+                      />
+                    </Group>
+                  )}
+                </>
               )}
             </div>
           </Card.Section>
