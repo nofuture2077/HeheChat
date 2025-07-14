@@ -1,6 +1,7 @@
 import { Container, Title, Text, Button, Alert, Stack, Table, Badge, LoadingOverlay, Card, Group, Accordion, Anchor } from '@mantine/core';
 import { IconRefresh, IconAlertCircle, IconUsers, IconClock, IconWifi, IconDevices, IconExternalLink } from '@tabler/icons-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
+import { LoginContextContext } from '@/ApplicationContext';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -65,6 +66,7 @@ interface FlatConnection {
 }
 
 export function AdminConnectionsPage() {
+  const loginContext = useContext(LoginContextContext);
   const [connections, setConnections] = useState<FlatConnection[]>([]);
   const [connectionStats, setConnectionStats] = useState({ connection_count: 0, user_count: 0 });
   const [loading, setLoading] = useState(false);
@@ -78,6 +80,13 @@ export function AdminConnectionsPage() {
     try {
       const response = await fetch(`${BASE_URL}/api/admin/connections?token=${adminToken}`);
       if (!response.ok) {
+        // Handle 401 Unauthorized - clear accessToken from localStorage and loginContext
+        if (response.status === 401) {
+          localStorage.removeItem('hehe-token_state');
+          loginContext.setAccessToken(undefined);
+          setError('Authentication failed. Please log in again.');
+          return;
+        }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data: ConnectionsResponse = await response.json();
