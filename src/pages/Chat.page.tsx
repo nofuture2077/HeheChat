@@ -76,8 +76,14 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     const [online, setOnline] = useState(true);
     const documentVisible = useDocumentVisibility();
     const networkStatus = useNetwork();
+    const prevDocumentVisible = useRef(true); // Start with true to detect first hide->show transition
     const [videoHeight, setVideoHeight] = useState(0);
-    const [shortcutsVisible, setShortcutsVisible] = useState(true);
+    // Load shortcuts visible state from localStorage with profile.guid based key
+    const [shortcutsVisible, setShortcutsVisible] = useState(() => {
+        const key = `hehe-shortcuts-visible-${profile.guid}`;
+        const saved = localStorage.getItem(key);
+        return saved !== null ? JSON.parse(saved) : true;
+    });
     const [currentClipId, setCurrentClipId] = useState<string | null>(null);
     const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
     const notificationIdsRef = useRef<string[]>([]);
@@ -137,7 +143,6 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             const messagesToDelete = chatMessages.filter(m => m._prefix?.user === username).map(m => m.id);
             setDeletedMessages((dM) => dM.concat(messagesToDelete));
         }
-        console.log(eventname, data);
         if (data.eventtype === "seventv_emote_add") {
             const d = JSON.parse(data.text);
             PubSub.publish('Update-seventTV', {type: "add", data: d})
@@ -340,11 +345,9 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             const userId = loginContext.user.id;
             EmoteStore.getUserEmotes(userId).then(async (userEmotes) => {
                 if (!userEmotes || Date.now() - userEmotes.timestamp > 24 * 60 * 60 * 1000) { // Refresh if older than 24h
-                    console.log("load useremote");
                     const api = loginContext.getApiClient();
                     
                     const userEmotesResult = (await api.chat.getUserEmotesPaginated(userId).getAll()).map(getRawData);
-                    console.log("userEmotesResult", userEmotesResult);
 
                     await EmoteStore.storeUserEmotes(userId, userEmotesResult);
                 }
@@ -393,10 +396,23 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         };
     }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, loginContext.user]);
 
-    useDidUpdate(() => {
+    // Track document visibility changes for reload functionality
+    useEffect(() => {
+        const isVisible = documentVisible === 'visible';
+        
+        // Check if document became visible (was hidden, now visible) and reload if enabled
+        if (isVisible && !prevDocumentVisible.current && networkStatus.online && config.reloadOnReturnToApp) {
+            console.log('Reloading page due to return to app');
+            window.location.reload();
+            return;
+        }
+        
+        // Update the previous visibility state
+        prevDocumentVisible.current = isVisible;
+
         setOnline(networkStatus.online);
         setShouldScroll(true);
-        if (networkStatus.online && documentVisible) {
+        if (networkStatus.online && isVisible) {
             Storage.load(config.channels, config.ignoredUsers, config.maxMessages).then(rawMessages => {
                 const msgs = rawMessages.map(parseMessage);
                 setUsernames(new Set(msgs.filter(msg => msg.type === 'chat').map(msg => msg.userInfo.userName.toLowerCase())));
@@ -412,7 +428,21 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
 
         // Check connections when component mounts
         checkConnections();
-    }, [documentVisible, networkStatus.online]);
+    }, [documentVisible, networkStatus.online, config.reloadOnReturnToApp]);
+
+    // Save shortcuts visible state to localStorage when it changes
+    useEffect(() => {
+        const key = `hehe-shortcuts-visible-${profile.guid}`;
+        localStorage.setItem(key, JSON.stringify(shortcutsVisible));
+    }, [shortcutsVisible, profile.guid]);
+
+    // Load shortcuts visible state when profile changes
+    useEffect(() => {
+        const key = `hehe-shortcuts-visible-${profile.guid}`;
+        const saved = localStorage.getItem(key);
+        const newState = saved !== null ? JSON.parse(saved) : true;
+        setShortcutsVisible(newState);
+    }, [profile.guid]);
 
     // Check connections when profile changes or browserSourceAudio setting changes
     useEffect(() => {

@@ -154,6 +154,7 @@ export default function HeheChat() {
                 profileData.config.skipGlobalEmotesInTTS ??= false;
                 profileData.config.checkBrowsersourceConnection ??= true;
                 profileData.config.desktopVideoMode ??= true;
+                profileData.config.reloadOnReturnToApp ??= true;
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
@@ -383,6 +384,7 @@ export default function HeheChat() {
     const setSkipEmotesInTTS = (value: boolean) => updateConfig('skipEmotesInTTS', value);
     const setSkip7TVEmotesInTTS = (value: boolean) => updateConfig('skip7TVEmotesInTTS', value);
     const setSkipGlobalEmotesInTTS = (value: boolean) => updateConfig('skipGlobalEmotesInTTS', value);
+    const setReloadOnReturnToApp = (value: boolean) => updateConfig('reloadOnReturnToApp', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -638,7 +640,8 @@ export default function HeheChat() {
         setVisualAlertDelay,
         setSkipEmotesInTTS,
         setSkip7TVEmotesInTTS,
-        setSkipGlobalEmotesInTTS
+        setSkipGlobalEmotesInTTS,
+        setReloadOnReturnToApp
     };
 
     const appLogin = {

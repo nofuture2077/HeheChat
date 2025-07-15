@@ -57,7 +57,8 @@ export interface ConfigData {
     shares: string[],
     freeTTS: string[],
     deactivatedAlerts: Record<string, boolean>,
-    shortcuts: ShortCut[]
+    shortcuts: ShortCut[],
+    reloadOnReturnToApp: boolean
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -111,6 +112,7 @@ export interface Config extends ConfigData {
     setCheckBrowsersourceConnection: (val: boolean) => void;
     setFreeTTS: (val: string[]) => void;
     setShortcuts: (val: ShortCut[]) => void;
+    setReloadOnReturnToApp: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -146,7 +148,7 @@ export const DEFAULT_CONFIG: Config = {
     hideRaid: false,
     hideAdBreak: false,
     disableEmoteDialog: false,
-    browserSourceAudio: false,
+    browserSourceAudio: true,
     browserSourceVisual: true,
     checkBrowsersourceConnection: true,
     systemMessageInChat: {
@@ -177,6 +179,7 @@ export const DEFAULT_CONFIG: Config = {
     freeTTS: [],
     deactivatedAlerts: {},
     shortcuts: [],
+    reloadOnReturnToApp: false,
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setMaxMessages: (value: number) => {},
@@ -225,6 +228,7 @@ export const DEFAULT_CONFIG: Config = {
     setSkipEmotesInTTS: (val) => {},
     setSkip7TVEmotesInTTS: (val) => {},
     setSkipGlobalEmotesInTTS: (val) => {},
+    setReloadOnReturnToApp: (val) => {},
 };
 
 export const DB_VERSION = 8;
