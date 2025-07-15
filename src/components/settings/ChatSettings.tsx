@@ -72,6 +72,7 @@ export function ChatSettings() {
 
             <Fieldset legend="Chat cosmetics" variant='filled'>
                 <Stack>
+                    <Switch checked={config.reloadOnReturnToApp} onChange={(event) => config.setReloadOnReturnToApp(event.currentTarget.checked)} label="Reload on Return" size="lg" />
                     <Switch checked={config.showVideo} onChange={(event) => config.setShowVideo(event.currentTarget.checked)} label="Video Player" size="lg" />
                     <Switch checked={config.desktopVideoMode} onChange={(event) => config.setDesktopVideoMode(event.currentTarget.checked)} label="Desktop Video Mode" size="lg" />
                     <Switch checked={config.chatEnabled} onChange={(event) => config.setChatEnabled(event.currentTarget.checked)} label="Chat Input" size="lg" />
