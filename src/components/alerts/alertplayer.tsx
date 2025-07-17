@@ -40,11 +40,13 @@ class AlertPlayer {
     skipCurrent: boolean = false;
     ttsExtra?: number;
     jingleExtra?: number;
+    mode?: 'app' | 'browsersource';
 
     constructor() {
         setInterval(() => this.checkQueue(), 1000);
         this.ttsExtra = Number(localStorage.getItem('hehechat-ttsExtra') || '0') || 0;
         this.jingleExtra = Number(localStorage.getItem('hehechat-jingleExtra') || '0') || 0;
+        this.mode = (localStorage.getItem('hehe-mode') as 'app' | 'browsersource') || undefined;
         // Removed the silence interval that was causing "Activate Alerts" to appear every 2 minutes
     }
 
@@ -715,8 +717,6 @@ class AlertPlayer {
                     text: visualText
                 }), false);
 
-                console.log('Visuell', text, headline);
-
                 const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: minDuration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
                 
                 // Send to backend immediately (this doesn't affect display timing)
@@ -725,8 +725,12 @@ class AlertPlayer {
                 PubSub.publish('ALERT_SHOW', visualAlert);
             }
 
-            // Chain audio playback with proper error handling - only if browserSourceAudio is enabled
-            if (this.config?.browserSourceAudio) {
+            // Chain audio playback with proper error handling - use mode to determine which setting to check
+            const shouldPlayAudio = this.mode === 'browsersource' 
+                ? this.config?.browserSourceAudio 
+                : this.config?.playAlerts;
+            
+            if (shouldPlayAudio) {
                 console.log("Starting jingle playback");
                 this.playAudio(0.8, jingleAudio, this.jingleExtra || 0)
                     .then(() => {
