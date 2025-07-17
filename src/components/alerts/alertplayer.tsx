@@ -9,6 +9,8 @@ import _ from "underscore";
 import { AlertConfig } from "@/components/events/alertconfigstorage";
 import { formatEventText } from "@/components/events/eventlist";
 import { DEFAULT_CHAT_EMOTES } from "@/commons/emotes";
+import { ParsedMessagePart } from "@/commons/message";
+import { buildEmoteImageUrl } from '../../commons/twitch';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -602,16 +604,22 @@ class AlertPlayer {
         }
     }
 
-    parsedPartsToTTSText(parsedParts: any[]) {
+    parsedPartsToTTSText(parsedParts: ParsedMessagePart[]) {
         return parsedParts.map((part, partIndex) => {
+            if (part.type === 'emote' && this.config?.skipEmotesInTTS) {
+                return '';
+            }
             return part.text;
-        }).join(' ');
+        }).filter(x => x).join(' ');
     }
 
-    parsedPartsToText(parsedParts: any[]) {
+    parsedPartsToText(parsedParts: ParsedMessagePart[]) {
         return parsedParts.map((part, partIndex) => {
+            if (part.type === 'emote') {
+                return "image" + buildEmoteImageUrl(part.emote?.id! || part.id || '', {size: '3.0'}).substring(5);
+            }
             return part.text;
-        }).join(' ');
+        }).filter(x => x).join(' ');
     }
  
     async showNotification(item: Event) {
