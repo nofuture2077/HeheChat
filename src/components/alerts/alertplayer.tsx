@@ -616,7 +616,7 @@ class AlertPlayer {
     parsedPartsToText(parsedParts: ParsedMessagePart[]) {
         return parsedParts.map((part, partIndex) => {
             if (part.type === 'emote') {
-                return "image" + buildEmoteImageUrl(part.emote?.id! || part.id || '', {size: '3.0'}).substring(5);
+                return "image" + buildEmoteImageUrl(part.emote?.id! || part.id || '', {size: '3.0'}).substring(6);
             }
             return part.text;
         }).filter(x => x).join(' ');
