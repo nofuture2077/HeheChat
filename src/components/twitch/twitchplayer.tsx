@@ -225,10 +225,15 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
     if (!channel) return null;
 
     return (
-        <div 
-            id={containerId}
-            ref={containerRef}
-            style={{ width: w, height: h }}
-        />
+        <>
+            <style>
+                {`p[data-test-selector="stream-info-card-component__description"] {display: none !important;}`}
+            </style>
+            <div 
+                id={containerId}
+                ref={containerRef}
+                style={{ width: w, height: h }}
+            />
+        </>
     );
 }
