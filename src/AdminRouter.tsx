@@ -1,5 +1,6 @@
 import { AdminHomePage } from './pages/AdminHome.page';
 import { AdminConnectionsPage } from './pages/AdminConnections.page';
+import { AdminChannelManagementPage } from './pages/AdminChannelManagement.page';
 import { AdminAnalyticsPage } from './pages/AdminAnalytics.page';
 import { AdminNewsPage } from './pages/AdminNews.page';
 import { AdminPremiumPage } from './pages/AdminPremium.page';
@@ -7,7 +8,7 @@ import { LoginContextContext } from './ApplicationContext';
 import { useContext, useState } from 'react';
 import { AppShell, Burger, Group, NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconDashboard, IconUsers, IconChartBar, IconNews, IconCrown } from '@tabler/icons-react';
+import { IconDashboard, IconUsers, IconChartBar, IconNews, IconCrown, IconSettings } from '@tabler/icons-react';
 import { HeaderLogo } from './components/header/HeaderLogo';
 
 export function AdminRouter() {
@@ -29,6 +30,8 @@ export function AdminRouter() {
     switch (activeSection) {
       case 'connections':
         return <AdminConnectionsPage />;
+      case 'channels':
+        return <AdminChannelManagementPage />;
       case 'analytics':
         return <AdminAnalyticsPage />;
       case 'news':
@@ -67,6 +70,13 @@ export function AdminRouter() {
           leftSection={<IconUsers size="1rem" />}
           active={activeSection === 'connections'}
           onClick={() => setActiveSection('connections')}
+        />
+        <NavLink
+          href="#"
+          label="Channel Management"
+          leftSection={<IconSettings size="1rem" />}
+          active={activeSection === 'channels'}
+          onClick={() => setActiveSection('channels')}
         />
         <NavLink
           href="#"
