@@ -205,6 +205,10 @@ body, html {
   max-width: 100vw;
 }
 
+.text-over-image .text {
+  margin-top: -4rem;
+}
+
 /* Layout classes for headline sizes */
 .headline-xs .text p:first-child { font-size: 1.25rem; }
 .headline-sm .text p:first-child { font-size: 1.5rem; }
