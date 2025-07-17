@@ -15,7 +15,9 @@ import {
   TextInput,
   Notification,
   Collapse,
-  Tooltip
+  Tooltip,
+  Textarea,
+  Tabs
 } from '@mantine/core';
 import { 
   IconRefresh, 
@@ -28,7 +30,11 @@ import {
   IconX,
   IconChevronDown,
   IconChevronRight,
-  IconExclamationCircle
+  IconExclamationCircle,
+  IconTrash,
+  IconBan,
+  IconShield,
+  IconList
 } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { useDisclosure } from '@mantine/hooks';
@@ -45,14 +51,26 @@ interface AuthorizedChannel {
 
 interface ChannelInfo extends AuthorizedChannel {
   is_loaded: boolean;
+  is_pubsub_initialized?: boolean;
+}
+
+interface BannedChannel {
+  id: number;
+  channelname: string;
+  channelid: string;
+  reason: string;
+  banned_by: string;
+  banned_at: string;
 }
 
 interface ApiResponse<T> {
   success: boolean;
   channels?: T[];
   channel?: T;
+  banned_channels?: BannedChannel[];
   message?: string;
   error?: string;
+  action?: string;
 }
 
 export function AdminChannelManagementPage() {
@@ -66,8 +84,15 @@ export function AdminChannelManagementPage() {
   const [channelInfo, setChannelInfo] = useState<ChannelInfo | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [expandedScopes, setExpandedScopes] = useState<Set<string>>(new Set());
+  const [bannedChannels, setBannedChannels] = useState<BannedChannel[]>([]);
+  const [activeTab, setActiveTab] = useState<string | null>('authorized');
+  const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
+  const [banLoading, setBanLoading] = useState<string | null>(null);
+  const [banReason, setBanReason] = useState('');
+  const [selectedChannelForBan, setSelectedChannelForBan] = useState<string | null>(null);
   
   const [infoModalOpened, { open: openInfoModal, close: closeInfoModal }] = useDisclosure(false);
+  const [banModalOpened, { open: openBanModal, close: closeBanModal }] = useDisclosure(false);
 
   const getAdminToken = () => {
     return localStorage.getItem('hehe-token_state');
@@ -223,10 +248,220 @@ export function AdminChannelManagementPage() {
     }
   };
 
+  const fetchBannedChannels = async () => {
+    const adminToken = getAdminToken();
+    if (!adminToken) {
+      showNotification('error', 'No admin token found. Please log in again.');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/api/channels/banned?token=${adminToken}`);
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('hehe-token_state');
+          loginContext.setAccessToken(undefined);
+          showNotification('error', 'Authentication failed. Please log in again.');
+          return;
+        }
+        if (response.status === 403) {
+          showNotification('error', 'Access denied. Admin privileges required.');
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ApiResponse<BannedChannel> = await response.json();
+      
+      if (data.success && data.banned_channels) {
+        setBannedChannels(data.banned_channels);
+      } else {
+        showNotification('error', data.error || 'Failed to fetch banned channels');
+      }
+    } catch (error) {
+      showNotification('error', error instanceof Error ? error.message : 'Failed to fetch banned channels');
+      console.error('Error fetching banned channels:', error);
+    }
+  };
+
+  const deleteChannelToken = async (channelname: string) => {
+    const adminToken = getAdminToken();
+    if (!adminToken) {
+      showNotification('error', 'No admin token found. Please log in again.');
+      return;
+    }
+
+    setDeleteLoading(channelname);
+    
+    try {
+      const response = await fetch(`${BASE_URL}/api/channels/token?token=${adminToken}&channelname=${channelname}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('hehe-token_state');
+          loginContext.setAccessToken(undefined);
+          showNotification('error', 'Authentication failed. Please log in again.');
+          return;
+        }
+        if (response.status === 403) {
+          showNotification('error', 'Access denied. Admin privileges required.');
+          return;
+        }
+        if (response.status === 404) {
+          showNotification('error', `Channel '${channelname}' not found.`);
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ApiResponse<AuthorizedChannel> = await response.json();
+      
+      if (data.success) {
+        showNotification('success', data.message || `Token deleted for channel '${channelname}'`);
+        // Refresh the channels list
+        fetchAuthorizedChannels();
+      } else {
+        showNotification('error', data.error || 'Failed to delete channel token');
+      }
+    } catch (error) {
+      showNotification('error', error instanceof Error ? error.message : 'Failed to delete channel token');
+      console.error('Error deleting channel token:', error);
+    } finally {
+      setDeleteLoading(null);
+    }
+  };
+
+  const banChannel = async (channelname: string, reason: string) => {
+    const adminToken = getAdminToken();
+    if (!adminToken) {
+      showNotification('error', 'No admin token found. Please log in again.');
+      return;
+    }
+
+    setBanLoading(channelname);
+    
+    try {
+      const response = await fetch(`${BASE_URL}/api/channels/ban`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: adminToken,
+          channelname: channelname,
+          action: 'ban',
+          reason: reason
+        })
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('hehe-token_state');
+          loginContext.setAccessToken(undefined);
+          showNotification('error', 'Authentication failed. Please log in again.');
+          return;
+        }
+        if (response.status === 403) {
+          showNotification('error', 'Access denied. Admin privileges required.');
+          return;
+        }
+        if (response.status === 404) {
+          showNotification('error', `Channel '${channelname}' not found.`);
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ApiResponse<BannedChannel> = await response.json();
+      
+      if (data.success) {
+        showNotification('success', data.message || `Channel '${channelname}' has been banned`);
+        // Refresh both lists
+        fetchAuthorizedChannels();
+        fetchBannedChannels();
+        closeBanModal();
+        setBanReason('');
+        setSelectedChannelForBan(null);
+      } else {
+        showNotification('error', data.error || 'Failed to ban channel');
+      }
+    } catch (error) {
+      showNotification('error', error instanceof Error ? error.message : 'Failed to ban channel');
+      console.error('Error banning channel:', error);
+    } finally {
+      setBanLoading(null);
+    }
+  };
+
+  const unbanChannel = async (channelname: string) => {
+    const adminToken = getAdminToken();
+    if (!adminToken) {
+      showNotification('error', 'No admin token found. Please log in again.');
+      return;
+    }
+
+    setBanLoading(channelname);
+    
+    try {
+      const response = await fetch(`${BASE_URL}/api/channels/ban`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: adminToken,
+          channelname: channelname,
+          action: 'unban'
+        })
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          localStorage.removeItem('hehe-token_state');
+          loginContext.setAccessToken(undefined);
+          showNotification('error', 'Authentication failed. Please log in again.');
+          return;
+        }
+        if (response.status === 403) {
+          showNotification('error', 'Access denied. Admin privileges required.');
+          return;
+        }
+        if (response.status === 404) {
+          showNotification('error', `Channel '${channelname}' not found.`);
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ApiResponse<BannedChannel> = await response.json();
+      
+      if (data.success) {
+        showNotification('success', data.message || `Channel '${channelname}' has been unbanned`);
+        // Refresh both lists
+        fetchAuthorizedChannels();
+        fetchBannedChannels();
+      } else {
+        showNotification('error', data.error || 'Failed to unban channel');
+      }
+    } catch (error) {
+      showNotification('error', error instanceof Error ? error.message : 'Failed to unban channel');
+      console.error('Error unbanning channel:', error);
+    } finally {
+      setBanLoading(null);
+    }
+  };
+
   useEffect(() => {
     fetchAuthorizedChannels();
+    fetchBannedChannels();
     // Auto-refresh every 60 seconds
-    const interval = setInterval(fetchAuthorizedChannels, 60000);
+    const interval = setInterval(() => {
+      fetchAuthorizedChannels();
+      fetchBannedChannels();
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -350,6 +585,29 @@ export function AdminChannelManagementPage() {
             >
               <IconReload size="1rem" />
             </ActionIcon>
+            <ActionIcon
+              variant="light"
+              color="red"
+              size="sm"
+              onClick={() => deleteChannelToken(channel.channelname)}
+              loading={deleteLoading === channel.channelname}
+              title="Delete Token"
+            >
+              <IconTrash size="1rem" />
+            </ActionIcon>
+            <ActionIcon
+              variant="light"
+              color="dark"
+              size="sm"
+              onClick={() => {
+                setSelectedChannelForBan(channel.channelname);
+                openBanModal();
+              }}
+              loading={banLoading === channel.channelname}
+              title="Ban Channel"
+            >
+              <IconBan size="1rem" />
+            </ActionIcon>
           </Group>
         </Table.Td>
       </Table.Tr>
@@ -399,68 +657,160 @@ export function AdminChannelManagementPage() {
           </Text>
         )}
 
-        <Card withBorder>
-          <Card.Section p="md" withBorder>
-            <Group justify="space-between">
-              <Text fw={500}>Authorized Channels</Text>
-              <Badge size="lg" variant="light" color="blue">
-                {channels.length} Channels
-              </Badge>
-            </Group>
-          </Card.Section>
+        <Tabs value={activeTab} onChange={setActiveTab}>
+          <Tabs.List>
+            <Tabs.Tab value="authorized" leftSection={<IconShield size="0.8rem" />}>
+              Authorized Channels ({channels.length})
+            </Tabs.Tab>
+            <Tabs.Tab value="banned" leftSection={<IconBan size="0.8rem" />}>
+              Banned Channels ({bannedChannels.length})
+            </Tabs.Tab>
+          </Tabs.List>
 
-          <Card.Section>
-            <div style={{ position: 'relative' }}>
-              <LoadingOverlay visible={loading} />
-              
-              {error && (
-                <Alert 
-                  icon={<IconAlertCircle size="1rem" />} 
-                  title="Error Loading Channels" 
-                  color="red"
-                  variant="light"
-                  m="md"
-                >
-                  <Text>{error}</Text>
-                  <Button 
-                    size="xs" 
-                    variant="light" 
-                    mt="xs"
-                    onClick={fetchAuthorizedChannels}
-                  >
-                    Try Again
-                  </Button>
-                </Alert>
-              )}
+          <Tabs.Panel value="authorized">
+            <Card withBorder mt="md">
+              <Card.Section p="md" withBorder>
+                <Group justify="space-between">
+                  <Text fw={500}>Authorized Channels</Text>
+                  <Badge size="lg" variant="light" color="blue">
+                    {channels.length} Channels
+                  </Badge>
+                </Group>
+              </Card.Section>
 
-              {!error && channels.length === 0 && !loading && (
-                <Alert 
-                  icon={<IconSettings size="1rem" />} 
-                  title="No Authorized Channels" 
-                  color="blue"
-                  variant="light"
-                  m="md"
-                >
-                  <Text>There are currently no authorized channels to display.</Text>
-                </Alert>
-              )}
+              <Card.Section>
+                <div style={{ position: 'relative' }}>
+                  <LoadingOverlay visible={loading} />
+                  
+                  {error && (
+                    <Alert 
+                      icon={<IconAlertCircle size="1rem" />} 
+                      title="Error Loading Channels" 
+                      color="red"
+                      variant="light"
+                      m="md"
+                    >
+                      <Text>{error}</Text>
+                      <Button 
+                        size="xs" 
+                        variant="light" 
+                        mt="xs"
+                        onClick={fetchAuthorizedChannels}
+                      >
+                        Try Again
+                      </Button>
+                    </Alert>
+                  )}
 
-              {!error && channels.length > 0 && (
-                <Table striped highlightOnHover>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Channel Name</Table.Th>
-                      <Table.Th>Channel ID</Table.Th>
-                      <Table.Th>Permissions</Table.Th>
-                      <Table.Th>Actions</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>{rows}</Table.Tbody>
-                </Table>
-              )}
-            </div>
-          </Card.Section>
-        </Card>
+                  {!error && channels.length === 0 && !loading && (
+                    <Alert 
+                      icon={<IconSettings size="1rem" />} 
+                      title="No Authorized Channels" 
+                      color="blue"
+                      variant="light"
+                      m="md"
+                    >
+                      <Text>There are currently no authorized channels to display.</Text>
+                    </Alert>
+                  )}
+
+                  {!error && channels.length > 0 && (
+                    <Table striped highlightOnHover>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>Channel Name</Table.Th>
+                          <Table.Th>Channel ID</Table.Th>
+                          <Table.Th>Permissions</Table.Th>
+                          <Table.Th>Actions</Table.Th>
+                        </Table.Tr>
+                      </Table.Thead>
+                      <Table.Tbody>{rows}</Table.Tbody>
+                    </Table>
+                  )}
+                </div>
+              </Card.Section>
+            </Card>
+          </Tabs.Panel>
+
+          <Tabs.Panel value="banned">
+            <Card withBorder mt="md">
+              <Card.Section p="md" withBorder>
+                <Group justify="space-between">
+                  <Text fw={500}>Banned Channels</Text>
+                  <Badge size="lg" variant="light" color="red">
+                    {bannedChannels.length} Banned
+                  </Badge>
+                </Group>
+              </Card.Section>
+
+              <Card.Section>
+                <div style={{ position: 'relative' }}>
+                  {bannedChannels.length === 0 ? (
+                    <Alert 
+                      icon={<IconShield size="1rem" />} 
+                      title="No Banned Channels" 
+                      color="green"
+                      variant="light"
+                      m="md"
+                    >
+                      <Text>There are currently no banned channels.</Text>
+                    </Alert>
+                  ) : (
+                    <Table striped highlightOnHover>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>Channel Name</Table.Th>
+                          <Table.Th>Channel ID</Table.Th>
+                          <Table.Th>Reason</Table.Th>
+                          <Table.Th>Banned By</Table.Th>
+                          <Table.Th>Banned At</Table.Th>
+                          <Table.Th>Actions</Table.Th>
+                        </Table.Tr>
+                      </Table.Thead>
+                      <Table.Tbody>
+                        {bannedChannels.map((channel) => (
+                          <Table.Tr key={channel.id}>
+                            <Table.Td>
+                              <Text fw={500}>{channel.channelname}</Text>
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                {channel.channelid}
+                              </Text>
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm">{channel.reason}</Text>
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm">{channel.banned_by}</Text>
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm">
+                                {new Date(channel.banned_at).toLocaleString()}
+                              </Text>
+                            </Table.Td>
+                            <Table.Td>
+                              <ActionIcon
+                                variant="light"
+                                color="green"
+                                size="sm"
+                                onClick={() => unbanChannel(channel.channelname)}
+                                loading={banLoading === channel.channelname}
+                                title="Unban Channel"
+                              >
+                                <IconShield size="1rem" />
+                              </ActionIcon>
+                            </Table.Td>
+                          </Table.Tr>
+                        ))}
+                      </Table.Tbody>
+                    </Table>
+                  )}
+                </div>
+              </Card.Section>
+            </Card>
+          </Tabs.Panel>
+        </Tabs>
 
         <Modal 
           opened={infoModalOpened} 
@@ -489,6 +839,18 @@ export function AdminChannelManagementPage() {
                   {channelInfo.is_loaded ? 'Loaded' : 'Not Loaded'}
                 </Badge>
               </Group>
+
+              {channelInfo.is_pubsub_initialized !== undefined && (
+                <Group justify="space-between">
+                  <Text fw={500}>PubSub Status:</Text>
+                  <Badge 
+                    color={channelInfo.is_pubsub_initialized ? 'green' : 'red'}
+                    variant="light"
+                  >
+                    {channelInfo.is_pubsub_initialized ? 'Initialized' : 'Not Initialized'}
+                  </Badge>
+                </Group>
+              )}
               
               <Group justify="space-between">
                 <Text fw={500}>Scope Status:</Text>
@@ -521,6 +883,66 @@ export function AdminChannelManagementPage() {
               )}
             </Stack>
           )}
+        </Modal>
+
+        <Modal 
+          opened={banModalOpened} 
+          onClose={closeBanModal} 
+          title="Ban Channel"
+          size="md"
+        >
+          <Stack gap="md">
+            <Alert 
+              icon={<IconBan size="1rem" />} 
+              title="Warning" 
+              color="orange"
+              variant="light"
+            >
+              <Text>
+                Banning a channel will:
+              </Text>
+              <ul style={{ marginTop: '8px', marginBottom: '0' }}>
+                <li>Delete its authentication token (revoking current access)</li>
+                <li>Reset its PubSub initialization (stopping event processing)</li>
+                <li>Block future OAuth authorization attempts</li>
+                <li>Prevent event registration in PubSub</li>
+              </ul>
+            </Alert>
+
+            {selectedChannelForBan && (
+              <Group justify="space-between">
+                <Text fw={500}>Channel:</Text>
+                <Text>{selectedChannelForBan}</Text>
+              </Group>
+            )}
+
+            <Textarea
+              label="Ban Reason"
+              placeholder="Enter the reason for banning this channel..."
+              value={banReason}
+              onChange={(event) => setBanReason(event.currentTarget.value)}
+              minRows={3}
+              required
+            />
+
+            <Group justify="flex-end" gap="sm">
+              <Button 
+                variant="light" 
+                onClick={closeBanModal}
+                disabled={banLoading === selectedChannelForBan}
+              >
+                Cancel
+              </Button>
+              <Button 
+                color="red" 
+                onClick={() => selectedChannelForBan && banChannel(selectedChannelForBan, banReason)}
+                loading={banLoading === selectedChannelForBan}
+                disabled={!banReason.trim()}
+              >
+                Ban Channel
+              </Button>
+            </Group>
+          </Stack>
         </Modal>
       </Stack>
     </Container>
