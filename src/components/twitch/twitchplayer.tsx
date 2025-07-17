@@ -140,27 +140,10 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
     }, []);
 
     const addGlobalStyle = useCallback(() => {
-        // Check if style already exists
-        if (document.getElementById('twitch-hide-description-global-style')) return;
-
         // Create and inject global style that targets iframe content
         const style = document.createElement('style');
-        style.id = 'twitch-hide-description-global-style';
         style.textContent = `
-            /* Hide Twitch stream description globally */
-            iframe[src*="player.twitch.tv"] {
-                /* This won't work due to cross-origin, but we'll try other approaches */
-            }
-            
-            /* Alternative approach using CSS that might work */
-            .tw-card {
-                display: none !important;
-            }
-            
-            /* Try to hide through iframe container styling */
-            #${containerId} iframe {
-                /* Additional styling if needed */
-            }
+            .tw-card-body { display: none !important; }
         `;
         document.head.appendChild(style);
     }, [containerId]);
