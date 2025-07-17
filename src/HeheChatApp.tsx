@@ -155,6 +155,7 @@ export default function HeheChat() {
                 profileData.config.checkBrowsersourceConnection ??= true;
                 profileData.config.desktopVideoMode ??= true;
                 profileData.config.reloadOnReturnToApp ??= true;
+                profileData.config.browserSourceVisual ??= true;
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
