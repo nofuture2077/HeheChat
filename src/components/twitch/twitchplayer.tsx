@@ -139,6 +139,30 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
         }
     }, []);
 
+    const injectStyleIntoIframe = useCallback(() => {
+        try {
+            // Find the Twitch iframe
+            const iframe = containerRef.current?.querySelector('iframe') as HTMLIFrameElement;
+            if (!iframe) return;
+
+            // Try to access the iframe's document
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+            if (!iframeDoc) return;
+
+            // Check if style already exists
+            if (iframeDoc.getElementById('twitch-hide-description-style')) return;
+
+            // Create and inject the style
+            const style = iframeDoc.createElement('style');
+            style.id = 'twitch-hide-description-style';
+            style.textContent = 'p[data-test-selector="stream-info-card-component__description"] {display: none !important;}';
+            iframeDoc.head.appendChild(style);
+        } catch (error) {
+            // Silently fail if we can't access the iframe (cross-origin restrictions)
+            console.warn('Could not inject style into Twitch iframe:', error);
+        }
+    }, []);
+
     const createPlayer = useCallback(async () => {
         if (!channel || !containerRef.current || !window.Twitch) return;
 
@@ -175,8 +199,15 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
                 player.setQuality(config.videoQuality);
                 player.setMuted(isMuted);
             }
+
+            // Try to inject style after a short delay to ensure iframe is fully loaded
+            setTimeout(() => {
+                injectStyleIntoIframe();
+                // Try again after a longer delay in case the content loads later
+                setTimeout(injectStyleIntoIframe, 2000);
+            }, 500);
         });
-    }, [channel, loginContext.accessToken, w, h, props.muted, requestStorageAccessForTwitch]);
+    }, [channel, loginContext.accessToken, w, h, props.muted, requestStorageAccessForTwitch, injectStyleIntoIframe]);
 
     // Handle resize
     const handleResize = useCallback(
@@ -225,15 +256,10 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
     if (!channel) return null;
 
     return (
-        <>
-            <style>
-                {`p[data-test-selector="stream-info-card-component__description"] {display: none !important;}`}
-            </style>
-            <div 
-                id={containerId}
-                ref={containerRef}
-                style={{ width: w, height: h }}
-            />
-        </>
+        <div 
+            id={containerId}
+            ref={containerRef}
+            style={{ width: w, height: h }}
+        />
     );
 }
