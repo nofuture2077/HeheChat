@@ -9,6 +9,8 @@ import _ from "underscore";
 import { AlertConfig } from "@/components/events/alertconfigstorage";
 import { formatEventText } from "@/components/events/eventlist";
 import { DEFAULT_CHAT_EMOTES } from "@/commons/emotes";
+import { ParsedMessagePart } from "@/commons/message";
+import { buildEmoteImageUrl } from '../../commons/twitch';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -38,13 +40,14 @@ class AlertPlayer {
     skipCurrent: boolean = false;
     ttsExtra?: number;
     jingleExtra?: number;
+    mode?: 'app' | 'browsersource';
 
     constructor() {
         setInterval(() => this.checkQueue(), 1000);
         this.ttsExtra = Number(localStorage.getItem('hehechat-ttsExtra') || '0') || 0;
         this.jingleExtra = Number(localStorage.getItem('hehechat-jingleExtra') || '0') || 0;
-        // Set up interval to check if queue is empty every 2 minutes
         setInterval(() => this.playSilenceIfQueueEmpty(), 120000);
+        this.mode = (localStorage.getItem('hehe-mode') as 'app' | 'browsersource') || undefined;
     }
 
     status(): boolean {
@@ -603,16 +606,22 @@ class AlertPlayer {
         }
     }
 
-    parsedPartsToTTSText(parsedParts: any[]) {
+    parsedPartsToTTSText(parsedParts: ParsedMessagePart[]) {
         return parsedParts.map((part, partIndex) => {
+            if (part.type === 'emote' && this.config?.skipEmotesInTTS) {
+                return '';
+            }
             return part.text;
-        }).join(' ');
+        }).filter(x => x).join(' ');
     }
 
-    parsedPartsToText(parsedParts: any[]) {
+    parsedPartsToText(parsedParts: ParsedMessagePart[]) {
         return parsedParts.map((part, partIndex) => {
+            if (part.type === 'emote') {
+                return "image" + buildEmoteImageUrl(part.emote?.id! || part.id || '', {size: '3.0'}).substring(6);
+            }
             return part.text;
-        }).join(' ');
+        }).filter(x => x).join(' ');
     }
  
     async showNotification(item: Event) {
@@ -708,8 +717,6 @@ class AlertPlayer {
                     text: visualText
                 }), false);
 
-                console.log('Visuell', text, headline);
-
                 const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: minDuration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
                 
                 // Send to backend immediately (this doesn't affect display timing)
@@ -718,35 +725,45 @@ class AlertPlayer {
                 PubSub.publish('ALERT_SHOW', visualAlert);
             }
 
-            // Chain audio playback with proper error handling
-            console.log("Starting jingle playback");
-            this.playAudio(0.8, jingleAudio, this.jingleExtra || 0)
-                .then(() => {
-                    console.log("Jingle playback completed, starting TTS");
-                    if (this.skipCurrent) throw new Error("Playback skipped");
-                    
-                    // Handle case where TTS audio is undefined
-                    if (!ttsAudio) {
-                        console.log("No TTS audio available, skipping TTS part but continuing alert");
-                        return Promise.resolve(); // Skip TTS part but continue chain
-                    }
-                    return this.playAudio(1.0, ttsAudio, this.ttsExtra || 0);
-                })
-                .then(() => {
-                    console.log("TTS playback completed");
-                    if (this.skipCurrent) throw new Error("Playback skipped");
-                    return this.endAudio();
-                })
-                .then(() => {
-                    console.log("Audio ended, waiting for minimum duration");
-                    if (this.skipCurrent) throw new Error("Playback skipped");
-                    return this.wait(duration, minDuration);
-                })
-                .then(onEnd)
-                .catch(err => {
-                    console.error("Error in audio chain:", err);
-                    onError(err);
-                });
+            // Chain audio playback with proper error handling - use mode to determine which setting to check
+            const shouldPlayAudio = this.mode === 'browsersource' 
+                ? this.config?.browserSourceAudio 
+                : this.config?.playAlerts;
+            
+            if (shouldPlayAudio) {
+                console.log("Starting jingle playback");
+                this.playAudio(0.8, jingleAudio, this.jingleExtra || 0)
+                    .then(() => {
+                        console.log("Jingle playback completed, starting TTS");
+                        if (this.skipCurrent) throw new Error("Playback skipped");
+                        
+                        // Handle case where TTS audio is undefined
+                        if (!ttsAudio) {
+                            console.log("No TTS audio available, skipping TTS part but continuing alert");
+                            return Promise.resolve(); // Skip TTS part but continue chain
+                        }
+                        return this.playAudio(1.0, ttsAudio, this.ttsExtra || 0);
+                    })
+                    .then(() => {
+                        console.log("TTS playback completed");
+                        if (this.skipCurrent) throw new Error("Playback skipped");
+                        return this.endAudio();
+                    })
+                    .then(() => {
+                        console.log("Audio ended, waiting for minimum duration");
+                        if (this.skipCurrent) throw new Error("Playback skipped");
+                        return this.wait(duration, minDuration);
+                    })
+                    .then(onEnd)
+                    .catch(err => {
+                        console.error("Error in audio chain:", err);
+                        onError(err);
+                    });
+            } else {
+                console.log("Audio disabled, showing visual only");
+                // Skip audio but still wait for minimum duration for visual
+                this.wait(0, minDuration).then(onEnd).catch(onError);
+            }
         } catch (err) {
             console.error(err);
             this.stopPlaying();
@@ -770,16 +787,33 @@ class AlertPlayer {
         return sbp;
     }
 
-    shouldBePlayedInBrowsersource(item: Event): boolean {
+    shouldBePlayedInBrowsersourceAudio(item: Event): boolean {
         if (!this.config) {
             console.error('Adding event but config not set', item);
             return false;
         }
         const sbp = this.config!.browserSourceAudio && this.config!.receivedShares.includes(item.channel) && this.config!.activatedShares.includes(item.channel);
         if (!sbp) {
-            // console.debug('Will not play alerts', this.config, item);
+            // console.debug('Will not play audio alerts', this.config, item);
         }
         return sbp;
+    }
+
+    shouldBePlayedInBrowsersourceVisual(item: Event): boolean {
+        if (!this.config) {
+            console.error('Adding event but config not set', item);
+            return false;
+        }
+        const sbp = this.config!.browserSourceVisual && this.config!.receivedShares.includes(item.channel) && this.config!.activatedShares.includes(item.channel);
+        if (!sbp) {
+            // console.debug('Will not show visual alerts', this.config, item);
+        }
+        return sbp;
+    }
+
+    shouldBePlayedInBrowsersource(item: Event): boolean {
+        // Keep for backward compatibility - returns true if either audio or visual should be played
+        return this.shouldBePlayedInBrowsersourceAudio(item) || this.shouldBePlayedInBrowsersourceVisual(item);
     }
 
     addEvent(item: Event) {

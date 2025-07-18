@@ -139,6 +139,15 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
         }
     }, []);
 
+    const addGlobalStyle = useCallback(() => {
+        // Create and inject global style that targets iframe content
+        const style = document.createElement('style');
+        style.textContent = `
+            .tw-card-body { display: none !important; }
+        `;
+        document.head.appendChild(style);
+    }, [containerId]);
+
     const createPlayer = useCallback(async () => {
         if (!channel || !containerRef.current || !window.Twitch) return;
 
@@ -175,8 +184,11 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
                 player.setQuality(config.videoQuality);
                 player.setMuted(isMuted);
             }
+
+            // Add global style to try to hide the description
+            addGlobalStyle();
         });
-    }, [channel, loginContext.accessToken, w, h, props.muted, requestStorageAccessForTwitch]);
+    }, [channel, loginContext.accessToken, w, h, props.muted, requestStorageAccessForTwitch, addGlobalStyle]);
 
     // Handle resize
     const handleResize = useCallback(

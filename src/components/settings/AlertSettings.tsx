@@ -207,6 +207,21 @@ export function AlertSettings() {
                     <Text fs="italic" size='14px'>Show warnings when Browsersource is not connected but audio is set to OBS</Text>
                 </Stack>
             </Fieldset>
+
+            <Fieldset legend="Visual Alerts" variant="filled" key="visual-alerts">
+                <Stack>
+                    <Switch 
+                        checked={config.browserSourceVisual} 
+                        onChange={(event) => { 
+                            config.setBrowserSourceVisual(event.currentTarget.checked); 
+                            forceUpdate(); 
+                        }} 
+                        label="Show visual alerts in OBS Browser Source" 
+                        size="lg" 
+                    />
+                    <Text fs="italic" size='14px'>Enable visual alert overlays in OBS (independent of audio)</Text>
+                </Stack>
+            </Fieldset>
             
             <Fieldset legend="Alert Editor" variant="filled">
                 <Table>

@@ -17,5 +17,6 @@ const query = window.location.hash.substring(1);
 const token = getQueryVariable(query, "token");
 const preview = !!getQueryVariable(query, "preview");
 localStorage.setItem('hehe-sink', token || '');
+localStorage.setItem('hehe-mode', 'browsersource');
 
 ReactDOM.createRoot(document.getElementById('alert')!).render(<BrowserSource token={token} preview={preview}/>);
