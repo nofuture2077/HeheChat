@@ -47,6 +47,8 @@ interface AuthorizedChannel {
   channelid: string;
   channelname: string;
   scope: string[];
+  first_login?: string;
+  last_login?: string;
 }
 
 interface ChannelInfo extends AuthorizedChannel {
@@ -133,7 +135,14 @@ export function AdminChannelManagementPage() {
       const data: ApiResponse<AuthorizedChannel> = await response.json();
       
       if (data.success && data.channels) {
-        setChannels(data.channels);
+        // Sort channels by last_login in descending order (most recent first)
+        const sortedChannels = data.channels.sort((a, b) => {
+          if (!a.last_login && !b.last_login) return 0;
+          if (!a.last_login) return 1;
+          if (!b.last_login) return -1;
+          return new Date(b.last_login).getTime() - new Date(a.last_login).getTime();
+        });
+        setChannels(sortedChannels);
         setLastUpdated(new Date());
       } else {
         setError(data.error || 'Failed to fetch channels');
@@ -564,6 +573,16 @@ export function AdminChannelManagementPage() {
           </Stack>
         </Table.Td>
         <Table.Td>
+          <Text size="sm" c={channel.first_login ? 'dark' : 'dimmed'}>
+            {channel.first_login ? new Date(channel.first_login).toLocaleString() : 'Never'}
+          </Text>
+        </Table.Td>
+        <Table.Td>
+          <Text size="sm" c={channel.last_login ? 'dark' : 'dimmed'}>
+            {channel.last_login ? new Date(channel.last_login).toLocaleString() : 'Never'}
+          </Text>
+        </Table.Td>
+        <Table.Td>
           <Group gap="xs">
             <ActionIcon
               variant="light"
@@ -721,6 +740,8 @@ export function AdminChannelManagementPage() {
                           <Table.Th>Channel Name</Table.Th>
                           <Table.Th>Channel ID</Table.Th>
                           <Table.Th>Permissions</Table.Th>
+                          <Table.Th>First Login</Table.Th>
+                          <Table.Th>Last Login</Table.Th>
                           <Table.Th>Actions</Table.Th>
                         </Table.Tr>
                       </Table.Thead>
@@ -861,6 +882,20 @@ export function AdminChannelManagementPage() {
                   {hasAllRequiredScopes(channelInfo.scope) ? 'Complete' : 'Missing Scopes'}
                 </Badge>
               </Group>
+
+              {channelInfo.first_login && (
+                <Group justify="space-between">
+                  <Text fw={500}>First Login:</Text>
+                  <Text size="sm">{new Date(channelInfo.first_login).toLocaleString()}</Text>
+                </Group>
+              )}
+
+              {channelInfo.last_login && (
+                <Group justify="space-between">
+                  <Text fw={500}>Last Login:</Text>
+                  <Text size="sm">{new Date(channelInfo.last_login).toLocaleString()}</Text>
+                </Group>
+              )}
               
               <div>
                 <Text fw={500} mb="xs">Current Permissions ({channelInfo.scope.length}):</Text>
