@@ -1,7 +1,6 @@
-import { Container, Title, Text, Button, Alert, Stack, Select, Card, Group, LoadingOverlay, Grid, Tabs, Table, Badge, ScrollArea, Divider, Paper, ActionIcon, Tooltip } from '@mantine/core';
-import { IconChartBar, IconAlertCircle, IconCalendar, IconTrendingUp, IconUsers, IconHeart, IconGift, IconMessageCircle, IconRefresh, IconEye, IconClock, IconTrophy } from '@tabler/icons-react';
+import { Container, Title, Text, Alert, Stack, Select, Card, Group, Grid, Tabs, Table, Badge, ScrollArea, Divider, Paper, ActionIcon } from '@mantine/core';
+import { IconChartBar, IconAlertCircle, IconTrendingUp, IconUsers, IconHeart, IconGift, IconMessageCircle, IconRefresh, IconEye } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
-import { AnalyticsApiClient, StreamAnalyticsResponse } from '../api/analytics';
 import { StreamAnalyticsChart } from '../components/analytics/StreamAnalyticsChart';
 import { useChannels } from '../hooks/useChannels';
 
@@ -64,19 +63,6 @@ interface EventSummary {
   };
 }
 
-interface StreamSession {
-  id: number;
-  start_timestamp: number;
-  end_timestamp: number;
-  duration_seconds: number;
-  title: string;
-  category: string;
-  peak_viewers: number;
-  avg_viewers: number;
-  total_messages: number;
-  is_active: boolean;
-}
-
 interface CurrentStreamStats {
   success: boolean;
   channel: string;
@@ -132,60 +118,22 @@ interface CurrentStreamStats {
 }
 
 export function AdminAnalyticsPage() {
-  const [analyticsData, setAnalyticsData] = useState<StreamAnalyticsResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  // New state for additional features
+  // State for additional features
   const [currentStreamStats, setCurrentStreamStats] = useState<CurrentStreamStats | null>(null);
   const [streamEvents, setStreamEvents] = useState<StreamEvent[]>([]);
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const [eventSummary, setEventSummary] = useState<EventSummary | null>(null);
-  const [streamSessions, setStreamSessions] = useState<StreamSession[]>([]);
-  const [activeTab, setActiveTab] = useState<string>('chart');
+  const [activeTab, setActiveTab] = useState<string>('events');
   const [eventsLoading, setEventsLoading] = useState(false);
   const [chatUsersLoading, setChatUsersLoading] = useState(false);
   const [summaryLoading, setSummaryLoading] = useState(false);
-  const [sessionsLoading, setSessionsLoading] = useState(false);
   const [currentStatsLoading, setCurrentStatsLoading] = useState(false);
   
-  // State to track the selected channel and stream from the chart component
+  // Channel selection for additional features
   const [selectedChannel, setSelectedChannel] = useState<string>('');
-  const [selectedStreamId, setSelectedStreamId] = useState<string>('');
-  const [selectedStreamData, setSelectedStreamData] = useState<any>(null);
+  const { channels } = useChannels();
 
-  const fetchAnalytics = async (channel: string) => {
-    const adminToken = localStorage.getItem('hehe-token_state') || '';
-    if (!channel) return;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      // Get analytics for the last 7 days
-      const endTime = Math.floor(Date.now() / 1000);
-      const startTime = endTime - (7 * 24 * 60 * 60); // 7 days ago
-      
-      const data = await AnalyticsApiClient.getStreamAnalytics(
-        channel,
-        adminToken,
-        startTime,
-        endTime,
-        '1h',
-        true,
-        true
-      );
-      
-      setAnalyticsData(data);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch analytics');
-      console.error('Error fetching analytics:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // New API methods for additional features
+  // API methods for additional features
   const fetchCurrentStreamStats = async (channel: string) => {
     const adminToken = localStorage.getItem('hehe-token_state') || '';
     if (!channel) return;
@@ -292,42 +240,12 @@ export function AdminAnalyticsPage() {
     }
   };
 
-  const fetchStreamSessions = async (channel: string) => {
-    const adminToken = localStorage.getItem('hehe-token_state') || '';
-    if (!channel) return;
-    
-    setSessionsLoading(true);
-    try {
-      const endTime = Math.floor(Date.now() / 1000);
-      const startTime = endTime - (30 * 24 * 60 * 60); // 30 days ago
-      
-      const params = new URLSearchParams({
-        token: adminToken,
-        channelname: channel,
-        start: startTime.toString(),
-        end: endTime.toString()
-      });
-      
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/streams?${params}`);
-      if (response.ok) {
-        const data = await response.json();
-        setStreamSessions(data.streams || []);
-      }
-    } catch (error) {
-      console.error('Error fetching stream sessions:', error);
-    } finally {
-      setSessionsLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (selectedChannel) {
-      fetchAnalytics(selectedChannel);
       fetchCurrentStreamStats(selectedChannel);
       fetchStreamEvents(selectedChannel);
       fetchChatUsers(selectedChannel);
       fetchEventSummary(selectedChannel);
-      fetchStreamSessions(selectedChannel);
     }
   }, [selectedChannel]);
 
@@ -403,462 +321,290 @@ export function AdminAnalyticsPage() {
           </Text>
         </div>
 
+        <StreamAnalyticsChart admin={true} />
+
+        {/* Additional Analytics Features */}
+        <Divider my="xl" />
+        
         <Card withBorder p="md" mb="md">
           <Group justify="space-between" align="center">
             <div>
-              <Title order={3}>Channel Analytics</Title>
+              <Title order={3}>Additional Analytics</Title>
               <Text c="dimmed" size="sm">
-                Select a channel to view comprehensive analytics including charts, events, and stream data
+                Select a channel to view detailed event tracking and chat analytics
               </Text>
             </div>
             <Select
               label="Channel"
-              placeholder="Select a channel for analytics"
+              placeholder="Select a channel for detailed analytics"
               value={selectedChannel}
               onChange={(value) => setSelectedChannel(value || '')}
-              data={useChannels().channels.map(channel => ({ value: channel, label: channel }))}
+              data={channels.map(channel => ({ value: channel, label: channel }))}
               searchable
               w={300}
-              disabled={useChannels().loading}
             />
           </Group>
         </Card>
         
         {!selectedChannel ? (
           <Alert icon={<IconAlertCircle size="1rem" />} title="Select a Channel" color="blue">
-            Please select a channel above to view analytics features.
+            Please select a channel above to view additional analytics features.
           </Alert>
         ) : (
-          <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'overview')}>
-          <Tabs.List>
-            <Tabs.Tab value="chart" leftSection={<IconChartBar size="0.8rem" />}>
-              Stream Chart
-            </Tabs.Tab>
-            <Tabs.Tab value="overview" leftSection={<IconTrendingUp size="0.8rem" />}>
-              Overview
-            </Tabs.Tab>
-            <Tabs.Tab value="current-stream" leftSection={<IconEye size="0.8rem" />}>
-              Current Stream
-            </Tabs.Tab>
-            <Tabs.Tab value="events" leftSection={<IconHeart size="0.8rem" />}>
-              Stream Events
-            </Tabs.Tab>
-            <Tabs.Tab value="chat-users" leftSection={<IconUsers size="0.8rem" />}>
-              Chat Users
-            </Tabs.Tab>
-            <Tabs.Tab value="sessions" leftSection={<IconClock size="0.8rem" />}>
-              Stream Sessions
-            </Tabs.Tab>
-          </Tabs.List>
+          <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'events')}>
+            <Tabs.List>
+              <Tabs.Tab value="events" leftSection={<IconHeart size="0.8rem" />}>
+                Event Tracking
+              </Tabs.Tab>
+              <Tabs.Tab value="chat-analytics" leftSection={<IconUsers size="0.8rem" />}>
+                Chat Analytics
+              </Tabs.Tab>
+              <Tabs.Tab value="live-support" leftSection={<IconEye size="0.8rem" />}>
+                Live Support
+              </Tabs.Tab>
+            </Tabs.List>
 
-          <Tabs.Panel value="chart" pt="xs">
-            <StreamAnalyticsChart admin={true} channel={selectedChannel} />
-          </Tabs.Panel>
+            <Tabs.Panel value="events" pt="xs">
+              <Stack gap="md">
+                <Group justify="space-between" align="center">
+                  <Title order={4}>Stream Events (Last 7 Days)</Title>
+                  <Group>
+                    <Select
+                      placeholder="Filter by event type"
+                      data={[
+                        { value: '', label: 'All Events' },
+                        { value: 'follow', label: 'Follows' },
+                        { value: 'subscription', label: 'Subscriptions' },
+                        { value: 'donation', label: 'Donations' },
+                        { value: 'raid', label: 'Raids' }
+                      ]}
+                      onChange={(value) => fetchStreamEvents(selectedChannel, value || undefined)}
+                    />
+                    <ActionIcon 
+                      variant="light" 
+                      onClick={() => fetchStreamEvents(selectedChannel)}
+                      loading={eventsLoading}
+                    >
+                      <IconRefresh size="1rem" />
+                    </ActionIcon>
+                  </Group>
+                </Group>
 
-          <Tabs.Panel value="overview" pt="xs">
-            <Stack gap="md">
-              <Group justify="space-between" align="center">
-                <Title order={3}>Event Summary (Last 7 Days)</Title>
-                <ActionIcon 
-                  variant="light" 
-                  onClick={() => selectedChannel && fetchEventSummary(selectedChannel)}
-                  loading={summaryLoading}
-                >
-                  <IconRefresh size="1rem" />
-                </ActionIcon>
-              </Group>
-              
-              {eventSummary && (
-                <Grid>
-                  <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                    <StatCard 
-                      title="Follows" 
-                      value={formatNumber(eventSummary.follows)} 
-                      icon={<IconUsers size="1.5rem" />} 
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                    <StatCard 
-                      title="Subscriptions" 
-                      value={formatNumber(eventSummary.subscriptions.total)} 
-                      icon={<IconHeart size="1.5rem" />} 
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                    <StatCard 
-                      title="Donations" 
-                      value={`${formatNumber(eventSummary.donations.total)} (${formatCurrency(eventSummary.donations.total_amount)})`} 
-                      icon={<IconGift size="1.5rem" />} 
-                    />
-                  </Grid.Col>
-                  <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                    <StatCard 
-                      title="Raids" 
-                      value={`${formatNumber(eventSummary.raids.total)} (${formatNumber(eventSummary.raids.total_viewers)} viewers)`} 
-                      icon={<IconTrendingUp size="1.5rem" />} 
-                    />
-                  </Grid.Col>
-                </Grid>
-              )}
-
-              {eventSummary && (
-                <Grid>
-                  <Grid.Col span={{ base: 12, md: 6 }}>
-                    <Card withBorder p="md">
-                      <Title order={4} mb="md">Subscription Breakdown</Title>
-                      <Stack gap="xs">
-                        <Group justify="space-between">
-                          <Text>Tier 1:</Text>
-                          <Badge color="blue">{formatNumber(eventSummary.subscriptions.tier1)}</Badge>
-                        </Group>
-                        <Group justify="space-between">
-                          <Text>Tier 2:</Text>
-                          <Badge color="purple">{formatNumber(eventSummary.subscriptions.tier2)}</Badge>
-                        </Group>
-                        <Group justify="space-between">
-                          <Text>Tier 3:</Text>
-                          <Badge color="gold">{formatNumber(eventSummary.subscriptions.tier3)}</Badge>
-                        </Group>
-                        <Group justify="space-between">
-                          <Text>Prime:</Text>
-                          <Badge color="violet">{formatNumber(eventSummary.subscriptions.prime)}</Badge>
-                        </Group>
-                      </Stack>
-                    </Card>
-                  </Grid.Col>
-                  <Grid.Col span={{ base: 12, md: 6 }}>
-                    <Card withBorder p="md">
-                      <Title order={4} mb="md">Donations by Platform</Title>
-                      <Stack gap="xs">
-                        {Object.entries(eventSummary.donations.by_platform).map(([platform, data]) => (
-                          <Group key={platform} justify="space-between">
-                            <Text tt="capitalize">{platform}:</Text>
-                            <Badge color="green">
-                              {formatNumber(data.count)} ({formatCurrency(data.amount)})
-                            </Badge>
-                          </Group>
+                {/* Event Summary Cards */}
+                {eventSummary && (
+                  <Grid mb="md">
+                    <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+                      <StatCard 
+                        title="Follows" 
+                        value={formatNumber(eventSummary.follows)} 
+                        icon={<IconUsers size="1.5rem" />} 
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+                      <StatCard 
+                        title="Subscriptions" 
+                        value={formatNumber(eventSummary.subscriptions.total)} 
+                        icon={<IconHeart size="1.5rem" />} 
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+                      <StatCard 
+                        title="Donations" 
+                        value={`${formatNumber(eventSummary.donations.total)} (${formatCurrency(eventSummary.donations.total_amount)})`} 
+                        icon={<IconGift size="1.5rem" />} 
+                      />
+                    </Grid.Col>
+                    <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
+                      <StatCard 
+                        title="Raids" 
+                        value={`${formatNumber(eventSummary.raids.total)} (${formatNumber(eventSummary.raids.total_viewers)} viewers)`} 
+                        icon={<IconTrendingUp size="1.5rem" />} 
+                      />
+                    </Grid.Col>
+                  </Grid>
+                )}
+                
+                <Paper withBorder>
+                  <ScrollArea>
+                    <Table striped highlightOnHover>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>Type</Table.Th>
+                          <Table.Th>User</Table.Th>
+                          <Table.Th>Amount</Table.Th>
+                          <Table.Th>Details</Table.Th>
+                          <Table.Th>Time</Table.Th>
+                        </Table.Tr>
+                      </Table.Thead>
+                      <Table.Tbody>
+                        {streamEvents.map((event) => (
+                          <Table.Tr key={event.id}>
+                            <Table.Td>
+                              <Group gap="xs">
+                                {getEventTypeIcon(event.event_type)}
+                                <Badge color={getEventTypeBadgeColor(event.event_type)} size="sm">
+                                  {event.event_type}
+                                </Badge>
+                              </Group>
+                            </Table.Td>
+                            <Table.Td>{event.display_name}</Table.Td>
+                            <Table.Td>
+                              {event.amount ? formatCurrency(event.amount) : '-'}
+                            </Table.Td>
+                            <Table.Td>
+                              {event.event_subtype && (
+                                <Badge variant="light" size="xs">{event.event_subtype}</Badge>
+                              )}
+                              {event.metadata?.message && (
+                                <Text size="xs" c="dimmed" truncate>
+                                  {event.metadata.message}
+                                </Text>
+                              )}
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm">{formatTimestamp(event.timestamp)}</Text>
+                            </Table.Td>
+                          </Table.Tr>
                         ))}
-                      </Stack>
-                    </Card>
-                  </Grid.Col>
-                </Grid>
-              )}
-            </Stack>
-          </Tabs.Panel>
+                      </Table.Tbody>
+                    </Table>
+                  </ScrollArea>
+                </Paper>
+              </Stack>
+            </Tabs.Panel>
 
-          <Tabs.Panel value="current-stream" pt="xs">
-            <Stack gap="md">
-              <Group justify="space-between" align="center">
-                <Title order={3}>Current Stream Stats</Title>
-                <ActionIcon 
-                  variant="light" 
-                  onClick={() => selectedChannel && fetchCurrentStreamStats(selectedChannel)}
-                  loading={currentStatsLoading}
-                >
-                  <IconRefresh size="1rem" />
-                </ActionIcon>
-              </Group>
-              
-              {currentStreamStats ? (
-                <Stack gap="md">
-                  <Card withBorder p="md">
-                    <Group justify="space-between" mb="md">
-                      <div>
-                        <Title order={4}>{currentStreamStats.stream_info.title}</Title>
-                        <Text c="dimmed">{currentStreamStats.stream_info.category}</Text>
-                      </div>
-                      <Badge color="green" size="lg">LIVE</Badge>
-                    </Group>
-                    <Text>
-                      Duration: {formatDuration(currentStreamStats.stream_info.duration_seconds)}
-                    </Text>
-                    <Text>
-                      Started: {formatTimestamp(currentStreamStats.stream_info.start_time)}
-                    </Text>
-                  </Card>
-
-                  <Grid>
-                    <Grid.Col span={{ base: 12, md: 6 }}>
-                      <Card withBorder p="md">
-                        <Title order={4} mb="md">New Followers</Title>
-                        <ScrollArea h={200}>
-                          <Stack gap="xs">
-                            {currentStreamStats.supporters.new_followers.map((follower, index) => (
-                              <Group key={index} justify="space-between">
-                                <Text>{follower.display_name}</Text>
-                                <Text size="sm" c="dimmed">
-                                  {formatTimestamp(follower.timestamp)}
-                                </Text>
-                              </Group>
-                            ))}
-                          </Stack>
-                        </ScrollArea>
-                      </Card>
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, md: 6 }}>
-                      <Card withBorder p="md">
-                        <Title order={4} mb="md">New Subscribers</Title>
-                        <ScrollArea h={200}>
-                          <Stack gap="xs">
-                            {currentStreamStats.supporters.new_subscribers.map((sub, index) => (
-                              <Group key={index} justify="space-between">
-                                <div>
-                                  <Text>{sub.display_name}</Text>
-                                  <Text size="xs" c="dimmed">
-                                    {sub.tier} • {sub.months} months
-                                  </Text>
-                                </div>
-                                <Text size="sm" c="dimmed">
-                                  {formatTimestamp(sub.timestamp)}
-                                </Text>
-                              </Group>
-                            ))}
-                          </Stack>
-                        </ScrollArea>
-                      </Card>
-                    </Grid.Col>
-                  </Grid>
-
-                  <Grid>
-                    <Grid.Col span={{ base: 12, md: 6 }}>
-                      <Card withBorder p="md">
-                        <Title order={4} mb="md">Recent Donations</Title>
-                        <ScrollArea h={200}>
-                          <Stack gap="xs">
-                            {currentStreamStats.supporters.donations.map((donation, index) => (
-                              <div key={index}>
-                                <Group justify="space-between">
-                                  <Text>{donation.display_name}</Text>
-                                  <Badge color="green">{formatCurrency(donation.amount)}</Badge>
-                                </Group>
-                                <Text size="xs" c="dimmed">{donation.message}</Text>
-                                <Text size="xs" c="dimmed">
-                                  {donation.platform} • {formatTimestamp(donation.timestamp)}
-                                </Text>
-                              </div>
-                            ))}
-                          </Stack>
-                        </ScrollArea>
-                      </Card>
-                    </Grid.Col>
-                    <Grid.Col span={{ base: 12, md: 6 }}>
-                      <Card withBorder p="md">
-                        <Title order={4} mb="md">Top Chatters</Title>
-                        <ScrollArea h={200}>
-                          <Stack gap="xs">
-                            {currentStreamStats.supporters.top_chatters.map((chatter, index) => (
-                              <Group key={index} justify="space-between">
-                                <div>
-                                  <Text>{chatter.display_name}</Text>
-                                  {chatter.is_first_time_chatter && (
-                                    <Badge size="xs" color="blue">First Time</Badge>
-                                  )}
-                                </div>
-                                <Badge variant="light">{formatNumber(chatter.message_count)} messages</Badge>
-                              </Group>
-                            ))}
-                          </Stack>
-                        </ScrollArea>
-                      </Card>
-                    </Grid.Col>
-                  </Grid>
-                </Stack>
-              ) : (
-                <Alert icon={<IconAlertCircle size="1rem" />} title="No Active Stream" color="yellow">
-                  No active stream session found for this channel.
-                </Alert>
-              )}
-            </Stack>
-          </Tabs.Panel>
-
-          <Tabs.Panel value="events" pt="xs">
-            <Stack gap="md">
-              <Group justify="space-between" align="center">
-                <Title order={3}>Stream Events (Last 7 Days)</Title>
-                <Group>
-                  <Select
-                    placeholder="Filter by event type"
-                    data={[
-                      { value: '', label: 'All Events' },
-                      { value: 'follow', label: 'Follows' },
-                      { value: 'subscription', label: 'Subscriptions' },
-                      { value: 'donation', label: 'Donations' },
-                      { value: 'raid', label: 'Raids' }
-                    ]}
-                    onChange={(value) => selectedChannel && fetchStreamEvents(selectedChannel, value || undefined)}
-                  />
+            <Tabs.Panel value="chat-analytics" pt="xs">
+              <Stack gap="md">
+                <Group justify="space-between" align="center">
+                  <Title order={4}>Chat Users (Last 7 Days)</Title>
                   <ActionIcon 
                     variant="light" 
-                    onClick={() => selectedChannel && fetchStreamEvents(selectedChannel)}
-                    loading={eventsLoading}
+                    onClick={() => fetchChatUsers(selectedChannel)}
+                    loading={chatUsersLoading}
                   >
                     <IconRefresh size="1rem" />
                   </ActionIcon>
                 </Group>
-              </Group>
-              
-              <Paper withBorder>
-                <ScrollArea>
-                  <Table striped highlightOnHover>
-                    <Table.Thead>
-                      <Table.Tr>
-                        <Table.Th>Type</Table.Th>
-                        <Table.Th>User</Table.Th>
-                        <Table.Th>Amount</Table.Th>
-                        <Table.Th>Details</Table.Th>
-                        <Table.Th>Time</Table.Th>
-                      </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                      {streamEvents.map((event) => (
-                        <Table.Tr key={event.id}>
-                          <Table.Td>
-                            <Group gap="xs">
-                              {getEventTypeIcon(event.event_type)}
-                              <Badge color={getEventTypeBadgeColor(event.event_type)} size="sm">
-                                {event.event_type}
-                              </Badge>
-                            </Group>
-                          </Table.Td>
-                          <Table.Td>{event.display_name}</Table.Td>
-                          <Table.Td>
-                            {event.amount ? formatCurrency(event.amount) : '-'}
-                          </Table.Td>
-                          <Table.Td>
-                            {event.event_subtype && (
-                              <Badge variant="light" size="xs">{event.event_subtype}</Badge>
-                            )}
-                            {event.metadata?.message && (
-                              <Text size="xs" c="dimmed" truncate>
-                                {event.metadata.message}
-                              </Text>
-                            )}
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">{formatTimestamp(event.timestamp)}</Text>
-                          </Table.Td>
+                
+                <Paper withBorder>
+                  <ScrollArea>
+                    <Table striped highlightOnHover>
+                      <Table.Thead>
+                        <Table.Tr>
+                          <Table.Th>User</Table.Th>
+                          <Table.Th>Messages</Table.Th>
+                          <Table.Th>First Message</Table.Th>
+                          <Table.Th>Last Message</Table.Th>
+                          <Table.Th>Status</Table.Th>
                         </Table.Tr>
-                      ))}
-                    </Table.Tbody>
-                  </Table>
-                </ScrollArea>
-              </Paper>
-            </Stack>
-          </Tabs.Panel>
+                      </Table.Thead>
+                      <Table.Tbody>
+                        {chatUsers.map((user) => (
+                          <Table.Tr key={user.id}>
+                            <Table.Td>{user.display_name}</Table.Td>
+                            <Table.Td>
+                              <Badge variant="light">{formatNumber(user.message_count)}</Badge>
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm">{formatTimestamp(user.first_message_time)}</Text>
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm">{formatTimestamp(user.last_message_time)}</Text>
+                            </Table.Td>
+                            <Table.Td>
+                              {user.is_first_time_chatter && (
+                                <Badge color="blue" size="sm">First Time</Badge>
+                              )}
+                            </Table.Td>
+                          </Table.Tr>
+                        ))}
+                      </Table.Tbody>
+                    </Table>
+                  </ScrollArea>
+                </Paper>
+              </Stack>
+            </Tabs.Panel>
 
-          <Tabs.Panel value="chat-users" pt="xs">
-            <Stack gap="md">
-              <Group justify="space-between" align="center">
-                <Title order={3}>Chat Users (Last 7 Days)</Title>
-                <ActionIcon 
-                  variant="light" 
-                  onClick={() => selectedChannel && fetchChatUsers(selectedChannel)}
-                  loading={chatUsersLoading}
-                >
-                  <IconRefresh size="1rem" />
-                </ActionIcon>
-              </Group>
-              
-              <Paper withBorder>
-                <ScrollArea>
-                  <Table striped highlightOnHover>
-                    <Table.Thead>
-                      <Table.Tr>
-                        <Table.Th>User</Table.Th>
-                        <Table.Th>Messages</Table.Th>
-                        <Table.Th>First Message</Table.Th>
-                        <Table.Th>Last Message</Table.Th>
-                        <Table.Th>Status</Table.Th>
-                      </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                      {chatUsers.map((user) => (
-                        <Table.Tr key={user.id}>
-                          <Table.Td>{user.display_name}</Table.Td>
-                          <Table.Td>
-                            <Badge variant="light">{formatNumber(user.message_count)}</Badge>
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">{formatTimestamp(user.first_message_time)}</Text>
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">{formatTimestamp(user.last_message_time)}</Text>
-                          </Table.Td>
-                          <Table.Td>
-                            {user.is_first_time_chatter && (
-                              <Badge color="blue" size="sm">First Time</Badge>
-                            )}
-                          </Table.Td>
-                        </Table.Tr>
-                      ))}
-                    </Table.Tbody>
-                  </Table>
-                </ScrollArea>
-              </Paper>
-            </Stack>
-          </Tabs.Panel>
+            <Tabs.Panel value="live-support" pt="xs">
+              <Stack gap="md">
+                <Group justify="space-between" align="center">
+                  <Title order={4}>Live Stream Support</Title>
+                  <ActionIcon 
+                    variant="light" 
+                    onClick={() => fetchCurrentStreamStats(selectedChannel)}
+                    loading={currentStatsLoading}
+                  >
+                    <IconRefresh size="1rem" />
+                  </ActionIcon>
+                </Group>
+                
+                {currentStreamStats ? (
+                  <Stack gap="md">
+                    <Card withBorder p="md">
+                      <Group justify="space-between" mb="md">
+                        <div>
+                          <Title order={5}>{currentStreamStats.stream_info.title}</Title>
+                          <Text c="dimmed">{currentStreamStats.stream_info.category}</Text>
+                        </div>
+                        <Badge color="green" size="lg">LIVE</Badge>
+                      </Group>
+                      <Text>
+                        Duration: {formatDuration(currentStreamStats.stream_info.duration_seconds)}
+                      </Text>
+                      <Text>
+                        Started: {formatTimestamp(currentStreamStats.stream_info.start_time)}
+                      </Text>
+                    </Card>
 
-          <Tabs.Panel value="sessions" pt="xs">
-            <Stack gap="md">
-              <Group justify="space-between" align="center">
-                <Title order={3}>Stream Sessions (Last 30 Days)</Title>
-                <ActionIcon 
-                  variant="light" 
-                  onClick={() => selectedChannel && fetchStreamSessions(selectedChannel)}
-                  loading={sessionsLoading}
-                >
-                  <IconRefresh size="1rem" />
-                </ActionIcon>
-              </Group>
-              
-              <Paper withBorder>
-                <ScrollArea>
-                  <Table striped highlightOnHover>
-                    <Table.Thead>
-                      <Table.Tr>
-                        <Table.Th>Title</Table.Th>
-                        <Table.Th>Category</Table.Th>
-                        <Table.Th>Duration</Table.Th>
-                        <Table.Th>Peak Viewers</Table.Th>
-                        <Table.Th>Avg Viewers</Table.Th>
-                        <Table.Th>Messages</Table.Th>
-                        <Table.Th>Start Time</Table.Th>
-                        <Table.Th>Status</Table.Th>
-                      </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                      {streamSessions.map((session) => (
-                        <Table.Tr key={session.id}>
-                          <Table.Td>
-                            <Text truncate maw={200}>{session.title}</Text>
-                          </Table.Td>
-                          <Table.Td>{session.category}</Table.Td>
-                          <Table.Td>{formatDuration(session.duration_seconds)}</Table.Td>
-                          <Table.Td>
-                            <Group gap="xs">
-                              <IconTrophy size="0.8rem" />
-                              {formatNumber(session.peak_viewers)}
-                            </Group>
-                          </Table.Td>
-                          <Table.Td>{formatNumber(session.avg_viewers)}</Table.Td>
-                          <Table.Td>{formatNumber(session.total_messages)}</Table.Td>
-                          <Table.Td>
-                            <Text size="sm">{formatTimestamp(session.start_timestamp)}</Text>
-                          </Table.Td>
-                          <Table.Td>
-                            <Badge color={session.is_active ? 'green' : 'gray'}>
-                              {session.is_active ? 'Live' : 'Ended'}
-                            </Badge>
-                          </Table.Td>
-                        </Table.Tr>
-                      ))}
-                    </Table.Tbody>
-                  </Table>
-                </ScrollArea>
-              </Paper>
-            </Stack>
-          </Tabs.Panel>
-        </Tabs>
+                    <Grid>
+                      <Grid.Col span={{ base: 12, md: 6 }}>
+                        <Card withBorder p="md">
+                          <Title order={5} mb="md">New Followers</Title>
+                          <ScrollArea h={200}>
+                            <Stack gap="xs">
+                              {currentStreamStats.supporters.new_followers.map((follower, index) => (
+                                <Group key={index} justify="space-between">
+                                  <Text>{follower.display_name}</Text>
+                                  <Text size="sm" c="dimmed">
+                                    {formatTimestamp(follower.timestamp)}
+                                  </Text>
+                                </Group>
+                              ))}
+                            </Stack>
+                          </ScrollArea>
+                        </Card>
+                      </Grid.Col>
+                      <Grid.Col span={{ base: 12, md: 6 }}>
+                        <Card withBorder p="md">
+                          <Title order={5} mb="md">Recent Donations</Title>
+                          <ScrollArea h={200}>
+                            <Stack gap="xs">
+                              {currentStreamStats.supporters.donations.map((donation, index) => (
+                                <div key={index}>
+                                  <Group justify="space-between">
+                                    <Text>{donation.display_name}</Text>
+                                    <Badge color="green">{formatCurrency(donation.amount)}</Badge>
+                                  </Group>
+                                  <Text size="xs" c="dimmed">{donation.message}</Text>
+                                  <Text size="xs" c="dimmed">
+                                    {donation.platform} • {formatTimestamp(donation.timestamp)}
+                                  </Text>
+                                </div>
+                              ))}
+                            </Stack>
+                          </ScrollArea>
+                        </Card>
+                      </Grid.Col>
+                    </Grid>
+                  </Stack>
+                ) : (
+                  <Alert icon={<IconAlertCircle size="1rem" />} title="No Active Stream" color="yellow">
+                    No active stream session found for this channel.
+                  </Alert>
+                )}
+              </Stack>
+            </Tabs.Panel>
+          </Tabs>
         )}
       </Stack>
     </Container>
