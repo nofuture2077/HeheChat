@@ -140,7 +140,7 @@ export function AdminChannelManagementPage() {
           if (!a.last_login && !b.last_login) return 0;
           if (!a.last_login) return 1;
           if (!b.last_login) return -1;
-          return new Date(b.last_login).getTime() - new Date(a.last_login).getTime();
+          return new Date(Number(b.last_login)).getTime() - new Date(Number(a.last_login)).getTime();
         });
         setChannels(sortedChannels);
         setLastUpdated(new Date());
@@ -573,13 +573,13 @@ export function AdminChannelManagementPage() {
           </Stack>
         </Table.Td>
         <Table.Td>
-          <Text size="sm" c={channel.first_login ? 'dark' : 'dimmed'}>
-            {channel.first_login ? new Date(channel.first_login).toLocaleString() : 'Never'}
+          <Text size="sm" c={channel.first_login ? '' : 'dimmed'}>
+            {channel.first_login ? new Date(Number(channel.first_login)).toLocaleString() : 'Never'}
           </Text>
         </Table.Td>
         <Table.Td>
-          <Text size="sm" c={channel.last_login ? 'dark' : 'dimmed'}>
-            {channel.last_login ? new Date(channel.last_login).toLocaleString() : 'Never'}
+          <Text size="sm" c={channel.last_login ? '' : 'dimmed'}>
+            {channel.last_login ? new Date(Number(channel.last_login)).toLocaleString() : 'Never'}
           </Text>
         </Table.Td>
         <Table.Td>
