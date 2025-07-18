@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { UnstyledButton, Tooltip, Title, rem, Button, Box, Avatar, ScrollArea } from '@mantine/core';
+import { UnstyledButton, Tooltip, Title, rem, Button, Avatar, ScrollArea } from '@mantine/core';
 import {
   IconHome2,
   IconX,
@@ -8,36 +8,45 @@ import {
   IconChevronRight,
   IconBell,
   IconShare,
-  IconKeyboard
+  IconKeyboard,
+  IconUserUp,
+  IconCrown,
+  IconBrandDiscord
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ChatSettings } from './ChatSettings';
 import { UISettings } from './UISettings';
 import { ModSettings } from './ModSettings';
 import { InfoCard } from '../infocard/infocard';
-import { LoginContextContext } from '@/ApplicationContext';
+import { LoginContextContext, PremiumContext } from '@/ApplicationContext';
 import { AlertSettings } from './AlertSettings';
-import { ShareSettings } from './ShareSettings';
+import { ConnectSettings } from './ConnectSettings';
 import { ShortcutSettings } from './ShortcutSettings';
+import { NotificationSettings } from './NotificationSettings';
 import { OverlayDrawer } from '@/pages/Chat.page';
+import { PremiumSettings } from '../premium';
+import { DiscordInfo } from './DiscordInfo';
 
 const mainLinksMockdata = [
   { icon: IconHome2, label: 'General' },
   { icon: IconMessageChatbot, label: 'Chat' },
   { icon: IconSword, label: 'Mod' },
   { icon: IconBell, label: 'Alerts' },
-  { icon: IconShare, label: 'Share' },
-  { icon: IconKeyboard, label: 'Shortcuts' }
+  { icon: IconShare, label: 'Connect' },
+  { icon: IconKeyboard, label: 'Shortcuts' },
+  { icon: IconUserUp, label: 'Notifications' },
+  { icon: IconCrown, label: 'Premium' },
+  { icon: IconBrandDiscord, label: 'Discord' },
 ];
 
 export const SettingsDrawer: OverlayDrawer = {
   name: 'settings',
   component: Settings,
   size: 440,
-  position: 'left',
+  position: 'right',
 }
 
-export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts' | 'Share' | 'Shortcuts';
+export type SettingsTab = 'General' | 'Chat' | 'Mod' | 'Alerts' | 'Notifications' | 'Connect' | 'Shortcuts' | 'Premium' | 'Discord';
 
 export interface SettingsProperties {
   close: () => void;
@@ -78,10 +87,16 @@ export function Settings(props: SettingsProperties) {
         return <ModSettings />;
       case 'Alerts':
         return <AlertSettings />;
-      case 'Share':
-        return <ShareSettings />;
+      case 'Notifications':
+        return <NotificationSettings />;
+      case 'Connect':
+        return <ConnectSettings />;
       case 'Shortcuts':
         return <ShortcutSettings />;
+      case 'Premium':
+        return <PremiumSettings />;
+      case 'Discord':
+        return <DiscordInfo />;
       default:
         return null;
     }
@@ -110,7 +125,7 @@ export function Settings(props: SettingsProperties) {
         </div>
       </div>
       <div className={classes.footer}>
-        <InfoCard onClick={props.openUserProfile} date={0} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''} left={<Avatar src={loginContext.user?.profilePictureUrl || ''} radius="xl"/>} right={<IconChevronRight/>}/>
+        <InfoCard onClick={props.openUserProfile} showPremium={true} date={0} name={loginContext.user?.displayName || ''} text={loginContext.user?.description || ''} left={<Avatar src={loginContext.user?.profilePictureUrl || ''} radius="xl"/>} right={<IconChevronRight/>}/>
       </div>
     </nav>
   );

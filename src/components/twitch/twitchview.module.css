@@ -3,10 +3,23 @@
     display: flex;
     flex-direction: column;
     border-right: rem(1px) solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-    height: 100vh;
+    height: 100dvh;
     justify-content: space-between;
 }
 
 .main {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.streams {
+    padding-bottom: 10px;
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+}
+
+.header {
+    background-color: var(--mantine-color-body);
 }

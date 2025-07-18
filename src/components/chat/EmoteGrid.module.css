@@ -1,0 +1,98 @@
+.container {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: 300px;
+  z-index: 1000;
+  background-color: #1A1A1A;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .container {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 8px;
+    right: 8px;
+    max-height: 40vh;
+    z-index: 1001;
+    /* Ensure it's visible above mobile keyboards */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+  
+  .scrollArea {
+    height: 30vh;
+    max-height: 30vh;
+  }
+}
+
+/* For very small screens */
+@media (max-width: 480px) {
+  .container {
+    left: 4px;
+    right: 4px;
+    max-height: 45vh;
+  }
+  
+  .scrollArea {
+    height: 35vh;
+    max-height: 35vh;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .container {
+    /* Force hardware acceleration on touch devices */
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  
+  .emoteContainer {
+    /* Larger touch targets on mobile */
+    padding: 8px;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .emoteContainer:active {
+    background-color: #2A2A2A;
+    transform: scale(0.95);
+  }
+}
+
+.scrollArea {
+  height: 350px;
+  max-height: 350px;
+  overflow-x: hidden;
+}
+
+.gridContainer {
+  overflow: hidden;
+}
+
+.categoryTitle {
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: white;
+}
+
+.emoteContainer {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.emoteContainer:hover {
+  background-color: #2A2A2A;
+}

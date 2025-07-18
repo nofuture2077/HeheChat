@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
-import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext } from '../ApplicationContext';
+import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext, PremiumContext } from '../ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
-import { ScrollArea, Affix, Drawer, Button, Space, ActionIcon, Badge, Stack, Group } from '@mantine/core';
+import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, ActionIcon, Text } from '@mantine/core';
+import { IconAlertTriangle, IconDeviceDesktop, IconRepeat, IconMessagePause, IconSettings, IconKeyboard, IconBell, IconBrandTwitch } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { Chat } from '../components/chat/Chat';
+import { MobileAppPrompt } from '../components/chat/MobileAppPrompt';
 import { ShortcutView } from '../components/shortcuts/ShortcutView';
-import { IconMessagePause } from '@tabler/icons-react';
 import { AppShell } from '@mantine/core';
 import { Header } from '../components/header/Header';
+import { HeaderLogo } from '../components/header/HeaderLogo';
 import { EventDrawer } from '../components/events/eventdrawer';
 import { ChatInput } from '../components/chat/ChatInput';
 import { HelixModeratedChannel } from '@twurple/api';
@@ -15,16 +18,25 @@ import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { HeheMessage, parseMessage, HeheChatMessage } from '../commons/message';
 import { TwitchDrawer } from '../components/twitch/twitchview';
-import { ModActions, deleteMessage, timeoutUser, banUser, raidUser, shoutoutUser } from '../components/chat/mod/modactions';
+import { TwitchPlayer } from '../components/twitch/twitchplayer';
+import { TwitchClipsPlayer } from '../components/twitch/twitchclipsplayer';
+import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, shoutoutUser, modUser, unmodUser, vipUser, unvipUser, unraid } from '../components/chat/mod/modactions';
 import { ProfileBarDrawer } from '../components/profile/profilebar';
 import { Storage } from '../components/chat/chatstorage';
 import { AlertSystem } from '../components/alerts/alertplayer';
+import { AlertStatusIndicator } from '../components/alerts/AlertStatusIndicator';
+import { ConnectionStatusIndicator } from '../components/alerts/ConnectionStatusIndicator';
+import { ReloadAlertsButton } from '../components/alerts/ReloadAlertsButton';
 import { toMap } from '../commons/helper';
 import { Event } from '../commons/events';
 import { UserCardDrawer } from '../components/login/usercard';
 import { PinManager } from '../components/pinned/pinmanager';
 import { useViewportWidthCallback } from '../commons/helper';
 import { getDimension } from '../components/twitch/twitchplayer';
+import { EmoteStore } from '../components/chat/emotestorage';
+import { getRawData } from '@twurple/common';
+import { NewsDisplay } from '../components/news/NewsDisplay';
+import classes from './chat.module.css'
 
 export type OverlayDrawer = {
     name: string;
@@ -34,13 +46,23 @@ export type OverlayDrawer = {
     props?: any;
 }
 
-export function ChatPage() {
+interface ChatPageProps {
+    connectionStatus?: {
+        status: string;
+        reconnectAttempts: number;
+        lastHeartbeat: string | null;
+    };
+}
+
+export function ChatPage({ connectionStatus }: ChatPageProps) {
     const viewport = useRef<HTMLDivElement>(null);
     const footer = useRef<HTMLDivElement>(null);
     const { width, height } = useViewportSize();
     const config = useContext(ConfigContext);
     const profile = useContext(ProfileContext);
+    const premium = useContext(PremiumContext);
     const [chatMessages, setChatMessages] = useThrottledState<HeheMessage[]>([], 500);
+    const [usernames, setUsernames] = useState<Set<string>>(new Set());
     const [shouldScroll, setShouldScroll] = useState(true);
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
@@ -54,9 +76,24 @@ export function ChatPage() {
     const [online, setOnline] = useState(true);
     const documentVisible = useDocumentVisibility();
     const networkStatus = useNetwork();
+    const prevDocumentVisible = useRef(true); // Start with true to detect first hide->show transition
     const [videoHeight, setVideoHeight] = useState(0);
-    const [shortcutsVisible, setShortcutsVisible] = useState(true);
+    // Load shortcuts visible state from localStorage with profile.guid based key
+    const [shortcutsVisible, setShortcutsVisible] = useState(() => {
+        const key = `hehe-shortcuts-visible-${profile.guid}`;
+        const saved = localStorage.getItem(key);
+        return saved !== null ? JSON.parse(saved) : true;
+    });
     const [currentClipId, setCurrentClipId] = useState<string | null>(null);
+    const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
+    const notificationIdsRef = useRef<string[]>([]);
+    
+    // Chat width state with localStorage persistence
+    const [chatWidth, setChatWidth] = useState(() => {
+        const saved = localStorage.getItem('hehe-chat-width');
+        return saved ? parseInt(saved, 10) : 480;
+    });
+    const [isResizing, setIsResizing] = useState(false);
 
     const onScrollPositionChange = (position: { x: number, y: number }) => {
         const viewportElement = viewport.current;
@@ -86,34 +123,12 @@ export function ChatPage() {
         if (msg.id && messageIndex.has(msg.id)) {
             return;
         }
-        if (msg instanceof HeheChatMessage && msg.text.startsWith("!tts") && (config.freeTTS || []).includes(user)) {
-            const message = msg.text.split("!tts")[1];
-            AlertSystem.addEvent({
-                id: Date.now(),
-                channel: msg.channelId || '',
-                username: user, 
-                eventtype: 'raid',
-                date: Date.now(),
-                text: message,
-                eventAlert: {
-                    name: 'defaul',
-                    id: Date.now() + "",
-                    type: 'raid',
-                    specifier: {
-                        type: 'matches'
-                    },
-                    restriction: 'none',
-                    audio: {
-                        tts: {
-                            text: message,
-                            voiceType: 'google',
-                            voiceSpecifier: 'adam',
-                            voiceParams: {}
-                        }
-                    }
-                }
-            });
+        
+        // Track username from new messages
+        if (msg.type === 'chat') {
+            setUsernames(prev => new Set([...prev, msg.userInfo.userName.toLowerCase()]));
         }
+
         setChatMessages((prevMessages) => prevMessages.concat(msg).slice((prevMessages.length % 2) ? 0 : (-1 * maxMessages + 1)));
     };
 
@@ -128,6 +143,14 @@ export function ChatPage() {
             const messagesToDelete = chatMessages.filter(m => m._prefix?.user === username).map(m => m.id);
             setDeletedMessages((dM) => dM.concat(messagesToDelete));
         }
+        if (data.eventtype === "seventv_emote_add") {
+            const d = JSON.parse(data.text);
+            PubSub.publish('Update-seventTV', {type: "add", data: d})
+        }
+        if (data.eventtype === "seventv_emote_remove") {
+            const d = JSON.parse(data.text);
+            PubSub.publish('Update-seventTV', {type: "remove", data: d})
+        }
     }, [chatMessages]);
 
     useViewportWidthCallback(() => {
@@ -136,11 +159,150 @@ export function ChatPage() {
     });
 
     useEffect(() => {
-        const modEventSub = PubSub.subscribe("WS-modevent", onModEvent);
-        return () => {
-            PubSub.unsubscribe(modEventSub);
-        };
-    }, [onModEvent]);
+        forceUpdate();
+    }, [replyMsg]);
+
+    // Define interfaces for the new connection data structure
+    interface ConnectionSource {
+        userId: string;
+        userName: string;
+        channels: string[];
+        guid: string;
+        connectionStatus: any;
+    }
+    
+    interface ProfileSources {
+        [sourceName: string]: ConnectionSource;
+    }
+    
+    interface ProfileConnection {
+        profileName: string;
+        sources: ProfileSources;
+    }
+    
+    interface UserConnections {
+        [connectionId: string]: ProfileConnection;
+    }
+    
+    interface ConnectionsData {
+        [username: string]: UserConnections;
+    }
+    
+    interface ConnectionsResponse {
+        connection_count: number;
+        connections: ConnectionsData;
+    }
+
+    // Function to check connections and show warnings if needed
+    const checkConnections = useCallback(async () => {
+        try {
+            if (!config.checkBrowsersourceConnection || !config.browserSourceAudio) {
+                return;
+            }
+            const token = localStorage.getItem('hehe-token_state') || '';
+            if (!token) return;
+            
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/connection?token=${token}`);
+            const data: ConnectionsResponse = await response.json();
+            
+            // Clear previous notifications
+            notificationIdsRef.current.forEach((id: string) => notifications.hide(id));
+            const newNotificationIds: string[] = [];
+            
+            if (!data || !data.connections || Object.keys(data.connections).length === 0) {
+                return;
+            }
+            
+            // Check for Browsersource connections across all users and profiles
+            let hasBrowserSourceForCurrentProfile = false;
+            let browserSourceForDifferentProfileName = '';
+            let browserSourceConnectionsCount = 0;
+            let replayAppConnectionsCount = 0;
+            
+            // Iterate through all users and their connections
+            Object.values(data.connections).forEach(userConnections => {
+                // Check each connection (profile)
+                Object.entries(userConnections).forEach(([connectionId, profileConnection]) => {
+                    // Check if this profile has Browsersource connections
+                    if (profileConnection.sources && profileConnection.sources['Browsersource']) {
+                        if (connectionId === profile.guid) {
+                            hasBrowserSourceForCurrentProfile = true;
+                            browserSourceConnectionsCount = 1; // Each connection represents one browsersource
+                        } else {
+                            browserSourceForDifferentProfileName = profileConnection.profileName;
+                        }
+                    }
+                    
+                    // Check if this profile has ReplayApp connections
+                    if (connectionId === profile.guid && 
+                        profileConnection.sources && 
+                        profileConnection.sources['ReplayApp']) {
+                        replayAppConnectionsCount = 1; // Each connection represents one replayapp
+                    }
+                });
+            });
+            
+            // Check if user has set Alert Audio to Browsersource
+            if (config.browserSourceAudio && !hasBrowserSourceForCurrentProfile) {
+                const id = `browsersource-warning-${Date.now()}`;
+                notifications.show({
+                    id,
+                    title: 'Connection Warning',
+                    message: 'You have set Alert Audio to Browsersource, but there is no Browsersource connected for this profile. Your alerts may not play correctly.',
+                    color: 'yellow',
+                    icon: <IconAlertTriangle size="1rem" />,
+                    autoClose: 10000,
+                });
+                newNotificationIds.push(id);
+            }
+            
+            // Check if there's a Browsersource for a different profile
+            if (browserSourceForDifferentProfileName) {
+                const id = `browsersource-different-profile-${Date.now()}`;
+                notifications.show({
+                    id,
+                    title: 'Connection Warning',
+                    message: `There is a Browsersource connected for profile "${browserSourceForDifferentProfileName}". Make sure this is intended.`,
+                    color: 'yellow',
+                    icon: <IconAlertTriangle size="1rem" />,
+                    autoClose: 10000,
+                });
+                newNotificationIds.push(id);
+            }
+            
+            // Show notifications for Browsersource connections
+            if (browserSourceConnectionsCount > 0) {
+                const id = `browsersource-connected-${Date.now()}`;
+                notifications.show({
+                    id,
+                    title: 'Browsersource Connected',
+                    message: `${browserSourceConnectionsCount} Browsersource connection(s) found for profile "${profile.name}"`,
+                    color: 'green',
+                    icon: <IconDeviceDesktop size="1rem" />,
+                    autoClose: 3000,
+                });
+                newNotificationIds.push(id);
+            }
+            
+            // Show notifications for ReplayApp connections
+            if (replayAppConnectionsCount > 0) {
+                const id = `replayapp-connected-${Date.now()}`;
+                notifications.show({
+                    id,
+                    title: 'ReplayApp Connected',
+                    message: `${replayAppConnectionsCount} ReplayApp connection(s) found for profile "${profile.name}"`,
+                    color: 'green',
+                    icon: <IconRepeat size="1rem" />,
+                    autoClose: 3000,
+                });
+                newNotificationIds.push(id);
+            }
+            
+            notificationIdsRef.current = newNotificationIds;
+        } catch (error) {
+            console.error('Error checking connections:', error);
+        }
+    }, [config, profile]);
 
     useEffect(() => {
         if (profile.name === 'default' && !config.channels.length) {
@@ -153,9 +315,6 @@ export function ChatPage() {
             }, 2500);
         }
         config.loadShares();
-
-        return () => {
-        }
     }, []);
 
     useEffect(() => {
@@ -170,16 +329,30 @@ export function ChatPage() {
         });
 
         const eventSub = PubSub.subscribe("WS-event", (msg, data: Event) => {
-            if (AlertSystem.shouldBePlayed(data)) {
+            if (AlertSystem.shouldBePlayedInApp(data)) {
                 AlertSystem.addEvent(data);
             }
         });
         const modEventSub = PubSub.subscribe("WS-modevent", onModEvent);
 
-        Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
+        Storage.load(config.channels, config.ignoredUsers, config.maxMessages).then(rawMessages => {
             const msgs = rawMessages.map(parseMessage);
+            setUsernames(new Set(msgs.filter(msg => msg.type === 'chat').map(msg => msg.userInfo.userName.toLowerCase())));
             setChatMessages(msgs);
         });
+
+        if (loginContext.user) {
+            const userId = loginContext.user.id;
+            EmoteStore.getUserEmotes(userId).then(async (userEmotes) => {
+                if (!userEmotes || Date.now() - userEmotes.timestamp > 24 * 60 * 60 * 1000) { // Refresh if older than 24h
+                    const api = loginContext.getApiClient();
+                    
+                    const userEmotesResult = (await api.chat.getUserEmotesPaginated(userId).getAll()).map(getRawData);
+
+                    await EmoteStore.storeUserEmotes(userId, userEmotesResult);
+                }
+            });
+        }
 
         (loginContext.moderatedChannels || []).forEach(mC => {
             emotes.updateUserInfo(loginContext, mC.name);
@@ -199,14 +372,21 @@ export function ChatPage() {
 
         setTimeout(() => {
             scrollToBottom();
-        }, 2000);
+        }, 5000);
 
         (config.channels || []).forEach(channel => {
-            emotes.updateChannel(loginContext, channel).then(forceUpdate);
+            emotes.updateChannel(channel).then(forceUpdate);
         });
         const state = localStorage.getItem('hehe-token_state') || '';
         AlertSystem.addNewChannels(config.channels);
-        PubSub.publish("WSSEND", { type: "subscribe", state, channels: Object.fromEntries(config.channels.map(key => [key, true])) });
+        PubSub.publish("WSSEND", { 
+            type: "subscribe", 
+            source: "HeheChat App", 
+            profile: profile.guid,
+            profileName: profile.name,
+            state, 
+            channels: Object.fromEntries(config.channels.map(key => [key, true])) 
+        });
 
         return () => {
             PubSub.unsubscribe(msgSub);
@@ -214,14 +394,28 @@ export function ChatPage() {
             PubSub.unsubscribe(modEventSub);
             config.off(chatHandler);
         };
-    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS]);
+    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, loginContext.user]);
 
-    useDidUpdate(() => {
+    // Track document visibility changes for reload functionality
+    useEffect(() => {
+        const isVisible = documentVisible === 'visible';
+        
+        // Check if document became visible (was hidden, now visible) and reload if enabled
+        if (isVisible && !prevDocumentVisible.current && networkStatus.online && config.reloadOnReturnToApp) {
+            console.log('Reloading page due to return to app');
+            window.location.reload();
+            return;
+        }
+        
+        // Update the previous visibility state
+        prevDocumentVisible.current = isVisible;
+
         setOnline(networkStatus.online);
         setShouldScroll(true);
-        if (networkStatus.online && documentVisible) {
-            Storage.load(config.channels, config.ignoredUsers).then(rawMessages => {
+        if (networkStatus.online && isVisible) {
+            Storage.load(config.channels, config.ignoredUsers, config.maxMessages).then(rawMessages => {
                 const msgs = rawMessages.map(parseMessage);
+                setUsernames(new Set(msgs.filter(msg => msg.type === 'chat').map(msg => msg.userInfo.userName.toLowerCase())));
                 setChatMessages(msgs);
             });
         }
@@ -231,7 +425,29 @@ export function ChatPage() {
         setTimeout(() => {
             scrollToBottom();
         }, 2000);
-    }, [documentVisible, networkStatus.online]);
+
+        // Check connections when component mounts
+        checkConnections();
+    }, [documentVisible, networkStatus.online, config.reloadOnReturnToApp]);
+
+    // Save shortcuts visible state to localStorage when it changes
+    useEffect(() => {
+        const key = `hehe-shortcuts-visible-${profile.guid}`;
+        localStorage.setItem(key, JSON.stringify(shortcutsVisible));
+    }, [shortcutsVisible, profile.guid]);
+
+    // Load shortcuts visible state when profile changes
+    useEffect(() => {
+        const key = `hehe-shortcuts-visible-${profile.guid}`;
+        const saved = localStorage.getItem(key);
+        const newState = saved !== null ? JSON.parse(saved) : true;
+        setShortcutsVisible(newState);
+    }, [profile.guid]);
+
+    // Check connections when profile changes or browserSourceAudio setting changes
+    useEffect(() => {
+        checkConnections();
+    }, [profile.guid, config.browserSourceAudio]);
 
     useEffect(() => {
         if (shouldScroll) {
@@ -239,8 +455,8 @@ export function ChatPage() {
         }
     }, [chatMessages, shouldScroll]);
 
-    const openModView = (msg: HeheChatMessage) => {
-        ModDrawer.props = { msg };
+    const openModView = (channel: string, channelId: string, username: string) => {
+        ModDrawer.props = { channel, channelId, username };
         setDrawer(ModDrawer);
         drawerHandler.open()
     }
@@ -249,13 +465,168 @@ export function ChatPage() {
         deleteMessage,
         timeoutUser,
         banUser,
+        unbanUser,
         shoutoutUser,
-        raidUser
+        raidUser,
+        modUser,
+        unmodUser,
+        vipUser,
+        unvipUser,
+        unraid
     };
+
+    // Resize handlers
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+        e.preventDefault();
+        setIsResizing(true);
+    }, []);
+
+    const handleMouseMove = useCallback((e: MouseEvent) => {
+        if (!isResizing) return;
+        
+        const newWidth = width - e.clientX;
+        const clampedWidth = Math.max(300, Math.min(800, newWidth));
+        setChatWidth(clampedWidth);
+    }, [isResizing, width]);
+
+    const handleMouseUp = useCallback(() => {
+        if (isResizing) {
+            setIsResizing(false);
+            localStorage.setItem('hehe-chat-width', chatWidth.toString());
+        }
+    }, [isResizing, chatWidth]);
+
+    // Add event listeners for resize
+    useEffect(() => {
+        if (isResizing) {
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+        } else {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
+
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        };
+    }, [isResizing, handleMouseMove, handleMouseUp]);
 
     const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);
     const affixOffset = headerHeight + 15;
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    const isDesktopVideoMode = config.desktopVideoMode && (config.showVideo || currentClipId) && !isMobile;
 
+    // Desktop video layout with side-by-side video and chat
+    if (isDesktopVideoMode) {
+        return (
+            <div className={classes.desktopVideoLayout}>
+                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
+                    {drawer ? <drawer.component 
+                        style={{overflow: 'visible'}} 
+                        height="100dvh" 
+                        modActions={modActions} 
+                        close={drawerHandler.close} 
+                        openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} 
+                        openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }}
+                        openDrawer={(drawer: OverlayDrawer) => { setDrawer(drawer); drawerHandler.open() }}
+                        {...drawer.props} 
+                        openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }}
+                    ></drawer.component> : null}
+                </Drawer>
+
+                {/* Video Section */}
+                <div className={classes.videoSection}>
+                    {currentClipId ? (
+                        <TwitchClipsPlayer clipId={currentClipId} onClose={() => setCurrentClipId(null)}/>
+                    ) : config.showVideo ? (
+                        <TwitchPlayer fullSize={true} customWidth={width - chatWidth} customHeight={height} muted={false}/>
+                    ) : null}
+                </div>
+
+                {/* Chat Section */}
+                <div className={classes.chatSection} style={{ width: chatWidth }}>
+                    {/* Resize Handle */}
+                    <div className={classes.resizeHandle} onMouseDown={handleMouseDown} />
+                    {/* Chat Header */}
+                    <div className={classes.chatHeader}>
+                        <Button fw={300} p={0} style={{overflow: 'visible'}} variant='transparent' color='primary' size='sm' onClick={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} leftSection={<HeaderLogo height={20}/>}>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <Text fw={700} size="sm">HEHE</Text>
+                                <Text fw={300} size="sm">Chat{premium.isPremium ? ' Pro' : ''}</Text>
+                            </div>
+                        </Button>
+                        
+                        <div style={{ display: 'flex', gap: '4px' }}>
+                            <ActionIcon variant='transparent' color='primary' size='sm' onClick={() => { setDrawer({...SettingsDrawer}); drawerHandler.open() }}>
+                                <ConnectionStatusIndicator connectionStatus={connectionStatus}>
+                                    <IconSettings size={16} />
+                                </ConnectionStatusIndicator>
+                            </ActionIcon>
+                            
+                            {!!(config.shortcuts && config.shortcuts.length) && (
+                                <ActionIcon variant='transparent' color='primary' onClick={() => setShortcutsVisible(!shortcutsVisible)} size='sm'>
+                                    <IconKeyboard size={16}/>
+                                </ActionIcon>
+                            )}
+
+                            <ActionIcon variant='transparent' color='primary' size='sm' onClick={() => { setDrawer(EventDrawer); drawerHandler.open() }}>
+                                <AlertStatusIndicator>
+                                    <IconBell size={16} />
+                                </AlertStatusIndicator>
+                            </ActionIcon>
+                            <ActionIcon variant='transparent' color='primary' size='sm' onClick={() => { setDrawer(TwitchDrawer); drawerHandler.open() }}>
+                                <IconBrandTwitch size={16}/>
+                            </ActionIcon>
+                        </div>
+                    </div>
+
+                    {/* Chat Content */}
+                    <div className={classes.chatContent}>
+                        <MobileAppPrompt />
+                        
+                        {/* Status indicators */}
+                        <Stack align='stretch' gap="xs" p="xs">
+                            {!online ? <Badge color="red" size="sm">No internet connection...</Badge> : null}
+                            <NewsDisplay />
+                            {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
+                            <PinManager/>
+                            <ReloadAlertsButton />
+                        </Stack>
+
+                        {/* Chat Messages */}
+                        <div className={classes.chatMessages} style={{ position: 'relative' }}>
+                            {!shouldScroll && (
+                                <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
+                                    <Button size="xs" onClick={scrollToBottom} leftSection={<IconMessagePause size={14} />} variant="gradient" radius={"lg"}>New Messages</Button>
+                                </div>
+                            )}
+                            <ScrollArea viewportRef={viewport} h="100%" type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
+                                <Space h={8}></Space>
+                                <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
+                                <Space h={8}></Space>
+                            </ScrollArea>
+                        </div>
+
+                        {/* Chat Input */}
+                        {config.chatEnabled && (
+                            <div className={classes.chatInput}>
+                                <ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView} usernames={Array.from(usernames)}/>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Original layout for mobile or when video is not shown
     return (
         <AppShell>
             <AppShell.Header>
@@ -268,24 +639,38 @@ export function ChatPage() {
                     showShortcutsToggle={!!(config.shortcuts && config.shortcuts.length)}
                     currentClipId={currentClipId}
                     setCurrentClipId={setCurrentClipId}
+                    connectionStatus={connectionStatus}
                 />
             </AppShell.Header>
 
             <AppShell.Main>
+                <MobileAppPrompt />
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
                         {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}
+                        <NewsDisplay />
                         {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                         <PinManager/>
+                        <ReloadAlertsButton />
                     </Stack>
                 </Affix>
 
-                <Drawer zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
-                    {drawer ? <drawer.component height="100vh" modActions={modActions} close={drawerHandler.close} openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }} {...drawer.props} openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }} ></drawer.component> : null}
+                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
+                    {drawer ? <drawer.component 
+                        style={{overflow: 'visible'}} 
+                        height="100dvh" 
+                        modActions={modActions} 
+                        close={drawerHandler.close} 
+                        openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} 
+                        openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }}
+                        openDrawer={(drawer: OverlayDrawer) => { setDrawer(drawer); drawerHandler.open() }}
+                        {...drawer.props} 
+                        openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }}
+                    ></drawer.component> : null}
                 </Drawer>
                 {(drawerOpen || shouldScroll) ? null : (
                     <Affix position={{ bottom: 10 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>
-                        <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" gradient={{ from: 'var(--mantine-color-skyblue-8)', to: 'var(--mantine-color-paleviolet-5)', deg: 55 }} style={{ borderRadius: 16 }}>New Messages</Button>
+                        <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" radius={"lg"}>New Messages</Button>
                     </Affix>
                 )}
                 <ScrollArea viewportRef={viewport} pos='absolute' w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
@@ -295,7 +680,7 @@ export function ChatPage() {
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
             <AppShell.Footer >
-                {config.chatEnabled ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} /></div> : null}
+                {config.chatEnabled ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView} usernames={Array.from(usernames)}/></div> : null}
             </AppShell.Footer>
         </AppShell>
     );

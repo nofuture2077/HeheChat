@@ -1,6 +1,5 @@
 import { Text, Card, Badge, Group, Progress, ActionIcon } from '@mantine/core';
-import { useState, useEffect, useContext } from 'react';
-import { useInterval } from '@mantine/hooks';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { formatMinuteSeconds } from '@/commons/helper'
 import { ChatEmotesContext } from '@/ApplicationContext'
@@ -25,15 +24,28 @@ interface PollProps extends PinProps {
 export function Poll(props: PollProps) {
     const emotes = useContext(ChatEmotesContext);
     const [remaining, setRemaining] = useState<number>(Math.round((props.endTime.getTime() - new Date().getTime()) / 1000));
-    const timer = useInterval(() => {
-      const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
-      setRemaining(remaining);
-    }, 1000);
+    const intervalRef = useRef<number | null>(null);
 
     useEffect(() => {
-      timer.start();
-      return timer.stop;
-    });
+      // Clear any existing interval
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current);
+      }
+      
+      // Set up a new interval
+      intervalRef.current = window.setInterval(() => {
+        const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
+        setRemaining(remaining);
+      }, 1000);
+      
+      // Clean up the interval when the component unmounts
+      return () => {
+        if (intervalRef.current !== null) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      };
+    }, [props.endTime]);
 
     if (remaining < 0 && props.state !== 'ended') {
       props.remove();

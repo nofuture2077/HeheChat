@@ -2,8 +2,9 @@ import { Group, Text, Card, Skeleton, Stack } from '@mantine/core';
 import classes from './infocard.module.css';
 import { ReactComponentLike, ReactElementLike } from 'prop-types';
 import { useContext } from 'react';
-import { ChatEmotesContext } from '@/ApplicationContext';
+import { ChatEmotesContext, PremiumContext } from '@/ApplicationContext';
 import { timeSince } from '@/commons/helper'
+import { PremiumStatus } from '../premium';
 
 export interface InfoCardProperties {
   channel?: string;
@@ -12,6 +13,7 @@ export interface InfoCardProperties {
   date: number;
   left?: ReactElementLike;
   right?: ReactElementLike;
+  showPremium?: boolean;
   onClick?: () => void;
 }
 
@@ -23,9 +25,12 @@ export function InfoCard(props: InfoCardProperties) {
       {props.left || null}
         <Stack gap={0} style={{flexGrow: 5}}>
           <Group justify='space-between'>
-            <Text size="sm" fw={700} className={classes.username}>
-              {props.name}
-            </Text>
+            <Group gap="xs">
+              <Text size="sm" fw={700} className={classes.username}>
+                {props.name}
+              </Text>
+              {props.showPremium && <PremiumStatus showText={false} />}
+            </Group>
             <Text fw={500} c="dimmed" size="sm">
               {timeSince(props.date)}
             </Text>

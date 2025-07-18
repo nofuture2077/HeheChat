@@ -1,34 +1,90 @@
-# Mantine Vite template
+# HeheChat
+
+## Overview
+
+Best Twitch Chat and Alerts Companion App both for IRL and Desktp streaming.
 
 ## Features
 
-This template comes with the following features:
+### 🎥 Twitch Integration
+- Full Twitch chat functionality
+- Stream management tools
+- Clip playback
+- Interactive stream cards
 
-- [PostCSS](https://postcss.org/) with [mantine-postcss-preset](https://mantine.dev/styles/postcss-preset)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Storybook](https://storybook.js.org/)
-- [Vitest](https://vitest.dev/) setup with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro)
-- ESLint setup with [eslint-config-mantine](https://github.com/mantinedev/eslint-config-mantine)
+### 💬 Chat Capabilities
+- Advanced chat input
+- Emote support
+- Channel selection
+- Moderation tools
+- Pinned message management
 
-## npm scripts
+### 🔔 Alerts System
+- Customizable alerts
+- Event tracking and management
+- Support for various Twitch events:
+  - Ad breaks
+  - Hype trains
+  - Raids
+  - Shoutouts
+  - Predictions
+  - Polls
 
-## Build and dev scripts
+### 👤 User Management
+- Secure login system
+- Detailed user profiles
+- User card functionality
 
-- `dev` – start development server
-- `build` – build production version of the app
-- `preview` – locally preview production build
+### ⚙️ Customization
+Comprehensive settings panels:
+- Alert configurations
+- Chat preferences
+- Moderation settings
+- Shortcut management
+- UI customization
 
-### Testing scripts
+### 🚀 Technical Features
+- React-based application
+- TypeScript
+- Vite build system
+- Web worker support
+- Responsive design
+- Keyboard shortcut integration
 
-- `typecheck` – checks TypeScript types
-- `lint` – runs ESLint
-- `prettier:check` – checks files with Prettier
-- `vitest` – runs vitest tests
-- `vitest:watch` – starts vitest watch
-- `test` – runs `vitest`, `prettier:check`, `lint` and `typecheck` scripts
+## Prerequisites
 
-### Other scripts
+- Node.js (version specified in .nvmrc)
+- Yarn
 
-- `storybook` – starts storybook dev server
-- `storybook:build` – build production storybook bundle to `storybook-static`
-- `prettier:write` – formats all files with Prettier
+## Installation
+
+1. Clone the repository
+2. Run `yarn install`
+3. Configure your Twitch application settings
+
+## Development
+
+- `yarn dev`: Start development server
+- `yarn build`: Production build
+- `yarn test`: Run test suite
+
+### Development Environment
+
+1. Copy `.env.example` to `.env`
+2. Configure your environment variables:
+   - `VITE_CLIENT_ID`: Your Twitch application client ID
+   - `VITE_BYPASS_LOGIN`: Set to 'true' to bypass Twitch login in development mode
+
+## Contributing
+
+Please read CONTRIBUTING.md for details on our code of conduct and the process for submitting pull requests.
+
+## License
+
+[License Type - To be added]
+
+## Acknowledgments
+
+- Twitch API
+- React Community
+- Open Source Contributors

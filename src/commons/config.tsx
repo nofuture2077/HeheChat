@@ -3,9 +3,21 @@ import { ShortCut } from './shortcuts';
 
 export type MessageHandler = {id?: number, handle: (channel: string, text: string, replyTo?: string) => void};
 
+export type NotificationSettingType = 'streamStartChannels' | 'chatMentionChannels' | 'chatMentionUsers' | 'chatMention';
+
+export interface NotificationSettings {
+    // Channel-specific notification settings
+    streamStartChannels?: string[];
+    chatMentionChannels?: string[];
+    chatMentionUsers?: string[];
+    // Global notification settings
+    chatMention?: boolean;
+}
+
 export interface ConfigData {
     channels: string[];
     showVideo: boolean;
+    desktopVideoMode: boolean;
     videoQuality: string;
     chatChannel?: string;
     chatEnabled: boolean;
@@ -25,10 +37,19 @@ export interface ConfigData {
     hideShoutout: boolean;
     hideRaid: boolean;
     hideAdBreak: boolean;
+    disableEmoteDialog: boolean;
     fontSize: number;
     modToolsEnabled: boolean;
     raidTargets: string[];
     playAlerts: boolean;
+    browserSourceAudio: boolean;
+    browserSourceVisual: boolean;
+    checkBrowsersourceConnection: boolean;
+    alertBoost: number;
+    visualAlertDelay: number;
+    skipEmotesInTTS: boolean;
+    skip7TVEmotesInTTS: boolean;
+    skipGlobalEmotesInTTS: boolean;
     systemMessageInChat: Partial<Record<SystemMessageMainType, boolean>>,
     hideEvents: Partial<Record<SystemMessageMainType, boolean>>,
     receivedShares: string[],
@@ -36,7 +57,8 @@ export interface ConfigData {
     shares: string[],
     freeTTS: string[],
     deactivatedAlerts: Record<string, boolean>,
-    shortcuts: ShortCut[]
+    shortcuts: ShortCut[],
+    reloadOnReturnToApp: boolean
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -61,6 +83,11 @@ export interface Config extends ConfigData {
     setModToolsEnabled: (val: boolean) => void;
     setRaidTargets: (val: string[]) => void;
     setPlayAlerts: (val: boolean) => void;
+    setAlertBoost: (val: number) => void;
+    setVisualAlertDelay: (val: number) => void;
+    setSkipEmotesInTTS: (val: boolean) => void;
+    setSkip7TVEmotesInTTS: (val: boolean) => void;
+    setSkipGlobalEmotesInTTS: (val: boolean) => void;
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => void;
     setHideEvents: (type: SystemMessageMainType, val: boolean) => void;
     loadReceivedShares: () => void;
@@ -69,6 +96,7 @@ export interface Config extends ConfigData {
     loadShares: () => void;
     setDeactivatedAlerts: (id: string, val: boolean) => void;
     setShowVideo: (val: boolean) => void;
+    setDesktopVideoMode: (val: boolean) => void;
     setVideoQuality: (val: string) => void;
     setHideViewers: (val: boolean) => void;
     setHideOwnViewers: (val: boolean) => void;
@@ -78,13 +106,19 @@ export interface Config extends ConfigData {
     setHideShoutout: (val: boolean) => void;
     setHideRaid: (val: boolean) => void;
     setHideAdBreak: (val: boolean) => void;
+    setDisableEmoteDialog: (val: boolean) => void;
+    setBrowserSourceAudio: (val: boolean) => void;
+    setBrowserSourceVisual: (val: boolean) => void;
+    setCheckBrowsersourceConnection: (val: boolean) => void;
     setFreeTTS: (val: string[]) => void;
     setShortcuts: (val: ShortCut[]) => void;
+    setReloadOnReturnToApp: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
     channels: [],
     showVideo: false,
+    desktopVideoMode: true,
     videoQuality: '480p',
     chatChannel: undefined,
     chatEnabled: true,
@@ -100,6 +134,11 @@ export const DEFAULT_CONFIG: Config = {
     modToolsEnabled: false,
     raidTargets: [],
     playAlerts: false,
+    alertBoost: 1.0,
+    visualAlertDelay: 8,
+    skipEmotesInTTS: false,
+    skip7TVEmotesInTTS: false,
+    skipGlobalEmotesInTTS: false,
     hideViewers: false,
     hideOwnViewers: false,
     hideHypetrain: false,
@@ -108,6 +147,10 @@ export const DEFAULT_CONFIG: Config = {
     hideShoutout: false,
     hideRaid: false,
     hideAdBreak: false,
+    disableEmoteDialog: false,
+    browserSourceAudio: true,
+    browserSourceVisual: true,
+    checkBrowsersourceConnection: true,
     systemMessageInChat: {
         sub: true,
         subgift: true,
@@ -127,7 +170,8 @@ export const DEFAULT_CONFIG: Config = {
         raid: false,
         follow: true,
         donation: false,
-        channelPointRedemption: true
+        channelPointRedemption: true,
+        hypetrain: true
     },
     receivedShares: [],
     activatedShares: [],
@@ -135,6 +179,7 @@ export const DEFAULT_CONFIG: Config = {
     freeTTS: [],
     deactivatedAlerts: {},
     shortcuts: [],
+    reloadOnReturnToApp: false,
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setMaxMessages: (value: number) => {},
@@ -148,6 +193,7 @@ export const DEFAULT_CONFIG: Config = {
     setChatChannel: (channel: string) => {},
     setChatEnabled: (val: boolean) => {},
     setShowVideo: (val: boolean) => {},
+    setDesktopVideoMode: (val: boolean) => {},
     setVideoQuality: (val: string) => {},
     onMessage: (handler: MessageHandler) => ({handle: () => {}}),
     off: (handler: MessageHandler) => {},
@@ -162,6 +208,7 @@ export const DEFAULT_CONFIG: Config = {
     setHideShoutout: (val) => {},
     setHideRaid: (val) => {},
     setHideAdBreak: (val) => {},
+    setDisableEmoteDialog: (val) => {},
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => {},
     setHideEvents: (type: SystemMessageMainType, val: boolean) => {},
     setDeactivatedAlerts: (id: string, val: boolean) => {},
@@ -173,4 +220,16 @@ export const DEFAULT_CONFIG: Config = {
     loadShares: () => {},
     setFreeTTS: (val: string[]) => {},
     setShortcuts: (val: ShortCut[]) => {},
+    setBrowserSourceAudio: (val) => {},
+    setBrowserSourceVisual: (val) => {},
+    setCheckBrowsersourceConnection: (val) => {},
+    setAlertBoost: (val) => {},
+    setVisualAlertDelay: (val) => {},
+    setSkipEmotesInTTS: (val) => {},
+    setSkip7TVEmotesInTTS: (val) => {},
+    setSkipGlobalEmotesInTTS: (val) => {},
+    setReloadOnReturnToApp: (val) => {},
 };
+
+export const DB_VERSION = 8;
+export const DB_NAME = 'HeheChat';

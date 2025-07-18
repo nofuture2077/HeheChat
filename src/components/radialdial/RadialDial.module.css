@@ -1,0 +1,117 @@
+.container {
+  position: relative;
+  border: 5000px solid light-dark(rgba(255,255,255,0.7), rgba(0,0,0,0.7));
+  width: 180px;
+  height: 180px;
+  transform: translate(-50%, -50%);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  z-index: 9999;
+}
+
+.trigger {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  opacity: 0;
+  border-radius: 50%;
+  background-color: var(--mantine-color-dark-6);
+  color: var(--mantine-color-white);
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, background-color 0.2s;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+.actions {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  z-index: 9999;
+}
+
+.actionButton {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out, background-color 0.15s ease-out;
+  transform: scale(0);
+  overflow: initial !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  z-index: 9999;
+}
+
+.actionButton:not(:disabled):hover,
+.actionButton:not(:disabled).hovered,
+.actionButton:not(:disabled):active {
+  background-color: light-dark(var(--mantine-color-green-5), var(--mantine-color-green-9));
+}
+
+.tooltip {
+  position: absolute;
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  padding: 8px 32px;
+  border-radius: 4px;
+  font-size: 36px;
+  top: -160px;
+  font-weight: 900;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  left: 50%;
+  transform: translate(-50%, -50px);
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 10000;
+  opacity: 1;
+}
+
+/* Message highlighting */
+.highlightedMessage {
+  background-color: light-dark(var(--mantine-color-red-5), var(--mantine-color-red-2)) !important;
+  color: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-8));
+  transition: background-color 0.2s ease-out;
+}
+
+/* Touch-specific optimizations */
+@media (pointer: coarse) {
+  .actionButton {
+    /* Larger touch target on touch devices */
+    width: 80px;
+    height: 80px;
+  }
+  
+  .tooltip {
+    /* Larger tooltip text on touch devices */
+    padding: 6px 12px;
+  }
+
+  .container {
+    /* Ensure container is large enough for touch targets */
+    width: 200px;
+    height: 200px;
+  }
+}

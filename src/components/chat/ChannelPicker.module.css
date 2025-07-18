@@ -1,9 +1,56 @@
 
 
-  .menuItem {
-    padding: 4px 8px;
-    margin: 0;
-    >.mantine-Menu-itemSection:where([data-position='left']) {
-        margin-inline-end: 0 !important;
-    }
+.menuItem {
+  padding: 4px 8px;
+  margin: 0;
+  >.mantine-Menu-itemSection:where([data-position='left']) {
+      margin-inline-end: 0 !important;
   }
+}
+
+.channelImage {
+  display: block;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  flex: none !important;
+}
+
+/* Firefox-specific styles */
+@-moz-document url-prefix() {
+  .menuItem {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Ensure dropdown is visible in expanded mode */
+  :global(.mantine-Menu-dropdown) {
+    z-index: 9999 !important;
+    position: absolute !important;
+    visibility: visible !important;
+    display: block !important;
+  }
+  
+  /* Fix for Firefox setting flex: 0 on images */
+  :global(.mantine-Menu-target img),
+  .channelImage {
+    flex: none !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: block !important;
+  }
+  
+  /* Specifically target the image in the leftSection of the Textarea */
+  :global(.mantine-Textarea-leftSection .mantine-Menu-target img) {
+    flex: 1 !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: block !important;
+  }
+}

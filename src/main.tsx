@@ -1,4 +1,6 @@
 import ReactDOM from 'react-dom/client';
-import App from './App';
+import HeheChat from '@/HeheChatApp';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(<App />);
+localStorage.setItem('hehe-mode', 'app');
+
+ReactDOM.createRoot(document.getElementById('root')!).render(<HeheChat />);

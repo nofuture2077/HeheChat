@@ -1,6 +1,14 @@
 import { useViewportSize } from '@mantine/hooks';
 import { useEffect } from 'react';
 
+export function param(key: string, value: string) {
+    return [key, value].join("=");
+}
+
+export function query(params: string[]) {
+    return params.join("&");
+}
+
 export function toMap<A, K>(arr: A[], func1: (el: A) => K) {
     return arr.reduce((acc, el) => {
         acc.set(func1(el), el);
@@ -12,6 +20,36 @@ export function generateGUID(): string {
     return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c =>
         (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
     );
+}
+
+// Levenshtein distance function
+export function levenshtein(a: string, b: string) {
+    const tmp = [];
+    let i, j, alen = a.length, blen = b.length, cost;
+
+    if (alen === 0) return blen;
+    if (blen === 0) return alen;
+
+    for (i = 0; i <= alen; i++) {
+        tmp[i] = [i];
+    }
+
+    for (j = 0; j <= blen; j++) {
+        tmp[0][j] = j;
+    }
+
+    for (i = 1; i <= alen; i++) {
+        for (j = 1; j <= blen; j++) {
+            cost = (a[i - 1] === b[j - 1]) ? 0 : 1;
+            tmp[i][j] = Math.min(
+                tmp[i - 1][j] + 1,         // Deletion
+                tmp[i][j - 1] + 1,         // Insertion
+                tmp[i - 1][j - 1] + cost   // Substitution
+            );
+        }
+    }
+
+    return tmp[alen][blen];
 }
 
 import humanizeDuration, { HumanizerOptions } from "humanize-duration"
@@ -77,6 +115,17 @@ export function formatTime(date: Date): string {
     return `${hours}:${minutes}`;
 }
 
+export function formatDateWithTime(date: Date): string {
+    return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+}
+
+export function formatDate(date: Date): string {
+    const day = date.getDate();
+    const month = date.toLocaleString('en-US', { month: 'long' });
+    const year = date.getFullYear();
+    return `${day}. ${month} ${year}`;
+}
+
 export function formatMinuteSeconds(seconds: number): string {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -103,12 +152,31 @@ export const formatDuration = (duration: number) => {
     return shortEnglishHumanizer(duration, { largest: 1 });
 }
 
+export function formatCurrency(value: string): string {
+    const currencyMap: Record<string, string> = {
+        'USD': '$',
+        'EUR': '€',
+        'GBP': '£',
+        'JPY': '¥',
+        'CNY': '¥',
+        'INR': '₹',
+        'RUB': '₽',
+        'KRW': '₩',
+        'BRL': 'R$',
+        'CAD': 'C$',
+        'AUD': 'A$',
+        'CHF': 'CHF'
+    };
+    return currencyMap[value] || value || "";
+}
+
 const formatFunctions: { [key: string]: (value: any) => string } = {
     whole: (value: number) => Number(value).toFixed(0),
     decimal: (value: number) => Number(value).toFixed(2),
     uppercase: (value: string) => value.toUpperCase(),
     lowercase: (value: string) => value.toLowerCase(),
     duration: (value: string) => formatDuration(Number(value) * 1000),
+    currency: (value: string) => formatCurrency(value),
 };
 
 export function formatString(messageTemplate: string, args: Record<string, any>): string {
@@ -224,4 +292,13 @@ export const adjustColorForContrast = (color: string, backgroundColor: string) =
     }
     
     return `rgb(${r},${g},${b})`;
+};
+
+export const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] => {
+    return elements.reduce<React.ReactNode[]>((acc, elem, index) => {
+      if (index === 0) {
+        return [elem];
+      }
+      return [...acc, ' ', elem];
+    }, []);
 };

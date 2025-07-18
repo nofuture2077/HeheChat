@@ -4,9 +4,14 @@ import { useForceUpdate } from '@mantine/hooks';
 import { ConfigContext } from '@/ApplicationContext';
 import { ModActionType } from '@/components/chat/mod/modactions'
 
-const modActions: ModActionType[] = ['ban', 'timeout', 'delete'];
+const modActions: ModActionType[] = ['ban', 'timeout', 'delete', 'mod', 'unmod', 'vip', 'unvip', 'unban'];
 
 const Messages: Record<ModActionType, string> = {
+    "mod": "Moderator added",
+    "unmod": "Moderator removed",
+    "vip": "VIP added",
+    "unvip": "VIP removed",
+    "unban": "Unban",
     "ban": "Banned Users",
     "timeout": "Timeouted Users",
     "delete": "Deleted Messages"
@@ -25,12 +30,6 @@ export function ModSettings() {
                 <Stack>
                     {modActions.map(eventType => <Switch key={eventType} checked={config.systemMessageInChat[eventType]} onChange={(event) => {config.setSystemMessageInChat(eventType, event.currentTarget.checked);forceUpdate();}} label={Messages[eventType]} size="lg"/>)}
                 </Stack>  
-            </Fieldset>
-
-            <Fieldset legend="Raid Targets" variant="filled">
-                <TagsInput placeholder="" value={config.raidTargets} onChange={(targets) => config.setRaidTargets(targets.map(c => c.toLowerCase().substring(0, 25).trim()))}></TagsInput>
-                <Space h="xs" />
-                <Text fs="italic" size='14px'>List of potential raid targets. You will see who is online in raid view</Text>
             </Fieldset>
         </Stack>)
 }

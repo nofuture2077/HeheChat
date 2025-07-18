@@ -1,0 +1,334 @@
+body, html {
+  margin: 0;
+  padding: 0;
+}
+
+/* Base styles */
+.alertContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: sans-serif;
+  visibility: hidden;
+  height: 100vh;
+  width: 100%;
+  position: fixed;
+}
+
+.contentWrapper {
+  display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Position classes */
+.top {
+  top: 0;
+  justify-content: flex-start;
+
+  .contentWrapper {
+    padding-top: 2rem;
+  }
+}
+
+.middle {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.bottom {
+  bottom: 0;
+  justify-content: flex-end;
+
+  .contentWrapper {
+    padding-bottom: 2rem;
+  }
+}
+
+.left {
+  align-items: flex-start;
+  .contentWrapper {
+    padding-left: 2rem;
+  }
+}
+
+.center {
+  align-items: center;
+}
+
+.right {
+  align-items: flex-end;
+
+  .contentWrapper {
+    padding-right: 2rem;
+  }
+}
+
+/* Layout classes for text alignment */
+.align-left .text {
+  text-align: left;
+}
+
+.align-center .text {
+  text-align: center;
+}
+
+.align-right .text {
+  text-align: right;
+}
+
+.text p:first-child { margin: 0; }
+
+.font-headline-bangers .text p:first-child {
+  font-family: "Bangers", serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-bangers .text p:last-child {
+  font-family: "Bangers", serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-molle .text p:first-child {
+  font-family: "Molle", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-molle .text p:last-child {
+  font-family: "Molle", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-fjallaone .text p:first-child {
+  font-family: "Fjalla One", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-fjallaone .text p:last-child {
+  font-family: "Fjalla One", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-ericaone .text p:first-child {
+  font-family: "Erica One", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-ericaone .text p:last-child {
+  font-family: "Erica One", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-daysone .text p:first-child {
+  font-family: "Days One", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-daysone .text p:last-child {
+  font-family: "Days One", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-ultra .text p:first-child {
+  font-family: "Ultra", serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-ultra .text p:last-child {
+  font-family: "Ultra", serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-pressstart2p .text p:first-child {
+  font-family: "Press Start 2P", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-pressstart2p .text p:last-child {
+  font-family: "Press Start 2P", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.image-xs .image { width: 10vw; }
+.image-sm .image { width: 20vw; }
+.image-md .image { width: 30vw; }
+.image-lg .image { width: 50vw; }
+.image-xl .image { width: 100vw; }
+
+.image-fixed-bottom .image  {
+  position: absolute;
+  bottom: 0px;
+}
+
+.image-fixed-left .image {
+  position: absolute;
+  left: 0px;
+}
+
+.image-fixed-right .image {
+  position: absolute;
+  right: 0px;
+}
+
+.image-xs .text p {
+  max-width: 20vw;
+}
+
+.image-sm .text p {
+  max-width: 30vw;
+}
+
+.image-md .text p {
+  max-width: 45vw;
+}
+
+.image-lg .text p {
+  max-width: 65vw;
+}
+
+.image-lg .text p {
+  max-width: 100vw;
+}
+
+.text-over-image .text {
+  margin-top: -4rem;
+}
+
+/* Layout classes for headline sizes */
+.headline-xs .text p:first-child { font-size: 1.25rem; }
+.headline-sm .text p:first-child { font-size: 1.5rem; }
+.headline-md .text p:first-child { font-size: 2rem; }
+.headline-lg .text p:first-child { font-size: 2.5rem; }
+.headline-xl .text p:first-child { font-size: 3rem; }
+
+.headline-uppercase p:first-child { text-transform: uppercase; }
+
+/* Layout classes for text sizes */
+.text-xs .text p:last-child { font-size: 0.875rem; }
+.text-sm .text p:last-child { font-size: 1rem; }
+.text-md .text p:last-child { font-size: 1.25rem; }
+.text-lg .text p:last-child { font-size: 1.5rem; }
+.text-xl .text p:last-child { font-size: 1.75rem; }
+
+.text-uppercase p:last-child { text-transform: uppercase; }
+
+/* Base text styles */
+.text {
+  color: white;
+  text-shadow: 2px 2px 2px #333;
+  font-weight: 900;
+  letter-spacing: 5px;
+  display: flex;
+  flex-direction: column;
+}
+
+.text-dark .text { 
+  color: #111; 
+  text-shadow: 2px 2px 2px #ddd;
+}
+
+/* Layout classes for highlight colors */
+.yellow :global(span.highlight) { color: rgb(255, 241, 51); }
+.green :global(span.highlight) { color: rgb(51, 255, 65); }
+.red :global(span.highlight) { color: rgb(255, 51, 51); }
+.blue :global(span.highlight) { color: rgb(58, 51, 255); }
+.orange :global(span.highlight) { color: rgb(255, 173, 51); }
+.pink :global(span.highlight) { color: #f39; }
+.teal :global(span.highlight) { color: rgb(51, 255, 197); }
+.violett :global(span.highlight) { color: rgb(136, 51, 255); }
+
+/* Layout classes for highlight animations */
+.effect-bounce :global(span.highlight span) {
+  position: relative;
+  top: 5px;
+  display: inline-block;
+  animation: bounce 0.3s ease infinite alternate;
+}
+
+.effect-wave :global(span.highlight span) {
+  position: relative;
+  display: inline-block;
+  animation: wave 0.5s ease infinite alternate;
+}
+
+.effect-shake :global(span.highlight span) {
+  position: relative;
+  display: inline-block;
+  animation: shake 0.5s ease infinite;
+}
+
+.effect-pulse :global(span.highlight span) {
+  display: inline-block;
+  animation: pulse 1s ease infinite;
+}
+
+.effect-glitch :global(span.highlight span) {
+  position: relative;
+  display: inline-block;
+  animation: glitch 0.3s ease infinite;
+}
+
+/* Animation delays for character-by-character effects */
+:global(span.highlight span:nth-child(2)) { animation-delay: 0.1s; }
+:global(span.highlight span:nth-child(3)) { animation-delay: 0.2s; }
+:global(span.highlight span:nth-child(4)) { animation-delay: 0.3s; }
+:global(span.highlight span:nth-child(5)) { animation-delay: 0.4s; }
+:global(span.highlight span:nth-child(6)) { animation-delay: 0.5s; }
+:global(span.highlight span:nth-child(7)) { animation-delay: 0.6s; }
+:global(span.highlight span:nth-child(8)) { animation-delay: 0.2s; }
+:global(span.highlight span:nth-child(9)) { animation-delay: 0.3s; }
+:global(span.highlight span:nth-child(10)) { animation-delay: 0.4s; }
+:global(span.highlight span:nth-child(11)) { animation-delay: 0.5s; }
+:global(span.highlight span:nth-child(12)) { animation-delay: 0.6s; }
+:global(span.highlight span:nth-child(13)) { animation-delay: 0.7s; }
+:global(span.highlight span:nth-child(14)) { animation-delay: 0.8s; }
+
+/* Animations */
+@keyframes bounce {
+  100% { top: -5px; }
+}
+
+@keyframes wave {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-10px); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+.visible {
+  visibility: visible;
+}

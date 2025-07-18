@@ -1,9 +1,9 @@
-export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' |
+export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' | 'blerp' |
 'sub_1000' | 'sub_2000' | 'sub_3000' | 'sub_Prime' | 
 'subgift_1000' | 'subgift_2000' | 'subgift_3000' | 
-'subgiftb_1000' | 'subgiftb_2000' | 'subgiftb_3000' | 'channelPointRedemption';
+'subgiftb_1000' | 'subgiftb_2000' | 'subgiftb_3000' | 'channelPointRedemption' | 'kofisub' | 'kofidono' | 'kofishop' | 'tts' | 'hypetrain';
 
-export type EventMainType = 'sub' | 'subgift' | 'subgiftb' | 'raid' | 'follow' | 'donation' | 'cheer' | 'channelPointRedemption';
+export type EventMainType = 'sub' | 'subgift' | 'subgiftb' | 'raid' | 'follow' | 'donation' | 'cheer' | 'channelPointRedemption' | 'blerp' | 'kofi' | 'tts' | 'hypetrain';
 
 export type EventAlertRestriction = 'none' | 'mod' | 'system';
 
@@ -35,8 +35,13 @@ export const EventTypeMapping: Record<string, string> = {
     'streamOnline': 'streamOnline',
     'streamOffline': 'streamOffline',
     'channelPointRedemption': 'channelPointRedemption',
-    'sevenTVAdded': 'sevenTVAdded',
-    'sevenTVRemoved': 'sevenTVRemoved'
+    'blerp': 'blerp',
+    'seventv_emote_add': 'sevenTVAdded',
+    'seventv_emote_remove': 'sevenTVRemoved',
+    'kofishop': 'kofi',
+    'kofisub': 'kofi',
+    'kofidono': 'kofi',
+    'hypetrain': 'hypetrain'
 };
 
 export type EventAlertMeta = {
@@ -108,4 +113,14 @@ export type Event = {
     amount?: number;
     amount2?: number;
     eventAlert?: EventAlert;
+}
+
+export interface VisualAlert {
+    text: string;
+    headline: string;
+    image?: string;
+    duration: number;
+    channel: string;
+    position?: string;
+    layout?: string;
 }

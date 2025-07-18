@@ -144,6 +144,7 @@ export function PinManager() {
     //    {expanded: true, hidden: false, type: 'adbreak', id: '1', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {onClick: () => {}}},
     //    {expanded: true, hidden: false, type: 'shoutout', id: '5', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {    broadcasterName: 'ronnyberger', targetUserName: 'jonsman', viewerCount: 1224,moderatorName: 'nofuture2077'}},
     //    {expanded: true, hidden: false, type: 'hypetrain', id: '4', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {level: 7, progress: 2323, goal: 4356, state: 'active'}},
+    //    {expanded: true, hidden: false, type: 'hypetrain', id: '9', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {level: 7, progress: 4200, goal: 4356, state: 'active', isGoldenKappaTrain: true}},
     //    {expanded: false, hidden: false, type: 'poll', id: '6', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {title: 'was esst ihr lieber?', winningChoice: {title: 'Nutella', totalVotes: 43}, options: [{title: 'Nutella', totalVotes: 43}, {title: 'Marmelade', totalVotes: 7}], state: 'ended'}},
     //    {expanded: false, hidden: false, type: 'prediction', id: '7', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: {title: 'was esst ihr lieber?', winningOutcomes: {title: 'Nutella', channelPoints: 31343, users: 23}, outcomes: [{title: 'Nutella', channelPoints: 31343, users: 23}, {title: 'Marmelande', channelPoints: 23132, users: 12}, {title: 'Obst', channelPoints: 2222, users: 1}], state: 'active'}},
     //    {expanded: true, hidden: false, type: 'raid', id: '8', endTime: new Date(Date.now() + 5*1000*60), channel: 'ronnyberger', data: { broadcasterName: 'z0kka', targetChannelName: 'ronnyberger', viewers: 1242}},
@@ -164,7 +165,7 @@ export function PinManager() {
                     id: d.id, 
                     channel: d.channel, 
                     endTime: new Date(Date.parse(d.expiryDate)), 
-                    data: {level: d.level, progress: d.progress, goal: d.goal},
+                    data: {level: d.level, progress: d.progress, goal: d.goal, isGoldenKappaTrain: d.isGoldenKappaTrain},
                     state: 'active'
                 };
                 upsertPin(pin);
@@ -184,7 +185,8 @@ export function PinManager() {
                     data: {
                         level: d.level,
                         progress: 100,  // Show full progress in final state
-                        goal: d.total
+                        goal: d.total, 
+                        isGoldenKappaTrain: d.isGoldenKappaTrain
                     },
                     state: 'ended'
                 };
@@ -201,7 +203,7 @@ export function PinManager() {
                     id: d.id, 
                     channel: d.channel, 
                     endTime: new Date(Date.parse(d.expiryDate)), 
-                    data: {level: d.level, progress: d.progress, goal: d.goal},
+                    data: {level: d.level, progress: d.progress, goal: d.goal, isGoldenKappaTrain: d.isGoldenKappaTrain},
                     state: 'active'
                 };
                 upsertPin(pin);
@@ -376,10 +378,10 @@ export function PinManager() {
                     hidden: true,
                     type: 'raid',
                     id: generateGUID(),
-                    channel: d.broadcasterName,
-                    endTime: new Date(Date.now() + 0),
+                    channel: d.channel,
+                    endTime: new Date(Date.now()),
                     data: {
-                        broadcasterName: d.broadcasterName,
+                        broadcasterName: d.channel,
                         targetChannelName: d.targetChannelName,
                         viewers: 0
                     }
@@ -396,10 +398,10 @@ export function PinManager() {
                     hidden: false,
                     type: 'shoutout',
                     id: generateGUID(),
-                    channel: d.broadcasterName,
+                    channel: d.channel,
                     endTime: new Date(Date.now() + SHOUTOUT_DURATION),
                     data: {
-                        broadcasterName: d.broadcasterName,
+                        broadcasterName: d.channel,
                         targetUserName: d.targetUserName,
                         viewerCount: d.viewerCount,
                         moderatorName: d.moderatorName
@@ -416,7 +418,7 @@ export function PinManager() {
                     hidden: false,
                     type: 'adbreak',
                     id: generateGUID(),
-                    channel: d.broadcasterName,
+                    channel: d.channel,
                     endTime: new Date(Date.now() + d.durationSeconds * 1000),
                     data: {}
                 };

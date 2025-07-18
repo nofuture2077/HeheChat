@@ -18,7 +18,7 @@ export interface StreamCardProps {
 
 export function StreamCard(props: StreamCardProps) {
     const stream = props.stream;
-    return (<Anchor href={"https://twitch.tv/" + stream.userName} target='blank' className={classes.link}>
+    const content = (
         <Paper shadow="sm" radius="md" withBorder>
             <Box>
                 <BackgroundImage src={stream.getThumbnailUrl(320, 180)} radius="sm">
@@ -38,7 +38,21 @@ export function StreamCard(props: StreamCardProps) {
                 </BackgroundImage>
             </Box>
         </Paper>
-    </Anchor>);
+    );
+
+    if (props.onClick) {
+        return (
+            <Box className={classes.link} onClick={() => props.onClick?.(stream)}>
+                {content}
+            </Box>
+        );
+    }
+
+    return (
+        <Anchor href={"https://twitch.tv/" + stream.userName} target='blank' className={classes.link}>
+            {content}
+        </Anchor>
+    );
 }
 
 export function StreamCardPlaceholder(props: {}) {

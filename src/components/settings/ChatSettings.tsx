@@ -1,10 +1,10 @@
-import { TagsInput, Switch, Stack, Select, Fieldset } from '@mantine/core';
+import { TagsInput, Switch, Stack, Select, Fieldset, Space, Text, Image, Alert } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
 import { SystemMessageMainType } from '../../commons/message';
 
-const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'streamOnline', 'streamOffline', 'channelPointRedemption'];
+const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'streamOnline', 'streamOffline', 'channelPointRedemption', 'blerp', 'kofi'];
 const seventTVMessages: SystemMessageMainType[] = ['sevenTVAdded', 'sevenTVRemoved'];
 
 const Messages: Record<string, string> = {
@@ -19,7 +19,9 @@ const Messages: Record<string, string> = {
     "streamOffline": "Offline Message",
     "channelPointRedemption": "Channel Points",
     "sevenTVAdded": "New 7TV Emotes",
-    "sevenTVRemoved": "Removed 7TV Emotes"
+    "sevenTVRemoved": "Removed 7TV Emotes",
+    "blerp": "Blerps",
+    "kofi": "Ko-fi Events"
 };
 
 export function ChatSettings() {
@@ -32,17 +34,47 @@ export function ChatSettings() {
                 <TagsInput placeholder="" value={config.channels} onChange={(channels) => config.setChannels(channels.map(c => c.toLowerCase().substring(0, 25).trim()))}></TagsInput>
             </Fieldset>
 
+            <Fieldset legend="!tts Users" variant="filled" key="free-tts">
+                <TagsInput placeholder="" value={config.freeTTS} onChange={(freeTTS) => config.setFreeTTS(freeTTS.map(c => c.toLowerCase().substring(0, 50).trim()))}></TagsInput>
+                <Space h="xs" />
+                <Text fs="italic" size='14px'>Users in this list can use e.g. "!tts Forget your phone" in chat. You can give this to thrustful moderators, friends or management for emergency cases. "all" gives everyone free tts</Text>
+            </Fieldset>
+
             <Fieldset legend="Ignored Users" variant='filled'>
                 <TagsInput placeholder="" value={config.ignoredUsers} onChange={(users) => config.setIgnoredUsers(users.map(u => u.toLowerCase().substring(0, 25).trim()))}></TagsInput>
+                <Space h="xs" />
+                <Text fs="italic" size='14px'>Messages from this users (e.g. bots) will not show in your Chat.</Text>
+            </Fieldset>
+
+            <Fieldset legend="Raid Targets" variant="filled">
+                <TagsInput placeholder="" value={config.raidTargets} onChange={(targets) => config.setRaidTargets(targets.map(c => c.toLowerCase().substring(0, 25).trim()))}></TagsInput>
+                <Space h="xs" />
+                <Text fs="italic" size='14px'>List of potential raid targets. You will see who is online in raid view</Text>
             </Fieldset>
 
             <Fieldset legend="Messages" variant='filled'>
-                 <Select label="Max Messages" data={['100', '200', '500']} value={config.maxMessages + ''} onChange={(value) => config.setMaxMessages(Number(value))} />
+                 <Select label="Max Messages" data={['20', '40', '60', '100', '200', '500']} value={config.maxMessages + ''} onChange={(value) => config.setMaxMessages(Number(value))} />
+                 {config.maxMessages === 20 && (
+                     <Stack mt="md" align="center">
+                         <Alert color="green" title="🥒 You are now in Gurkenmodus 🥒" variant="filled">
+                         </Alert>
+                         <Image 
+                             src="/simon.avif" 
+                             alt="Simon in Gurkenmodus" 
+                             w={200} 
+                             h={200} 
+                             fit="contain"
+                             radius="md"
+                         />
+                     </Stack>
+                 )}
             </Fieldset>
 
             <Fieldset legend="Chat cosmetics" variant='filled'>
                 <Stack>
+                    <Switch checked={config.reloadOnReturnToApp} onChange={(event) => config.setReloadOnReturnToApp(event.currentTarget.checked)} label="Reload on Return" size="lg" />
                     <Switch checked={config.showVideo} onChange={(event) => config.setShowVideo(event.currentTarget.checked)} label="Video Player" size="lg" />
+                    <Switch checked={config.desktopVideoMode} onChange={(event) => config.setDesktopVideoMode(event.currentTarget.checked)} label="Desktop Video Mode" size="lg" />
                     <Switch checked={config.chatEnabled} onChange={(event) => config.setChatEnabled(event.currentTarget.checked)} label="Chat Input" size="lg" />
                     <Switch checked={config.showTimestamp} onChange={(event) => config.setShowTimestamp(event.currentTarget.checked)} label="Timestamp" size="lg" />
                     <Switch checked={config.showProfilePicture} onChange={(event) => config.setShowProfilePicture(event.currentTarget.checked)} label="Profile Picture" size="lg" />
@@ -58,16 +90,8 @@ export function ChatSettings() {
                     <Switch checked={config.hideShoutout} onChange={(event) => config.setHideShoutout(event.currentTarget.checked)} label="Hide Shoutouts" size="lg" />
                     <Switch checked={config.hideRaid} onChange={(event) => config.setHideRaid(event.currentTarget.checked)} label="Hide Raids" size="lg" />
                     <Switch checked={config.hideAdBreak} onChange={(event) => config.setHideAdBreak(event.currentTarget.checked)} label="Hide Ad Break" size="lg" />
+                    <Switch checked={config.disableEmoteDialog} onChange={(event) => config.setDisableEmoteDialog(event.currentTarget.checked)} label="Disable Emote Dialog" size="lg" />
                 </Stack>
-            </Fieldset>
-
-            <Fieldset legend="Twitch Player"  variant='filled'>
-                <Select
-                    label="Video Quality"
-                    data={['auto', 'source', '1080p60', '1080p', '720p60', '720p', '480p', '360p', '160p']}
-                    value={config.videoQuality}
-                    onChange={(value) => config.setVideoQuality(value || '480p')}
-                />
             </Fieldset>
 
             <Fieldset legend="Event Messages" variant='filled'>

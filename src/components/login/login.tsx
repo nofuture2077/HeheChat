@@ -5,7 +5,10 @@ import { IconLink } from '@tabler/icons-react';
 import { useEffect, useContext, useState } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 import { generateGUID } from '@/commons/helper';
+import { LOGIN_SCOPES, AUTH_VERSION } from '@/commons/login';
+import { EmoteStore } from '@/components/chat/emotestorage';
 import PubSub from 'pubsub-js'
+import { DEFAULT_CHAT_EMOTES } from '@/commons/emotes'
 
 function getQueryVariable(query: String, variable: String): string | undefined {
     var vars = query.split('&');
@@ -18,9 +21,14 @@ function getQueryVariable(query: String, variable: String): string | undefined {
     console.log('Query variable %s not found', variable);
   }
 
-const AUTH_VERSION = 12;
+interface LoginProps {
+    color1: string;
+    color2: string;
+    target: string;
+    clientId: string;
+}
 
-export default function Login() {
+export default function Login(props: LoginProps) {
     const loginContext = useContext(LoginContextContext);
     const hash = window.location.hash.substring(1);
     const authVersion: string | null = localStorage.getItem('hehe-auth-version');
@@ -35,10 +43,12 @@ export default function Login() {
         }, 5000);
 
         if (tokenStored || token) {
-            const authProvider = new StaticAuthProvider(loginContext.clientId, tokenStored || token || '');
+            const authProvider = new StaticAuthProvider(props.clientId, tokenStored || token || '');
             const api = new ApiClient({authProvider});
             api.getTokenInfo().then((tokenInfo) => {
-                api.users.getAuthenticatedUser({id: tokenInfo.userId || ''}).then((user) => {
+                const userId = tokenInfo.userId || '';
+                DEFAULT_CHAT_EMOTES.updateUserEmote(userId);
+                api.users.getAuthenticatedUser({id: userId}).then((user) => {
                     loginContext.setUser(user);
                 });
 
@@ -65,60 +75,26 @@ export default function Login() {
                 localStorage.removeItem('hehe-token');
                 localStorage.removeItem('hehe-token_state');
                 loginContext.setAccessToken(undefined);
+                // Clear emote cache on logout/token error
+                if (loginContext.user) {
+                    EmoteStore.clearUserEmotes(loginContext.user.id).catch(console.error);
+                }
                 const redirectUrl = encodeURI(window.location.origin + window.location.pathname.replace("index.html", ""));
                 document.location = redirectUrl;
             });
         }
     }, [token]);
 
-    const authUrl = import.meta.env.VITE_BACKEND_URL + "/twitchauth";
+    const authUrl = import.meta.env.VITE_BACKEND_URL + props.target;
 
-    let scope = [
-        "bits:read",
-        "channel:bot",
-        "channel:manage:predictions",
-        "channel:manage:raids",
-        "channel:manage:redemptions",
-        "channel:manage:ads",
-        "channel:read:goals",
-        "channel:read:hype_train",
-        "channel:read:polls",
-        "channel:read:predictions",
-        "channel:read:redemptions",
-        "channel:read:subscriptions",
-        "channel:read:vips",
-        "channel:read:ads",
-        "channel:edit:commercial",
-        "channel:manage:broadcast",
-        "channel:moderate",
-        "chat:edit",
-        "chat:read",
-        "clips:edit",
-        "moderator:manage:announcements",
-        "moderator:manage:blocked_terms",
-        "moderator:manage:chat_messages",
-        "moderator:manage:banned_users",
-        "moderator:manage:unban_requests",
-        "moderator:manage:chat_settings",
-        "moderator:manage:warnings",
-        "moderator:read:moderators",
-        "moderator:read:vips",
-        "moderator:read:chatters",
-        "moderator:read:followers",
-        "moderator:read:shield_mode",
-        "moderator:read:shoutouts",
-        "user:bot",
-        "user:read:moderated_channels",
-        "user:read:chat",
-        "user:write:chat"
-    ].map(encodeURIComponent).join('+');
+    let scope = LOGIN_SCOPES.map(encodeURIComponent).join('+');
     
     const onClick = () => {
         const state = generateGUID();
         localStorage.setItem('hehe-token_state', state);
 
         let responseType = encodeURIComponent('code');
-        let link = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${loginContext.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}`;
+        let link = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${props.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}`;
 
         window.location.href = link;
     };
@@ -126,12 +102,12 @@ export default function Login() {
     return (<Button
             component="a"
             disabled={(!!(token || tokenStored) && !waitover)}
-            size='xl'
+            size='lg'
             radius="xl"
             variant='gradient'
-            gradient={{ from: 'var(--mantine-color-skyblue-8)', to: 'var(--mantine-color-paleviolet-6)', deg: 135 }}
+            gradient={{ from: props.color1, to: props.color2, deg: 45 }}
             onClick={onClick}
-            rightSection={<IconLink size={32} />}>    
+            rightSection={<IconLink size={24} />}>    
             Login with Twitch
         </Button> );
 }

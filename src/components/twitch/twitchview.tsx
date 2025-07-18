@@ -1,11 +1,12 @@
-import { Title, Button, SimpleGrid, Tabs, Text, Group } from '@mantine/core';
+import { Title, Button, SimpleGrid, Tabs, Text, Group, ActionIcon } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconX } from '@tabler/icons-react';
+import { IconX, IconEdit } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
 import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
 import { HelixStream } from '@twurple/api';
 import { StreamCardPlaceholder, StreamCard } from './streamcard';
 import { RaidView } from '../chat/mod/modview';
+import { StreamInfoDrawer } from './streaminfo';
 import classes from './twitchview.module.css';
 import { ModActions } from '../chat/mod/modactions'
 import { OverlayDrawer } from '@/pages/Chat.page';
@@ -20,6 +21,7 @@ export const TwitchDrawer: OverlayDrawer = {
 export interface TwitchViewProps {
     close: () => void,
     modActions: ModActions,
+    openDrawer?: (drawer: OverlayDrawer) => void,
 }
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -32,7 +34,7 @@ export function TwitchView(props: TwitchViewProps) {
     const [raidTargetStreams, setRaidTargetStreams] = useState<HelixStream[]>([]);
     const [activeTab, setActiveTab] = useState<string | null>('live');
     const [raidModalOpenend, raidModalHandler] = useDisclosure(false);
-    const [initialRaidTarget, setInitialRaidTarget] = useState<string | undefined>();
+    const [initialRaidTarget, setInitialRaidTarget] = useState<HelixStream | undefined>();
 
     useEffect(() => {
         setLoadStreams(true);
@@ -44,20 +46,36 @@ export function TwitchView(props: TwitchViewProps) {
         }
         if (activeTab === 'raids') {
             fetch(BASE_URL + "/twitch/streams?channels=" + (config.raidTargets || []).join(',')).then(res => res.json()).then((data) => {
-                setStreams(data.map((d: any) => new HelixStream(d)));
+                setRaidTargetStreams(data.map((d: any) => new HelixStream(d)));
                 setLoadStreams(false);
             });
         }
     }, [activeTab]);
 
     return (<nav className={classes.navbar}>
-        <Group justify='space-between' p='md'>
+        <Group justify='space-between' p='md' className={classes.header}>
             <Title order={4}>
                 Twitch Streams
             </Title>
-            <Button onClick={props.close} variant='subtle' color='primary'>
-                <IconX />
-            </Button>
+            <Group>
+                {login.user?.name && (
+                    <ActionIcon 
+                        variant="subtle" 
+                        color="primary"
+                        onClick={() => {
+                            if (props.openDrawer) {
+                                props.openDrawer(StreamInfoDrawer);
+                            }
+                        }}
+                        title="Edit Stream Info"
+                    >
+                        <IconEdit size={18} />
+                    </ActionIcon>
+                )}
+                <Button onClick={props.close} variant='subtle' color='primary'>
+                    <IconX />
+                </Button>
+            </Group>
         </Group>
         <div className={classes.main}>
             <Tabs value={activeTab} onChange={setActiveTab}>
@@ -79,7 +97,7 @@ export function TwitchView(props: TwitchViewProps) {
                         {loadStream ? [1, 2, 3].map((x) => (<StreamCardPlaceholder key={x} />)) : null}
                         {!loadStream && raidTargetStreams.length === 0 ? <Text pt='xl' size='xl' ta="center" fw={500}>No Streams for raid right now.</Text> : null}
                         {raidTargetStreams.map(stream => (<StreamCard stream={stream} key={stream.id} hideViewers={config.hideViewers || (config.hideOwnViewers && stream.userName === login.user?.name)} onClick={(stream) => {
-                            setInitialRaidTarget(stream.userName);
+                            setInitialRaidTarget(stream);
                             raidModalHandler.open();
                         }}/>))}
                     </SimpleGrid>

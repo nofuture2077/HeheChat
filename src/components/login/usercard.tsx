@@ -1,9 +1,11 @@
-import { Avatar, Text, Button, Paper, Space, Group } from '@mantine/core';
+import { Avatar, Text, Button, Paper, Space, Group, Stack } from '@mantine/core';
+
 import { OverlayDrawer } from '@/pages/Chat.page';
 import { useContext } from 'react';
-import { LoginContextContext } from '@/ApplicationContext';
+import { LoginContextContext, ProfileContext } from '@/ApplicationContext';
 import { IconUnlink, IconX } from '@tabler/icons-react';
 import { LoginContext } from '@/commons/login';
+import { CompactAnalyticsChart } from "@/components/analytics/CompactAnalyticsChart";
 
 
 export const UserCardDrawer: OverlayDrawer = {
@@ -24,6 +26,8 @@ export interface UserCardProps {
   
 export function UserCard(props: UserCardProps) {
     const loginContext = useContext(LoginContextContext);
+    const profile = useContext(ProfileContext);
+
     return (
         <Paper radius="md" withBorder p="lg" bg="var(--mantine-color-body)" ta="center">
             <Group justify="flex-end">
@@ -50,7 +54,6 @@ export function UserCard(props: UserCardProps) {
                 radius="xl"
                 variant='gradient'
                 onClick={() => logout(loginContext)}
-                gradient={{ from: 'red', to: 'orange', deg: 135 }}
                 rightSection={<IconUnlink size={32} />}>    
                 Logout
             </Button>

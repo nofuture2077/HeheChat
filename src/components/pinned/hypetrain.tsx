@@ -1,6 +1,5 @@
 import { Text, Card, Badge, Group, Stack, ActionIcon } from '@mantine/core';
-import { useState, useEffect, useContext } from 'react';
-import { useInterval } from '@mantine/hooks';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { formatMinuteSeconds } from '@/commons/helper'
 import { ChatEmotesContext } from '@/ApplicationContext'
 import pinClasses from './pinmanager.module.css';
@@ -13,28 +12,44 @@ interface HypetrainProps extends PinProps {
     progress: number;
     goal: number;
     state?: 'active' | 'ended';
+    isGoldenKappaTrain: boolean;
 }
 
 export function Hypetrain(props: HypetrainProps) {
     const emotes = useContext(ChatEmotesContext);
     const [remaining, setRemaining] = useState<number>(Math.round((props.endTime.getTime() - new Date().getTime()) / 1000));
-    const timer = useInterval(() => {
-      const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
-      setRemaining(remaining);
-    }, 1000);
+    const intervalRef = useRef<number | null>(null);
     const progress = Math.ceil(100 * props.progress / props.goal);
 
     useEffect(() => {
-      timer.start();
-      return timer.stop;
-    });
+      // Clear any existing interval
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current);
+      }
+      
+      // Set up a new interval
+      intervalRef.current = window.setInterval(() => {
+        const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
+        setRemaining(remaining);
+      }, 1000);
+      
+      // Clean up the interval when the component unmounts
+      return () => {
+        if (intervalRef.current !== null) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      };
+    }, [props.endTime]);
 
     if (remaining < 0 && props.state !== 'ended') {
       props.remove();
       return null;
     }
 
-    return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={props.onClick} className={htClasses.hypetrain}>
+    const prefix = props.isGoldenKappaTrain ? 'Golden Kappa ' : '';
+
+    return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={props.onClick} className={[htClasses.hypetrain, props.isGoldenKappaTrain ? htClasses.goldenkappa : ''].join(' ')}>
       <div 
         style={{ width: `${100 - progress}%` }} 
         className={`${htClasses.progress} ${props.state === 'ended' ? htClasses.completed : ''}`}
@@ -44,7 +59,7 @@ export function Hypetrain(props: HypetrainProps) {
           <Group gap='xs'>
             <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
             <Text fw={900}>
-              {props.state === 'ended' ? "Hype Train Completed!" : "Hype Train"}
+              {props.state === 'ended' ? prefix + "Hype Train Completed!" : prefix + "Hype Train"}
             </Text>
             <Badge color={props.state === 'ended' ? "purple" : "pink"}>LVL {props.level}</Badge>
           </Group>

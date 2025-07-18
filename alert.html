@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" manifest="cache.manifest">
-
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="favicon.ico" />
@@ -13,157 +12,13 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-status-bar-style" content="black-translucent">
   <title>Hehe Chat</title>
-  <title>Twitchs finest chat app</title>
-  <style>
 
-    .yellow span.highlight {
-      color: rgb(255, 241, 51);
-    }
-
-    .green span.highlight {
-      color: rgb(51, 255, 65);
-    }
-
-    .red span.highlight {
-      color: rgb(255, 51, 51);
-    }
-
-    .blue span.highlight {
-      color: rgb(58, 51, 255);
-    }
-
-    .orange span.highlight {
-      color: rgb(255, 173, 51);
-    }
-
-    .pink span.highlight {
-      color: #f39;
-    }
-
-    .teal span.highlight {
-      color: rgb(51, 255, 197);
-    }
-
-    span.highlight {
-      color: #333;
-    }
-    span.highlight span {
-      position: relative;
-      top: 5px;
-      display: inline-block;
-      animation: bounce 0.3s ease infinite alternate;
-    }
-
-    #alert {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: sans-serif;
-      text-transform: uppercase;
-      visibility: hidden;
-    }
-
-    #alert.left {
-      justify-content: flex-start;
-    }
-
-    #alert.center {
-      justify-content: space-around;
-    }
-
-    #alert.right {
-      justify-content: flex-end;
-    }
-
-    .text {
-      font-size: 24px;
-      line-height: 36px;
-      color: white;
-      text-shadow: 2px 2px 2px #333;
-      font-weight: 900;
-      letter-spacing: 5px;
-
-      display: flex;
-      align-items: center;
-      flex-direction: column;
-      text-align: center;
-    }
-
-    .text>p {
-      max-width: 60%;
-    }
-
-    span.highlight span:nth-child(2) {
-      animation-delay: 0.1s;
-    }
-
-    span.highlight span:nth-child(3) {
-      animation-delay: 0.2s;
-    }
-
-    span.highlight span:nth-child(4) {
-      animation-delay: 0.3s;
-    }
-
-    span.highlight span:nth-child(5) {
-      animation-delay: 0.4s;
-    }
-
-    span.highlight span:nth-child(6) {
-      animation-delay: 0.5s;
-    }
-
-    span.highlight span:nth-child(7) {
-      animation-delay: 0.6s;
-    }
-
-    span.highlight span:nth-child(8) {
-      animation-delay: 0.2s;
-    }
-
-    span.highlight span:nth-child(9) {
-      animation-delay: 0.3s;
-    }
-
-    span.highlight span:nth-child(10) {
-      animation-delay: 0.4s;
-    }
-
-    span.highlight span:nth-child(11) {
-      animation-delay: 0.5s;
-    }
-
-    span.highlight span:nth-child(12) {
-      animation-delay: 0.6s;
-    }
-
-    span.highlight span:nth-child(13) {
-      animation-delay: 0.7s;
-    }
-
-    span.highlight span:nth-child(14) {
-      animation-delay: 0.8s;
-    }
-
-    /* ANIMATION */
-    @keyframes bounce {
-      100% {
-        top: -5px;
-      }
-    }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Days+One&family=Erica+One&family=Fjalla+One&family=Molle&family=Press+Start+2P&family=Ultra&display=swap" rel="stylesheet">
 </head>
-
 <body>
-  <div id="alert">
-    <img id='image' />
-    <div class="text">
-      <p id="headline"></p>
-      <p id="text"></p>
-    </div>
-  </div>
-  <script type="module" src="/src/alert.tsx"></script>
+  <div id="alert"></div>
+  <script type="module" src="/src/alerts.tsx"></script>
 </body>
-
 </html>

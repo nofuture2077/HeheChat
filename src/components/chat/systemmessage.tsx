@@ -1,15 +1,16 @@
 import { SystemMessage, SystemMessageMainType, HeheChatMessage, parseMessage } from '../../commons/message';
-import { formatDuration, formatString } from '../../commons/helper';
+import { formatTime, formatString } from '../../commons/helper';
 import { Text, ActionIcon } from "@mantine/core"
 import classes from './systemmessage.module.css';
 import { IconSpeakerphone } from '@tabler/icons-react';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../ApplicationContext';
 import { ModActions } from './mod/modactions';
 import { getEventStyle } from '../events/eventhelper';
 import { EventType, EventTypeMapping } from '../../commons/events';
 import { ParsedMessagePart } from "../../commons/message";
-import { parsedPartsToHtml, joinWithSpace } from './ChatMessage';
+import { joinWithSpace } from "../../commons/helper";
+import { parsedPartsToHtml } from './ChatMessage';
 
 export type SystemMessageProps = {
     msg: SystemMessage;
@@ -18,8 +19,8 @@ export type SystemMessageProps = {
 }
 
 const messages = {
-    'delete': 'A messages from ${username}',
-    'timeout': '${username} was timeouted for ${amount:duration}',
+    'delete': 'A messages from ${username} was deleted',
+    'timeout': '${username} was timeouted for ${duration:duration}',
     'ban': '${username} was banned',
     'streamOnline': '${channel} just went Live',
     'streamOffline': '${channel} is now Offline',
@@ -38,9 +39,16 @@ const messages = {
     'sub_Prime': '${username} subscribed with prime for ${amount:whole} months///${text}',
     'follow': '${username} just followed',
     'cheer': '${username} cheered ${amount:whole} bits///${text}',
-    'donation': '${username} donated ${amount} EURO: ${text}',
-    'sevenTVAdded': '${username} added new Emote ${emote} ${emote}',
-    'sevenTVRemoved': '${username} removed Emote ${emote}'
+    'donation': '${username} donated ${amount}${currency:currency}///${text}',
+    'announcement': 'Chat Announcement///${text}',
+    'blerp': '${username} played Blerp ${audioTitle}',
+    'seventv_emote_add': '${username} added new Emote ${emote} ${emote}',
+    'seventv_emote_remove': '${username} removed Emote ${emote}',
+    'kofishop': '${username} bought something on ko-fi',
+    'kofidono': '${username} donated ${amount}${currency:currency} on ko-fi',
+    'kofisub': '${username} subed on ko-fi with tier ${tier}',
+    'tts': '${username} triggered tts',
+    'hypetrain': 'Hypetrain level ${amount}'
 };
 
 export function SystemMessageComp(props: SystemMessageProps) {
@@ -56,7 +64,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const eventType = props.msg.data.type as EventType;
 
     const wordMapper = (type: string, word: string, index: number, arr: string[]) => {
-        if ((type === 'sevenTVAdded') && index === arr.length - 2) {
+        if ((type === 'seventv_emote_add') && index === arr.length - 2) {
             return emotes.getEmote(props.msg.data.channel, word, props.msg.id);
         }
         return word;
@@ -68,7 +76,7 @@ export function SystemMessageComp(props: SystemMessageProps) {
     const style = {variant: 'color', width: '100%'};
     
     const eventMainType = EventTypeMapping[eventType] as SystemMessageMainType;
-    if (!config.systemMessageInChat[eventMainType]) {
+    if (props.msg.data.type !== 'announcement' && !config.systemMessageInChat[eventMainType]) {
         return;
     }
     getEventStyle({eventtype: eventType, amount: Number(props.msg.data.amount)}, style);
@@ -80,8 +88,12 @@ export function SystemMessageComp(props: SystemMessageProps) {
     }
 
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)} style={{ verticalAlign: 'middle' }}><IconSpeakerphone size={22} /></ActionIcon> : null;
-    return <div className={[classes.msg, classes[props.msg.subType]].join(' ')}>
-                <Text key="msg-main" fw={700} {...style} style={{fontSize: config.fontSize}}><span className={classes.logo}>{emotes.getLogo(props.msg.data.channel)}</span>{joinWithSpace(textParts[0].split(" ").map((value, index, array) => wordMapper(eventType, value, index, array)))}{actions}</Text>
-                {textParts.length === 2 ? <Text key="msg-second" fw={500} style={{fontSize: config.fontSize}}>{parsedPartsToHtml(msgParts, channel, config, emotes, login)}</Text>: null}
+    return <div className={[classes.msg, classes[props.msg.subType], classes[props.msg.data.color]].join(' ')}>
+                {config.showProfilePicture ? <span className={classes.logo}>{emotes.getLogo(props.msg.data.channel)}</span> : null}
+                {config.showTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)} </span> : null}
+                <Text {...style} key="msg-main" fw={700} style={{fontSize: config.fontSize, color: "light-dark(black, white)"}} span>
+                    {joinWithSpace(textParts[0].split(" ").map((value, index, array) => wordMapper(eventType, value, index, array)))}{actions}
+                </Text>
+                {textParts.length === 2 ? <Text key="msg-second" fw={500} style={{fontSize: config.fontSize}}>{parsedPartsToHtml(msgParts, channel, false, config, emotes, login)}</Text>: null}
         </div>;
 }
