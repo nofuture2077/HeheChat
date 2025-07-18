@@ -34,7 +34,7 @@ interface ChartDataPoint {
 }
 
 
-export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) {
+export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, onChannelChange?: (channel: string) => void, onStreamChange?: (streamId: string, streamData: any) => void}) {
   const premium = useContext(PremiumContext);
   const { channels, loading: channelsLoading } = useChannels();
   
@@ -432,11 +432,16 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
               placeholder="Select a channel"
               value={selectedChannel}
               onChange={(value) => {
-                setSelectedChannel(value || '');
+                const newChannel = value || '';
+                setSelectedChannel(newChannel);
                 setSelectedStream('');
                 setStreams([]);
                 setData([]);
                 setSummary(null);
+                // Notify parent component of channel change
+                if (props.onChannelChange) {
+                  props.onChannelChange(newChannel);
+                }
               }}
               data={channels.length > 0 ? channels.map(channel => ({ value: channel, label: channel })) : []}
               searchable
@@ -488,7 +493,13 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
                         backgroundColor: isSelected ? 'var(--mantine-color-blue-light)' : undefined,
                         borderColor: isSelected ? 'var(--mantine-color-blue-6)' : undefined
                       }}
-                      onClick={() => setSelectedStream(streamId)}
+                      onClick={() => {
+                        setSelectedStream(streamId);
+                        // Notify parent component of stream change
+                        if (props.onStreamChange) {
+                          props.onStreamChange(streamId, stream);
+                        }
+                      }}
                     >
                       <Group justify="space-between">
                         <div>
