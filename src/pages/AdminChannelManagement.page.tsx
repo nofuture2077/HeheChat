@@ -138,9 +138,9 @@ export function AdminChannelManagementPage() {
         // Sort channels by first_login in descending order (most recent first)
         const sortedChannels = data.channels.sort((a, b) => {
           if (!a.first_login && !b.first_login) return 0;
-          if (!a.first_login) return 1;
-          if (!b.first_login) return -1;
-          return new Date(Number(b.first_login)).getTime() - new Date(Number(a.first_login)).getTime();
+          if (!a.first_login) return -1;
+          if (!b.first_login) return 1;
+          return new Date(Number(a.first_login)).getTime() - new Date(Number(b.first_login)).getTime();
         });
         setChannels(sortedChannels);
         setLastUpdated(new Date());
