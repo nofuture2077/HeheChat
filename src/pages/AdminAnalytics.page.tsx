@@ -76,6 +76,7 @@ export function AdminAnalyticsPage() {
   // Channel and stream selection for additional features
   const [selectedChannel, setSelectedChannel] = useState<string>('');
   const [selectedStreamData, setSelectedStreamData] = useState<any>(null);
+  const [streamEventFilter, setStreamEventFilter] = useState<string>('');
 
   // API methods for additional features
 
@@ -261,47 +262,120 @@ export function AdminAnalyticsPage() {
             <Divider />
             <Title order={3}>Stream Details</Title>
             
-            {/* Stream Information Card */}
-            <Card withBorder p="md">
-              <Group justify="space-between" mb="md">
-                <div>
-                  <Title order={4}>{selectedStreamData.title}</Title>
-                  <Text c="dimmed">Selected Stream Analytics</Text>
-                </div>
-                {selectedStreamData.id === null && (
-                  <Badge color="red" size="lg">LIVE</Badge>
-                )}
-              </Group>
-              <Grid>
-                <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                  <Text size="sm" c="dimmed">Duration</Text>
-                  <Text fw={600}>{formatDuration(selectedStreamData.duration_seconds)}</Text>
-                </Grid.Col>
-                <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                  <Text size="sm" c="dimmed">Peak Viewers</Text>
-                  <Text fw={600}>{formatNumber(selectedStreamData.peak_viewers)}</Text>
-                </Grid.Col>
-                <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                  <Text size="sm" c="dimmed">Avg Viewers</Text>
-                  <Text fw={600}>{formatNumber(selectedStreamData.avg_viewers)}</Text>
-                </Grid.Col>
-                <Grid.Col span={{ base: 12, sm: 6, md: 3 }}>
-                  <Text size="sm" c="dimmed">Total Messages</Text>
-                  <Text fw={600}>{formatNumber(selectedStreamData.total_messages)}</Text>
-                </Grid.Col>
-              </Grid>
-            </Card>
+            {/* Detailed Stream Stats */}
+            <Grid>
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Card withBorder p="md">
+                  <Title order={4} mb="md">Stream Details</Title>
+                  <Grid>
+                    <Grid.Col span={6}>
+                      <Text size="sm" c="dimmed">Duration</Text>
+                      <Text fw={600}>{formatDuration(selectedStreamData.duration_seconds)}</Text>
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                      <Text size="sm" c="dimmed">Peak Viewers</Text>
+                      <Text fw={600}>{formatNumber(selectedStreamData.peak_viewers)}</Text>
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                      <Text size="sm" c="dimmed">Avg Viewers</Text>
+                      <Text fw={600}>{formatNumber(selectedStreamData.avg_viewers)}</Text>
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                      <Text size="sm" c="dimmed">Total Messages</Text>
+                      <Text fw={600}>{formatNumber(selectedStreamData.total_messages)}</Text>
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                      <Text size="sm" c="dimmed">Start Time</Text>
+                      <Text fw={600} size="sm">{new Date(selectedStreamData.start_timestamp * 1000).toLocaleString()}</Text>
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                      <Text size="sm" c="dimmed">End Time</Text>
+                      <Text fw={600} size="sm">
+                        {selectedStreamData.id === null ? 'Live' : new Date(selectedStreamData.end_timestamp * 1000).toLocaleString()}
+                      </Text>
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                      <Text size="sm" c="dimmed">Category</Text>
+                      <Text fw={600} size="sm">{selectedStreamData.category || 'N/A'}</Text>
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                      <Text size="sm" c="dimmed">Status</Text>
+                      <Badge color={selectedStreamData.id === null ? 'red' : 'gray'} size="sm">
+                        {selectedStreamData.id === null ? '🔴 LIVE' : 'Ended'}
+                      </Badge>
+                    </Grid.Col>
+                  </Grid>
+                </Card>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Card withBorder p="md">
+                  <Title order={4} mb="md">Top Chat Users (This Stream)</Title>
+                  <Stack gap="xs">
+                    {(() => {
+                      const streamChatUsers = chatUsers
+                        .filter(user => {
+                          return user.first_message_time >= selectedStreamData.start_timestamp && 
+                                 user.first_message_time <= selectedStreamData.end_timestamp;
+                        })
+                        .sort((a, b) => b.message_count - a.message_count)
+                        .slice(0, 7);
+                      
+                      if (streamChatUsers.length === 0) {
+                        return (
+                          <Text size="sm" c="dimmed" ta="center" py="md">
+                            No chat users found for this stream
+                          </Text>
+                        );
+                      }
+                      
+                      return streamChatUsers.map((user, index) => (
+                        <Group key={user.id} justify="space-between">
+                          <Group gap="xs">
+                            <Badge variant="light" size="xs">#{index + 1}</Badge>
+                            <Text size="sm">{user.display_name}</Text>
+                            {user.is_first_time_chatter && (
+                              <Badge color="blue" size="xs">First Time</Badge>
+                            )}
+                          </Group>
+                          <Badge variant="outline" size="sm">{formatNumber(user.message_count)}</Badge>
+                        </Group>
+                      ));
+                    })()}
+                  </Stack>
+                </Card>
+              </Grid.Col>
+            </Grid>
 
             {/* Stream Events for Selected Stream */}
             <Card withBorder p="md">
               <Group justify="space-between" mb="md">
                 <Title order={4}>Events During This Stream</Title>
-                <Text size="sm" c="dimmed">
-                  {streamEvents.filter(event => 
-                    event.timestamp >= selectedStreamData.start_timestamp && 
-                    event.timestamp <= selectedStreamData.end_timestamp
-                  ).length} events
-                </Text>
+                <Group>
+                  <Select
+                    placeholder="Filter by event type"
+                    data={[
+                      { value: '', label: 'All Events' },
+                      { value: 'follow', label: 'Follows' },
+                      { value: 'subscription', label: 'Subscriptions' },
+                      { value: 'donation', label: 'Donations' },
+                      { value: 'raid', label: 'Raids' }
+                    ]}
+                    value={streamEventFilter}
+                    onChange={(value) => setStreamEventFilter(value || '')}
+                    w={150}
+                  />
+                  <Text size="sm" c="dimmed">
+                    {(() => {
+                      const filteredEvents = streamEvents.filter(event => {
+                        const isInStream = event.timestamp >= selectedStreamData.start_timestamp && 
+                                          event.timestamp <= selectedStreamData.end_timestamp;
+                        const matchesFilter = !streamEventFilter || event.event_type === streamEventFilter;
+                        return isInStream && matchesFilter;
+                      });
+                      return filteredEvents.length;
+                    })()} events
+                  </Text>
+                </Group>
               </Group>
               
               <Paper withBorder>
@@ -317,40 +391,59 @@ export function AdminAnalyticsPage() {
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
-                      {streamEvents
-                        .filter(event => {
-                          return event.timestamp >= selectedStreamData.start_timestamp && 
-                                 event.timestamp <= selectedStreamData.end_timestamp;
-                        })
-                        .map((event) => (
-                        <Table.Tr key={event.id}>
-                          <Table.Td>
-                            <Group gap="xs">
-                              {getEventTypeIcon(event.event_type)}
-                              <Badge color={getEventTypeBadgeColor(event.event_type)} size="sm">
-                                {event.event_type}
-                              </Badge>
-                            </Group>
-                          </Table.Td>
-                          <Table.Td>{event.display_name}</Table.Td>
-                          <Table.Td>
-                            {event.amount ? formatCurrency(event.amount) : '-'}
-                          </Table.Td>
-                          <Table.Td>
-                            {event.event_subtype && (
-                              <Badge variant="light" size="xs">{event.event_subtype}</Badge>
-                            )}
-                            {event.metadata?.message && (
-                              <Text size="xs" c="dimmed" truncate>
-                                {event.metadata.message}
-                              </Text>
-                            )}
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">{formatTimestamp(event.timestamp)}</Text>
-                          </Table.Td>
-                        </Table.Tr>
-                      ))}
+                      {(() => {
+                        const filteredEvents = streamEvents.filter(event => {
+                          const isInStream = event.timestamp >= selectedStreamData.start_timestamp && 
+                                            event.timestamp <= selectedStreamData.end_timestamp;
+                          const matchesFilter = !streamEventFilter || event.event_type === streamEventFilter;
+                          return isInStream && matchesFilter;
+                        });
+                        
+                        if (filteredEvents.length === 0) {
+                          return (
+                            <Table.Tr>
+                              <Table.Td colSpan={5}>
+                                <Text size="sm" c="dimmed" ta="center" py="md">
+                                  {streamEventFilter 
+                                    ? `No ${streamEventFilter} events found for this stream`
+                                    : 'No events found for this stream'
+                                  }
+                                </Text>
+                              </Table.Td>
+                            </Table.Tr>
+                          );
+                        }
+                        
+                        return filteredEvents.map((event) => (
+                          <Table.Tr key={event.id}>
+                            <Table.Td>
+                              <Group gap="xs">
+                                {getEventTypeIcon(event.event_type)}
+                                <Badge color={getEventTypeBadgeColor(event.event_type)} size="sm">
+                                  {event.event_type}
+                                </Badge>
+                              </Group>
+                            </Table.Td>
+                            <Table.Td>{event.display_name}</Table.Td>
+                            <Table.Td>
+                              {event.amount ? formatCurrency(event.amount) : '-'}
+                            </Table.Td>
+                            <Table.Td>
+                              {event.event_subtype && (
+                                <Badge variant="light" size="xs">{event.event_subtype}</Badge>
+                              )}
+                              {event.metadata?.message && (
+                                <Text size="xs" c="dimmed" truncate>
+                                  {event.metadata.message}
+                                </Text>
+                              )}
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm">{formatTimestamp(event.timestamp)}</Text>
+                            </Table.Td>
+                          </Table.Tr>
+                        ));
+                      })()}
                     </Table.Tbody>
                   </Table>
                 </ScrollArea>
@@ -443,50 +536,61 @@ export function AdminAnalyticsPage() {
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
-                      {streamEvents.map((event) => (
-                        <Table.Tr key={event.id}>
-                          <Table.Td>
-                            <Group gap="xs">
-                              {getEventTypeIcon(event.event_type)}
-                              <Badge color={getEventTypeBadgeColor(event.event_type)} size="sm">
-                                {event.event_type}
-                              </Badge>
-                            </Group>
-                          </Table.Td>
-                          <Table.Td>{event.display_name}</Table.Td>
-                          <Table.Td>
-                            {event.amount ? formatCurrency(event.amount) : '-'}
-                          </Table.Td>
-                          <Table.Td>
-                            {event.event_subtype && (
-                              <Badge variant="light" size="xs">{event.event_subtype}</Badge>
-                            )}
-                            {event.metadata?.message && (
-                              <Text size="xs" c="dimmed" truncate>
-                                {event.metadata.message}
-                              </Text>
-                            )}
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">{formatTimestamp(event.timestamp)}</Text>
+                      {streamEvents.length === 0 ? (
+                        <Table.Tr>
+                          <Table.Td colSpan={5}>
+                            <Text size="sm" c="dimmed" ta="center" py="md">
+                              No events found for the last 7 days
+                            </Text>
                           </Table.Td>
                         </Table.Tr>
-                      ))}
+                      ) : (
+                        streamEvents.map((event) => (
+                          <Table.Tr key={event.id}>
+                            <Table.Td>
+                              <Group gap="xs">
+                                {getEventTypeIcon(event.event_type)}
+                                <Badge color={getEventTypeBadgeColor(event.event_type)} size="sm">
+                                  {event.event_type}
+                                </Badge>
+                              </Group>
+                            </Table.Td>
+                            <Table.Td>{event.display_name}</Table.Td>
+                            <Table.Td>
+                              {event.amount ? formatCurrency(event.amount) : '-'}
+                            </Table.Td>
+                            <Table.Td>
+                              {event.event_subtype && (
+                                <Badge variant="light" size="xs">{event.event_subtype}</Badge>
+                              )}
+                              {event.metadata?.message && (
+                                <Text size="xs" c="dimmed" truncate>
+                                  {event.metadata.message}
+                                </Text>
+                              )}
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm">{formatTimestamp(event.timestamp)}</Text>
+                            </Table.Td>
+                          </Table.Tr>
+                        ))
+                      )}
                     </Table.Tbody>
                   </Table>
                 </ScrollArea>
               </Paper>
             </Card>
 
-            {/* Chat Users Table */}
+            {/* Top Chat Users */}
             <Card withBorder p="md">
-              <Title order={4} mb="md">Chat Users</Title>
+              <Title order={4} mb="md">Top 7 Chat Users (Last 7 Days)</Title>
               
               <Paper withBorder>
                 <ScrollArea>
                   <Table striped highlightOnHover>
                     <Table.Thead>
                       <Table.Tr>
+                        <Table.Th>Rank</Table.Th>
                         <Table.Th>User</Table.Th>
                         <Table.Th>Messages</Table.Th>
                         <Table.Th>First Message</Table.Th>
@@ -495,25 +599,41 @@ export function AdminAnalyticsPage() {
                       </Table.Tr>
                     </Table.Thead>
                     <Table.Tbody>
-                      {chatUsers.map((user) => (
-                        <Table.Tr key={user.id}>
-                          <Table.Td>{user.display_name}</Table.Td>
-                          <Table.Td>
-                            <Badge variant="light">{formatNumber(user.message_count)}</Badge>
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">{formatTimestamp(user.first_message_time)}</Text>
-                          </Table.Td>
-                          <Table.Td>
-                            <Text size="sm">{formatTimestamp(user.last_message_time)}</Text>
-                          </Table.Td>
-                          <Table.Td>
-                            {user.is_first_time_chatter && (
-                              <Badge color="blue" size="sm">First Time</Badge>
-                            )}
+                      {chatUsers.length === 0 ? (
+                        <Table.Tr>
+                          <Table.Td colSpan={6}>
+                            <Text size="sm" c="dimmed" ta="center" py="md">
+                              No chat users found for the last 7 days
+                            </Text>
                           </Table.Td>
                         </Table.Tr>
-                      ))}
+                      ) : (
+                        chatUsers
+                          .sort((a, b) => b.message_count - a.message_count)
+                          .slice(0, 7)
+                          .map((user, index) => (
+                          <Table.Tr key={user.id}>
+                            <Table.Td>
+                              <Badge variant="light" size="sm">#{index + 1}</Badge>
+                            </Table.Td>
+                            <Table.Td>{user.display_name}</Table.Td>
+                            <Table.Td>
+                              <Badge variant="outline" color="blue">{formatNumber(user.message_count)}</Badge>
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm">{formatTimestamp(user.first_message_time)}</Text>
+                            </Table.Td>
+                            <Table.Td>
+                              <Text size="sm">{formatTimestamp(user.last_message_time)}</Text>
+                            </Table.Td>
+                            <Table.Td>
+                              {user.is_first_time_chatter && (
+                                <Badge color="blue" size="sm">First Time</Badge>
+                              )}
+                            </Table.Td>
+                          </Table.Tr>
+                        ))
+                      )}
                     </Table.Tbody>
                   </Table>
                 </ScrollArea>

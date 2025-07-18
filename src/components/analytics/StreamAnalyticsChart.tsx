@@ -506,7 +506,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
                           <Group gap="xs">
                             <Text fw={500} truncate maw={300}>{stream.title}</Text>
                             {stream.id === null && (
-                              <Badge color="red" size="sm">LIVE</Badge>
+                              <Badge color="red" size="sm" variant="filled">🔴 LIVE</Badge>
                             )}
                           </Group>
                           <Text size="sm" c="dimmed">
