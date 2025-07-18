@@ -142,7 +142,7 @@ export function AdminAnalyticsPage() {
   const [chatUsers, setChatUsers] = useState<ChatUser[]>([]);
   const [eventSummary, setEventSummary] = useState<EventSummary | null>(null);
   const [streamSessions, setStreamSessions] = useState<StreamSession[]>([]);
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeTab, setActiveTab] = useState<string>('chart');
   const [eventsLoading, setEventsLoading] = useState(false);
   const [chatUsersLoading, setChatUsersLoading] = useState(false);
   const [summaryLoading, setSummaryLoading] = useState(false);
@@ -403,22 +403,17 @@ export function AdminAnalyticsPage() {
           </Text>
         </div>
 
-        <StreamAnalyticsChart admin={true} />
-
-        {/* New Features Section */}
-        <Divider my="xl" />
-        
         <Card withBorder p="md" mb="md">
           <Group justify="space-between" align="center">
             <div>
-              <Title order={3}>Detailed Analytics</Title>
+              <Title order={3}>Channel Analytics</Title>
               <Text c="dimmed" size="sm">
-                Select a channel to view detailed event tracking, chat analytics, and stream sessions
+                Select a channel to view comprehensive analytics including charts, events, and stream data
               </Text>
             </div>
             <Select
               label="Channel"
-              placeholder="Select a channel for detailed analytics"
+              placeholder="Select a channel for analytics"
               value={selectedChannel}
               onChange={(value) => setSelectedChannel(value || '')}
               data={useChannels().channels.map(channel => ({ value: channel, label: channel }))}
@@ -431,11 +426,14 @@ export function AdminAnalyticsPage() {
         
         {!selectedChannel ? (
           <Alert icon={<IconAlertCircle size="1rem" />} title="Select a Channel" color="blue">
-            Please select a channel above to view detailed analytics features.
+            Please select a channel above to view analytics features.
           </Alert>
         ) : (
           <Tabs value={activeTab} onChange={(value) => setActiveTab(value || 'overview')}>
           <Tabs.List>
+            <Tabs.Tab value="chart" leftSection={<IconChartBar size="0.8rem" />}>
+              Stream Chart
+            </Tabs.Tab>
             <Tabs.Tab value="overview" leftSection={<IconTrendingUp size="0.8rem" />}>
               Overview
             </Tabs.Tab>
@@ -452,6 +450,10 @@ export function AdminAnalyticsPage() {
               Stream Sessions
             </Tabs.Tab>
           </Tabs.List>
+
+          <Tabs.Panel value="chart" pt="xs">
+            <StreamAnalyticsChart admin={true} channel={selectedChannel} />
+          </Tabs.Panel>
 
           <Tabs.Panel value="overview" pt="xs">
             <Stack gap="md">
