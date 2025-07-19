@@ -20,7 +20,7 @@ interface PremiumUser {
 
 interface RedeemCode {
   code: string;
-  days: number;
+  duration_days: number;
   created_at: string;
   used: boolean;
   used_by?: string;
@@ -289,7 +289,7 @@ export function AdminPremiumPage() {
       </Table.Td>
       <Table.Td>
         <Badge variant="outline" color="blue">
-          {code.days} days
+          {code.duration_days} days
         </Badge>
       </Table.Td>
       <Table.Td>{formatDate(code.created_at)}</Table.Td>

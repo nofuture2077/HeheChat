@@ -34,7 +34,7 @@ interface ChartDataPoint {
 }
 
 
-export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) {
+export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, onChannelChange?: (channel: string) => void, onStreamChange?: (streamId: string, streamData: any) => void}) {
   const premium = useContext(PremiumContext);
   const { channels, loading: channelsLoading } = useChannels();
   
@@ -425,49 +425,28 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
     <Stack gap="md">
       <Fieldset legend="Stream Analytics" variant="filled">
         <Stack gap="md">
-          {/* Channel and Stream Selection */}
+          {/* Channel Selection Only */}
           <Group>
             <Select
               label="Channel"
               placeholder="Select a channel"
               value={selectedChannel}
               onChange={(value) => {
-                setSelectedChannel(value || '');
+                const newChannel = value || '';
+                setSelectedChannel(newChannel);
                 setSelectedStream('');
                 setStreams([]);
                 setData([]);
                 setSummary(null);
+                // Notify parent component of channel change
+                if (props.onChannelChange) {
+                  props.onChannelChange(newChannel);
+                }
               }}
               data={channels.length > 0 ? channels.map(channel => ({ value: channel, label: channel })) : []}
               searchable
               w={200}
               disabled={channelsLoading}
-            />
-            
-            <Select
-              label="Stream"
-              placeholder="Select a stream"
-              value={selectedStream}
-              onChange={(value) => setSelectedStream(value || '')}
-              data={[...streams].map(stream => {
-                // Use ID if available, otherwise use start timestamp as identifier
-                const streamId = stream.id 
-                  ? stream.id.toString() 
-                  : `active_${stream.start_timestamp}`;
-                
-                // Add indicator for active streams (null ID)
-                const streamLabel = stream.id === null 
-                  ? `${stream.title} (${new Date(stream.start_timestamp * 1000).toLocaleDateString()}) - LIVE`
-                  : `${stream.title} (${new Date(stream.start_timestamp * 1000).toLocaleDateString()})`;
-                
-                return {
-                  value: streamId,
-                  label: streamLabel
-                };
-              })}
-              searchable
-              w={400}
-              disabled={!selectedChannel || streamsLoading || streams.length === 0}
             />
             
             <Button 
@@ -476,7 +455,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
               disabled={!selectedChannel}
               mt="auto"
             >
-              Refresh Streams
+              Load Recent Streams
             </Button>
           </Group>
 
@@ -485,6 +464,69 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean}) 
             <Alert icon={<IconInfoCircle size={16} />} title="Loading" color="blue">
               Loading streams for the last 30 days...
             </Alert>
+          )}
+
+          {/* Stream Selection */}
+          {streams.length > 0 && (
+            <Card withBorder p="md">
+              <Text fw={600} mb="md">Recent Streams (Last 30 Days)</Text>
+              <Stack gap="xs">
+                {streams.slice(0, 5).map((stream) => {
+                  const streamId = stream.id ? stream.id.toString() : `active_${stream.start_timestamp}`;
+                  const isSelected = selectedStream === streamId;
+                  const formatDate = (timestamp: number) => {
+                    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    });
+                  };
+                  
+                  return (
+                    <Paper
+                      key={streamId}
+                      p="sm"
+                      withBorder
+                      style={{
+                        cursor: 'pointer',
+                        backgroundColor: isSelected ? 'var(--mantine-color-blue-light)' : undefined,
+                        borderColor: isSelected ? 'var(--mantine-color-blue-6)' : undefined
+                      }}
+                      onClick={() => {
+                        setSelectedStream(streamId);
+                        // Notify parent component of stream change
+                        if (props.onStreamChange) {
+                          props.onStreamChange(streamId, stream);
+                        }
+                      }}
+                    >
+                      <Group justify="space-between">
+                        <div>
+                          <Group gap="xs">
+                            <Text fw={500} truncate maw={300}>{stream.title}</Text>
+                            {stream.id === null && (
+                              <Badge color="red" size="sm" variant="filled">🔴 LIVE</Badge>
+                            )}
+                          </Group>
+                          <Text size="sm" c="dimmed">
+                            {formatDate(stream.start_timestamp)} • {stream.peak_viewers} peak viewers
+                          </Text>
+                        </div>
+                        {isSelected && (
+                          <Badge color="blue" variant="filled">Selected</Badge>
+                        )}
+                      </Group>
+                    </Paper>
+                  );
+                })}
+                {streams.length > 5 && (
+                  <Text size="sm" c="dimmed" ta="center">
+                    Showing 5 most recent streams of {streams.length} total
+                  </Text>
+                )}
+              </Stack>
+            </Card>
           )}
 
           {/* Stream Info */}
