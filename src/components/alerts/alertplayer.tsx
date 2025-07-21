@@ -722,7 +722,14 @@ class AlertPlayer {
                 // Send to backend immediately (this doesn't affect display timing)
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
                 
-                PubSub.publish('ALERT_SHOW', visualAlert);
+                // Apply visual alert delay for browser source mode
+                if (this.mode === 'browsersource' && this.config?.visualAlertDelay) {
+                    setTimeout(() => {
+                        PubSub.publish('ALERT_SHOW', visualAlert);
+                    }, this.config.visualAlertDelay * 1000);
+                } else {
+                    PubSub.publish('ALERT_SHOW', visualAlert);
+                }
             }
 
             // Chain audio playback with proper error handling - use mode to determine which setting to check

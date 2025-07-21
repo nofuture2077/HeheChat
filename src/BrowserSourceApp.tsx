@@ -62,6 +62,9 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
   });
 
   useEffect(() => {
+    // Set the AlertSystem mode to browsersource
+    AlertSystem.mode = 'browsersource';
+    
     // Initialize the worker
     backendWorkerRef.current = new Worker(new URL('./components/webworker/backendworker.ts', import.meta.url), { type: 'module' });
 
