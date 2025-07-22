@@ -161,9 +161,11 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
   useEffect(() => {
     if (!enabled) return;
 
-    // Initialize current version
+    // Initialize current version and store it in localStorage
     getCurrentVersion().then(version => {
       setState(prev => ({ ...prev, currentVersion: version }));
+      // Always store the current version in localStorage when the app loads
+      localStorage.setItem(STORAGE_KEY_CURRENT_VERSION, version);
     });
 
     // Check immediately if enough time has passed
