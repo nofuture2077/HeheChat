@@ -26,6 +26,8 @@ let connectionState = ConnectionState.DISCONNECTED;
 let reconnectAttempts = 0;
 let reconnectTimeout: number | undefined;
 let lastHeartbeatReceived = 0;
+let statusInterval: number | undefined;
+let isClosing = false;
 
 /**
  * Resets the connection state and timers
@@ -112,10 +114,17 @@ function connectToBackend() {
             // Report status immediately when disconnected
             reportStatus();
             
+            // Don't reconnect if we're closing
+            if (isClosing) {
+                return;
+            }
+            
             // Schedule reconnection with exponential backoff
             reconnectAttempts++;
             reconnectTimeout = setTimeout(() => {
-                connectToBackend();
+                if (!isClosing) {
+                    connectToBackend();
+                }
             }, getReconnectDelay()) as unknown as number;
         };
 
@@ -194,8 +203,18 @@ self.onmessage = async (e) => {
             break;
             
         case 'STOP':
+            // Set closing flag to prevent reconnections
+            isClosing = true;
+            
             // Clean up before closing
             resetConnectionState();
+            
+            // Clear status interval
+            if (statusInterval) {
+                clearInterval(statusInterval);
+                statusInterval = undefined;
+            }
+            
             if (backendWebsocket) {
                 backendWebsocket.close();
             }
@@ -221,4 +240,4 @@ function reportStatus() {
 }
 
 // Report status periodically (every second to match AlertStatusIndicator check interval)
-setInterval(reportStatus, 1000);
+statusInterval = setInterval(reportStatus, 1000) as unknown as number;

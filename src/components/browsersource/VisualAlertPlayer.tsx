@@ -61,26 +61,36 @@ export default function VisualAlertPlayer() {
     return "";
   };
 
-  const showAlert = (alert: VisualAlert) => {
-    setCurrentAlert(alert);
-    setIsVisible(true);
-
-    setTimeout(() => {
-      setIsVisible(false);
-      setCurrentAlert(null);
-    }, alert.duration);
-  };
-
   useEffect(() => {
+    let alertTimeoutId: number | undefined;
+    
     // Subscribe to new alerts
     const alertToken = PubSub.subscribe('ALERT_SHOW', (_, data) => {
-      showAlert(data);
+      // Clear any existing timeout
+      if (alertTimeoutId) {
+        clearTimeout(alertTimeoutId);
+      }
+      
+      setCurrentAlert(data);
+      setIsVisible(true);
       setTimestamp(Date.now());
+
+      // Set timeout to hide alert
+      alertTimeoutId = setTimeout(() => {
+        setIsVisible(false);
+        setCurrentAlert(null);
+        alertTimeoutId = undefined;
+      }, data.duration) as unknown as number;
     });
 
-    // Cleanup subscriptions
+    // Cleanup subscriptions and any pending timeouts
     return () => {
       PubSub.unsubscribe(alertToken);
+      if (alertTimeoutId) {
+        clearTimeout(alertTimeoutId);
+      }
+      setIsVisible(false);
+      setCurrentAlert(null);
     };
   }, []);
 

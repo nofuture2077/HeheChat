@@ -15,39 +15,66 @@ interface BrowserSourceProps {
   preview: boolean;
 }
 
-window.addEventListener("click", () => {
-  if (!AlertSystem.status()) {
-      AlertSystem.initialize();
-  } 
-}); 
-
 export default function BrowserSource({ token, preview }: BrowserSourceProps) {
   const backendWorkerRef = useRef<Worker>();
   const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE});
   const [chatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
   const documentVisible = useDocumentVisibility();
   const networkStatus = useNetwork();
+  const initializationAttempted = useRef(false);
+  const alertSystemCheckInterval = useRef<number>();
 
   // Run storage patches on app initialization
   useEffect(() => {
     initializeStoragePatches();
   }, []);
 
-  useDidUpdate(() => {
-      if (!AlertSystem.status()) {
-          AlertSystem.initialize();
-      } 
-  }, [documentVisible, networkStatus.online]);
-
-  // Check and initialize AlertSystem every 5 seconds
+  // Initialize AlertSystem once on user interaction
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (!AlertSystem.status()) {
+    const handleUserInteraction = () => {
+      if (!initializationAttempted.current && !AlertSystem.status()) {
+        console.log('Initializing AlertSystem on user interaction');
+        AlertSystem.initialize();
+        initializationAttempted.current = true;
+      }
+    };
+
+    // Add event listeners for user interaction
+    window.addEventListener("click", handleUserInteraction, { once: true });
+    window.addEventListener("keydown", handleUserInteraction, { once: true });
+    window.addEventListener("touchstart", handleUserInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener("click", handleUserInteraction);
+      window.removeEventListener("keydown", handleUserInteraction);
+      window.removeEventListener("touchstart", handleUserInteraction);
+    };
+  }, []);
+
+  // Handle document visibility and network changes
+  useDidUpdate(() => {
+    if (documentVisible && networkStatus.online && initializationAttempted.current) {
+      if (AlertSystem.interrupted()) {
+        console.log('Attempting to resume AlertSystem after interruption');
         AlertSystem.initialize();
       }
-    }, 5000); // 5 seconds interval
+    }
+  }, [documentVisible, networkStatus.online]);
 
-    return () => clearInterval(intervalId); // Cleanup on unmount
+  // Periodic AlertSystem health check (less frequent)
+  useEffect(() => {
+    alertSystemCheckInterval.current = setInterval(() => {
+      if (initializationAttempted.current && !AlertSystem.status() && !AlertSystem.interrupted()) {
+        console.log('AlertSystem health check: reinitializing');
+        AlertSystem.initialize();
+      }
+    }, 30000) as unknown as number; // Check every 30 seconds instead of 5
+
+    return () => {
+      if (alertSystemCheckInterval.current) {
+        clearInterval(alertSystemCheckInterval.current);
+      }
+    };
   }, []);
 
   // Track connection status
