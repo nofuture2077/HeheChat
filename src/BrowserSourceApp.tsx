@@ -51,14 +51,25 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
     };
   }, []);
 
-  // Handle document visibility and network changes
-  useDidUpdate(() => {
+  // Handle document visibility and network changes with debouncing
+  useEffect(() => {
+    let timeoutId: number;
+    
     if (documentVisible && networkStatus.online && initializationAttempted.current) {
       if (AlertSystem.interrupted()) {
-        console.log('Attempting to resume AlertSystem after interruption');
-        AlertSystem.initialize();
+        // Debounce AlertSystem initialization to prevent excessive calls
+        timeoutId = setTimeout(() => {
+          console.log('Attempting to resume AlertSystem after interruption');
+          AlertSystem.initialize();
+        }, 500) as unknown as number; // Wait 500ms before initializing
       }
     }
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [documentVisible, networkStatus.online]);
 
   // Periodic AlertSystem health check (less frequent)
@@ -200,10 +211,21 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
 
   // Force reconnection if network status changes or document becomes visible
   useEffect(() => {
+    let timeoutId: number;
+    
     if (networkStatus.online && documentVisible && backendWorkerRef.current) {
-      console.log("Network or visibility changed, forcing reconnection");
-      backendWorkerRef.current.postMessage({ type: 'RECONNECT' });
+      // Debounce reconnection attempts to prevent excessive calls
+      timeoutId = setTimeout(() => {
+        console.log("Network or visibility changed, forcing reconnection");
+        backendWorkerRef.current?.postMessage({ type: 'RECONNECT' });
+      }, 1000) as unknown as number; // Wait 1 second before reconnecting
     }
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   }, [networkStatus.online, documentVisible]);
 
   return (<ProfileContext.Provider value={profile}>
