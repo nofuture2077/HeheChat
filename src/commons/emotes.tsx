@@ -911,7 +911,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     }
 }
 
-PubSub.subscribe('Update-seventTV', (m, data) => {
+PubSub.subscribe('Update-seventTV', async (m, data) => {
     try {
         // Validate data structure before processing
         if (!data || typeof data !== 'object') {
@@ -956,6 +956,41 @@ PubSub.subscribe('Update-seventTV', (m, data) => {
                 DEFAULT_CHAT_EMOTES.emotes.set(channel, channelData);
                 
                 console.log(`Added 7TV emote ${data.data.emote} to channel ${channel}`);
+
+                // Persist to EmoteStore
+                try {
+                    const userId = channelData.user?.id;
+                    if (userId) {
+                        // Get current stored emotes
+                        const storedEmotes = await EmoteStore.getEmotes(EmotePrefix.SEVENTV, userId);
+                        const currentEmotes = storedEmotes?.emotes || [];
+                        
+                        // Check if emote already exists to avoid duplicates
+                        const existingEmoteIndex = currentEmotes.findIndex(emote => emote.name === data.data.emote);
+                        
+                        let updatedEmotes;
+                        if (existingEmoteIndex >= 0) {
+                            // Update existing emote
+                            updatedEmotes = [...currentEmotes];
+                            updatedEmotes[existingEmoteIndex] = {
+                                name: data.data.emote,
+                                data: data.data.emoteData
+                            };
+                        } else {
+                            // Add new emote
+                            updatedEmotes = [...currentEmotes, {
+                                name: data.data.emote,
+                                data: data.data.emoteData
+                            }];
+                        }
+                        
+                        // Persist updated emotes
+                        await EmoteStore.storeEmotes(EmotePrefix.SEVENTV, userId, updatedEmotes);
+                        console.log(`Persisted 7TV emote add for ${data.data.emote} to EmoteStore`);
+                    }
+                } catch (persistError) {
+                    console.error('Error persisting 7TV emote add to store:', persistError);
+                }
             } catch (addError) {
                 console.error('Error processing 7TV add update:', addError);
                 // Continue execution to handle other updates
@@ -992,6 +1027,25 @@ PubSub.subscribe('Update-seventTV', (m, data) => {
                 // Remove the emote
                 channelData.sevenTVEmotes.delete(data.data.emote);
                 console.log(`Removed 7TV emote ${data.data.emote} from channel ${channel}`);
+
+                // Persist to EmoteStore
+                try {
+                    const userId = channelData.user?.id;
+                    if (userId) {
+                        // Get current stored emotes
+                        const storedEmotes = await EmoteStore.getEmotes(EmotePrefix.SEVENTV, userId);
+                        const currentEmotes = storedEmotes?.emotes || [];
+                        
+                        // Remove the emote from stored emotes
+                        const updatedEmotes = currentEmotes.filter(emote => emote.name !== data.data.emote);
+                        
+                        // Persist updated emotes
+                        await EmoteStore.storeEmotes(EmotePrefix.SEVENTV, userId, updatedEmotes);
+                        console.log(`Persisted 7TV emote remove for ${data.data.emote} to EmoteStore`);
+                    }
+                } catch (persistError) {
+                    console.error('Error persisting 7TV emote remove to store:', persistError);
+                }
             } catch (removeError) {
                 console.error('Error processing 7TV remove update:', removeError);
                 // Continue execution to handle other updates

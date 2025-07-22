@@ -723,11 +723,7 @@ class AlertPlayer {
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
                 
                 // Apply visual alert delay for browser source mode
-                if (this.mode === 'browsersource' && this.config?.visualAlertDelay) {
-                    setTimeout(() => {
-                        PubSub.publish('ALERT_SHOW', visualAlert);
-                    }, this.config.visualAlertDelay * 1000);
-                } else {
+                if (this.config?.browserSourceAudio) {
                     PubSub.publish('ALERT_SHOW', visualAlert);
                 }
             }
