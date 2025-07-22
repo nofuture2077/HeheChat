@@ -181,7 +181,7 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
     }, checkInterval);
 
     return () => clearInterval(intervalId);
-  }, [enabled, checkInterval, shouldCheck, checkForUpdates, getCurrentVersion]);
+  }, [enabled, checkInterval]); // Removed shouldCheck, checkForUpdates, getCurrentVersion to prevent endless loop
 
   return {
     ...state,
