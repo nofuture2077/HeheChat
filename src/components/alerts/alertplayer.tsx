@@ -41,13 +41,47 @@ class AlertPlayer {
     ttsExtra?: number;
     jingleExtra?: number;
     mode?: 'app' | 'browsersource';
+    queueCheckInterval?: number;
+    isDestroyed: boolean = false;
 
     constructor() {
-        setInterval(() => this.checkQueue(), 1000);
+        this.queueCheckInterval = setInterval(() => this.checkQueue(), 1000) as unknown as number;
         this.ttsExtra = Number(localStorage.getItem('hehechat-ttsExtra') || '0') || 0;
         this.jingleExtra = Number(localStorage.getItem('hehechat-jingleExtra') || '0') || 0;
         setInterval(() => this.playSilenceIfQueueEmpty(), 120000);
         this.mode = (localStorage.getItem('hehe-mode') as 'app' | 'browsersource') || undefined;
+        
+        // Handle page unload to cleanup resources
+        if (typeof window !== 'undefined') {
+            window.addEventListener('beforeunload', () => this.destroy());
+            window.addEventListener('pagehide', () => this.destroy());
+        }
+    }
+
+    destroy() {
+        this.isDestroyed = true;
+        
+        // Clear intervals
+        if (this.queueCheckInterval) {
+            clearInterval(this.queueCheckInterval);
+            this.queueCheckInterval = undefined;
+        }
+        
+        // Stop any playing audio
+        this.stopPlaying();
+        
+        // Close audio context
+        if (this.audioContext && this.audioContext.state !== 'closed') {
+            this.audioContext.close().catch(err => {
+                console.log('Error closing audio context:', err);
+            });
+        }
+        
+        // Clear queue
+        this.queue = [];
+        this.index = 0;
+        
+        console.log('AlertPlayer destroyed');
     }
 
     status(): boolean {
@@ -723,11 +757,7 @@ class AlertPlayer {
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
                 
                 // Apply visual alert delay for browser source mode
-                if (this.mode === 'browsersource' && this.config?.visualAlertDelay) {
-                    setTimeout(() => {
-                        PubSub.publish('ALERT_SHOW', visualAlert);
-                    }, this.config.visualAlertDelay * 1000);
-                } else {
+                if (this.config?.browserSourceAudio) {
                     PubSub.publish('ALERT_SHOW', visualAlert);
                 }
             }
@@ -852,6 +882,11 @@ class AlertPlayer {
     }
 
     checkQueue() {
+        // Don't process queue if destroyed
+        if (this.isDestroyed) {
+            return;
+        }
+        
         if (this.interrupted()) {
             return this.handleAudioInterruption();
         }
