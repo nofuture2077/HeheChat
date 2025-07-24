@@ -37,6 +37,7 @@ import { EmoteStore } from '../components/chat/emotestorage';
 import { getRawData } from '@twurple/common';
 import { NewsDisplay } from '../components/news/NewsDisplay';
 import classes from './chat.module.css'
+import { version } from '../../package.json';
 
 export type OverlayDrawer = {
     name: string;
@@ -384,6 +385,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             source: "HeheChat App", 
             profile: profile.guid,
             profileName: profile.name,
+            version,
             state, 
             channels: Object.fromEntries(config.channels.map(key => [key, true])) 
         });

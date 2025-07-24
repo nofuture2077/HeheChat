@@ -645,7 +645,7 @@ export function AdminPremiumPage() {
             value={generateDays}
             onChange={(value) => setGenerateDays(Number(value) || 30)}
             min={1}
-            max={365}
+            max={36500}
             required
           />
 

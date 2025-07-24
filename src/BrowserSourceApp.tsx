@@ -7,7 +7,8 @@ import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { AlertSystem } from './components/alerts/alertplayer';
 import { BrowserSourceAlertStatusIndicator } from './components/alerts/BrowserSourceAlertStatusIndicator';
 import { initializeStoragePatches } from './commons/patches';
-import { useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
+import { useDocumentVisibility, useNetwork,  } from '@mantine/hooks';
+import { version } from '../package.json';
 
 
 interface BrowserSourceProps {
@@ -161,6 +162,7 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
           source: "Browsersource", 
           profile: profile.guid,
           profileName: profile.name,
+          version,
           token, 
           channels: Object.fromEntries(channels.map((key: string) => [key, true])) 
         }});
