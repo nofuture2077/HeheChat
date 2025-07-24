@@ -7,6 +7,7 @@ import { initializeStoragePatches } from './commons/patches';
 import { theme } from './theme';
 import { EventList } from './components/events/eventlist';
 import { AlertSystem } from '@/components/alerts/alertplayer';
+import { version } from '../package.json';
 
 export const REPLAY_APP_NAME = "Replay App";
 
@@ -42,6 +43,7 @@ export default function ReplayApp({ token }: ReplayAppProps) {
             source: REPLAY_APP_NAME, 
             profile: profile.guid,
             profileName: profile.name,
+            version,
             token, 
             channels: Object.fromEntries(channels.map((key: string) => [key, true])) 
           }});

@@ -29,6 +29,7 @@ interface SourceData {
   userName: string;
   channels: string[];
   guid: string;
+  version: string;
   connectionStatus: ConnectionStatus;
 }
 
@@ -55,6 +56,7 @@ interface FlatConnection {
   userId: string;
   channels: string[];
   guid: string;
+  version: string;
   sevenTVConnected: boolean;
   sevenTVChannel: string;
   streamElementsConnected: boolean;
@@ -105,6 +107,7 @@ export function AdminConnectionsPage() {
               userId: sourceData.userId,
               channels: sourceData.channels,
               guid: sourceData.guid,
+              version: sourceData.version,
               sevenTVConnected: sourceData.connectionStatus?.sevenTV?.connected || false,
               sevenTVChannel: sourceData.connectionStatus?.sevenTV?.channelname || 'N/A',
               streamElementsConnected: sourceData.connectionStatus?.streamelements?.connected || false,
@@ -186,9 +189,26 @@ export function AdminConnectionsPage() {
 
   const rows = connections.map((connection, index) => (
     <Table.Tr key={`${connection.username}-${connection.sessionId}-${connection.sourceName}-${index}`}>
-      <Table.Td>{connection.username}</Table.Td>
-      <Table.Td>{connection.profileName}</Table.Td>
-      <Table.Td>{connection.sourceName}</Table.Td>
+      <Table.Td>
+        <Stack gap={0}>
+          <Text>{connection.username}</Text>
+          <Text size="xs" c="dimmed">{connection.userId}</Text>
+        </Stack>
+      </Table.Td>
+      <Table.Td>
+        <Stack gap={0}>
+          <Text>{connection.profileName}</Text>
+          <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+            {connection.guid.substring(0, 8)}...
+          </Text>
+        </Stack>
+      </Table.Td>
+      <Table.Td>
+        <Stack gap={0}>
+          <Text>{connection.sourceName}</Text>
+          <Text size="xs" c="dimmed">{connection.version}</Text>
+        </Stack>
+      </Table.Td>
       <Table.Td>
         <Group gap="xs" wrap="wrap">
           {connection.channels.map((channel, channelIndex) => (
@@ -215,9 +235,7 @@ export function AdminConnectionsPage() {
         </Group>
       </Table.Td>
       <Table.Td>
-        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-          {connection.guid.substring(0, 8)}...
-        </Text>
+        
       </Table.Td>
     </Table.Tr>
   ));
@@ -312,12 +330,36 @@ export function AdminConnectionsPage() {
                 <Table striped highlightOnHover>
                   <Table.Thead>
                     <Table.Tr>
-                      <Table.Th>Username</Table.Th>
-                      <Table.Th>Profile</Table.Th>
-                      <Table.Th>Source</Table.Th>
-                      <Table.Th>Channels</Table.Th>
-                      <Table.Th>Service Status</Table.Th>
-                      <Table.Th>GUID</Table.Th>
+                      <Table.Th>
+                        <Stack gap={0}>
+                          <Text fw={900}>Username</Text>
+                          <Text fw={600} size="xs" c="dimmed">User ID</Text>
+                        </Stack>
+                      </Table.Th>
+                      <Table.Th>
+                        <Stack gap={0}>
+                          <Text fw={900}>Profile</Text>
+                          <Text fw={600} size="xs" c="dimmed">GUID</Text>
+                        </Stack>
+                      </Table.Th>
+                      <Table.Th>
+                        <Stack gap={0}>
+                          <Text fw={900}>Source</Text>
+                          <Text fw={600} size="xs" c="dimmed">Version</Text>
+                        </Stack>
+                      </Table.Th>
+                      <Table.Th>
+                        <Stack gap={0}>
+                          <Text fw={900}>Channels</Text>
+                          <Text fw={600} size="xs" c="dimmed">&nbsp;</Text>
+                        </Stack>
+                      </Table.Th>
+                      <Table.Th>
+                        <Stack gap={0}>
+                          <Text fw={900}>Service Status</Text>
+                          <Text fw={600} size="xs" c="dimmed">&nbsp;</Text>
+                        </Stack>
+                      </Table.Th>
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>{rows}</Table.Tbody>
