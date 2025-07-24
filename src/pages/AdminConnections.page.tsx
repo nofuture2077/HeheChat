@@ -330,11 +330,36 @@ export function AdminConnectionsPage() {
                 <Table striped highlightOnHover>
                   <Table.Thead>
                     <Table.Tr>
-                      <Table.Th>Username</Table.Th>
-                      <Table.Th>Profile</Table.Th>
-                      <Table.Th>Source</Table.Th>
-                      <Table.Th>Channels</Table.Th>
-                      <Table.Th>Service Status</Table.Th>
+                      <Table.Th>
+                        <Stack gap={0}>
+                          <Text>Username</Text>
+                          <Text size="xs" c="dimmed">User ID</Text>
+                        </Stack>
+                      </Table.Th>
+                      <Table.Th>
+                        <Stack gap={0}>
+                          <Text>Profile</Text>
+                          <Text size="xs" c="dimmed">GUID</Text>
+                        </Stack>
+                      </Table.Th>
+                      <Table.Th>
+                        <Stack gap={0}>
+                          <Text>Source</Text>
+                          <Text size="xs" c="dimmed">Version</Text>
+                        </Stack>
+                      </Table.Th>
+                      <Table.Th>
+                        <Stack gap={0}>
+                          <Text>Channels</Text>
+                          <Text size="xs" c="dimmed">Connected</Text>
+                        </Stack>
+                      </Table.Th>
+                      <Table.Th>
+                        <Stack gap={0}>
+                          <Text>Service Status</Text>
+                          <Text size="xs" c="dimmed">Integrations</Text>
+                        </Stack>
+                      </Table.Th>
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>{rows}</Table.Tbody>
