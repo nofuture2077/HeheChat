@@ -328,35 +328,35 @@ export function AdminConnectionsPage() {
 
               {!error && connections.length > 0 && (
                 <Table striped highlightOnHover>
-                  <Table.Thead style={{ backgroundColor: 'var(--mantine-color-gray-1)' }}>
+                  <Table.Thead>
                     <Table.Tr>
                       <Table.Th>
                         <Stack gap={0}>
-                          <Text fw={900} c="dark">Username</Text>
+                          <Text fw={900}>Username</Text>
                           <Text fw={600} size="xs" c="dimmed">User ID</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
                         <Stack gap={0}>
-                          <Text fw={900} c="dark">Profile</Text>
+                          <Text fw={900}>Profile</Text>
                           <Text fw={600} size="xs" c="dimmed">GUID</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
                         <Stack gap={0}>
-                          <Text fw={900} c="dark">Source</Text>
+                          <Text fw={900}>Source</Text>
                           <Text fw={600} size="xs" c="dimmed">Version</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
                         <Stack gap={0}>
-                          <Text fw={900} c="dark">Channels</Text>
+                          <Text fw={900}>Channels</Text>
                           <Text fw={600} size="xs" c="dimmed">&nbsp;</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
                         <Stack gap={0}>
-                          <Text fw={900} c="dark">Service Status</Text>
+                          <Text fw={900}>Service Status</Text>
                           <Text fw={600} size="xs" c="dimmed">&nbsp;</Text>
                         </Stack>
                       </Table.Th>
