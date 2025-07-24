@@ -332,32 +332,32 @@ export function AdminConnectionsPage() {
                     <Table.Tr>
                       <Table.Th>
                         <Stack gap={0}>
-                          <Text>Username</Text>
-                          <Text size="xs" c="dimmed">User ID</Text>
+                          <Text fw={700}>Username</Text>
+                          <Text fw={500} size="xs" c="dimmed">User ID</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
                         <Stack gap={0}>
-                          <Text>Profile</Text>
-                          <Text size="xs" c="dimmed">GUID</Text>
+                          <Text fw={700}>Profile</Text>
+                          <Text fw={500} size="xs" c="dimmed">GUID</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
                         <Stack gap={0}>
-                          <Text>Source</Text>
-                          <Text size="xs" c="dimmed">Version</Text>
+                          <Text fw={700}>Source</Text>
+                          <Text fw={500} size="xs" c="dimmed">Version</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
                         <Stack gap={0}>
-                          <Text>Channels</Text>
-                          <Text size="xs" c="dimmed">Connected</Text>
+                          <Text fw={700}>Channels</Text>
+                          <Text size="xs" c="dimmed">&nbsp;</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
                         <Stack gap={0}>
                           <Text>Service Status</Text>
-                          <Text size="xs" c="dimmed">Integrations</Text>
+                          <Text size="xs" c="dimmed">&nbsp;</Text>
                         </Stack>
                       </Table.Th>
                     </Table.Tr>
