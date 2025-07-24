@@ -190,13 +190,13 @@ export function AdminConnectionsPage() {
   const rows = connections.map((connection, index) => (
     <Table.Tr key={`${connection.username}-${connection.sessionId}-${connection.sourceName}-${index}`}>
       <Table.Td>
-        <Stack>
+        <Stack gap={0}>
           <Text>{connection.username}</Text>
-          <Text> </Text>
+          <Text size="xs" c="dimmed">{connection.userId}</Text>
         </Stack>
       </Table.Td>
       <Table.Td>
-        <Stack>
+        <Stack gap={0}>
           <Text>{connection.profileName}</Text>
           <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
             {connection.guid.substring(0, 8)}...
@@ -204,9 +204,9 @@ export function AdminConnectionsPage() {
         </Stack>
       </Table.Td>
       <Table.Td>
-        <Stack>
+        <Stack gap={0}>
           <Text>{connection.sourceName}</Text>
-          <Text c="dimmed">{connection.version}</Text>
+          <Text size="xs" c="dimmed">{connection.version}</Text>
         </Stack>
       </Table.Td>
       <Table.Td>
@@ -335,7 +335,6 @@ export function AdminConnectionsPage() {
                       <Table.Th>Source</Table.Th>
                       <Table.Th>Channels</Table.Th>
                       <Table.Th>Service Status</Table.Th>
-                      <Table.Th>GUID</Table.Th>
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>{rows}</Table.Tbody>
