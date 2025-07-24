@@ -29,6 +29,7 @@ interface SourceData {
   userName: string;
   channels: string[];
   guid: string;
+  version: string;
   connectionStatus: ConnectionStatus;
 }
 
@@ -55,6 +56,7 @@ interface FlatConnection {
   userId: string;
   channels: string[];
   guid: string;
+  version: string;
   sevenTVConnected: boolean;
   sevenTVChannel: string;
   streamElementsConnected: boolean;
@@ -105,6 +107,7 @@ export function AdminConnectionsPage() {
               userId: sourceData.userId,
               channels: sourceData.channels,
               guid: sourceData.guid,
+              version: sourceData.version,
               sevenTVConnected: sourceData.connectionStatus?.sevenTV?.connected || false,
               sevenTVChannel: sourceData.connectionStatus?.sevenTV?.channelname || 'N/A',
               streamElementsConnected: sourceData.connectionStatus?.streamelements?.connected || false,
@@ -186,9 +189,26 @@ export function AdminConnectionsPage() {
 
   const rows = connections.map((connection, index) => (
     <Table.Tr key={`${connection.username}-${connection.sessionId}-${connection.sourceName}-${index}`}>
-      <Table.Td>{connection.username}</Table.Td>
-      <Table.Td>{connection.profileName}</Table.Td>
-      <Table.Td>{connection.sourceName}</Table.Td>
+      <Table.Td>
+        <Stack>
+          <Text>{connection.username}</Text>
+          <Text> </Text>
+        </Stack>
+      </Table.Td>
+      <Table.Td>
+        <Stack>
+          <Text>{connection.profileName}</Text>
+          <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
+            {connection.guid.substring(0, 8)}...
+          </Text>
+        </Stack>
+      </Table.Td>
+      <Table.Td>
+        <Stack>
+          <Text>{connection.sourceName}</Text>
+          <Text c="dimmed">{connection.version}</Text>
+        </Stack>
+      </Table.Td>
       <Table.Td>
         <Group gap="xs" wrap="wrap">
           {connection.channels.map((channel, channelIndex) => (
@@ -215,9 +235,7 @@ export function AdminConnectionsPage() {
         </Group>
       </Table.Td>
       <Table.Td>
-        <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-          {connection.guid.substring(0, 8)}...
-        </Text>
+        
       </Table.Td>
     </Table.Tr>
   ));
