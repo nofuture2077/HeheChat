@@ -4,6 +4,7 @@ import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { useDidUpdate, useNetwork, useDocumentVisibility } from '@mantine/hooks';
 import { useEffect, useState, useRef } from 'react';
+import { useWakeLock } from './hooks/useWakeLock';
 import { initializeStoragePatches } from './commons/patches';
 import { Router } from './Router';
 import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext, PremiumContext } from './ApplicationContext';
@@ -119,6 +120,9 @@ export default function HeheChat() {
     // Get network status and document visibility at component level
     const networkStatus = useNetwork();
     const documentVisible = useDocumentVisibility();
+    
+    // Initialize wake lock to keep display on while using the app
+    const { isSupported: wakeLockSupported, isActive: wakeLockActive, requestWakeLock, releaseWakeLock, error: wakeLockError } = useWakeLock();
 
     useDidUpdate(() => {
         const saveProfileToServer = async () => {
@@ -342,6 +346,27 @@ export default function HeheChat() {
             }
         }
     }, [profile.config.channels]);
+
+    // Manage wake lock based on document visibility and app usage
+    useEffect(() => {
+        if (wakeLockSupported && documentVisible) {
+            // Request wake lock when document becomes visible
+            requestWakeLock();
+        } else if (!documentVisible && wakeLockActive) {
+            // Wake lock will be automatically released when document becomes hidden
+            // The useWakeLock hook handles reacquisition when document becomes visible again
+        }
+    }, [documentVisible, wakeLockSupported, requestWakeLock, wakeLockActive]);
+
+    // Log wake lock status changes for debugging
+    useEffect(() => {
+        if (wakeLockError) {
+            console.warn('Wake lock error:', wakeLockError);
+        }
+        if (wakeLockActive) {
+            console.log('Screen wake lock is active - display will stay on');
+        }
+    }, [wakeLockActive, wakeLockError]);
 
     const updateConfig = (key: ConfigKey, value: any) => {
         setProfile((profile) => {
