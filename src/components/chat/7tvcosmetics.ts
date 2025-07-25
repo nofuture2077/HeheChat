@@ -353,7 +353,7 @@ export class SevenTVCosmeticsAPI {
             let paint: SevenTVPaint | null = null;
             let badge: SevenTVBadge | null = null;
 
-            if (user.style?.paint) {
+            if (user.user?.style?.paint_id) {
                 console.log('User has paint, fetching paint details:', user.user.style.paint_id);
                 paint = await this.fetchPaint(user.user.style.paint_id);
                 console.log('Fetched paint data:', paint);
