@@ -354,8 +354,8 @@ export class SevenTVCosmeticsAPI {
             let badge: SevenTVBadge | null = null;
 
             if (user.style?.paint) {
-                console.log('User has paint, fetching paint details:', user.style.paint.id);
-                paint = await this.fetchPaint(user.style.paint.id);
+                console.log('User has paint, fetching paint details:', user.user.style.paint_id);
+                paint = await this.fetchPaint(user.user.style.paint_id);
                 console.log('Fetched paint data:', paint);
             } else {
                 console.log('User has no paint');
