@@ -125,21 +125,20 @@ export class SevenTVCosmeticsService {
             element.style.webkitBackgroundClip = 'text';
             element.style.color = 'transparent';
             
-            // Force a reflow to ensure correct dimensions
-            element.offsetHeight;
-            
-            // Adjust background size based on text dimensions
-            const textWidth = element.scrollWidth;
-            const textHeight = element.scrollHeight;
-            element.style.backgroundSize = `${textWidth}px ${textHeight}px`;
+            // For text gradients, we need to ensure proper sizing
+            // Use 100% 100% to cover the entire text area
+            element.style.backgroundSize = '100% 100%';
             element.style.backgroundPosition = '0 0';
             element.style.backgroundRepeat = 'no-repeat';
+            
+            console.log('Applied background gradient:', paintInfo.backgroundImage);
         } else if (adjustedColors && adjustedColors[theme]) {
             // Use adjusted color for the theme
             element.style.backgroundImage = '';
             element.style.backgroundClip = '';
             element.style.webkitBackgroundClip = '';
             element.style.color = adjustedColors[theme];
+            console.log('Applied color:', adjustedColors[theme]);
         }
 
         // Apply shadows
