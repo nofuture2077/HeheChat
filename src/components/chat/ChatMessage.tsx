@@ -3,6 +3,7 @@ import classes from './ChatMessage.module.css';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { LoginContext } from '../../commons/login';
 import { useContext, useState, useRef } from 'react';
+import { use7TVUsernameCosmetics } from './use7TVCosmetics';
 import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconUser } from '@tabler/icons-react';
 import { Text, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -105,8 +106,18 @@ export function ChatMessageComp(props: ChatMessageProps) {
     const [timeoutModalOpened, timeoutModalHandler] = useDisclosure(false);
     const [banModalOpened, banModalHandler] = useDisclosure(false);
 
-    // Adjust username color for contrast against standard dark background
-    const adjustedColor = adjustColorForContrast(props.msg.userInfo.color || '#ffffff', computedColorScheme === 'light' ? '#f1f1f1' : '#1e1e1e');
+    // 7TV Cosmetics integration (only if enabled in config)
+    const theme = computedColorScheme === 'light' ? 'light' : 'dark';
+    const { usernameRef, cosmetics, hasCosmetics } = use7TVUsernameCosmetics(
+        config.show7TVCosmetics ? props.msg.userInfo.userId : undefined, // Only fetch if enabled
+        props.msg.userInfo.displayName,
+        theme
+    );
+
+    // Fallback to original color adjustment if no 7TV cosmetics or disabled
+    const adjustedColor = (config.show7TVCosmetics && hasCosmetics) 
+        ? undefined // Let 7TV cosmetics handle the color
+        : adjustColorForContrast(props.msg.userInfo.color || '#ffffff', computedColorScheme === 'light' ? '#f1f1f1' : '#1e1e1e');
 
     const handleCloseRadial = () => {
         setMenuPosition(null);
@@ -241,7 +252,14 @@ export function ChatMessageComp(props: ChatMessageProps) {
                 {(config.showProfilePicture && !props.hideReply) ? <span key='channel' className={classes.channel}>{emotes.getLogo(channel)}</span>: null}
                 {config.showTimestamp || props.forceTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
                 <span className={classes.badges}>{Object.entries(props.msg.userInfo.badges).map((entry, index) =>  getBadge(config, emotes, channel, entry.join(','), index.toString()))}</span>
-                <span className={classes.username} style={{color: adjustedColor}}>{props.msg.userInfo.displayName}</span>
+                <span 
+                    ref={config.show7TVCosmetics ? usernameRef : undefined}
+                    className={classes.username} 
+                    style={config.show7TVCosmetics && hasCosmetics ? {} : {color: adjustedColor}}
+                    title={config.show7TVCosmetics && hasCosmetics && cosmetics?.paint ? `7TV Paint: ${cosmetics.paint.name}` : undefined}
+                >
+                    {props.msg.userInfo.displayName}
+                </span>
                 <span>: </span>
                 <span className={classes.text}>{parsedPartsToHtml(msgParts, channel, largeEmote, config, emotes, login)}</span>
             </div>
@@ -279,4 +297,3 @@ export function isModerator(msg: HeheChatMessage, channel: string, moderatedChan
     const isBroadcaster = channel === login.user?.name;
     return (isModerator || isBroadcaster);
 }
-

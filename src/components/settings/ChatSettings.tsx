@@ -91,6 +91,7 @@ export function ChatSettings() {
                     <Switch checked={config.hideRaid} onChange={(event) => config.setHideRaid(event.currentTarget.checked)} label="Hide Raids" size="lg" />
                     <Switch checked={config.hideAdBreak} onChange={(event) => config.setHideAdBreak(event.currentTarget.checked)} label="Hide Ad Break" size="lg" />
                     <Switch checked={config.disableEmoteDialog} onChange={(event) => config.setDisableEmoteDialog(event.currentTarget.checked)} label="Disable Emote Dialog" size="lg" />
+                    <Switch checked={config.show7TVCosmetics} onChange={(event) => config.setShow7TVCosmetics(event.currentTarget.checked)} label="7TV Username Paints" size="lg" />
                 </Stack>
             </Fieldset>
 

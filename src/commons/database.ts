@@ -3,6 +3,7 @@ import { DB_VERSION, DB_NAME } from "./config";
 // Store names
 export const EMOTES_STORE = 'userEmotes';
 export const ALERT_CONFIG_STORE = 'alertConfigs';
+export const SEVENTV_COSMETICS_STORE = 'seventvCosmetics';
 
 class DatabaseService {
     private db: IDBDatabase | null = null;
@@ -34,6 +35,11 @@ class DatabaseService {
                 // Handle alertConfigs store
                 if (!db.objectStoreNames.contains(ALERT_CONFIG_STORE)) {
                     db.createObjectStore(ALERT_CONFIG_STORE, { keyPath: 'meta.channel' });
+                }
+
+                // Handle seventvCosmetics store
+                if (!db.objectStoreNames.contains(SEVENTV_COSMETICS_STORE)) {
+                    db.createObjectStore(SEVENTV_COSMETICS_STORE, { keyPath: 'userId' });
                 }
             };
 
