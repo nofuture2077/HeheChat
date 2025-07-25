@@ -322,64 +322,56 @@ export class SevenTVCosmeticsAPI {
     }
 
     /**
-     * Fetch user cosmetics data using REST API
+     * Fetch user cosmetics data using REST API for user info and GraphQL for paint
      * @param twitchUserId The Twitch user ID
      */
     static async fetchUserCosmetics(twitchUserId: string): Promise<SevenTVUserCosmetics | null> {
         try {
-            // Use REST API to fetch user by Twitch ID
-            const response = await fetch(`${this.REST_URL}/users/twitch/${twitchUserId}`);
+            // Step 1: Use REST API to fetch user by Twitch ID to get 7TV ObjectId
+            const userResponse = await fetch(`${this.REST_URL}/users/twitch/${twitchUserId}`);
 
-            if (!response.ok) {
-                if (response.status === 404) {
-                    // User doesn't exist on 7TV - create a default cosmetics object to cache this result
-                    return {
-                        userId: twitchUserId,
-                        username: '', // We don't have the username from 7TV
-                        adjustedColors: {
-                            light: '#000000',
-                            dark: '#ffffff'
-                        },
-                        paintInfo: {
-                            backgroundImage: null,
-                            shadow: null
-                        }
-                    };
+            if (!userResponse.ok) {
+                if (userResponse.status === 404) {
+                    // User doesn't exist on 7TV - return null so we use normal username color
+                    console.log('User not found on 7TV:', twitchUserId);
+                    return null;
                 }
-                throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error(`HTTP error! Status: ${userResponse.status}`);
             }
 
-            const user = await response.json();
+            const user = await userResponse.json();
 
-            if (!user) {
-                // Return default cosmetics for users without 7TV data
-                return {
-                    userId: twitchUserId,
-                    username: '',
-                    adjustedColors: {
-                        light: '#000000',
-                        dark: '#ffffff'
-                    },
-                    paintInfo: {
-                        backgroundImage: null,
-                        shadow: null
-                    }
-                };
+            if (!user || !user.id) {
+                // User exists but no valid data - return null so we use normal username color
+                console.log('Invalid user data from 7TV:', twitchUserId);
+                return null;
             }
 
+            console.log('Found 7TV user:', user.username, 'ObjectId:', user.id);
+
+            // Step 2: Use GraphQL to fetch user cosmetics by 7TV ObjectId
+            const cosmetics = await this.fetchUserCosmeticsById(user.id);
+            
             let paint: SevenTVPaint | null = null;
             let badge: SevenTVBadge | null = null;
 
-            // Fetch paint details if user has paint
-            if (user.style?.paint) {
-                console.log('Fetching paint for user:', user.username, 'paint ID:', user.style.paint.id);
-                paint = await this.fetchPaint(user.style.paint.id);
+            if (cosmetics?.user?.style?.paint) {
+                console.log('User has paint, fetching paint details:', cosmetics.user.style.paint.id);
+                paint = await this.fetchPaint(cosmetics.user.style.paint.id);
                 console.log('Fetched paint data:', paint);
+            } else {
+                console.log('User has no paint');
             }
 
             // Set badge if user has badge
-            if (user.style?.badge) {
-                badge = user.style.badge;
+            if (cosmetics?.user?.style?.badge) {
+                badge = cosmetics.user.style.badge;
+            }
+
+            // If user has 7TV account but no paint, return null so we use normal username color
+            if (!paint) {
+                console.log('User has 7TV account but no paint, using normal username color');
+                return null;
             }
 
             // Process paint info
@@ -403,26 +395,63 @@ export class SevenTVCosmeticsAPI {
                 userId: twitchUserId, // Store the original Twitch user ID for caching
                 username: user.username,
                 display_name: user.display_name,
-                paint: paint || undefined,
+                paint: paint,
                 badge: badge || undefined,
                 adjustedColors,
                 paintInfo
             };
         } catch (error) {
             console.error('Error fetching 7TV user cosmetics:', error);
-            // Return default cosmetics on error to prevent repeated failed requests
-            return {
-                userId: twitchUserId,
-                username: '',
-                adjustedColors: {
-                    light: '#000000',
-                    dark: '#ffffff'
+            // Return null on error so we use normal username color
+            return null;
+        }
+    }
+
+    /**
+     * Fetch user cosmetics by 7TV ObjectId using GraphQL
+     * @param seventvUserId The 7TV user ObjectId
+     */
+    static async fetchUserCosmeticsById(seventvUserId: string): Promise<any> {
+        try {
+            const response = await fetch(this.GQL_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
-                paintInfo: {
-                    backgroundImage: null,
-                    shadow: null
-                }
-            };
+                body: JSON.stringify({
+                    operationName: 'GetUser',
+                    variables: { id: seventvUserId },
+                    query: `query GetUser($id: ObjectID!) {
+                        user(id: $id) {
+                            id
+                            username
+                            display_name
+                            style {
+                                paint {
+                                    id
+                                }
+                                badge {
+                                    id
+                                    kind
+                                    name
+                                    tooltip
+                                    tag
+                                }
+                            }
+                        }
+                    }`,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.data;
+        } catch (error) {
+            console.error('Error fetching 7TV user cosmetics by ID:', error);
+            return null;
         }
     }
 }

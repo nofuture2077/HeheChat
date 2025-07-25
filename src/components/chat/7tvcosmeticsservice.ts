@@ -35,6 +35,10 @@ export class SevenTVCosmeticsService {
         if (!forceRefresh) {
             const cached = await SevenTVCosmeticsStore.getUserCosmetics(userId);
             if (cached) {
+                // Check if this is a "no cosmetics" marker
+                if ((cached.cosmetics as any).isNoCosmeticsMarker) {
+                    return null; // Return null so normal username color is used
+                }
                 return cached.cosmetics;
             }
         }
@@ -60,27 +64,30 @@ export class SevenTVCosmeticsService {
         try {
             const cosmetics = await SevenTVCosmeticsAPI.fetchUserCosmetics(userId);
             
-            // Always cache the result, even if it's null or default cosmetics
-            // This prevents repeated API calls for users without 7TV accounts
             if (cosmetics) {
+                // User has 7TV cosmetics with paint - cache them
                 await SevenTVCosmeticsStore.storeUserCosmetics(userId, cosmetics);
                 return cosmetics;
             } else {
-                // Cache a default "no cosmetics" result to prevent repeated API calls
-                const defaultCosmetics = this.createDefaultCosmetics(userId, '');
-                await SevenTVCosmeticsStore.storeUserCosmetics(userId, defaultCosmetics);
-                return defaultCosmetics;
+                // User either doesn't have 7TV account or has no paint
+                // Cache a "no cosmetics" marker to prevent repeated API calls
+                const noCosmetics = this.createDefaultCosmetics(userId, '');
+                // Mark this as a "no cosmetics" result by setting a special flag
+                (noCosmetics as any).isNoCosmeticsMarker = true;
+                await SevenTVCosmeticsStore.storeUserCosmetics(userId, noCosmetics);
+                return null; // Return null so normal username color is used
             }
         } catch (error) {
             console.error('Error fetching 7TV cosmetics for user:', userId, error);
-            // Cache a default result even on error to prevent repeated failed requests
-            const defaultCosmetics = this.createDefaultCosmetics(userId, '');
+            // Cache a "no cosmetics" result even on error to prevent repeated failed requests
+            const noCosmetics = this.createDefaultCosmetics(userId, '');
+            (noCosmetics as any).isNoCosmeticsMarker = true;
             try {
-                await SevenTVCosmeticsStore.storeUserCosmetics(userId, defaultCosmetics);
+                await SevenTVCosmeticsStore.storeUserCosmetics(userId, noCosmetics);
             } catch (cacheError) {
-                console.error('Error caching default cosmetics:', cacheError);
+                console.error('Error caching no cosmetics marker:', cacheError);
             }
-            return defaultCosmetics;
+            return null; // Return null so normal username color is used
         }
     }
 
