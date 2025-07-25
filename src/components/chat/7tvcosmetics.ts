@@ -262,7 +262,8 @@ export class SevenTVCosmeticsUtils {
  * 7TV API service for fetching cosmetics
  */
 export class SevenTVCosmeticsAPI {
-    private static readonly BASE_URL = 'https://7tv.io/v3/gql';
+    private static readonly GQL_URL = 'https://7tv.io/v3/gql';
+    private static readonly REST_URL = 'https://7tv.io/v3';
 
     /**
      * Fetch paint data by paint ID
@@ -270,7 +271,7 @@ export class SevenTVCosmeticsAPI {
      */
     static async fetchPaint(paintId: string): Promise<SevenTVPaint | null> {
         try {
-            const response = await fetch(this.BASE_URL, {
+            const response = await fetch(this.GQL_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -319,69 +320,23 @@ export class SevenTVCosmeticsAPI {
     }
 
     /**
-     * Fetch 7TV user ID from Twitch user ID
-     * @param twitchUserId The Twitch user ID
-     */
-    static async fetchSevenTVUserId(twitchUserId: string): Promise<string | null> {
-        try {
-            const response = await fetch(this.BASE_URL, {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "query": "query GetUserByTwitchID($twitch_id: String!) { user(twitch_id: $twitch_id) { id } }",
-                    "variables": {
-                        "twitch_id": twitchUserId
-                    }
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-            const data = await response.json();
-            return data.data?.user?.id || null;
-        } catch (error) {
-            console.error('Error fetching 7TV user ID:', error);
-            return null;
-        }
-    }
-
-    /**
-     * Fetch user cosmetics data
+     * Fetch user cosmetics data using REST API
      * @param twitchUserId The Twitch user ID
      */
     static async fetchUserCosmetics(twitchUserId: string): Promise<SevenTVUserCosmetics | null> {
         try {
-            // First, get the 7TV user ID from the Twitch user ID
-            const seventvUserId = await this.fetchSevenTVUserId(twitchUserId);
-            
-            if (!seventvUserId) {
-                // User doesn't exist on 7TV
-                return null;
-            }
-
-            const response = await fetch(this.BASE_URL, {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "query": "query GetUserCurrentCosmetics($id: ObjectID!) { user(id: $id) { id username display_name style { paint { id kind name } badge { id kind name } } } }",
-                    "variables": {
-                        "id": seventvUserId
-                    }
-                })
-            });
+            // Use REST API to fetch user by Twitch ID
+            const response = await fetch(`${this.REST_URL}/users/twitch/${twitchUserId}`);
 
             if (!response.ok) {
+                if (response.status === 404) {
+                    // User doesn't exist on 7TV
+                    return null;
+                }
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
-            const data = await response.json();
-            const user = data.data?.user;
+            const user = await response.json();
 
             if (!user) {
                 return null;
