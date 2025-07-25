@@ -319,11 +319,50 @@ export class SevenTVCosmeticsAPI {
     }
 
     /**
-     * Fetch user cosmetics data
-     * @param userId The user ID
+     * Fetch 7TV user ID from Twitch user ID
+     * @param twitchUserId The Twitch user ID
      */
-    static async fetchUserCosmetics(userId: string): Promise<SevenTVUserCosmetics | null> {
+    static async fetchSevenTVUserId(twitchUserId: string): Promise<string | null> {
         try {
+            const response = await fetch(this.BASE_URL, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "query": "query GetUserByTwitchID($twitch_id: String!) { user(twitch_id: $twitch_id) { id } }",
+                    "variables": {
+                        "twitch_id": twitchUserId
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.data?.user?.id || null;
+        } catch (error) {
+            console.error('Error fetching 7TV user ID:', error);
+            return null;
+        }
+    }
+
+    /**
+     * Fetch user cosmetics data
+     * @param twitchUserId The Twitch user ID
+     */
+    static async fetchUserCosmetics(twitchUserId: string): Promise<SevenTVUserCosmetics | null> {
+        try {
+            // First, get the 7TV user ID from the Twitch user ID
+            const seventvUserId = await this.fetchSevenTVUserId(twitchUserId);
+            
+            if (!seventvUserId) {
+                // User doesn't exist on 7TV
+                return null;
+            }
+
             const response = await fetch(this.BASE_URL, {
                 method: 'POST',
                 headers: {
@@ -332,7 +371,7 @@ export class SevenTVCosmeticsAPI {
                 body: JSON.stringify({
                     "query": "query GetUserCurrentCosmetics($id: ObjectID!) { user(id: $id) { id username display_name style { paint { id kind name } badge { id kind name } } } }",
                     "variables": {
-                        "id": userId
+                        "id": seventvUserId
                     }
                 })
             });
@@ -369,7 +408,7 @@ export class SevenTVCosmeticsAPI {
             const adjustedColors = SevenTVCosmeticsUtils.calculateAdjustedColors(baseColor);
 
             return {
-                userId,
+                userId: twitchUserId, // Store the original Twitch user ID for caching
                 username: user.username,
                 display_name: user.display_name,
                 paint: paint || undefined,
