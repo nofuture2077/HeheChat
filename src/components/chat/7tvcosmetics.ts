@@ -180,9 +180,13 @@ export class SevenTVCosmeticsUtils {
             color = color >>> 0; // Convert negative to unsigned
         }
 
-        const red = (color >> 24) & 0xFF;
-        const green = (color >> 16) & 0xFF;
-        const blue = (color >> 8) & 0xFF;
+        // 7TV uses ARGB format: Alpha (bits 24-31), Red (bits 16-23), Green (bits 8-15), Blue (bits 0-7)
+        const alpha = (color >> 24) & 0xFF;
+        const red = (color >> 16) & 0xFF;
+        const green = (color >> 8) & 0xFF;
+        const blue = color & 0xFF;
+        
+        // Return RGB format (ignore alpha for now)
         return `rgb(${red}, ${green}, ${blue})`;
     }
 
@@ -223,17 +227,15 @@ export class SevenTVCosmeticsUtils {
         } 
         // Handle gradient-based paint
         else if (paint.stops && paint.stops.length > 0) {
-            const colors = paint.stops.map(stop => ({
-                at: stop.at,
-                color: stop.color
-            }));
+            // Sort stops by position to ensure correct gradient order
+            const sortedStops = paint.stops
+                .map(stop => ({
+                    at: stop.at * 100, // Convert from 0-1 range to 0-100% range
+                    color: stop.color
+                }))
+                .sort((a, b) => a.at - b.at);
 
-            const normalizedColors = colors.map((stop, index) => ({
-                at: (100 / (colors.length - 1)) * index,
-                color: stop.color
-            }));
-
-            const gradient = normalizedColors.map(stop =>
+            const gradient = sortedStops.map(stop =>
                 `${this.argbToRgba(stop.color)} ${stop.at}%`
             ).join(', ');
 
@@ -330,8 +332,19 @@ export class SevenTVCosmeticsAPI {
 
             if (!response.ok) {
                 if (response.status === 404) {
-                    // User doesn't exist on 7TV
-                    return null;
+                    // User doesn't exist on 7TV - create a default cosmetics object to cache this result
+                    return {
+                        userId: twitchUserId,
+                        username: '', // We don't have the username from 7TV
+                        adjustedColors: {
+                            light: '#000000',
+                            dark: '#ffffff'
+                        },
+                        paintInfo: {
+                            backgroundImage: null,
+                            shadow: null
+                        }
+                    };
                 }
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -339,7 +352,19 @@ export class SevenTVCosmeticsAPI {
             const user = await response.json();
 
             if (!user) {
-                return null;
+                // Return default cosmetics for users without 7TV data
+                return {
+                    userId: twitchUserId,
+                    username: '',
+                    adjustedColors: {
+                        light: '#000000',
+                        dark: '#ffffff'
+                    },
+                    paintInfo: {
+                        backgroundImage: null,
+                        shadow: null
+                    }
+                };
             }
 
             let paint: SevenTVPaint | null = null;
@@ -347,7 +372,9 @@ export class SevenTVCosmeticsAPI {
 
             // Fetch paint details if user has paint
             if (user.style?.paint) {
+                console.log('Fetching paint for user:', user.username, 'paint ID:', user.style.paint.id);
                 paint = await this.fetchPaint(user.style.paint.id);
+                console.log('Fetched paint data:', paint);
             }
 
             // Set badge if user has badge
@@ -357,10 +384,20 @@ export class SevenTVCosmeticsAPI {
 
             // Process paint info
             const paintInfo = SevenTVCosmeticsUtils.processPaintInfo(paint);
+            console.log('Processed paint info:', paintInfo);
 
             // Calculate adjusted colors
             const baseColor = paint?.color ? SevenTVCosmeticsUtils.argbToRgba(paint.color) : '#ffffff';
             const adjustedColors = SevenTVCosmeticsUtils.calculateAdjustedColors(baseColor);
+
+            console.log('7TV user cosmetics result:', {
+                userId: twitchUserId,
+                username: user.username,
+                hasPaint: !!paint,
+                paintName: paint?.name,
+                adjustedColors,
+                paintInfo
+            });
 
             return {
                 userId: twitchUserId, // Store the original Twitch user ID for caching
@@ -373,7 +410,19 @@ export class SevenTVCosmeticsAPI {
             };
         } catch (error) {
             console.error('Error fetching 7TV user cosmetics:', error);
-            return null;
+            // Return default cosmetics on error to prevent repeated failed requests
+            return {
+                userId: twitchUserId,
+                username: '',
+                adjustedColors: {
+                    light: '#000000',
+                    dark: '#ffffff'
+                },
+                paintInfo: {
+                    backgroundImage: null,
+                    shadow: null
+                }
+            };
         }
     }
 }

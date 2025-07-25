@@ -44,6 +44,8 @@ export function use7TVCosmetics(options: Use7TVCosmeticsOptions = {}): Use7TVCos
                 // Create default cosmetics for users without 7TV ID
                 const defaultCosmetics = SevenTVCosmeticsServiceInstance.createDefaultCosmetics('', username);
                 setCosmetics(defaultCosmetics);
+            } else {
+                setCosmetics(null);
             }
             return;
         }
@@ -58,6 +60,11 @@ export function use7TVCosmetics(options: Use7TVCosmeticsOptions = {}): Use7TVCos
             const errorMessage = err instanceof Error ? err.message : 'Failed to fetch cosmetics';
             setError(errorMessage);
             console.error('Error fetching 7TV cosmetics:', err);
+            // Set default cosmetics on error
+            if (username) {
+                const defaultCosmetics = SevenTVCosmeticsServiceInstance.createDefaultCosmetics(userId || '', username);
+                setCosmetics(defaultCosmetics);
+            }
         } finally {
             setLoading(false);
         }

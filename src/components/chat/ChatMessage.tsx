@@ -115,7 +115,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
     );
 
     // Fallback to original color adjustment if no 7TV cosmetics or disabled
-    const adjustedColor = (config.show7TVCosmetics && hasCosmetics) 
+    const adjustedColor = (config.show7TVCosmetics && hasCosmetics && cosmetics?.paint) 
         ? undefined // Let 7TV cosmetics handle the color
         : adjustColorForContrast(props.msg.userInfo.color || '#ffffff', computedColorScheme === 'light' ? '#f1f1f1' : '#1e1e1e');
 

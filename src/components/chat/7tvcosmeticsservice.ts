@@ -22,6 +22,10 @@ export class SevenTVCosmeticsService {
      * @param forceRefresh Force refresh from API
      */
     async getUserCosmetics(userId: string, forceRefresh: boolean = false): Promise<SevenTVUserCosmetics | null> {
+        if (!userId) {
+            return null;
+        }
+
         // Check if we're already loading this user's cosmetics
         if (this.loadingPromises.has(userId)) {
             return this.loadingPromises.get(userId)!;
@@ -56,16 +60,27 @@ export class SevenTVCosmeticsService {
         try {
             const cosmetics = await SevenTVCosmeticsAPI.fetchUserCosmetics(userId);
             
+            // Always cache the result, even if it's null or default cosmetics
+            // This prevents repeated API calls for users without 7TV accounts
             if (cosmetics) {
-                // Cache the cosmetics
                 await SevenTVCosmeticsStore.storeUserCosmetics(userId, cosmetics);
                 return cosmetics;
+            } else {
+                // Cache a default "no cosmetics" result to prevent repeated API calls
+                const defaultCosmetics = this.createDefaultCosmetics(userId, '');
+                await SevenTVCosmeticsStore.storeUserCosmetics(userId, defaultCosmetics);
+                return defaultCosmetics;
             }
-            
-            return null;
         } catch (error) {
             console.error('Error fetching 7TV cosmetics for user:', userId, error);
-            return null;
+            // Cache a default result even on error to prevent repeated failed requests
+            const defaultCosmetics = this.createDefaultCosmetics(userId, '');
+            try {
+                await SevenTVCosmeticsStore.storeUserCosmetics(userId, defaultCosmetics);
+            } catch (cacheError) {
+                console.error('Error caching default cosmetics:', cacheError);
+            }
+            return defaultCosmetics;
         }
     }
 
@@ -76,15 +91,25 @@ export class SevenTVCosmeticsService {
      * @param theme The current theme ('light' or 'dark')
      */
     applyCosmetics(element: HTMLElement, cosmetics: SevenTVUserCosmetics, theme: 'light' | 'dark' = 'light'): void {
-        if (!cosmetics.paint) {
+        if (!cosmetics || !cosmetics.paint) {
             // Reset to default if no paint
             element.style.backgroundImage = '';
+            element.style.backgroundClip = '';
+            element.style.webkitBackgroundClip = '';
             element.style.filter = '';
             element.style.color = theme === 'dark' ? '#ffffff' : '#000000';
             return;
         }
 
         const { paintInfo, adjustedColors } = cosmetics;
+
+        console.log('Applying 7TV cosmetics:', {
+            userId: cosmetics.userId,
+            paintName: cosmetics.paint?.name,
+            paintInfo,
+            adjustedColors,
+            theme
+        });
 
         // Apply background image (gradient or image)
         if (paintInfo.backgroundImage) {
@@ -101,8 +126,12 @@ export class SevenTVCosmeticsService {
             const textHeight = element.scrollHeight;
             element.style.backgroundSize = `${textWidth}px ${textHeight}px`;
             element.style.backgroundPosition = '0 0';
-        } else {
+            element.style.backgroundRepeat = 'no-repeat';
+        } else if (adjustedColors && adjustedColors[theme]) {
             // Use adjusted color for the theme
+            element.style.backgroundImage = '';
+            element.style.backgroundClip = '';
+            element.style.webkitBackgroundClip = '';
             element.style.color = adjustedColors[theme];
         }
 
