@@ -50,6 +50,7 @@ export interface ConfigData {
     skipEmotesInTTS: boolean;
     skip7TVEmotesInTTS: boolean;
     skipGlobalEmotesInTTS: boolean;
+    show7TVCosmetics: boolean;
     systemMessageInChat: Partial<Record<SystemMessageMainType, boolean>>,
     hideEvents: Partial<Record<SystemMessageMainType, boolean>>,
     receivedShares: string[],
@@ -88,6 +89,7 @@ export interface Config extends ConfigData {
     setSkipEmotesInTTS: (val: boolean) => void;
     setSkip7TVEmotesInTTS: (val: boolean) => void;
     setSkipGlobalEmotesInTTS: (val: boolean) => void;
+    setShow7TVCosmetics: (val: boolean) => void;
     setSystemMessageInChat: (type: SystemMessageMainType, val: boolean) => void;
     setHideEvents: (type: SystemMessageMainType, val: boolean) => void;
     loadReceivedShares: () => void;
@@ -139,6 +141,7 @@ export const DEFAULT_CONFIG: Config = {
     skipEmotesInTTS: false,
     skip7TVEmotesInTTS: false,
     skipGlobalEmotesInTTS: false,
+    show7TVCosmetics: true,
     hideViewers: false,
     hideOwnViewers: false,
     hideHypetrain: false,
@@ -228,8 +231,9 @@ export const DEFAULT_CONFIG: Config = {
     setSkipEmotesInTTS: (val) => {},
     setSkip7TVEmotesInTTS: (val) => {},
     setSkipGlobalEmotesInTTS: (val) => {},
+    setShow7TVCosmetics: (val) => {},
     setReloadOnReturnToApp: (val) => {},
 };
 
-export const DB_VERSION = 8;
+export const DB_VERSION = 9;
 export const DB_NAME = 'HeheChat';
