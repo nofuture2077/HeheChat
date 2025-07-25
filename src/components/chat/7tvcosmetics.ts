@@ -176,17 +176,19 @@ export class SevenTVCosmeticsUtils {
      * @param color ARGB color value
      */
     static argbToRgba(color: number): string {
-        if (color < 0) {
-            color = color >>> 0; // Convert negative to unsigned
-        }
+        // Convert to unsigned 32-bit integer to handle negative values correctly
+        const unsignedColor = color >>> 0;
 
         // 7TV uses ARGB format: Alpha (bits 24-31), Red (bits 16-23), Green (bits 8-15), Blue (bits 0-7)
-        const alpha = (color >> 24) & 0xFF;
-        const red = (color >> 16) & 0xFF;
-        const green = (color >> 8) & 0xFF;
-        const blue = color & 0xFF;
+        const alpha = (unsignedColor >>> 24) & 0xFF;
+        const red = (unsignedColor >>> 16) & 0xFF;
+        const green = (unsignedColor >>> 8) & 0xFF;
+        const blue = unsignedColor & 0xFF;
         
-        // Return RGB format (ignore alpha for now)
+        // Convert alpha from 0-255 range to 0-1 range for CSS
+        const normalizedAlpha = alpha / 255;
+        
+        // Return RGBA format with proper alpha
         return `rgb(${red}, ${green}, ${blue})`;
     }
 
