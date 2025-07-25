@@ -110,14 +110,6 @@ export class SevenTVCosmeticsService {
 
         const { paintInfo, adjustedColors } = cosmetics;
 
-        console.log('Applying 7TV cosmetics:', {
-            userId: cosmetics.userId,
-            paintName: cosmetics.paint?.name,
-            paintInfo,
-            adjustedColors,
-            theme
-        });
-
         // Apply background image (gradient or image)
         if (paintInfo.backgroundImage) {
             element.style.backgroundImage = paintInfo.backgroundImage;
@@ -130,15 +122,12 @@ export class SevenTVCosmeticsService {
             element.style.backgroundSize = '100% 100%';
             element.style.backgroundPosition = '0 0';
             element.style.backgroundRepeat = 'no-repeat';
-            
-            console.log('Applied background gradient:', paintInfo.backgroundImage);
         } else if (adjustedColors && adjustedColors[theme]) {
             // Use adjusted color for the theme
             element.style.backgroundImage = '';
             element.style.backgroundClip = '';
             element.style.webkitBackgroundClip = '';
             element.style.color = adjustedColors[theme];
-            console.log('Applied color:', adjustedColors[theme]);
         }
 
         // Apply shadows

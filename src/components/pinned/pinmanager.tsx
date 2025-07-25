@@ -153,7 +153,6 @@ export function PinManager() {
 
     useEffect(() => {
         const streamEventSub = PubSub.subscribe("WS-streamevent", (msg, data) => {
-            console.log("streamevent", data);
 
             // Hype Train Events
             if (data.eventtype === 'hypeTrainBegin' && !config.hideHypetrain) {

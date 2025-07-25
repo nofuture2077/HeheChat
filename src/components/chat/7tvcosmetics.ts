@@ -345,20 +345,13 @@ export class SevenTVCosmeticsAPI {
                 return null;
             }
 
-            console.log('Found 7TV user:', user.username, 'User object:', user);
-
             // The REST API returns the user with style directly
             let paint: SevenTVPaint | null = null;
             let badge: SevenTVBadge | null = null;
 
             if (user.user?.style?.paint_id) {
-                console.log('User has paint, fetching paint details:', user.user.style.paint_id);
                 paint = await this.fetchPaint(user.user.style.paint_id);
-                console.log('Fetched paint data:', paint);
-            } else {
-                console.log('User has no paint');
             }
-
             // Set badge if user has badge
             if (user.style?.badge) {
                 badge = user.style.badge;
@@ -366,26 +359,15 @@ export class SevenTVCosmeticsAPI {
 
             // If user has 7TV account but no paint, return null so we use normal username color
             if (!paint) {
-                console.log('User has 7TV account but no paint, using normal username color');
                 return null;
             }
 
             // Process paint info
             const paintInfo = SevenTVCosmeticsUtils.processPaintInfo(paint);
-            console.log('Processed paint info:', paintInfo);
 
             // Calculate adjusted colors
             const baseColor = paint?.color ? SevenTVCosmeticsUtils.argbToRgba(paint.color) : '#ffffff';
             const adjustedColors = SevenTVCosmeticsUtils.calculateAdjustedColors(baseColor);
-
-            console.log('7TV user cosmetics result:', {
-                userId: twitchUserId,
-                username: user.username,
-                hasPaint: !!paint,
-                paintName: paint?.name,
-                adjustedColors,
-                paintInfo
-            });
 
             return {
                 userId: twitchUserId, // Store the original Twitch user ID for caching

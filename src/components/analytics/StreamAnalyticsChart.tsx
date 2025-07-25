@@ -182,12 +182,9 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
         false
       );
 
-      if (response.success) {
-        console.log('Raw API response data:', response.data);
-        
+      if (response.success) {        
         // Normalize the data to ensure consistent types
         const normalizedData = normalizeAnalyticsData(response.data);
-        console.log('Normalized data:', normalizedData);
         
         // Fill missing timestamps with zero values for better chart visualization
         const filledData = fillMissingTimestamps(
@@ -196,10 +193,8 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
           selectedStreamData.end_timestamp,
           interval
         );
-        console.log('Filled data:', filledData);
         
         const transformedData = transformData(filledData, durationMinutes);
-        console.log('Transformed data for chart:', transformedData);
         
         setData(transformedData);
         setSummary(response.summary || null);
