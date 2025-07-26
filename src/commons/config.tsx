@@ -59,7 +59,8 @@ export interface ConfigData {
     freeTTS: string[],
     deactivatedAlerts: Record<string, boolean>,
     shortcuts: ShortCut[],
-    reloadOnReturnToApp: boolean
+    reloadOnReturnToApp: boolean,
+    rainMode: boolean
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -115,6 +116,7 @@ export interface Config extends ConfigData {
     setFreeTTS: (val: string[]) => void;
     setShortcuts: (val: ShortCut[]) => void;
     setReloadOnReturnToApp: (val: boolean) => void;
+    setRainMode: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -182,7 +184,8 @@ export const DEFAULT_CONFIG: Config = {
     freeTTS: [],
     deactivatedAlerts: {},
     shortcuts: [],
-    reloadOnReturnToApp: false,
+    reloadOnReturnToApp: true,
+    rainMode: false,
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setMaxMessages: (value: number) => {},
@@ -233,6 +236,7 @@ export const DEFAULT_CONFIG: Config = {
     setSkipGlobalEmotesInTTS: (val) => {},
     setShow7TVCosmetics: (val) => {},
     setReloadOnReturnToApp: (val) => {},
+    setRainMode: (val) => {},
 };
 
 export const DB_VERSION = 9;

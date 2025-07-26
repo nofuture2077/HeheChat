@@ -604,14 +604,14 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
 
                         {/* Chat Messages */}
                         <div className={classes.chatMessages} style={{ position: 'relative' }}>
-                            {!shouldScroll && (
+                            {!shouldScroll && !config.rainMode && (
                                 <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
                                     <Button size="xs" onClick={scrollToBottom} leftSection={<IconMessagePause size={14} />} variant="gradient" radius={"lg"}>New Messages</Button>
                                 </div>
                             )}
                             <ScrollArea viewportRef={viewport} h="100%" type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
                                 <Space h={8}></Space>
-                                <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
+                                <Chat messages={chatMessages} openModView={config.rainMode ? () => {} : openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={config.rainMode ? () => {} : (msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
                                 <Space h={8}></Space>
                             </ScrollArea>
                         </div>
@@ -670,14 +670,14 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                         openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }}
                     ></drawer.component> : null}
                 </Drawer>
-                {(drawerOpen || shouldScroll) ? null : (
+                {(drawerOpen || shouldScroll || config.rainMode) ? null : (
                     <Affix position={{ bottom: 10 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>
                         <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" radius={"lg"}>New Messages</Button>
                     </Affix>
                 )}
                 <ScrollArea viewportRef={viewport} pos='absolute' w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
                     <Space h={48}></Space>
-                    <Chat messages={chatMessages} openModView={openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={(msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
+                    <Chat messages={chatMessages} openModView={config.rainMode ? () => {} : openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={config.rainMode ? () => {} : (msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
                 </ScrollArea>
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
