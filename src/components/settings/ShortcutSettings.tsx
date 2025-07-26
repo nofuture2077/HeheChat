@@ -1,7 +1,7 @@
 import { Stack, Fieldset, Button, TextInput, Select, ActionIcon, Group, Text, Modal, Switch } from '@mantine/core';
 import { useContext, useState } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
-import { ShortCut, ShortCutType } from '../../commons/shortcuts';
+import { ShortCut, ShortCutType, TOGGLEABLE_CONFIG_VALUES } from '../../commons/shortcuts';
 import { IconTrash, IconEdit, IconPlus, IconCheck } from '@tabler/icons-react';
 import { generateGUID } from '@/commons/helper';
 
@@ -10,6 +10,7 @@ const shortcutTypes = [
     { value: 'marker', label: 'Marker' },
     { value: 'chat', label: 'Chat' },
     { value: 'adbreak', label: 'Run Ad' },
+    { value: 'toggle', label: 'Toggle Config' },
 ];
 
 const colorOptions = [
@@ -51,7 +52,9 @@ export function ShortcutSettings() {
             color,
             input,
             confirm,
-            params: params.split(',').map(p => p.trim()).filter(p => p !== '')
+            params: type === 'toggle' 
+                ? [params] // For toggle, params is a single config key
+                : params.split(',').map(p => p.trim()).filter(p => p !== '') // For others, split by comma
         };
 
         const updatedShortcuts = editingShortcut
@@ -67,7 +70,10 @@ export function ShortcutSettings() {
         setName(shortcut.name);
         setType(shortcut.type);
         setColor(shortcut.color);
-        setParams(shortcut.params.join(', '));
+        setParams(shortcut.type === 'toggle' 
+            ? shortcut.params[0] || '' // For toggle, use first param as single value
+            : shortcut.params.join(', ') // For others, join with comma
+        );
         setInput(shortcut.input);
         setConfirm(shortcut.confirm);
         setModalOpen(true);
@@ -129,15 +135,36 @@ export function ShortcutSettings() {
                             ))}
                         </Group>
                     </Stack>
-                    <TextInput
-                        label="Text"
-                        value={params}
-                        onChange={(e) => setParams(e.target.value)}
-                        placeholder="e.g. !live"
-                    />
-                    <Switch checked={input} onChange={(event) => setInput(event.currentTarget.checked)} label="Input" size="lg" />
+                    {type === 'toggle' ? (
+                        <Select
+                            label="Config Value to Toggle"
+                            data={TOGGLEABLE_CONFIG_VALUES}
+                            value={params}
+                            onChange={(value) => setParams(value || '')}
+                            placeholder="Select a config value to toggle"
+                            searchable
+                            styles={{ dropdown: { zIndex: 1001 } }}
+                        />
+                    ) : (
+                        <TextInput
+                            label="Text"
+                            value={params}
+                            onChange={(e) => setParams(e.target.value)}
+                            placeholder="e.g. !live"
+                        />
+                    )}
+                    
+                    {type !== 'toggle' && (
+                        <Switch checked={input} onChange={(event) => setInput(event.currentTarget.checked)} label="Input" size="lg" />
+                    )}
                     <Switch checked={confirm} onChange={(event) => setConfirm(event.currentTarget.checked)} label="Confirm" size="lg" />
-                    <Text fs='italic'>Input can be used to set the streammarkers name. Confirm makes sure that a shortcut is only executed after confirmation.</Text>
+                    
+                    <Text fs='italic'>
+                        {type === 'toggle' 
+                            ? 'Toggle shortcuts will switch the selected config value between true and false. Confirm makes sure that a shortcut is only executed after confirmation.'
+                            : 'Input can be used to set the streammarkers name. Confirm makes sure that a shortcut is only executed after confirmation.'
+                        }
+                    </Text>
                     <Group justify="space-between" mt="md">
                         <Button variant="light" onClick={resetForm}>Cancel</Button>
                         <Button variant="gradient" onClick={handleSave}>{editingShortcut ? 'Update' : 'Add'}</Button>
