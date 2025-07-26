@@ -107,8 +107,8 @@ export function ShortcutView() {
     };
 
     return (
-        <Card withBorder radius="md" p="sm" ml="sm" mr="sm" mt={0} mb={0}>
-            <Group justify="center" gap="md">
+        <Card withBorder radius="md" p="md" mx="sm" my="sm">
+            <Group justify="center" gap="lg" wrap="nowrap">
                 {config.shortcuts.map((shortcut) => {
                     let Icon;
                     let badgeText = shortcut.name;
@@ -124,17 +124,37 @@ export function ShortcutView() {
                     }
                     
                     return (
-                        <Stack key={shortcut.id} align="center" gap={5}>
+                        <Stack key={shortcut.id} align="center" gap="xs" style={{ flex: 1, minWidth: 0 }}>
                             <ActionIcon
                                 variant="filled"
-                                size="xl"
+                                size="lg"
                                 radius="xl"
                                 onClick={() => handleShortcutClick(shortcut)}
-                                style={{ backgroundColor: shortcut.color }}
+                                style={{ 
+                                    backgroundColor: shortcut.color,
+                                    width: '50px',
+                                    height: '50px'
+                                }}
                             >
-                                <Icon/>
+                                <Icon size={20}/>
                             </ActionIcon>
-                            <Badge size="xs" ta="center" bg="primary">{badgeText}</Badge>
+                            <Badge 
+                                size="xs" 
+                                ta="center" 
+                                bg="primary"
+                                style={{ 
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.3px',
+                                    fontWeight: 600,
+                                    fontSize: '10px',
+                                    maxWidth: '100%',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                }}
+                            >
+                                {badgeText}
+                            </Badge>
                         </Stack>
                     );
                 })}

@@ -140,7 +140,7 @@ export const DEFAULT_CONFIG: Config = {
     playAlerts: false,
     alertBoost: 1.0,
     visualAlertDelay: 8,
-    skipEmotesInTTS: false,
+    skipEmotesInTTS: true,
     skip7TVEmotesInTTS: false,
     skipGlobalEmotesInTTS: false,
     show7TVCosmetics: true,
