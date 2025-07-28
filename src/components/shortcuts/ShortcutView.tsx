@@ -1,5 +1,5 @@
 import { Group, ActionIcon, Text, Modal, TextInput, Button, Stack, Badge, Card } from '@mantine/core';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
 import { ShortCut, shortcutHandler } from '@/commons/shortcuts';
 import { 
@@ -9,11 +9,13 @@ import {
     IconSettings, 
     IconPlayerPause,
     IconCheck,
-    IconAd
+    IconAd,
+    IconToggleLeft,
+    IconToggleRight
 } from '@tabler/icons-react';
 import { Dictionary } from 'underscore';
 
-const getIconForType = (type: string) => {
+const getIconForType = (type: string, isToggleOn?: boolean) => {
     switch (type) {
         case 'clip':
             return IconClipboard;
@@ -27,9 +29,15 @@ const getIconForType = (type: string) => {
             return IconPlayerPause;
         case 'adbreak':
             return IconAd;
+        case 'toggle':
+            return isToggleOn ? IconToggleRight : IconToggleLeft;
         default:
             return IconMessage;
     }
+};
+
+const getConfigValue = (config: any, configKey: string): boolean => {
+    return config[configKey] || false;
 };
 
 export function ShortcutView() {
@@ -40,6 +48,11 @@ export function ShortcutView() {
     const [activeShortcut, setActiveShortcut] = useState<ShortCut | null>(null);
     const [inputValue, setInputValue] = useState('');
     const [checkedShortcuts, setCheckedShortcuts] = useState<Dictionary<boolean>>({});
+
+    // Initialize shortcutHandler with config
+    useEffect(() => {
+        shortcutHandler.setConfig(config);
+    }, [config]);
 
     const handleShortcutClick = (shortcut: ShortCut) => {
         if (checkedShortcuts[shortcut.id]) {
@@ -94,22 +107,54 @@ export function ShortcutView() {
     };
 
     return (
-        <Card withBorder radius="md" p="sm" ml="sm" mr="sm" mt={0} mb={0}>
-            <Group justify="center" gap="md">
+        <Card withBorder radius="md" p="md" mx="sm" my="sm">
+            <Group justify="center" gap="lg" wrap="nowrap">
                 {config.shortcuts.map((shortcut) => {
-                    const Icon = checkedShortcuts[shortcut.id] ? IconCheck : getIconForType(shortcut.type);
+                    let Icon;
+                    let badgeText = shortcut.name;
+                    
+                    if (checkedShortcuts[shortcut.id]) {
+                        Icon = IconCheck;
+                    } else if (shortcut.type === 'toggle' && shortcut.params[0]) {
+                        const isToggleOn = getConfigValue(config, shortcut.params[0]);
+                        Icon = getIconForType(shortcut.type, isToggleOn);
+                        badgeText = `${shortcut.name}`;
+                    } else {
+                        Icon = getIconForType(shortcut.type);
+                    }
+                    
                     return (
-                        <Stack key={shortcut.id} align="center" gap={5}>
+                        <Stack key={shortcut.id} align="center" gap="xs" style={{ flex: 1, minWidth: 0 }}>
                             <ActionIcon
                                 variant="filled"
-                                size="xl"
+                                size="lg"
                                 radius="xl"
                                 onClick={() => handleShortcutClick(shortcut)}
-                                style={{ backgroundColor: shortcut.color }}
+                                style={{ 
+                                    backgroundColor: shortcut.color,
+                                    width: '50px',
+                                    height: '50px'
+                                }}
                             >
-                                <Icon/>
+                                <Icon size={20}/>
                             </ActionIcon>
-                            <Badge size="xs" ta="center" bg="primary">{shortcut.name}</Badge>
+                            <Badge 
+                                size="xs" 
+                                ta="center" 
+                                bg="primary"
+                                style={{ 
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.3px',
+                                    fontWeight: 600,
+                                    fontSize: '10px',
+                                    maxWidth: '100%',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap'
+                                }}
+                            >
+                                {badgeText}
+                            </Badge>
                         </Stack>
                     );
                 })}

@@ -352,11 +352,10 @@ export default function HeheChat() {
         if (wakeLockSupported && documentVisible) {
             // Request wake lock when document becomes visible
             requestWakeLock();
-        } else if (!documentVisible && wakeLockActive) {
-            // Wake lock will be automatically released when document becomes hidden
-            // The useWakeLock hook handles reacquisition when document becomes visible again
         }
-    }, [documentVisible, wakeLockSupported, requestWakeLock, wakeLockActive]);
+        // Wake lock will be automatically released when document becomes hidden
+        // The useWakeLock hook handles reacquisition when document becomes visible again
+    }, [documentVisible, wakeLockSupported, requestWakeLock]);
 
     // Log wake lock status changes for debugging
     useEffect(() => {
@@ -413,6 +412,7 @@ export default function HeheChat() {
     const setSkipGlobalEmotesInTTS = (value: boolean) => updateConfig('skipGlobalEmotesInTTS', value);
     const setShow7TVCosmetics = (value: boolean) => updateConfig('show7TVCosmetics', value);
     const setReloadOnReturnToApp = (value: boolean) => updateConfig('reloadOnReturnToApp', value);
+    const setRainMode = (value: boolean) => updateConfig('rainMode', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -670,7 +670,8 @@ export default function HeheChat() {
         setSkip7TVEmotesInTTS,
         setSkipGlobalEmotesInTTS,
         setShow7TVCosmetics,
-        setReloadOnReturnToApp
+        setReloadOnReturnToApp,
+        setRainMode
     };
 
     const appLogin = {

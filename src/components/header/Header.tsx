@@ -69,7 +69,7 @@ export function Header(props: {
                     </ActionIcon>
                     
                     {props.showShortcutsToggle ? 
-                        (<ActionIcon variant='transparent' color='primary' onClick={props.toggleShortcuts}  size='44px'>
+                        (<ActionIcon variant='transparent' color='primary' onClick={props.toggleShortcuts} size='44px'>
                             <IconKeyboard/>
                         </ActionIcon>)
                     : null}

@@ -24,6 +24,7 @@ export function ChatInput(props: ChatInputProps) {
     const config = useContext(ConfigContext);
     const emotes = useContext(ChatEmotesContext);
     const [inputText, setInputText] = useState<string>('');
+    
     const [messageHistory, setMessageHistory] = useState<string[]>([]);
     const [historyIndex, setHistoryIndex] = useState<number>(-1);
     const [isEmoteGridOpen, setIsEmoteGridOpen] = useState<boolean>(false);
@@ -44,7 +45,23 @@ export function ChatInput(props: ChatInputProps) {
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption()
     });
-    
+
+    // Get the current word being typed
+    const currentWord = useMemo(() => {
+        const words = inputText.split(' ');
+        return words[words.length - 1];
+    }, [inputText]);
+
+    // Reset manually closed state when input changes significantly
+    useEffect(() => {
+        if (manuallyClosedEmoteGrid) {
+            // Reset if the current word becomes empty or very short
+            if (currentWord.length < 2) {
+                setManuallyClosedEmoteGrid(false);
+            }
+        }
+    }, [currentWord, manuallyClosedEmoteGrid]);
+
     interface Command {
         value: string;
         label: string;
@@ -247,12 +264,6 @@ export function ChatInput(props: ChatInputProps) {
     };
 
     const filtered = getFilteredItems();
-    
-    // Get the current word being typed
-    const currentWord = useMemo(() => {
-        const words = inputText.split(' ');
-        return words[words.length - 1];
-    }, [inputText]);
 
     // Get filtered emote list - show when typing (3+ chars) OR when manually opened
     const filteredEmotes = useMemo(() => {
@@ -300,15 +311,11 @@ export function ChatInput(props: ChatInputProps) {
         setManuallyClosedEmoteGrid(true);
     };
 
-    // Reset manually closed state when input changes significantly
-    useEffect(() => {
-        if (manuallyClosedEmoteGrid) {
-            // Reset if the current word becomes empty or very short
-            if (currentWord.length < 2) {
-                setManuallyClosedEmoteGrid(false);
-            }
-        }
-    }, [currentWord, manuallyClosedEmoteGrid]);
+
+    // If rain mode is enabled, don't render the chat input
+    if (config.rainMode) {
+        return null;
+    }
 
     return (
         <Stack gap={0} className={inputClasses.chatInput}>

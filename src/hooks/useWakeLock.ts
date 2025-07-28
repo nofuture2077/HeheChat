@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface WakeLockState {
   isSupported: boolean;
@@ -15,9 +15,14 @@ export function useWakeLock() {
   
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
-  const requestWakeLock = async () => {
+  const requestWakeLock = useCallback(async () => {
     if (!state.isSupported) {
       setState(prev => ({ ...prev, error: 'Wake Lock API is not supported in this browser' }));
+      return;
+    }
+
+    // Don't request if we already have an active wake lock
+    if (wakeLockRef.current) {
       return;
     }
 
@@ -48,7 +53,7 @@ export function useWakeLock() {
       }));
       console.error('Failed to request wake lock:', error);
     }
-  };
+  }, [state.isSupported]);
 
   const releaseWakeLock = async () => {
     if (wakeLockRef.current) {
@@ -72,21 +77,6 @@ export function useWakeLock() {
     }
   };
 
-  // Handle visibility change - reacquire wake lock when page becomes visible
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && state.isActive && !wakeLockRef.current) {
-        // Reacquire wake lock when page becomes visible again
-        requestWakeLock();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [state.isActive]);
 
   // Cleanup on unmount
   useEffect(() => {
