@@ -86,7 +86,7 @@ export function useWakeLock() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [state.isActive]);
+  }, []); // Remove state.isActive from dependencies to prevent infinite loop
 
   // Cleanup on unmount
   useEffect(() => {

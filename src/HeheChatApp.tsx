@@ -352,11 +352,10 @@ export default function HeheChat() {
         if (wakeLockSupported && documentVisible) {
             // Request wake lock when document becomes visible
             requestWakeLock();
-        } else if (!documentVisible && wakeLockActive) {
-            // Wake lock will be automatically released when document becomes hidden
-            // The useWakeLock hook handles reacquisition when document becomes visible again
         }
-    }, [documentVisible, wakeLockSupported, requestWakeLock, wakeLockActive]);
+        // Wake lock will be automatically released when document becomes hidden
+        // The useWakeLock hook handles reacquisition when document becomes visible again
+    }, [documentVisible, wakeLockSupported, requestWakeLock]);
 
     // Log wake lock status changes for debugging
     useEffect(() => {
