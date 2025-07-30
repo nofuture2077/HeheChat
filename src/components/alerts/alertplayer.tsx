@@ -435,7 +435,46 @@ class AlertPlayer {
         });
     }
 
-    cleanMessage(message: string, filterTTS: boolean) {
+    /**
+     * Apply TTS replacements from the alert configuration
+     * Supports word-based, case-insensitive matching with wildcard support
+     */
+    applyTTSReplacements(message: string, channel: string): string {
+        const alertConfig = this.alertConfig[channel];
+        const replacements = alertConfig?.data?.config?.ttsReplacements;
+        
+        if (!replacements || Object.keys(replacements).length === 0) {
+            return message;
+        }
+        
+        let processedMessage = message;
+        
+        // Process each replacement rule
+        Object.entries(replacements).forEach(([searchPattern, replacement]) => {
+            if (!searchPattern || replacement === undefined) return;
+            
+            // Handle wildcard patterns
+            if (searchPattern.includes('*')) {
+                // Convert wildcard pattern to regex
+                // Escape special regex characters except *
+                const escapedPattern = searchPattern
+                    .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+                    .replace(/\*/g, '.*');
+                
+                // Create word boundary regex for case-insensitive matching
+                const regex = new RegExp(`\\b${escapedPattern}\\b`, 'gi');
+                processedMessage = processedMessage.replace(regex, replacement);
+            } else {
+                // Simple word-based replacement (case-insensitive)
+                const regex = new RegExp(`\\b${searchPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+                processedMessage = processedMessage.replace(regex, replacement);
+            }
+        });
+        
+        return processedMessage;
+    }
+
+    cleanMessage(message: string, filterTTS: boolean, channel?: string) {
         // First clean cheer prefixes
         var cleanedMessage = cheerPrefixesRegExp.reduce(
             (accumulator, prefix) => accumulator.replaceAll(prefix, ""),
@@ -443,6 +482,11 @@ class AlertPlayer {
         );
         // Then remove URLs
         cleanedMessage = cleanedMessage.replace(/https?:\/\/[^\s]+/g, "");
+
+        // Apply TTS replacements if channel is provided
+        if (channel && filterTTS) {
+            cleanedMessage = this.applyTTSReplacements(cleanedMessage, channel);
+        }
 
         // Replace multiple consecutive symbols with single instances
         // This array can be easily expanded with other symbols that cause TTS issues
@@ -561,7 +605,33 @@ class AlertPlayer {
     }
 
     async tts(ttsMessage: string, channel: string, voice: string, voiceType: string, state: string, sink: string) {
+        // Handle 'none' voice type - return undefined to skip TTS
+        if (voiceType === 'none') {
+            return undefined;
+        }
         
+        // Handle 'default' voice type - use defaultVoice from config
+        if (voiceType === 'default') {
+            const alertConfig = this.alertConfig[channel];
+            const defaultVoice = alertConfig?.data?.config?.defaultVoice;
+            
+            if (!defaultVoice) {
+                console.warn('Default voice type specified but no defaultVoice config found');
+                return undefined;
+            }
+            
+            // Use the default voice configuration
+            const audioData = defaultVoice.voiceType === 'ai' 
+                ? await this.aiTTS(ttsMessage, channel, defaultVoice.voiceSpecifier, state, sink)
+                : await this.googleTTS(ttsMessage, channel, defaultVoice.voiceSpecifier, state, sink);
+                
+            if (!audioData) {
+                return undefined;
+            }
+            return await this.getAudioInfo('data:audio/mp3;base64,' + audioData);
+        }
+        
+        // Handle 'ai' and 'google' voice types as before
         const audioData = voiceType === 'ai' ? await this.aiTTS(ttsMessage, channel, voice, state, sink) : await this.googleTTS(ttsMessage, channel, voice, state, sink);
         if (!audioData) {
             return undefined;
@@ -579,15 +649,15 @@ class AlertPlayer {
         });
     }
 
-    getAlert(event: Event, eventData: any, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
+    getAlert(event: Event, eventData: any, alertConfig?: EventAlertConfig, config?: Config): EventAlert | undefined {
         if (eventData.eventAlert) {
-            if (!((config.freeTTS || []).includes(event.username) || (config.freeTTS || []).includes('all'))) {
+            if (!((config?.freeTTS || []).includes(event.username) || (config?.freeTTS || []).includes('all'))) {
                 return undefined;
             }
             return eventData.eventAlert;
         }
         const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
-        const alerts = alertConfig.data?.alerts[eventMainType];
+        const alerts = alertConfig?.data?.alerts[eventMainType];
         if (!alerts) {
             return undefined;
         }
@@ -595,7 +665,7 @@ class AlertPlayer {
         const minAlerts: Record<number, EventAlert[]> = {};
         const matchesAlerts: EventAlert[] = [];
 
-        alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
+        alerts.filter(a => !config?.deactivatedAlerts[a.id]).forEach(alert => {
             const amount = Number(alert.specifier.amount || 0);
             if (alert.specifier.type === "exact") {
                 if (exactAlerts[amount]) {
@@ -730,7 +800,7 @@ class AlertPlayer {
         const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", {
             ...vars,
             text: (eventData && eventData.text) ? this.parsedPartsToTTSText(eventData.text.parts || eventData.text) : undefined
-        }), true);
+        }), true, item.channel);
         try {
             const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state, sink) : undefined;
             const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;

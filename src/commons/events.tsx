@@ -55,6 +55,14 @@ export type EventAlertMeta = {
 export type EventAlertData = {
     alerts: Record<EventMainType, EventAlert[]>;
     files: Record<Base64FileReference, Base64File>;
+    config?: {
+        ttsReplacements?: Record<string, string>;
+        defaultVoice?: {
+            voiceType: 'ai' | 'google';
+            voiceSpecifier: string;
+            voiceParams: Record<string, string | number>;
+        };
+    }
 }
 
 export type EventAlert = {
@@ -74,7 +82,7 @@ export type EventAlertAudioData = {
 
 export type EventAlertTTS = {
     text?: string;
-    voiceType: 'ai' | 'google' | 'system';
+    voiceType: 'ai' | 'google' | 'none' | 'default';
     voiceSpecifier: string;
     voiceParams: Record<string, string | number>;
 }
