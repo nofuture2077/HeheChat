@@ -648,15 +648,15 @@ class AlertPlayer {
         });
     }
 
-    getAlert(event: Event, eventData: any, alertConfig: EventAlertConfig, config: Config): EventAlert | undefined {
+    getAlert(event: Event, eventData: any, alertConfig?: EventAlertConfig, config?: Config): EventAlert | undefined {
         if (eventData.eventAlert) {
-            if (!((config.freeTTS || []).includes(event.username) || (config.freeTTS || []).includes('all'))) {
+            if (!((config?.freeTTS || []).includes(event.username) || (config?.freeTTS || []).includes('all'))) {
                 return undefined;
             }
             return eventData.eventAlert;
         }
         const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
-        const alerts = alertConfig.data?.alerts[eventMainType];
+        const alerts = alertConfig?.data?.alerts[eventMainType];
         if (!alerts) {
             return undefined;
         }
@@ -664,7 +664,7 @@ class AlertPlayer {
         const minAlerts: Record<number, EventAlert[]> = {};
         const matchesAlerts: EventAlert[] = [];
 
-        alerts.filter(a => !config.deactivatedAlerts[a.id]).forEach(alert => {
+        alerts.filter(a => !config?.deactivatedAlerts[a.id]).forEach(alert => {
             const amount = Number(alert.specifier.amount || 0);
             if (alert.specifier.type === "exact") {
                 if (exactAlerts[amount]) {
