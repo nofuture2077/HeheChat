@@ -27,7 +27,7 @@ export function SevenTVBadgeComponent({ badge, size = 18, className = '' }: Seve
         }
 
         // Find the smallest file that is >= targetSize
-        const bestFile = files.find(file => (file.width * 1.5) >= targetSize) || files[files.length - 1];
+        const bestFile = files.find(file => file.width >= (targetSize * 1.5)) || files[files.length - 1];
         return `${badge.host.url}/${bestFile.name}`;
     };
 
@@ -74,6 +74,6 @@ export function getSevenTVBadgeImageUrl(badge: SevenTVBadge, size: number = 18):
     }
 
     // Find the smallest file that is >= targetSize
-    const bestFile = files.find(file => (file.width * 1.5) >= size) || files[files.length - 1];
+    const bestFile = files.find(file => file.width >= (size * 1.5)) || files[files.length - 1];
     return `${badge.host.url}/${bestFile.name}`;
 }
