@@ -38,6 +38,15 @@ export interface SevenTVBadge {
     name: string;
     tooltip?: string;
     tag?: string;
+    host?: {
+        url: string;
+        files: Array<{
+            name: string;
+            format: string;
+            width: number;
+            height: number;
+        }>;
+    };
 }
 
 export interface SevenTVUserCosmetics {
@@ -320,6 +329,55 @@ export class SevenTVCosmeticsAPI {
     }
 
     /**
+     * Fetch badge data by badge ID
+     * @param badgeId The badge ID
+     */
+    static async fetchBadge(badgeId: string): Promise<SevenTVBadge | null> {
+        try {
+            const response = await fetch(this.GQL_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    operationName: 'GetCosmetics',
+                    variables: { list: [badgeId] },
+                    query: `query GetCosmetics($list: [ObjectID!]) {
+                        cosmetics(list: $list) {
+                            badges {
+                                id
+                                kind
+                                name
+                                tooltip
+                                tag
+                                host {
+                                    url
+                                    files {
+                                        name
+                                        format
+                                        width
+                                        height
+                                    }
+                                }
+                            }
+                        }
+                    }`,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.data?.cosmetics?.badges?.[0] || null;
+        } catch (error) {
+            console.error('Error fetching 7TV badge:', error);
+            return null;
+        }
+    }
+
+    /**
      * Fetch user cosmetics data using REST API only
      * @param twitchUserId The Twitch user ID
      */
@@ -349,16 +407,18 @@ export class SevenTVCosmeticsAPI {
             let paint: SevenTVPaint | null = null;
             let badge: SevenTVBadge | null = null;
 
+            // Fetch paint if user has one
             if (user.user?.style?.paint_id) {
                 paint = await this.fetchPaint(user.user.style.paint_id);
             }
-            // Set badge if user has badge
-            if (user.style?.badge) {
-                badge = user.style.badge;
+
+            // Fetch badge if user has one
+            if (user.user?.style?.badge_id) {
+                badge = await this.fetchBadge(user.user.style.badge_id);
             }
 
-            // If user has 7TV account but no paint, return null so we use normal username color
-            if (!paint) {
+            // If user has 7TV account but no paint and no badge, return null
+            if (!paint && !badge) {
                 return null;
             }
 
@@ -373,7 +433,7 @@ export class SevenTVCosmeticsAPI {
                 userId: twitchUserId, // Store the original Twitch user ID for caching
                 username: user.username,
                 display_name: user.display_name,
-                paint: paint,
+                paint: paint || undefined,
                 badge: badge || undefined,
                 adjustedColors,
                 paintInfo

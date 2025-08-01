@@ -102,7 +102,7 @@ export function use7TVCosmetics(options: Use7TVCosmeticsOptions = {}): Use7TVCos
         elementRef,
         applyCosmetics,
         refreshCosmetics,
-        hasCosmetics: cosmetics?.paint !== undefined
+        hasCosmetics: cosmetics?.paint !== undefined || cosmetics?.badge !== undefined
     };
 }
 
@@ -156,7 +156,7 @@ export function use7TVCosmeticsBatch(userIds: string[], theme: 'light' | 'dark' 
         refreshBatchCosmetics,
         applyBatchCosmetics,
         getCosmetics: (userId: string) => cosmeticsMap.get(userId) || null,
-        hasCosmetics: (userId: string) => cosmeticsMap.get(userId)?.paint !== undefined
+        hasCosmetics: (userId: string) => cosmeticsMap.get(userId)?.paint !== undefined || cosmeticsMap.get(userId)?.badge !== undefined
     };
 }
 

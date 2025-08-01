@@ -4,6 +4,7 @@ import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../App
 import { LoginContext } from '../../commons/login';
 import { useContext, useState, useRef } from 'react';
 import { use7TVUsernameCosmetics } from './use7TVCosmetics';
+import { SevenTVBadgeComponent } from './SevenTVBadge';
 import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconUser } from '@tabler/icons-react';
 import { Text, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -251,7 +252,16 @@ export function ChatMessageComp(props: ChatMessageProps) {
                 {badge}
                 {(config.showProfilePicture && !props.hideReply) ? <span key='channel' className={classes.channel}>{emotes.getLogo(channel)}</span>: null}
                 {config.showTimestamp || props.forceTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
-                <span className={classes.badges}>{Object.entries(props.msg.userInfo.badges).map((entry, index) =>  getBadge(config, emotes, channel, entry.join(','), index.toString()))}</span>
+                <span className={classes.badges}>
+                    {Object.entries(props.msg.userInfo.badges).map((entry, index) =>  getBadge(config, emotes, channel, entry.join(','), index.toString()))}
+                    {config.show7TVCosmetics && cosmetics?.badge && (
+                        <SevenTVBadgeComponent 
+                            key="seventv-badge" 
+                            badge={cosmetics.badge} 
+                            size={config.fontSize}
+                        />
+                    )}
+                </span>
                 <span 
                     ref={config.show7TVCosmetics ? usernameRef : undefined}
                     className={classes.username} 
