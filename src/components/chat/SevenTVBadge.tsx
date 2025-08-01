@@ -17,16 +17,17 @@ export function SevenTVBadgeComponent({ badge, size = 18, className = '' }: Seve
             return null;
         }
 
-        // Find the best matching file size
+        // Filter supported formats and sort by size
         const files = badge.host.files
             .filter(file => file.format === 'WEBP' || file.format === 'PNG')
-            .sort((a, b) => Math.abs(a.width - targetSize) - Math.abs(b.width - targetSize));
+            .sort((a, b) => a.width - b.width);
 
         if (files.length === 0) {
             return null;
         }
 
-        const bestFile = files[0];
+        // Find the smallest file that is >= targetSize
+        const bestFile = files.find(file => file.width >= targetSize) || files[files.length - 1];
         return `${badge.host.url}/${bestFile.name}`;
     };
 
@@ -43,8 +44,6 @@ export function SevenTVBadgeComponent({ badge, size = 18, className = '' }: Seve
             title={badge.tooltip || badge.name}
             className={`seventv-badge ${className}`}
             style={{
-                width: `${size}px`,
-                height: `${size}px`,
                 display: 'inline-block',
                 verticalAlign: 'middle',
                 marginRight: '2px'
@@ -65,15 +64,16 @@ export function getSevenTVBadgeImageUrl(badge: SevenTVBadge, size: number = 18):
         return null;
     }
 
-    // Find the best matching file size
+    // Filter supported formats and sort by size
     const files = badge.host.files
         .filter(file => file.format === 'WEBP' || file.format === 'PNG')
-        .sort((a, b) => Math.abs(a.width - size) - Math.abs(b.width - size));
+        .sort((a, b) => a.width - b.width);
 
     if (files.length === 0) {
         return null;
     }
 
-    const bestFile = files[0];
+    // Find the smallest file that is >= targetSize
+    const bestFile = files.find(file => file.width >= size) || files[files.length - 1];
     return `${badge.host.url}/${bestFile.name}`;
 }

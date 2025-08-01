@@ -258,7 +258,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
                         <SevenTVBadgeComponent 
                             key="seventv-badge" 
                             badge={cosmetics.badge} 
-                            size={18}
+                            size={config.fontSize}
                         />
                     )}
                 </span>
