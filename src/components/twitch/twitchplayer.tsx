@@ -292,7 +292,7 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
                 style={{ width: w, height: h }}
             />
             
-            {/* Mask bar - only visible on hover and when hideViewer is enabled */}
+            {/* Mask bar - always visible when hideViewer is enabled */}
             {props.hideViewer && (
                 <div 
                     style={{
@@ -305,7 +305,7 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
                         borderRadius: '4px',
                         zIndex: 10,
                         pointerEvents: 'none',
-                        opacity: isHovered ? 1 : 0
+                        opacity: 1
                     }}
                 />
             )}
