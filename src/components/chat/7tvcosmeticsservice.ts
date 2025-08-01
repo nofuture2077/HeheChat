@@ -65,11 +65,11 @@ export class SevenTVCosmeticsService {
             const cosmetics = await SevenTVCosmeticsAPI.fetchUserCosmetics(userId);
             
             if (cosmetics) {
-                // User has 7TV cosmetics with paint - cache them
+                // User has 7TV cosmetics (paint and/or badge) - cache them
                 await SevenTVCosmeticsStore.storeUserCosmetics(userId, cosmetics);
                 return cosmetics;
             } else {
-                // User either doesn't have 7TV account or has no paint
+                // User either doesn't have 7TV account or has no cosmetics
                 // Cache a "no cosmetics" marker to prevent repeated API calls
                 const noCosmetics = this.createDefaultCosmetics(userId, '');
                 // Mark this as a "no cosmetics" result by setting a special flag
