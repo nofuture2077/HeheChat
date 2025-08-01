@@ -90,6 +90,7 @@ interface TwitchPlayerProps {
     customWidth?: number;
     customHeight?: number;
     muted?: boolean;
+    hideViewer?: boolean;
 }
 
 export function TwitchPlayer(props: TwitchPlayerProps) {
@@ -105,6 +106,8 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
         return getDimension();
     });
     const [hasStorageAccess, setHasStorageAccess] = useState(true);
+    const [isHovered, setIsHovered] = useState(false);
+    const [touchTimeout, setTouchTimeout] = useState<NodeJS.Timeout | null>(null);
     
     // Use custom dimensions if provided, otherwise use calculated dimensions
     const w = props.customWidth || dimensions[0];
@@ -234,13 +237,78 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
         player.setQuality(config.videoQuality);
     }, [channel, props.muted]);
 
+    const handleTouchStart = () => {
+        setIsHovered(true);
+        // Clear any existing timeout
+        if (touchTimeout) {
+            clearTimeout(touchTimeout);
+        }
+        // Hide the mask after 3 seconds on mobile
+        const timeout = setTimeout(() => {
+            setIsHovered(false);
+        }, 3000);
+        setTouchTimeout(timeout);
+    };
+
+    const handleMouseEnter = () => {
+        setIsHovered(true);
+        // Clear touch timeout if mouse is used
+        if (touchTimeout) {
+            clearTimeout(touchTimeout);
+            setTouchTimeout(null);
+        }
+    };
+
+    const handleMouseLeave = () => {
+        setIsHovered(false);
+        // Clear touch timeout if mouse is used
+        if (touchTimeout) {
+            clearTimeout(touchTimeout);
+            setTouchTimeout(null);
+        }
+    };
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (touchTimeout) {
+                clearTimeout(touchTimeout);
+            }
+        };
+    }, [touchTimeout]);
+
     if (!channel) return null;
 
     return (
         <div 
-            id={containerId}
-            ref={containerRef}
-            style={{ width: w, height: h }}
-        />
+            style={{ position: 'relative', width: w, height: h }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            onTouchStart={handleTouchStart}
+        >
+            <div 
+                id={containerId}
+                ref={containerRef}
+                style={{ width: w, height: h }}
+            />
+            
+            {/* Mask bar - only visible on hover and when hideViewer is enabled */}
+            {props.hideViewer && (
+                <div 
+                    style={{
+                        position: 'absolute',
+                        top: '58px',
+                        left: '2%',
+                        width: '96%',
+                        height: '20px',
+                        background: 'rgba(0, 0, 0, 1)',
+                        borderRadius: '4px',
+                        zIndex: 10,
+                        pointerEvents: 'none',
+                        opacity: isHovered ? 1 : 0
+                    }}
+                />
+            )}
+        </div>
     );
 }

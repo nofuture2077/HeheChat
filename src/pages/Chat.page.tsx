@@ -548,7 +548,17 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                     {currentClipId ? (
                         <TwitchClipsPlayer clipId={currentClipId} onClose={() => setCurrentClipId(null)}/>
                     ) : config.showVideo ? (
-                        <TwitchPlayer fullSize={true} customWidth={width - chatWidth} customHeight={height} muted={false}/>
+                        <TwitchPlayer 
+                            fullSize={true} 
+                            customWidth={width - chatWidth} 
+                            customHeight={height} 
+                            muted={false}
+                            hideViewer={
+                                loginContext.user && config.getChatChannel() === loginContext.user.name 
+                                    ? config.hideOwnViewers 
+                                    : config.hideViewers
+                            }
+                        />
                     ) : null}
                 </div>
 

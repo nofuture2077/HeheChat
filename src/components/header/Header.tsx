@@ -3,7 +3,7 @@ import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
 import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard } from '@tabler/icons-react';
 import { useContext, useEffect } from 'react';
-import { ConfigContext, ProfileContext, PremiumContext } from '@/ApplicationContext';
+import { ConfigContext, ProfileContext, PremiumContext, LoginContextContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
 import { HeaderLogo } from './HeaderLogo';
 import { TwitchPlayer } from '@/components/twitch/twitchplayer'
@@ -31,6 +31,8 @@ export function Header(props: {
     const [opened] = useDisclosure(false);
     const profile = useContext(ProfileContext);
     const premium = useContext(PremiumContext);
+    const loginContext = useContext(LoginContextContext);
+    
     useEffect(() => {
         const clipSub = PubSub.subscribe("CLIP-CLICK", (msg: any, data: { clipId: string }) => {
             props.setCurrentClipId(data.clipId);
@@ -85,7 +87,11 @@ export function Header(props: {
                 </div>
             </Container>
             {props.currentClipId ? <TwitchClipsPlayer clipId={props.currentClipId} onClose={() => props.setCurrentClipId(null)}/> : config.showVideo ? (<Container p={0}>
-                <TwitchPlayer/>
+                <TwitchPlayer hideViewer={
+                    loginContext.user && config.getChatChannel() === loginContext.user.name 
+                        ? config.hideOwnViewers 
+                        : config.hideViewers
+                }/>
             </Container>): null}
         </Stack>
     );
