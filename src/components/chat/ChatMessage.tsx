@@ -261,6 +261,9 @@ export function ChatMessageComp(props: ChatMessageProps) {
                             size={config.fontSize}
                         />
                     )}
+                    {
+                        props.msg.userInfo.isHehePro ? <img alt={"HeheChat Pro User"} src="/hehebadge.webp"/> : null
+                    }
                 </span>
                 <span 
                     ref={config.show7TVCosmetics ? usernameRef : undefined}
