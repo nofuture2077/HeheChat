@@ -15,6 +15,7 @@ interface UserInfo {
     color?: string;
     badges: Record<string, string>;
     isMod: boolean;
+    isHehePro: boolean;
 }
 
 export interface ParsedMessagePart {

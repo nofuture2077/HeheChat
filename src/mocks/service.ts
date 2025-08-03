@@ -41,7 +41,8 @@ function createMockMessage(channels: string[]): HeheChatMessage | undefined {
             userName: username.toLowerCase(),
             color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
             badges: {},
-            isMod: false
+            isMod: false,
+            isHehePro: false
         },
         '123456789'
     );
