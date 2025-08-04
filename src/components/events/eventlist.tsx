@@ -42,7 +42,7 @@ const messages: Record<EventType, string> = {
     'kofidono': '${username} donated ${amount}${currency:currency} on ko-fi',
     'kofisub': '${username} subed on ko-fi',
     'tts': '${username} triggered tts',
-    'hypetrain': 'Hypetrain level ${amount}'
+    'hypetrain': 'Hypetrain level ${level:whole}'
 }
 
 export const icons: Record<EventType, ReactElementLike> = {

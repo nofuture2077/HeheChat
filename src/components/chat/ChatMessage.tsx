@@ -262,7 +262,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
                         />
                     )}
                     {
-                        props.msg.userInfo.isHehePro ? <img alt={"HeheChat Pro User"} src="/hehebadge.webp"/> : null
+                        props.msg.userInfo.isHeheAdmin ? <img alt={"HeheChat Admin"} src="/hehebadge_admin.webp"/> : props.msg.userInfo.isHehePro ? <img alt={"HeheChat Pro User"} src="/hehebadge.webp"/> : null
                     }
                 </span>
                 <span 
