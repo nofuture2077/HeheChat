@@ -447,3 +447,74 @@ body, html {
 .visible {
   visibility: visible;
 }
+
+/* Video styles - inherit all image styles */
+.image video {
+  background-color: transparent !important;
+  object-fit: contain;
+}
+
+/* Ensure video elements inherit image sizing classes */
+.image-xs video { width: 10vw; }
+.image-sm video { width: 20vw; }
+.image-md video { width: 30vw; }
+.image-lg video { width: 50vw; }
+.image-xl video { width: 100vw; }
+
+/* Ensure video elements inherit image positioning classes */
+.image-fixed-bottom video {
+  position: absolute;
+  bottom: 0px;
+}
+
+.image-fixed-left video {
+  position: absolute;
+  left: 0px;
+}
+
+.image-fixed-right video {
+  position: absolute;
+  right: 0px;
+}
+
+/* Ensure video elements inherit image animation effects */
+.image-effect-bounce video {
+  animation: imageBounce 0.6s ease-in-out infinite alternate;
+}
+
+.image-effect-shake video {
+  animation: imageShake 0.5s ease-in-out infinite;
+}
+
+.image-effect-pulse video {
+  animation: imagePulse 1.5s ease-in-out infinite;
+}
+
+.image-effect-wobble video {
+  animation: imageWobble 1s ease-in-out infinite;
+}
+
+.image-effect-swing video {
+  transform-origin: top center;
+  animation: imageSwing 2s ease-in-out infinite;
+}
+
+.image-effect-rotate video {
+  animation: imageRotate 2s linear infinite;
+}
+
+.image-effect-float video {
+  animation: imageFloat 3s ease-in-out infinite;
+}
+
+.image-effect-heartbeat video {
+  animation: imageHeartbeat 1.2s ease-in-out infinite;
+}
+
+.image-effect-jello video {
+  animation: imageJello 1s ease-in-out infinite;
+}
+
+.image-effect-flash video {
+  animation: imageFlash 1s ease-in-out infinite;
+}

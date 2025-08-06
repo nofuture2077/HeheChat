@@ -53,12 +53,20 @@ export default function VisualAlertPlayer() {
   const [isVisible, setIsVisible] = useState(false);
   const [timestamp, setTimestamp] = useState(0);
 
-  const getImage = (ref: string, channel: string) => {
+  const getMediaData = (ref: string, channel: string) => {
     if (AlertSystem.alertConfig?.[channel]?.data?.files?.[ref]) {
       const file = AlertSystem.alertConfig[channel].data.files[ref];
-      return `data:${file.mime};base64,${file.data}`;
+      return {
+        src: `data:${file.mime};base64,${file.data}`,
+        type: file.type,
+        mime: file.mime
+      };
     }
-    return "";
+    return null;
+  };
+
+  const isVideoMimeType = (mime: string) => {
+    return mime.startsWith('video/') || mime === 'video/webm' || mime === 'video/mp4' || mime === 'video/ogg';
   };
 
   useEffect(() => {
@@ -108,14 +116,34 @@ export default function VisualAlertPlayer() {
   return (
     <div className={containerClasses}>
       <div className={styles.contentWrapper}>
-        {currentAlert.image && (
-          <img 
-            className={styles.image}
-            src={getImage(currentAlert.image, currentAlert.channel)} 
-            alt="Alert" 
-            key={"image-" + timestamp}
-          />
-        )}
+        {currentAlert.image && (() => {
+          const mediaData = getMediaData(currentAlert.image, currentAlert.channel);
+          if (!mediaData) return null;
+          
+          if (mediaData.type === 'video' || isVideoMimeType(mediaData.mime)) {
+            return (
+              <video 
+                className={styles.image}
+                src={mediaData.src}
+                autoPlay
+                muted
+                loop
+                playsInline
+                key={"video-" + timestamp}
+                style={{ backgroundColor: 'transparent' }}
+              />
+            );
+          } else {
+            return (
+              <img 
+                className={styles.image}
+                src={mediaData.src} 
+                alt="Alert" 
+                key={"image-" + timestamp}
+              />
+            );
+          }
+        })()}
         <div className={styles.text}>
           <p><HighlightedText text={currentAlert.headline} /></p>
           <p>{formatText(currentAlert.text, chatEmotes, currentAlert.channel)}</p>
