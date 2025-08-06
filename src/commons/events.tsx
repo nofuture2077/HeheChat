@@ -73,6 +73,7 @@ export type EventAlert = {
     restriction: EventAlertRestriction;
     audio?: EventAlertAudioData;
     visual?: EventAlertVisualData;
+    minDuration?: number;
 }
 
 export type EventAlertAudioData = {

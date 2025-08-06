@@ -807,7 +807,7 @@ class AlertPlayer {
             console.log('Audio', ttsAudio, jingleAudio);
     
             const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
-            const minDuration = Math.max(duration, 2);
+            const minDuration = Math.max(duration, alert.minDuration || 2);
             PubSub.publish('AlertPlayer-update', {duration});
             if (alert.visual) {
                 const visualText = (eventData && eventData.text) ? this.parsedPartsToText(eventData.text.parts || eventData.text) : undefined
