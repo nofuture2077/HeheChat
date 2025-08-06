@@ -832,8 +832,10 @@ class AlertPlayer {
             }
 
             // Chain audio playback with proper error handling - use mode to determine which setting to check
+            // For preview alerts (event.force), always play audio in browsersource regardless of settings
+            const isPreviewAlert = !!(item as any).force;
             const shouldPlayAudio = this.mode === 'browsersource' 
-                ? this.config?.browserSourceAudio 
+                ? (isPreviewAlert || this.config?.browserSourceAudio)
                 : this.config?.playAlerts;
             
             if (shouldPlayAudio) {
