@@ -207,6 +207,7 @@ body, html {
 
 .text-over-image .text {
   margin-top: -4rem;
+  z-index: 100;
 }
 
 /* Layout classes for headline sizes */
