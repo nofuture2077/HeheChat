@@ -170,6 +170,12 @@ body, html {
 .image-lg .image { width: 50vw; }
 .image-xl .image { width: 100vw; }
 
+.image-xs .video { width: 10vw; }
+.image-sm .video { width: 20vw; }
+.image-md .video { width: 30vw; }
+.image-lg .video { width: 50vw; }
+.image-xl .video { width: 100vw; }
+
 .image-fixed-bottom .image  {
   position: absolute;
   bottom: 0px;
