@@ -655,6 +655,9 @@ class AlertPlayer {
             }
             return eventData.eventAlert;
         }
+        if (event.eventAlert) {
+            return event.eventAlert;
+        }
         const eventMainType = EventTypeMapping[event.eventtype] as EventMainType;
         const alerts = alertConfig?.data?.alerts[eventMainType];
         if (!alerts) {
