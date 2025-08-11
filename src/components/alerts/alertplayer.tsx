@@ -560,7 +560,7 @@ class AlertPlayer {
     }
 
     getAudioFileData(reference: Base64FileReference, alertConfig: EventAlertConfig) {
-        const file = alertConfig.data?.files[reference] as unknown as Base64File;
+        const file = alertConfig?.data?.files[reference] as unknown as Base64File;
         if (file && file.data) {
             return 'data:audio/mp3;base64,' + file.data;
         }
@@ -838,7 +838,7 @@ class AlertPlayer {
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
                 
                 // Apply visual alert delay for browser source mode
-                if ((this.config?.browserSourceVisual && this.config?.browserSourceAudio) || isPreviewAlert) {
+                if (this.config?.browserSourceAudio || isPreviewAlert) {
                     PubSub.publish('ALERT_SHOW', visualAlert);
                 }
             }
