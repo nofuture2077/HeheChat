@@ -181,7 +181,9 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
         const shouldPlayAudio = AlertSystem.shouldBePlayedInBrowsersourceAudio(event);
         const shouldShowVisual = AlertSystem.shouldBePlayedInBrowsersourceVisual(event);
         
-        if (((shouldPlayAudio || shouldShowVisual) && !event.force) || (preview && event.force)) {
+        // Only process events if browserSourceAudio is true (meaning browsersource handles its own processing)
+        // If browserSourceAudio is false, the main app will send pre-processed alerts via 'alert' type
+        if (profile.config.browserSourceAudio && (((shouldPlayAudio || shouldShowVisual) && !event.force) || (preview && event.force))) {
           AlertSystem.addEvent(event);
         }
       }
