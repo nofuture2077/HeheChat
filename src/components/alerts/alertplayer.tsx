@@ -804,6 +804,14 @@ class AlertPlayer {
             ...vars,
             text: (eventData && eventData.text) ? this.parsedPartsToTTSText(eventData.text.parts || eventData.text) : undefined
         }), true, item.channel);
+
+        // Chain audio playback with proper error handling - use mode to determine which setting to check
+        // For preview alerts (event.force), always play audio in browsersource regardless of settings
+        const isPreviewAlert = !!(item as any).force;
+        const shouldPlayAudio = this.mode === 'browsersource' 
+            ? (isPreviewAlert || this.config?.browserSourceAudio)
+            : this.config?.playAlerts;
+
         try {
             const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state, sink) : undefined;
             const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
@@ -830,17 +838,10 @@ class AlertPlayer {
                 PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
                 
                 // Apply visual alert delay for browser source mode
-                if (this.config?.browserSourceVisual) {
+                if ((this.config?.browserSourceVisual && this.config?.browserSourceAudio) || isPreviewAlert) {
                     PubSub.publish('ALERT_SHOW', visualAlert);
                 }
             }
-
-            // Chain audio playback with proper error handling - use mode to determine which setting to check
-            // For preview alerts (event.force), always play audio in browsersource regardless of settings
-            const isPreviewAlert = !!(item as any).force;
-            const shouldPlayAudio = this.mode === 'browsersource' 
-                ? (isPreviewAlert || this.config?.browserSourceAudio)
-                : this.config?.playAlerts;
             
             if (shouldPlayAudio) {
                 console.log("Starting jingle playback");
