@@ -834,8 +834,10 @@ class AlertPlayer {
 
                 const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: minDuration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
                 
-                // Send to backend immediately (this doesn't affect display timing)
-                PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
+                if (this.mode === 'app' ) {
+                    // Send to backend immediately (this doesn't affect display timing)
+                    PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });
+                }
                 
                 // Apply visual alert delay for browser source mode
                 if (this.config?.browserSourceAudio || isPreviewAlert) {
