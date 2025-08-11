@@ -300,7 +300,7 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
                         top: '58px',
                         left: '2%',
                         width: '96%',
-                        height: '20px',
+                        height: '60px',
                         background: 'rgba(0, 0, 0, 1)',
                         borderRadius: '4px',
                         zIndex: 10,
