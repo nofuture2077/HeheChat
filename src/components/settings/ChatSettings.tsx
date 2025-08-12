@@ -1,8 +1,10 @@
-import { TagsInput, Switch, Stack, Select, Fieldset, Space, Text, Image, Alert } from '@mantine/core';
+import { TagsInput, Switch, Stack, Select, Fieldset, Space, Text, Image, Alert, Box, ComboboxLikeRenderOptionInput, ComboboxStringItem, ComboboxItem } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
-import { useContext } from 'react';
+import { useContext, useMemo } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
 import { SystemMessageMainType } from '../../commons/message';
+import { useChannels } from '@/hooks/useChannels';
+import { IconInfoCircle } from '@tabler/icons-react';
 
 const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'streamOnline', 'streamOffline', 'channelPointRedemption', 'blerp', 'kofi'];
 const seventTVMessages: SystemMessageMainType[] = ['sevenTVAdded', 'sevenTVRemoved'];
@@ -27,11 +29,39 @@ const Messages: Record<string, string> = {
 export function ChatSettings() {
     const config = useContext(ConfigContext);
     const forceUpdate = useForceUpdate();
+    const { channels: authorizedChannels, loading } = useChannels();
+    
+    // Compare fetched channels with channels in config to find unauthorized channels
+    const unauthorizedChannels = useMemo(() => {
+        if (loading || !authorizedChannels || !config.channels || config.channels.length === 0) {
+            return [];
+        }
+        
+        // Find channels in config that are not in the fetched channels list
+        return config.channels.filter(configChannel => 
+            !authorizedChannels.some(channel => channel.toLowerCase() === configChannel.toLowerCase())
+        );
+    }, [authorizedChannels, config.channels, loading]);
+    
+    const hasUnauthorizedChannels = unauthorizedChannels.length > 0;
 
     return (
         <Stack mt={30} mb={30} gap={30}>
             <Fieldset legend="Channelnames" variant='filled'>
-                <TagsInput placeholder="" value={config.channels} onChange={(channels) => config.setChannels(channels.map(c => c.toLowerCase().substring(0, 25).trim()))}></TagsInput>
+                <TagsInput 
+                    placeholder="" 
+                    value={config.channels} 
+                    onChange={(channels) => config.setChannels(channels.map(c => c.toLowerCase().substring(0, 25).trim()))}
+                />
+                
+                {hasUnauthorizedChannels && (
+                    <>
+                        <Space h="xs" />
+                        <Alert variant="light" color="orange" title="Missing Authorization" icon={<IconInfoCircle />}>
+                            Some channels ({unauthorizedChannels.join(', ')}) have not authorized hehechat yet. Please ask them to join or going into a shared chat to see their messages.
+                        </Alert>
+                    </>
+                )}
             </Fieldset>
 
             <Fieldset legend="!tts Users" variant="filled" key="free-tts">
