@@ -337,7 +337,9 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                     eventtype: 'tts',
                     date: date,
                     text: JSON.stringify({ 
-                        parts: message.parts
+                        text: {
+                            parts: message.parts
+                        }
                     }),
                     eventAlert: {
                         name: 'tts',
