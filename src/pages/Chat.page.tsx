@@ -327,16 +327,18 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
 
         const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
             const message = parseMessage(data.message);
-            if (config.readAllMessages && premium.isPremium) {
+            if (config.readAllMessages && premium.isPremium && message.type === 'chat') {
                 const date = Date.now();
 
                 const tts: Event = {
                     id: date,
-                    channel: message.target,
+                    channel: message.target.slice(1),
                     username: data.username,
                     eventtype: 'tts',
                     date: date,
-                    text: data.message,
+                    text: JSON.stringify({ 
+                        parts: message.parts
+                    }),
                     eventAlert: {
                         name: 'tts',
                         id: '0',
