@@ -431,7 +431,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             PubSub.unsubscribe(modEventSub);
             config.off(chatHandler);
         };
-    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, loginContext.user]);
+    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, config.readAllMessages, loginContext.user]);
 
     // Track document visibility changes for reload functionality
     useEffect(() => {
