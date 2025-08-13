@@ -414,6 +414,7 @@ export default function HeheChat() {
     const setShow7TVCosmetics = (value: boolean) => updateConfig('show7TVCosmetics', value);
     const setReloadOnReturnToApp = (value: boolean) => updateConfig('reloadOnReturnToApp', value);
     const setRainMode = (value: boolean) => updateConfig('rainMode', value);
+    const setReadAllMessages = (value: boolean) => updateConfig('readAllMessages', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -672,7 +673,8 @@ export default function HeheChat() {
         setSkipGlobalEmotesInTTS,
         setShow7TVCosmetics,
         setReloadOnReturnToApp,
-        setRainMode
+        setRainMode,
+        setReadAllMessages
     };
 
     const appLogin = {
