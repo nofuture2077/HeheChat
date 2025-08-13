@@ -326,7 +326,38 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         });
 
         const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
-            addMessage(parseMessage(data.message), data.username, config.maxMessages);
+            const message = parseMessage(data.message);
+            if (config.readAllMessages && premium.isPremium) {
+                const date = Date.now();
+
+                const tts: Event = {
+                    id: date,
+                    channel: message.target,
+                    username: data.username,
+                    eventtype: 'tts',
+                    date: date,
+                    text: data.message,
+                    eventAlert: {
+                        name: 'tts',
+                        id: '0',
+                        type: 'tts',
+                        specifier: {
+                            type: 'exact'
+                        },
+                        restriction: 'none',
+                        audio: {
+                            tts: {
+                                text: '${text}',
+                                voiceType: 'default',
+                                voiceSpecifier: '',
+                                voiceParams: {}
+                            }
+                        }
+                    }
+                }
+                AlertSystem.addEvent(tts);
+            }
+            addMessage(message, data.username, config.maxMessages);
         });
 
         const eventSub = PubSub.subscribe("WS-event", (msg, data: Event) => {

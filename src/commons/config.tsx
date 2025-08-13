@@ -57,6 +57,7 @@ export interface ConfigData {
     activatedShares: string[],
     shares: string[],
     freeTTS: string[],
+    readAllMessages: boolean,
     deactivatedAlerts: Record<string, boolean>,
     shortcuts: ShortCut[],
     reloadOnReturnToApp: boolean,
@@ -117,6 +118,7 @@ export interface Config extends ConfigData {
     setShortcuts: (val: ShortCut[]) => void;
     setReloadOnReturnToApp: (val: boolean) => void;
     setRainMode: (val: boolean) => void;
+    setReadAllMessages: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -186,6 +188,7 @@ export const DEFAULT_CONFIG: Config = {
     shortcuts: [],
     reloadOnReturnToApp: true,
     rainMode: false,
+    readAllMessages: false,
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setMaxMessages: (value: number) => {},
@@ -237,6 +240,7 @@ export const DEFAULT_CONFIG: Config = {
     setShow7TVCosmetics: (val) => {},
     setReloadOnReturnToApp: (val) => {},
     setRainMode: (val) => {},
+    setReadAllMessages: (val) => {},
 };
 
 export const DB_VERSION = 9;

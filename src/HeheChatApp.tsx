@@ -161,6 +161,7 @@ export default function HeheChat() {
                 profileData.config.reloadOnReturnToApp ??= true;
                 profileData.config.browserSourceVisual ??= true;
                 profileData.config.show7TVCosmetics ??= true;
+                profileData.config.readAllMessages ??= false;
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
