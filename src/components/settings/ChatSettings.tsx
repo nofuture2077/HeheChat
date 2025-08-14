@@ -123,7 +123,7 @@ export function ChatSettings() {
                     <Switch checked={config.disableEmoteDialog} onChange={(event) => config.setDisableEmoteDialog(event.currentTarget.checked)} label="Disable Emote Dialog" size="lg" />
                     <Switch checked={config.show7TVCosmetics} onChange={(event) => config.setShow7TVCosmetics(event.currentTarget.checked)} label="7TV Username Paints" size="lg" />
                     <Switch checked={config.rainMode} onChange={(event) => config.setRainMode(event.currentTarget.checked)} label="Rain Mode" size="lg" />
-                    <Switch checked={config.readAllMessages} onChange={(event) => config.setReadAllMessages(event.currentTarget.checked)} label="Read All Messages" size="lg" />
+                    <Switch checked={config.readAllMessages} onChange={(event) => config.setReadAllMessages(event.currentTarget.checked)} label="Read All Messages *" size="lg" />
                     <Text fs="italic" size='14px'>(*) HeheChatPro required</Text>
 
                 </Stack>
