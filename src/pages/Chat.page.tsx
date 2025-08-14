@@ -326,7 +326,42 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         });
 
         const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
-            addMessage(parseMessage(data.message), data.username, config.maxMessages);
+            const message = parseMessage(data.message);
+            if (config.readAllMessages && premium.isPremium && message.type === 'chat') {
+                const date = Date.now();
+
+                const tts: Event = {
+                    id: date,
+                    channel: message.target.slice(1),
+                    username: data.username,
+                    eventtype: 'tts',
+                    date: date,
+                    text: JSON.stringify({ 
+                        text: {
+                            parts: message.parts
+                        }
+                    }),
+                    eventAlert: {
+                        name: 'tts',
+                        id: '0',
+                        type: 'tts',
+                        specifier: {
+                            type: 'exact'
+                        },
+                        restriction: 'none',
+                        audio: {
+                            tts: {
+                                text: '${text}',
+                                voiceType: 'default',
+                                voiceSpecifier: '',
+                                voiceParams: {}
+                            }
+                        }
+                    }
+                }
+                AlertSystem.addEvent(tts);
+            }
+            addMessage(message, data.username, config.maxMessages);
         });
 
         const eventSub = PubSub.subscribe("WS-event", (msg, data: Event) => {
@@ -396,7 +431,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             PubSub.unsubscribe(modEventSub);
             config.off(chatHandler);
         };
-    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, loginContext.user]);
+    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, config.readAllMessages, loginContext.user]);
 
     // Track document visibility changes for reload functionality
     useEffect(() => {
