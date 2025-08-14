@@ -164,17 +164,17 @@ body, html {
   font-style: normal;
 }
 
-.image-xs .image { width: 10vw; }
-.image-sm .image { width: 20vw; }
-.image-md .image { width: 30vw; }
-.image-lg .image { width: 50vw; }
-.image-xl .image { width: 100vw; }
+.image-xs .image { max-width: 10vw; }
+.image-sm .image { max-width: 20vw; }
+.image-md .image { max-width: 30vw; }
+.image-lg .image { max-width: 50vw; }
+.image-xl .image { max-width: 100vw; }
 
-.image-xs .video { width: 10vw; }
-.image-sm .video { width: 20vw; }
-.image-md .video { width: 30vw; }
-.image-lg .video { width: 50vw; }
-.image-xl .video { width: 100vw; }
+.image-xs .video { max-width: 10vw; }
+.image-sm .video { max-width: 20vw; }
+.image-md .video { max-width: 30vw; }
+.image-lg .video { max-width: 50vw; }
+.image-xl .video { max-width: 100vw; }
 
 .image-fixed-bottom .image  {
   position: absolute;
