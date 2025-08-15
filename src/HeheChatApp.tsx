@@ -274,6 +274,14 @@ export default function HeheChat() {
             AlertSystem.loadAlertConfig([data.channel]);
         });
 
+        // Add subscription for replay events
+        const psReplayEvent = PubSub.subscribe("WS-replayevent", (msg, event) => {
+            // Process replay events the same way as regular events
+            if (AlertSystem.shouldBePlayedInApp(event)) {
+                AlertSystem.addEvent(event);
+            }
+        });
+
         const psDelayInfo = PubSub.subscribe("WS-delayinfo", (msg, data) => {
             backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "delayinfo", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
             return;
@@ -302,6 +310,7 @@ export default function HeheChat() {
             const stopMessage = { type: 'STOP' };
             backendWorkerRef.current?.postMessage(stopMessage);
             PubSub.unsubscribe(psAlertConfig);
+            PubSub.unsubscribe(psReplayEvent);
             PubSub.unsubscribe(psDelayInfo);
             PubSub.unsubscribe(psSetDelay);
             PubSub.unsubscribe(psWSSend);
