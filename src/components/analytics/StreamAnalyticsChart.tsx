@@ -12,7 +12,8 @@ import {
   Grid,
   Badge,
   Paper,
-  alpha
+  alpha,
+  Pagination
 } from '@mantine/core';
 import { CompositeChart } from '@mantine/charts';
 import { IconInfoCircle, IconTrendingUp, IconUsers, IconMessage, IconGift, IconBolt, IconClock, IconCalendar } from '@tabler/icons-react';
@@ -46,6 +47,10 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
   const [summary, setSummary] = useState<StreamAnalyticsSummary | null>(null);
   const [streams, setStreams] = useState<StreamInfo[]>([]);
   const [selectedStream, setSelectedStream] = useState<string>('');
+  
+  // Pagination state for Recent Streams
+  const [streamsPage, setStreamsPage] = useState(1);
+  const [streamsLimit] = useState(5);
 
   const getLast30DaysRange = () => {
     const now = Math.floor(Date.now() / 1000);
@@ -208,9 +213,15 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
     }
   };
 
+  // Handler function for pagination
+  const handleStreamsPageChange = (page: number) => {
+    setStreamsPage(page);
+  };
+
   // Fetch streams when channel changes
   useEffect(() => {
     if (selectedChannel) {
+      setStreamsPage(1); // Reset to first page
       fetchStreams(selectedChannel);
     }
   }, [selectedChannel]);
@@ -466,7 +477,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
             <Card withBorder p="md">
               <Text fw={600} mb="md">Recent Streams (Last 30 Days)</Text>
               <Stack gap="xs">
-                {streams.slice(0, 5).map((stream) => {
+                {streams.slice((streamsPage - 1) * streamsLimit, streamsPage * streamsLimit).map((stream) => {
                   const streamId = stream.id ? stream.id.toString() : `active_${stream.start_timestamp}`;
                   const isSelected = selectedStream === streamId;
                   const formatDate = (timestamp: number) => {
@@ -516,9 +527,15 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
                   );
                 })}
                 {streams.length > 5 && (
-                  <Text size="sm" c="dimmed" ta="center">
-                    Showing 5 most recent streams of {streams.length} total
-                  </Text>
+                  <Group justify="center" mt="md">
+                    <Pagination
+                      value={streamsPage}
+                      onChange={handleStreamsPageChange}
+                      total={Math.ceil(streams.length / streamsLimit)}
+                      size="sm"
+                      disabled={streamsLoading}
+                    />
+                  </Group>
                 )}
               </Stack>
             </Card>

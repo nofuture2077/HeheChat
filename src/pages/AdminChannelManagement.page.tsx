@@ -17,7 +17,8 @@ import {
   Collapse,
   Tooltip,
   Textarea,
-  Tabs
+  Tabs,
+  Pagination
 } from '@mantine/core';
 import { 
   IconRefresh, 
@@ -93,6 +94,14 @@ export function AdminChannelManagementPage() {
   const [banReason, setBanReason] = useState('');
   const [selectedChannelForBan, setSelectedChannelForBan] = useState<string | null>(null);
   
+  // Pagination state for authorized channels
+  const [channelsPage, setChannelsPage] = useState(1);
+  const [channelsLimit] = useState(10);
+  
+  // Pagination state for banned channels
+  const [bannedPage, setBannedPage] = useState(1);
+  const [bannedLimit] = useState(10);
+  
   const [infoModalOpened, { open: openInfoModal, close: closeInfoModal }] = useDisclosure(false);
   const [banModalOpened, { open: openBanModal, close: closeBanModal }] = useDisclosure(false);
 
@@ -116,7 +125,8 @@ export function AdminChannelManagementPage() {
     setError(null);
     
     try {
-      const response = await fetch(`${BASE_URL}/api/channels/authorized?token=${adminToken}`);
+      const offset = (channelsPage - 1) * channelsLimit;
+      const response = await fetch(`${BASE_URL}/api/channels/authorized?token=${adminToken}&limit=${channelsLimit}&offset=${offset}`);
       
       if (!response.ok) {
         if (response.status === 401) {
@@ -265,7 +275,8 @@ export function AdminChannelManagementPage() {
     }
 
     try {
-      const response = await fetch(`${BASE_URL}/api/channels/banned?token=${adminToken}`);
+      const offset = (bannedPage - 1) * bannedLimit;
+      const response = await fetch(`${BASE_URL}/api/channels/banned?token=${adminToken}&limit=${bannedLimit}&offset=${offset}`);
       
       if (!response.ok) {
         if (response.status === 401) {
@@ -463,6 +474,15 @@ export function AdminChannelManagementPage() {
     }
   };
 
+  const handleChannelsPageChange = (page: number) => {
+    setChannelsPage(page);
+  };
+
+  const handleBannedPageChange = (page: number) => {
+    setBannedPage(page);
+  };
+
+  // Initial load
   useEffect(() => {
     fetchAuthorizedChannels();
     fetchBannedChannels();
@@ -473,6 +493,16 @@ export function AdminChannelManagementPage() {
     }, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  // Effect to fetch authorized channels when page changes
+  useEffect(() => {
+    fetchAuthorizedChannels();
+  }, [channelsPage]);
+
+  // Effect to fetch banned channels when page changes
+  useEffect(() => {
+    fetchBannedChannels();
+  }, [bannedPage]);
 
   const hasAllRequiredScopes = (channelScopes: string[]) => {
     return LOGIN_SCOPES.every(requiredScope => channelScopes.includes(requiredScope));
@@ -734,19 +764,30 @@ export function AdminChannelManagementPage() {
                   )}
 
                   {!error && channels.length > 0 && (
-                    <Table striped highlightOnHover>
-                      <Table.Thead>
-                        <Table.Tr>
-                          <Table.Th>Channel Name</Table.Th>
-                          <Table.Th>Channel ID</Table.Th>
-                          <Table.Th>Permissions</Table.Th>
-                          <Table.Th>First Login</Table.Th>
-                          <Table.Th>Last Login</Table.Th>
-                          <Table.Th>Actions</Table.Th>
-                        </Table.Tr>
-                      </Table.Thead>
-                      <Table.Tbody>{rows}</Table.Tbody>
-                    </Table>
+                    <>
+                      <Table striped highlightOnHover>
+                        <Table.Thead>
+                          <Table.Tr>
+                            <Table.Th>Channel Name</Table.Th>
+                            <Table.Th>Channel ID</Table.Th>
+                            <Table.Th>Permissions</Table.Th>
+                            <Table.Th>First Login</Table.Th>
+                            <Table.Th>Last Login</Table.Th>
+                            <Table.Th>Actions</Table.Th>
+                          </Table.Tr>
+                        </Table.Thead>
+                        <Table.Tbody>{rows}</Table.Tbody>
+                      </Table>
+                      
+                      <Group justify="center" p="md">
+                        <Pagination
+                          value={channelsPage}
+                          onChange={handleChannelsPageChange}
+                          total={channels.length < channelsLimit ? channelsPage : channelsPage + 1} // If we have fewer items than the limit, we're on the last page
+                          size="sm"
+                        />
+                      </Group>
+                    </>
                   )}
                 </div>
               </Card.Section>
@@ -777,55 +818,66 @@ export function AdminChannelManagementPage() {
                       <Text>There are currently no banned channels.</Text>
                     </Alert>
                   ) : (
-                    <Table striped highlightOnHover>
-                      <Table.Thead>
-                        <Table.Tr>
-                          <Table.Th>Channel Name</Table.Th>
-                          <Table.Th>Channel ID</Table.Th>
-                          <Table.Th>Reason</Table.Th>
-                          <Table.Th>Banned By</Table.Th>
-                          <Table.Th>Banned At</Table.Th>
-                          <Table.Th>Actions</Table.Th>
-                        </Table.Tr>
-                      </Table.Thead>
-                      <Table.Tbody>
-                        {bannedChannels.map((channel) => (
-                          <Table.Tr key={channel.id}>
-                            <Table.Td>
-                              <Text fw={500}>{channel.channelname}</Text>
-                            </Table.Td>
-                            <Table.Td>
-                              <Text size="sm" c="dimmed" style={{ fontFamily: 'monospace' }}>
-                                {channel.channelid}
-                              </Text>
-                            </Table.Td>
-                            <Table.Td>
-                              <Text size="sm">{channel.reason}</Text>
-                            </Table.Td>
-                            <Table.Td>
-                              <Text size="sm">{channel.banned_by}</Text>
-                            </Table.Td>
-                            <Table.Td>
-                              <Text size="sm">
-                                {new Date(channel.banned_at).toLocaleString()}
-                              </Text>
-                            </Table.Td>
-                            <Table.Td>
-                              <ActionIcon
-                                variant="light"
-                                color="green"
-                                size="sm"
-                                onClick={() => unbanChannel(channel.channelname)}
-                                loading={banLoading === channel.channelname}
-                                title="Unban Channel"
-                              >
-                                <IconShield size="1rem" />
-                              </ActionIcon>
-                            </Table.Td>
+                    <>
+                      <Table striped highlightOnHover>
+                        <Table.Thead>
+                          <Table.Tr>
+                            <Table.Th>Channel Name</Table.Th>
+                            <Table.Th>Channel ID</Table.Th>
+                            <Table.Th>Reason</Table.Th>
+                            <Table.Th>Banned By</Table.Th>
+                            <Table.Th>Banned At</Table.Th>
+                            <Table.Th>Actions</Table.Th>
                           </Table.Tr>
-                        ))}
-                      </Table.Tbody>
-                    </Table>
+                        </Table.Thead>
+                        <Table.Tbody>
+                          {bannedChannels.map((channel) => (
+                            <Table.Tr key={channel.id}>
+                              <Table.Td>
+                                <Text fw={500}>{channel.channelname}</Text>
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="sm" c="dimmed" style={{ fontFamily: 'monospace' }}>
+                                  {channel.channelid}
+                                </Text>
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="sm">{channel.reason}</Text>
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="sm">{channel.banned_by}</Text>
+                              </Table.Td>
+                              <Table.Td>
+                                <Text size="sm">
+                                  {new Date(channel.banned_at).toLocaleString()}
+                                </Text>
+                              </Table.Td>
+                              <Table.Td>
+                                <ActionIcon
+                                  variant="light"
+                                  color="green"
+                                  size="sm"
+                                  onClick={() => unbanChannel(channel.channelname)}
+                                  loading={banLoading === channel.channelname}
+                                  title="Unban Channel"
+                                >
+                                  <IconShield size="1rem" />
+                                </ActionIcon>
+                              </Table.Td>
+                            </Table.Tr>
+                          ))}
+                        </Table.Tbody>
+                      </Table>
+                      
+                      <Group justify="center" p="md">
+                        <Pagination
+                          value={bannedPage}
+                          onChange={handleBannedPageChange}
+                          total={bannedChannels.length < bannedLimit ? bannedPage : bannedPage + 1} // If we have fewer items than the limit, we're on the last page
+                          size="sm"
+                        />
+                      </Group>
+                    </>
                   )}
                 </div>
               </Card.Section>

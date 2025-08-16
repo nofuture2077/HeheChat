@@ -1,4 +1,4 @@
-import { Container, Title, Text, Stack, Select, Card, Group, Grid, Table, Badge, ScrollArea, Divider, Paper, ActionIcon } from '@mantine/core';
+import { Container, Title, Text, Stack, Select, Card, Group, Grid, Table, Badge, ScrollArea, Divider, Paper, ActionIcon, Pagination } from '@mantine/core';
 import { IconChartBar, IconTrendingUp, IconUsers, IconHeart, IconGift, IconMessageCircle, IconRefresh } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 import { StreamAnalyticsChart } from '../components/analytics/StreamAnalyticsChart';
@@ -77,6 +77,14 @@ export function AdminAnalyticsPage() {
   const [selectedChannel, setSelectedChannel] = useState<string>('');
   const [selectedStreamData, setSelectedStreamData] = useState<any>(null);
   const [streamEventFilter, setStreamEventFilter] = useState<string>('');
+  
+  // Pagination state for All Events table
+  const [eventsPage, setEventsPage] = useState(1);
+  const [eventsLimit] = useState(10);
+  
+  // Pagination state for Top Chat Users table
+  const [chatUsersPage, setChatUsersPage] = useState(1);
+  const [chatUsersLimit] = useState(10);
 
   // API methods for additional features
 
@@ -89,11 +97,15 @@ export function AdminAnalyticsPage() {
       const endTime = Math.floor(Date.now() / 1000);
       const startTime = endTime - (7 * 24 * 60 * 60); // 7 days ago
       
+      const offset = (eventsPage - 1) * eventsLimit;
+      
       const params = new URLSearchParams({
         token: adminToken,
         channelname: channel,
         start: startTime.toString(),
-        end: endTime.toString()
+        end: endTime.toString(),
+        limit: eventsLimit.toString(),
+        offset: offset.toString()
       });
       
       if (eventType) {
@@ -121,11 +133,15 @@ export function AdminAnalyticsPage() {
       const endTime = Math.floor(Date.now() / 1000);
       const startTime = endTime - (7 * 24 * 60 * 60); // 7 days ago
       
+      const offset = (chatUsersPage - 1) * chatUsersLimit;
+      
       const params = new URLSearchParams({
         token: adminToken,
         channelname: channel,
         start: startTime.toString(),
-        end: endTime.toString()
+        end: endTime.toString(),
+        limit: chatUsersLimit.toString(),
+        offset: offset.toString()
       });
       
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/analytics/stream/chat-users?${params}`);
@@ -168,13 +184,39 @@ export function AdminAnalyticsPage() {
     }
   };
 
+  // Handler functions for pagination
+  const handleEventsPageChange = (page: number) => {
+    setEventsPage(page);
+  };
+
+  const handleChatUsersPageChange = (page: number) => {
+    setChatUsersPage(page);
+  };
+
+  // Initial load when channel changes
   useEffect(() => {
     if (selectedChannel) {
+      setEventsPage(1); // Reset to first page
+      setChatUsersPage(1); // Reset to first page
       fetchStreamEvents(selectedChannel);
       fetchChatUsers(selectedChannel);
       fetchEventSummary(selectedChannel);
     }
   }, [selectedChannel]);
+
+  // Fetch events when page changes
+  useEffect(() => {
+    if (selectedChannel) {
+      fetchStreamEvents(selectedChannel);
+    }
+  }, [eventsPage]);
+
+  // Fetch chat users when page changes
+  useEffect(() => {
+    if (selectedChannel) {
+      fetchChatUsers(selectedChannel);
+    }
+  }, [chatUsersPage]);
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat().format(num);
@@ -579,6 +621,19 @@ export function AdminAnalyticsPage() {
                   </Table>
                 </ScrollArea>
               </Paper>
+              
+              {/* Pagination for All Events */}
+              {streamEvents.length > 0 && (
+                <Group justify="center" p="md">
+                  <Pagination
+                    value={eventsPage}
+                    onChange={handleEventsPageChange}
+                    total={streamEvents.length < eventsLimit ? eventsPage : eventsPage + 1} // If we have fewer items than the limit, we're on the last page
+                    size="sm"
+                    disabled={eventsLoading}
+                  />
+                </Group>
+              )}
             </Card>
 
             {/* Top Chat Users */}
@@ -610,7 +665,6 @@ export function AdminAnalyticsPage() {
                       ) : (
                         chatUsers
                           .sort((a, b) => b.message_count - a.message_count)
-                          .slice(0, 7)
                           .map((user, index) => (
                           <Table.Tr key={user.id}>
                             <Table.Td>
@@ -638,6 +692,19 @@ export function AdminAnalyticsPage() {
                   </Table>
                 </ScrollArea>
               </Paper>
+              
+              {/* Pagination for Chat Users */}
+              {chatUsers.length > 0 && (
+                <Group justify="center" p="md">
+                  <Pagination
+                    value={chatUsersPage}
+                    onChange={handleChatUsersPageChange}
+                    total={chatUsers.length < chatUsersLimit ? chatUsersPage : chatUsersPage + 1} // If we have fewer items than the limit, we're on the last page
+                    size="sm"
+                    disabled={chatUsersLoading}
+                  />
+                </Group>
+              )}
             </Card>
           </Stack>
         )}
