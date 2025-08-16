@@ -62,6 +62,14 @@ export function AdminPremiumPage() {
   const [generateModalOpened, { open: openGenerateModal, close: closeGenerateModal }] = useDisclosure(false);
   const [generateDays, setGenerateDays] = useState<number>(30);
   
+  // Pagination state for premium users
+  const [usersPage, setUsersPage] = useState(1);
+  const [usersLimit] = useState(10);
+  
+  // Pagination state for redeem codes
+  const [codesPage, setCodesPage] = useState(1);
+  const [codesLimit] = useState(10);
+  
   // History state
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -84,7 +92,8 @@ export function AdminPremiumPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${BASE_URL}/admin/premium/users?active=true&token=${adminToken}`);
+      const offset = (usersPage - 1) * usersLimit;
+      const response = await fetch(`${BASE_URL}/admin/premium/users?active=true&token=${adminToken}&limit=${usersLimit}&offset=${offset}`);
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('hehe-token_state');
@@ -115,7 +124,8 @@ export function AdminPremiumPage() {
     setCodesLoading(true);
     setCodesError(null);
     try {
-      const response = await fetch(`${BASE_URL}/admin/premium/codes?token=${adminToken}&unused=true`);
+      const offset = (codesPage - 1) * codesLimit;
+      const response = await fetch(`${BASE_URL}/admin/premium/codes?token=${adminToken}&unused=true&limit=${codesLimit}&offset=${offset}`);
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('hehe-token_state');
@@ -258,12 +268,28 @@ export function AdminPremiumPage() {
     setHistoryPage(page);
   };
 
+  const handleUsersPageChange = (page: number) => {
+    setUsersPage(page);
+  };
+
+  const handleCodesPageChange = (page: number) => {
+    setCodesPage(page);
+  };
+
   // Effect to fetch history when page changes
   useEffect(() => {
-    if (historyPage > 1) {
-      fetchHistory();
-    }
+    fetchHistory();
   }, [historyPage]);
+
+  // Effect to fetch premium users when page changes
+  useEffect(() => {
+    fetchPremiumUsers();
+  }, [usersPage]);
+
+  // Effect to fetch redeem codes when page changes
+  useEffect(() => {
+    fetchRedeemCodes();
+  }, [codesPage]);
 
   const premiumUserRows = premiumUsers.map((user) => (
     <Table.Tr key={user.user_id}>
@@ -404,19 +430,30 @@ export function AdminPremiumPage() {
               )}
 
               {!error && premiumUsers.length > 0 && (
-                <Table striped highlightOnHover>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Username</Table.Th>
-                      <Table.Th>Type</Table.Th>
-                      <Table.Th>Status</Table.Th>
-                      <Table.Th>Expires At</Table.Th>
-                      <Table.Th>Days Remaining</Table.Th>
-                      <Table.Th>Created At</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>{premiumUserRows}</Table.Tbody>
-                </Table>
+                <>
+                  <Table striped highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>Username</Table.Th>
+                        <Table.Th>Type</Table.Th>
+                        <Table.Th>Status</Table.Th>
+                        <Table.Th>Expires At</Table.Th>
+                        <Table.Th>Days Remaining</Table.Th>
+                        <Table.Th>Created At</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>{premiumUserRows}</Table.Tbody>
+                  </Table>
+                  
+                  <Group justify="center" p="md">
+                    <Pagination
+                      value={usersPage}
+                      onChange={handleUsersPageChange}
+                      total={premiumUsers.length < usersLimit ? usersPage : usersPage + 1} // If we have fewer items than the limit, we're on the last page
+                      size="sm"
+                    />
+                  </Group>
+                </>
               )}
             </div>
           </Card.Section>
@@ -531,16 +568,14 @@ export function AdminPremiumPage() {
                     <Table.Tbody>{historyRows}</Table.Tbody>
                   </Table>
                   
-                  {history.length === historyLimit && (
-                    <Group justify="center" p="md">
-                      <Pagination
-                        value={historyPage}
-                        onChange={handleHistoryPageChange}
-                        total={Math.ceil(history.length / historyLimit) + 1} // Estimate, since we don't have total count
-                        size="sm"
-                      />
-                    </Group>
-                  )}
+                  <Group justify="center" p="md">
+                    <Pagination
+                      value={historyPage}
+                      onChange={handleHistoryPageChange}
+                      total={history.length < historyLimit ? historyPage : historyPage + 1} // If we have fewer items than the limit, we're on the last page
+                      size="sm"
+                    />
+                  </Group>
                 </>
               )}
             </div>
@@ -610,17 +645,28 @@ export function AdminPremiumPage() {
               )}
 
               {!codesError && redeemCodes.length > 0 && (
-                <Table striped highlightOnHover>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>Code</Table.Th>
-                      <Table.Th>Days</Table.Th>
-                      <Table.Th>Created At</Table.Th>
-                      <Table.Th>Status</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>{redeemCodeRows}</Table.Tbody>
-                </Table>
+                <>
+                  <Table striped highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>Code</Table.Th>
+                        <Table.Th>Days</Table.Th>
+                        <Table.Th>Created At</Table.Th>
+                        <Table.Th>Status</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>{redeemCodeRows}</Table.Tbody>
+                  </Table>
+                  
+                  <Group justify="center" p="md">
+                    <Pagination
+                      value={codesPage}
+                      onChange={handleCodesPageChange}
+                      total={redeemCodes.length < codesLimit ? codesPage : codesPage + 1} // If we have fewer items than the limit, we're on the last page
+                      size="sm"
+                    />
+                  </Group>
+                </>
               )}
             </div>
           </Card.Section>
