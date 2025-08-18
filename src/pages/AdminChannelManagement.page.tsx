@@ -34,8 +34,7 @@ import {
   IconExclamationCircle,
   IconTrash,
   IconBan,
-  IconShield,
-  IconList
+  IconShield
 } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { useDisclosure } from '@mantine/hooks';
@@ -43,15 +42,6 @@ import { LoginContextContext } from '@/ApplicationContext';
 import { LOGIN_SCOPES } from '@/commons/login';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
-
-interface AuthorizedChannels {
-  limit: number;
-  offset: number;
-  success: boolean;
-  total: number;
-  channels: AuthorizedChannel[];
-  error: string | null;
-}
 
 interface AuthorizedChannel {
   channelid: string;
@@ -76,6 +66,9 @@ interface BannedChannel {
 }
 
 interface ApiResponse<T> {
+  limit: number;
+  offset: number;
+  total: number;
   success: boolean;
   channels?: T[];
   channel?: T;
@@ -87,7 +80,7 @@ interface ApiResponse<T> {
 
 export function AdminChannelManagementPage() {
   const loginContext = useContext(LoginContextContext);
-  const [channels, setChannels] = useState<AuthorizedChannels | null>(null);
+  const [channels, setChannels] = useState<ApiResponse<AuthorizedChannel> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -96,7 +89,7 @@ export function AdminChannelManagementPage() {
   const [channelInfo, setChannelInfo] = useState<ChannelInfo | null>(null);
   const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [expandedScopes, setExpandedScopes] = useState<Set<string>>(new Set());
-  const [bannedChannels, setBannedChannels] = useState<BannedChannel[]>([]);
+  const [bannedChannels, setBannedChannels] = useState<ApiResponse<BannedChannel> | null>();
   const [activeTab, setActiveTab] = useState<string | null>('authorized');
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
   const [banLoading, setBanLoading] = useState<string | null>(null);
@@ -151,17 +144,9 @@ export function AdminChannelManagementPage() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: AuthorizedChannels = await response.json();
+      const data: ApiResponse<AuthorizedChannel> = await response.json();
       
       if (data.success && data.channels) {
-        // Sort channels by first_login in descending order (most recent first)
-        const sortedChannels = data.channels.sort((a, b) => {
-          if (!a.first_login && !b.first_login) return 0;
-          if (!a.first_login) return -1;
-          if (!b.first_login) return 1;
-          return new Date(Number(a.first_login)).getTime() - new Date(Number(b.first_login)).getTime();
-        });
-        data.channels = sortedChannels;
         setChannels(data);
         setLastUpdated(new Date());
       } else {
@@ -303,11 +288,11 @@ export function AdminChannelManagementPage() {
       }
 
       const data: ApiResponse<BannedChannel> = await response.json();
-      
-      if (data.success && data.banned_channels) {
-        setBannedChannels(data.banned_channels);
+
+      if (data.success && data.channels) {
+        setBannedChannels(data);
       } else {
-        showNotification('error', data.error || 'Failed to fetch banned channels');
+        setError(data.error || 'Failed to fetch banned channels');
       }
     } catch (error) {
       showNotification('error', error instanceof Error ? error.message : 'Failed to fetch banned channels');
@@ -557,7 +542,7 @@ export function AdminChannelManagementPage() {
     return null;
   }
 
-  const rows = channels?.channels.map((channel) => {
+  const rows = channels?.channels?.map((channel) => {
     const hasAllScopes = hasAllRequiredScopes(channel.scope);
     const missingScopes = getMissingScopes(channel.scope);
     const isExpanded = expandedScopes.has(channel.channelid);
@@ -726,7 +711,7 @@ export function AdminChannelManagementPage() {
               Authorized Channels ({channels?.total})
             </Tabs.Tab>
             <Tabs.Tab value="banned" leftSection={<IconBan size="0.8rem" />}>
-              Banned Channels ({bannedChannels.length})
+              Banned Channels ({bannedChannels?.total})
             </Tabs.Tab>
           </Tabs.List>
 
@@ -814,14 +799,14 @@ export function AdminChannelManagementPage() {
                 <Group justify="space-between">
                   <Text fw={500}>Banned Channels</Text>
                   <Badge size="lg" variant="light" color="red">
-                    {bannedChannels.length} Banned
+                    {bannedChannels?.total} Banned
                   </Badge>
                 </Group>
               </Card.Section>
 
               <Card.Section>
                 <div style={{ position: 'relative' }}>
-                  {bannedChannels.length === 0 ? (
+                  {bannedChannels?.total === 0 ? (
                     <Alert 
                       icon={<IconShield size="1rem" />} 
                       title="No Banned Channels" 
@@ -845,7 +830,7 @@ export function AdminChannelManagementPage() {
                           </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
-                          {bannedChannels.map((channel) => (
+                          {bannedChannels?.banned_channels?.map((channel) => (
                             <Table.Tr key={channel.id}>
                               <Table.Td>
                                 <Text fw={500}>{channel.channelname}</Text>
@@ -887,7 +872,7 @@ export function AdminChannelManagementPage() {
                         <Pagination
                           value={bannedPage}
                           onChange={handleBannedPageChange}
-                          total={bannedChannels.length < bannedLimit ? bannedPage : bannedPage + 1} // If we have fewer items than the limit, we're on the last page
+                          total={bannedChannels?.total || 0 < bannedLimit ? bannedPage : bannedPage + 1} // If we have fewer items than the limit, we're on the last page
                           size="sm"
                         />
                       </Group>
