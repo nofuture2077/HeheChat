@@ -4,11 +4,12 @@ import { AdminChannelManagementPage } from './pages/AdminChannelManagement.page'
 import { AdminAnalyticsPage } from './pages/AdminAnalytics.page';
 import { AdminNewsPage } from './pages/AdminNews.page';
 import { AdminPremiumPage } from './pages/AdminPremium.page';
+import { AdminAlertsPage } from './pages/AdminAlerts.page';
 import { LoginContextContext } from './ApplicationContext';
 import { useContext, useState } from 'react';
 import { AppShell, Burger, Group, NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconDashboard, IconUsers, IconChartBar, IconNews, IconCrown, IconSettings } from '@tabler/icons-react';
+import { IconDashboard, IconUsers, IconChartBar, IconNews, IconCrown, IconSettings, IconBell } from '@tabler/icons-react';
 import { HeaderLogo } from './components/header/HeaderLogo';
 
 export function AdminRouter() {
@@ -38,6 +39,8 @@ export function AdminRouter() {
         return <AdminNewsPage />;
       case 'premium':
         return <AdminPremiumPage />;
+      case 'alerts':
+        return <AdminAlertsPage />;
       default:
         return <AdminConnectionsPage />; // Default to connections page
     }
@@ -98,6 +101,13 @@ export function AdminRouter() {
           leftSection={<IconCrown size="1rem" />}
           active={activeSection === 'premium'}
           onClick={() => setActiveSection('premium')}
+        />
+        <NavLink
+          href="#"
+          label="Alert Tokens"
+          leftSection={<IconBell size="1rem" />}
+          active={activeSection === 'alerts'}
+          onClick={() => setActiveSection('alerts')}
         />
       </AppShell.Navbar>
 
