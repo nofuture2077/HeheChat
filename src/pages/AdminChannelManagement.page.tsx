@@ -44,6 +44,15 @@ import { LOGIN_SCOPES } from '@/commons/login';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
+interface AuthorizedChannels {
+  limit: number;
+  offset: number;
+  success: boolean;
+  total: number;
+  channels: AuthorizedChannel[];
+  error: string | null;
+}
+
 interface AuthorizedChannel {
   channelid: string;
   channelname: string;
@@ -78,7 +87,7 @@ interface ApiResponse<T> {
 
 export function AdminChannelManagementPage() {
   const loginContext = useContext(LoginContextContext);
-  const [channels, setChannels] = useState<AuthorizedChannel[]>([]);
+  const [channels, setChannels] = useState<AuthorizedChannels | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -142,7 +151,7 @@ export function AdminChannelManagementPage() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data: ApiResponse<AuthorizedChannel> = await response.json();
+      const data: AuthorizedChannels = await response.json();
       
       if (data.success && data.channels) {
         // Sort channels by first_login in descending order (most recent first)
@@ -152,7 +161,8 @@ export function AdminChannelManagementPage() {
           if (!b.first_login) return 1;
           return new Date(Number(a.first_login)).getTime() - new Date(Number(b.first_login)).getTime();
         });
-        setChannels(sortedChannels);
+        data.channels = sortedChannels;
+        setChannels(data);
         setLastUpdated(new Date());
       } else {
         setError(data.error || 'Failed to fetch channels');
@@ -543,7 +553,11 @@ export function AdminChannelManagementPage() {
     ));
   };
 
-  const rows = channels.map((channel) => {
+  if (!channels) {
+    return null;
+  }
+
+  const rows = channels?.channels.map((channel) => {
     const hasAllScopes = hasAllRequiredScopes(channel.scope);
     const missingScopes = getMissingScopes(channel.scope);
     const isExpanded = expandedScopes.has(channel.channelid);
@@ -709,7 +723,7 @@ export function AdminChannelManagementPage() {
         <Tabs value={activeTab} onChange={setActiveTab}>
           <Tabs.List>
             <Tabs.Tab value="authorized" leftSection={<IconShield size="0.8rem" />}>
-              Authorized Channels ({channels.length})
+              Authorized Channels ({channels?.total})
             </Tabs.Tab>
             <Tabs.Tab value="banned" leftSection={<IconBan size="0.8rem" />}>
               Banned Channels ({bannedChannels.length})
@@ -722,7 +736,7 @@ export function AdminChannelManagementPage() {
                 <Group justify="space-between">
                   <Text fw={500}>Authorized Channels</Text>
                   <Badge size="lg" variant="light" color="blue">
-                    {channels.length} Channels
+                    {channels?.total} Channels
                   </Badge>
                 </Group>
               </Card.Section>
@@ -751,7 +765,7 @@ export function AdminChannelManagementPage() {
                     </Alert>
                   )}
 
-                  {!error && channels.length === 0 && !loading && (
+                  {!error && channels?.total === 0 && !loading && (
                     <Alert 
                       icon={<IconSettings size="1rem" />} 
                       title="No Authorized Channels" 
@@ -763,7 +777,7 @@ export function AdminChannelManagementPage() {
                     </Alert>
                   )}
 
-                  {!error && channels.length > 0 && (
+                  {!error && (channels?.total || 0) > 0 && (
                     <>
                       <Table striped highlightOnHover>
                         <Table.Thead>
@@ -783,7 +797,7 @@ export function AdminChannelManagementPage() {
                         <Pagination
                           value={channelsPage}
                           onChange={handleChannelsPageChange}
-                          total={channels.length < channelsLimit ? channelsPage : channelsPage + 1} // If we have fewer items than the limit, we're on the last page
+                          total={channels?.total || 0 < channelsLimit ? channelsPage : channelsPage + 1} // If we have fewer items than the limit, we're on the last page
                           size="sm"
                         />
                       </Group>
