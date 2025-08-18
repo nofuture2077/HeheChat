@@ -782,7 +782,7 @@ export function AdminChannelManagementPage() {
                         <Pagination
                           value={channelsPage}
                           onChange={handleChannelsPageChange}
-                          total={channels?.total || 0 < channelsLimit ? channelsPage : channelsPage + 1} // If we have fewer items than the limit, we're on the last page
+                          total={Math.ceil((channels?.total || 1.0 * 1.0) / channelsLimit)} // If we have fewer items than the limit, we're on the last page
                           size="sm"
                         />
                       </Group>
@@ -872,7 +872,7 @@ export function AdminChannelManagementPage() {
                         <Pagination
                           value={bannedPage}
                           onChange={handleBannedPageChange}
-                          total={bannedChannels?.total || 0 < bannedLimit ? bannedPage : bannedPage + 1} // If we have fewer items than the limit, we're on the last page
+                          total={Math.ceil((bannedChannels?.total || 1.0 * 1.0) / bannedLimit)} // If we have fewer items than the limit, we're on the last page
                           size="sm"
                         />
                       </Group>
