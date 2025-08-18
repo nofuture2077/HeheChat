@@ -289,7 +289,7 @@ export function AdminChannelManagementPage() {
 
       const data: ApiResponse<BannedChannel> = await response.json();
 
-      if (data.success && data.channels) {
+      if (data.success && data.banned_channels) {
         setBannedChannels(data);
       } else {
         setError(data.error || 'Failed to fetch banned channels');
