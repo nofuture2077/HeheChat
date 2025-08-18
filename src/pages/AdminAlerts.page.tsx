@@ -14,6 +14,7 @@ import {
   Anchor
 } from '@mantine/core';
 import { 
+  IconLink,
   IconRefresh, 
   IconAlertCircle, 
   IconClock, 
@@ -128,13 +129,7 @@ export function AdminAlertsPage() {
   const rows = alertTokens?.tokens?.map((token) => (
     <Table.Tr key={token.id}>
       <Table.Td>
-        <Text fw={500}>{token.name}</Text>
-      </Table.Td>
-      <Table.Td>
         <Text size="sm">{token.channelname}</Text>
-      </Table.Td>
-      <Table.Td>
-        <Text size="sm">{new Date(token.created).toLocaleString()}</Text>
       </Table.Td>
       <Table.Td>
         <Anchor 
@@ -143,7 +138,7 @@ export function AdminAlertsPage() {
           rel="noopener noreferrer"
           size="sm"
         >
-          {token.token.substring(0, 10)}...
+            <IconLink />
         </Anchor>
       </Table.Td>
     </Table.Tr>
@@ -232,9 +227,7 @@ export function AdminAlertsPage() {
                   <Table striped highlightOnHover>
                     <Table.Thead>
                       <Table.Tr>
-                        <Table.Th>Name</Table.Th>
                         <Table.Th>Channel</Table.Th>
-                        <Table.Th>Created</Table.Th>
                         <Table.Th>Token</Table.Th>
                       </Table.Tr>
                     </Table.Thead>
