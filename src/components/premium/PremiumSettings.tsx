@@ -43,8 +43,10 @@ export const PremiumSettings: React.FC = () => {
           <div className={classes.premiumFeatureList}>
             <Text fw={600} mb="xs">Premium Features:</Text>
             <ul style={{ paddingLeft: '20px', margin: 0 }}>
-              <li>Support HeheChat</li>
-              <li>Pro Features</li>
+              <li>Deluxe TTS Voices</li>
+              <li>Push Notifications</li>
+              <li>Read all chat messages</li>
+              <li>Cool HeheChat Badge</li>
             </ul>
           </div>
 
