@@ -76,7 +76,7 @@ export function AdminAlertsPage() {
     
     try {
       const offset = (page - 1) * limit;
-      const searchParam = search ? `&q=${encodeURIComponent(search)}` : '';
+      const searchParam = search ? `&query=${encodeURIComponent(search)}` : '';
       const response = await fetch(`${BASE_URL}/api/admin/alerts/token?token=${adminToken}&limit=${limit}&offset=${offset}${searchParam}`);
       
       if (!response.ok) {

@@ -131,7 +131,7 @@ export function AdminChannelManagementPage() {
     
     try {
       const offset = (channelsPage - 1) * channelsLimit;
-      const searchParam = channelsSearch ? `&q=${encodeURIComponent(channelsSearch)}` : '';
+      const searchParam = channelsSearch ? `&query=${encodeURIComponent(channelsSearch)}` : '';
       const response = await fetch(`${BASE_URL}/api/channels/authorized?token=${adminToken}&limit=${channelsLimit}&offset=${offset}${searchParam}`);
       
       if (!response.ok) {
@@ -275,7 +275,7 @@ export function AdminChannelManagementPage() {
 
     try {
       const offset = (bannedPage - 1) * bannedLimit;
-      const searchParam = bannedSearch ? `&q=${encodeURIComponent(bannedSearch)}` : '';
+      const searchParam = bannedSearch ? `&query=${encodeURIComponent(bannedSearch)}` : '';
       const response = await fetch(`${BASE_URL}/api/channels/banned?token=${adminToken}&limit=${bannedLimit}&offset=${offset}${searchParam}`);
       
       if (!response.ok) {
