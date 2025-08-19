@@ -11,14 +11,18 @@ import {
   Card, 
   Group, 
   Pagination,
-  Anchor
+  Anchor,
+  TextInput,
+  ActionIcon
 } from '@mantine/core';
 import { 
   IconLink,
   IconRefresh, 
   IconAlertCircle, 
   IconClock, 
-  IconBell
+  IconBell,
+  IconSearch,
+  IconX
 } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
@@ -54,6 +58,7 @@ export function AdminAlertsPage() {
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
+  const [search, setSearch] = useState('');
 
   const getAdminToken = () => {
     return localStorage.getItem('hehe-token_state');
@@ -71,7 +76,8 @@ export function AdminAlertsPage() {
     
     try {
       const offset = (page - 1) * limit;
-      const response = await fetch(`${BASE_URL}/api/admin/alerts/token?token=${adminToken}&limit=${limit}&offset=${offset}`);
+      const searchParam = search ? `&q=${encodeURIComponent(search)}` : '';
+      const response = await fetch(`${BASE_URL}/api/admin/alerts/token?token=${adminToken}&limit=${limit}&offset=${offset}${searchParam}`);
       
       if (!response.ok) {
         if (response.status === 401) {
@@ -106,6 +112,11 @@ export function AdminAlertsPage() {
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
+  
+  const handleSearch = (query: string) => {
+    setSearch(query);
+    setPage(1); // Reset to first page when searching
+  };
 
   // Initial load
   useEffect(() => {
@@ -117,10 +128,10 @@ export function AdminAlertsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Effect to fetch tokens when page changes
+  // Effect to fetch tokens when page or search changes
   useEffect(() => {
     fetchAlertTokens();
-  }, [page]);
+  }, [page, search]);
 
   if (!alertTokens) {
     return null;
@@ -184,6 +195,23 @@ export function AdminAlertsPage() {
                 {alertTokens?.total} Tokens
               </Badge>
             </Group>
+          </Card.Section>
+          
+          <Card.Section p="md" withBorder>
+            <TextInput
+              placeholder="Search tokens..."
+              value={search}
+              onChange={(event) => handleSearch(event.currentTarget.value)}
+              rightSection={
+                search ? (
+                  <ActionIcon onClick={() => handleSearch('')} variant="subtle" size="sm">
+                    <IconX size="1rem" />
+                  </ActionIcon>
+                ) : (
+                  <IconSearch size="1rem" opacity={0.5} />
+                )
+              }
+            />
           </Card.Section>
 
           <Card.Section>

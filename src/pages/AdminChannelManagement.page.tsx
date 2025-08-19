@@ -34,7 +34,8 @@ import {
   IconExclamationCircle,
   IconTrash,
   IconBan,
-  IconShield
+  IconShield,
+  IconSearch
 } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { useDisclosure } from '@mantine/hooks';
@@ -99,10 +100,12 @@ export function AdminChannelManagementPage() {
   // Pagination state for authorized channels
   const [channelsPage, setChannelsPage] = useState(1);
   const [channelsLimit] = useState(10);
+  const [channelsSearch, setChannelsSearch] = useState('');
   
   // Pagination state for banned channels
   const [bannedPage, setBannedPage] = useState(1);
   const [bannedLimit] = useState(10);
+  const [bannedSearch, setBannedSearch] = useState('');
   
   const [infoModalOpened, { open: openInfoModal, close: closeInfoModal }] = useDisclosure(false);
   const [banModalOpened, { open: openBanModal, close: closeBanModal }] = useDisclosure(false);
@@ -128,7 +131,8 @@ export function AdminChannelManagementPage() {
     
     try {
       const offset = (channelsPage - 1) * channelsLimit;
-      const response = await fetch(`${BASE_URL}/api/channels/authorized?token=${adminToken}&limit=${channelsLimit}&offset=${offset}`);
+      const searchParam = channelsSearch ? `&q=${encodeURIComponent(channelsSearch)}` : '';
+      const response = await fetch(`${BASE_URL}/api/channels/authorized?token=${adminToken}&limit=${channelsLimit}&offset=${offset}${searchParam}`);
       
       if (!response.ok) {
         if (response.status === 401) {
@@ -271,7 +275,8 @@ export function AdminChannelManagementPage() {
 
     try {
       const offset = (bannedPage - 1) * bannedLimit;
-      const response = await fetch(`${BASE_URL}/api/channels/banned?token=${adminToken}&limit=${bannedLimit}&offset=${offset}`);
+      const searchParam = bannedSearch ? `&q=${encodeURIComponent(bannedSearch)}` : '';
+      const response = await fetch(`${BASE_URL}/api/channels/banned?token=${adminToken}&limit=${bannedLimit}&offset=${offset}${searchParam}`);
       
       if (!response.ok) {
         if (response.status === 401) {
@@ -476,6 +481,16 @@ export function AdminChannelManagementPage() {
   const handleBannedPageChange = (page: number) => {
     setBannedPage(page);
   };
+  
+  const handleChannelsSearch = (query: string) => {
+    setChannelsSearch(query);
+    setChannelsPage(1); // Reset to first page when searching
+  };
+  
+  const handleBannedSearch = (query: string) => {
+    setBannedSearch(query);
+    setBannedPage(1); // Reset to first page when searching
+  };
 
   // Initial load
   useEffect(() => {
@@ -489,15 +504,15 @@ export function AdminChannelManagementPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Effect to fetch authorized channels when page changes
+  // Effect to fetch authorized channels when page or search changes
   useEffect(() => {
     fetchAuthorizedChannels();
-  }, [channelsPage]);
+  }, [channelsPage, channelsSearch]);
 
-  // Effect to fetch banned channels when page changes
+  // Effect to fetch banned channels when page or search changes
   useEffect(() => {
     fetchBannedChannels();
-  }, [bannedPage]);
+  }, [bannedPage, bannedSearch]);
 
   const hasAllRequiredScopes = (channelScopes: string[]) => {
     return LOGIN_SCOPES.every(requiredScope => channelScopes.includes(requiredScope));
@@ -725,6 +740,23 @@ export function AdminChannelManagementPage() {
                   </Badge>
                 </Group>
               </Card.Section>
+              
+              <Card.Section p="md" withBorder>
+                <TextInput
+                  placeholder="Search channels..."
+                  value={channelsSearch}
+                  onChange={(event) => handleChannelsSearch(event.currentTarget.value)}
+                  rightSection={
+                    channelsSearch ? (
+                      <ActionIcon onClick={() => handleChannelsSearch('')} variant="subtle" size="sm">
+                        <IconX size="1rem" />
+                      </ActionIcon>
+                    ) : (
+                      <IconSearch size="1rem" opacity={0.5} />
+                    )
+                  }
+                />
+              </Card.Section>
 
               <Card.Section>
                 <div style={{ position: 'relative' }}>
@@ -802,6 +834,23 @@ export function AdminChannelManagementPage() {
                     {bannedChannels?.total} Banned
                   </Badge>
                 </Group>
+              </Card.Section>
+              
+              <Card.Section p="md" withBorder>
+                <TextInput
+                  placeholder="Search banned channels..."
+                  value={bannedSearch}
+                  onChange={(event) => handleBannedSearch(event.currentTarget.value)}
+                  rightSection={
+                    bannedSearch ? (
+                      <ActionIcon onClick={() => handleBannedSearch('')} variant="subtle" size="sm">
+                        <IconX size="1rem" />
+                      </ActionIcon>
+                    ) : (
+                      <IconSearch size="1rem" opacity={0.5} />
+                    )
+                  }
+                />
               </Card.Section>
 
               <Card.Section>
