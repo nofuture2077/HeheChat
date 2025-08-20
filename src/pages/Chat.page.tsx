@@ -3,6 +3,7 @@ import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext, 
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, ActionIcon, Text } from '@mantine/core';
 import { IconAlertTriangle, IconDeviceDesktop, IconRepeat, IconMessagePause, IconSettings, IconKeyboard, IconBell, IconBrandTwitch } from '@tabler/icons-react';
+import PubSub from 'pubsub-js';
 import { notifications } from '@mantine/notifications';
 import { Chat } from '../components/chat/Chat';
 import { MobileAppPrompt } from '../components/chat/MobileAppPrompt';
@@ -16,6 +17,7 @@ import { HelixModeratedChannel } from '@twurple/api';
 import { SettingsDrawer, SettingsTab } from '../components/settings/settings';
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
+import { MassBanDrawer } from '../components/chat/mod/massban';
 import { HeheMessage, parseMessage, HeheChatMessage } from '../commons/message';
 import { TwitchDrawer } from '../components/twitch/twitchview';
 import { TwitchPlayer } from '../components/twitch/twitchplayer';
@@ -325,6 +327,13 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             }
         });
 
+        // Subscribe to the OPEN_MASSBAN event
+        const massBanSub = PubSub.subscribe("OPEN_MASSBAN", (msg, data) => {
+            MassBanDrawer.props = { channelId: data.channelId, channelName: data.channelName };
+            setDrawer(MassBanDrawer);
+            drawerHandler.open();
+        });
+
         const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
             const message = parseMessage(data.message);
             if (config.readAllMessages && premium.isPremium && message.type === 'chat') {
@@ -429,6 +438,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             PubSub.unsubscribe(msgSub);
             PubSub.unsubscribe(eventSub);
             PubSub.unsubscribe(modEventSub);
+            PubSub.unsubscribe(massBanSub);
             config.off(chatHandler);
         };
     }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, config.readAllMessages, loginContext.user]);

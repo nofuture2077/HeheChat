@@ -73,7 +73,8 @@ export function ChatInput(props: ChatInputProps) {
         { value: '/shoutout', label: '/shoutout [channelname] - Shoutout another channel' },
         { value: '/user', label: '/user [username] - Show user details' },
         { value: '/ban', label: '/ban [username] - Ban a user' },
-        { value: '/timeout', label: '/timeout [username] [seconds] - Timeout a user for specified duration' }
+        { value: '/timeout', label: '/timeout [username] [seconds] - Timeout a user for specified duration' },
+        { value: '/massban', label: '/massban - Open mass ban tool to ban multiple users' }
     ];
 
     const loginContext = useContext(LoginContextContext);
@@ -104,28 +105,28 @@ export function ChatInput(props: ChatInputProps) {
         }
 
         switch (cmd) {
+            case 'massban':
+                // Open mass ban modal
+                PubSub.publish('OPEN_MASSBAN', { channelId, channelName: channelname });
+                break;
             case 'raid':
                 if (args.length > 0) {
                     const data = await getUserId(args[0]);
-                    const channelId = emotes.getChannelId(config.getChatChannel() || '');
                     props.modActions.raidUser(channelId, data.userId);
                 }
                 break;
             case 'unraid':
-                const channelId = emotes.getChannelId(config.getChatChannel() || '');
                 props.modActions.unraid(channelId);
                 break;
             case 'shoutout':
                 if (args.length > 0) {
                     const data = await getUserId(args[0]);
-                    const channelId = emotes.getChannelId(config.getChatChannel() || '');
                     props.modActions.shoutoutUser(channelId, data.userId);
                 }
                 break;
             case 'ban':
                 if (args.length >= 2) {
                     const data = await getUserId(args[0]);
-                    const channelId = emotes.getChannelId(config.getChatChannel() || '');
                     props.modActions.banUser(channelId, data.userId, "Banned via HeheChat");
                 }
                 break;
@@ -133,7 +134,6 @@ export function ChatInput(props: ChatInputProps) {
                 if (args.length >= 1) {
                     const data = await getUserId(args[0]);
                     const duration = parseInt(args[1], 10);
-                    const channelId = emotes.getChannelId(config.getChatChannel() || '');
                     if (!isNaN(duration)) {
                         props.modActions.timeoutUser(channelId, data.userId, duration, "Timed out via HeheChat");
                     }
@@ -143,7 +143,6 @@ export function ChatInput(props: ChatInputProps) {
                 if (args.length >= 1) {
                     const username = args[0];
                     const channel = config.getChatChannel() || '';
-                    const channelId = emotes.getChannelId(channel);
                     props.openModView(channel, channelId, username);
                 }
                 break;
