@@ -24,39 +24,42 @@ interface ConnectionStatus {
   };
 }
 
-interface SourceData {
+interface StreamInfo {
+  title: string;
+  category: string;
+  viewerCount: number;
+  startTime: number;
+}
+
+interface Connection {
+  guid: string;
   userId: string;
   userName: string;
-  channels: string[];
-  guid: string;
-  version: string;
-  connectionStatus: ConnectionStatus;
-}
-
-interface SessionData {
+  profileId: string;
   profileName: string;
-  sources: Record<string, SourceData>;
-}
-
-interface UserConnections {
-  [sessionId: string]: SessionData;
+  source: string;
+  version: string;
+  channels: string[];
+  connectionStatus: ConnectionStatus;
+  connectedAt: number;
+  streamInfo?: StreamInfo;
 }
 
 interface ConnectionsResponse {
   connection_count: number;
   user_count: number;
-  connections: Record<string, UserConnections>;
+  connections: Connection[];
 }
 
 interface FlatConnection {
-  username: string;
-  sessionId: string;
-  profileName: string;
-  sourceName: string;
-  userId: string;
-  channels: string[];
   guid: string;
+  userId: string;
+  userName: string;
+  profileId: string;
+  profileName: string;
+  source: string;
   version: string;
+  channels: string[];
   sevenTVConnected: boolean;
   sevenTVChannel: string;
   streamElementsConnected: boolean;
@@ -65,6 +68,8 @@ interface FlatConnection {
   blerpChannel: string;
   pallyggConnected: boolean;
   pallyggChannel: string;
+  connectedAt: number;
+  streamInfo?: StreamInfo;
 }
 
 export function AdminConnectionsPage() {
@@ -93,33 +98,27 @@ export function AdminConnectionsPage() {
       }
       const data: ConnectionsResponse = await response.json();
       
-      // Flatten the nested structure for easier display
-      const flatConnections: FlatConnection[] = [];
-      
-      Object.entries(data.connections || {}).forEach(([username, userConnections]) => {
-        Object.entries(userConnections).forEach(([sessionId, sessionData]) => {
-          Object.entries(sessionData.sources || {}).forEach(([sourceName, sourceData]) => {
-            flatConnections.push({
-              username,
-              sessionId,
-              profileName: sessionData.profileName,
-              sourceName,
-              userId: sourceData.userId,
-              channels: sourceData.channels,
-              guid: sourceData.guid,
-              version: sourceData.version,
-              sevenTVConnected: sourceData.connectionStatus?.sevenTV?.connected || false,
-              sevenTVChannel: sourceData.connectionStatus?.sevenTV?.channelname || 'N/A',
-              streamElementsConnected: sourceData.connectionStatus?.streamelements?.connected || false,
-              streamElementsChannel: sourceData.connectionStatus?.streamelements?.channelname || 'N/A',
-              blerpConnected: sourceData.connectionStatus?.blerp?.connected || false,
-              blerpChannel: sourceData.connectionStatus?.blerp?.channelname || 'N/A',
-              pallyggConnected: sourceData.connectionStatus?.pallygg?.connected || false,
-              pallyggChannel: sourceData.connectionStatus?.pallygg?.channelname || 'N/A',
-            });
-          });
-        });
-      });
+      // Map the flat structure to our display format
+      const flatConnections: FlatConnection[] = data.connections.map(conn => ({
+        guid: conn.guid,
+        userId: conn.userId,
+        userName: conn.userName,
+        profileId: conn.profileId,
+        profileName: conn.profileName,
+        source: conn.source,
+        version: conn.version,
+        channels: conn.channels,
+        sevenTVConnected: conn.connectionStatus?.sevenTV?.connected || false,
+        sevenTVChannel: conn.connectionStatus?.sevenTV?.channelname || 'N/A',
+        streamElementsConnected: conn.connectionStatus?.streamelements?.connected || false,
+        streamElementsChannel: conn.connectionStatus?.streamelements?.channelname || 'N/A',
+        blerpConnected: conn.connectionStatus?.blerp?.connected || false,
+        blerpChannel: conn.connectionStatus?.blerp?.channelname || 'N/A',
+        pallyggConnected: conn.connectionStatus?.pallygg?.connected || false,
+        pallyggChannel: conn.connectionStatus?.pallygg?.channelname || 'N/A',
+        connectedAt: conn.connectedAt,
+        streamInfo: conn.streamInfo
+      }));
       
       setConnections(flatConnections);
       setConnectionStats({
@@ -187,12 +186,32 @@ export function AdminConnectionsPage() {
     return null;
   };
 
+  const formatStreamDuration = (startTime: number) => {
+    const durationSeconds = Math.floor(Date.now() / 1000) - startTime;
+    const hours = Math.floor(durationSeconds / 3600);
+    const minutes = Math.floor((durationSeconds % 3600) / 60);
+    return `${hours}h ${minutes}m`;
+  };
+
   const rows = connections.map((connection, index) => (
-    <Table.Tr key={`${connection.username}-${connection.sessionId}-${connection.sourceName}-${index}`}>
+    <Table.Tr key={`${connection.userName}-${connection.profileId}-${connection.source}-${index}`}>
       <Table.Td>
         <Stack gap={0}>
-          <Text>{connection.username}</Text>
+          <Group gap="xs">
+            <Text>{connection.userName}</Text>
+            {connection.streamInfo && (
+              <Badge color="red" size="xs">LIVE</Badge>
+            )}
+          </Group>
           <Text size="xs" c="dimmed">{connection.userId}</Text>
+          {connection.streamInfo && (
+            <Text size="xs" c="dimmed">
+              <Group gap={4}>
+                <span>🔴 {connection.streamInfo.viewerCount} viewers</span>
+                <span>⏱️ {formatStreamDuration(connection.streamInfo.startTime)}</span>
+              </Group>
+            </Text>
+          )}
         </Stack>
       </Table.Td>
       <Table.Td>
@@ -201,12 +220,22 @@ export function AdminConnectionsPage() {
           <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
             {connection.guid.substring(0, 8)}...
           </Text>
+          {connection.streamInfo && (
+            <Text size="xs" c="dimmed" fw={500}>
+              {connection.streamInfo.title}
+            </Text>
+          )}
         </Stack>
       </Table.Td>
       <Table.Td>
         <Stack gap={0}>
-          <Text>{connection.sourceName}</Text>
+          <Text>{connection.source}</Text>
           <Text size="xs" c="dimmed">{connection.version}</Text>
+          {connection.streamInfo && (
+            <Text size="xs" c="dimmed">
+              {connection.streamInfo.category}
+            </Text>
+          )}
         </Stack>
       </Table.Td>
       <Table.Td>
@@ -333,19 +362,19 @@ export function AdminConnectionsPage() {
                       <Table.Th>
                         <Stack gap={0}>
                           <Text fw={900}>Username</Text>
-                          <Text fw={600} size="xs" c="dimmed">User ID</Text>
+                          <Text fw={600} size="xs" c="dimmed">User ID / Stream Info</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
                         <Stack gap={0}>
                           <Text fw={900}>Profile</Text>
-                          <Text fw={600} size="xs" c="dimmed">GUID</Text>
+                          <Text fw={600} size="xs" c="dimmed">GUID / Stream Title</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
                         <Stack gap={0}>
                           <Text fw={900}>Source</Text>
-                          <Text fw={600} size="xs" c="dimmed">Version</Text>
+                          <Text fw={600} size="xs" c="dimmed">Version / Category</Text>
                         </Stack>
                       </Table.Th>
                       <Table.Th>
