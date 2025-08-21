@@ -40,9 +40,9 @@ export class AlertConfigStorage {
         try {
             const state = localStorage.getItem('hehe-token_state') || '';
             const sink = localStorage.getItem('hehe-sink') || '';
-            const response = await fetch(this.baseUrl + '/event/config?' + [['channels', channel].join('='), ['state', state].join('='), ['sink', sink].join('='), ['t', Date.now()].join('=')].join('&'));
+            const response = await fetch(this.baseUrl + '/event/config?' + [['channel', channel].join('='), ['state', state].join('='), ['sink', sink].join('='), ['t', Date.now()].join('=')].join('&'));
             if (!response.ok) throw new Error('Failed to fetch full config');
-            return await response.json().then(r => r[channel]);
+            return await response.json();
         } catch (error) {
             console.error('Error fetching full config:', error);
             throw error;
