@@ -1,5 +1,5 @@
-import { Container, Title, Text, Button, Alert, Stack, Table, Badge, LoadingOverlay, Card, Group, Accordion, Anchor } from '@mantine/core';
-import { IconRefresh, IconAlertCircle, IconUsers, IconClock, IconWifi, IconDevices, IconExternalLink } from '@tabler/icons-react';
+import { Container, Title, Text, Button, Alert, Stack, Table, Badge, LoadingOverlay, Card, Group, Anchor } from '@mantine/core';
+import { IconRefresh, IconAlertCircle, IconUsers, IconClock, IconWifi, IconDevices, IconExternalLink, IconEye } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 
@@ -141,49 +141,28 @@ export function AdminConnectionsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const getServiceLogo = (service: '7TV' | 'SE' | 'Blerp' | 'Pally', connected: boolean) => {
+  const getServiceBadge = (service: '7TV' | 'SE' | 'Blerp' | 'Pally', connected: boolean) => {
     if (!connected) return null;
     
-    const logoStyle = {
-      width: '20px',
-      height: '20px',
-      borderRadius: '4px',
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '8px',
-      fontWeight: 'bold',
-      color: 'white',
-      marginRight: '4px'
+    const badgeProps = {
+      size: 'sm',
+      radius: 'sm',
+      variant: 'filled',
+      style: { fontWeight: 'bold' }
     };
 
-    if (service === '7TV') {
-      return (
-        <div style={{ ...logoStyle, backgroundColor: '#1976d2' }}>
-          7TV
-        </div>
-      );
-    } else if (service === 'SE') {
-      return (
-        <div style={{ ...logoStyle, backgroundColor: '#00d4aa' }}>
-          SE
-        </div>
-      );
-    } else if (service === 'Blerp') {
-      return (
-        <div style={{ ...logoStyle, backgroundColor: '#ff6b35' }}>
-          BLERP
-        </div>
-      );
-    } else if (service === 'Pally') {
-      return (
-        <div style={{ ...logoStyle, backgroundColor: '#9c27b0' }}>
-          PALLY
-        </div>
-      );
+    switch (service) {
+      case '7TV':
+        return <Badge {...badgeProps} color="blue">7TV</Badge>;
+      case 'SE':
+        return <Badge {...badgeProps} color="teal">SE</Badge>;
+      case 'Blerp':
+        return <Badge {...badgeProps} color="orange">BLERP</Badge>;
+      case 'Pally':
+        return <Badge {...badgeProps} color="grape">PALLY</Badge>;
+      default:
+        return null;
     }
-    
-    return null;
   };
 
   const formatStreamDuration = (startTime: number) => {
@@ -193,45 +172,63 @@ export function AdminConnectionsPage() {
     return `${hours}h ${minutes}m`;
   };
 
+  const formatGUID = (guid: string) => {
+    if (!guid) return '';
+    return guid.substring(0, 8) + '...' + guid.substring(guid.length - 4);
+  };
+
   const rows = connections.map((connection, index) => (
     <Table.Tr key={`${connection.userName}-${connection.profileId}-${connection.source}-${index}`}>
       <Table.Td>
-        <Stack gap={0}>
+        <Stack gap={4}>
           <Group gap="xs">
-            <Text>{connection.userName}</Text>
+            <Text fw={500}>{connection.userName}</Text>
             {connection.streamInfo && (
               <Badge color="red" size="xs">LIVE</Badge>
             )}
           </Group>
           <Text size="xs" c="dimmed">{connection.userId}</Text>
           {connection.streamInfo && (
-            <Text size="xs" c="dimmed">
-              <Group gap={4}>
-                <span>🔴 {connection.streamInfo.viewerCount} viewers</span>
-                <span>⏱️ {formatStreamDuration(connection.streamInfo.startTime)}</span>
-              </Group>
-            </Text>
+            <Group gap="xs" mt={2}>
+              <Badge 
+                size="xs" 
+                color="red" 
+                variant="dot" 
+                leftSection={<Text size="xs">{connection.streamInfo.viewerCount}</Text>}
+              >
+                viewers
+              </Badge>
+              <Badge 
+                size="xs" 
+                color="gray" 
+                leftSection={<IconClock size="0.7rem" />}
+              >
+                {formatStreamDuration(connection.streamInfo.startTime)}
+              </Badge>
+            </Group>
           )}
         </Stack>
       </Table.Td>
       <Table.Td>
-        <Stack gap={0}>
-          <Text>{connection.profileName}</Text>
+        <Stack gap={4}>
+          <Text fw={500}>{connection.profileName}</Text>
           <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-            {connection.guid.substring(0, 8)}...
+            {formatGUID(connection.guid)}
           </Text>
-          {connection.streamInfo && (
+          {connection.streamInfo && connection.streamInfo.title && (
             <Text size="xs" c="dimmed" fw={500}>
-              {connection.streamInfo.title}
+              {connection.streamInfo.title.length > 30 
+                ? `${connection.streamInfo.title.substring(0, 30)}...` 
+                : connection.streamInfo.title}
             </Text>
           )}
         </Stack>
       </Table.Td>
       <Table.Td>
-        <Stack gap={0}>
-          <Text>{connection.source}</Text>
-          <Text size="xs" c="dimmed">{connection.version}</Text>
-          {connection.streamInfo && (
+        <Stack gap={4}>
+          <Text fw={500}>{connection.source}</Text>
+          <Badge size="xs" variant="light" color="gray">{connection.version}</Badge>
+          {connection.streamInfo && connection.streamInfo.category && (
             <Text size="xs" c="dimmed">
               {connection.streamInfo.category}
             </Text>
@@ -241,30 +238,33 @@ export function AdminConnectionsPage() {
       <Table.Td>
         <Group gap="xs" wrap="wrap">
           {connection.channels.map((channel, channelIndex) => (
-            <Anchor
+            <Badge 
               key={channelIndex}
-              href={`https://twitch.tv/${channel}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              size="sm"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+              variant="light"
+              color="blue"
+              rightSection={
+                <Anchor
+                  href={`https://twitch.tv/${channel}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'inherit' }}
+                >
+                  <IconExternalLink size="0.7rem" />
+                </Anchor>
+              }
             >
               {channel}
-              <IconExternalLink size="0.75rem" />
-            </Anchor>
+            </Badge>
           ))}
         </Group>
       </Table.Td>
       <Table.Td>
         <Group gap="xs">
-          {getServiceLogo('7TV', connection.sevenTVConnected)}
-          {getServiceLogo('SE', connection.streamElementsConnected)}
-          {getServiceLogo('Blerp', connection.blerpConnected)}
-          {getServiceLogo('Pally', connection.pallyggConnected)}
+          {getServiceBadge('7TV', connection.sevenTVConnected)}
+          {getServiceBadge('SE', connection.streamElementsConnected)}
+          {getServiceBadge('Blerp', connection.blerpConnected)}
+          {getServiceBadge('Pally', connection.pallyggConnected)}
         </Group>
-      </Table.Td>
-      <Table.Td>
-        
       </Table.Td>
     </Table.Tr>
   ));
@@ -301,18 +301,18 @@ export function AdminConnectionsPage() {
           </Text>
         )}
 
-        <Card withBorder>
+        <Card withBorder shadow="sm">
           <Card.Section p="md" withBorder>
             <Group justify="space-between">
-              <Text fw={500}>Connection Statistics</Text>
+              <Text fw={700} size="lg">Connection Statistics</Text>
               <Group gap="md">
-                <Badge size="lg" variant="light" color="blue">
+                <Badge size="lg" variant="filled" color="blue" leftSection={<IconUsers size="0.9rem" />}>
                   {connectionStats.user_count} Users
                 </Badge>
-                <Badge size="lg" variant="light" color="green">
+                <Badge size="lg" variant="filled" color="green" leftSection={<IconWifi size="0.9rem" />}>
                   {connectionStats.connection_count} Total Connections
                 </Badge>
-                <Badge size="lg" variant="light" color="orange">
+                <Badge size="lg" variant="filled" color="orange" leftSection={<IconDevices size="0.9rem" />}>
                   {connections.length} Active Sources
                 </Badge>
               </Group>
@@ -356,38 +356,32 @@ export function AdminConnectionsPage() {
               )}
 
               {!error && connections.length > 0 && (
-                <Table striped highlightOnHover>
+                <Table striped highlightOnHover withTableBorder withColumnBorders>
                   <Table.Thead>
                     <Table.Tr>
                       <Table.Th>
-                        <Stack gap={0}>
-                          <Text fw={900}>Username</Text>
-                          <Text fw={600} size="xs" c="dimmed">User ID / Stream Info</Text>
-                        </Stack>
+                        <Group gap={4} align="center">
+                          <IconUsers size="0.9rem" />
+                          <Text fw={700}>Username</Text>
+                        </Group>
                       </Table.Th>
                       <Table.Th>
-                        <Stack gap={0}>
-                          <Text fw={900}>Profile</Text>
-                          <Text fw={600} size="xs" c="dimmed">GUID / Stream Title</Text>
-                        </Stack>
+                        <Group gap={4} align="center">
+                          <IconDevices size="0.9rem" />
+                          <Text fw={700}>Profile</Text>
+                        </Group>
                       </Table.Th>
                       <Table.Th>
-                        <Stack gap={0}>
-                          <Text fw={900}>Source</Text>
-                          <Text fw={600} size="xs" c="dimmed">Version / Category</Text>
-                        </Stack>
+                        <Group gap={4} align="center">
+                          <IconWifi size="0.9rem" />
+                          <Text fw={700}>Source</Text>
+                        </Group>
                       </Table.Th>
                       <Table.Th>
-                        <Stack gap={0}>
-                          <Text fw={900}>Channels</Text>
-                          <Text fw={600} size="xs" c="dimmed">&nbsp;</Text>
-                        </Stack>
+                        <Text fw={700}>Channels</Text>
                       </Table.Th>
                       <Table.Th>
-                        <Stack gap={0}>
-                          <Text fw={900}>Service Status</Text>
-                          <Text fw={600} size="xs" c="dimmed">&nbsp;</Text>
-                        </Stack>
+                        <Text fw={700}>Services</Text>
                       </Table.Th>
                     </Table.Tr>
                   </Table.Thead>
