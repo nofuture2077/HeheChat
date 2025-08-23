@@ -193,10 +193,9 @@ export function AdminConnectionsPage() {
               <Badge 
                 size="xs" 
                 color="red" 
-                variant="dot" 
-                leftSection={<Text size="xs">{connection.streamInfo.viewerCount}</Text>}
+                leftSection={<IconUsers size="0.7rem" />}
               >
-                viewers
+                {connection.streamInfo.viewerCount}
               </Badge>
               <Badge 
                 size="xs" 
