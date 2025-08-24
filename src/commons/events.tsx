@@ -41,7 +41,8 @@ export const EventTypeMapping: Record<string, string> = {
     'kofishop': 'kofi',
     'kofisub': 'kofi',
     'kofidono': 'kofi',
-    'hypetrain': 'hypetrain'
+    'hypetrain': 'hypetrain',
+    'tts': 'tts'
 };
 
 export type EventAlertMeta = {
