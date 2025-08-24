@@ -123,6 +123,7 @@ export type Event = {
     amount?: number;
     amount2?: number;
     eventAlert?: EventAlert;
+    userSeed?: string; // Added for deterministic sprite selection
 }
 
 export interface VisualAlert {
@@ -133,4 +134,16 @@ export interface VisualAlert {
     channel: string;
     position?: string;
     layout?: string;
+}
+
+export interface ExtractedImage {
+    name: string;
+    data: string; // base64 data URL
+    mime: string;
+}
+
+export interface ZipCache {
+    zipHash: string;
+    images: ExtractedImage[];
+    timestamp: number;
 }

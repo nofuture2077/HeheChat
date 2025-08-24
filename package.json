@@ -28,6 +28,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "dayjs": "^1.11.13",
     "humanize-duration": "^3.32.1",
+    "jszip": "^3.10.1",
     "pg-format": "^1.0.4",
     "pubsub-js": "^1.9.4",
     "react": "^18.3.1",
