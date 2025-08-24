@@ -100,6 +100,8 @@ const extractImagesFromZip = async (zipData: string): Promise<ExtractedImage[]> 
       
       // Skip directories and non-image files
       if (file.dir || !isImageFile(filename)) return;
+
+      if (filename.includes("__MACOSX/")) return;
       
       try {
         // Get file as array buffer
