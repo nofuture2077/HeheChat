@@ -184,7 +184,7 @@ export function AdminConnectionsPage() {
           <Group gap="xs">
             <Text fw={500}>{connection.userName}</Text>
             {connection.streamInfo && (
-              <Badge color="red" size="xs">LIVE</Badge>
+              <Badge color="pink" size="xs">LIVE</Badge>
             )}
           </Group>
           <Text size="xs" c="dimmed">{connection.userId}</Text>
@@ -192,7 +192,7 @@ export function AdminConnectionsPage() {
             <Group gap="xs" mt={2}>
               <Badge 
                 size="xs" 
-                color="red" 
+                color="violet" 
                 leftSection={<IconUsers size="0.7rem" />}
               >
                 {connection.streamInfo.viewerCount}
@@ -326,7 +326,7 @@ export function AdminConnectionsPage() {
                 <Alert 
                   icon={<IconAlertCircle size="1rem" />} 
                   title="Error Loading Connections" 
-                  color="red"
+                  color="pink"
                   variant="light"
                   m="md"
                 >

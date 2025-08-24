@@ -349,24 +349,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                         text: {
                             parts: message.parts
                         }
-                    }),
-                    eventAlert: {
-                        name: 'tts',
-                        id: '0',
-                        type: 'tts',
-                        specifier: {
-                            type: 'exact'
-                        },
-                        restriction: 'none',
-                        audio: {
-                            tts: {
-                                text: '${text}',
-                                voiceType: 'default',
-                                voiceSpecifier: '',
-                                voiceParams: {}
-                            }
-                        }
-                    }
+                    })
                 }
                 AlertSystem.addEvent(tts);
             }
