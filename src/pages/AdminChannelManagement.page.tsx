@@ -567,7 +567,7 @@ export function AdminChannelManagementPage() {
       <Table.Tr key={channel.channelid}>
         <Table.Td>
           <Group gap="xs">
-            <Text fw={500}>{channel.is_valid ? '' : '⚠️ ' + channel.channelname}</Text>
+            <Text fw={500}>{(channel.is_valid ? '' : '⚠️ ') + channel.channelname}</Text>
             {!hasAllScopes && (
               <Tooltip label={`Missing ${missingScopes.length} required scope${missingScopes.length > 1 ? 's' : ''}`}>
                 <IconExclamationCircle size="1rem" color="orange" />
