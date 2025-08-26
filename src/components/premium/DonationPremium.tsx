@@ -1,8 +1,35 @@
-import React from 'react';
 import { Stack, Title, Text, Button, Group, List, Card, Box } from '@mantine/core';
-import { IconGift, IconInfoCircle, IconBrandDiscord, IconExternalLink } from '@tabler/icons-react';
+import { IconGift, IconInfoCircle, IconBrandDiscord, IconExternalLink, IconX } from '@tabler/icons-react';
+import { OverlayDrawer } from '../../pages/Chat.page';
 
-export const DonationPremium: React.FC = () => {
+export const PremiumDrawer: OverlayDrawer = {
+    name: 'massban',
+    component: DonationModal,
+    size: 'xl',
+    position: 'bottom'
+};
+
+interface DonationModalProps {
+  close: () => void;
+}
+
+function DonationModal(props: DonationModalProps) {
+  return <Stack>
+        <Group justify='space-between' p='md'>
+            <Title order={4}>
+                HeheChat needs your support!
+            </Title>
+            {props.close ? 
+            <Button onClick={props.close} variant='subtle' color='primary'>
+                <IconX />
+            </Button> : <span></span>
+            }
+        </Group>
+        <DonationPremium/>
+    </Stack>
+}
+
+export function DonationPremium() {
   const handleDonateClick = () => {
     window.open('https://pally.gg/p/hehechat', '_blank');
   };

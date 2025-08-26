@@ -15,6 +15,7 @@ import { EventDrawer } from '../components/events/eventdrawer';
 import { ChatInput } from '../components/chat/ChatInput';
 import { HelixModeratedChannel } from '@twurple/api';
 import { SettingsDrawer, SettingsTab } from '../components/settings/settings';
+import { PremiumDrawer } from '../components/premium/DonationPremium';
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { MassBanDrawer } from '../components/chat/mod/massban';
@@ -331,6 +332,11 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         const massBanSub = PubSub.subscribe("OPEN_MASSBAN", (msg, data) => {
             MassBanDrawer.props = { channelId: data.channelId, channelName: data.channelName };
             setDrawer(MassBanDrawer);
+            drawerHandler.open();
+        });
+
+        const premiumSub = PubSub.subscribe("OPEN_PREMIUM", (msg, data) => {
+            setDrawer(PremiumDrawer);
             drawerHandler.open();
         });
 

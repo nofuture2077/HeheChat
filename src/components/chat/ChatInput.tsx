@@ -74,7 +74,8 @@ export function ChatInput(props: ChatInputProps) {
         { value: '/user', label: '/user [username] - Show user details' },
         { value: '/ban', label: '/ban [username] - Ban a user' },
         { value: '/timeout', label: '/timeout [username] [seconds] - Timeout a user for specified duration' },
-        { value: '/massban', label: '/massban - Open mass ban tool to ban multiple users' }
+        { value: '/massban', label: '/massban - Open mass ban tool to ban multiple users' },
+        { value: '/premium', label: '/premium - Show ad for HeheChat Pro' },
     ];
 
     const loginContext = useContext(LoginContextContext);
@@ -108,6 +109,9 @@ export function ChatInput(props: ChatInputProps) {
             case 'massban':
                 // Open mass ban modal
                 PubSub.publish('OPEN_MASSBAN', { channelId, channelName: channelname });
+                break;
+            case 'premium':
+                PubSub.publish('OPEN_PREMIUM');
                 break;
             case 'raid':
                 if (args.length > 0) {

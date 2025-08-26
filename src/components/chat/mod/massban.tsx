@@ -11,7 +11,7 @@ import { param, query } from '../../../commons/helper';
 export const MassBanDrawer: OverlayDrawer = {
     name: 'massban',
     component: MassBanView,
-    size: 700,
+    size: 'xl',
     position: 'bottom'
 };
 
@@ -221,9 +221,6 @@ export function MassBanView(props: MassBanViewProps) {
                 props.modActions.banUser(props.channelId, user.userId, banReason);
             });
         }
-        
-        // Close the drawer after banning
-        props.close();
     };
     
     // Reset state when component unmounts
