@@ -81,6 +81,16 @@ const generateSimpleHash = (input: string): number => {
   return Math.abs(hash);
 };
 
+// Extract weight from filename (e.g., "48_whatever.jpg" => 48)
+const extractWeightFromFilename = (filename: string): number | null => {
+  const match = filename.match(/^(\d+)_/);
+  if (match && match[1]) {
+    const weight = parseInt(match[1], 10);
+    return weight > 0 ? weight : null;
+  }
+  return null;
+};
+
 // Extract images from a zip file
 const extractImagesFromZip = async (zipData: string): Promise<ExtractedImage[]> => {
   try {
@@ -152,7 +162,88 @@ export default function VisualAlertPlayer() {
   const [timestamp, setTimestamp] = useState(0);
   const [mediaData, setMediaData] = useState<{ src: string; type: string; mime: string; } | null>(null);
 
-  const getMediaData = async (ref: string, channel: string, username?: string, userSeed?: string) => {
+  // Handle reroll if pending
+const handleRerollIfPending = (
+  sortedImages: ExtractedImage[], 
+  spriteAssignment: UserSpriteAssignment,
+  channel: string,
+  username: string
+): ExtractedImage => {
+  console.log(`Reroll pending for ${username} in ${channel}`);
+  
+  // Select a new image (different from current) using weighted selection
+  const currentFilename = spriteAssignment.selectedFilename;
+  const availableImages = sortedImages.filter(img => img.name !== currentFilename);
+  
+  let selectedImage: ExtractedImage;
+  
+  if (availableImages.length > 0) {
+    // Use weighted selection for reroll too
+    const userHash = generateSimpleHash(`${username}${channel}${Date.now()}`); // Add timestamp for different result
+    selectedImage = selectImageWithWeighting(availableImages, userHash);
+    
+    // Report back to server that reroll is complete
+    completeReroll(channel, username, selectedImage.name)
+      .then(success => {
+        if (success) {
+          console.log(`Reroll completed for ${username} in ${channel}`);
+        } else {
+          console.error(`Failed to complete reroll for ${username} in ${channel}`);
+        }
+      })
+      .catch(error => {
+        console.error('Error completing reroll:', error);
+      });
+  } else {
+    // If no other images available, keep current
+    const foundImage = sortedImages.find(img => img.name === currentFilename);
+    selectedImage = foundImage || sortedImages[0];
+  }
+  
+  return selectedImage;
+};
+
+// Select an image with weighting based on filename prefixes
+const selectImageWithWeighting = (
+  images: ExtractedImage[],
+  userHash: number
+): ExtractedImage => {
+  // Create a weighted pool of images
+  const weightedPool: { image: ExtractedImage; weight: number }[] = [];
+  
+  // Process each image and determine its weight
+  images.forEach(image => {
+    const weight = extractWeightFromFilename(image.name);
+    
+    if (weight !== null) {
+      // If filename has a weight prefix (e.g., "48_whatever.jpg"),
+      // add it to the pool with 1/weight of normal chance
+      weightedPool.push({ image, weight: 1 / weight });
+    } else {
+      // No prefix means normal weight (1.0)
+      weightedPool.push({ image, weight: 1.0 });
+    }
+  });
+  
+  // Calculate total weight
+  const totalWeight = weightedPool.reduce((sum, item) => sum + item.weight, 0);
+  
+  // Use the hash to select an image based on weighted probability
+  let targetValue = (userHash % 1000) / 1000 * totalWeight;
+  let cumulativeWeight = 0;
+  
+  for (const item of weightedPool) {
+    cumulativeWeight += item.weight;
+    if (targetValue <= cumulativeWeight) {
+      return item.image;
+    }
+  }
+  
+  // Fallback to the first image if something goes wrong
+  return images[0];
+};
+
+const getMediaData = async (ref: string, channel: string, username?: string, userSeed?: string) => {
     if (!AlertSystem.alertConfig?.[channel]?.data?.files?.[ref] || !username) {
       return null;
     }
@@ -212,34 +303,7 @@ export default function VisualAlertPlayer() {
         
         // Handle reroll if pending
         if (spriteAssignment?.rerollPending) {
-          console.log(`Reroll pending for ${username} in ${channel}`);
-          
-          // Select a new random image (different from current)
-          const currentFilename = spriteAssignment.selectedFilename;
-          const availableImages = sortedImages.filter(img => img.name !== currentFilename);
-          
-          if (availableImages.length > 0) {
-            // Select random image from available images
-            const randomIndex = Math.floor(Math.random() * availableImages.length);
-            selectedImage = availableImages[randomIndex];
-            
-            // Report back to server that reroll is complete
-            completeReroll(channel, username, selectedImage.name)
-              .then(success => {
-                if (success) {
-                  console.log(`Reroll completed for ${username} in ${channel}`);
-                } else {
-                  console.error(`Failed to complete reroll for ${username} in ${channel}`);
-                }
-              })
-              .catch(error => {
-                console.error('Error completing reroll:', error);
-              });
-          } else {
-            // If no other images available, keep current
-            const foundImage = sortedImages.find(img => img.name === currentFilename);
-            selectedImage = foundImage || sortedImages[0];
-          }
+          selectedImage = handleRerollIfPending(sortedImages, spriteAssignment, channel, username);
         }
         // Use existing assignment if available
         else if (spriteAssignment?.selectedFilename) {
@@ -247,10 +311,9 @@ export default function VisualAlertPlayer() {
           if (foundImage) {
             selectedImage = foundImage;
           } else {
-            // If assigned image no longer exists, select new one
+            // If assigned image no longer exists, select new one using weighted selection
             const userHash = generateSimpleHash(`${username}${channel}`);
-            const selectedIndex = userHash % sortedImages.length;
-            selectedImage = sortedImages[selectedIndex];
+            selectedImage = selectImageWithWeighting(sortedImages, userHash);
             newAssignment = true;
           }
         }
@@ -260,14 +323,13 @@ export default function VisualAlertPlayer() {
           selectedImage = foundImage || sortedImages[0]; // Fallback to first image if not found
           newAssignment = true;
         }
-        // Otherwise, select based on hash
+        // Otherwise, select based on hash with filename-based weighting
         else {
           // Generate deterministic hash from username and channel
           const userHash = generateSimpleHash(`${username}${channel}`);
           
-          // Select image based on hash from sorted images for stability
-          const selectedIndex = userHash % sortedImages.length;
-          selectedImage = sortedImages[selectedIndex];
+          // Apply weighted selection based on filename prefixes
+          selectedImage = selectImageWithWeighting(sortedImages, userHash);
           newAssignment = true;
         }
         
