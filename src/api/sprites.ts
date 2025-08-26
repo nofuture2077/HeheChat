@@ -85,7 +85,9 @@ export const completeReroll = async (
   newFilename: string
 ): Promise<boolean> => {
   try {
-    const response = await fetch(`${BASE_URL}/api/user-sprite/${channel}/${username}/complete-reroll`, {
+    const token = localStorage.getItem('hehe-token_state') || '';
+    const sink = localStorage.getItem('hehe-sink') || '';
+    const response = await fetch(`${BASE_URL}/api/user-sprite/${channel}/${username}/complete-reroll?token=${token}&sink=${sink}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
