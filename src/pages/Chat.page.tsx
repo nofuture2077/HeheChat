@@ -70,6 +70,18 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     const [shouldScroll, setShouldScroll] = useState(true);
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
+    
+    // Custom drawer close handler that also updates the URL
+    const closeDrawerAndUpdateURL = useCallback(() => {
+        // Close the drawer
+        drawerHandler.close();
+        
+        // Check if we're on a special path like /massban or any other special route
+        if (window.location.pathname !== '/') {
+            // Update URL to root without refreshing the page
+            window.history.pushState({}, '', '/');
+        }
+    }, [drawerHandler]);
     const [replyMsg, setReplyMsg] = useState<HeheChatMessage>();
     const [chatInputOpened, chatInputHandler] = useDisclosure(true);
     const loginContext = useContext(LoginContextContext);
@@ -563,12 +575,12 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     if (isDesktopVideoMode) {
         return (
             <div className={classes.desktopVideoLayout}>
-                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
+                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={closeDrawerAndUpdateURL} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
                     {drawer ? <drawer.component 
                         style={{overflow: 'visible'}} 
                         height="100dvh" 
                         modActions={modActions} 
-                        close={drawerHandler.close} 
+                        close={closeDrawerAndUpdateURL} 
                         openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} 
                         openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }}
                         openDrawer={(drawer: OverlayDrawer) => { setDrawer(drawer); drawerHandler.open() }}
@@ -701,12 +713,12 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                     </Stack>
                 </Affix>
 
-                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={drawerHandler.close} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
+                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={closeDrawerAndUpdateURL} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
                     {drawer ? <drawer.component 
                         style={{overflow: 'visible'}} 
                         height="100dvh" 
                         modActions={modActions} 
-                        close={drawerHandler.close} 
+                        close={closeDrawerAndUpdateURL} 
                         openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} 
                         openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }}
                         openDrawer={(drawer: OverlayDrawer) => { setDrawer(drawer); drawerHandler.open() }}
