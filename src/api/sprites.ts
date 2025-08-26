@@ -3,6 +3,16 @@ import { UserSpriteAssignment } from '@/commons/events';
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 /**
+ * Interface for reroll configuration
+ */
+export interface RerollConfig {
+  channel: string;
+  bitsAmount: number | null;
+  donationAmount: number | null;
+  enabled: boolean;
+}
+
+/**
  * Get the sprite assignment for a user in a channel
  * @param channel The channel name
  * @param username The username
@@ -127,6 +137,68 @@ export const triggerReroll = async (
     return {
       success: false,
       rerollPending: false,
+    };
+  }
+};
+
+/**
+ * Get the reroll configuration for a channel
+ * @param channel The channel name
+ * @returns The channel's reroll configuration
+ */
+export const getRerollConfig = async (channel: string): Promise<RerollConfig | null> => {
+  try {
+    const state = localStorage.getItem('hehe-token_state') || '';
+    const response = await fetch(`${BASE_URL}/api/user-sprite/reroll-config/${channel}?token=${state}`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch reroll config: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching reroll config:', error);
+    return null;
+  }
+};
+
+/**
+ * Update the reroll configuration for a channel
+ * @param channel The channel name
+ * @param config The updated configuration
+ * @returns Success status and updated configuration
+ */
+export const updateRerollConfig = async (
+  channel: string,
+  config: {
+    bitsAmount: number | null;
+    donationAmount: number | null;
+    enabled: boolean;
+  }
+): Promise<{ success: boolean; config?: RerollConfig }> => {
+  try {
+    const state = localStorage.getItem('hehe-token_state') || '';
+    const response = await fetch(`${BASE_URL}/api/user-sprite/reroll-config/${channel}?token=${state}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Failed to update reroll config: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    return {
+      success: true,
+      config: result
+    };
+  } catch (error) {
+    console.error('Error updating reroll config:', error);
+    return {
+      success: false
     };
   }
 };

@@ -1,12 +1,13 @@
-import { Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space, Modal, Group, Button } from '@mantine/core';
+import { Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space, Modal, Group, Button, NumberInput } from '@mantine/core';
 import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
 import { useForceUpdate, useDisclosure } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
-import { ConfigContext } from '@/ApplicationContext';
+import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
 import { AlertSystem } from '../../components/alerts/alertplayer'
 import { IconLink, IconRepeat, IconPlus, IconTrash, IconCopy } from '@tabler/icons-react'
 import { SystemMessageMainType } from '../../commons/message';
 import { notifications } from '@mantine/notifications';
+import { getRerollConfig, updateRerollConfig, RerollConfig } from '@/api/sprites';
 
 interface EditorData {
     id: string;
@@ -65,11 +66,15 @@ function CreateEditorModal({ opened, close, createEditor }: { opened: boolean, c
 
 export function AlertSettings() {
     const config = useContext(ConfigContext);
+    const loginContext = useContext(LoginContextContext);
     const forceUpdate = useForceUpdate();
     const [sink, setSink] = useState<string | undefined>(undefined);
     const [shares, setShares] = useState<string[]>(config.shares);
     const [editors, setEditors] = useState<EditorData[]>([]);
     const [editorModalOpened, editorModalHandler] = useDisclosure(false);
+    const [rerollConfig, setRerollConfig] = useState<RerollConfig | null>(null);
+    const [isLoadingRerollConfig, setIsLoadingRerollConfig] = useState(false);
+    const [isSavingRerollConfig, setIsSavingRerollConfig] = useState(false);
 
     useEffect(() => {
         const state = localStorage.getItem('hehe-token_state') || '';
@@ -79,10 +84,76 @@ export function AlertSettings() {
         });
         
         loadEditors();
+        loadRerollConfig();
 
         config.loadReceivedShares();
         config.loadShares();
     }, []);
+    
+    const loadRerollConfig = async () => {
+        if (!loginContext.user) {
+            console.error('User not logged in or user data not available');
+            return;
+        }
+        
+        const username = loginContext.user.name;
+        console.log('Loading reroll config for username:', username);
+        
+        setIsLoadingRerollConfig(true);
+        try {
+            const config = await getRerollConfig(username);
+            console.log('Received reroll config:', config);
+            
+            // If config is null, create a default config
+            if (!config) {
+                const defaultConfig = {
+                    channel: username,
+                    bitsAmount: null,
+                    donationAmount: null,
+                    enabled: true
+                };
+                console.log('Creating default config:', defaultConfig);
+                setRerollConfig(defaultConfig);
+            } else {
+                setRerollConfig(config);
+            }
+        } catch (error) {
+            console.error('Failed to load reroll config:', error);
+        } finally {
+            setIsLoadingRerollConfig(false);
+        }
+    };
+    
+    const saveRerollConfig = async () => {
+        if (!rerollConfig || !loginContext.user) return;
+        
+        setIsSavingRerollConfig(true);
+        try {
+            const result = await updateRerollConfig(rerollConfig.channel, {
+                bitsAmount: rerollConfig.bitsAmount,
+                donationAmount: rerollConfig.donationAmount,
+                enabled: rerollConfig.enabled
+            });
+            
+            if (result.success && result.config) {
+                setRerollConfig(result.config);
+                notifications.show({
+                    title: 'Success',
+                    message: 'Reroll configuration saved successfully',
+                    color: 'green',
+                });
+            }
+        } catch (error) {
+            console.error('Failed to save reroll config:', error);
+            notifications.show({
+                title: 'Error',
+                message: 'Failed to save reroll configuration',
+                color: 'red',
+            });
+        } finally {
+            setIsSavingRerollConfig(false);
+        }
+    };
     
     const loadEditors = () => {
         const state = localStorage.getItem('hehe-token_state') || '';
@@ -391,5 +462,78 @@ export function AlertSettings() {
                     <Text fs="italic" size='14px'>Adjust the volume boost for all alert sounds</Text>
                 </Stack>
             </Fieldset>
+            
+            {rerollConfig && (
+                <Fieldset legend="Sprite Reroll Configuration" variant="filled" key="reroll-config">
+                    <Stack>
+                        <Switch 
+                            checked={rerollConfig.enabled} 
+                            onChange={(event) => { 
+                                const newConfig = {
+                                    ...rerollConfig,
+                                    enabled: event.currentTarget.checked
+                                };
+                                setRerollConfig(newConfig);
+                                
+                                // Save the updated config
+                                (async () => {
+                                    setIsSavingRerollConfig(true);
+                                    try {
+                                        await updateRerollConfig(newConfig.channel, {
+                                            bitsAmount: newConfig.bitsAmount,
+                                            donationAmount: newConfig.donationAmount,
+                                            enabled: newConfig.enabled
+                                        });
+                                    } catch (error) {
+                                        console.error('Failed to update reroll config:', error);
+                                    } finally {
+                                        setIsSavingRerollConfig(false);
+                                    }
+                                })();
+                            }} 
+                            label="Enable sprite rerolls" 
+                            size="lg" 
+                            disabled={isSavingRerollConfig}
+                        />
+                        <Text fs="italic" size='14px'>Allow viewers to reroll their assigned sprites using bits</Text>
+                        
+                        <Text size="sm">Bits amount for reroll</Text>
+                        <NumberInput
+                            placeholder="Enter bits amount"
+                            value={rerollConfig.bitsAmount === null ? undefined : rerollConfig.bitsAmount}
+                            onBlur={(ev) => {
+                                const value = ev.target.value;
+                                const newValue = value === undefined || value === '' ? null : parseInt(value, 10);
+                                const newConfig = {
+                                    ...rerollConfig,
+                                    bitsAmount: newValue
+                                };
+                                setRerollConfig(newConfig);
+                                
+                                // Save the updated config
+                                (async () => {
+                                    setIsSavingRerollConfig(true);
+                                    try {
+                                        await updateRerollConfig(newConfig.channel, {
+                                            bitsAmount: newConfig.bitsAmount,
+                                            donationAmount: newConfig.donationAmount,
+                                            enabled: newConfig.enabled
+                                        });
+                                    } catch (error) {
+                                        console.error('Failed to update reroll config:', error);
+                                    } finally {
+                                        setIsSavingRerollConfig(false);
+                                    }
+                                })();
+                            }}
+                            min={0}
+                            allowNegative={false}
+                            hideControls
+                            disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                        />
+                        <Text fs="italic" size='14px'>Amount of bits required for a viewer to reroll their sprite (leave empty to disable bits rerolls)</Text>
+                    </Stack>
+                </Fieldset>
+            )}
         </Stack>)
 }
