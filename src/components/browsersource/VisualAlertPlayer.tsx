@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext } from 'react';
 import styles from './VisualAlertPlayer.module.css';
-import { VisualAlert, ExtractedImage, ZipCache, Event } from '@/commons/events';
+import { VisualAlert, ExtractedImage, ZipCache, Event, UserSpriteAssignment } from '@/commons/events';
 import { AlertSystem } from '../alerts/alertplayer';
 import { ChatEmotesContext } from '@/ApplicationContext';
 import PubSub from 'pubsub-js';
@@ -8,6 +8,7 @@ import { ChatEmotes } from '@/commons/emotes';
 import { joinWithSpace } from '../../commons/helper';
 import { EmoteComponentSimple } from '../emote/emote';
 import JSZip from 'jszip';
+import { getUserSpriteAssignment, saveUserSpriteAssignment, completeReroll } from '@/api/sprites';
 
 interface HighlightedTextProps {
   text: string;
@@ -152,7 +153,7 @@ export default function VisualAlertPlayer() {
   const [mediaData, setMediaData] = useState<{ src: string; type: string; mime: string; } | null>(null);
 
   const getMediaData = async (ref: string, channel: string, username?: string, userSeed?: string) => {
-    if (!AlertSystem.alertConfig?.[channel]?.data?.files?.[ref]) {
+    if (!AlertSystem.alertConfig?.[channel]?.data?.files?.[ref] || !username) {
       return null;
     }
     
@@ -198,19 +199,91 @@ export default function VisualAlertPlayer() {
         // Sort images by filename for consistent ordering
         const sortedImages = [...cacheEntry.images].sort((a, b) => a.name.localeCompare(b.name));
         
-        let selectedImage: ExtractedImage;
+        // Check if user has a sprite assignment or reroll pending
+        let spriteAssignment: UserSpriteAssignment | null = null;
+        try {
+          spriteAssignment = await getUserSpriteAssignment(channel, username);
+        } catch (error) {
+          console.error('Error fetching sprite assignment:', error);
+        }
         
+        let selectedImage: ExtractedImage;
+        let newAssignment = false;
+        
+        // Handle reroll if pending
+        if (spriteAssignment?.rerollPending) {
+          console.log(`Reroll pending for ${username} in ${channel}`);
+          
+          // Select a new random image (different from current)
+          const currentFilename = spriteAssignment.selectedFilename;
+          const availableImages = sortedImages.filter(img => img.name !== currentFilename);
+          
+          if (availableImages.length > 0) {
+            // Select random image from available images
+            const randomIndex = Math.floor(Math.random() * availableImages.length);
+            selectedImage = availableImages[randomIndex];
+            
+            // Report back to server that reroll is complete
+            completeReroll(channel, username, selectedImage.name)
+              .then(success => {
+                if (success) {
+                  console.log(`Reroll completed for ${username} in ${channel}`);
+                } else {
+                  console.error(`Failed to complete reroll for ${username} in ${channel}`);
+                }
+              })
+              .catch(error => {
+                console.error('Error completing reroll:', error);
+              });
+          } else {
+            // If no other images available, keep current
+            const foundImage = sortedImages.find(img => img.name === currentFilename);
+            selectedImage = foundImage || sortedImages[0];
+          }
+        }
+        // Use existing assignment if available
+        else if (spriteAssignment?.selectedFilename) {
+          const foundImage = sortedImages.find(img => img.name === spriteAssignment.selectedFilename);
+          if (foundImage) {
+            selectedImage = foundImage;
+          } else {
+            // If assigned image no longer exists, select new one
+            const userHash = generateSimpleHash(`${username}${channel}`);
+            const selectedIndex = userHash % sortedImages.length;
+            selectedImage = sortedImages[selectedIndex];
+            newAssignment = true;
+          }
+        }
         // If userSeed is a filename that exists in the zip, use that image directly
-        if (userSeed && sortedImages.some(img => img.name === userSeed)) {
+        else if (userSeed && sortedImages.some(img => img.name === userSeed)) {
           const foundImage = sortedImages.find(img => img.name === userSeed);
           selectedImage = foundImage || sortedImages[0]; // Fallback to first image if not found
-        } else {
+          newAssignment = true;
+        }
+        // Otherwise, select based on hash
+        else {
           // Generate deterministic hash from username and channel
-          const userHash = generateSimpleHash(`${username || ''}${channel}`);
+          const userHash = generateSimpleHash(`${username}${channel}`);
           
           // Select image based on hash from sorted images for stability
           const selectedIndex = userHash % sortedImages.length;
           selectedImage = sortedImages[selectedIndex];
+          newAssignment = true;
+        }
+        
+        // Save new assignment if needed
+        if (newAssignment) {
+          saveUserSpriteAssignment(channel, username, selectedImage.name)
+            .then(success => {
+              if (success) {
+                console.log(`Saved sprite assignment for ${username} in ${channel}: ${selectedImage.name}`);
+              } else {
+                console.error(`Failed to save sprite assignment for ${username} in ${channel}`);
+              }
+            })
+            .catch(error => {
+              console.error('Error saving sprite assignment:', error);
+            });
         }
         
         return {
@@ -244,6 +317,18 @@ export default function VisualAlertPlayer() {
         const eventData = AlertSystem.currentlyPlaying || {} as Event;
         const username = eventData.username || '';
         const userSeed = eventData.userSeed || '';
+        
+        // If the event has rerollPending flag, trigger a reroll on the server
+        if (eventData.rerollPending && username) {
+          try {
+            // This is a fallback in case the server didn't set the reroll flag
+            // It ensures the reroll will be processed when we fetch the sprite assignment
+            await completeReroll(currentAlert.channel, username, '');
+            console.log(`Triggered reroll for ${username} from event data`);
+          } catch (error) {
+            console.error('Error triggering reroll from event:', error);
+          }
+        }
         
         const data = await getMediaData(currentAlert.image, currentAlert.channel, username, userSeed);
         setMediaData(data);

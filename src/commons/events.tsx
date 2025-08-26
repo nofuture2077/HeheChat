@@ -124,6 +124,15 @@ export type Event = {
     amount2?: number;
     eventAlert?: EventAlert;
     userSeed?: string; // Added for deterministic sprite selection
+    rerollPending?: boolean; // Flag indicating a reroll is pending for this user
+}
+
+// User sprite assignment interface
+export interface UserSpriteAssignment {
+    username: string;
+    channel: string;
+    selectedFilename: string;
+    rerollPending: boolean;
 }
 
 export interface VisualAlert {
