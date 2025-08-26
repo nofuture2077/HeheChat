@@ -57,6 +57,7 @@ export interface ConfigData {
     activatedShares: string[],
     shares: string[],
     freeTTS: string[],
+    ignoreTTS: string[],
     readAllMessages: boolean,
     deactivatedAlerts: Record<string, boolean>,
     shortcuts: ShortCut[],
@@ -115,6 +116,7 @@ export interface Config extends ConfigData {
     setBrowserSourceVisual: (val: boolean) => void;
     setCheckBrowsersourceConnection: (val: boolean) => void;
     setFreeTTS: (val: string[]) => void;
+    setIgnoreTTS: (val: string[]) => void;
     setShortcuts: (val: ShortCut[]) => void;
     setReloadOnReturnToApp: (val: boolean) => void;
     setRainMode: (val: boolean) => void;
@@ -184,6 +186,7 @@ export const DEFAULT_CONFIG: Config = {
     activatedShares: [],
     shares: [],
     freeTTS: [],
+    ignoreTTS: [],
     deactivatedAlerts: {},
     shortcuts: [],
     reloadOnReturnToApp: true,
@@ -228,6 +231,7 @@ export const DEFAULT_CONFIG: Config = {
     setHideOwnViewers: (val: boolean) => {},
     loadShares: () => {},
     setFreeTTS: (val: string[]) => {},
+    setIgnoreTTS: (val: string[]) => {},
     setShortcuts: (val: ShortCut[]) => {},
     setBrowserSourceAudio: (val) => {},
     setBrowserSourceVisual: (val) => {},

@@ -12,6 +12,7 @@ export const TOGGLEABLE_CONFIG_VALUES = [
     { value: 'showTimestamp', label: 'Timestamp' },
     { value: 'modToolsEnabled', label: 'Mod Tools' },
     { value: 'playAlerts', label: 'Play Alerts' },
+    { value: 'readAllMessages', label: 'Read Chat' }
 ];
 
 export interface ShortCut {

@@ -355,21 +355,25 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         const msgSub = PubSub.subscribe("WS-msg", (msg, data) => {
             const message = parseMessage(data.message);
             if (config.readAllMessages && premium.isPremium && message.type === 'chat') {
-                const date = Date.now();
+                // Check if the user is not in the ignoreTTS list
+                const username = data.username.toLowerCase();
+                if (!config.ignoreTTS.includes(username)) {
+                    const date = Date.now();
 
-                const tts: Event = {
-                    id: date,
-                    channel: message.target.slice(1),
-                    username: data.username,
-                    eventtype: 'tts',
-                    date: date,
-                    text: JSON.stringify({ 
-                        text: {
-                            parts: message.parts
-                        }
-                    })
+                    const tts: Event = {
+                        id: date,
+                        channel: message.target.slice(1),
+                        username: data.username,
+                        eventtype: 'tts',
+                        date: date,
+                        text: JSON.stringify({ 
+                            text: {
+                                parts: message.parts
+                            }
+                        })
+                    }
+                    AlertSystem.addEvent(tts);
                 }
-                AlertSystem.addEvent(tts);
             }
             addMessage(message, data.username, config.maxMessages);
         });
@@ -442,7 +446,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             PubSub.unsubscribe(massBanSub);
             config.off(chatHandler);
         };
-    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, config.readAllMessages, loginContext.user]);
+    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, config.ignoreTTS, config.readAllMessages, loginContext.user]);
 
     // Track document visibility changes for reload functionality
     useEffect(() => {

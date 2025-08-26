@@ -70,6 +70,12 @@ export function ChatSettings() {
                 <Text fs="italic" size='14px'>Users in this list can use e.g. "!tts Forget your phone" in chat. You can give this to thrustful moderators, friends or management for emergency cases. "all" gives everyone free tts</Text>
             </Fieldset>
 
+            <Fieldset legend="Ignore TTS Users" variant="filled" key="ignore-tts">
+                <TagsInput placeholder="" value={config.ignoreTTS} onChange={(ignoreTTS) => config.setIgnoreTTS(ignoreTTS.map(c => c.toLowerCase().substring(0, 50).trim()))}></TagsInput>
+                <Space h="xs" />
+                <Text fs="italic" size='14px'>Users in this list will be ignored from messages triggered by readAllMessages</Text>
+            </Fieldset>
+
             <Fieldset legend="Ignored Users" variant='filled'>
                 <TagsInput placeholder="" value={config.ignoredUsers} onChange={(users) => config.setIgnoredUsers(users.map(u => u.toLowerCase().substring(0, 25).trim()))}></TagsInput>
                 <Space h="xs" />

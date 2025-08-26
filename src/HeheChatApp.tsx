@@ -401,6 +401,7 @@ export default function HeheChat() {
     const setVideoQuality = (value: string) => updateConfig('videoQuality', value);
     const setRaidTargets = (value: string[]) => updateConfig('raidTargets', value);
     const setFreeTTS = (value: string[]) => updateConfig('freeTTS', value);
+    const setIgnoreTTS = (value: string[]) => updateConfig('ignoreTTS', value);
     const setChatEnabled = (value: boolean) => updateConfig('chatEnabled', value);
     const setHideViewers = (value: boolean) => updateConfig('hideViewers', value);
     const setHideOwnViewers = (value: boolean) => updateConfig('hideOwnViewers', value);
@@ -651,6 +652,7 @@ export default function HeheChat() {
         setModToolsEnabled,
         setRaidTargets,
         setFreeTTS,
+        setIgnoreTTS,
         setPlayAlerts,
         setSystemMessageInChat,
         setHideEvents,
