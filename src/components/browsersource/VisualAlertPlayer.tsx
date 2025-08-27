@@ -160,7 +160,7 @@ export default function VisualAlertPlayer() {
   const chatEmotes = useContext(ChatEmotesContext);
   const [isVisible, setIsVisible] = useState(false);
   const [timestamp, setTimestamp] = useState(0);
-  const [mediaData, setMediaData] = useState<{ src: string; type: string; mime: string; } | null>(null);
+  const [mediaData, setMediaData] = useState<{ src: string; type: string; mime: string; prefixClass?: string; } | null>(null);
 
   // Handle reroll if pending
 const handleRerollIfPending = (
@@ -348,10 +348,15 @@ const getMediaData = async (ref: string, channel: string, username?: string, use
             });
         }
         
+        // Extract number prefix if it exists for glow effect
+        const prefixMatch = selectedImage.name.match(/^(\d+)_/);
+        const prefixClass = prefixMatch ? `prefix-${prefixMatch[1]}` : '';
+        
         return {
           src: `data:${selectedImage.mime};base64,${selectedImage.data}`,
           type: 'image',
-          mime: selectedImage.mime
+          mime: selectedImage.mime,
+          prefixClass: prefixClass
         };
       } catch (err) {
         console.error('Error processing zip file:', err);
@@ -363,7 +368,8 @@ const getMediaData = async (ref: string, channel: string, username?: string, use
     return {
       src: `data:${file.mime};base64,${file.data}`,
       type: file.type,
-      mime: file.mime
+      mime: file.mime,
+      prefixClass: '' // No prefix class for non-zip files
     };
   };
 
@@ -466,9 +472,12 @@ const getMediaData = async (ref: string, channel: string, username?: string, use
               />
             );
           } else {
+            // Use the prefixClass that was determined in getMediaData
+            const prefixClass = mediaData.prefixClass || '';
+            
             return (
               <img 
-                className={styles.image}
+                className={`${styles.image} ${prefixClass ? styles[prefixClass] : ''}`}
                 src={mediaData.src} 
                 alt="Alert" 
                 key={"image-" + timestamp}

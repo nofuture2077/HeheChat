@@ -947,6 +947,19 @@ body, html {
   visibility: visible;
 }
 
+/* Prefix-based glow effects */
+.prefix-2 {
+  filter: drop-shadow(0 0 15px rgba(0, 100, 255, 0.8));
+}
+
+.prefix-5 {
+  filter: drop-shadow(0 0 15px rgba(128, 0, 255, 0.8));
+}
+
+.prefix-10 {
+  filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+}
+
 /* Video styles - inherit all image styles */
 .image video {
   background-color: transparent !important;
