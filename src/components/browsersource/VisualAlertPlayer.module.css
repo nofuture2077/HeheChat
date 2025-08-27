@@ -949,15 +949,57 @@ body, html {
 
 /* Prefix-based glow effects */
 .prefix-2 {
-  filter: drop-shadow(0 0 15px rgba(0, 100, 255, 0.8));
+  position: relative;
+  z-index: 1;
+}
+
+.prefix-2::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  z-index: -1;
+  border-radius: 50%;
+  background-color: rgba(0, 100, 255, 0.6);
+  filter: blur(20px);
 }
 
 .prefix-5 {
-  filter: drop-shadow(0 0 15px rgba(128, 0, 255, 0.8));
+  position: relative;
+  z-index: 1;
+}
+
+.prefix-5::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  z-index: -1;
+  border-radius: 50%;
+  background-color: rgba(128, 0, 255, 0.6);
+  filter: blur(20px);
 }
 
 .prefix-10 {
-  filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+  position: relative;
+  z-index: 1;
+}
+
+.prefix-10::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.8) 0%, rgba(255, 180, 0, 0.6) 50%, rgba(255, 140, 0, 0.4) 100%);
+  filter: blur(20px);
 }
 
 /* Video styles - inherit all image styles */
