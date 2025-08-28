@@ -361,7 +361,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                     const date = Date.now();
 
                     const tts: Event = {
-                        id: date,
+                        id: -1,
                         channel: message.target.slice(1),
                         username: data.username,
                         eventtype: 'tts',

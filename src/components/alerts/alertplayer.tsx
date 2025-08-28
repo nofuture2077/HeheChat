@@ -650,11 +650,10 @@ class AlertPlayer {
     }
 
     getAlert(event: Event, eventData: any, alertConfig?: EventAlertConfig, config?: Config): EventAlert | undefined {
-        if (eventData.eventAlert) {
+        if (event.eventtype === 'tts' && event.id !== -1) {
             if (!((config?.freeTTS || []).includes(event.username) || (config?.freeTTS || []).includes('all'))) {
                 return undefined;
             }
-            return eventData.eventAlert;
         }
         if (event.eventAlert) {
             return event.eventAlert;
