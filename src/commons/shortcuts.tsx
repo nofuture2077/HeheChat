@@ -66,6 +66,7 @@ class ShortCutHandler {
             'skipGlobalEmotesInTTS': () => this.config!.setSkipGlobalEmotesInTTS(!this.config!.skipGlobalEmotesInTTS),
             'show7TVCosmetics': () => this.config!.setShow7TVCosmetics(!this.config!.show7TVCosmetics),
             'reloadOnReturnToApp': () => this.config!.setReloadOnReturnToApp(!this.config!.reloadOnReturnToApp),
+            'readAllMessages': () => this.config!.setReadAllMessages(!this.config!.readAllMessages),
         };
 
         const toggleMethod = toggleMethods[configKey];
