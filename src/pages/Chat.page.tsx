@@ -148,6 +148,43 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         setChatMessages((prevMessages) => prevMessages.concat(msg).slice((prevMessages.length % 2) ? 0 : (-1 * maxMessages + 1)));
     };
 
+    const setMessages = (msgs: HeheMessage[], maxMessages: number) => {
+        messageIndex.clear();
+        const newMessages: HeheMessage[] = [];
+        const usernames: string[] = [];
+
+        for (const msg of msgs) {
+            if (msg instanceof HeheChatMessage && config.ignoredUsers.indexOf(msg.userInfo.userName.toLowerCase()) !== -1) {
+                continue;
+            }
+
+            if (msg.id && messageIndex.has(msg.id)) {
+                continue;
+            }
+
+            // Track username from new messages
+            if (msg.type === 'chat') {
+                usernames.push(msg.userInfo.userName.toLowerCase());
+                
+            }
+
+            newMessages.push(msg);
+        }
+
+        if (newMessages.length === 0) {
+            return; // nothing to add
+        }
+
+        setUsernames(new Set(usernames));
+
+        setChatMessages(prevMessages =>
+            prevMessages
+                .concat(newMessages)
+                .slice((prevMessages.length % 2) ? 0 : (-1 * maxMessages + 1))
+        );
+    };
+
+
     const onModEvent = useCallback((eventname: string, data: any) => {
         if (data.eventtype === 'delete') {
             const msgId = data.text;
@@ -387,8 +424,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
 
         Storage.load(config.channels, config.ignoredUsers, config.maxMessages).then(rawMessages => {
             const msgs = rawMessages.map(parseMessage);
-            setUsernames(new Set(msgs.filter(msg => msg.type === 'chat').map(msg => msg.userInfo.userName.toLowerCase())));
-            setChatMessages(msgs);
+            setMessages(msgs, config.maxMessages);
         });
 
         if (loginContext.user) {
@@ -467,8 +503,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         if (networkStatus.online && isVisible) {
             Storage.load(config.channels, config.ignoredUsers, config.maxMessages).then(rawMessages => {
                 const msgs = rawMessages.map(parseMessage);
-                setUsernames(new Set(msgs.filter(msg => msg.type === 'chat').map(msg => msg.userInfo.userName.toLowerCase())));
-                setChatMessages(msgs);
+                setMessages(msgs, config.maxMessages);
             });
         }
         if (!AlertSystem.status()) {
