@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext, PremiumContext } from '../ApplicationContext';
-import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork, useDidUpdate } from '@mantine/hooks';
+import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, ActionIcon, Text } from '@mantine/core';
 import { IconAlertTriangle, IconDeviceDesktop, IconRepeat, IconMessagePause, IconSettings, IconKeyboard, IconBell, IconBrandTwitch } from '@tabler/icons-react';
 import PubSub from 'pubsub-js';
@@ -19,7 +19,8 @@ import { PremiumDrawer } from '../components/premium/DonationPremium';
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { MassBanDrawer } from '../components/chat/mod/massban';
-import { HeheMessage, parseMessage, HeheChatMessage } from '../commons/message';
+import { HeheMessage, parseMessage, HeheChatMessage, SystemMessage, SystemMessageMainType } from '../commons/message';
+import { EventType, EventTypeMapping } from '../commons/events';
 import { TwitchDrawer } from '../components/twitch/twitchview';
 import { TwitchPlayer } from '../components/twitch/twitchplayer';
 import { TwitchClipsPlayer } from '../components/twitch/twitchclipsplayer';
@@ -156,6 +157,14 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         for (const msg of msgs) {
             if (msg instanceof HeheChatMessage && config.ignoredUsers.indexOf(msg.userInfo.userName.toLowerCase()) !== -1) {
                 continue;
+            }
+
+            if (msg instanceof SystemMessage) {
+                const eventType = msg.data.type as EventType;
+                const eventMainType = EventTypeMapping[eventType] as SystemMessageMainType;
+                if (msg.data.type !== 'announcement' && !config.systemMessageInChat[eventMainType]) {
+                    continue;
+                }
             }
 
             if (msg.id && messageIndex.has(msg.id)) {
