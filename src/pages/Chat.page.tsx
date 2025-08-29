@@ -167,7 +167,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                 usernames.push(msg.userInfo.userName.toLowerCase());
                 
             }
-
+            messageIndex.set(msg.id, msg);
             newMessages.push(msg);
         }
 
