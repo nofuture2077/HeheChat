@@ -453,6 +453,9 @@ class AlertPlayer {
         Object.entries(replacements).forEach(([searchPattern, replacement]) => {
             if (!searchPattern || replacement === undefined) return;
             
+            // Check if the pattern consists only of special characters
+            const isSpecialCharsOnly = /^[^\w\s]+$/.test(searchPattern);
+            
             // Handle wildcard patterns
             if (searchPattern.includes('*')) {
                 // Convert wildcard pattern to regex
@@ -461,12 +464,28 @@ class AlertPlayer {
                     .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
                     .replace(/\*/g, '.*');
                 
-                // Create word boundary regex for case-insensitive matching
-                const regex = new RegExp(`\\b${escapedPattern}\\b`, 'gi');
+                // Create appropriate regex for matching
+                // Don't use word boundaries for patterns that are only special characters
+                const regexPattern = isSpecialCharsOnly 
+                    ? escapedPattern 
+                    : `\\b${escapedPattern}\\b`;
+                    
+                const regex = new RegExp(regexPattern, 'gi');
                 processedMessage = processedMessage.replace(regex, replacement);
             } else {
-                // Simple word-based replacement (case-insensitive)
-                const regex = new RegExp(`\\b${searchPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
+                // Simple replacement (case-insensitive)
+                // Don't use word boundaries for patterns that are only special characters
+                const escapedPattern = searchPattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                
+                let regex;
+                if (isSpecialCharsOnly) {
+                    // For special characters like "^^", match them anywhere
+                    regex = new RegExp(escapedPattern, 'gi');
+                } else {
+                    // For normal words, use word boundaries
+                    regex = new RegExp(`\\b${escapedPattern}\\b`, 'gi');
+                }
+                
                 processedMessage = processedMessage.replace(regex, replacement);
             }
         });
