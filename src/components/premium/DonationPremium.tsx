@@ -3,7 +3,7 @@ import { IconGift, IconInfoCircle, IconBrandDiscord, IconExternalLink, IconX } f
 import { OverlayDrawer } from '../../pages/Chat.page';
 
 export const PremiumDrawer: OverlayDrawer = {
-    name: 'massban',
+    name: 'premium',
     component: DonationModal,
     size: 'xl',
     position: 'bottom'

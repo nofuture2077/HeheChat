@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from 'react';
-import { TextInput, Textarea, Checkbox, Button, Group, Stack, Text, ScrollArea, Badge, ActionIcon, TagsInput, Fieldset } from '@mantine/core';
-import { IconSearch, IconTrash, IconCheck, IconX } from '@tabler/icons-react';
+import { TextInput, Textarea, Checkbox, Button, Group, Stack, Text, Title, Badge, ActionIcon, TagsInput, Fieldset } from '@mantine/core';
+import { IconSearch, IconX } from '@tabler/icons-react';
 import { ModActions } from './modactions';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../../ApplicationContext';
 import { HeheChatMessage, parseMessage } from '../../../commons/message';
@@ -71,7 +71,9 @@ export function MassBanView(props: MassBanViewProps) {
     // Initialize selected channels with current channel
     useEffect(() => {
         if (props.channelName && !selectedChannels.includes(props.channelName)) {
-            setSelectedChannels([props.channelName]);
+            const selectedChannelsData = localStorage.getItem('hehechat-massban-channels');
+            const selectedChannels = selectedChannelsData ? JSON.parse(selectedChannelsData) : [props.channelName];
+            setSelectedChannels(selectedChannels);
         }
     }, [props.channelName]);
     
@@ -229,7 +231,6 @@ export function MassBanView(props: MassBanViewProps) {
             setSearchPhrase('');
             setBanReason('');
             setBanInAllChannels(false);
-            setSelectedChannels([]);
             setUsersToModerate([]);
             setShowConfirmation(false);
         };
@@ -237,7 +238,16 @@ export function MassBanView(props: MassBanViewProps) {
     
     return (
         <Stack justify='space-between' h="100%" gap="xs">
-            <Text fw={700} size="lg" p="md">Mass Ban Tool</Text>
+            <Group justify='space-between' p='md'>
+                <Title order={4}>
+                    Mass Ban Tool
+                </Title>
+                {props.close ? 
+                <Button onClick={props.close} variant='subtle' color='primary'>
+                    <IconX />
+                </Button> : <span></span>
+                }
+            </Group>
             <Stack p="md" style={{ flex: 1, overflow: 'auto' }}>
                 <Text size="sm" color="dimmed" mb="md">
                     Search for messages to find users or manually select channels to ban in.
@@ -296,13 +306,6 @@ export function MassBanView(props: MassBanViewProps) {
                                     checked={banInAllChannels}
                                     onChange={(e) => {
                                         setBanInAllChannels(e.currentTarget.checked);
-                                        if (e.currentTarget.checked) {
-                                            // If checking "all channels", clear the selected channels
-                                            setSelectedChannels([]);
-                                        } else if (props.channelName) {
-                                            // If unchecking, default to current channel
-                                            setSelectedChannels([props.channelName]);
-                                        }
                                     }}
                                 />
                                 
@@ -312,7 +315,11 @@ export function MassBanView(props: MassBanViewProps) {
                                         <TagsInput
                                             placeholder="Add channel names"
                                             value={selectedChannels}
-                                            onChange={(channels) => setSelectedChannels(channels.map(c => c.toLowerCase().substring(0, 25).trim()))}
+                                            onChange={(channels) => {
+                                                const newChannels = channels.map(c => c.toLowerCase().substring(0, 25).trim());
+                                                localStorage.setItem('hehechat-massban-channels', JSON.stringify(newChannels));
+                                                setSelectedChannels(newChannels);                
+                                            }}
                                             disabled={banInAllChannels}
                                             data={moderatedChannels.map(channel => channel.name)}
                                         />
