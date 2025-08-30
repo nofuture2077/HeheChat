@@ -380,6 +380,9 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     }, []);
 
     useEffect(() => {
+        if (!config.channels || !config.channels.length || !loginContext.user) {
+            return;
+        }
         const chatHandler = config.onMessage({
             handle: async (channel, text, replyTo) => {
                 PubSub.publish('WSSEND', {type: 'sendMessage', channel, text, replyTo});
