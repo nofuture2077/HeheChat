@@ -180,17 +180,9 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             newMessages.push(msg);
         }
 
-        if (newMessages.length === 0) {
-            return; // nothing to add
-        }
-
         setUsernames(new Set(usernames));
 
-        setChatMessages(prevMessages =>
-            prevMessages
-                .concat(newMessages)
-                .slice((prevMessages.length % 2) ? 0 : (-1 * maxMessages + 1))
-        );
+        setChatMessages(newMessages);
     };
 
 
