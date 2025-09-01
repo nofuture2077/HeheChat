@@ -493,7 +493,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         const isVisible = documentVisible === 'visible';
         
         // Check if document became visible (was hidden, now visible) and reload if enabled
-        if (isVisible && !prevDocumentVisible.current && networkStatus.online && config.reloadOnReturnToApp && !drawerOpen) {
+        if (isVisible && !prevDocumentVisible.current && networkStatus.online && config.reloadOnReturnToApp && !drawerOpen && !config.showVideo) {
             console.log('Reloading page due to return to app');
             window.location.reload();
             return;
