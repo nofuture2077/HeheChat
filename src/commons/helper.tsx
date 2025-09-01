@@ -179,7 +179,37 @@ const formatFunctions: { [key: string]: (value: any) => string } = {
     currency: (value: string) => formatCurrency(value),
 };
 
+// prüft einfache Bedingungen wie "durationMonths > 1"
+function checkCondition(condition: string, args: Record<string, any>): boolean {
+    const match = condition.match(/^(\w+)\s*(==|!=|>|<|>=|<=)\s*(\d+)$/);
+    if (!match) return false;
+    const [, key, op, numStr] = match;
+    const val = Number(args[key]);
+    const num = Number(numStr);
+
+    switch (op) {
+        case '==': return val === num;
+        case '!=': return val !== num;
+        case '>': return val > num;
+        case '<': return val < num;
+        case '>=': return val >= num;
+        case '<=': return val <= num;
+        default: return false;
+    }
+}
+
 export function formatString(messageTemplate: string, args: Record<string, any>): string {
+    // Schritt 1: Condition-Blöcke auflösen
+    messageTemplate = messageTemplate.replace(
+        /\${\s*"([^"]+)"\s*,\s*"([^"]+)"\s*}/g,
+        (_, template, condition) => {
+            return checkCondition(condition, args)
+                ? formatString(template, args) // inneres Template erneut verarbeiten
+                : '';
+        }
+    );
+
+    // Schritt 2: normale Platzhalter ersetzen
     return messageTemplate.replace(/\${(\w+)(?::(\w+))?}/g, (_, key, formatFunction) => {
         const value = args[key];
         if (formatFunction && formatFunctions[formatFunction]) {
