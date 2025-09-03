@@ -121,18 +121,6 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
         return;
       }
 
-      if (data.type === 'delayinfo') {
-        backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "delayinfo", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
-        return;
-      }
-
-      if (data.type === 'setdelay') {
-        AlertSystem.setJingleExtra(data.data.jingleExtra);
-        AlertSystem.setTTSExtra(data.data.ttsExtra);
-        backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "setdelayresponse", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
-        return;
-      }
-
       if (data.type === 'profile') {
         const profile: Profile = data.profile;
         setProfile(profile);

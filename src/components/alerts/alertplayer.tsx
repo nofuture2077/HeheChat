@@ -38,16 +38,12 @@ class AlertPlayer {
     profile?: Profile;
     currentlyPlaying?: Event;
     skipCurrent: boolean = false;
-    ttsExtra?: number;
-    jingleExtra?: number;
     mode?: 'app' | 'browsersource';
     queueCheckInterval?: number;
     isDestroyed: boolean = false;
 
     constructor() {
         this.queueCheckInterval = setInterval(() => this.checkQueue(), 1000) as unknown as number;
-        this.ttsExtra = Number(localStorage.getItem('hehechat-ttsExtra') || '0') || 0;
-        this.jingleExtra = Number(localStorage.getItem('hehechat-jingleExtra') || '0') || 0;
         setInterval(() => this.playSilenceIfQueueEmpty(), 120000);
         this.mode = (localStorage.getItem('hehe-mode') as 'app' | 'browsersource') || undefined;
         
@@ -568,16 +564,6 @@ class AlertPlayer {
         return cleanedMessage;
     }
 
-    setTTSExtra(extra: number) {
-        this.ttsExtra = extra;
-        localStorage.setItem('hehechat-ttsExtra', extra + "");
-    }
-
-    setJingleExtra(extra: number) {
-        this.jingleExtra = extra;
-        localStorage.setItem('hehechat-jingleExtra', extra + "");
-    }
-
     getAudioFileData(reference: Base64FileReference, alertConfig: EventAlertConfig) {
         const file = alertConfig?.data?.files[reference] as unknown as Base64File;
         if (file && file.data) {
@@ -865,7 +851,7 @@ class AlertPlayer {
             
             if (shouldPlayAudio) {
                 console.log("Starting jingle playback");
-                this.playAudio(0.8, jingleAudio, this.jingleExtra || 0)
+                this.playAudio(0.8, jingleAudio, 0)
                     .then(() => {
                         console.log("Jingle playback completed, starting TTS");
                         if (this.skipCurrent) throw new Error("Playback skipped");
@@ -875,7 +861,7 @@ class AlertPlayer {
                             console.log("No TTS audio available, skipping TTS part but continuing alert");
                             return Promise.resolve(); // Skip TTS part but continue chain
                         }
-                        return this.playAudio(1.0, ttsAudio, this.ttsExtra || 0);
+                        return this.playAudio(1.0, ttsAudio, 0);
                     })
                     .then(() => {
                         console.log("TTS playback completed");

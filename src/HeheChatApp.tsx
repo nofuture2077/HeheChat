@@ -281,19 +281,7 @@ export default function HeheChat() {
                 AlertSystem.addEvent(event);
             }
         });
-
-        const psDelayInfo = PubSub.subscribe("WS-delayinfo", (msg, data) => {
-            backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "delayinfo", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
-            return;
-        });
     
-        const psSetDelay = PubSub.subscribe("WS-setdelay", (msg, data) => {
-            AlertSystem.setJingleExtra(data.jingleExtra);
-            AlertSystem.setTTSExtra(data.ttsExtra);
-            backendWorkerRef.current?.postMessage({ type: "SEND", data: { type: "setdelayresponse", ttsExtra: localStorage.getItem('hehechat-ttsExtra'), jingleExtra: localStorage.getItem('hehechat-jingleExtra') }});
-            return;
-        });
-
         // Set up a listener for network/visibility changes
         const handleNetworkOrVisibilityChange = () => {
             if (networkStatus.online && documentVisible && backendWorkerRef.current) {
@@ -311,8 +299,6 @@ export default function HeheChat() {
             backendWorkerRef.current?.postMessage(stopMessage);
             PubSub.unsubscribe(psAlertConfig);
             PubSub.unsubscribe(psReplayEvent);
-            PubSub.unsubscribe(psDelayInfo);
-            PubSub.unsubscribe(psSetDelay);
             PubSub.unsubscribe(psWSSend);
             
             // Remove event listeners
