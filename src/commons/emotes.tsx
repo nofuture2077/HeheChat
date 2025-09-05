@@ -133,9 +133,39 @@ function getBadgeImageHtml(badges: Map<string, BadgeSet>, setId: string, version
 }
 
 export async function get7TVEmotes(userId: string, username: string) {
-    // Try to get from EmoteStore first
-    const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.SEVENTV, userId);
-    if (cachedEmotes) {
+    // First, check if we need to refresh the cache by checking the version
+    let needsRefresh = false;
+    let cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.SEVENTV, userId);
+    
+    try {
+        // Try to get version info from server (if the endpoint exists)
+        const versionInfo = await EmoteApiClient.get7TVEmoteVersion(userId);
+        
+        if (versionInfo && versionInfo.lastModified) {
+            // If we have cached emotes and server version is newer, we need to refresh
+            if (cachedEmotes && 
+                (!cachedEmotes.lastModified || versionInfo.lastModified > cachedEmotes.lastModified)) {
+                needsRefresh = true;
+                console.log(`7TV emotes for ${username} need refresh: server version is newer`);
+            }
+            
+            // If we have an emote set ID from version check, update the mapping
+            if (versionInfo.emoteSetId) {
+                emoteSetUserNameMap[versionInfo.emoteSetId] = username;
+            }
+        }
+    } catch (error) {
+        console.error('Error checking 7TV emote version:', error);
+        // Continue with cached data if available
+    }
+    
+    // Use cache if available and doesn't need refresh
+    if (cachedEmotes && !needsRefresh) {
+        // Restore emote set mapping from cache
+        if (cachedEmotes.emoteSetId) {
+            emoteSetUserNameMap[cachedEmotes.emoteSetId] = username;
+        }
+        
         // Convert array back to Map
         const emoteMap = new Map();
         cachedEmotes.emotes.forEach(emote => {
@@ -144,22 +174,47 @@ export async function get7TVEmotes(userId: string, username: string) {
         return emoteMap;
     }
 
-    // If not in store, fetch from backend API
+    // If not in store or needs refresh, fetch from backend API
     try {
         const data = await EmoteApiClient.get7TVEmotes(userId, username);
         
+        // Update emote set mapping
         if (data.emoteSetId) {
             emoteSetUserNameMap[data.emoteSetId] = username;
         }
         
         const emotes = toMap(data.emotes, (e: any) => e.name);
         
-        // Store in EmoteStore for future use
-        await EmoteStore.storeEmotes(EmotePrefix.SEVENTV, userId, Array.from(emotes.values()));
+        // Store in EmoteStore with lastModified and emoteSetId if available
+        await EmoteStore.storeEmotes(
+            EmotePrefix.SEVENTV, 
+            userId, 
+            Array.from(emotes.values()),
+            data.lastModified,
+            data.emoteSetId
+        );
         
         return emotes;
     } catch (error) {
         console.error('Error fetching 7TV emotes:', error);
+        
+        // If we have cached data, use it as fallback even if it needed refresh
+        if (cachedEmotes) {
+            console.log(`Using cached 7TV emotes for ${username} as fallback`);
+            
+            // Restore emote set mapping from cache
+            if (cachedEmotes.emoteSetId) {
+                emoteSetUserNameMap[cachedEmotes.emoteSetId] = username;
+            }
+            
+            // Convert array back to Map
+            const emoteMap = new Map();
+            cachedEmotes.emotes.forEach(emote => {
+                emoteMap.set(emote.name, emote);
+            });
+            return emoteMap;
+        }
+        
         return new Map();
     }
 }
@@ -984,9 +1039,16 @@ PubSub.subscribe('Update-seventTV', async (m, data) => {
                             }];
                         }
                         
-                        // Persist updated emotes
-                        await EmoteStore.storeEmotes(EmotePrefix.SEVENTV, userId, updatedEmotes);
-                        console.log(`Persisted 7TV emote add for ${data.data.emote} to EmoteStore`);
+                        // Persist updated emotes with updated lastModified timestamp
+                        const now = Date.now();
+                        await EmoteStore.storeEmotes(
+                            EmotePrefix.SEVENTV, 
+                            userId, 
+                            updatedEmotes,
+                            now, // Use current timestamp as lastModified
+                            data.data.emoteSetId
+                        );
+                        console.log(`Persisted 7TV emote add for ${data.data.emote} to EmoteStore with lastModified=${now}`);
                     }
                 } catch (persistError) {
                     console.error('Error persisting 7TV emote add to store:', persistError);
@@ -1039,9 +1101,16 @@ PubSub.subscribe('Update-seventTV', async (m, data) => {
                         // Remove the emote from stored emotes
                         const updatedEmotes = currentEmotes.filter(emote => emote.name !== data.data.emote);
                         
-                        // Persist updated emotes
-                        await EmoteStore.storeEmotes(EmotePrefix.SEVENTV, userId, updatedEmotes);
-                        console.log(`Persisted 7TV emote remove for ${data.data.emote} to EmoteStore`);
+                        // Persist updated emotes with updated lastModified timestamp
+                        const now = Date.now();
+                        await EmoteStore.storeEmotes(
+                            EmotePrefix.SEVENTV, 
+                            userId, 
+                            updatedEmotes,
+                            now, // Use current timestamp as lastModified
+                            data.data.emoteSetId
+                        );
+                        console.log(`Persisted 7TV emote remove for ${data.data.emote} to EmoteStore with lastModified=${now}`);
                     }
                 } catch (persistError) {
                     console.error('Error persisting 7TV emote remove to store:', persistError);

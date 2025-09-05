@@ -9,7 +9,7 @@ export class EmoteApiClient {
    * Get 7TV emotes for a user
    * @param userId The Twitch user ID
    * @param username The Twitch username
-   * @returns The 7TV emotes for the user
+   * @returns The 7TV emotes for the user, including emoteSetId and lastModified if available
    */
   static async get7TVEmotes(userId: string, username: string) {
     const response = await fetch(`${API_BASE_URL}/emotes/7tv/${userId}?username=${encodeURIComponent(username)}`);
@@ -17,6 +17,29 @@ export class EmoteApiClient {
       throw new Error(`Failed to fetch 7TV emotes: ${response.statusText}`);
     }
     return response.json();
+  }
+
+  /**
+   * Get 7TV emote version information for a user
+   * This is a lightweight check to see if emotes have been updated
+   * @param userId The Twitch user ID
+   * @returns The version information including lastModified timestamp
+   */
+  static async get7TVEmoteVersion(userId: string) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/emotes/7tv/${userId}/version`);
+      if (!response.ok) {
+        // If the endpoint doesn't exist yet, return null
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error(`Failed to fetch 7TV emote version: ${response.statusText}`);
+      }
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching 7TV emote version:', error);
+      return null;
+    }
   }
 
   /**

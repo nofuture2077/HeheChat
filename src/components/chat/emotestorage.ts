@@ -5,6 +5,8 @@ interface UserEmotes {
     emotes: any[];
     timestamp: number;
     expiresAt: number; // Timestamp when cache should be invalidated
+    lastModified?: number; // Server-side last modification timestamp
+    emoteSetId?: string; // For 7TV emotes, the emote set ID
 }
 
 // Emote type prefixes for storage
@@ -118,8 +120,16 @@ export class EmoteStorage {
      * @param prefix The prefix to use (from EmotePrefix enum)
      * @param userId The user ID or identifier
      * @param emotes The emotes to store
+     * @param lastModified Optional server-side last modification timestamp
+     * @param emoteSetId Optional emote set ID (for 7TV emotes)
      */
-    async storeEmotes(prefix: EmotePrefix, userId: string, emotes: any[]): Promise<void> {
+    async storeEmotes(
+        prefix: EmotePrefix, 
+        userId: string, 
+        emotes: any[], 
+        lastModified?: number,
+        emoteSetId?: string
+    ): Promise<void> {
         try {
             const prefixedId = `${prefix}${userId}`;
             const store = await this.getStore('readwrite');
@@ -129,7 +139,9 @@ export class EmoteStorage {
                     userId: prefixedId,
                     emotes,
                     timestamp: now,
-                    expiresAt: now + CACHE_DURATION
+                    expiresAt: now + CACHE_DURATION,
+                    lastModified,
+                    emoteSetId
                 });
                 request.onsuccess = () => resolve();
                 request.onerror = () => reject(request.error);
