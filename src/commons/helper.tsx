@@ -218,7 +218,7 @@ export function formatString(messageTemplate: string, args: Record<string, any>)
     );
 
     // Schritt 2: normale Platzhalter ersetzen
-    return messageTemplate.replace(/\${(\w+)(?::(\w+))?}/g, (_, key, formatFunction) => {
+    return messageTemplate.replace(/\${([^:}]+)(?::(\w+))?}/g, (_, key, formatFunction) => {
         const value = args[key];
         if (formatFunction && formatFunctions[formatFunction]) {
             return formatFunctions[formatFunction](value);
