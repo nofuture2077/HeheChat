@@ -10,6 +10,9 @@ export interface RerollConfig {
   bitsAmount: number | null;
   donationAmount: number | null;
   enabled: boolean;
+  channelPoints: string | null;
+  userPick: boolean;
+  userPickCP: string | null;
 }
 
 /**
@@ -176,6 +179,9 @@ export const updateRerollConfig = async (
     bitsAmount: number | null;
     donationAmount: number | null;
     enabled: boolean;
+    channelPoints: string | null;
+    userPick: boolean;
+    userPickCP: string | null;
   }
 ): Promise<{ success: boolean; config?: RerollConfig }> => {
   try {

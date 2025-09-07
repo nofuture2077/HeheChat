@@ -110,7 +110,10 @@ export function AlertSettings() {
                     channel: username,
                     bitsAmount: null,
                     donationAmount: null,
-                    enabled: true
+                    enabled: true,
+                    channelPoints: null,
+                    userPick: false,
+                    userPickCP: null
                 };
                 console.log('Creating default config:', defaultConfig);
                 setRerollConfig(defaultConfig);
@@ -132,7 +135,10 @@ export function AlertSettings() {
             const result = await updateRerollConfig(rerollConfig.channel, {
                 bitsAmount: rerollConfig.bitsAmount,
                 donationAmount: rerollConfig.donationAmount,
-                enabled: rerollConfig.enabled
+                enabled: rerollConfig.enabled,
+                channelPoints: rerollConfig.channelPoints,
+                userPick: rerollConfig.userPick,
+                userPickCP: rerollConfig.userPickCP
             });
             
             if (result.success && result.config) {
@@ -478,7 +484,10 @@ export function AlertSettings() {
                                         await updateRerollConfig(newConfig.channel, {
                                             bitsAmount: newConfig.bitsAmount,
                                             donationAmount: newConfig.donationAmount,
-                                            enabled: newConfig.enabled
+                                            enabled: newConfig.enabled,
+                                            channelPoints: newConfig.channelPoints,
+                                            userPick: newConfig.userPick,
+                                            userPickCP: newConfig.userPickCP
                                         });
                                     } catch (error) {
                                         console.error('Failed to update reroll config:', error);
@@ -513,7 +522,10 @@ export function AlertSettings() {
                                         await updateRerollConfig(newConfig.channel, {
                                             bitsAmount: newConfig.bitsAmount,
                                             donationAmount: newConfig.donationAmount,
-                                            enabled: newConfig.enabled
+                                            enabled: newConfig.enabled,
+                                            channelPoints: newConfig.channelPoints,
+                                            userPick: newConfig.userPick,
+                                            userPickCP: newConfig.userPickCP
                                         });
                                     } catch (error) {
                                         console.error('Failed to update reroll config:', error);
@@ -528,6 +540,112 @@ export function AlertSettings() {
                             disabled={!rerollConfig.enabled || isSavingRerollConfig}
                         />
                         <Text fs="italic" size='14px'>Amount of bits required for a viewer to reroll their sprite (leave empty to disable bits rerolls)</Text>
+                        
+                        <Text size="sm">Channel Points Reward Name for reroll</Text>
+                        <TextInput
+                            placeholder="Enter Channel Points Reward name"
+                            value={rerollConfig.channelPoints || ''}
+                            onChange={(ev) => {
+                                const value = ev.target.value;
+                                const newConfig = {
+                                    ...rerollConfig,
+                                    channelPoints: value === '' ? null : value
+                                };
+                                setRerollConfig(newConfig);
+                            }}
+                            onBlur={() => {
+                                // Save the updated config
+                                (async () => {
+                                    setIsSavingRerollConfig(true);
+                                    try {
+                                        await updateRerollConfig(rerollConfig.channel, {
+                                            bitsAmount: rerollConfig.bitsAmount,
+                                            donationAmount: rerollConfig.donationAmount,
+                                            enabled: rerollConfig.enabled,
+                                            channelPoints: rerollConfig.channelPoints,
+                                            userPick: rerollConfig.userPick,
+                                            userPickCP: rerollConfig.userPickCP
+                                        });
+                                    } catch (error) {
+                                        console.error('Failed to update reroll config:', error);
+                                    } finally {
+                                        setIsSavingRerollConfig(false);
+                                    }
+                                })();
+                            }}
+                            disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                        />
+                        <Text fs="italic" size='14px'>Name of the Channel Point Reward to trigger a reroll (leave empty to disable channel points rerolls)</Text>
+                        
+                        <Switch 
+                            checked={rerollConfig.userPick} 
+                            onChange={(event) => { 
+                                const newConfig = {
+                                    ...rerollConfig,
+                                    userPick: event.currentTarget.checked
+                                };
+                                setRerollConfig(newConfig);
+                                
+                                // Save the updated config
+                                (async () => {
+                                    setIsSavingRerollConfig(true);
+                                    try {
+                                        await updateRerollConfig(newConfig.channel, {
+                                            bitsAmount: newConfig.bitsAmount,
+                                            donationAmount: newConfig.donationAmount,
+                                            enabled: newConfig.enabled,
+                                            channelPoints: newConfig.channelPoints,
+                                            userPick: newConfig.userPick,
+                                            userPickCP: newConfig.userPickCP
+                                        });
+                                    } catch (error) {
+                                        console.error('Failed to update reroll config:', error);
+                                    } finally {
+                                        setIsSavingRerollConfig(false);
+                                    }
+                                })();
+                            }} 
+                            label="Allow users to pick their sprite" 
+                            size="lg" 
+                            disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                        />
+                        <Text fs="italic" size='14px'>Enable this to allow users to pick one of their collected sprites</Text>
+                        
+                        <Text size="sm">Channel Points Reward Name for user pick</Text>
+                        <TextInput
+                            placeholder="Enter Channel Points Reward name for user pick"
+                            value={rerollConfig.userPickCP || ''}
+                            onChange={(ev) => {
+                                const value = ev.target.value;
+                                const newConfig = {
+                                    ...rerollConfig,
+                                    userPickCP: value === '' ? null : value
+                                };
+                                setRerollConfig(newConfig);
+                            }}
+                            onBlur={() => {
+                                // Save the updated config
+                                (async () => {
+                                    setIsSavingRerollConfig(true);
+                                    try {
+                                        await updateRerollConfig(rerollConfig.channel, {
+                                            bitsAmount: rerollConfig.bitsAmount,
+                                            donationAmount: rerollConfig.donationAmount,
+                                            enabled: rerollConfig.enabled,
+                                            channelPoints: rerollConfig.channelPoints,
+                                            userPick: rerollConfig.userPick,
+                                            userPickCP: rerollConfig.userPickCP
+                                        });
+                                    } catch (error) {
+                                        console.error('Failed to update reroll config:', error);
+                                    } finally {
+                                        setIsSavingRerollConfig(false);
+                                    }
+                                })();
+                            }}
+                            disabled={!rerollConfig.enabled || !rerollConfig.userPick || isSavingRerollConfig}
+                        />
+                        <Text fs="italic" size='14px'>Name of the Channel Point Reward for users to pick their sprite (only used if "Allow users to pick their sprite" is enabled)</Text>
                     </Stack>
                 </Fieldset>
             )}
