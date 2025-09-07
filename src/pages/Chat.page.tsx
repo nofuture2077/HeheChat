@@ -140,7 +140,8 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         if (msg.id && messageIndex.has(msg.id)) {
             return;
         }
-        
+        messageIndex.set(msg.id, msg);
+
         // Track username from new messages
         if (msg.type === 'chat') {
             setUsernames(prev => new Set([...prev, msg.userInfo.userName.toLowerCase()]));
