@@ -115,6 +115,13 @@ export function formatTime(date: Date): string {
     return `${hours}:${minutes}`;
 }
 
+export function formatName(value: string): string {
+    const withoutExtension = value.replace(/\.[^.]+$/, "");
+    const withoutPrefix = withoutExtension.replace(/^[^_]*_/, "");
+    return withoutPrefix;
+}
+
+
 export function formatDateWithTime(date: Date): string {
     return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 }
@@ -177,6 +184,7 @@ const formatFunctions: { [key: string]: (value: any) => string } = {
     lowercase: (value: string) => value.toLowerCase(),
     duration: (value: string) => formatDuration(Number(value) * 1000),
     currency: (value: string) => formatCurrency(value),
+    name: (value: string) => formatName(value),
 };
 
 // prüft einfache Bedingungen wie "durationMonths > 1"
