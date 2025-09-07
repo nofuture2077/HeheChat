@@ -1,4 +1,5 @@
 import { Event, EventAlertConfig, Base64FileReference, Base64File, EventAlert, EventMainType, EventTypeMapping, VisualAlert } from "@/commons/events";
+import { spriteManager } from "@/commons/spritemanager";
 
 import { Config } from "@/commons/config";
 import { Profile } from "@/commons/profile";
@@ -738,6 +739,7 @@ class AlertPlayer {
     async showNotification(item: Event) {
         const eventData = this.getEventData(item.text);
         let alertFullyProcessed = false;
+        let selectedSpriteFilename: string | undefined;
 
         const onEnd = () => {
             console.log('Stop Playing');
@@ -788,6 +790,36 @@ class AlertPlayer {
             return;
         }
 
+        // Process sprite selection if there's a visual element that's a zip file
+        if (alert.visual?.element && alertConfig?.data?.files?.[alert.visual.element]) {
+            const file = alertConfig.data.files[alert.visual.element];
+            
+            // Check if file is a zip file
+            if (file.mime === 'application/zip' && item.username) {
+                try {
+                    // Get sprite data using SpriteManager
+                    const spriteData = await spriteManager.getSpriteData(
+                        file.data,
+                        item.channel,
+                        item.username,
+                        item.userSeed
+                    );
+                    
+                    if (spriteData) {
+                        // Store the selected filename for use in TTS
+                        selectedSpriteFilename = spriteData.selectedFilename;
+                        
+                        // Add the selectedFilename to the event for use in VisualAlertPlayer
+                        item.selectedSpriteFilename = selectedSpriteFilename;
+                        
+                        console.log(`Selected sprite for ${item.username}: ${selectedSpriteFilename}`);
+                    }
+                } catch (err) {
+                    console.error('Error selecting sprite:', err);
+                }
+            }
+        }
+
         PubSub.publish('AlertPlayer-update', {text: 'Prepare Alert'});
         console.log('Play alert with config', item, alert);
 
@@ -795,7 +827,8 @@ class AlertPlayer {
             ...eventData,
             ...item,
             amount: Number(item.amount),
-            amount2: Number(item.amount2)
+            amount2: Number(item.amount2),
+            selectedFilename: selectedSpriteFilename // Make available for TTS
         };
 
 

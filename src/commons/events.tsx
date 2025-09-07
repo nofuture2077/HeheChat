@@ -125,6 +125,7 @@ export type Event = {
     eventAlert?: EventAlert;
     userSeed?: string; // Added for deterministic sprite selection
     rerollPending?: boolean; // Flag indicating a reroll is pending for this user
+    selectedSpriteFilename?: string; // Selected sprite filename for TTS and visual display
 }
 
 // User sprite assignment interface
