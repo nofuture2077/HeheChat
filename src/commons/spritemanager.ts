@@ -289,10 +289,19 @@ export class SpriteManager {
         if (foundImage) {
           selectedImage = foundImage;
         } else {
-          // If assigned image no longer exists, select new one using weighted selection
-          const userHash = this.generateSimpleHash(`${username}${channel}`);
-          selectedImage = this.selectImageWithWeighting(sortedImages, userHash);
-          newAssignment = true;
+          // If assigned image no longer exists, use the first image for display
+          // but keep the user's selected filename in the database
+          console.log(`Selected sprite "${spriteAssignment.selectedFilename}" not found in current sprite pack for ${username} in ${channel}. Using fallback for display only.`);
+          selectedImage = sortedImages[0]; // Use first image as fallback for display
+          
+          // Important: Override the display image's name with the user's actual selection
+          // This ensures we don't lose their selection when the sprite pack changes
+          selectedImage = {
+            ...selectedImage,
+            name: spriteAssignment.selectedFilename // Preserve the original filename
+          };
+          
+          // Don't set newAssignment = true, as we want to keep their existing selection
         }
       }
       // If userSeed is a filename that exists in the zip, use that image directly
