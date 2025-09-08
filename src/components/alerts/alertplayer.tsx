@@ -44,7 +44,17 @@ class AlertPlayer {
     isDestroyed: boolean = false;
 
     constructor() {
-        this.queueCheckInterval = setInterval(() => this.checkQueue(), 1000) as unknown as number;
+        // Use a safer approach for the queue check interval with the async function
+        this.queueCheckInterval = setInterval(() => {
+            // Only start a new check if we're not already playing something
+            if (!this.playing) {
+                this.checkQueue().catch(err => {
+                    console.error("Error in queue check:", err);
+                    this.playing = false; // Reset flag in case of error
+                });
+            }
+        }, 1000) as unknown as number;
+        
         setInterval(() => this.playSilenceIfQueueEmpty(), 120000);
         this.mode = (localStorage.getItem('hehe-mode') as 'app' | 'browsersource') || undefined;
         
@@ -996,48 +1006,60 @@ class AlertPlayer {
         }
     }
 
-    checkQueue() {
-        // Don't process queue if destroyed
-        if (this.isDestroyed) {
-            return;
-        }
+    async checkQueue() {
+        try {
+            // Don't process queue if destroyed
+            if (this.isDestroyed) {
+                return;
+            }
+            
+            if (this.interrupted()) {
+                return this.handleAudioInterruption();
+            }
+            
+            // If we're paused, don't process the queue
+            if (this.paused) {
+                return;
+            }
+            
+            // Don't process queue if we're already playing or not initialized
+            if (this.playing || !this.config || !this.status()) {
+                return;
+            }
         
-        if (this.interrupted()) {
-            return this.handleAudioInterruption();
-        }
+            // Check if we've processed all items in the queue
+            if (this.index >= this.queue.length) {
+                return;
+            }
         
-        // If we're paused, don't process the queue
-        if (this.paused) {
-            return;
-        }
+            // Get the next item from the queue
+            const item = this.queue[this.index++];
         
-        // Don't process queue if we're already playing or not initialized
-        if (this.playing || !this.config || !this.status()) {
-            return;
-        }
-    
-        // Check if we've processed all items in the queue
-        if (this.index >= this.queue.length) {
-            return;
-        }
-    
-        // Get the next item from the queue
-        const item = this.queue[this.index++];
-    
-        if (!item) {
-            return;
-        }
-        
-        // Reset state before playing new item
-        this.skipCurrent = false;
-        
-        console.log("Play Event", item);
-        this.showNotification(item).catch(err => {
-            console.error("Error showing notification:", err);
-            // Make sure we reset the playing state so the queue can continue
-            this.stopPlaying();
+            if (!item) {
+                return;
+            }
+            
+            // Set playing flag immediately to prevent concurrent processing
+            this.playing = true;
+            
+            // Reset state before playing new item
+            this.skipCurrent = false;
+            
+            console.log("Play Event", item);
+            try {
+                await this.showNotification(item);
+            } catch (err) {
+                console.error("Error showing notification:", err);
+                // Make sure we reset the playing state so the queue can continue
+                this.stopPlaying();
+                PubSub.publish('AlertPlayer-update');
+            }
+        } catch (err) {
+            // Make sure we reset the playing state in case of unexpected errors
+            this.playing = false;
+            console.error("Unexpected error in checkQueue:", err);
             PubSub.publish('AlertPlayer-update');
-        });
+        }
     }
 }
 
