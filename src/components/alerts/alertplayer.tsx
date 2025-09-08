@@ -736,8 +736,8 @@ class AlertPlayer {
         }).filter(x => x).join(' ');
     }
  
-    async showNotification(item: Event) {
-        const eventData = this.getEventData(item.text);
+    async showNotification(event: Event) {
+        const eventData = this.getEventData(event.text);
         let alertFullyProcessed = false;
         let selectedSpriteFilename: string | undefined;
 
@@ -777,16 +777,16 @@ class AlertPlayer {
             onError(err);
             return;
         }
-        const alertConfig = this.alertConfig[item.channel];
-        if (!alertConfig && !item.eventAlert) {
+        const alertConfig = this.alertConfig[event.channel];
+        if (!alertConfig && !event.eventAlert) {
             console.log('No alertconfig set');
             return;
         }
-        const alert = this.getAlert(item, eventData, alertConfig, this.config!);
+        const alert = this.getAlert(event, eventData, alertConfig, this.config!);
 
         if (!alert) {
             PubSub.publish('AlertPlayer-update', {text: 'No Alert for Event'});
-            console.log('No alert for event', this.config, alertConfig, item);
+            console.log('No alert for event', this.config, alertConfig, event);
             return;
         }
 
@@ -795,14 +795,14 @@ class AlertPlayer {
             const file = alertConfig.data.files[alert.visual.element];
             
             // Check if file is a zip file
-            if (file.mime === 'application/zip' && item.username) {
+            if (file.mime === 'application/zip' && event.username) {
                 try {
                     // Get sprite data using SpriteManager
                     const spriteData = await spriteManager.getSpriteData(
                         file.data,
-                        item.channel,
-                        item.username,
-                        item.userSeed
+                        event.channel,
+                        event.username,
+                        event.userSeed
                     );
                     
                     if (spriteData) {
@@ -810,9 +810,9 @@ class AlertPlayer {
                         selectedSpriteFilename = spriteData.selectedFilename;
                         
                         // Add the selectedFilename to the event for use in VisualAlertPlayer
-                        item.selectedSpriteFilename = selectedSpriteFilename;
+                        event.selectedSpriteFilename = selectedSpriteFilename;
                         
-                        console.log(`Selected sprite for ${item.username}: ${selectedSpriteFilename}`);
+                        console.log(`Selected sprite for ${event.username}: ${selectedSpriteFilename}`);
                     }
                 } catch (err) {
                     console.error('Error selecting sprite:', err);
@@ -821,13 +821,13 @@ class AlertPlayer {
         }
 
         PubSub.publish('AlertPlayer-update', {text: 'Prepare Alert'});
-        console.log('Play alert with config', item, alert);
+        console.log('Play alert with config', event, alert);
 
         const vars:any = {
             ...eventData,
-            ...item,
-            amount: Number(item.amount),
-            amount2: Number(item.amount2),
+            ...event,
+            amount: Number(event.amount),
+            amount2: Number(event.amount2),
             selectedFilename: selectedSpriteFilename // Make available for TTS
         };
 
@@ -836,21 +836,21 @@ class AlertPlayer {
         const sink = localStorage.getItem('hehe-sink') || '';
         this.startPlaying();
         console.log('Start playing');
-        this.currentlyPlaying = item;
+        this.currentlyPlaying = event;
         const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", {
             ...vars,
             text: (eventData && eventData.text) ? this.parsedPartsToTTSText(eventData.text.parts || eventData.text) : undefined
-        }), true, item.channel);
+        }), true, event.channel);
 
         // Chain audio playback with proper error handling - use mode to determine which setting to check
         // For preview alerts (event.force), always play audio in browsersource regardless of settings
-        const isPreviewAlert = !!(item as any).force;
+        const isPreviewAlert = !!(event as any).force;
         const shouldPlayAudio = this.mode === 'browsersource' 
             ? (isPreviewAlert || this.config?.browserSourceAudio)
             : this.config?.playAlerts;
 
         try {
-            const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, item.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state, sink) : undefined;
+            const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, event.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state, sink) : undefined;
             const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
 
             console.log('Audio', ttsAudio, jingleAudio);
@@ -869,8 +869,8 @@ class AlertPlayer {
                     text: visualText
                 }), false);
 
-                const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: minDuration * 1000, channel: item.channel, position: alert.visual?.position, layout: alert.visual?.layout};
-                
+                const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: minDuration * 1000, channel: event.channel, position: alert.visual?.position, layout: alert.visual?.layout};
+                visualAlert.triggerId = event.triggerId;
                 if (this.mode === 'app' ) {
                     // Send to backend immediately (this doesn't affect display timing)
                     PubSub.publish('WSSEND', {type: 'alert', data: visualAlert, profile: this.profile?.guid });

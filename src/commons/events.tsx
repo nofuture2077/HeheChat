@@ -123,6 +123,7 @@ export type Event = {
     amount?: number;
     amount2?: number;
     eventAlert?: EventAlert;
+    triggerId?: string;
     userSeed?: string; // Added for deterministic sprite selection
     rerollPending?: boolean; // Flag indicating a reroll is pending for this user
     selectedSpriteFilename?: string; // Selected sprite filename for TTS and visual display
@@ -144,6 +145,7 @@ export interface VisualAlert {
     channel: string;
     position?: string;
     layout?: string;
+    triggerId?: string;
 }
 
 export interface ExtractedImage {

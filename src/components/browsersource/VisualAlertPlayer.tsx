@@ -48,6 +48,8 @@ function formatText(text: string, emotes: ChatEmotes, channel: string) {
   }));
 }
 
+const shownAlerts: Record<string, boolean> = {};
+
 export default function VisualAlertPlayer() {
   const [currentAlert, setCurrentAlert] = useState<VisualAlert | null>(null);
   const chatEmotes = useContext(ChatEmotesContext);
@@ -135,11 +137,18 @@ export default function VisualAlertPlayer() {
     
     // Subscribe to new alerts
     const alertToken = PubSub.subscribe('ALERT_SHOW', (_, data) => {
+      if (data.triggerId) {
+        if (shownAlerts[data.triggerId]) {
+          // skip alert
+          return;
+        }
+        shownAlerts[data.triggerId] = true;
+      }
       // Clear any existing timeout
       if (alertTimeoutId) {
         clearTimeout(alertTimeoutId);
       }
-      
+
       setCurrentAlert(data);
       setIsVisible(true);
       setTimestamp(Date.now());
