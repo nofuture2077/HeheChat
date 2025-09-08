@@ -771,6 +771,7 @@ class AlertPlayer {
                 // Check if blerps are deactivated in the config
                 if (this.config?.deactivatedAlerts["blerp"]) {
                     console.log('Blerp alert skipped - deactivated in settings');
+                    this.stopPlaying(); // Reset playing state
                     return;
                 }
                 
@@ -790,6 +791,7 @@ class AlertPlayer {
         const alertConfig = this.alertConfig[event.channel];
         if (!alertConfig && !event.eventAlert) {
             console.log('No alertconfig set');
+            this.stopPlaying(); // Reset playing state
             return;
         }
         const alert = this.getAlert(event, eventData, alertConfig, this.config!);
@@ -797,6 +799,7 @@ class AlertPlayer {
         if (!alert) {
             PubSub.publish('AlertPlayer-update', {text: 'No Alert for Event'});
             console.log('No alert for event', this.config, alertConfig, event);
+            this.stopPlaying(); // Reset playing state
             return;
         }
 
