@@ -322,7 +322,7 @@ export class SpriteManager {
       
       // Save new assignment if needed
       if (newAssignment) {
-        saveUserSpriteAssignment(channel, username, selectedImage.name)
+        await saveUserSpriteAssignment(channel, username, selectedImage.name)
           .then(success => {
             if (success) {
               console.log(`Saved sprite assignment for ${username} in ${channel}: ${selectedImage.name}`);
