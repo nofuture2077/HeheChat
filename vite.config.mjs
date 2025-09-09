@@ -38,6 +38,7 @@ export default defineConfig({
         main: './index.html',
         replay: './replay.html',
         admin: './admin.html',
+        collection: './collection.html',
         alert: './alert.html'
       }
     }
