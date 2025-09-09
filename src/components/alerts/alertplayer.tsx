@@ -19,6 +19,7 @@ interface AudioInfo {
     duration: number;
     audioBuffer?: AudioBuffer;
     audioUrl?: string;
+    videoElement?: HTMLVideoElement;
 }
 
 let cheerPrefixes = ['Cheer', 'BibleThump', 'cheerwhal', 'Corgo', 'uni', 'ShowLove', 'Party', 'SeemsGood', 'Pride', 'Kappa', 'FrankerZ', 'HeyGuys', 'DansGame', 'EleGiggle', 'TriHard', 'Kreygasm', '4Head', 'SwiftRage', 'NotLikeThis', 'FailFish', 'VoHiYo', 'PJSalt', 'MrDestructoid', 'bday', 'RIPCheer', 'Shamrock'];
@@ -27,7 +28,7 @@ let cheerPrefixesRegExp = cheerPrefixes.map(x => new RegExp(`\\b${x}\\d+\\b`, "g
 class AlertPlayer {
     audioContext?: AudioContext;
     mainAudioGain?: GainNode;
-    currentSource?: AudioBufferSourceNode;
+    currentSource?: AudioBufferSourceNode | MediaElementAudioSourceNode;
     playing: boolean = false;
     paused: boolean = false;
     muted: boolean = false;
@@ -171,7 +172,7 @@ class AlertPlayer {
                 return;
             }
             
-            const { duration, audioBuffer, audioUrl } = audioInfo;
+            const { duration, audioBuffer, audioUrl, videoElement } = audioInfo;
             
             // Clean up any existing audio source
             this.cleanupCurrentSource();
@@ -191,7 +192,37 @@ class AlertPlayer {
                 resolve(); // Resolve the promise to allow queue to continue
             };
             
-            if (audioBuffer) {
+            // Handle video element as audio source
+            if (videoElement) {
+                try {
+                    const source = this.audioContext.createMediaElementSource(videoElement);
+                    source.connect(gainNode);
+                    
+                    this.currentSource = source;
+                    
+                    // Handle normal completion
+                    videoElement.onended = () => {
+                        this.cleanupCurrentSource();
+                        setTimeout(() => resolve(), extra);
+                    };
+                    
+                    // Handle errors
+                    videoElement.onerror = () => {
+                        console.error("Error playing video audio");
+                        handleInterruption();
+                    };
+                    
+                    videoElement.play();
+                    
+                    // Update media session metadata
+                    if ('mediaSession' in navigator) {
+                        this.updateMediaSessionMetadata();
+                    }
+                } catch (err) {
+                    console.error("Error starting video audio playback:", err);
+                    handleInterruption();
+                }
+            } else if (audioBuffer) {
                 try {
                     // Play from decoded buffer
                     const source = this.audioContext.createBufferSource();
@@ -272,10 +303,36 @@ class AlertPlayer {
         });
     }
 
+    private isVideoFile(src: string): boolean {
+        return src.includes('video/webm') || src.includes('video/mp4') || 
+               src.includes('video/ogg') || src.includes('data:video/');
+    }
+
     async getAudioInfo(src: string): Promise<AudioInfo | undefined> {
         return new Promise((resolve, reject) => {
             if (!src || !this.audioContext) {
                 resolve(undefined);
+                return;
+            }
+            
+            // Handle video files
+            if (this.isVideoFile(src)) {
+                const video = document.createElement('video');
+                video.src = src;
+                video.preload = 'metadata';
+                
+                video.onloadedmetadata = () => {
+                    resolve({
+                        duration: video.duration,
+                        videoElement: video
+                    });
+                };
+                
+                video.onerror = (err) => {
+                    console.error("Error loading video metadata:", err);
+                    reject(err);
+                };
+                
                 return;
             }
             
@@ -381,8 +438,11 @@ class AlertPlayer {
     private cleanupCurrentSource() {
         if (this.currentSource) {
             try {
-                this.currentSource.onended = null; // Remove event listener
-                this.currentSource.stop();
+                // For AudioBufferSourceNode
+                if ('stop' in this.currentSource) {
+                    this.currentSource.onended = null; // Remove event listener
+                    this.currentSource.stop();
+                }
                 this.currentSource.disconnect();
             } catch (e) {
                 // Ignore errors if source was already stopped
