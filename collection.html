@@ -140,6 +140,18 @@
       max-width: 80%;
       text-align: center;
     }
+    
+    .prefix-2 {
+      filter: drop-shadow(0 0 15px rgba(0, 100, 255, 0.8));
+    }
+
+    .prefix-5 {
+      filter: drop-shadow(0 0 15px rgba(128, 0, 255, 0.8));
+    }
+
+    .prefix-10 {
+      filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+    }
   </style>
 </head>
 <body>
@@ -326,6 +338,19 @@
       // Check if we have a custom title from the URL parameters
       const { title } = getUrlParams();
       
+      // Extract the numeric prefix if it exists
+      const prefixMatch = filename.match(/^(\d+)_/);
+      let imageClass = 'selected-image';
+      
+      // Add the appropriate prefix class based on the numeric prefix
+      if (prefixMatch) {
+        const prefix = prefixMatch[1];
+        if (prefix === '2' || prefix === '5' || prefix === '10') {
+          imageClass += ` prefix-${prefix}`;
+        }
+      }
+      
+      selectedImage.className = imageClass;
       selectedImage.src = imageUrl;
       selectedImage.alt = formatFilename(filename);
       selectedTitle.textContent = formatFilename(filename);
@@ -351,7 +376,19 @@
       gridItem.className = `grid-item${isSelected ? ' selected' : ''}`;
       
       const image = document.createElement('img');
-      image.className = 'grid-image';
+      // Extract the numeric prefix if it exists
+      const prefixMatch = filename.match(/^(\d+)_/);
+      let imageClass = 'grid-image';
+      
+      // Add the appropriate prefix class based on the numeric prefix
+      if (prefixMatch) {
+        const prefix = prefixMatch[1];
+        if (prefix === '2' || prefix === '5' || prefix === '10') {
+          imageClass += ` prefix-${prefix}`;
+        }
+      }
+      
+      image.className = imageClass;
       image.src = imageUrl;
       image.alt = formatFilename(filename);
       
