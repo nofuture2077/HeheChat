@@ -15,11 +15,11 @@
         const base64Param = params.get('q');
         
         if (base64Param) {
-          const decodedString = atob(base64Param);
-          const parsedParams = JSON.parse(decodedString);
+          const decodedString = decodeURIComponent(base64Param);
+          const parsedParams = decodedString.split('|');
           
-          if (parsedParams.t) {
-            document.title = `${parsedParams.t}`;
+          if (parsedParams[2]) {
+            document.title = `${parsedParams[2]}`;
           }
         }
       } catch (error) {
@@ -152,11 +152,11 @@
         const base64Param = params.get('q');
         
         if (base64Param) {
-          const decodedString = atob(base64Param);
-          const parsedParams = JSON.parse(decodedString);
+          const decodedString = decodeURIComponent(base64Param);
+          const parsedParams = decodedString.split('|');
           
-          if (parsedParams.t) {
-            document.getElementById('pageTitle').textContent = parsedParams.t;
+          if (parsedParams[2]) {
+            document.getElementById('pageTitle').textContent = parsedParams[2];
           }
         }
       } catch (error) {
@@ -187,13 +187,13 @@
       if (base64Param) {
         try {
           // Decode base64 string and parse JSON
-          const decodedString = atob(base64Param);
-          const parsedParams = JSON.parse(decodedString);
+          const decodedString = decodeURIComponent(base64Param);
+          const parsedParams = decodedString.split('|');
           
           // Extract parameters from the decoded JSON
-          const username = parsedParams.u || '';
-          const channel = parsedParams.c || '';
-          const title = parsedParams.t || '';
+          const username = parsedParams[1];
+          const channel = parsedParams[0];
+          const title = parsedParams[2];
           
           return { username, channel, title };
         } catch (error) {
@@ -201,11 +201,7 @@
         }
       }
       
-      // Fallback to direct URL parameters if base64 decoding fails
-      const username = params.get('u') || '';
-      const channel = params.get('c') || '';
-      
-      return { username, channel };
+      return { username: '', channel: '' };
     }
     
     // Fetch sprite data from the API
