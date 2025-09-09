@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Using only favicon.ico to reduce console errors -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico"> 
+  <meta name="theme-color" content="#242424">
+  <meta name="viewport" content="maximum-scale=1, minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"/>
+  <title>Sprite Collection</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #242424;
+      color: #ffffff;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .selected-container {
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .selected-image {
+      max-width: 300px;
+      max-height: 300px;
+      border: 2px solid #666;
+      border-radius: 8px;
+      background-color: #333;
+      padding: 10px;
+    }
+    
+    .selected-title {
+      margin-top: 10px;
+      font-size: 1.5rem;
+      color: #ffffff;
+    }
+    
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 20px;
+      width: 100%;
+      max-width: 1200px;
+    }
+    
+    .grid-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 8px;
+      background-color: #333;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    
+    .grid-item:hover {
+      transform: scale(1.05);
+      background-color: #444;
+    }
+    
+    .grid-item.selected {
+      background-color: #555;
+      border: 2px solid #888;
+    }
+    
+    .grid-image {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+    }
+    
+    .grid-title {
+      margin-top: 8px;
+      font-size: 0.9rem;
+      text-align: center;
+      word-break: break-word;
+    }
+    
+    .file-input-container {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .file-input-label {
+      display: inline-block;
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .file-input-label:hover {
+      background-color: #45a049;
+    }
+    
+    .loading {
+      margin: 20px 0;
+      font-size: 1.2rem;
+      color: #aaa;
+    }
+    
+    .error {
+      margin: 20px 0;
+      padding: 10px;
+      background-color: #ff5555;
+      color: white;
+      border-radius: 4px;
+      max-width: 80%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sprite Collection</h1>
+  
+  <div id="loadingMessage" class="loading" style="display: none;">Loading sprites...</div>
+  <div id="errorMessage" class="error" style="display: none;"></div>
+  
+  <div id="selectedContainer" class="selected-container" style="display: none;">
+    <img id="selectedImage" class="selected-image" src="" alt="Selected Sprite">
+    <div id="selectedTitle" class="selected-title"></div>
+  </div>
+  
+  <div id="gridContainer" class="grid-container"></div>
+  
+  <script>
+    // Store the extracted images from the ZIP file
+    const extractedImages = {};
+    
+    // Get URL parameters
+    function getUrlParams() {
+      const params = new URLSearchParams(window.location.search);
+      const username = params.get('u') || 'nofuture2077';
+      const channel = params.get('c') || username;
+      
+      return { username, channel };
+    }
+    
+    // Fetch sprite data from the API
+    async function fetchSpriteData() {
+      try {
+        const { username, channel } = getUrlParams();
+        const apiUrl = `https://${location.host}/api/user-sprite/${username}/${channel}/collected-sprites`;
+        
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error('API returned unsuccessful response');
+        }
+        return data;
+      } catch (error) {
+        showError(`Failed to fetch sprite data: ${error.message}`);
+        return null;
+      }
+    }
+    
+    // Fetch the ZIP file from the server
+    async function fetchZipFile() {
+      try {
+        showLoading(true);
+        
+        // Fetch the ZIP file
+        const { username } = getUrlParams();
+        const response = await fetch(`https://${location.host}/sprites/${username}.zip`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ZIP file: ${response.status} ${response.statusText}`);
+        }
+        
+        // Get the ZIP file as an ArrayBuffer
+        const zipData = await response.arrayBuffer();
+        const zip = await JSZip.loadAsync(zipData);
+        
+        // Extract all image files
+        const imagePromises = [];
+        let imageCount = 0;
+        
+        zip.forEach((relativePath, zipEntry) => {
+          if (!zipEntry.dir && isImageFile(relativePath)) {
+            imageCount++;
+            const promise = zipEntry.async("blob").then(blob => {
+              const imageUrl = URL.createObjectURL(blob);
+              extractedImages[relativePath] = imageUrl;
+              return { name: relativePath, url: imageUrl };
+            });
+            imagePromises.push(promise);
+          }
+        });
+        
+        if (imageCount === 0) {
+          throw new Error('No image files found in the ZIP file');
+        }
+        
+        // Wait for all images to be extracted
+        await Promise.all(imagePromises);
+        
+        // Fetch sprite data and display
+        const spriteData = await fetchSpriteData();
+        if (spriteData && spriteData.success) {
+          displaySprites(spriteData);
+        }
+        
+        showLoading(false);
+      } catch (error) {
+        showLoading(false);
+        showError(`Failed to process sprites: ${error.message}`);
+      }
+    }
+    
+    // Check if a file is an image
+    function isImageFile(filename) {
+      const lowerFilename = filename.toLowerCase();
+      return lowerFilename.endsWith('.png') || 
+             lowerFilename.endsWith('.jpg') || 
+             lowerFilename.endsWith('.jpeg') || 
+             lowerFilename.endsWith('.gif') || 
+             lowerFilename.endsWith('.webp');
+    }
+    
+    // Display sprites based on API data
+    function displaySprites(data) {
+      const { filenames, selectedFilename } = data;
+      
+      // Clear previous content
+      const gridContainer = document.getElementById('gridContainer');
+      gridContainer.innerHTML = '';
+      
+      // Check if we have the selected image
+      if (selectedFilename && extractedImages[selectedFilename]) {
+        displaySelectedImage(selectedFilename, extractedImages[selectedFilename]);
+      } else if (selectedFilename) {
+        showError(`Selected image "${selectedFilename}" not found in the ZIP file`);
+      }
+      
+      // Check if we have any matching images
+      let matchCount = 0;
+      
+      // Display all images in the grid (removing duplicates)
+      [...new Set(filenames)].forEach(filename => {
+        if (extractedImages[filename]) {
+          matchCount++;
+          const gridItem = createGridItem(filename, extractedImages[filename], filename === selectedFilename);
+          gridContainer.appendChild(gridItem);
+        } else {
+          console.warn(`Image "${filename}" not found in the ZIP file`);
+        }
+      });
+    }
+    
+    // Display the selected image
+    function displaySelectedImage(filename, imageUrl) {
+      const selectedContainer = document.getElementById('selectedContainer');
+      const selectedImage = document.getElementById('selectedImage');
+      const selectedTitle = document.getElementById('selectedTitle');
+      
+      selectedImage.src = imageUrl;
+      selectedImage.alt = formatFilename(filename);
+      selectedTitle.textContent = formatFilename(filename);
+      selectedContainer.style.display = 'block';
+    }
+    
+    // Format filename by removing prefix and suffix
+    function formatFilename(filename) {
+      // Remove any numeric prefix followed by underscore (e.g., "10_", "42_", etc.)
+      let formattedName = filename.replace(/^\d+_/, '');
+      
+      // Remove ".png" suffix if present
+      if (formattedName.toLowerCase().endsWith('.png')) {
+        formattedName = formattedName.substring(0, formattedName.length - 4);
+      }
+      
+      return formattedName;
+    }
+    
+    // Create a grid item for an image
+    function createGridItem(filename, imageUrl, isSelected) {
+      const gridItem = document.createElement('div');
+      gridItem.className = `grid-item${isSelected ? ' selected' : ''}`;
+      
+      const image = document.createElement('img');
+      image.className = 'grid-image';
+      image.src = imageUrl;
+      image.alt = formatFilename(filename);
+      
+      const title = document.createElement('div');
+      title.className = 'grid-title';
+      title.textContent = formatFilename(filename);
+      
+      gridItem.appendChild(image);
+      gridItem.appendChild(title);
+      
+      return gridItem;
+    }
+    
+    // Show/hide loading message
+    function showLoading(show) {
+      document.getElementById('loadingMessage').style.display = show ? 'block' : 'none';
+    }
+    
+    // Show error message
+    function showError(message) {
+      const errorElement = document.getElementById('errorMessage');
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+      
+      // Hide error after 5 seconds
+      setTimeout(() => {
+        errorElement.style.display = 'none';
+      }, 5000);
+    }
+    
+    // Auto-load sprites when the page loads
+    window.addEventListener('load', () => {
+      fetchZipFile();
+    });
+  </script>
+</body>
+</html>

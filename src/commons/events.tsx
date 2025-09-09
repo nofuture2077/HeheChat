@@ -101,7 +101,7 @@ export type Base64FileReference = string;
 
 export type Base64File = {
     id: string;
-    type: 'audio' | 'image' | 'video';
+    type: 'audio' | 'image' | 'video' | 'application/zip';
     name: string;
     mime: string;
     data: string;
