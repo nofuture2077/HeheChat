@@ -152,7 +152,7 @@
     async function fetchSpriteData() {
       try {
         const { username, channel } = getUrlParams();
-        const apiUrl = `https://${location.host}/api/user-sprite/${username}/${channel}/collected-sprites`;
+        const apiUrl = `https://${location.host.replace('hehechat', 'server.hehechat')}/api/user-sprite/${username}/${channel}/collected-sprites`;
         
         const response = await fetch(apiUrl);
         if (!response.ok) {
