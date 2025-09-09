@@ -19,7 +19,7 @@
           const parsedParams = JSON.parse(decodedString);
           
           if (parsedParams.t) {
-            document.title = `${parsedParams.t} - Sprite Collection`;
+            document.title = `${parsedParams.t}`;
           }
         }
       } catch (error) {
@@ -212,7 +212,7 @@
     async function fetchSpriteData() {
       try {
         const { username, channel } = getUrlParams();
-        const apiUrl = `https://${location.host.replace('hehechat', 'server.hehechat')}/api/user-sprite/${username}/${channel}/collected-sprites`;
+        const apiUrl = `https://${location.host.replace('hehechat', 'server.hehechat')}/api/user-sprite/${channel}/${username}/collected-sprites`;
         
         const response = await fetch(apiUrl);
         if (!response.ok) {
@@ -332,7 +332,7 @@
       
       selectedImage.src = imageUrl;
       selectedImage.alt = formatFilename(filename);
-      selectedTitle.textContent = title || formatFilename(filename);
+      selectedTitle.textContent = formatFilename(filename);
       selectedContainer.style.display = 'block';
     }
     
