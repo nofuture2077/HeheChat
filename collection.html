@@ -7,6 +7,26 @@
   <meta name="theme-color" content="#242424">
   <meta name="viewport" content="maximum-scale=1, minimum-scale=1, initial-scale=1, width=device-width, user-scalable=no"/>
   <title>Sprite Collection</title>
+  <script>
+    // Update page title if custom title is provided in URL
+    window.addEventListener('DOMContentLoaded', () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const base64Param = params.get('q');
+        
+        if (base64Param) {
+          const decodedString = atob(base64Param);
+          const parsedParams = JSON.parse(decodedString);
+          
+          if (parsedParams.t) {
+            document.title = `${parsedParams.t} - Sprite Collection`;
+          }
+        }
+      } catch (error) {
+        console.error('Error updating page title:', error);
+      }
+    });
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     body {
@@ -123,7 +143,27 @@
   </style>
 </head>
 <body>
-  <h1>Sprite Collection</h1>
+  <h1 id="pageTitle">Sprite Collection</h1>
+  <script>
+    // Update page header if custom title is provided in URL
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const base64Param = params.get('q');
+        
+        if (base64Param) {
+          const decodedString = atob(base64Param);
+          const parsedParams = JSON.parse(decodedString);
+          
+          if (parsedParams.t) {
+            document.getElementById('pageTitle').textContent = parsedParams.t;
+          }
+        }
+      } catch (error) {
+        console.error('Error updating page header:', error);
+      }
+    });
+  </script>
   
   <div id="loadingMessage" class="loading" style="display: none;">Loading sprites...</div>
   <div id="errorMessage" class="error" style="display: none;"></div>
@@ -139,11 +179,31 @@
     // Store the extracted images from the ZIP file
     const extractedImages = {};
     
-    // Get URL parameters
+    // Get URL parameters from base64 encoded query string
     function getUrlParams() {
       const params = new URLSearchParams(window.location.search);
-      const username = params.get('u') || 'nofuture2077';
-      const channel = params.get('c') || username;
+      const base64Param = params.get('q');
+      
+      if (base64Param) {
+        try {
+          // Decode base64 string and parse JSON
+          const decodedString = atob(base64Param);
+          const parsedParams = JSON.parse(decodedString);
+          
+          // Extract parameters from the decoded JSON
+          const username = parsedParams.u || '';
+          const channel = parsedParams.c || '';
+          const title = parsedParams.t || '';
+          
+          return { username, channel, title };
+        } catch (error) {
+          console.error('Error decoding base64 parameter:', error);
+        }
+      }
+      
+      // Fallback to direct URL parameters if base64 decoding fails
+      const username = params.get('u') || '';
+      const channel = params.get('c') || '';
       
       return { username, channel };
     }
@@ -175,8 +235,8 @@
         showLoading(true);
         
         // Fetch the ZIP file
-        const { username } = getUrlParams();
-        const response = await fetch(`https://${location.host}/sprites/${username}.zip`);
+        const { channel } = getUrlParams();
+        const response = await fetch(`https://${location.host}/sprites/${channel}.zip`);
         if (!response.ok) {
           throw new Error(`Failed to fetch ZIP file: ${response.status} ${response.statusText}`);
         }
@@ -267,9 +327,12 @@
       const selectedImage = document.getElementById('selectedImage');
       const selectedTitle = document.getElementById('selectedTitle');
       
+      // Check if we have a custom title from the URL parameters
+      const { title } = getUrlParams();
+      
       selectedImage.src = imageUrl;
       selectedImage.alt = formatFilename(filename);
-      selectedTitle.textContent = formatFilename(filename);
+      selectedTitle.textContent = title || formatFilename(filename);
       selectedContainer.style.display = 'block';
     }
     
