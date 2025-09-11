@@ -65,6 +65,18 @@ body, html {
   }
 }
 
+.left .image, .left .video {
+  display: block;
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.right .image, .right .video {
+  display: block;
+  margin-left: auto;
+  margin-right: 0;
+}
+
 /* Layout classes for text alignment */
 .align-left .text {
   text-align: left;
