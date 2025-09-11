@@ -65,13 +65,13 @@ body, html {
   }
 }
 
-.left .image, .left .video {
+.align-left .image, .align-left .video {
   display: block;
   margin-left: 0;
   margin-right: auto;
 }
 
-.right .image, .right .video {
+.align-right .image, .align-right .video {
   display: block;
   margin-left: auto;
   margin-right: 0;
