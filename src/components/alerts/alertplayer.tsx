@@ -805,65 +805,73 @@ class AlertPlayer {
             return part.text;
         }).filter(x => x).join(' ');
     }
- 
-    async showNotification(event: Event) {
+
+    /**
+     * Determines which alert to play for a given event
+     * @param event The event to determine the alert for
+     * @returns Object containing alert information or undefined if no alert should be played
+     */
+    async determineAlert(event: Event): Promise<{
+        alertType: 'blerp' | 'standard' | 'none';
+        alert?: EventAlert;
+        audioUrl?: string;
+        selectedSpriteFilename?: string;
+        eventData: any;
+        skipReason?: string;
+    }> {
         const eventData = this.getEventData(event.text);
-        let alertFullyProcessed = false;
-        let selectedSpriteFilename: string | undefined;
-
-        const onEnd = () => {
-            console.log('Stop Playing');
-            alertFullyProcessed = true;
-            this.stopPlaying();
-            PubSub.publish('AlertPlayer-update');
-        }
-
-        const onError = (reason: any) => {
-            console.log('Error while Playing', reason);
-            alertFullyProcessed = true;
-            this.stopPlaying();
-            PubSub.publish('AlertPlayer-update');
-        }
-
+        
         try {
-            // eventData.audioUrl is used for blerps
+            // Check for blerp alerts (direct audio URL)
             if (eventData.audioUrl) {
                 // Check if blerps are deactivated in the config
                 if (this.config?.deactivatedAlerts["blerp"]) {
-                    console.log('Blerp alert skipped - deactivated in settings');
-                    this.stopPlaying(); // Reset playing state
-                    return;
+                    return {
+                        alertType: 'none',
+                        eventData,
+                        skipReason: 'Blerp alert skipped - deactivated in settings'
+                    };
                 }
                 
-                this.startPlaying();
-                // Direct access to blerp audio without proxy
-                this.getAudioInfo(eventData.audioUrl).then((audioInfo) => {
-                    PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration || 5}); // Default to 5 seconds if duration unknown
-                    this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
-                }, onError);
-                return;
+                return {
+                    alertType: 'blerp',
+                    audioUrl: eventData.audioUrl,
+                    eventData
+                };
             }
         } catch (err) {
             console.error("Error processing blerp:", err);
-            onError(err);
-            return;
+            return {
+                alertType: 'none',
+                eventData,
+                skipReason: 'Error processing blerp'
+            };
         }
+        
+        // Check for alert configuration
         const alertConfig = this.alertConfig[event.channel];
         if (!alertConfig && !event.eventAlert) {
-            console.log('No alertconfig set');
-            this.stopPlaying(); // Reset playing state
-            return;
+            return {
+                alertType: 'none',
+                eventData,
+                skipReason: 'No alert configuration set'
+            };
         }
+        
+        // Get the appropriate alert for this event
         const alert = this.getAlert(event, eventData, alertConfig, this.config!);
-
+        
         if (!alert) {
-            PubSub.publish('AlertPlayer-update', {text: 'No Alert for Event'});
-            console.log('No alert for event', this.config, alertConfig, event);
-            this.stopPlaying(); // Reset playing state
-            return;
+            return {
+                alertType: 'none',
+                eventData,
+                skipReason: 'No matching alert for event'
+            };
         }
-
+        
         // Process sprite selection if there's a visual element that's a zip file
+        let selectedSpriteFilename: string | undefined;
+        
         if (alert.visual?.element && alertConfig?.data?.files?.[alert.visual.element]) {
             const file = alertConfig.data.files[alert.visual.element];
             
@@ -892,6 +900,55 @@ class AlertPlayer {
                 }
             }
         }
+        
+        return {
+            alertType: 'standard',
+            alert,
+            selectedSpriteFilename,
+            eventData
+        };
+    }
+ 
+    async playAlert(event: Event, alertInfo: {
+        alertType: 'blerp' | 'standard' | 'none';
+        alert?: EventAlert;
+        audioUrl?: string;
+        selectedSpriteFilename?: string;
+        eventData: any;
+        skipReason?: string;
+    }) {
+        const onEnd = () => {
+            console.log('Stop Playing');
+            this.stopPlaying();
+            PubSub.publish('AlertPlayer-update');
+        }
+
+        const onError = (reason: any) => {
+            console.log('Error while Playing', reason);
+            this.stopPlaying();
+            PubSub.publish('AlertPlayer-update');
+        }
+        
+        // Handle blerp alerts (direct audio URL)
+        if (alertInfo.alertType === 'blerp') {
+            this.startPlaying();
+            // Direct access to blerp audio without proxy
+            this.getAudioInfo(alertInfo.audioUrl!).then((audioInfo) => {
+                PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration || 5}); // Default to 5 seconds if duration unknown
+                this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
+            }, onError);
+            return;
+        }
+        
+        // At this point we have a standard alert
+        const { alert, selectedSpriteFilename, eventData } = alertInfo;
+        if (!alert) {
+            console.log('No alert found after determination');
+            this.stopPlaying(); // Reset playing state
+            return;
+        }
+        
+        const alertConfig = this.alertConfig[event.channel];
 
         PubSub.publish('AlertPlayer-update', {text: 'Prepare Alert'});
         console.log('Play alert with config', event, alert);
@@ -903,7 +960,6 @@ class AlertPlayer {
             amount2: Number(event.amount2),
             selectedFilename: selectedSpriteFilename // Make available for TTS
         };
-
 
         const state = localStorage.getItem('hehe-token_state') || '';
         const sink = localStorage.getItem('hehe-sink') || '';
@@ -919,17 +975,17 @@ class AlertPlayer {
         // For preview alerts (event.force), always play audio in browsersource regardless of settings
         const isPreviewAlert = !!(event as any).force;
         const shouldPlayAudio = this.mode === 'browsersource' 
-            ? (isPreviewAlert || this.config?.browserSourceAudio)
-            : this.config?.playAlerts;
+            ? (isPreviewAlert || (this.config?.browserSourceAudio ?? false))
+            : (this.config?.playAlerts ?? false);
 
         try {
-            const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, event.channel, alert.audio!.tts!.voiceSpecifier, alert.audio!.tts!.voiceType, state, sink) : undefined;
-            const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio!.jingle!, alertConfig)) : undefined;
+            const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, event.channel, alert.audio.tts.voiceSpecifier, alert.audio.tts.voiceType, state, sink) : undefined;
+            const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio.jingle, alertConfig)) : undefined;
 
             console.log('Audio', ttsAudio, jingleAudio);
     
             const duration = (ttsAudio?.duration || 0) + (jingleAudio?.duration || 0);
-            const minDuration = Math.max(duration, alert.minDuration || 2);
+            const minDuration = Math.max(duration, alert.minDuration ?? 2);
             PubSub.publish('AlertPlayer-update', {duration});
             if (alert.visual) {
                 const visualText = (eventData && eventData.text) ? this.parsedPartsToText(eventData.text.parts || eventData.text) : undefined
@@ -950,7 +1006,7 @@ class AlertPlayer {
                 }
                 
                 // Apply visual alert delay for browser source mode
-                if (this.config?.browserSourceAudio || isPreviewAlert) {
+                if ((this.config?.browserSourceAudio ?? false) || isPreviewAlert) {
                     PubSub.publish('ALERT_SHOW', visualAlert);
                 }
             }
@@ -1080,13 +1136,8 @@ class AlertPlayer {
                 return this.handleAudioInterruption();
             }
             
-            // If we're paused, don't process the queue
-            if (this.paused) {
-                return;
-            }
-            
             // Don't process queue if we're already playing or not initialized
-            if (this.playing || !this.config || !this.status()) {
+            if (this.paused || this.playing || !this.config || !this.status()) {
                 return;
             }
         
@@ -1095,25 +1146,30 @@ class AlertPlayer {
                 return;
             }
         
-            // Get the next item from the queue
-            const item = this.queue[this.index++];
+            // Get the next event from the queue
+            const event = this.queue[this.index++];
         
-            if (!item) {
+            if (!event) {
                 return;
             }
             
-            // Set playing flag immediately to prevent concurrent processing
-            this.playing = true;
-            
-            // Reset state before playing new item
-            this.skipCurrent = false;
-            
-            console.log("Play Event", item);
             try {
-                await this.showNotification(item);
+                // Determine which alert to play
+                const alertInfo = await this.determineAlert(event);
+                
+                // Handle case where no alert should be played
+                if (alertInfo.alertType === 'none') {
+                    console.log(alertInfo.skipReason);
+                    return;
+                }
+
+                this.playing = true;
+                this.skipCurrent = false;
+                console.log("Play Event", event);
+                
+                await this.playAlert(event, alertInfo);
             } catch (err) {
                 console.error("Error showing notification:", err);
-                // Make sure we reset the playing state so the queue can continue
                 this.stopPlaying();
                 PubSub.publish('AlertPlayer-update');
             }
