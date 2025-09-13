@@ -681,38 +681,31 @@ class AlertPlayer {
     }
 
     async tts(ttsMessage: string, channel: string, voice: string, voiceType: string, state: string, sink: string) {
-        // Handle 'none' voice type - return undefined to skip TTS
-        if (voiceType === 'none') {
-            return undefined;
-        }
-        
-        // Handle 'default' voice type - use defaultVoice from config
-        if (voiceType === 'default') {
-            const alertConfig = this.alertConfig[channel];
-            const defaultVoice = alertConfig?.data?.config?.defaultVoice;
-            
+        // Skip if explicitly disabled
+        if (voiceType === "none") return;
+
+        // Resolve which voice to use
+        let resolvedVoiceType = voiceType;
+        let resolvedVoice = voice;
+
+        if (voiceType === "default") {
+            const defaultVoice = this.alertConfig[channel]?.data?.config?.defaultVoice;
             if (!defaultVoice) {
-                console.warn('Default voice type specified but no defaultVoice config found');
-                return undefined;
+                console.warn("Default voice type specified but no defaultVoice config found");
+                return;
             }
-            
-            // Use the default voice configuration
-            const audioData = defaultVoice.voiceType === 'ai' 
-                ? await this.aiTTS(ttsMessage, channel, defaultVoice.voiceSpecifier, state, sink)
-                : await this.googleTTS(ttsMessage, channel, defaultVoice.voiceSpecifier, state, sink);
-                
-            if (!audioData) {
-                return undefined;
-            }
-            return await this.getAudioInfo('data:audio/mp3;base64,' + audioData);
+            resolvedVoiceType = defaultVoice.voiceType;
+            resolvedVoice = defaultVoice.voiceSpecifier;
         }
-        
-        // Handle 'ai' and 'google' voice types as before
-        const audioData = voiceType === 'ai' ? await this.aiTTS(ttsMessage, channel, voice, state, sink) : await this.googleTTS(ttsMessage, channel, voice, state, sink);
-        if (!audioData) {
-            return undefined;
-        }
-        return await this.getAudioInfo('data:audio/mp3;base64,' + audioData);
+
+        // Choose engine
+        const audioData = resolvedVoiceType === "ai"
+            ? await this.aiTTS(ttsMessage, channel, resolvedVoice, state, sink)
+            : await this.googleTTS(ttsMessage, channel, resolvedVoice, state, sink);
+
+        if (!audioData) return;
+        return this.getAudioInfo("data:audio/mp3;base64," + audioData);
+
     }
 
     async wait(duration: number, minDuration: number): Promise<void> {
