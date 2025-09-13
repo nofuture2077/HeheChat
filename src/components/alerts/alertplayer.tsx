@@ -998,7 +998,7 @@ class AlertPlayer {
                     text: visualText
                 }), false);
 
-                const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: minDuration * 1000, channel: event.channel, position: alert.visual?.position, layout: alert.visual?.layout};
+                const visualAlert: VisualAlert = {image: alert.visual?.element, headline, text, duration: minDuration * 1000, channel: event.channel, position: alert.visual?.position, layout: alert.visual?.layout, event: event};
                 visualAlert.triggerId = event.triggerId;
                 if (this.mode === 'app' ) {
                     // Send to backend immediately (this doesn't affect display timing)

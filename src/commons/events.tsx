@@ -146,6 +146,7 @@ export interface VisualAlert {
     position?: string;
     layout?: string;
     triggerId?: string;
+    event: Event;
 }
 
 export interface ExtractedImage {

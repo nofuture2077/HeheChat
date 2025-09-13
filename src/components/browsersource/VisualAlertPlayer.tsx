@@ -114,29 +114,11 @@ export default function VisualAlertPlayer() {
     return mime.startsWith('video/') || mime === 'video/webm' || mime === 'video/mp4' || mime === 'video/ogg';
   };
 
-  // Load media data when currentAlert changes
-  useEffect(() => {
-    const loadMediaData = async () => {
-      if (currentAlert?.image) {
-        // Get the event data from AlertSystem
-        const eventData = AlertSystem.currentlyPlaying || {} as Event;
-        
-        // Use the pre-selected sprite data from AlertSystem
-        const data = await getMediaData(currentAlert.image, currentAlert.channel, eventData);
-        setMediaData(data);
-      } else {
-        setMediaData(null);
-      }
-    };
-    
-    loadMediaData();
-  }, [currentAlert]);
-
   useEffect(() => {
     let alertTimeoutId: number | undefined;
-    
+
     // Subscribe to new alerts
-    const alertToken = PubSub.subscribe('ALERT_SHOW', (_, data) => {
+    const alertToken = PubSub.subscribe('ALERT_SHOW', async (_, data) => {
       if (data.triggerId) {
         if (shownAlerts[data.triggerId]) {
           // skip alert
@@ -149,7 +131,14 @@ export default function VisualAlertPlayer() {
         clearTimeout(alertTimeoutId);
       }
 
+      // Preload media before showing the alert
+      let preloaded: typeof mediaData = null;
+      if (data.image) {
+        preloaded = await getMediaData(data.image, data.channel, data.event);
+      }
+
       setCurrentAlert(data);
+      setMediaData(preloaded);
       setIsVisible(true);
       setTimestamp(Date.now());
 
