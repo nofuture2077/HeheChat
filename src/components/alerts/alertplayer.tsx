@@ -876,7 +876,7 @@ class AlertPlayer {
                         file.data,
                         event.channel,
                         event.username,
-                        event.selectedSpriteFilename || event.userSeed
+                        event.userSeed
                     );
                     
                     if (spriteData) {
