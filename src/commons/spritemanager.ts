@@ -283,6 +283,12 @@ export class SpriteManager {
       if (spriteAssignment?.rerollPending) {
         selectedImage = await this.handleRerollIfPending(sortedImages, spriteAssignment, channel, username);
       }
+      // If userSeed is a filename that exists in the zip, use that image directly
+      else if (userSeed && sortedImages.some(img => img.name === userSeed)) {
+        const foundImage = sortedImages.find(img => img.name === userSeed);
+        selectedImage = foundImage || sortedImages[0]; // Fallback to first image if not found
+        newAssignment = true;
+      }
       // Use existing assignment if available
       else if (spriteAssignment?.selectedFilename) {
         const foundImage = sortedImages.find(img => img.name === spriteAssignment.selectedFilename);
@@ -303,12 +309,6 @@ export class SpriteManager {
           
           // Don't set newAssignment = true, as we want to keep their existing selection
         }
-      }
-      // If userSeed is a filename that exists in the zip, use that image directly
-      else if (userSeed && sortedImages.some(img => img.name === userSeed)) {
-        const foundImage = sortedImages.find(img => img.name === userSeed);
-        selectedImage = foundImage || sortedImages[0]; // Fallback to first image if not found
-        newAssignment = true;
       }
       // Otherwise, select based on hash with filename-based weighting
       else {
