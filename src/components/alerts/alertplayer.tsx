@@ -529,7 +529,7 @@ class AlertPlayer {
                 // Escape special regex characters except *
                 const escapedPattern = searchPattern
                     .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
-                    .replace(/\*/g, '.*');
+                    .replace(/\*/g, '\\w*');
                 
                 // Create appropriate regex for matching
                 // Don't use word boundaries for patterns that are only special characters
