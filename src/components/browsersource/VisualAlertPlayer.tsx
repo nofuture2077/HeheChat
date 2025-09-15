@@ -79,7 +79,7 @@ export default function VisualAlertPlayer() {
           file.data,
           channel,
           event.username,
-          event.userSeed
+          event.selectedSpriteFilename || event.userSeed
         );
         
         if (!spriteData) {
