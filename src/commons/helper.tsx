@@ -121,6 +121,10 @@ export function formatName(value: string): string {
     return withoutPrefix;
 }
 
+export function formatUsername(value: string): string {
+    return value.replace(/_/g, ' ').trim();
+}
+
 
 export function formatDateWithTime(date: Date): string {
     return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
@@ -185,6 +189,7 @@ const formatFunctions: { [key: string]: (value: any) => string } = {
     duration: (value: string) => formatDuration(Number(value) * 1000),
     currency: (value: string) => formatCurrency(value),
     name: (value: string) => formatName(value),
+    username: (value: string) => formatUsername(value),
 };
 
 // prüft einfache Bedingungen wie "durationMonths > 1"
