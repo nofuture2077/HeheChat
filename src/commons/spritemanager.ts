@@ -136,7 +136,8 @@ export class SpriteManager {
    */
   public selectImageWithWeighting(
     images: ExtractedImage[],
-    userHash: number
+    userHash: number,
+    mod?: number
   ): ExtractedImage {
     // Create a weighted pool of images
     const weightedPool: { image: ExtractedImage; weight: number }[] = [];
@@ -144,7 +145,7 @@ export class SpriteManager {
     // Process each image and determine its weight
     images.forEach(image => {
       const weight = this.extractWeightFromFilename(image.name);
-      
+      if (mod && (weight || 0) < mod) return;
       if (weight !== null) {
         // If filename has a weight prefix (e.g., "48_whatever.jpg"),
         // add it to the pool with 1/weight of normal chance
@@ -193,7 +194,7 @@ export class SpriteManager {
     if (availableImages.length > 0) {
       // Use weighted selection for reroll too
       const userHash = this.generateSimpleHash(`${username}${channel}${Date.now()}`); // Add timestamp for different result
-      selectedImage = this.selectImageWithWeighting(availableImages, userHash);
+      selectedImage = this.selectImageWithWeighting(availableImages, userHash, spriteAssignment.mod);
       
       // Report back to server that reroll is complete
       // The backend will keep selectedFilename unchanged and set lastFilename to the new sprite

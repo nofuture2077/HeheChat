@@ -5,14 +5,23 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 /**
  * Interface for reroll configuration
  */
+export interface RerollTrigger {
+  type: 'ChannelPointReward' | 'Sub' | 'Giftsub' | 'Bits' | 'Donation';
+  tier?: 'tier1' | 'tier2' | 'tier3' | 'prime';
+  amount?: number;
+  operation: 'exact' | 'min';
+  value: string;
+  mod?: number;
+}
+
 export interface RerollConfig {
   channel: string;
-  bitsAmount: number | null;
-  donationAmount: number | null;
+  config: {
+    userPickEnabled: boolean;
+    userPickChannelPointReward: string | null;
+    rerollTriggers: RerollTrigger[];
+  },
   enabled: boolean;
-  channelPoints: string | null;
-  userPick: boolean;
-  userPickCP: string | null;
 }
 
 /**
@@ -176,12 +185,12 @@ export const getRerollConfig = async (channel: string): Promise<RerollConfig | n
 export const updateRerollConfig = async (
   channel: string,
   config: {
-    bitsAmount: number | null;
-    donationAmount: number | null;
+    config: {
+      userPickEnabled: boolean;
+      userPickChannelPointReward: string | null;
+      rerollTriggers: RerollTrigger[];
+    },
     enabled: boolean;
-    channelPoints: string | null;
-    userPick: boolean;
-    userPickCP: string | null;
   }
 ): Promise<{ success: boolean; config?: RerollConfig }> => {
   try {

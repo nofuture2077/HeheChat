@@ -137,6 +137,7 @@ export interface UserSpriteAssignment {
     selectedFilename: string;
     lastFilename?: string; // Added for tracking the most recently rolled sprite
     rerollPending: boolean;
+    mod?: number;
     filenames?: string[]; // Array of all previously assigned filenames
 }
 
