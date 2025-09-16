@@ -876,7 +876,7 @@ class AlertPlayer {
                         file.data,
                         event.channel,
                         event.username,
-                        event.useLastSpriteFilename || false,
+                        eventData.useLast || false,
                         event.userSeed,
                     );
                     
