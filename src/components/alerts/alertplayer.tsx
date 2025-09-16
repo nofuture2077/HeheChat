@@ -870,13 +870,14 @@ class AlertPlayer {
             
             // Check if file is a zip file
             if (file.mime === 'application/zip' && event.username) {
-                try {
+                try {                    
                     // Get sprite data using SpriteManager
                     const spriteData = await spriteManager.getSpriteData(
                         file.data,
                         event.channel,
                         event.username,
-                        event.userSeed
+                        event.useLastSpriteFilename || false,
+                        event.userSeed,
                     );
                     
                     if (spriteData) {

@@ -127,6 +127,7 @@ export type Event = {
     userSeed?: string; // Added for deterministic sprite selection
     rerollPending?: boolean; // Flag indicating a reroll is pending for this user
     selectedSpriteFilename?: string; // Selected sprite filename for TTS and visual display
+    useLastSpriteFilename?: boolean; // Flag to control whether to use lastFilename or selectedFilename
 }
 
 // User sprite assignment interface
@@ -134,7 +135,9 @@ export interface UserSpriteAssignment {
     username: string;
     channel: string;
     selectedFilename: string;
+    lastFilename?: string; // Added for tracking the most recently rolled sprite
     rerollPending: boolean;
+    filenames?: string[]; // Array of all previously assigned filenames
 }
 
 export interface VisualAlert {

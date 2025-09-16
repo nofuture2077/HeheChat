@@ -1,4 +1,4 @@
-import { ExtractedImage, UserSpriteAssignment, ZipCache } from './events';
+import { ExtractedImage, UserSpriteAssignment, ZipCache, Event } from './events';
 import { getUserSpriteAssignment, saveUserSpriteAssignment, completeReroll } from '@/api/sprites';
 import JSZip from 'jszip';
 
@@ -196,6 +196,7 @@ export class SpriteManager {
       selectedImage = this.selectImageWithWeighting(availableImages, userHash);
       
       // Report back to server that reroll is complete
+      // The backend will keep selectedFilename unchanged and set lastFilename to the new sprite
       completeReroll(channel, username, selectedImage.name)
         .then(success => {
           if (success) {
@@ -224,7 +225,8 @@ export class SpriteManager {
     zipData: string,
     channel: string,
     username: string,
-    userSeed?: string
+    useLast: boolean,
+    userSeed?: string,
   ): Promise<{
     selectedImage: ExtractedImage;
     prefixClass: string;
@@ -282,6 +284,74 @@ export class SpriteManager {
       // Handle reroll if pending
       if (spriteAssignment?.rerollPending) {
         selectedImage = await this.handleRerollIfPending(sortedImages, spriteAssignment, channel, username);
+      }
+      // Check if we should explicitly use lastFilename based on event flag
+      else if (useLast && spriteAssignment?.lastFilename) {
+        const foundImage = sortedImages.find(img => img.name === spriteAssignment.lastFilename);
+        if (foundImage) {
+          selectedImage = foundImage;
+          console.log(`Using lastFilename "${spriteAssignment.lastFilename}" for ${username} in ${channel} (explicit flag)`);
+        } else {
+          // Fall back to selectedFilename if lastFilename not found
+          console.log(`Last sprite "${spriteAssignment.lastFilename}" not found, falling back to selectedFilename`);
+          
+          // Use existing assignment if available
+          if (spriteAssignment.selectedFilename) {
+            const selectedFoundImage = sortedImages.find(img => img.name === spriteAssignment.selectedFilename);
+            if (selectedFoundImage) {
+              selectedImage = selectedFoundImage;
+            } else {
+              // If assigned image no longer exists, use the first image for display
+              console.log(`Selected sprite "${spriteAssignment.selectedFilename}" not found in current sprite pack for ${username} in ${channel}. Using fallback for display only.`);
+              selectedImage = sortedImages[0]; // Use first image as fallback for display
+              
+              // Important: Override the display image's name with the user's actual selection
+              selectedImage = {
+                ...selectedImage,
+                name: spriteAssignment.selectedFilename // Preserve the original filename
+              };
+            }
+          } else {
+            // No valid selectedFilename either, use first image
+            selectedImage = sortedImages[0];
+          }
+        }
+      }
+      // Check for lastFilename for reroll alerts and replays (if no explicit flag)
+      else if (spriteAssignment?.lastFilename) {
+        const foundImage = sortedImages.find(img => img.name === spriteAssignment.lastFilename);
+        if (foundImage) {
+          selectedImage = foundImage;
+          console.log(`Using lastFilename "${spriteAssignment.lastFilename}" for ${username} in ${channel}`);
+        } else {
+          // Fall back to selectedFilename if lastFilename not found
+          console.log(`Last sprite "${spriteAssignment.lastFilename}" not found, falling back to selectedFilename`);
+          
+          // Use existing assignment if available
+          if (spriteAssignment.selectedFilename) {
+            const selectedFoundImage = sortedImages.find(img => img.name === spriteAssignment.selectedFilename);
+            if (selectedFoundImage) {
+              selectedImage = selectedFoundImage;
+            } else {
+              // If assigned image no longer exists, use the first image for display
+              // but keep the user's selected filename in the database
+              console.log(`Selected sprite "${spriteAssignment.selectedFilename}" not found in current sprite pack for ${username} in ${channel}. Using fallback for display only.`);
+              selectedImage = sortedImages[0]; // Use first image as fallback for display
+              
+              // Important: Override the display image's name with the user's actual selection
+              // This ensures we don't lose their selection when the sprite pack changes
+              selectedImage = {
+                ...selectedImage,
+                name: spriteAssignment.selectedFilename // Preserve the original filename
+              };
+            }
+          } else {
+            // No valid selectedFilename either, use first image
+            selectedImage = sortedImages[0];
+          }
+          
+          // Don't set newAssignment = true, as we want to keep their existing selection
+        }
       }
       // Use existing assignment if available
       else if (spriteAssignment?.selectedFilename) {
