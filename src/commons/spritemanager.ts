@@ -132,6 +132,29 @@ export class SpriteManager {
   }
 
   /**
+   * Create a deterministic shuffle using userHash as seed
+   */
+  private deterministicShuffle<T>(array: T[], seed: number): T[] {
+    // Clone the array to avoid modifying the original
+    const result = [...array];
+    
+    // Fisher-Yates shuffle algorithm with seeded random
+    for (let i = result.length - 1; i > 0; i--) {
+      // Simple LCG (Linear Congruential Generator) using the seed
+      seed = (seed * 9301 + 49297) % 233280;
+      const randomValue = seed / 233280;
+      
+      // Get random index based on seeded random value
+      const j = Math.floor(randomValue * (i + 1));
+      
+      // Swap elements
+      [result[i], result[j]] = [result[j], result[i]];
+    }
+    
+    return result;
+  }
+
+  /**
    * Select an image with weighting based on filename prefixes
    */
   public selectImageWithWeighting(
@@ -156,14 +179,18 @@ export class SpriteManager {
       }
     });
     
+    // Shuffle the weightedPool using a deterministic shuffle based on userHash
+    // This ensures images with equal weights have equal chances regardless of order
+    const shuffledPool = this.deterministicShuffle(weightedPool, userHash);
+    
     // Calculate total weight
-    const totalWeight = weightedPool.reduce((sum, item) => sum + item.weight, 0);
+    const totalWeight = shuffledPool.reduce((sum, item) => sum + item.weight, 0);
     
     // Use the hash to select an image based on weighted probability
     let targetValue = (userHash % 1000) / 1000 * totalWeight;
     let cumulativeWeight = 0;
     
-    for (const item of weightedPool) {
+    for (const item of shuffledPool) {
       cumulativeWeight += item.weight;
       if (targetValue <= cumulativeWeight) {
         return item.image;
