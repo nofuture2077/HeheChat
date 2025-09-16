@@ -3,10 +3,9 @@ import { spriteManager } from "@/commons/spritemanager";
 
 import { Config } from "@/commons/config";
 import { Profile } from "@/commons/profile";
-import { formatString } from "@/commons/helper";
+import { formatString, deterministicSample } from "@/commons/helper";
 import { silence } from "./silence";
 import PubSub from 'pubsub-js';
-import _ from "underscore";
 import { AlertConfig } from "@/components/events/alertconfigstorage";
 import { formatEventText } from "@/components/events/eventlist";
 import { DEFAULT_CHAT_EMOTES } from "@/commons/emotes";
@@ -760,15 +759,15 @@ class AlertPlayer {
         const eventAmount = Number(event.amount || 0);
         const exactAlertMatches = exactAlerts[eventAmount];
         if (exactAlertMatches && exactAlertMatches.length) {
-            return _.sample(exactAlertMatches);
+            return deterministicSample(exactAlertMatches, event.triggerId || Math.random() + '');
         }
         if (matchesAlerts.length) {
-            return _.sample(matchesAlerts);
+            return deterministicSample(matchesAlerts, event.triggerId || Math.random() + '');
         }
         const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
         const step = minKeys.findLast(x => x <= eventAmount);
         if (step || step === 0) {
-            return _.sample(minAlerts[step]);
+            return deterministicSample(minAlerts[step], event.triggerId || Math.random() + '');
         }
     }
 

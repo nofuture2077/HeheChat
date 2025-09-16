@@ -345,3 +345,31 @@ export const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] =>
       return [...acc, ' ', elem];
     }, []);
 };
+
+/**
+ * Deterministic sample function that selects an item from an array using a seed string
+ * @param array The array to sample from
+ * @param seed A string to use as a seed for deterministic selection
+ * @returns A randomly selected item from the array, determined by the seed
+ */
+export function deterministicSample<T>(array: T[], seed: string): T {
+  if (!array || array.length === 0) {
+    throw new Error("Cannot sample from empty or undefined array");
+  }
+  
+  // Generate a simple hash from the seed string
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    const char = seed.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  
+  // Use the absolute value of the hash to ensure positive number
+  const positiveHash = Math.abs(hash);
+  
+  // Use the hash to select an index from the array
+  const index = positiveHash % array.length;
+  
+  return array[index];
+}
