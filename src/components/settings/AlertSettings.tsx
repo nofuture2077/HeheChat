@@ -1,4 +1,4 @@
-import { Paper, Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space, Modal, Group, Button, NumberInput, Select } from '@mantine/core';
+import { Divider, Paper, Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space, Modal, Group, Button, NumberInput, Select } from '@mantine/core';
 import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
 import { useForceUpdate, useDisclosure } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
@@ -8,6 +8,7 @@ import { IconLink, IconRepeat, IconPlus, IconTrash, IconCopy } from '@tabler/ico
 import { SystemMessageMainType } from '../../commons/message';
 import { notifications } from '@mantine/notifications';
 import { getRerollConfig, updateRerollConfig, RerollConfig } from '@/api/sprites';
+import { EventAlert, EventTypeMapping } from '@/commons/events';
 
 interface EditorData {
     id: string;
@@ -222,6 +223,23 @@ export function AlertSettings() {
         }
     };
 
+    const formatDescription = function(alert: EventAlert) {
+        let suffix = '';
+        switch (alert.type as string) {
+            case 'raid': suffix = ' Viewers';break;
+            case 'cheer': suffix = ' Bits';break;
+            case 'sub': suffix = ' Months';break;
+            case 'subgift': suffix = ' Subs';break;
+            case 'subgiftb': suffix = ' Subs';break;
+            case 'hypetrain': suffix = ' Level';break;
+        }
+        switch (alert.specifier.type) {
+            case 'min': return alert.specifier.amount + "+" + suffix;
+            case 'exact': return alert.specifier.amount + suffix;
+            case 'matches': return alert.specifier.attribute +  ": " + alert.specifier.text;
+        }
+    }
+
     return (
         <Stack mt={30} mb={30} gap={30}>
             <Fieldset legend="Alert Sound Output" variant="filled" key="alert-output">
@@ -357,22 +375,41 @@ export function AlertSettings() {
                     return null;
                 }
                 return <Fieldset key={"Alerts-" + channel} legend={"Alerts " + channel} variant="filled">
-                    <Stack key={"alert-config-" + channel}>
+                                        <Stack key={"alert-config-" + channel}>
                         {/* Add blerp alert option */}
+                        {Object.entries(AlertSystem.alertConfig[channel].data?.alerts || {}).map(([eventMainType, alerts]) => {
+                            if (!alerts || alerts.length === 0) return null;
+                            return (
+                                <div key={eventMainType}>
+                                    <Divider mb="md" label={Messages[eventMainType]} labelPosition="center"  mt='xs'/>
+                                    {alerts.map((alert) => (
+                                        <Switch 
+                                            disabled={!config.activatedShares.includes(channel)} 
+                                            checked={!config.deactivatedAlerts[alert.id]} 
+                                            onChange={(event) => { 
+                                                config.setDeactivatedAlerts(alert.id, !event.currentTarget.checked); 
+                                                forceUpdate(); 
+                                            }} 
+                                            key={alert.id} 
+                                            label={alert.name} 
+                                            size="lg" 
+                                            mb="md"
+                                            description={formatDescription(alert)}
+                                        />
+                                    ))}
+                                </div>
+                            );
+                        })}
+                        <Divider label={'Blerps'} labelPosition="center" mt='xs'/>
                         <Switch 
                             disabled={!config.activatedShares.includes(channel)} 
                             checked={!config.deactivatedAlerts["blerp"]} 
-                            onChange={(event) => { 
-                                config.setDeactivatedAlerts("blerp", !event.currentTarget.checked); 
-                                forceUpdate(); 
-                            }} 
                             key="blerp" 
                             label="Blerps" 
                             size="lg" 
+                            mb="md"
+                            description={'All Blerps'}
                         />
-                        {Object.values(AlertSystem.alertConfig[channel].data?.alerts || []).reduce((accumulator, value) => accumulator.concat(value), []).map((alert) => {
-                            return <Switch disabled={!config.activatedShares.includes(channel)} checked={!config.deactivatedAlerts[alert.id]} onChange={(event) => { config.setDeactivatedAlerts(alert.id, !event.currentTarget.checked); forceUpdate() }} key={alert.id} label={alert.name} size="lg" />
-                        })}
                     </Stack>
                 </Fieldset>
             })}
