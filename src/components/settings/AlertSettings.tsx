@@ -1,4 +1,4 @@
-import { Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space, Modal, Group, Button, NumberInput, Divider } from '@mantine/core';
+import { Paper, Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space, Modal, Group, Button, NumberInput, Select } from '@mantine/core';
 import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
 import { useForceUpdate, useDisclosure } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
@@ -8,7 +8,6 @@ import { IconLink, IconRepeat, IconPlus, IconTrash, IconCopy } from '@tabler/ico
 import { SystemMessageMainType } from '../../commons/message';
 import { notifications } from '@mantine/notifications';
 import { getRerollConfig, updateRerollConfig, RerollConfig } from '@/api/sprites';
-import { EventAlert, EventTypeMapping } from '@/commons/events';
 
 interface EditorData {
     id: string;
@@ -109,12 +108,12 @@ export function AlertSettings() {
             if (!config) {
                 const defaultConfig = {
                     channel: username,
-                    bitsAmount: null,
-                    donationAmount: null,
                     enabled: true,
-                    channelPoints: null,
-                    userPick: false,
-                    userPickCP: null
+                    config: {
+                        userPickEnabled: false,
+                        userPickChannelPointReward: null,
+                        rerollTriggers: []
+                    }
                 };
                 console.log('Creating default config:', defaultConfig);
                 setRerollConfig(defaultConfig);
@@ -134,12 +133,8 @@ export function AlertSettings() {
         setIsSavingRerollConfig(true);
         try {
             const result = await updateRerollConfig(rerollConfig.channel, {
-                bitsAmount: rerollConfig.bitsAmount,
-                donationAmount: rerollConfig.donationAmount,
                 enabled: rerollConfig.enabled,
-                channelPoints: rerollConfig.channelPoints,
-                userPick: rerollConfig.userPick,
-                userPickCP: rerollConfig.userPickCP
+                config: rerollConfig.config
             });
             
             if (result.success && result.config) {
@@ -226,23 +221,6 @@ export function AlertSettings() {
             });
         }
     };
-
-    const formatDescription = function(alert: EventAlert) {
-        let suffix = '';
-        switch (EventTypeMapping[alert.type]) {
-            case 'raid': suffix = ' Viewers';break;
-            case 'cheer': suffix = ' Bits';break;
-            case 'sub': suffix = ' Months';break;
-            case 'subgift': suffix = ' Subs';break;
-            case 'subgiftb': suffix = ' Subs';break;
-            case 'hypetrain': suffix = ' Level';break;
-        }
-        switch (alert.specifier.type) {
-            case 'min': return alert.specifier.amount + "+" + suffix;
-            case 'exact': return alert.specifier.amount + suffix;
-            case 'matches': return alert.specifier.attribute +  ": " + alert.specifier.text;
-        }
-    }
 
     return (
         <Stack mt={30} mb={30} gap={30}>
@@ -381,30 +359,6 @@ export function AlertSettings() {
                 return <Fieldset key={"Alerts-" + channel} legend={"Alerts " + channel} variant="filled">
                     <Stack key={"alert-config-" + channel}>
                         {/* Add blerp alert option */}
-                        {Object.entries(AlertSystem.alertConfig[channel].data?.alerts || {}).map(([eventMainType, alerts]) => {
-                            if (!alerts || alerts.length === 0) return null;
-                            return (
-                                <div key={eventMainType}>
-                                    <Divider mb="md" label={Messages[eventMainType]} labelPosition="center"  mt='xs'/>
-                                    {alerts.map((alert) => (
-                                        <Switch 
-                                            disabled={!config.activatedShares.includes(channel)} 
-                                            checked={!config.deactivatedAlerts[alert.id]} 
-                                            onChange={(event) => { 
-                                                config.setDeactivatedAlerts(alert.id, !event.currentTarget.checked); 
-                                                forceUpdate(); 
-                                            }} 
-                                            key={alert.id} 
-                                            label={alert.name} 
-                                            size="lg" 
-                                            mb="md"
-                                            description={formatDescription(alert)}
-                                        />
-                                    ))}
-                                </div>
-                            );
-                        })}
-                        <Divider label={'Blerps'} labelPosition="center" mt='xs'/>
                         <Switch 
                             disabled={!config.activatedShares.includes(channel)} 
                             checked={!config.deactivatedAlerts["blerp"]} 
@@ -415,9 +369,10 @@ export function AlertSettings() {
                             key="blerp" 
                             label="Blerps" 
                             size="lg" 
-                            mb="md"
-                            description={'All Blerps'}
                         />
+                        {Object.values(AlertSystem.alertConfig[channel].data?.alerts || []).reduce((accumulator, value) => accumulator.concat(value), []).map((alert) => {
+                            return <Switch disabled={!config.activatedShares.includes(channel)} checked={!config.deactivatedAlerts[alert.id]} onChange={(event) => { config.setDeactivatedAlerts(alert.id, !event.currentTarget.checked); forceUpdate() }} key={alert.id} label={alert.name} size="lg" />
+                        })}
                     </Stack>
                 </Fieldset>
             })}
@@ -523,12 +478,8 @@ export function AlertSettings() {
                                     setIsSavingRerollConfig(true);
                                     try {
                                         await updateRerollConfig(newConfig.channel, {
-                                            bitsAmount: newConfig.bitsAmount,
-                                            donationAmount: newConfig.donationAmount,
                                             enabled: newConfig.enabled,
-                                            channelPoints: newConfig.channelPoints,
-                                            userPick: newConfig.userPick,
-                                            userPickCP: newConfig.userPickCP
+                                            config: newConfig.config
                                         });
                                     } catch (error) {
                                         console.error('Failed to update reroll config:', error);
@@ -541,152 +492,334 @@ export function AlertSettings() {
                             size="lg" 
                             disabled={isSavingRerollConfig}
                         />
-                        <Text fs="italic" size='14px'>Allow viewers to reroll their assigned sprites using bits</Text>
+                        <Text fs="italic" size='14px'>Allow viewers to reroll their assigned sprites</Text>
                         
-                        <Text size="sm">Bits amount for reroll</Text>
-                        <NumberInput
-                            placeholder="Enter bits amount"
-                            value={rerollConfig.bitsAmount === null ? undefined : rerollConfig.bitsAmount}
-                            onBlur={(ev) => {
-                                const value = ev.target.value;
-                                const newValue = value === undefined || value === '' ? null : parseInt(value, 10);
-                                const newConfig = {
-                                    ...rerollConfig,
-                                    bitsAmount: newValue
-                                };
-                                setRerollConfig(newConfig);
+                            <Stack>
+                                {(rerollConfig.config.rerollTriggers || []).map((trigger, index) => (
+                                <Paper p="sm">
+                                    <Group key={index} align="flex-start">
+                                        <Select
+                                            label="Type"
+                                            value={trigger.type}
+                                            onChange={(value) => {
+                                                if (!value) return;
+                                                const newTriggers = [...rerollConfig.config.rerollTriggers || []];
+                                                newTriggers[index] = { ...trigger, type: value as any };
+                                                const newConfig = {
+                                                    ...rerollConfig,
+                                                    config: {
+                                                        ...rerollConfig.config,
+                                                        rerollTriggers: newTriggers
+                                                    }
+                                                };
+                                                setRerollConfig(newConfig);
+                                            }}
+                                            data={[
+                                                { value: 'ChannelPointReward', label: 'Channel Points' },
+                                                { value: 'Bits', label: 'Bits' },
+                                                { value: 'Donation', label: 'Donation' },
+                                                { value: 'Sub', label: 'Subscription' },
+                                                { value: 'Giftsub', label: 'Gift Sub' }
+                                            ]}
+                                            disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                        />
+                                        
+                                        {trigger.type === 'Sub' || trigger.type === 'Giftsub' ? (
+                                            <>
+                                                <Select
+                                                    label="Tier"
+                                                    value={trigger.tier || 'tier1'}
+                                                    onChange={(value) => {
+                                                        if (!value) return;
+                                                        const newTriggers = [...rerollConfig.config.rerollTriggers];
+                                                        newTriggers[index] = { ...trigger, tier: value as any };
+                                                        const newConfig = {
+                                                            ...rerollConfig,
+                                                            config: {
+                                                                ...rerollConfig.config,
+                                                                rerollTriggers: newTriggers
+                                                            }
+                                                        };
+                                                        setRerollConfig(newConfig);
+                                                    }}
+                                                    data={[
+                                                        { value: 'tier1', label: 'Tier 1' },
+                                                        { value: 'tier2', label: 'Tier 2' },
+                                                        { value: 'tier3', label: 'Tier 3' },
+                                                        { value: 'prime', label: 'Prime' }
+                                                    ]}
+                                                    disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                                />
+                                                
+                                                <Select
+                                                    label="Operation"
+                                                    value={trigger.operation}
+                                                    onChange={(value) => {
+                                                        if (!value) return;
+                                                        const newTriggers = [...rerollConfig.config.rerollTriggers];
+                                                        newTriggers[index] = { ...trigger, operation: value as any };
+                                                        const newConfig = {
+                                                            ...rerollConfig,
+                                                            config: {
+                                                                ...rerollConfig.config,
+                                                                rerollTriggers: newTriggers
+                                                            }
+                                                        };
+                                                        setRerollConfig(newConfig);
+                                                    }}
+                                                    data={[
+                                                        { value: 'exact', label: 'Exact' },
+                                                        { value: 'min', label: 'Minimum' }
+                                                    ]}
+                                                    disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                                />
+                                                
+                                                <NumberInput
+                                                    label="Amount"
+                                                    value={typeof trigger.amount === 'number' ? trigger.amount : 0}
+                                                    onChange={(value) => {
+                                                        const newTriggers = [...rerollConfig.config.rerollTriggers];
+                                                        newTriggers[index] = { 
+                                                            ...trigger, 
+                                                            amount: Number(value) || 0,
+                                                            value: (value || 0).toString()
+                                                        };
+                                                        const newConfig = {
+                                                            ...rerollConfig,
+                                                            config: {
+                                                                ...rerollConfig.config,
+                                                                rerollTriggers: newTriggers
+                                                            }
+                                                        };
+                                                        setRerollConfig(newConfig);
+                                                    }}
+                                                    min={0}
+                                                    disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                                />
+                                            </>
+                                        ) : null}
+                                        
+                                        {trigger.type === 'Bits' || trigger.type === 'Donation' ? (
+                                            <>
+                                                <Select
+                                                    label="Operation"
+                                                    value={trigger.operation}
+                                                    onChange={(value) => {
+                                                        if (!value) return;
+                                                        const newTriggers = [...rerollConfig.config.rerollTriggers || []];
+                                                        newTriggers[index] = { ...trigger, operation: value as any };
+                                                        const newConfig = {
+                                                            ...rerollConfig,
+                                                            config: {
+                                                                ...rerollConfig.config,
+                                                                rerollTriggers: newTriggers
+                                                            }
+                                                        };
+                                                        setRerollConfig(newConfig);
+                                                    }}
+                                                    data={[
+                                                        { value: 'exact', label: 'Exact' },
+                                                        { value: 'min', label: 'Minimum' }
+                                                    ]}
+                                                    disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                                />
+                                                
+                                                <NumberInput
+                                                    label="Amount"
+                                                    value={typeof trigger.amount === 'number' ? trigger.amount : 0}
+                                                    onChange={(value) => {
+                                                        const newTriggers = [...rerollConfig.config.rerollTriggers || []];
+                                                        newTriggers[index] = { 
+                                                            ...trigger, 
+                                                            amount: Number(value) || 0,
+                                                            value: (value || 0).toString()
+                                                        };
+                                                        const newConfig = {
+                                                            ...rerollConfig,
+                                                            config: {
+                                                                ...rerollConfig.config,
+                                                                rerollTriggers: newTriggers
+                                                            }
+                                                        };
+                                                        setRerollConfig(newConfig);
+                                                    }}
+                                                    min={0}
+                                                    disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                                />
+                                            </>
+                                        ) : null}
+                                        
+                                        {trigger.type === 'ChannelPointReward' ? (
+                                            <TextInput
+                                                label="Reward Name"
+                                                value={trigger.value}
+                                                onChange={(event) => {
+                                                    const newTriggers = [...rerollConfig.config.rerollTriggers || []];
+                                                    newTriggers[index] = { ...trigger, value: event.currentTarget.value };
+                                                    const newConfig = {
+                                                        ...rerollConfig,
+                                                        config: {
+                                                            ...rerollConfig.config,
+                                                            rerollTriggers: newTriggers
+                                                        }
+                                                    };
+                                                    setRerollConfig(newConfig);
+                                                }}
+                                                disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                            />
+                                        ) : null}
+                                        
+                                        <NumberInput
+                                            label="Mod"
+                                            value={typeof trigger.mod === 'number' ? trigger.mod : 0}
+                                            onChange={(value) => {
+                                                const newTriggers = [...rerollConfig.config.rerollTriggers];
+                                                newTriggers[index] = { 
+                                                    ...trigger, 
+                                                    mod: Number(value) || 0
+                                                };
+                                                const newConfig = {
+                                                    ...rerollConfig,
+                                                    config: {
+                                                        ...rerollConfig.config,
+                                                        rerollTriggers: newTriggers
+                                                    }
+                                                };
+                                                setRerollConfig(newConfig);
+                                            }}
+                                            min={0}
+                                            disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                        />
+                                        
+                                        <ActionIcon 
+                                            color="red" 
+                                            onClick={() => {
+                                                const newTriggers = [...rerollConfig.config.rerollTriggers || []];
+                                                newTriggers.splice(index, 1);
+                                                const newConfig = {
+                                                    ...rerollConfig,
+                                                    config: {
+                                                        ...rerollConfig.config,
+                                                        rerollTriggers: newTriggers
+                                                    }
+                                                };
+                                                setRerollConfig(newConfig);
+                                            }}
+                                            disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                        >
+                                            <IconTrash size={16} />
+                                        </ActionIcon>
+                                    </Group>
+                                    </Paper>
+                                ))}
                                 
-                                // Save the updated config
-                                (async () => {
-                                    setIsSavingRerollConfig(true);
-                                    try {
-                                        await updateRerollConfig(newConfig.channel, {
-                                            bitsAmount: newConfig.bitsAmount,
-                                            donationAmount: newConfig.donationAmount,
-                                            enabled: newConfig.enabled,
-                                            channelPoints: newConfig.channelPoints,
-                                            userPick: newConfig.userPick,
-                                            userPickCP: newConfig.userPickCP
+                                <Button 
+                                    leftSection={<IconPlus size={16} />}
+                                    onClick={() => {
+                                        const newTriggers = [...rerollConfig.config.rerollTriggers || []];
+                                        newTriggers.push({
+                                            type: 'Bits',
+                                            operation: 'exact',
+                                            value: '100',
+                                            amount: 100,
+                                            mod: 0
                                         });
-                                    } catch (error) {
-                                        console.error('Failed to update reroll config:', error);
-                                    } finally {
-                                        setIsSavingRerollConfig(false);
-                                    }
-                                })();
-                            }}
-                            min={0}
-                            allowNegative={false}
-                            hideControls
-                            disabled={!rerollConfig.enabled || isSavingRerollConfig}
-                        />
-                        <Text fs="italic" size='14px'>Amount of bits required for a viewer to reroll their sprite (leave empty to disable bits rerolls)</Text>
+                                        const newConfig = {
+                                            ...rerollConfig,
+                                            config: {
+                                                ...rerollConfig.config,
+                                                rerollTriggers: newTriggers
+                                            }
+                                        };
+                                        setRerollConfig(newConfig);
+                                    }}
+                                    disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                >
+                                    Add Trigger
+                                </Button>
+                            </Stack>
                         
-                        <Text size="sm">Channel Points Reward Name for reroll</Text>
-                        <TextInput
-                            placeholder="Enter Channel Points Reward name"
-                            value={rerollConfig.channelPoints || ''}
-                            onChange={(ev) => {
-                                const value = ev.target.value;
-                                const newConfig = {
-                                    ...rerollConfig,
-                                    channelPoints: value === '' ? null : value
-                                };
-                                setRerollConfig(newConfig);
-                            }}
-                            onBlur={() => {
-                                // Save the updated config
-                                (async () => {
-                                    setIsSavingRerollConfig(true);
-                                    try {
-                                        await updateRerollConfig(rerollConfig.channel, {
-                                            bitsAmount: rerollConfig.bitsAmount,
-                                            donationAmount: rerollConfig.donationAmount,
-                                            enabled: rerollConfig.enabled,
-                                            channelPoints: rerollConfig.channelPoints,
-                                            userPick: rerollConfig.userPick,
-                                            userPickCP: rerollConfig.userPickCP
-                                        });
-                                    } catch (error) {
-                                        console.error('Failed to update reroll config:', error);
-                                    } finally {
-                                        setIsSavingRerollConfig(false);
-                                    }
-                                })();
-                            }}
-                            disabled={!rerollConfig.enabled || isSavingRerollConfig}
-                        />
-                        <Text fs="italic" size='14px'>Name of the Channel Point Reward to trigger a reroll (leave empty to disable channel points rerolls)</Text>
-                        
-                        <Switch 
-                            checked={rerollConfig.userPick} 
-                            onChange={(event) => { 
-                                const newConfig = {
-                                    ...rerollConfig,
-                                    userPick: event.currentTarget.checked
-                                };
-                                setRerollConfig(newConfig);
+                        <Fieldset legend="User Pick Configuration" variant="filled">
+                            <Stack>
+                                <Switch 
+                                    checked={rerollConfig.config.userPickEnabled} 
+                                    onChange={(event) => { 
+                                        const newConfig = {
+                                            ...rerollConfig,
+                                            config: {
+                                                ...rerollConfig.config,
+                                                userPickEnabled: event.currentTarget.checked
+                                            }
+                                        };
+                                        setRerollConfig(newConfig);
+                                        
+                                        // Save the updated config
+                                        (async () => {
+                                            setIsSavingRerollConfig(true);
+                                            try {
+                                                await updateRerollConfig(newConfig.channel, {
+                                                    enabled: newConfig.enabled,
+                                                    config: newConfig.config
+                                                });
+                                            } catch (error) {
+                                                console.error('Failed to update reroll config:', error);
+                                            } finally {
+                                                setIsSavingRerollConfig(false);
+                                            }
+                                        })();
+                                    }} 
+                                    label="Allow users to pick their sprite" 
+                                    size="lg" 
+                                    disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                                />
+                                <Text fs="italic" size='14px'>Enable this to allow users to pick one of their collected sprites</Text>
                                 
-                                // Save the updated config
-                                (async () => {
-                                    setIsSavingRerollConfig(true);
-                                    try {
-                                        await updateRerollConfig(newConfig.channel, {
-                                            bitsAmount: newConfig.bitsAmount,
-                                            donationAmount: newConfig.donationAmount,
-                                            enabled: newConfig.enabled,
-                                            channelPoints: newConfig.channelPoints,
-                                            userPick: newConfig.userPick,
-                                            userPickCP: newConfig.userPickCP
-                                        });
-                                    } catch (error) {
-                                        console.error('Failed to update reroll config:', error);
-                                    } finally {
-                                        setIsSavingRerollConfig(false);
-                                    }
-                                })();
-                            }} 
-                            label="Allow users to pick their sprite" 
-                            size="lg" 
-                            disabled={!rerollConfig.enabled || isSavingRerollConfig}
-                        />
-                        <Text fs="italic" size='14px'>Enable this to allow users to pick one of their collected sprites</Text>
+                                <Text size="sm">Channel Points Reward Name for user pick</Text>
+                                <TextInput
+                                    placeholder="Enter Channel Points Reward name for user pick"
+                                    value={rerollConfig.config.userPickChannelPointReward || ''}
+                                    onChange={(ev) => {
+                                        const value = ev.target.value;
+                                        const newConfig = {
+                                            ...rerollConfig,
+                                            config: {
+                                                ...rerollConfig.config,
+                                                userPickChannelPointReward: value === '' ? null : value
+                                            }
+                                        };
+                                        setRerollConfig(newConfig);
+                                    }}
+                                    onBlur={() => {
+                                        // Save the updated config
+                                        (async () => {
+                                            setIsSavingRerollConfig(true);
+                                            try {
+                                                await updateRerollConfig(rerollConfig.channel, {
+                                                    enabled: rerollConfig.enabled,
+                                                    config: rerollConfig.config
+                                                });
+                                            } catch (error) {
+                                                console.error('Failed to update reroll config:', error);
+                                            } finally {
+                                                setIsSavingRerollConfig(false);
+                                            }
+                                        })();
+                                    }}
+                                    disabled={!rerollConfig.enabled || !rerollConfig.config.userPickEnabled || isSavingRerollConfig}
+                                />
+                                <Text fs="italic" size='14px'>Name of the Channel Point Reward for users to pick their sprite (only used if "Allow users to pick their sprite" is enabled)</Text>
+                            </Stack>
+                        </Fieldset>
                         
-                        <Text size="sm">Channel Points Reward Name for user pick</Text>
-                        <TextInput
-                            placeholder="Enter Channel Points Reward name for user pick"
-                            value={rerollConfig.userPickCP || ''}
-                            onChange={(ev) => {
-                                const value = ev.target.value;
-                                const newConfig = {
-                                    ...rerollConfig,
-                                    userPickCP: value === '' ? null : value
-                                };
-                                setRerollConfig(newConfig);
-                            }}
-                            onBlur={() => {
-                                // Save the updated config
-                                (async () => {
-                                    setIsSavingRerollConfig(true);
-                                    try {
-                                        await updateRerollConfig(rerollConfig.channel, {
-                                            bitsAmount: rerollConfig.bitsAmount,
-                                            donationAmount: rerollConfig.donationAmount,
-                                            enabled: rerollConfig.enabled,
-                                            channelPoints: rerollConfig.channelPoints,
-                                            userPick: rerollConfig.userPick,
-                                            userPickCP: rerollConfig.userPickCP
-                                        });
-                                    } catch (error) {
-                                        console.error('Failed to update reroll config:', error);
-                                    } finally {
-                                        setIsSavingRerollConfig(false);
-                                    }
-                                })();
-                            }}
-                            disabled={!rerollConfig.enabled || !rerollConfig.userPick || isSavingRerollConfig}
-                        />
-                        <Text fs="italic" size='14px'>Name of the Channel Point Reward for users to pick their sprite (only used if "Allow users to pick their sprite" is enabled)</Text>
+                        <Group justify="flex-end">
+                            <Button 
+                                onClick={saveRerollConfig} 
+                                loading={isSavingRerollConfig}
+                                disabled={!rerollConfig.enabled}
+                            >
+                                Save Configuration
+                            </Button>
+                        </Group>
                     </Stack>
                 </Fieldset>
             )}
