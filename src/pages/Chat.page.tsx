@@ -399,7 +399,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             if (config.readAllMessages && premium.isPremium && message.type === 'chat') {
                 // Check if the user is not in the ignoreTTS list
                 const username = data.username.toLowerCase();
-                if (!config.ignoreTTS.includes(username)) {
+                if (!config.ignoreTTS || !config.ignoreTTS.includes(username)) {
                     const date = Date.now();
 
                     const tts: Event = {
