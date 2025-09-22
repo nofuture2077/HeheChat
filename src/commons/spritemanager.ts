@@ -1,4 +1,11 @@
-import { ExtractedImage, UserSpriteAssignment, ZipCache, Event } from './events';
+import { ExtractedImage, UserSpriteAssignment, Event } from './events';
+// Update ZipCache interface to include sortedPrefixes
+interface ZipCache {
+  zipHash: string;
+  images: ExtractedImage[];
+  sortedPrefixes: number[];
+  timestamp: number;
+}
 import { getUserSpriteAssignment, saveUserSpriteAssignment, completeReroll } from '@/api/sprites';
 import JSZip from 'jszip';
 
@@ -63,6 +70,37 @@ export class SpriteManager {
       return weight > 0 ? weight : null;
     }
     return null;
+  }
+
+  /**
+   * Extract all numerical prefixes from images and return them sorted
+   */
+  private extractAllPrefixesFromImages(images: ExtractedImage[]): number[] {
+    const prefixes = new Set<number>();
+    
+    images.forEach(image => {
+      const prefix = this.extractWeightFromFilename(image.name);
+      if (prefix !== null) {
+        prefixes.add(prefix);
+      }
+    });
+    
+    return Array.from(prefixes).sort((a, b) => a - b);
+  }
+
+  /**
+   * Get the rank of a prefix in the sorted list of all prefixes
+   * Returns 0 for files without prefix, otherwise 1-based index
+   */
+  private getPrefixRank(filename: string, sortedPrefixes: number[]): number {
+    const prefix = this.extractWeightFromFilename(filename);
+    
+    if (prefix === null) {
+      return 0; // Files without prefix get rank 0
+    }
+    
+    const index = sortedPrefixes.indexOf(prefix);
+    return index + 1; // Convert to 1-based indexing
   }
 
   /**
@@ -276,10 +314,11 @@ export class SpriteManager {
           return null;
         }
         
-        // Create new cache entry
+        // Create new cache entry with sorted prefixes
         cacheEntry = {
           zipHash,
           images: extractedImages,
+          sortedPrefixes: this.extractAllPrefixesFromImages(extractedImages),
           timestamp: Date.now()
         };
         
@@ -397,9 +436,9 @@ export class SpriteManager {
           });
       }
       
-      // Extract number prefix if it exists for glow effect
-      const prefixMatch = selectedImage.name.match(/^(\d+)_/);
-      const prefixClass = prefixMatch ? `prefix-${prefixMatch[1]}` : '';
+      // Get the rank of the prefix for the selected image
+      const prefixRank = this.getPrefixRank(selectedImage.name, cacheEntry.sortedPrefixes);
+      const prefixClass = `prefix-${prefixRank}`;
       
       return {
         selectedImage,

@@ -1373,17 +1373,41 @@ body, html {
   visibility: visible;
 }
 
-/* Prefix-based glow effects */
-.prefix-2 {
+/* Rank-based glow effects (previously prefix-based) */
+/* prefix-0 is for files without prefix */
+.prefix-0 {
+  /* No special effect for non-prefixed files */
+}
+
+/* prefix-1 is for the first rank (lowest prefix value) */
+.prefix-1 {
   filter: drop-shadow(0 0 15px rgba(0, 100, 255, 0.8));
 }
 
-.prefix-5 {
+/* prefix-2 is for the second rank */
+.prefix-2 {
   filter: drop-shadow(0 0 15px rgba(128, 0, 255, 0.8));
 }
 
-.prefix-10 {
+/* prefix-3 is for the third rank */
+.prefix-3 {
   filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+}
+
+/* Rainbow drop-shadow animation */
+@keyframes rainbowDropShadow {
+  0% { filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.8)); }
+  14% { filter: drop-shadow(0 0 15px rgba(255, 127, 0, 0.8)); }
+  28% { filter: drop-shadow(0 0 15px rgba(255, 255, 0, 0.8)); }
+  42% { filter: drop-shadow(0 0 15px rgba(0, 255, 0, 0.8)); }
+  57% { filter: drop-shadow(0 0 15px rgba(0, 0, 255, 0.8)); }
+  71% { filter: drop-shadow(0 0 15px rgba(75, 0, 130, 0.8)); }
+  85% { filter: drop-shadow(0 0 15px rgba(148, 0, 211, 0.8)); }
+  100% { filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.8)); }
+}
+
+.prefix-4 {
+  animation: rainbowDropShadow 3s linear infinite;
 }
 
 /* Video styles - inherit all image styles */
