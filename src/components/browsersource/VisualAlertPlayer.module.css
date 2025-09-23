@@ -1406,24 +1406,6 @@ body, html {
   100% { filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.8)); }
 }
 
-/* Prefix-4 animation that works with other animations by using a pseudo-element */
-.prefix-4 {
-  position: relative;
-}
-
-.prefix-4::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  border-radius: inherit;
-  animation: rainbowDropShadow 3s linear infinite;
-  pointer-events: none;
-}
-
 /* Video styles - inherit all image styles */
 .image video {
   background-color: transparent !important;
