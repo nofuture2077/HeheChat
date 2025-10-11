@@ -367,7 +367,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                 }
                 setDrawer({...SettingsDrawer, props: {tab: 'Chat'} });
                 drawerHandler.open();
-            }, 2500);
+            }, 7000);
         }
         config.loadShares();
     }, []);
@@ -516,7 +516,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         } 
         setTimeout(() => {
             scrollToBottom();
-        }, 2000);
+        }, 5000);
 
         // Check connections when component mounts
         checkConnections();
