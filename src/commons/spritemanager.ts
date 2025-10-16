@@ -198,10 +198,32 @@ export class SpriteManager {
   public selectImageWithWeighting(
     images: ExtractedImage[],
     userHash: number,
-    mod?: number
+    mod?: number,
+    collectedSprites?: string[]
   ): ExtractedImage {
     // Create a weighted pool of images
     const weightedPool: { image: ExtractedImage; weight: number }[] = [];
+
+    // Check if we have collectedSprites and should look for date-prefixed images
+    if (collectedSprites) {
+      // Get current date in YYMMDD format
+      const now = new Date();
+      const yy = now.getFullYear().toString().slice(2); // Get last 2 digits of year
+      const mm = (now.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
+      const dd = now.getDate().toString().padStart(2, '0');
+      const datePrefix = `${dd}${mm}${yy}_`; // Format: YYMMDD_
+      
+      // Look for images with today's date prefix that aren't in collectedSprites
+      const todayImages = images.filter(img => 
+        img.name.startsWith(datePrefix) && 
+        !collectedSprites.includes(img.name)
+      );
+      
+      // If we found any matching images, return the first one
+      if (todayImages.length > 0) {
+        return todayImages[0];
+      }
+    }
     
     // Process each image and determine its weight
     images.forEach(image => {
@@ -259,7 +281,7 @@ export class SpriteManager {
     if (availableImages.length > 0) {
       // Use weighted selection for reroll too
       const userHash = this.generateSimpleHash(`${username}${channel}${Date.now()}`); // Add timestamp for different result
-      selectedImage = this.selectImageWithWeighting(availableImages, userHash, spriteAssignment.mod);
+      selectedImage = this.selectImageWithWeighting(availableImages, userHash, spriteAssignment.mod, spriteAssignment.filenames);
       
       // Report back to server that reroll is complete
       // The backend will keep selectedFilename unchanged and set lastFilename to the new sprite
