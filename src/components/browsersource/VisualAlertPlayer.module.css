@@ -413,6 +413,9 @@ body, html {
   100% { transform: translate(0); }
 }
 
+.image-bottom .alertContainer {
+  flex-direction: column-reverse;
+}
 
 /* Image animation effects */
 .image-effect-bounce .image {
