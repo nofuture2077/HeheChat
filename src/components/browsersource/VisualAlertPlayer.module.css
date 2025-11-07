@@ -413,7 +413,7 @@ body, html {
   100% { transform: translate(0); }
 }
 
-.image-bottom .alertContainer {
+.image-bottom > div.contentWrapper {
   flex-direction: column-reverse;
 }
 
