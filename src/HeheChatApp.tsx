@@ -25,6 +25,22 @@ import { ShortCut } from './commons/shortcuts';
 import _ from 'underscore';
 import { MockService } from '@/mocks/service';
 
+// Debounce function to prevent excessive API calls
+function debounce<T extends (...args: any[]) => any>(
+    func: T,
+    wait: number
+): (...args: Parameters<T>) => void {
+    let timeout: NodeJS.Timeout | null = null;
+    return function executedFunction(...args: Parameters<T>) {
+        const later = () => {
+            timeout = null;
+            func(...args);
+        };
+        if (timeout) clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 window.addEventListener("click", () => {
     if (!AlertSystem.status()) {
         AlertSystem.initialize();
@@ -106,6 +122,25 @@ export default function HeheChat() {
     });
     const backendWorkerRef = useRef<Worker>();
     
+    // Create a debounced save function to prevent excessive API calls
+    const debouncedSaveProfile = useRef(
+        debounce(async (profileToSave: Profile) => {
+            if (!profileToSave.guid) {
+                console.error("Saving profile without guid", profileToSave);
+                return;
+            }
+            if (!profileToSave.config.channels || !profileToSave.config.channels.length) {
+                return;
+            }
+            
+            try {
+                await storeProfile(profileToSave);
+            } catch (error) {
+                console.error('Error saving profile to server:', error);
+            }
+        }, 1000)
+    ).current;
+    
     // Track connection status
     const [connectionStatus, setConnectionStatus] = useState<{
         status: string;
@@ -125,24 +160,8 @@ export default function HeheChat() {
     const { isSupported: wakeLockSupported, isActive: wakeLockActive, requestWakeLock, releaseWakeLock, error: wakeLockError } = useWakeLock();
 
     useDidUpdate(() => {
-        const saveProfileToServer = async () => {
-            if (!profile.guid) {
-                console.error("Saving profile without guid", profile);
-                return;
-            }
-            if (!profile.config.channels || !profile.config.channels.length) {
-                return;
-            }
-            
-            try {
-                await storeProfile(profile);
-            } catch (error) {
-                console.error('Error saving profile to server:', error);
-                // Could add user notification here
-            }
-        };
-        
-        saveProfileToServer();
+        // Use debounced save to prevent excessive API calls
+        debouncedSaveProfile(profile);
     }, [profile])
 
     useEffect(() => {
@@ -323,13 +342,21 @@ export default function HeheChat() {
         };
         
         updateProfilesList();
-    }, [profile, profiles]);
+    }, [profiles]);
 
     useEffect(() => {
         const updatedArray = profiles.map(obj =>
             obj.guid === profile.guid ? profile : obj
         );
-        setProfiles(updatedArray);
+        
+        // Only update if there's an actual change to prevent infinite loops
+        const hasChanged = profiles.some((p, index) => 
+            p.guid === profile.guid && JSON.stringify(p) !== JSON.stringify(updatedArray[index])
+        );
+        
+        if (hasChanged) {
+            setProfiles(updatedArray);
+        }
         AlertSystem.updateProfile(profile);
     }, [profile]);
 
