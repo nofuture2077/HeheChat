@@ -329,34 +329,31 @@ export default function HeheChat() {
         }
     }, []);
 
+    // Use a ref to track the last saved profiles to prevent duplicate saves
+    const lastSavedProfilesRef = useRef<string>('');
+    
     useEffect(() => {
         const updateProfilesList = async () => {
             if (profiles.length) {
-                try {
-                    await saveProfiles(profile.guid, profiles.map(p => p.guid));
-                } catch (error) {
-                    console.error('Error saving profiles list:', error);
-                    // Could add user notification here
+                const profilesKey = profiles.map(p => p.guid).join(',');
+                // Only save if the list has actually changed
+                if (profilesKey !== lastSavedProfilesRef.current) {
+                    lastSavedProfilesRef.current = profilesKey;
+                    try {
+                        await saveProfiles(profile.guid, profiles.map(p => p.guid));
+                    } catch (error) {
+                        console.error('Error saving profiles list:', error);
+                    }
                 }
             }
         };
         
         updateProfilesList();
-    }, [profiles]);
+    }, [profiles, profile.guid]);
 
+    // Update AlertSystem when profile changes, but DON'T sync back to profiles array
+    // The profiles array should only be updated through explicit actions, not reactively
     useEffect(() => {
-        const updatedArray = profiles.map(obj =>
-            obj.guid === profile.guid ? profile : obj
-        );
-        
-        // Only update if there's an actual change to prevent infinite loops
-        const hasChanged = profiles.some((p, index) => 
-            p.guid === profile.guid && JSON.stringify(p) !== JSON.stringify(updatedArray[index])
-        );
-        
-        if (hasChanged) {
-            setProfiles(updatedArray);
-        }
         AlertSystem.updateProfile(profile);
     }, [profile]);
 
