@@ -6,7 +6,7 @@ import { SystemMessageMainType } from '../../commons/message';
 import { useChannels } from '@/hooks/useChannels';
 import { IconInfoCircle } from '@tabler/icons-react';
 
-const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'streamOnline', 'streamOffline', 'channelPointRedemption', 'blerp', 'kofi'];
+const eventMainTypeValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'follow', 'donation', 'cheer', 'streamOnline', 'streamOffline', 'channelPointRedemption', 'blerp', 'kofi', 'streak'];
 const seventTVMessages: SystemMessageMainType[] = ['sevenTVAdded', 'sevenTVRemoved'];
 
 const Messages: Record<string, string> = {
@@ -23,7 +23,8 @@ const Messages: Record<string, string> = {
     "sevenTVAdded": "New 7TV Emotes",
     "sevenTVRemoved": "Removed 7TV Emotes",
     "blerp": "Blerps",
-    "kofi": "Ko-fi Events"
+    "kofi": "Ko-fi Events",
+    "streak": "Viewer Streak"
 };
 
 export function ChatSettings() {

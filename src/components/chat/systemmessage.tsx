@@ -48,7 +48,8 @@ const messages = {
     'kofidono': '${username} donated ${amount}${currency:currency} on ko-fi',
     'kofisub': '${username} subed on ko-fi with tier ${tier}',
     'tts': '${username} triggered tts',
-    'hypetrain': 'Hypetrain level ${level:whole}'
+    'hypetrain': 'Hypetrain level ${level:whole}',
+    'streak': '${username} stream streak ${amount:whole}///${text}',
 };
 
 export function SystemMessageComp(props: SystemMessageProps) {

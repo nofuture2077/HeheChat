@@ -1,6 +1,6 @@
 import classes from './eventdrawer.module.css'
 import { ScrollArea, Text, ThemeIcon, ActionIcon } from '@mantine/core';
-import { IconCheck, IconReload, IconTrain } from '@tabler/icons-react';
+import { IconBoltFilled, IconCheck, IconReload, IconTrain } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { EventStorage, EventData } from './eventstorage';
 import { ConfigContext, ProfileContext } from '@/ApplicationContext';
@@ -42,7 +42,8 @@ const messages: Record<EventType, string> = {
     'kofidono': '${username} donated ${amount}${currency:currency} on ko-fi',
     'kofisub': '${username} subed on ko-fi',
     'tts': '${username} triggered tts',
-    'hypetrain': 'Hypetrain level ${level:whole}'
+    'hypetrain': 'Hypetrain level ${level:whole}',
+    'streak': '${username} stream streak ${amount:whole}',
 }
 
 export const icons: Record<EventType, ReactElementLike> = {
@@ -66,7 +67,8 @@ export const icons: Record<EventType, ReactElementLike> = {
     'kofidono': <IconAffiliate/>,
     'kofisub': <IconAffiliate/>,
     'tts': <IconSpeakerphone/>,
-    'hypetrain': <IconTrain/>
+    'hypetrain': <IconTrain/>,
+    'streak': <IconBoltFilled/>,
 }
 
 export function formatEventText(event: EventData): string {
