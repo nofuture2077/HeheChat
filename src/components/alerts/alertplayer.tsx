@@ -924,6 +924,18 @@ class AlertPlayer {
         
         // Handle blerp alerts (direct audio URL)
         if (alertInfo.alertType === 'blerp') {
+            // Check if audio should be played based on mode and settings
+            const isPreviewAlert = !!(event as any).force;
+            const shouldPlayAudio = this.mode === 'browsersource'
+                ? (isPreviewAlert || (this.config?.browserSourceAudio ?? false))
+                : (this.config?.playAlerts ?? false);
+
+            if (!shouldPlayAudio) {
+                console.log("Blerp audio playback skipped due to settings");
+                onEnd();
+                return;
+            }
+
             this.startPlaying();
             // Direct access to blerp audio without proxy
             this.getAudioInfo(alertInfo.audioUrl!).then((audioInfo) => {
@@ -1147,6 +1159,10 @@ class AlertPlayer {
                 return;
             }
             
+            // Set playing = true IMMEDIATELY to block re-entry during async determineAlert
+            this.playing = true;
+            this.skipCurrent = false;
+            
             try {
                 // Determine which alert to play
                 const alertInfo = await this.determineAlert(event);
@@ -1154,11 +1170,11 @@ class AlertPlayer {
                 // Handle case where no alert should be played
                 if (alertInfo.alertType === 'none') {
                     console.log(alertInfo.skipReason);
+                    this.playing = false;  // No audio to play, allow queue to continue
+                    PubSub.publish('AlertPlayer-update');
                     return;
                 }
 
-                this.playing = true;
-                this.skipCurrent = false;
                 console.log("Play Event", event);
                 
                 await this.playAlert(event, alertInfo);
