@@ -9,7 +9,7 @@ import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconUser }
 import { Text, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useLongPress } from "@uidotdev/usehooks";
-import { TimeoutView, BanView } from './mod/modview';
+import { TimeoutView, BanView, DeleteMessageView } from './mod/modview';
 import { formatTime, adjustColorForContrast, joinWithSpace } from '../../commons/helper';
 import { ModActions } from './mod/modactions';
 import { Config, ConfigKey } from '../../commons/config';
@@ -106,6 +106,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
 
     const [timeoutModalOpened, timeoutModalHandler] = useDisclosure(false);
     const [banModalOpened, banModalHandler] = useDisclosure(false);
+    const [deleteModalOpened, deleteModalHandler] = useDisclosure(false);
 
     // 7TV Cosmetics integration (only if enabled in config)
     const theme = computedColorScheme === 'light' ? 'light' : 'dark';
@@ -172,7 +173,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
             {
                 icon: <IconTrash size={48} />,
                 onClick: () => {
-                    props.modActions.deleteMessage(props.msg.channelId || '', props.msg.id);
+                    deleteModalHandler.open();
                 },
                 tooltip: 'Delete'
             },
@@ -290,6 +291,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
                 </>
             )}
 
+            {deleteModalOpened ? <DeleteMessageView key='deleteModal' channelId={props.msg.channelId || ''} channelName={channel} messageId={props.msg.id} messageText={props.msg.text} userName={props.msg.userInfo.displayName} close={deleteModalHandler.close} deleteMessage={props.modActions.deleteMessage}/> : null}
             {timeoutModalOpened ? <TimeoutView key='timeoutModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={timeoutModalHandler.close} timeoutUser={props.modActions.timeoutUser}/> : null}
             {banModalOpened ? <BanView key='banModal' channelId={props.msg.channelId || ''} channelName={channel} userId={props.msg.userInfo.userId} userName={props.msg.userInfo.displayName} close={banModalHandler.close} banUser={props.modActions.banUser}/> : null}
         </>

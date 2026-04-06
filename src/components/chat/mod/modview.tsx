@@ -4,7 +4,7 @@ import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge, 
 import { IconArrowsRight, IconX } from '@tabler/icons-react';
 import { OverlayDrawer } from '../../../pages/Chat.page';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
-import { HeheMessage, isSystemMessageType, parseMessage } from '../../../commons/message';
+import { HeheMessage, isSystemMessageType, isYTChatMessageType, parseMessage, YTChatMessage } from '../../../commons/message';
 import { getUserInfo, ModActions } from './modactions';
 import styles from './modview.module.css';
 import { formatDate, formatDuration, formatDateWithTime } from '../../../commons/helper';
@@ -108,9 +108,10 @@ export function ModView(props: ModViewProps) {
 
     const renderMessage = (rawLine: string) => {
         const msg = parseMessage(rawLine) as HeheMessage;
-        if (isSystemMessageType(msg)) {
+        if (isSystemMessageType(msg) || isYTChatMessageType(msg)) {
             return null;
         }
+
         return (
             <div key={msg.id}>
                 <ChatMessageComp 
@@ -309,6 +310,33 @@ export function BanView(props: {
                         props.banUser(props.channelId, props.userId, reason);
                         props.close();
                     }}>Ban</Button>
+                </Group>
+            </Fieldset>
+        </Modal>
+    );
+}
+
+export function DeleteMessageView(props: {
+    messageId: string,
+    messageText: string,
+    userName: string,
+    channelId: string,
+    channelName: string,
+    deleteMessage: (channelId: string, messageId: string) => void,
+    close: () => void;
+}): JSX.Element {
+    return (
+        <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
+            <Fieldset legend={["Delete message from", props.userName, "in", props.channelName].join(" ")}>
+                <Text size="sm" c="dimmed" mb="md">
+                    "{props.messageText}"
+                </Text>
+                <Group justify="flex-end" mt="md">
+                    <Button onClick={props.close}>Cancel</Button>
+                    <Button color='red' onClick={() => {
+                        props.deleteMessage(props.channelId, props.messageId);
+                        props.close();
+                    }}>Delete</Button>
                 </Group>
             </Fieldset>
         </Modal>
