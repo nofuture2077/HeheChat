@@ -420,6 +420,11 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
             addMessage(message, data.username, config.maxMessages);
         });
 
+        const ytChatSub = PubSub.subscribe("WS-ytchat", (msg, data) => {
+            const message = parseMessage(data.message);
+            addMessage(message, data.username, config.maxMessages);
+        });
+
         const eventSub = PubSub.subscribe("WS-event", (msg, data: Event) => {
             if (AlertSystem.shouldBePlayedInApp(data)) {
                 AlertSystem.addEvent(data);
@@ -482,6 +487,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
 
         return () => {
             PubSub.unsubscribe(msgSub);
+            PubSub.unsubscribe(ytChatSub);
             PubSub.unsubscribe(eventSub);
             PubSub.unsubscribe(modEventSub);
             PubSub.unsubscribe(massBanSub);

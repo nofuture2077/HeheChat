@@ -2,7 +2,7 @@ import { generateGUID } from './helper';
 import { EventType, EventMainType } from './events';
 import { ModActionType } from '../components/chat/mod/modactions';
 
-export type HeheMessage = HeheChatMessage | SystemMessage;
+export type HeheMessage = HeheChatMessage | SystemMessage | YTChatMessage;
 export type SevenTVMessage = "sevenTVAdded" | "sevenTVRemoved";
 export type StreamEventType = "streamOnline" | "streamOffline";
 export type SystemMessageType = ModActionType | EventType | StreamEventType | SevenTVMessage;
@@ -142,11 +142,77 @@ export class SystemMessage {
     }
 }
 
-export function parseMessage(rawLine: string): HeheMessage {
-    if (isSystemMessage(rawLine)) {
-        return SystemMessage.deserialize(rawLine);
+export class YTChatMessage {
+    type: 'ytchat' = 'ytchat';
+    id: string;
+    text: string;
+    authorName: string;
+    authorProfileImageUrl?: string;
+    channelId: string;
+    isMembership?: boolean;
+    isVerified?: boolean;
+    isModerator?: boolean;
+    isOwner?: boolean;
+    target: string;
+    date: Date;
+
+    constructor(
+        id: string,
+        text: string,
+        authorName: string,
+        channelId: string,
+        target: string,
+        date: Date,
+        authorProfileImageUrl?: string,
+        isMembership?: boolean,
+        isVerified?: boolean,
+        isModerator?: boolean,
+        isOwner?: boolean
+    ) {
+        this.id = id;
+        this.text = text;
+        this.authorName = authorName;
+        this.channelId = channelId;
+        this.target = target.startsWith('#') ? target : '#' + target;
+        this.date = date;
+        this.authorProfileImageUrl = authorProfileImageUrl;
+        this.isMembership = isMembership;
+        this.isVerified = isVerified;
+        this.isModerator = isModerator;
+        this.isOwner = isOwner;
     }
-    return HeheChatMessage.deserialize(rawLine);
+
+    static deserialize(json: string): YTChatMessage {
+        const data = JSON.parse(json);
+        return new YTChatMessage(
+            data.id,
+            data.text,
+            data.authorName,
+            data.channelId,
+            data.target,
+            new Date(data.date),
+            data.authorProfileImageUrl,
+            data.isMembership,
+            data.isVerified,
+            data.isModerator,
+            data.isOwner
+        );
+    }
+}
+
+export function parseMessage(rawLine: string): HeheMessage {
+    try {
+        const data = JSON.parse(rawLine);
+        if (data.type === 'system') {
+            return SystemMessage.deserialize(rawLine);
+        }
+        if (data.type === 'ytchat') {
+            return YTChatMessage.deserialize(rawLine);
+        }
+        return HeheChatMessage.deserialize(rawLine);
+    } catch {
+        return HeheChatMessage.deserialize(rawLine);
+    }
 }
 
 export function isSystemMessage(rawLine: string): boolean {
@@ -160,4 +226,8 @@ export function isSystemMessage(rawLine: string): boolean {
 
 export function isSystemMessageType(msg: HeheMessage) {
     return msg.type === 'system';
+}
+
+export function isYTChatMessageType(msg: HeheMessage) {
+    return msg.type === 'ytchat';
 }

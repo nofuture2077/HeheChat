@@ -1,5 +1,5 @@
-import { TextInput, Fieldset, Stack, Text, ActionIcon, Textarea } from '@mantine/core';
-import { IconCopy } from '@tabler/icons-react';
+import { TextInput, Fieldset, Stack, Text, ActionIcon, Textarea, Button, Badge, Group } from '@mantine/core';
+import { IconCopy, IconBrandYoutube } from '@tabler/icons-react';
 import { useEffect, useState, useContext } from 'react';
 import { ProfileContext, ConfigContext } from '@/ApplicationContext';
 
@@ -21,6 +21,10 @@ export function ConnectSettings() {
     const [fossabotBitLoading, setFossabotBitLoading] = useState<boolean>(false);
     const [fossabotSubgiftCommand, setFossabotSubgiftCommand] = useState<string>("");
     const [fossabotSubgiftLoading, setFossabotSubgiftLoading] = useState<boolean>(false);
+    const [youtubeConnected, setYoutubeConnected] = useState<boolean>(false);
+    const [youtubeChannelId, setYoutubeChannelId] = useState<string>("");
+    const [youtubeChannelName, setYoutubeChannelName] = useState<string>("");
+    const [youtubeLoading, setYoutubeLoading] = useState<boolean>(false);
 
     const profile = useContext(ProfileContext);
     const config = useContext(ConfigContext);
@@ -51,6 +55,9 @@ export function ConnectSettings() {
         fetch(import.meta.env.VITE_BACKEND_URL + "/kofi/webhook-url?state=" + state).then(res => res.json()).then((data) => {
             setKofiWebhookUrl(data.webhook_url || '');
         });
+
+        // Load YouTube connection status
+        checkYouTubeStatus();
 
         // Load Fossabot command
         const chatChannel = config.getChatChannel();
@@ -114,7 +121,171 @@ export function ConnectSettings() {
         setKofiVerificationToken(verificationToken || '');
     };
 
+    const checkYouTubeStatus = async () => {
+        setYoutubeLoading(true);
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/youtube/get?state=${state}`);
+            const data = await response.json();
+            
+            if (data.connected) {
+                setYoutubeConnected(true);
+                setYoutubeChannelId(data.channel_id || '');
+                setYoutubeChannelName(data.channel_name || '');
+            } else {
+                setYoutubeConnected(false);
+                setYoutubeChannelId('');
+                setYoutubeChannelName('');
+            }
+        } catch (error) {
+            console.error('Error checking YouTube status:', error);
+            setYoutubeConnected(false);
+            setYoutubeChannelId('');
+            setYoutubeChannelName('');
+        } finally {
+            setYoutubeLoading(false);
+        }
+    };
+
+    const saveYouTubeChannel = async () => {
+        if (!youtubeChannelId.trim()) {
+            alert('Please enter a YouTube Channel-ID');
+            return;
+        }
+
+        setYoutubeLoading(true);
+        
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/youtube/set-channel?state=${state}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    channel_id: youtubeChannelId,
+                    channel_name: youtubeChannelName
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                setYoutubeConnected(true);
+            } else {
+                alert('Error connecting: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        } finally {
+            setYoutubeLoading(false);
+        }
+    };
+
+    const disconnectYouTube = async () => {
+        if (!confirm('Are you sure you want to disconnect your YouTube channel?')) {
+            return;
+        }
+
+        setYoutubeLoading(true);
+        
+        try {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/youtube/disconnect?state=${state}`, {
+                method: 'DELETE'
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                setYoutubeConnected(false);
+                setYoutubeChannelId('');
+                setYoutubeChannelName('');
+                alert('YouTube connection disconnected');
+            } else {
+                alert('Error disconnecting: ' + (data.error || 'Unknown error'));
+            }
+        } catch (error) {
+            alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        } finally {
+            setYoutubeLoading(false);
+        }
+    };
+
     return (<Stack mt={30} mb={30} gap={30}>
+
+        <Fieldset legend="YouTube Chat" variant="filled">
+            <Text size="sm" mb={10}>
+                Connect your YouTube channel to receive live chat messages from your YouTube streams in HeheChat.
+            </Text>
+            
+            {youtubeLoading ? (
+                <Badge color="gray" size="lg" mb="md">Loading...</Badge>
+            ) : youtubeConnected ? (
+                <Stack gap="sm">
+                    <Group>
+                        <Badge color="green" size="lg" leftSection={<IconBrandYoutube size={16} />}>
+                            ✅ Connected
+                        </Badge>
+                    </Group>
+                    <Text size="sm" fw={500}>
+                        <strong>Channel-ID:</strong> {youtubeChannelId}
+                    </Text>
+                    {youtubeChannelName && (
+                        <Text size="sm" fw={500}>
+                            <strong>Channel Name:</strong> {youtubeChannelName}
+                        </Text>
+                    )}
+                    <Text size="sm" c="dimmed">
+                        💡 When you start a livestream, chat messages will automatically appear in HeheChat.
+                    </Text>
+                    <Button 
+                        color="red" 
+                        variant="light" 
+                        onClick={disconnectYouTube}
+                        disabled={youtubeLoading}
+                    >
+                        Disconnect YouTube
+                    </Button>
+                </Stack>
+            ) : (
+                <Stack gap="md">
+                    <Text size="sm">
+                        Connect your YouTube channel by entering your Channel-ID below.
+                    </Text>
+                    
+                    <TextInput 
+                        label="YouTube Channel-ID"
+                        placeholder="UCxxxxxxxxxxxxxxxxxxxxx"
+                        value={youtubeChannelId}
+                        onChange={(ev) => setYoutubeChannelId(ev.target.value)}
+                        description="Your channel ID starts with 'UC'"
+                    />
+                    
+                    <TextInput 
+                        label="Channel Name (optional)"
+                        placeholder="My YouTube Channel"
+                        value={youtubeChannelName}
+                        onChange={(ev) => setYoutubeChannelName(ev.target.value)}
+                    />
+                    
+                    <Button 
+                        color="red" 
+                        leftSection={<IconBrandYoutube size={20} />}
+                        onClick={saveYouTubeChannel}
+                        disabled={!youtubeChannelId || youtubeLoading}
+                    >
+                        {youtubeLoading ? 'Connecting...' : 'Connect YouTube'}
+                    </Button>
+                    
+                    <details>
+                        <summary style={{ cursor: 'pointer', fontSize: '14px', color: '#868e96' }}>
+                            How to find your Channel-ID
+                        </summary>
+                        <ol style={{ marginTop: '10px', fontSize: '14px', color: '#495057' }}>
+                            <li>Go to <a href="https://studio.youtube.com" target="_blank" rel="noopener noreferrer">YouTube Studio</a></li>
+                            <li>Click on "Customization" → "Basic info"</li>
+                            <li>Your Channel-ID is listed under "Channel URL"</li>
+                        </ol>
+                    </details>
+                </Stack>
+            )}
+        </Fieldset>
 
         <Fieldset legend="Streamelements Config" variant="filled">
             <Text size="sm" mb={10}>
