@@ -22,6 +22,10 @@ interface ConnectionStatus {
     connected: boolean;
     channelname: string;
   };
+  youtube: {
+    connected: boolean;
+    channelname: string;
+  };
 }
 
 interface StreamInfo {
@@ -68,6 +72,8 @@ interface FlatConnection {
   blerpChannel: string;
   pallyggConnected: boolean;
   pallyggChannel: string;
+  youtubeConnected: boolean;
+  youtubeChannel: string;
   connectedAt: number;
   streamInfo?: StreamInfo;
 }
@@ -116,6 +122,8 @@ export function AdminConnectionsPage() {
         blerpChannel: conn.connectionStatus?.blerp?.channelname || 'N/A',
         pallyggConnected: conn.connectionStatus?.pallygg?.connected || false,
         pallyggChannel: conn.connectionStatus?.pallygg?.channelname || 'N/A',
+        youtubeConnected: conn.connectionStatus?.youtube?.connected || false,
+        youtubeChannel: conn.connectionStatus?.youtube?.channelname || 'N/A',
         connectedAt: conn.connectedAt,
         streamInfo: conn.streamInfo
       }));
@@ -141,7 +149,7 @@ export function AdminConnectionsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const getServiceBadge = (service: '7TV' | 'SE' | 'Blerp' | 'Pally', connected: boolean) => {
+  const getServiceBadge = (service: '7TV' | 'SE' | 'Blerp' | 'Pally' | 'YT', connected: boolean) => {
     if (!connected) return null;
     
     const badgeProps = {
@@ -160,6 +168,8 @@ export function AdminConnectionsPage() {
         return <Badge {...badgeProps} color="orange">BLERP</Badge>;
       case 'Pally':
         return <Badge {...badgeProps} color="grape">PALLY</Badge>;
+      case 'YT':
+        return <Badge {...badgeProps} color="red">YT</Badge>;
       default:
         return null;
     }
@@ -263,6 +273,7 @@ export function AdminConnectionsPage() {
           {getServiceBadge('SE', connection.streamElementsConnected)}
           {getServiceBadge('Blerp', connection.blerpConnected)}
           {getServiceBadge('Pally', connection.pallyggConnected)}
+          {getServiceBadge('YT', connection.youtubeConnected)}
         </Group>
       </Table.Td>
     </Table.Tr>
