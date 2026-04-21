@@ -38,6 +38,10 @@
     background-color: #7932db80;
 }
 
+.streak {
+    background-color: #db8c3280;
+}
+
 .delete, .timeout, .ban, .unban, .mod, .unmod, .vip, .unvip {
     background-color: #db326d80;
 }
