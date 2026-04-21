@@ -170,7 +170,8 @@ export const DEFAULT_CONFIG: Config = {
         cheer: true,
         streamOnline: true,
         streamOffline: true,
-        channelPointRedemption: true
+        channelPointRedemption: true,
+        streak: true
     },
     hideEvents: {
         sub: false,
