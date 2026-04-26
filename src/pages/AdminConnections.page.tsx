@@ -18,6 +18,10 @@ interface ConnectionStatus {
     connected: boolean;
     channelname: string;
   };
+  soundalerts: {
+    connected: boolean;
+    channelname: string;
+  };
   pallygg: {
     connected: boolean;
     channelname: string;
@@ -70,6 +74,8 @@ interface FlatConnection {
   streamElementsChannel: string;
   blerpConnected: boolean;
   blerpChannel: string;
+  soundalertsConnected: boolean;
+  soundalertsChannel: string;
   pallyggConnected: boolean;
   pallyggChannel: string;
   youtubeConnected: boolean;
@@ -120,6 +126,8 @@ export function AdminConnectionsPage() {
         streamElementsChannel: conn.connectionStatus?.streamelements?.channelname || 'N/A',
         blerpConnected: conn.connectionStatus?.blerp?.connected || false,
         blerpChannel: conn.connectionStatus?.blerp?.channelname || 'N/A',
+        soundalertsConnected: conn.connectionStatus?.soundalerts?.connected || false,
+        soundalertsChannel: conn.connectionStatus?.soundalerts?.channelname || 'N/A',
         pallyggConnected: conn.connectionStatus?.pallygg?.connected || false,
         pallyggChannel: conn.connectionStatus?.pallygg?.channelname || 'N/A',
         youtubeConnected: conn.connectionStatus?.youtube?.connected || false,
@@ -149,7 +157,7 @@ export function AdminConnectionsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const getServiceBadge = (service: '7TV' | 'SE' | 'Blerp' | 'Pally' | 'YT', connected: boolean) => {
+  const getServiceBadge = (service: '7TV' | 'SE' | 'Blerp' | 'Pally' | 'YT' | 'SoA', connected: boolean) => {
     if (!connected) return null;
     
     const badgeProps = {
@@ -170,6 +178,8 @@ export function AdminConnectionsPage() {
         return <Badge {...badgeProps} color="grape">PALLY</Badge>;
       case 'YT':
         return <Badge {...badgeProps} color="red">YT</Badge>;
+      case 'SoA':
+        return <Badge {...badgeProps} color="violet">SOA</Badge>;
       default:
         return null;
     }
@@ -272,6 +282,7 @@ export function AdminConnectionsPage() {
           {getServiceBadge('7TV', connection.sevenTVConnected)}
           {getServiceBadge('SE', connection.streamElementsConnected)}
           {getServiceBadge('Blerp', connection.blerpConnected)}
+          {getServiceBadge('SoA', connection.soundalertsConnected)}
           {getServiceBadge('Pally', connection.pallyggConnected)}
           {getServiceBadge('YT', connection.youtubeConnected)}
         </Group>

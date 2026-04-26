@@ -804,7 +804,7 @@ class AlertPlayer {
      * @returns Object containing alert information or undefined if no alert should be played
      */
     async determineAlert(event: Event): Promise<{
-        alertType: 'blerp' | 'standard' | 'none';
+        alertType: 'blerp' | 'soundalerts' | 'standard' | 'none';
         alert?: EventAlert;
         audioUrl?: string;
         selectedSpriteFilename?: string;
@@ -812,11 +812,26 @@ class AlertPlayer {
         skipReason?: string;
     }> {
         const eventData = this.getEventData(event.text);
-        
+
         try {
-            // Check for blerp alerts (direct audio URL)
+            // Check for blerp/soundalerts (direct audio URL)
             if (eventData.audioUrl) {
-                // Check if blerps are deactivated in the config
+                if (event.eventtype === 'soundalerts') {
+                    if (this.config?.deactivatedAlerts["soundalerts"]) {
+                        return {
+                            alertType: 'none',
+                            eventData,
+                            skipReason: 'SoundAlerts skipped - deactivated in settings'
+                        };
+                    }
+                    return {
+                        alertType: 'soundalerts',
+                        audioUrl: eventData.audioUrl,
+                        eventData
+                    };
+                }
+
+                // blerp
                 if (this.config?.deactivatedAlerts["blerp"]) {
                     return {
                         alertType: 'none',
@@ -824,7 +839,6 @@ class AlertPlayer {
                         skipReason: 'Blerp alert skipped - deactivated in settings'
                     };
                 }
-                
                 return {
                     alertType: 'blerp',
                     audioUrl: eventData.audioUrl,
@@ -832,11 +846,11 @@ class AlertPlayer {
                 };
             }
         } catch (err) {
-            console.error("Error processing blerp:", err);
+            console.error("Error processing blerp/soundalerts:", err);
             return {
                 alertType: 'none',
                 eventData,
-                skipReason: 'Error processing blerp'
+                skipReason: 'Error processing blerp/soundalerts'
             };
         }
         
@@ -903,7 +917,7 @@ class AlertPlayer {
     }
  
     async playAlert(event: Event, alertInfo: {
-        alertType: 'blerp' | 'standard' | 'none';
+        alertType: 'blerp' | 'soundalerts' | 'standard' | 'none';
         alert?: EventAlert;
         audioUrl?: string;
         selectedSpriteFilename?: string;
@@ -944,7 +958,28 @@ class AlertPlayer {
             }, onError);
             return;
         }
-        
+
+        // Handle soundalerts (direct audio URL)
+        if (alertInfo.alertType === 'soundalerts') {
+            const isPreviewAlert = !!(event as any).force;
+            const shouldPlayAudio = this.mode === 'browsersource'
+                ? (isPreviewAlert || (this.config?.browserSourceAudio ?? false))
+                : (this.config?.playAlerts ?? false);
+
+            if (!shouldPlayAudio) {
+                console.log("SoundAlerts audio playback skipped due to settings");
+                onEnd();
+                return;
+            }
+
+            this.startPlaying();
+            this.getAudioInfo(alertInfo.audioUrl!).then((audioInfo) => {
+                PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration || 5});
+                this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
+            }, onError);
+            return;
+        }
+
         // At this point we have a standard alert
         const { alert, selectedSpriteFilename, eventData } = alertInfo;
         if (!alert) {

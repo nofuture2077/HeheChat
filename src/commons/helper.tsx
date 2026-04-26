@@ -212,6 +212,9 @@ function checkCondition(condition: string, args: Record<string, any>): boolean {
 }
 
 export function formatString(messageTemplate: string, args: Record<string, any>): string {
+    if (!messageTemplate) {
+        return '';
+    }
     // Schritt 1: Condition-Blöcke auflösen
     messageTemplate = messageTemplate.replace(
         /\${\s*"([^"]+)"\s*,\s*"([^"]+)"\s*}/g,

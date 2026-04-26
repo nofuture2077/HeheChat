@@ -15,6 +15,8 @@ export function ConnectSettings() {
     const [pallyggApiKey, setPallyggApiKey] = useState<string>("");
     const [pallyggChannel, setPallyggChannel] = useState<string>("");
     const [blerpKey, setBlerpKey] = useState<string>("");
+    const [soundAlertsUrl, setSoundAlertsUrl] = useState<string>("");
+    const [soundAlertsConnected, setSoundAlertsConnected] = useState<boolean>(false);
     const [kofiVerificationToken, setKofiVerificationToken] = useState<string>("");
     const [kofiWebhookUrl, setKofiWebhookUrl] = useState<string>("");
     const [fossabotBitCommand, setFossabotBitCommand] = useState<string>("");
@@ -38,6 +40,10 @@ export function ConnectSettings() {
 
         fetch(import.meta.env.VITE_BACKEND_URL + "/blerp/get?state=" + state).then(res => res.json()).then((data) => {
             setBlerpKey(data.roomid || '');
+        });
+
+        fetch(import.meta.env.VITE_BACKEND_URL + "/soundalerts/get?state=" + state).then(res => res.json()).then((data) => {
+            setSoundAlertsConnected(!!data.overlay_id);
         });
 
         fetch(import.meta.env.VITE_BACKEND_URL + "/elevenlabs/get?state=" + state).then(res => res.json()).then((data) => {
@@ -98,6 +104,12 @@ export function ConnectSettings() {
         fetch(import.meta.env.VITE_BACKEND_URL + "/pallygg/set?state=" + state + "&apikey=" + apikey + "&channel=" + channel);
         setPallyggApiKey(apikey || '');
         setPallyggChannel(channel || '');
+    };
+
+    const updateSoundAlerts = (url: string) => {
+        fetch(import.meta.env.VITE_BACKEND_URL + "/soundalerts/set?state=" + state + "&overlayUrl=" + encodeURIComponent(url));
+        setSoundAlertsUrl(url);
+        setSoundAlertsConnected(false);
     };
 
     const updateBlerp = (input: string) => {
@@ -326,6 +338,20 @@ export function ConnectSettings() {
                 </ol>
             </Text>
             <TextInput label="API Key" placeholder="Enter your ElevenLabs API key" value={elevenLabsApiKey} onChange={(ev) => updateElevenLabs(ev.target.value)} />
+        </Fieldset>
+
+        <Fieldset legend="SoundAlerts Config" variant="filled">
+            <Text size="sm" mb={10}>
+                To connect SoundAlerts with HeheChat:
+                <ol>
+                    <li>Go to <a href="https://soundalerts.com" target="_blank" rel="noopener noreferrer">soundalerts.com</a></li>
+                    <li>Navigate to OBS Browser Source section</li>
+                    <li>Copy the URL provided</li>
+                    <li>Paste the URL below</li>
+                </ol>
+            </Text>
+            {soundAlertsConnected && <Text size="sm" c="green" mb={8}>Connected</Text>}
+            <TextInput label="Overlay URL" placeholder="https://source.soundalerts.com/overlay/..." value={soundAlertsUrl} onChange={(ev) => updateSoundAlerts(ev.target.value)} />
         </Fieldset>
 
         <Fieldset legend="Blerp Config" variant="filled">

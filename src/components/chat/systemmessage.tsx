@@ -42,6 +42,7 @@ const messages = {
     'donation': '${username} donated ${amount}${currency:currency}///${text}',
     'announcement': 'Chat Announcement///${text}',
     'blerp': '${username} played Blerp ${audioTitle}',
+    'soundalerts': '${username} triggered SoundAlert ${overlayMessage}',
     'seventv_emote_add': '${username} added new Emote ${emote} ${emote}',
     'seventv_emote_remove': '${username} removed Emote ${emote}',
     'kofishop': '${username} bought something on ko-fi',

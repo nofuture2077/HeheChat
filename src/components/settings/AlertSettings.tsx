@@ -18,7 +18,7 @@ interface EditorData {
     name: string;
 }
 
-const hideEventsValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'streak', 'follow', 'donation', 'cheer', 'channelPointRedemption', 'blerp', 'tts'];
+const hideEventsValues: SystemMessageMainType[] = ['sub', 'subgift', 'subgiftb', 'raid', 'streak', 'follow', 'donation', 'cheer', 'channelPointRedemption', 'blerp', 'soundalerts', 'tts'];
 
 const Messages: Record<string, string> = {
     'sub': 'Subscriptions',
@@ -30,6 +30,7 @@ const Messages: Record<string, string> = {
     "cheer": "Bit-Donations",
     "channelPointRedemption": "Channel Points",
     "blerp": "Blerps",
+    "soundalerts": "SoundAlerts",
     "tts": "!tts Events"
 };
 
@@ -401,14 +402,24 @@ export function AlertSettings() {
                             );
                         })}
                         <Divider label={'Blerps'} labelPosition="center" mt='xs'/>
-                        <Switch 
-                            disabled={!config.activatedShares.includes(channel)} 
-                            checked={!config.deactivatedAlerts["blerp"]} 
-                            key="blerp" 
-                            label="Blerps" 
-                            size="lg" 
+                        <Switch
+                            disabled={!config.activatedShares.includes(channel)}
+                            checked={!config.deactivatedAlerts["blerp"]}
+                            key="blerp"
+                            label="Blerps"
+                            size="lg"
                             mb="md"
                             description={'All Blerps'}
+                        />
+                        <Divider label={'SoundAlerts'} labelPosition="center" mt='xs'/>
+                        <Switch
+                            disabled={!config.activatedShares.includes(channel)}
+                            checked={!config.deactivatedAlerts["soundalerts"]}
+                            key="soundalerts"
+                            label="SoundAlerts"
+                            size="lg"
+                            mb="md"
+                            description={'All SoundAlerts'}
                         />
                     </Stack>
                 </Fieldset>

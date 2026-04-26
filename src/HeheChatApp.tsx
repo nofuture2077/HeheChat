@@ -182,6 +182,7 @@ export default function HeheChat() {
                 profileData.config.show7TVCosmetics ??= true;
                 profileData.config.readAllMessages ??= false;
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
+                profileData.config.systemMessageInChat.streak ??= true;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);

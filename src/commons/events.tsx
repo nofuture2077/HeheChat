@@ -1,9 +1,9 @@
-export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' | 'blerp' |
-'sub_1000' | 'sub_2000' | 'sub_3000' | 'sub_Prime' | 
-'subgift_1000' | 'subgift_2000' | 'subgift_3000' | 
+export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' | 'blerp' | 'soundalerts' |
+'sub_1000' | 'sub_2000' | 'sub_3000' | 'sub_Prime' |
+'subgift_1000' | 'subgift_2000' | 'subgift_3000' |
 'subgiftb_1000' | 'subgiftb_2000' | 'subgiftb_3000' | 'channelPointRedemption' | 'kofisub' | 'kofidono' | 'kofishop' | 'tts' | 'hypetrain' | 'streak';
 
-export type EventMainType = 'sub' | 'subgift' | 'subgiftb' | 'raid' | 'follow' | 'donation' | 'cheer' | 'channelPointRedemption' | 'blerp' | 'kofi' | 'tts' | 'hypetrain' | 'streak';
+export type EventMainType = 'sub' | 'subgift' | 'subgiftb' | 'raid' | 'follow' | 'donation' | 'cheer' | 'channelPointRedemption' | 'blerp' | 'soundalerts' | 'kofi' | 'tts' | 'hypetrain' | 'streak';
 
 export type EventAlertRestriction = 'none' | 'mod' | 'system';
 
@@ -36,6 +36,7 @@ export const EventTypeMapping: Record<string, string> = {
     'streamOffline': 'streamOffline',
     'channelPointRedemption': 'channelPointRedemption',
     'blerp': 'blerp',
+    'soundalerts': 'soundalerts',
     'seventv_emote_add': 'sevenTVAdded',
     'seventv_emote_remove': 'sevenTVRemoved',
     'kofishop': 'kofi',
