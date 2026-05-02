@@ -737,13 +737,13 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                         <Stack align='stretch' gap="xs" p="xs">
                             {!online ? <Badge color="red" size="sm">No internet connection...</Badge> : null}
                             <NewsDisplay />
+                            {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
+                            <PinManager/>
                             {showUnplayedBanner && config.showMissedAlertsButton && (
                                 <Button size="xl" radius="xl" color="teal" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} className={classes.missedAlertsButton}>
                                     Play {unplayedEvents.length} missed alert{unplayedEvents.length !== 1 ? 's' : ''}
                                 </Button>
                             )}
-                            {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
-                            <PinManager/>
                             <ReloadAlertsButton onActivate={() => setShowUnplayedBanner(false)} />
                         </Stack>
 
