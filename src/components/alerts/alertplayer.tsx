@@ -1206,13 +1206,19 @@ class AlertPlayer {
                 if (alertInfo.alertType === 'none') {
                     console.log(alertInfo.skipReason);
                     this.playing = false;  // No audio to play, allow queue to continue
+                    if (event.id) {
+                        PubSub.publish('WSSEND', { type: 'mark_played', id: event.id });
+                    }
                     PubSub.publish('AlertPlayer-update');
                     return;
                 }
 
                 console.log("Play Event", event);
-                
+
                 await this.playAlert(event, alertInfo);
+                if (event.id) {
+                    PubSub.publish('WSSEND', { type: 'mark_played', id: event.id });
+                }
             } catch (err) {
                 console.error("Error showing notification:", err);
                 this.stopPlaying();

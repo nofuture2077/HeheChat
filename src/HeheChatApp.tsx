@@ -183,6 +183,7 @@ export default function HeheChat() {
                 profileData.config.readAllMessages ??= false;
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 profileData.config.systemMessageInChat.streak ??= true;
+                profileData.config.showMissedAlertsButton ??= true;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);
@@ -436,6 +437,7 @@ export default function HeheChat() {
     const setReloadOnReturnToApp = (value: boolean) => updateConfig('reloadOnReturnToApp', value);
     const setRainMode = (value: boolean) => updateConfig('rainMode', value);
     const setReadAllMessages = (value: boolean) => updateConfig('readAllMessages', value);
+    const setShowMissedAlertsButton = (value: boolean) => updateConfig('showMissedAlertsButton', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -696,7 +698,8 @@ export default function HeheChat() {
         setShow7TVCosmetics,
         setReloadOnReturnToApp,
         setRainMode,
-        setReadAllMessages
+        setReadAllMessages,
+        setShowMissedAlertsButton
     };
 
     const appLogin = {

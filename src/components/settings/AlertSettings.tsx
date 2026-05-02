@@ -300,6 +300,21 @@ export function AlertSettings() {
                 </Stack>
             </Fieldset>
 
+            <Fieldset legend="Missed Alerts" variant="filled" key="missed-alerts">
+                <Stack>
+                    <Switch
+                        checked={config.showMissedAlertsButton}
+                        onChange={(event) => {
+                            config.setShowMissedAlertsButton(event.currentTarget.checked);
+                            forceUpdate();
+                        }}
+                        label="Show missed alerts button"
+                        size="lg"
+                    />
+                    <Text fs="italic" size='14px'>Show a button when returning to the app if there are unplayed alerts</Text>
+                </Stack>
+            </Fieldset>
+
             <Fieldset legend="Visual Alerts" variant="filled" key="visual-alerts">
                 <Stack>
                     <Switch 

@@ -87,6 +87,17 @@
     background: var(--mantine-color-dark-7);
 }
 
+.missedAlertsButton {
+    padding: 20px 28px;
+    font-size: 20px;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 @media (max-width: 768px) {
     .desktopVideoLayout {
         flex-direction: column;

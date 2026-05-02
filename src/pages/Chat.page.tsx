@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useContext, useCallback } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext, PremiumContext } from '../ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, ActionIcon, Text } from '@mantine/core';
-import { IconAlertTriangle, IconDeviceDesktop, IconRepeat, IconMessagePause, IconSettings, IconKeyboard, IconBell, IconBrandTwitch } from '@tabler/icons-react';
+import { IconAlertTriangle, IconDeviceDesktop, IconRepeat, IconMessagePause, IconSettings, IconKeyboard, IconBell, IconBrandTwitch, IconPlayerPlay } from '@tabler/icons-react';
 import PubSub from 'pubsub-js';
 import { notifications } from '@mantine/notifications';
 import { Chat } from '../components/chat/Chat';
@@ -27,6 +27,7 @@ import { TwitchClipsPlayer } from '../components/twitch/twitchclipsplayer';
 import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, shoutoutUser, modUser, unmodUser, vipUser, unvipUser, unraid } from '../components/chat/mod/modactions';
 import { ProfileBarDrawer } from '../components/profile/profilebar';
 import { Storage } from '../components/chat/chatstorage';
+import { EventStorage, EventData } from '../components/events/eventstorage';
 import { AlertSystem } from '../components/alerts/alertplayer';
 import { AlertStatusIndicator } from '../components/alerts/AlertStatusIndicator';
 import { ConnectionStatusIndicator } from '../components/alerts/ConnectionStatusIndicator';
@@ -104,6 +105,9 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
     const [currentClipId, setCurrentClipId] = useState<string | null>(null);
     const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
     const notificationIdsRef = useRef<string[]>([]);
+    const [unplayedEvents, setUnplayedEvents] = useState<EventData[]>([]);
+    const [showUnplayedBanner, setShowUnplayedBanner] = useState(false);
+    const unplayedBannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     
     // Chat width state with localStorage persistence
     const [chatWidth, setChatWidth] = useState(() => {
@@ -519,7 +523,22 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         }
         if (!AlertSystem.status()) {
             AlertSystem.initialize();
-        } 
+        }
+        if (networkStatus.online && isVisible) {
+            EventStorage.load(config.channels, config.ignoredUsers).then(events => {
+                const unplayed = events
+                    .filter(e => !e.played && AlertSystem.shouldBePlayedInApp(e as unknown as Event))
+                    .sort((a, b) => a.date - b.date);
+                if (unplayed.length > 0) {
+                    setUnplayedEvents(unplayed);
+                    setShowUnplayedBanner(true);
+                    if (unplayedBannerTimerRef.current) clearTimeout(unplayedBannerTimerRef.current);
+                    unplayedBannerTimerRef.current = setTimeout(() => {
+                        setShowUnplayedBanner(false);
+                    }, 15000);
+                }
+            });
+        }
         setTimeout(() => {
             scrollToBottom();
         }, 5000);
@@ -541,6 +560,21 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
         const newState = saved !== null ? JSON.parse(saved) : true;
         setShortcutsVisible(newState);
     }, [profile.guid]);
+
+    // Cleanup unplayed events banner timer on unmount
+    useEffect(() => {
+        return () => { if (unplayedBannerTimerRef.current) clearTimeout(unplayedBannerTimerRef.current); };
+    }, []);
+
+    const handleUnplayedBannerClick = useCallback(() => {
+        setShowUnplayedBanner(false);
+        if (unplayedBannerTimerRef.current) {
+            clearTimeout(unplayedBannerTimerRef.current);
+            unplayedBannerTimerRef.current = null;
+        }
+        unplayedEvents.forEach(event => AlertSystem.addEvent(event as unknown as Event));
+        setUnplayedEvents([]);
+    }, [unplayedEvents]);
 
     // Check connections when profile changes or browserSourceAudio setting changes
     useEffect(() => {
@@ -703,9 +737,14 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                         <Stack align='stretch' gap="xs" p="xs">
                             {!online ? <Badge color="red" size="sm">No internet connection...</Badge> : null}
                             <NewsDisplay />
+                            {showUnplayedBanner && config.showMissedAlertsButton && (
+                                <Button size="xl" radius="xl" color="teal" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} className={classes.missedAlertsButton}>
+                                    Play {unplayedEvents.length} missed alert{unplayedEvents.length !== 1 ? 's' : ''}
+                                </Button>
+                            )}
                             {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                             <PinManager/>
-                            <ReloadAlertsButton />
+                            <ReloadAlertsButton onActivate={() => setShowUnplayedBanner(false)} />
                         </Stack>
 
                         {/* Chat Messages */}
@@ -757,9 +796,14 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                     <Stack align='stretch' gap="md">
                         {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}
                         <NewsDisplay />
+                        {showUnplayedBanner && (
+                            <Button size="xl" radius="xl" color="#ff1493" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} style={{ padding: '16px 24px', fontSize: '18px', width: '100%', maxWidth: '400px', margin: '0 auto', display: 'flex', justifyContent: 'center', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }}>
+                                Play {unplayedEvents.length} missed alert{unplayedEvents.length !== 1 ? 's' : ''}
+                            </Button>
+                        )}
                         {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                         <PinManager/>
-                        <ReloadAlertsButton />
+                        <ReloadAlertsButton onActivate={() => setShowUnplayedBanner(false)} />
                     </Stack>
                 </Affix>
 

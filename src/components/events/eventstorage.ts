@@ -11,6 +11,7 @@ export interface EventData {
     text?: string;
     amount?: number;
     amount2?: number;
+    played?: boolean;
 }
 
 export interface EventStorage {

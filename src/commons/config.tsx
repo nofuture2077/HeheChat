@@ -62,7 +62,8 @@ export interface ConfigData {
     deactivatedAlerts: Record<string, boolean>,
     shortcuts: ShortCut[],
     reloadOnReturnToApp: boolean,
-    rainMode: boolean
+    rainMode: boolean,
+    showMissedAlertsButton: boolean
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -121,6 +122,7 @@ export interface Config extends ConfigData {
     setReloadOnReturnToApp: (val: boolean) => void;
     setRainMode: (val: boolean) => void;
     setReadAllMessages: (val: boolean) => void;
+    setShowMissedAlertsButton: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -193,6 +195,7 @@ export const DEFAULT_CONFIG: Config = {
     reloadOnReturnToApp: true,
     rainMode: false,
     readAllMessages: false,
+    showMissedAlertsButton: true,
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setMaxMessages: (value: number) => {},
@@ -246,6 +249,7 @@ export const DEFAULT_CONFIG: Config = {
     setReloadOnReturnToApp: (val) => {},
     setRainMode: (val) => {},
     setReadAllMessages: (val) => {},
+    setShowMissedAlertsButton: (val) => {},
 };
 
 export const DB_VERSION = 9;

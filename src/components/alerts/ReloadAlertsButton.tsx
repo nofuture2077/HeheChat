@@ -5,7 +5,7 @@ import { useContext } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 import { IconRefresh } from '@tabler/icons-react';
 
-export function ReloadAlertsButton() {
+export function ReloadAlertsButton({ onActivate }: { onActivate?: () => void } = {}) {
   const [isAlertSystemRunning, setIsAlertSystemRunning] = useState<boolean>(AlertSystem.status());
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const config = useContext(ConfigContext);
@@ -40,6 +40,7 @@ export function ReloadAlertsButton() {
     
     // Hide the button
     setIsVisible(false);
+    onActivate?.();
   };
 
   // Only show the button when alerts are enabled, the system is not running, and the button is set to visible
