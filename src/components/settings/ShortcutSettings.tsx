@@ -11,6 +11,7 @@ const shortcutTypes = [
     { value: 'chat', label: 'Chat' },
     { value: 'adbreak', label: 'Run Ad' },
     { value: 'toggle', label: 'Toggle Config' },
+    { value: 'scene', label: 'Switch Scene' },
 ];
 
 const colorOptions = [
@@ -52,9 +53,9 @@ export function ShortcutSettings() {
             color,
             input,
             confirm,
-            params: type === 'toggle' 
-                ? [params] // For toggle, params is a single config key
-                : params.split(',').map(p => p.trim()).filter(p => p !== '') // For others, split by comma
+            params: (type === 'toggle' || type === 'scene')
+                ? [params]
+                : params.split(',').map(p => p.trim()).filter(p => p !== '')
         };
 
         const updatedShortcuts = editingShortcut
@@ -70,9 +71,9 @@ export function ShortcutSettings() {
         setName(shortcut.name);
         setType(shortcut.type);
         setColor(shortcut.color);
-        setParams(shortcut.type === 'toggle' 
-            ? shortcut.params[0] || '' // For toggle, use first param as single value
-            : shortcut.params.join(', ') // For others, join with comma
+        setParams((shortcut.type === 'toggle' || shortcut.type === 'scene')
+            ? shortcut.params[0] || ''
+            : shortcut.params.join(', ')
         );
         setInput(shortcut.input);
         setConfirm(shortcut.confirm);
@@ -145,6 +146,13 @@ export function ShortcutSettings() {
                             searchable
                             styles={{ dropdown: { zIndex: 1001 } }}
                         />
+                    ) : type === 'scene' ? (
+                        <TextInput
+                            label="Scene Name"
+                            value={params}
+                            onChange={(e) => setParams(e.target.value)}
+                            placeholder="e.g. Starting Soon"
+                        />
                     ) : (
                         <TextInput
                             label="Text"
@@ -154,14 +162,16 @@ export function ShortcutSettings() {
                         />
                     )}
                     
-                    {type !== 'toggle' && (
+                    {type !== 'toggle' && type !== 'scene' && (
                         <Switch checked={input} onChange={(event) => setInput(event.currentTarget.checked)} label="Input" size="lg" />
                     )}
                     <Switch checked={confirm} onChange={(event) => setConfirm(event.currentTarget.checked)} label="Confirm" size="lg" />
                     
                     <Text fs='italic'>
-                        {type === 'toggle' 
+                        {type === 'toggle'
                             ? 'Toggle shortcuts will switch the selected config value between true and false. Confirm makes sure that a shortcut is only executed after confirmation.'
+                            : type === 'scene'
+                            ? 'Scene shortcuts switch to the specified OBS scene when clicked. Confirm makes sure that the switch only happens after confirmation.'
                             : 'Input can be used to set the streammarkers name. Confirm makes sure that a shortcut is only executed after confirmation.'
                         }
                     </Text>

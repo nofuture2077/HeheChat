@@ -13,6 +13,7 @@ import { Header } from '../components/header/Header';
 import { HeaderLogo } from '../components/header/HeaderLogo';
 import { EventDrawer } from '../components/events/eventdrawer';
 import { ChatInput } from '../components/chat/ChatInput';
+import { StreamStatusBar } from '../components/switcher/StreamStatusBar';
 import { HelixModeratedChannel } from '@twurple/api';
 import { SettingsDrawer, SettingsTab } from '../components/settings/settings';
 import { PremiumDrawer } from '../components/premium/DonationPremium';
@@ -785,7 +786,7 @@ export function ChatPage() {
                 <MobileAppPrompt />
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
-                        {!online ? <Badge color="red" size="lg" m="0 auto">No internet connection...</Badge> : null}
+                        {config.showBitrateIndicator && <div style={{ display: 'flex', justifyContent: 'center' }}><StreamStatusBar /></div>}
                         <NewsDisplay />
                         {showUnplayedBanner && (
                             <Button size="xl" radius="xl" color="#ff1493" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} style={{ padding: '16px 24px', fontSize: '18px', width: '100%', maxWidth: '400px', margin: '0 auto', display: 'flex', justifyContent: 'center', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }}>

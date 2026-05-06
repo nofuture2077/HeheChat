@@ -38,6 +38,7 @@ export interface SwitcherRule {
     target_scene: string;
     cooldown_ms: number;
     enabled: boolean;
+    scene_group?: string | null;
 }
 
 export type SwitcherRuleInput = Omit<SwitcherRule, 'id'>;

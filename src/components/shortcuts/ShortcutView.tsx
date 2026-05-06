@@ -3,15 +3,16 @@ import { useContext, useState, useEffect } from 'react';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
 import { ShortCut, shortcutHandler } from '@/commons/shortcuts';
 import { 
-    IconClipboard, 
-    IconBookmark, 
-    IconMessage, 
-    IconSettings, 
+    IconClipboard,
+    IconBookmark,
+    IconMessage,
+    IconSettings,
     IconPlayerPause,
     IconCheck,
     IconAd,
     IconToggleLeft,
-    IconToggleRight
+    IconToggleRight,
+    IconCamera
 } from '@tabler/icons-react';
 import { Dictionary } from 'underscore';
 
@@ -31,6 +32,8 @@ const getIconForType = (type: string, isToggleOn?: boolean) => {
             return IconAd;
         case 'toggle':
             return isToggleOn ? IconToggleRight : IconToggleLeft;
+        case 'scene':
+            return IconCamera;
         default:
             return IconMessage;
     }

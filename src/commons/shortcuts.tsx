@@ -1,7 +1,8 @@
 import { Config } from './config';
 import PubSub from 'pubsub-js';
+import { postSwitcherScene } from '@/api/switcher';
 
-export type ShortCutType = 'clip' | 'marker' | 'chat' | 'adbreak' | 'toggle';
+export type ShortCutType = 'clip' | 'marker' | 'chat' | 'adbreak' | 'toggle' | 'scene';
 
 // Available config values that can be toggled via shortcuts
 export const TOGGLEABLE_CONFIG_VALUES = [
@@ -116,6 +117,13 @@ class ShortCutHandler {
                     duration: parseInt(shortCut.params[0] || '60', 10)
                 });
                 break;
+
+            case 'scene': {
+                const sceneName = inputValue || shortCut.params[0] || '';
+                const ch = this.config?.getChatChannel();
+                if (ch && sceneName) postSwitcherScene(ch, sceneName).catch(() => {});
+                break;
+            }
 
             case 'toggle':
                 // Toggle config value

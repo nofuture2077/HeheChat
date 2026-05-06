@@ -10,7 +10,6 @@ import { TwitchPlayer } from '@/components/twitch/twitchplayer'
 import { TwitchClipsPlayer } from '@/components/twitch/twitchclipsplayer';
 import { AlertStatusIndicator } from '../alerts/AlertStatusIndicator';
 import { BitrateIndicator } from '../switcher/BitrateIndicator';
-import { StreamStatusBar } from '../switcher/StreamStatusBar';
 
 export function Header(props: {
     openSettings: (tab?: SettingsTab) => void,
@@ -56,10 +55,7 @@ export function Header(props: {
                     
                 </Button>
                 
-                <div>
-                    {config.showBitrateIndicator && <StreamStatusBar />}
-                </div>
-                <div className={classes.rightGroup}>
+<div className={classes.rightGroup}>
                     
                     <ActionIcon variant='transparent' color='primary' size='44px' onClick={() => props.openSettings()}>
                         <IconSettings />

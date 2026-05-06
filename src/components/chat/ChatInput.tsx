@@ -1,5 +1,7 @@
 import { useContext, useState, useEffect, useMemo } from 'react';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
+import { postSwitcherScene } from '@/api/switcher';
+import PubSub from 'pubsub-js';
 import { ChannelPicker } from './ChannelPicker';
 import { Textarea, ActionIcon, rem, Flex, Stack, Combobox, useCombobox } from '@mantine/core';
 import { EmoteGrid } from './EmoteGrid';
@@ -29,6 +31,7 @@ export function ChatInput(props: ChatInputProps) {
     const [historyIndex, setHistoryIndex] = useState<number>(-1);
     const [isEmoteGridOpen, setIsEmoteGridOpen] = useState<boolean>(false);
     const [manuallyClosedEmoteGrid, setManuallyClosedEmoteGrid] = useState<boolean>(false);
+    const [sceneList, setSceneList] = useState<string[]>([]);
 
     // Load message history from localStorage on component mount
     useEffect(() => {
@@ -36,6 +39,13 @@ export function ChatInput(props: ChatInputProps) {
         if (savedHistory) {
             setMessageHistory(JSON.parse(savedHistory));
         }
+    }, []);
+
+    useEffect(() => {
+        const sub = PubSub.subscribe('WS-sceneList', (_msg: string, data: { scenes: string[] }) => {
+            setSceneList(data.scenes ?? []);
+        });
+        return () => { PubSub.unsubscribe(sub); };
     }, []);
 
     // Save message history to localStorage whenever it changes
@@ -76,6 +86,7 @@ export function ChatInput(props: ChatInputProps) {
         { value: '/timeout', label: '/timeout [username] [seconds] - Timeout a user for specified duration' },
         { value: '/massban', label: '/massban - Open mass ban tool to ban multiple users' },
         { value: '/premium', label: '/premium - Show ad for HeheChat Pro' },
+        { value: '/scene', label: '/scene [name] - Switch OBS scene' },
     ];
 
     const loginContext = useContext(LoginContextContext);
@@ -93,7 +104,15 @@ export function ChatInput(props: ChatInputProps) {
         const channelname = config.getChatChannel();
         const channelId = emotes.getChannelId(channelname || '');
         const isMod = isModerator(channelId);
-        
+
+        if (cmd === 'scene') {
+            const sceneName = args.join(' ');
+            if (channelname && sceneName) {
+                postSwitcherScene(channelname, sceneName).catch(() => {});
+            }
+            return true;
+        }
+
         // Check if user has permission to execute the command
         if (cmd === 'raid') {
             if (!isBroadcaster(channelId)) {
@@ -199,6 +218,9 @@ export function ChatInput(props: ChatInputProps) {
             const isModeratorStatus = isModerator(channelId);
 
             const availableCommands = commands.filter(cmd => {
+                if (cmd.value === '/scene') {
+                    return true;
+                }
                 if (cmd.value === '/raid') {
                     return isBroadcasterStatus;
                 }
@@ -263,6 +285,14 @@ export function ChatInput(props: ChatInputProps) {
             }
         }
         
+        // Handle /scene autocomplete
+        if (inputText.startsWith('/scene ')) {
+            const filter = inputText.slice('/scene '.length).toLowerCase();
+            return sceneList
+                .filter(s => s.toLowerCase().includes(filter))
+                .map(s => ({ value: '/scene ' + s, label: s }));
+        }
+
         return [];
     };
 
@@ -327,9 +357,15 @@ export function ChatInput(props: ChatInputProps) {
                 <Combobox
                     store={combobox}
                     onOptionSubmit={(value) => {
+                        // Scene autocomplete replaces the whole input
+                        if (value.startsWith('/scene ')) {
+                            setInputText(value);
+                            combobox.closeDropdown();
+                            return;
+                        }
+
                         const words = inputText.split(' ');
-                        const currentWord = words[words.length - 1];
-                        
+
                         // Replace only the last word with the selected value and add a space
                         if (words.length > 1) {
                             words[words.length - 1] = value;

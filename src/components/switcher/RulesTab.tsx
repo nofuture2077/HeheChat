@@ -29,21 +29,24 @@ const EMPTY_RULE: SwitcherRuleInput = {
     target_scene: '',
     cooldown_ms: 30000,
     enabled: true,
+    scene_group: null,
 };
 
 function RuleModal({
-    opened, onClose, onSave, initial, scenes,
+    opened, onClose, onSave, initial, scenes, existingGroups,
 }: {
     opened: boolean;
     onClose: () => void;
     onSave: (rule: SwitcherRuleInput) => Promise<void>;
     initial: SwitcherRuleInput;
     scenes: string[];
+    existingGroups: string[];
 }) {
     const [form, setForm] = useState<SwitcherRuleInput>(initial);
     const [saving, setSaving] = useState(false);
+    const [groupSearch, setGroupSearch] = useState('');
 
-    useEffect(() => { setForm(initial); }, [initial]);
+    useEffect(() => { setForm(initial); setGroupSearch(''); }, [initial]);
 
     const setField = <K extends keyof SwitcherRuleInput>(key: K, value: SwitcherRuleInput[K]) =>
         setForm(f => ({ ...f, [key]: value }));
@@ -66,8 +69,8 @@ function RuleModal({
         <Modal opened={opened} onClose={onClose} title="Scene Switching Rule" zIndex={400}>
             <Stack gap="sm">
                 <NumberInput label="Priority" value={form.priority} min={1} onChange={v => setField('priority', Number(v) || 1)} />
-                <Select label="Metric" data={METRICS} value={form.condition.metric} onChange={v => setCondField('metric', (v as any) ?? 'bitrate_kbps')} />
-                <Select label="Operator" data={OPERATORS} value={form.condition.operator} onChange={v => setCondField('operator', (v as any) ?? '<')} />
+                <Select label="Metric" data={METRICS} value={form.condition.metric} onChange={v => setCondField('metric', (v as any) ?? 'bitrate_kbps')} styles={{ dropdown: { zIndex: 401 } }} />
+                <Select label="Operator" data={OPERATORS} value={form.condition.operator} onChange={v => setCondField('operator', (v as any) ?? '<')} styles={{ dropdown: { zIndex: 401 } }} />
                 <NumberInput label="Value" value={form.condition.value} onChange={v => setCondField('value', Number(v) || 0)} />
                 <NumberInput label="Duration (ms)" description="How long condition must hold. 0 = instant" value={form.condition.duration_ms} min={0} step={500} onChange={v => setCondField('duration_ms', Number(v) || 0)} />
                 <Select
@@ -76,8 +79,27 @@ function RuleModal({
                     value={form.target_scene}
                     onChange={v => setField('target_scene', v ?? '')}
                     placeholder={scenes.length === 0 ? 'No scenes available' : 'Select scene'}
+                    styles={{ dropdown: { zIndex: 401 } }}
                 />
                 <NumberInput label="Cooldown (ms)" value={form.cooldown_ms} min={0} step={1000} onChange={v => setField('cooldown_ms', Number(v) || 0)} />
+                <Select
+                    label="Scene Group"
+                    description="Rules only fire when the current scene belongs to this group"
+                    data={[
+                        ...existingGroups.map(g => ({ value: g, label: g })),
+                        ...(groupSearch && !existingGroups.includes(groupSearch)
+                            ? [{ value: groupSearch, label: `Create "${groupSearch}"` }]
+                            : []),
+                    ]}
+                    value={form.scene_group ?? null}
+                    onChange={v => setField('scene_group', v ?? null)}
+                    searchable
+                    clearable
+                    searchValue={groupSearch}
+                    onSearchChange={setGroupSearch}
+                    placeholder="No group (ungrouped)"
+                    styles={{ dropdown: { zIndex: 401 } }}
+                />
                 <Switch label="Enabled" size="lg" checked={form.enabled} onChange={e => setField('enabled', e.currentTarget.checked)} />
                 <Group justify="flex-end" mt="sm">
                     <Button variant="default" onClick={onClose}>Cancel</Button>
@@ -134,6 +156,7 @@ export function RulesTab() {
     };
 
     const sorted = [...rules].sort((a, b) => a.priority - b.priority);
+    const existingGroups = [...new Set(rules.map(r => r.scene_group).filter(Boolean))] as string[];
 
     return (
         <Stack mt={16} gap={12} p="md">
@@ -143,6 +166,7 @@ export function RulesTab() {
                 onSave={handleSave}
                 initial={editing ? { ...editing } : EMPTY_RULE}
                 scenes={scenes}
+                existingGroups={existingGroups}
             />
 
             <Group justify="flex-end">
@@ -160,6 +184,7 @@ export function RulesTab() {
                             <Table.Th>#</Table.Th>
                             <Table.Th>Condition</Table.Th>
                             <Table.Th>Scene</Table.Th>
+                            <Table.Th>Group</Table.Th>
                             <Table.Th>On</Table.Th>
                             <Table.Th></Table.Th>
                         </Table.Tr>
@@ -180,6 +205,11 @@ export function RulesTab() {
                                 </Table.Td>
                                 <Table.Td>
                                     <Text size="xs">{rule.target_scene || '—'}</Text>
+                                </Table.Td>
+                                <Table.Td>
+                                    {rule.scene_group
+                                        ? <Badge size="xs" variant="light" color="blue">{rule.scene_group}</Badge>
+                                        : <Text size="xs" c="dimmed">—</Text>}
                                 </Table.Td>
                                 <Table.Td>
                                     <Switch
