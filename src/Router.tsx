@@ -5,14 +5,9 @@ import { useContext, useEffect } from 'react';
 import PubSub from 'pubsub-js';
 
 interface RouterProps {
-  connectionStatus?: {
-    status: string;
-    reconnectAttempts: number;
-    lastHeartbeat: string | null;
-  };
 }
 
-export function Router({ connectionStatus }: RouterProps) {
+export function Router() {
   const loginContext = useContext(LoginContextContext);
   
   useEffect(() => {
@@ -31,5 +26,5 @@ export function Router({ connectionStatus }: RouterProps) {
   if (!loginContext.isLoggedIn()) {
     return <HomePage/>
   }
-  return <ChatPage connectionStatus={connectionStatus} />;
+  return <ChatPage/>;
 }

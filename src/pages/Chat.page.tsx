@@ -30,7 +30,6 @@ import { Storage } from '../components/chat/chatstorage';
 import { EventStorage, EventData } from '../components/events/eventstorage';
 import { AlertSystem } from '../components/alerts/alertplayer';
 import { AlertStatusIndicator } from '../components/alerts/AlertStatusIndicator';
-import { ConnectionStatusIndicator } from '../components/alerts/ConnectionStatusIndicator';
 import { ReloadAlertsButton } from '../components/alerts/ReloadAlertsButton';
 import { toMap } from '../commons/helper';
 import { Event } from '../commons/events';
@@ -53,14 +52,9 @@ export type OverlayDrawer = {
 }
 
 interface ChatPageProps {
-    connectionStatus?: {
-        status: string;
-        reconnectAttempts: number;
-        lastHeartbeat: string | null;
-    };
 }
 
-export function ChatPage({ connectionStatus }: ChatPageProps) {
+export function ChatPage() {
     const viewport = useRef<HTMLDivElement>(null);
     const footer = useRef<HTMLDivElement>(null);
     const { width, height } = useViewportSize();
@@ -707,9 +701,7 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                         
                         <div style={{ display: 'flex', gap: '4px' }}>
                             <ActionIcon variant='transparent' color='primary' size='sm' onClick={() => { setDrawer({...SettingsDrawer}); drawerHandler.open() }}>
-                                <ConnectionStatusIndicator connectionStatus={connectionStatus}>
-                                    <IconSettings size={16} />
-                                </ConnectionStatusIndicator>
+                                <IconSettings size={16} />
                             </ActionIcon>
                             
                             {!!(config.shortcuts && config.shortcuts.length) && (
@@ -786,7 +778,6 @@ export function ChatPage({ connectionStatus }: ChatPageProps) {
                     showShortcutsToggle={!!(config.shortcuts && config.shortcuts.length)}
                     currentClipId={currentClipId}
                     setCurrentClipId={setCurrentClipId}
-                    connectionStatus={connectionStatus}
                 />
             </AppShell.Header>
 

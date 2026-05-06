@@ -141,17 +141,6 @@ export default function HeheChat() {
         }, 1000)
     ).current;
     
-    // Track connection status
-    const [connectionStatus, setConnectionStatus] = useState<{
-        status: string;
-        reconnectAttempts: number;
-        lastHeartbeat: string | null;
-    }>({
-        status: 'CONNECTING',
-        reconnectAttempts: 0,
-        lastHeartbeat: null
-    });
-    
     // Get network status and document visibility at component level
     const networkStatus = useNetwork();
     const documentVisible = useDocumentVisibility();
@@ -268,19 +257,9 @@ export default function HeheChat() {
             backendWorkerRef.current!.postMessage({type: "SEND", data});
         });
 
-        backendWorkerRef.current.addEventListener("message", (msg: MessageEvent) => {
-            // Handle connection status updates
-            if (msg.data.type === 'connectionStatus') {
-                setConnectionStatus({
-                    status: ['CONNECTING', 'CONNECTED', 'DISCONNECTED', 'RECONNECTING'][msg.data.status] || 'UNKNOWN',
-                    reconnectAttempts: msg.data.reconnectAttempts,
-                    lastHeartbeat: msg.data.lastHeartbeat
-                });
-                return;
-            }
-            
+        backendWorkerRef.current.addEventListener("message", (msg: MessageEvent) => {            
             // Forward all other messages to PubSub
-            PubSub.publish("WS-" + msg.data.type, msg.data.data);
+            PubSub.publish("WS-" + msg.data.type, msg.data);
         });
 
         loadReceivedShares();
@@ -438,6 +417,9 @@ export default function HeheChat() {
     const setRainMode = (value: boolean) => updateConfig('rainMode', value);
     const setReadAllMessages = (value: boolean) => updateConfig('readAllMessages', value);
     const setShowMissedAlertsButton = (value: boolean) => updateConfig('showMissedAlertsButton', value);
+    const setShowBitrateIndicator = (value: boolean) => updateConfig('showBitrateIndicator', value);
+    const setShowSceneName = (value: boolean) => updateConfig('showSceneName', value);
+    const setShowSceneSwitchNotifications = (value: boolean) => updateConfig('showSceneSwitchNotifications', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -699,7 +681,10 @@ export default function HeheChat() {
         setReloadOnReturnToApp,
         setRainMode,
         setReadAllMessages,
-        setShowMissedAlertsButton
+        setShowMissedAlertsButton,
+        setShowBitrateIndicator,
+        setShowSceneName,
+        setShowSceneSwitchNotifications
     };
 
     const appLogin = {
@@ -934,7 +919,7 @@ export default function HeheChat() {
                     <LoginContextContext.Provider value={appLogin}>
                         <ChatEmotesContext.Provider value={chatEmotes}>
                             <PremiumContext.Provider value={appPremium}>
-                                <Router connectionStatus={connectionStatus} />
+                                <Router/>
                             </PremiumContext.Provider>
                         </ChatEmotesContext.Provider>
                     </LoginContextContext.Provider>

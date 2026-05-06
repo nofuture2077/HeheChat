@@ -89,17 +89,6 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
     };
   }, []);
 
-  // Track connection status
-  const [connectionStatus, setConnectionStatus] = useState<{
-    status: string;
-    reconnectAttempts: number;
-    lastHeartbeat: string | null;
-  }>({
-    status: 'CONNECTING',
-    reconnectAttempts: 0,
-    lastHeartbeat: null
-  });
-
   useEffect(() => {
     // Set the AlertSystem mode to browsersource
     AlertSystem.mode = 'browsersource';
@@ -110,16 +99,6 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
     // Set up message handler
     backendWorkerRef.current.onmessage = (event) => {
       const data = event.data;
-
-      // Handle connection status updates
-      if (data.type === 'connectionStatus') {
-        setConnectionStatus({
-          status: ['CONNECTING', 'CONNECTED', 'DISCONNECTED', 'RECONNECTING'][data.status] || 'UNKNOWN',
-          reconnectAttempts: data.reconnectAttempts,
-          lastHeartbeat: data.lastHeartbeat
-        });
-        return;
-      }
 
       if (data.type === 'profile') {
         const profile: Profile = data.profile;

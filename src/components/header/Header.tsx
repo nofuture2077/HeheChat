@@ -8,9 +8,9 @@ import { SettingsTab } from '@/components/settings/settings';
 import { HeaderLogo } from './HeaderLogo';
 import { TwitchPlayer } from '@/components/twitch/twitchplayer'
 import { TwitchClipsPlayer } from '@/components/twitch/twitchclipsplayer';
-
 import { AlertStatusIndicator } from '../alerts/AlertStatusIndicator';
-import { ConnectionStatusIndicator } from '../alerts/ConnectionStatusIndicator';
+import { BitrateIndicator } from '../switcher/BitrateIndicator';
+import { StreamStatusBar } from '../switcher/StreamStatusBar';
 
 export function Header(props: {
     openSettings: (tab?: SettingsTab) => void,
@@ -20,12 +20,7 @@ export function Header(props: {
     toggleShortcuts: () => void,
     showShortcutsToggle: boolean,
     currentClipId: string | null,
-    setCurrentClipId: (currentClipId: string | null) => void,
-    connectionStatus?: {
-        status: string;
-        reconnectAttempts: number;
-        lastHeartbeat: string | null;
-    },
+    setCurrentClipId: (currentClipId: string | null) => void
 }) {
     const config = useContext(ConfigContext);
     const [opened] = useDisclosure(false);
@@ -61,13 +56,13 @@ export function Header(props: {
                     
                 </Button>
                 
-                <div></div>
+                <div>
+                    {config.showBitrateIndicator && <StreamStatusBar />}
+                </div>
                 <div className={classes.rightGroup}>
                     
                     <ActionIcon variant='transparent' color='primary' size='44px' onClick={() => props.openSettings()}>
-                        <ConnectionStatusIndicator connectionStatus={props.connectionStatus}>
-                            <IconSettings />
-                        </ConnectionStatusIndicator>
+                        <IconSettings />
                     </ActionIcon>
                     
                     {props.showShortcutsToggle ? 

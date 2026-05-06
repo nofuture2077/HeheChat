@@ -63,7 +63,10 @@ export interface ConfigData {
     shortcuts: ShortCut[],
     reloadOnReturnToApp: boolean,
     rainMode: boolean,
-    showMissedAlertsButton: boolean
+    showMissedAlertsButton: boolean,
+    showBitrateIndicator: boolean,
+    showSceneName: boolean,
+    showSceneSwitchNotifications: boolean
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -123,6 +126,9 @@ export interface Config extends ConfigData {
     setRainMode: (val: boolean) => void;
     setReadAllMessages: (val: boolean) => void;
     setShowMissedAlertsButton: (val: boolean) => void;
+    setShowBitrateIndicator: (val: boolean) => void;
+    setShowSceneName: (val: boolean) => void;
+    setShowSceneSwitchNotifications: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -196,6 +202,9 @@ export const DEFAULT_CONFIG: Config = {
     rainMode: false,
     readAllMessages: false,
     showMissedAlertsButton: true,
+    showBitrateIndicator: true,
+    showSceneName: true,
+    showSceneSwitchNotifications: true,
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setMaxMessages: (value: number) => {},
@@ -250,6 +259,9 @@ export const DEFAULT_CONFIG: Config = {
     setRainMode: (val) => {},
     setReadAllMessages: (val) => {},
     setShowMissedAlertsButton: (val) => {},
+    setShowBitrateIndicator: (val) => {},
+    setShowSceneName: (val) => {},
+    setShowSceneSwitchNotifications: (val) => {},
 };
 
 export const DB_VERSION = 9;
