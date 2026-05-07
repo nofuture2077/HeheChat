@@ -1,9 +1,9 @@
 import { useEffect, useState, useContext } from 'react';
-import { Group, Badge, Menu } from '@mantine/core';
+import { Group, Badge, Menu, Box } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import PubSub from 'pubsub-js';
 import { ConfigContext } from '@/ApplicationContext';
-import { getSwitcherScenes, getSwitcherStatus, postSwitcherScene } from '@/api/switcher';
+import { getSwitcherScenes, getSwitcherStatus, postSwitcherScene, getStreamStatus } from '@/api/switcher';
 
 interface StreamStatsMessage {
     bitrate_kbps: number | null;
@@ -28,16 +28,22 @@ export function StreamStatusBar() {
     const [bitrate, setBitrate] = useState<number | null>(null);
     const [scene, setScene] = useState<string | null>(null);
     const [scenes, setScenes] = useState<string[]>([]);
+    const [isLive, setIsLive] = useState<boolean>(false);
 
     useEffect(() => {
         const channel = config.getChatChannel();
         if (channel) {
-            Promise.all([getSwitcherStatus(channel), getSwitcherScenes(channel)]).then(([status, sceneData]) => {
+            Promise.all([getSwitcherStatus(channel), getSwitcherScenes(channel), getStreamStatus(channel)]).then(([status, sceneData, streamStatus]) => {
                 setScene(status.scene ?? null);
                 setBitrate(status.bitrate_kbps ?? null);
                 setScenes(sceneData.scenes ?? []);
+                setIsLive(streamStatus.outputActive ?? false);
             }).catch(() => {});
         }
+
+        const streamStatusSub = PubSub.subscribe('WS-streamStatus', (_msg: string, data: { outputActive: boolean }) => {
+            setIsLive(data.outputActive);
+        });
 
         const statsSub = PubSub.subscribe('WS-streamStats', (_msg: string, data: StreamStatsMessage) => {
             setBitrate(data.bitrate_kbps);
@@ -56,6 +62,7 @@ export function StreamStatusBar() {
             setScene(data.to);
         });
         return () => {
+            PubSub.unsubscribe(streamStatusSub);
             PubSub.unsubscribe(statsSub);
             PubSub.unsubscribe(listSub);
             PubSub.unsubscribe(switchSub);
@@ -70,7 +77,8 @@ export function StreamStatusBar() {
     };
 
     return (
-        <Group align="stretch" gap="xs">
+        <Group align="center" gap="xs">
+            <Box w={8} h={8} bg={isLive ? 'green' : 'red'} style={{ borderRadius: '50%', flexShrink: 0 }} />
             <Badge color={bitrateColor(bitrate)} size="sm" radius="sm">
                 {formatMbit(bitrate)}
             </Badge>

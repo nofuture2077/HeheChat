@@ -63,11 +63,21 @@ obs.on('SceneListChanged', ({ scenes }) => {
     sendToHehe({ type: 'sceneList', scenes: (scenes as { sceneName: string }[]).map(s => s.sceneName) });
 });
 
+obs.on('StreamStateChanged', ({ outputActive, outputReconnecting }) => {
+    sendToHehe({ type: 'streamStatus', outputActive, outputReconnecting });
+});
+
 async function sendSceneList() {
     try {
         const { scenes, currentProgramSceneName } = await obs.call('GetSceneList');
         sendToHehe({ type: 'sceneList', scenes: (scenes as { sceneName: string }[]).map(s => s.sceneName) });
         sendToHehe({ type: 'sceneReport', scene: currentProgramSceneName });
+    } catch {
+        // OBS not ready yet
+    }
+    try {
+        const { outputActive, outputReconnecting } = await obs.call('GetStreamStatus');
+        sendToHehe({ type: 'streamStatus', outputActive, outputReconnecting });
     } catch {
         // OBS not ready yet
     }
@@ -100,6 +110,18 @@ function connectHehe() {
             } catch {
                 // scene may not exist
             }
+            return;
+        }
+
+        if (msg.type === 'startStream') {
+            if (!obsConnected) return;
+            try { await obs.call('StartStream'); } catch { }
+            return;
+        }
+
+        if (msg.type === 'stopStream') {
+            if (!obsConnected) return;
+            try { await obs.call('StopStream'); } catch { }
             return;
         }
     });

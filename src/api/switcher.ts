@@ -103,6 +103,24 @@ export async function deleteSwitcherRule(channel: string, id: string): Promise<v
     });
 }
 
+// --- Stream start/stop ---
+
+export interface OBSStreamStatus {
+    outputActive: boolean;
+}
+
+export async function getStreamStatus(channel: string): Promise<OBSStreamStatus> {
+    return fetch(`${BASE_URL}/api/switcher/stream/status/${channel}?token=${token()}`).then(r => r.json());
+}
+
+export async function postStreamStart(channel: string): Promise<void> {
+    await fetch(`${BASE_URL}/api/switcher/stream/start/${channel}?token=${token()}`, { method: 'POST' });
+}
+
+export async function postStreamStop(channel: string): Promise<void> {
+    await fetch(`${BASE_URL}/api/switcher/stream/stop/${channel}?token=${token()}`, { method: 'POST' });
+}
+
 // --- OBS client token ---
 
 export async function getSwitcherClientToken(channel: string): Promise<{ token: string }> {

@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from 'react';
 import { Stack, Text, Group, Button, Badge, Fieldset, Tabs, ScrollArea } from '@mantine/core';
 import { IconBroadcast, IconSettings, IconList, IconKey } from '@tabler/icons-react';
 import PubSub from 'pubsub-js';
-import { getSwitcherStatus, getSwitcherScenes, postSwitcherScene } from '@/api/switcher';
+import { getSwitcherStatus, getSwitcherScenes, postSwitcherScene, getStreamStatus, postStreamStart, postStreamStop } from '@/api/switcher';
 import { ConfigContext, PremiumContext } from '@/ApplicationContext';
 import { OverlayDrawer } from '@/pages/Chat.page';
 import { ProviderConfigTab } from './ProviderConfigTab';
@@ -35,11 +35,16 @@ function bitrateLabel(bitrate: number | null): string {
     return `${bitrate.toLocaleString()} kbps`;
 }
 
+interface StreamStatusMessage {
+    outputActive: boolean;
+}
+
 function StreamTab({ channel }: { channel: string | undefined }) {
     const [scenes, setScenes] = useState<string[]>([]);
     const [activeScene, setActiveScene] = useState<string | null>(null);
     const [bitrate, setBitrate] = useState<number | null>(null);
     const [rtt, setRtt] = useState<number | null>(null);
+    const [isLive, setIsLive] = useState<boolean>(false);
 
     useEffect(() => {
         if (!channel) return;
@@ -47,11 +52,13 @@ function StreamTab({ channel }: { channel: string | undefined }) {
         Promise.all([
             getSwitcherStatus(channel),
             getSwitcherScenes(channel),
-        ]).then(([status, sceneData]) => {
+            getStreamStatus(channel),
+        ]).then(([status, sceneData, streamStatus]) => {
             setActiveScene(status.scene ?? null);
             setBitrate(status.bitrate_kbps ?? null);
             setRtt(status.rtt_ms ?? null);
             setScenes(sceneData.scenes ?? []);
+            setIsLive(streamStatus.outputActive ?? false);
         }).catch(() => {});
 
         const statsSub = PubSub.subscribe('WS-streamStats', (_: string, data: StreamStatsMessage) => {
@@ -70,11 +77,15 @@ function StreamTab({ channel }: { channel: string | undefined }) {
         const switchSub = PubSub.subscribe('WS-sceneSwitch', (_: string, data: SceneSwitchMessage) => {
             setActiveScene(data.to);
         });
+        const streamStatusSub = PubSub.subscribe('WS-streamStatus', (_: string, data: StreamStatusMessage) => {
+            setIsLive(data.outputActive);
+        });
 
         return () => {
             PubSub.unsubscribe(statsSub);
             PubSub.unsubscribe(listSub);
             PubSub.unsubscribe(switchSub);
+            PubSub.unsubscribe(streamStatusSub);
         };
     }, [channel]);
 
@@ -84,16 +95,33 @@ function StreamTab({ channel }: { channel: string | undefined }) {
         setActiveScene(scene);
     };
 
+    const handleStreamToggle = () => {
+        if (!channel) return;
+        if (isLive) {
+            postStreamStop(channel).catch(() => {});
+        } else {
+            postStreamStart(channel).catch(() => {});
+        }
+    };
+
     return (
         <Stack mt={16} gap={16} p="md">
             <Fieldset legend="Stream Stats" variant="filled">
-                <Group gap="md">
-                    <Badge color={bitrateColor(bitrate)} size="lg" variant="filled">
-                        {bitrateLabel(bitrate)}
-                    </Badge>
-                    {rtt !== null && (
-                        <Text size="sm" c="dimmed">RTT: {rtt} ms</Text>
-                    )}
+                <Group gap="md" justify="space-between">
+                    <Group gap="md">
+                        <Badge color={bitrateColor(bitrate)} size="lg" variant="filled">
+                            {bitrateLabel(bitrate)}
+                        </Badge>
+                        <Badge color={isLive ? 'green' : 'gray'} size="lg" variant="filled">
+                            {isLive ? 'LIVE' : 'OFFLINE'}
+                        </Badge>
+                        {rtt !== null && (
+                            <Text size="sm" c="dimmed">RTT: {rtt} ms</Text>
+                        )}
+                    </Group>
+                    <Button size="xs" color={isLive ? 'red' : 'green'} onClick={handleStreamToggle}>
+                        {isLive ? 'Stop Stream' : 'Start Stream'}
+                    </Button>
                 </Group>
             </Fieldset>
 

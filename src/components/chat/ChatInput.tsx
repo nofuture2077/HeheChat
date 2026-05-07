@@ -1,9 +1,9 @@
 import { useContext, useState, useEffect, useMemo } from 'react';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
-import { postSwitcherScene } from '@/api/switcher';
+import { postSwitcherScene, postStreamStart, postStreamStop } from '@/api/switcher';
 import PubSub from 'pubsub-js';
 import { ChannelPicker } from './ChannelPicker';
-import { Textarea, ActionIcon, rem, Flex, Stack, Combobox, useCombobox } from '@mantine/core';
+import { Textarea, ActionIcon, rem, Flex, Stack, Combobox, useCombobox, Alert, Button, Group } from '@mantine/core';
 import { EmoteGrid } from './EmoteGrid';
 import { IconSend, IconX, IconMoodSmile } from '@tabler/icons-react';
 import { HeheChatMessage } from '../../commons/message';
@@ -32,6 +32,7 @@ export function ChatInput(props: ChatInputProps) {
     const [isEmoteGridOpen, setIsEmoteGridOpen] = useState<boolean>(false);
     const [manuallyClosedEmoteGrid, setManuallyClosedEmoteGrid] = useState<boolean>(false);
     const [sceneList, setSceneList] = useState<string[]>([]);
+    const [pendingConfirm, setPendingConfirm] = useState<'start' | 'stop' | null>(null);
 
     // Load message history from localStorage on component mount
     useEffect(() => {
@@ -87,6 +88,8 @@ export function ChatInput(props: ChatInputProps) {
         { value: '/massban', label: '/massban - Open mass ban tool to ban multiple users' },
         { value: '/premium', label: '/premium - Show ad for HeheChat Pro' },
         { value: '/scene', label: '/scene [name] - Switch OBS scene' },
+        { value: '/start', label: '/start - Start OBS stream (requires confirmation)' },
+        { value: '/stop', label: '/stop - Stop OBS stream (requires confirmation)' },
     ];
 
     const loginContext = useContext(LoginContextContext);
@@ -112,6 +115,17 @@ export function ChatInput(props: ChatInputProps) {
             }
             return true;
         }
+
+        if (cmd === 'start') {
+            setPendingConfirm('start');
+            return true;
+        }
+
+        if (cmd === 'stop') {
+            setPendingConfirm('stop');
+            return true;
+        }
+
 
         // Check if user has permission to execute the command
         if (cmd === 'raid') {
@@ -353,6 +367,24 @@ export function ChatInput(props: ChatInputProps) {
     return (
         <Stack gap={0} className={inputClasses.chatInput}>
             {props.replyToMsg ? (<ChatMessageComp msg={props.replyToMsg} openModView={() => { }} moderatedChannel={{}} hideReply={true} deletedMessages={{}} setReplyMsg={props.setReplyMsg} modActions={props.modActions} />) : null}
+            {pendingConfirm && (
+                <Alert color={pendingConfirm === 'start' ? 'green' : 'red'} m="4px 12px 0 12px" p="6px 10px">
+                    <Group justify="space-between" align="center">
+                        <span>{pendingConfirm === 'start' ? 'Start the stream?' : 'Stop the stream?'}</span>
+                        <Group gap="xs">
+                            <Button size="xs" color={pendingConfirm === 'start' ? 'green' : 'red'} onClick={() => {
+                                const channelname = config.getChatChannel();
+                                if (channelname) {
+                                    if (pendingConfirm === 'start') postStreamStart(channelname).catch(() => {});
+                                    else postStreamStop(channelname).catch(() => {});
+                                }
+                                setPendingConfirm(null);
+                            }}>OK</Button>
+                            <Button size="xs" variant="subtle" onClick={() => setPendingConfirm(null)}>Cancel</Button>
+                        </Group>
+                    </Group>
+                </Alert>
+            )}
             <Flex justify="space-between" gap={'md'} align="center" m="6px 12px 22px 12px">
                 <Combobox
                     store={combobox}
