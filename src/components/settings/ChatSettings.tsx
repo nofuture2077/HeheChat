@@ -1,4 +1,4 @@
-import { TagsInput, Switch, Stack, Select, Fieldset, Space, Text, Image, Alert, Box, ComboboxLikeRenderOptionInput, ComboboxStringItem, ComboboxItem } from '@mantine/core';
+import { TagsInput, Switch, Stack, Select, Fieldset, Space, Text, Image, Alert, Box, ComboboxLikeRenderOptionInput } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext, useMemo } from 'react';
 import { ConfigContext } from '../../ApplicationContext';

@@ -119,7 +119,7 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
             }
             onClose={() => dismissMessage(message.id)}
           >
-            <Collapse in={!isCollapsed || !isLongText}>
+            <Collapse expanded={!isCollapsed || !isLongText}>
               <Text size="sm" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
                 {message.text}
               </Text>

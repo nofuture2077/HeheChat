@@ -17,13 +17,13 @@ interface BrowserSourceProps {
 }
 
 export default function BrowserSource({ token, preview }: BrowserSourceProps) {
-  const backendWorkerRef = useRef<Worker>();
+  const backendWorkerRef = useRef<Worker | undefined>(undefined);
   const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE});
   const [chatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
   const documentVisible = useDocumentVisibility();
   const networkStatus = useNetwork();
   const initializationAttempted = useRef(false);
-  const alertSystemCheckInterval = useRef<number>();
+  const alertSystemCheckInterval = useRef<number | undefined>(undefined);
 
   // Run storage patches on app initialization
   useEffect(() => {

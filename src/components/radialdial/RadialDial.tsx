@@ -13,7 +13,7 @@ interface RadialDialProps {
   actions: RadialAction[];
   radius?: number;
   onClose?: () => void;
-  messageRef: React.RefObject<HTMLElement>;
+  messageRef: React.RefObject<HTMLElement | null>;
   position: { x: number; y: number };
 }
 

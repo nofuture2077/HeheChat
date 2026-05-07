@@ -17,7 +17,7 @@ interface ReplayAppProps {
 
 
 export default function ReplayApp({ token }: ReplayAppProps) {
-  const backendWorkerRef = useRef<Worker>();
+  const backendWorkerRef = useRef<Worker | undefined>(undefined);
   const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE});
 
   // Run storage patches on app initialization

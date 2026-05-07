@@ -1,5 +1,5 @@
 import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
-import { useContext, useEffect, useState, useRef, useMemo } from "react";
+import { useContext, useEffect, useState, useRef, useMemo, type ReactElement } from "react";
 import { Avatar, Button, TextInput, Group, Modal, Text, Stack, Fieldset, Badge, ScrollArea, Image } from '@mantine/core';
 import { IconArrowsRight, IconX } from '@tabler/icons-react';
 import { OverlayDrawer } from '../../../pages/Chat.page';
@@ -267,7 +267,7 @@ export function TimeoutView(props: {
     channelName: string,
     timeoutUser: (channelId: string, userId: string, duration: number, reason: string) => void,
     close: () => void;
-}): JSX.Element {
+}): ReactElement {
     const [reason, setReason] = useState("");
     const [duration, setDuration] = useState<number>(600);
 
@@ -297,7 +297,7 @@ export function BanView(props: {
     channelName: string,
     banUser: (channelId: string, userId: string, reason: string) => void,
     close: () => void;
-}): JSX.Element {
+}): ReactElement {
     const [reason, setReason] = useState("");
 
     return (
@@ -324,7 +324,7 @@ export function DeleteMessageView(props: {
     channelName: string,
     deleteMessage: (channelId: string, messageId: string) => void,
     close: () => void;
-}): JSX.Element {
+}): ReactElement {
     return (
         <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
             <Fieldset legend={["Delete message from", props.userName, "in", props.channelName].join(" ")}>
@@ -348,7 +348,7 @@ export function RaidView(props: {
     initialTo?: HelixStream;
     raidChannel: (from: string, to: string) => void,
     close: () => void;
-}): JSX.Element {
+}): ReactElement {
     const [raidFrom, setRaidFrom] = useState(props.initialFrom);
     const [raidTo, setRaidTo] = useState<HelixStream | undefined>(props.initialTo);
     const [profilePicture, setProfilePicture] = useState<string>("");

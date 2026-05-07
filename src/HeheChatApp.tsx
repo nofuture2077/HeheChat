@@ -120,7 +120,7 @@ export default function HeheChat() {
         ...DEFAULT_PREMIUM,
         loading: true
     });
-    const backendWorkerRef = useRef<Worker>();
+    const backendWorkerRef = useRef<Worker | undefined>(undefined);
     
     // Create a debounced save function to prevent excessive API calls
     const debouncedSaveProfile = useRef(

@@ -14,7 +14,7 @@ interface Use7TVCosmeticsReturn {
     cosmetics: SevenTVUserCosmetics | null;
     loading: boolean;
     error: string | null;
-    elementRef: React.RefObject<HTMLElement>;
+    elementRef: React.RefObject<HTMLElement | null>;
     applyCosmetics: (element?: HTMLElement) => void;
     refreshCosmetics: () => Promise<void>;
     hasCosmetics: boolean;

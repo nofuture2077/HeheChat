@@ -596,7 +596,7 @@ export function AdminChannelManagementPage() {
                 {isExpanded ? <IconChevronDown size="0.8rem" /> : <IconChevronRight size="0.8rem" />}
               </ActionIcon>
             </Group>
-            <Collapse in={isExpanded}>
+            <Collapse expanded={isExpanded}>
               <Stack gap="xs">
                 <Group gap="xs" wrap="wrap">
                   {getScopeBadges(channel.scope)}

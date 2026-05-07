@@ -52,7 +52,7 @@ export function EmoteGrid({ channel, searchText, onEmoteSelect, emoteList, isMan
                 {Array.from(emoteList.entries()).map(([category, emotes]) => (
                     <div key={category}>
                         <Text size="sm" className={styles.categoryTitle}>{category}</Text>
-                        <Grid gutter="md" className={styles.gridContainer}>
+                        <Grid gap="md" className={styles.gridContainer}>
                             {emotes.map((emote: any, index: number) => (
                                 <Grid.Col span={3} key={`${emote.name}-${index}`}>
                                     <div 
