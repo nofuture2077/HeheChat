@@ -3,7 +3,7 @@ import { Group, Badge, Menu } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import PubSub from 'pubsub-js';
 import { ConfigContext } from '@/ApplicationContext';
-import { postSwitcherScene } from '@/api/switcher';
+import { getSwitcherScenes, getSwitcherStatus, postSwitcherScene } from '@/api/switcher';
 
 interface StreamStatsMessage {
     bitrate_kbps: number | null;
@@ -30,9 +30,24 @@ export function StreamStatusBar() {
     const [scenes, setScenes] = useState<string[]>([]);
 
     useEffect(() => {
+        const channel = config.getChatChannel();
+        if (channel) {
+            Promise.all([getSwitcherStatus(channel), getSwitcherScenes(channel)]).then(([status, sceneData]) => {
+                setScene(status.scene ?? null);
+                setBitrate(status.bitrate_kbps ?? null);
+                setScenes(sceneData.scenes ?? []);
+            }).catch(() => {});
+        }
+
         const statsSub = PubSub.subscribe('WS-streamStats', (_msg: string, data: StreamStatsMessage) => {
             setBitrate(data.bitrate_kbps);
             setScene(data.scene);
+            setScenes(prev => {
+                if (prev.length === 0 && channel) {
+                    getSwitcherScenes(channel).then(d => setScenes(d.scenes ?? [])).catch(() => {});
+                }
+                return prev;
+            });
         });
         const listSub = PubSub.subscribe('WS-sceneList', (_msg: string, data: { scenes: string[] }) => {
             setScenes(data.scenes ?? []);
@@ -60,30 +75,29 @@ export function StreamStatusBar() {
                 {formatMbit(bitrate)}
             </Badge>
             {config.showSceneName && scene && (
-                scenes.length > 0 ? (
-                    <Menu shadow="md" position="bottom-end">
-                        <Menu.Target>
-                            <Badge color="gray" size="sm" radius="sm" style={{ cursor: 'pointer' }}>
-                                {scene}
-                            </Badge>
-                        </Menu.Target>
-                        <Menu.Dropdown>
-                            {scenes.map((s) => (
-                                <Menu.Item
-                                    key={s}
-                                    onClick={() => handleSceneSwitch(s)}
-                                    rightSection={s === scene ? <IconCheck size={12} /> : null}
-                                >
-                                    {s}
-                                </Menu.Item>
-                            ))}
-                        </Menu.Dropdown>
-                    </Menu>
-                ) : (
-                    <Badge color="gray" size="sm" radius="sm">
-                        {scene}
-                    </Badge>
-                )
+                <Menu shadow="md" position="bottom-end" onOpen={() => {
+                    const channel = config.getChatChannel();
+                    if (scenes.length === 0 && channel) {
+                        getSwitcherScenes(channel).then(d => setScenes(d.scenes ?? [])).catch(() => {});
+                    }
+                }}>
+                    <Menu.Target>
+                        <Badge color="gray" size="sm" radius="sm" style={{ cursor: 'pointer' }}>
+                            {scene}
+                        </Badge>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                        {scenes.map((s) => (
+                            <Menu.Item
+                                key={s}
+                                onClick={() => handleSceneSwitch(s)}
+                                rightSection={s === scene ? <IconCheck size={12} /> : null}
+                            >
+                                {s}
+                            </Menu.Item>
+                        ))}
+                    </Menu.Dropdown>
+                </Menu>
             )}
         </Group>
     );

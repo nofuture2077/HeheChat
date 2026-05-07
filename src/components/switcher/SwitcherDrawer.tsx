@@ -57,6 +57,12 @@ function StreamTab({ channel }: { channel: string | undefined }) {
         const statsSub = PubSub.subscribe('WS-streamStats', (_: string, data: StreamStatsMessage) => {
             setBitrate(data.bitrate_kbps);
             setRtt(data.rtt_ms);
+            setScenes(prev => {
+                if (prev.length === 0 && channel) {
+                    getSwitcherScenes(channel).then(d => setScenes(d.scenes ?? [])).catch(() => {});
+                }
+                return prev;
+            });
         });
         const listSub = PubSub.subscribe('WS-sceneList', (_: string, data: { scenes: string[] }) => {
             setScenes(data.scenes ?? []);
@@ -93,7 +99,12 @@ function StreamTab({ channel }: { channel: string | undefined }) {
 
             <Fieldset legend="Scenes" variant="filled">
                 {scenes.length === 0 ? (
-                    <Text size="sm" c="dimmed">No OBS client connected</Text>
+                    <Group gap="xs">
+                        <Text size="sm" c="dimmed">No OBS client connected</Text>
+                        <Button size="xs" variant="subtle" onClick={() => {
+                            if (channel) getSwitcherScenes(channel).then(d => setScenes(d.scenes ?? [])).catch(() => {});
+                        }}>Retry</Button>
+                    </Group>
                 ) : (
                     <Group gap="xs" wrap="wrap">
                         {scenes.map(scene => (
