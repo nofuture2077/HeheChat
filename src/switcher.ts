@@ -63,8 +63,8 @@ obs.on('SceneListChanged', ({ scenes }) => {
     sendToHehe({ type: 'sceneList', scenes: (scenes as { sceneName: string }[]).map(s => s.sceneName) });
 });
 
-obs.on('StreamStateChanged', ({ outputActive, outputReconnecting }) => {
-    sendToHehe({ type: 'streamStatus', outputActive, outputReconnecting });
+obs.on('StreamStateChanged', ({ outputActive, outputState }) => {
+    sendToHehe({ type: 'streamStatus', outputActive, outputState });
 });
 
 async function sendSceneList() {
