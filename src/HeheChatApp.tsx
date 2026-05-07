@@ -259,7 +259,7 @@ export default function HeheChat() {
 
         backendWorkerRef.current.addEventListener("message", (msg: MessageEvent) => {            
             // Forward all other messages to PubSub
-            PubSub.publish("WS-" + msg.data.type, msg.data.data);
+            PubSub.publish("WS-" + msg.data.type, msg.data.data ?? msg.data);
         });
 
         loadReceivedShares();
