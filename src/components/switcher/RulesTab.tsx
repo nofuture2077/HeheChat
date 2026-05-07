@@ -152,7 +152,9 @@ export function RulesTab() {
     const handleToggle = async (rule: SwitcherRule, enabled: boolean) => {
         if (!channel) return;
         setRules(r => r.map(x => x.id === rule.id ? { ...x, enabled } : x));
-        await putSwitcherRule(channel, rule.id, { enabled }).catch(() => {});
+        await putSwitcherRule(channel, rule.id, { enabled }).catch(() => {
+            setRules(r => r.map(x => x.id === rule.id ? { ...x, enabled: rule.enabled } : x));
+        });
     };
 
     const sorted = [...rules].sort((a, b) => a.priority - b.priority);

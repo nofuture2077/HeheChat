@@ -39,7 +39,8 @@ export default defineConfig({
         replay: './replay.html',
         admin: './admin.html',
         collection: './collection.html',
-        alert: './alert.html'
+        alert: './alert.html',
+        switcher: './switcher.html'
       }
     }
   },
