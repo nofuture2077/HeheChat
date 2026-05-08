@@ -48,6 +48,7 @@ export function StreamStatusBar() {
         const statsSub = PubSub.subscribe('WS-streamStats', (_msg: string, data: StreamStatsMessage) => {
             setBitrate(data.bitrate_kbps);
             setScene(data.scene);
+            setIsLive(true);
             setScenes(prev => {
                 if (prev.length === 0 && channel) {
                     getSwitcherScenes(channel).then(d => setScenes(d.scenes ?? [])).catch(() => {});
@@ -77,36 +78,56 @@ export function StreamStatusBar() {
     };
 
     return (
-        <Group align="center" gap="xs">
-            <Box w={8} h={8} bg={isLive ? 'green' : 'red'} style={{ borderRadius: '50%', flexShrink: 0 }} />
-            <Badge color={bitrateColor(bitrate)} size="sm" radius="sm">
-                {formatMbit(bitrate)}
-            </Badge>
-            {config.showSceneName && scene && (
-                <Menu shadow="md" position="bottom-end" onOpen={() => {
-                    const channel = config.getChatChannel();
-                    if (scenes.length === 0 && channel) {
-                        getSwitcherScenes(channel).then(d => setScenes(d.scenes ?? [])).catch(() => {});
-                    }
-                }}>
-                    <Menu.Target>
-                        <Badge color="gray" size="sm" radius="sm" style={{ cursor: 'pointer' }}>
-                            {scene}
-                        </Badge>
-                    </Menu.Target>
-                    <Menu.Dropdown>
-                        {scenes.map((s) => (
-                            <Menu.Item
-                                key={s}
-                                onClick={() => handleSceneSwitch(s)}
-                                rightSection={s === scene ? <IconCheck size={12} /> : null}
-                            >
-                                {s}
-                            </Menu.Item>
-                        ))}
-                    </Menu.Dropdown>
-                </Menu>
-            )}
-        </Group>
+        <Box
+            px="md"
+            py={6}
+            style={{
+                background: 'var(--mantine-color-body)',
+                borderRadius: '0 0 var(--mantine-radius-md) var(--mantine-radius-md)',
+                display: 'inline-flex',
+                border: '1px solid var(--mantine-color-default-border)',
+                borderTop: 'none',
+            }}
+        >
+            <Group align="center" gap="xs">
+                <Box
+                    w={8}
+                    h={8}
+                    style={{
+                        borderRadius: '50%',
+                        flexShrink: 0,
+                        backgroundColor: isLive ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-red-6)',
+                    }}
+                />
+                <Badge color={bitrateColor(bitrate)} size="sm" radius="sm">
+                    {formatMbit(bitrate)}
+                </Badge>
+                {config.showSceneName && scene && (
+                    <Menu shadow="md" position="bottom-end" onOpen={() => {
+                        const channel = config.getChatChannel();
+                        if (scenes.length === 0 && channel) {
+                            getSwitcherScenes(channel).then(d => setScenes(d.scenes ?? [])).catch(() => {});
+                        }
+                    }}>
+                        <Menu.Target>
+                            <Badge color="gray" size="sm" radius="sm" style={{ cursor: 'pointer' }}>
+                                {scene}
+                            </Badge>
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                            {scenes.map((s) => (
+                                <Menu.Item
+                                    key={s}
+                                    onClick={() => handleSceneSwitch(s)}
+                                    rightSection={s === scene ? <IconCheck size={12} /> : null}
+                                >
+                                    {s}
+                                </Menu.Item>
+                            ))}
+                        </Menu.Dropdown>
+                    </Menu>
+                )}
+            </Group>
+        </Box>
     );
 }

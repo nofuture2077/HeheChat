@@ -110,7 +110,7 @@ export function ShortcutView() {
     };
 
     return (
-        <Card withBorder radius="md" p="md" mx="sm" my="sm">
+        <Card withBorder radius="md" p="xs" mx="xs" my={2}>
             <Group justify="center" gap="lg" wrap="nowrap">
                 {config.shortcuts.map((shortcut) => {
                     let Icon;
@@ -127,19 +127,19 @@ export function ShortcutView() {
                     }
                     
                     return (
-                        <Stack key={shortcut.id} align="center" gap="xs" style={{ flex: 1, minWidth: 0 }}>
+                        <Stack key={shortcut.id} align="center" gap={4} style={{ flex: 1, minWidth: 0 }}>
                             <ActionIcon
                                 variant="filled"
                                 size="lg"
                                 radius="xl"
                                 onClick={() => handleShortcutClick(shortcut)}
-                                style={{ 
+                                style={{
                                     backgroundColor: shortcut.color,
-                                    width: '50px',
-                                    height: '50px'
+                                    width: '42px',
+                                    height: '42px'
                                 }}
                             >
-                                <Icon size={20}/>
+                                <Icon size={18}/>
                             </ActionIcon>
                             <Badge 
                                 size="xs" 

@@ -646,7 +646,7 @@ export function ChatPage() {
     }, [isResizing, handleMouseMove, handleMouseUp]);
 
     const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);
-    const affixOffset = headerHeight + 15;
+    const affixOffset = headerHeight + (config.showBitrateIndicator ? 0 : 8);
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
     const isDesktopVideoMode = config.desktopVideoMode && (config.showVideo || currentClipId) && !isMobile;
 
