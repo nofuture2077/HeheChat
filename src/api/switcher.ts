@@ -43,6 +43,7 @@ export interface SwitcherRule {
     cooldown_ms: number;
     enabled: boolean;
     scene_group?: string | null;
+    chat_message?: string | null;
 }
 
 export type SwitcherRuleInput = Omit<SwitcherRule, 'id'>;

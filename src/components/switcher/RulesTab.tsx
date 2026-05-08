@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 import {
     Stack, Table, Button, ActionIcon, Switch, Group, Modal,
-    Select, NumberInput, Text, Badge,
+    Select, NumberInput, Text, Badge, TextInput,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconPencil, IconTrash, IconPlus } from '@tabler/icons-react';
@@ -30,6 +30,7 @@ const EMPTY_RULE: SwitcherRuleInput = {
     cooldown_ms: 30000,
     enabled: true,
     scene_group: null,
+    chat_message: null,
 };
 
 function RuleModal({
@@ -99,6 +100,14 @@ function RuleModal({
                     onSearchChange={setGroupSearch}
                     placeholder="No group (ungrouped)"
                     styles={{ dropdown: { zIndex: 401 } }}
+                />
+                <TextInput
+                    label="Chat Message"
+                    description="Optional message sent to chat when this rule triggers a scene switch"
+                    placeholder="e.g. Stream quality dropped, switching scene..."
+                    maxLength={500}
+                    value={form.chat_message ?? ''}
+                    onChange={e => setField('chat_message', e.currentTarget.value || null)}
                 />
                 <Switch label="Enabled" size="lg" checked={form.enabled} onChange={e => setField('enabled', e.currentTarget.checked)} />
                 <Group justify="flex-end" mt="sm">
