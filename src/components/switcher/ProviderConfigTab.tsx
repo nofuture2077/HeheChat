@@ -37,6 +37,10 @@ const DEFAULT_CONFIG: SwitcherConfig = {
     poll_interval_ms: 2000,
     provider_config: {},
     enabled: false,
+    stop_stream_after_raid: false,
+    stop_stream_after_raid_delay_ms: 95000,
+    stream_start_message: null,
+    stream_stop_message: null,
 };
 
 export function ProviderConfigTab() {
@@ -153,6 +157,45 @@ export function ProviderConfigTab() {
                         }}
                     />
                     <Text fs="italic" size="14px">Show the current OBS scene name below the header</Text>
+                </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Stream Messages" variant="filled">
+                <Stack gap="sm">
+                    <TextInput
+                        label="Stream Start Message"
+                        placeholder="Optional chat message when stream goes live"
+                        value={form.stream_start_message ?? ''}
+                        onChange={e => setField('stream_start_message', e.currentTarget.value || null)}
+                    />
+                    <TextInput
+                        label="Stream Stop Message"
+                        placeholder="Optional chat message when stream ends"
+                        value={form.stream_stop_message ?? ''}
+                        onChange={e => setField('stream_stop_message', e.currentTarget.value || null)}
+                    />
+                </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Raid" variant="filled">
+                <Stack gap="sm">
+                    <Switch
+                        label="Stop Stream After Raid"
+                        size="lg"
+                        checked={form.stop_stream_after_raid ?? false}
+                        onChange={e => setField('stop_stream_after_raid', e.currentTarget.checked)}
+                    />
+                    {form.stop_stream_after_raid && (
+                        <NumberInput
+                            label="Stop Delay (seconds)"
+                            description="Stream stops this many seconds after the raid is initiated (raid countdown takes ~90s)"
+                            value={(form.stop_stream_after_raid_delay_ms ?? 95000) / 1000}
+                            min={0}
+                            max={300}
+                            step={5}
+                            onChange={v => setField('stop_stream_after_raid_delay_ms', (Number(v) || 95) * 1000)}
+                        />
+                    )}
                 </Stack>
             </Fieldset>
 

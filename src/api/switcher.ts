@@ -24,6 +24,10 @@ export interface SwitcherConfig {
     poll_interval_ms: number;
     provider_config: Record<string, string>;
     enabled: boolean;
+    stop_stream_after_raid?: boolean;
+    stop_stream_after_raid_delay_ms?: number;
+    stream_start_message?: string | null;
+    stream_stop_message?: string | null;
 }
 
 export interface SwitcherRule {
