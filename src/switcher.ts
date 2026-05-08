@@ -17,10 +17,23 @@ if (!heheWsUrl || !token) {
     throw new Error('Missing heheWsUrl or token params');
 }
 
+const INITIAL_DELAY = 1000;
+const MAX_DELAY = 30000;
+const BACKOFF = 1.5;
+
+function calcDelay(attempts: number) {
+    return Math.min(INITIAL_DELAY * Math.pow(BACKOFF, attempts), MAX_DELAY);
+}
+
 const obs = new OBSWebSocket();
 let heheWs: WebSocket | null = null;
 let obsConnected = false;
 let heheConnected = false;
+
+let obsReconnectTimer: ReturnType<typeof setTimeout> | undefined;
+let heheReconnectTimer: ReturnType<typeof setTimeout> | undefined;
+let obsAttempts = 0;
+let heheAttempts = 0;
 
 function updateStatus() {
     if (obsConnected && heheConnected) {
@@ -34,25 +47,46 @@ function updateStatus() {
     }
 }
 
+function scheduleObsReconnect() {
+    if (obsReconnectTimer !== undefined) return;
+    const delay = calcDelay(obsAttempts);
+    obsAttempts++;
+    obsReconnectTimer = setTimeout(() => {
+        obsReconnectTimer = undefined;
+        connectObs();
+    }, delay);
+}
+
+function scheduleHeheReconnect() {
+    if (heheReconnectTimer !== undefined) return;
+    const delay = calcDelay(heheAttempts);
+    heheAttempts++;
+    heheReconnectTimer = setTimeout(() => {
+        heheReconnectTimer = undefined;
+        connectHehe();
+    }, delay);
+}
+
 // ── OBS connection ────────────────────────────────────────────────────────────
 
 async function connectObs() {
     try {
         await obs.connect(obsWsUrl, obsPassword);
         obsConnected = true;
+        obsAttempts = 0;
         updateStatus();
         if (heheConnected) await sendSceneList();
     } catch (err) {
         obsConnected = false;
         updateStatus();
-        setTimeout(connectObs, 5000);
+        scheduleObsReconnect();
     }
 }
 
 obs.on('ConnectionClosed', () => {
     obsConnected = false;
     updateStatus();
-    setTimeout(connectObs, 5000);
+    scheduleObsReconnect();
 });
 
 obs.on('CurrentProgramSceneChanged', ({ sceneName }) => {
@@ -129,7 +163,7 @@ function connectHehe() {
     heheWs.addEventListener('close', () => {
         heheConnected = false;
         updateStatus();
-        setTimeout(connectHehe, 5000);
+        scheduleHeheReconnect();
     });
 
     heheWs.addEventListener('error', () => {
@@ -142,6 +176,32 @@ function sendToHehe(data: object) {
         heheWs.send(JSON.stringify(data));
     }
 }
+
+// ── Reconnect on visibility / network restore ─────────────────────────────────
+
+let reconnectDebounce: ReturnType<typeof setTimeout> | undefined;
+
+function forceReconnect() {
+    clearTimeout(reconnectDebounce);
+    reconnectDebounce = setTimeout(() => {
+        if (!obsConnected) {
+            clearTimeout(obsReconnectTimer);
+            obsReconnectTimer = undefined;
+            connectObs();
+        }
+        if (!heheConnected) {
+            clearTimeout(heheReconnectTimer);
+            heheReconnectTimer = undefined;
+            connectHehe();
+        }
+    }, 1000);
+}
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') forceReconnect();
+});
+
+window.addEventListener('online', forceReconnect);
 
 // ── Startup ───────────────────────────────────────────────────────────────────
 
