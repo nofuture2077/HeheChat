@@ -42,6 +42,13 @@ export default function Login(props: LoginProps) {
             setWaitOver(true);
         }, 5000);
 
+        const botAuth = getQueryVariable(hash, 'bot_auth');
+        if (botAuth === 'success') {
+            const redirectUrl = encodeURI(window.location.origin + window.location.pathname.replace("index.html", ""));
+            document.location = redirectUrl;
+            return;
+        }
+
         if (tokenStored || token) {
             const authProvider = new StaticAuthProvider(props.clientId, tokenStored || token || '');
             const api = new ApiClient({authProvider});
@@ -94,7 +101,7 @@ export default function Login(props: LoginProps) {
         localStorage.setItem('hehe-token_state', state);
 
         let responseType = encodeURIComponent('code');
-        let link = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${props.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}`;
+        let link = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${props.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}&force_verify=true`;
 
         window.location.href = link;
     };

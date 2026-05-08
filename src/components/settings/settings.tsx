@@ -34,6 +34,7 @@ import {
   IconKey,
   IconChevronLeft,
   IconChevronRight,
+  IconRobot,
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ModSettings } from './ModSettings';
@@ -48,6 +49,7 @@ import { GeneralUISettings } from './general/GeneralUISettings';
 import { GeneralVideoSettings } from './general/GeneralVideoSettings';
 import { GeneralAccountSettings } from './general/GeneralAccountSettings';
 import { GeneralChannelsSection } from './general/GeneralChannelsSection';
+import { GeneralBotSettings } from './general/GeneralBotSettings';
 
 // Chat
 import { ChatChannelsSettings, ChatTopSection } from './chat/ChatChannelsSettings';
@@ -91,7 +93,7 @@ export const SettingsDrawer: OverlayDrawer = {
 
 export type SettingsTab =
   | 'General' | 'General/UI' | 'General/Video' | 'General/Account'
-  | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events'
+  | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events' | 'Chat/Bot'
   | 'Mod'
   | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/Reroll'
   | 'Notifications' | 'Notifications/StreamStart' | 'Notifications/ChatMention'
@@ -136,6 +138,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Chat/Channels', label: 'TTS', icon: IconUsers },
       { id: 'Chat/Appearance', label: 'Appearance', icon: IconPalette },
       { id: 'Chat/Events', label: 'Events', icon: IconCalendarEvent },
+      { id: 'Chat/Bot', label: 'Bot', icon: IconRobot },
     ],
   },
   { id: 'Mod', label: 'Mod', icon: IconSword },
@@ -208,6 +211,7 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Chat/Channels': 'Chat › TTS',
   'Chat/Appearance': 'Chat › Appearance',
   'Chat/Events': 'Chat › Events',
+  'Chat/Bot': 'Chat › Bot',
   'Mod': 'Mod',
   'Alerts': 'Alerts',
   'Alerts/Audio': 'Alerts › Audio',
@@ -334,6 +338,7 @@ export function Settings(props: SettingsProperties) {
       case 'Chat/Channels': return <ChatChannelsSettings />;
       case 'Chat/Appearance': return <ChatAppearanceSettings />;
       case 'Chat/Events': return <ChatEventsSettings />;
+      case 'Chat/Bot': return <Stack mt={30} mb={30} gap={30}><GeneralBotSettings /></Stack>;
       case 'Mod': return <ModSettings />;
       case 'Alerts/Audio': return <AlertsAudioSettings />;
       case 'Alerts/Sharing': return <AlertsSharingSettings />;
