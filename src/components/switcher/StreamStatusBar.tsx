@@ -9,6 +9,7 @@ interface StreamStatsMessage {
     bitrate_kbps: number | null;
     rtt_ms: number | null;
     scene: string | null;
+    isLive: boolean;
 }
 
 function bitrateColor(bitrate: number | null): string {
@@ -48,7 +49,7 @@ export function StreamStatusBar() {
         const statsSub = PubSub.subscribe('WS-streamStats', (_msg: string, data: StreamStatsMessage) => {
             setBitrate(data.bitrate_kbps);
             setScene(data.scene);
-            setIsLive(true);
+            setIsLive(data.isLive);
             setScenes(prev => {
                 if (prev.length === 0 && channel) {
                     getSwitcherScenes(channel).then(d => setScenes(d.scenes ?? [])).catch(() => {});
@@ -56,11 +57,13 @@ export function StreamStatusBar() {
                 return prev;
             });
         });
-        const listSub = PubSub.subscribe('WS-sceneList', (_msg: string, data: { scenes: string[] }) => {
+        const listSub = PubSub.subscribe('WS-sceneList', (_msg: string, data: { scenes: string[]; isLive: boolean }) => {
             setScenes(data.scenes ?? []);
+            setIsLive(data.isLive);
         });
-        const switchSub = PubSub.subscribe('WS-sceneSwitch', (_msg: string, data: { to: string }) => {
+        const switchSub = PubSub.subscribe('WS-sceneSwitch', (_msg: string, data: { to: string; isLive: boolean }) => {
             setScene(data.to);
+            setIsLive(data.isLive);
         });
         return () => {
             PubSub.unsubscribe(streamStatusSub);
