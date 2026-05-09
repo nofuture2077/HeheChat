@@ -1,8 +1,8 @@
-import { Button } from '@mantine/core';
+import { Menu, ActionIcon } from '@mantine/core';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
-import { IconLink } from '@tabler/icons-react';
-import { useEffect, useContext, useState } from 'react';
+import { IconLink, IconChevronDown } from '@tabler/icons-react';
+import React, { useEffect, useContext, useState } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 import { generateGUID } from '@/commons/helper';
 import { LOGIN_SCOPES, AUTH_VERSION } from '@/commons/login';
@@ -96,27 +96,73 @@ export default function Login(props: LoginProps) {
 
     let scope = LOGIN_SCOPES.map(encodeURIComponent).join('+');
     
-    const onClick = () => {
+    const buildAuthUrl = (forceVerify: boolean) => {
         const state = generateGUID();
         localStorage.setItem('hehe-token_state', state);
-
-        let responseType = encodeURIComponent('code');
-        let link = `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${props.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}&force_verify=true`;
-
-        window.location.href = link;
+        const responseType = encodeURIComponent('code');
+        const forceVerifyParam = forceVerify ? '&force_verify=true' : '';
+        return `https://id.twitch.tv/oauth2/authorize?response_type=${responseType}&client_id=${props.clientId}&redirect_uri=${authUrl}&scope=${scope}&state=${state}${forceVerifyParam}`;
     };
 
-    return (<Button
-            component="a"
-            disabled={(!!(token || tokenStored) && !waitover)}
-            size='lg'
-            radius="xl"
-            variant='gradient'
-            gradient={{ from: props.color1, to: props.color2, deg: 45 }}
-            onClick={onClick}
-            rightSection={<IconLink size={24} />}>    
-            Login with Twitch
-        </Button> );
+    const onClick = () => { window.location.href = buildAuthUrl(false); };
+    const onClickForceVerify = () => { window.location.href = buildAuthUrl(true); };
+
+    const disabled = (!!(token || tokenStored) && !waitover);
+    const radius = 'var(--mantine-radius-xl)';
+    const wrapperStyle: React.CSSProperties = {
+        display: 'inline-flex',
+        borderRadius: radius,
+        overflow: 'hidden',
+        background: disabled ? undefined : `linear-gradient(45deg, ${props.color1}, ${props.color2})`,
+        opacity: disabled ? 0.6 : 1,
+        cursor: disabled ? 'not-allowed' : undefined,
+    };
+    const btnStyle: React.CSSProperties = {
+        background: 'transparent',
+        border: 'none',
+        color: 'white',
+        height: 50,
+        padding: '0 20px',
+        fontSize: 'var(--mantine-font-size-lg)',
+        fontWeight: 600,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+    };
+    const dividerStyle: React.CSSProperties = {
+        width: 1,
+        background: 'rgba(255,255,255,0.35)',
+        alignSelf: 'stretch',
+        margin: '8px 0',
+    };
+    return (
+        <div style={wrapperStyle}>
+            <button disabled={disabled} style={btnStyle} onClick={onClick}>
+                <IconLink size={20} /> Login with Twitch 
+            </button>
+            <div style={dividerStyle} />
+            <Menu position="bottom-end" withinPortal>
+                <Menu.Target>
+                    <ActionIcon
+                        disabled={disabled}
+                        size={50}
+                        variant="transparent"
+                        color="white"
+                        aria-label="More login options"
+                        style={{ borderRadius: 0 }}
+                        onClick={(e) => e.stopPropagation()}>
+                        <IconChevronDown size={16} />
+                    </ActionIcon>
+                </Menu.Target>
+                <Menu.Dropdown>
+                    <Menu.Item onClick={onClickForceVerify}>
+                        Use another account
+                    </Menu.Item>
+                </Menu.Dropdown>
+            </Menu>
+        </div>
+    );
 }
 
 PubSub.subscribe('WS-auth-update', (msg, data) => {
