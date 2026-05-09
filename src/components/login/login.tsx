@@ -1,4 +1,4 @@
-import { Menu, ActionIcon } from '@mantine/core';
+import { Menu } from '@mantine/core';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
 import { IconLink, IconChevronDown } from '@tabler/icons-react';
@@ -113,7 +113,7 @@ export default function Login(props: LoginProps) {
         display: 'inline-flex',
         borderRadius: radius,
         overflow: 'hidden',
-        background: disabled ? undefined : `linear-gradient(45deg, ${props.color1}, ${props.color2})`,
+        background: `linear-gradient(45deg, ${props.color1}, ${props.color2})`,
         opacity: disabled ? 0.6 : 1,
         cursor: disabled ? 'not-allowed' : undefined,
     };
@@ -144,16 +144,12 @@ export default function Login(props: LoginProps) {
             <div style={dividerStyle} />
             <Menu position="bottom-end" withinPortal>
                 <Menu.Target>
-                    <ActionIcon
+                    <button
                         disabled={disabled}
-                        size={50}
-                        variant="transparent"
-                        color="white"
                         aria-label="More login options"
-                        style={{ borderRadius: 0 }}
-                        onClick={(e) => e.stopPropagation()}>
+                        style={{ ...btnStyle, padding: '0 14px' }}>
                         <IconChevronDown size={16} />
-                    </ActionIcon>
+                    </button>
                 </Menu.Target>
                 <Menu.Dropdown>
                     <Menu.Item onClick={onClickForceVerify}>
