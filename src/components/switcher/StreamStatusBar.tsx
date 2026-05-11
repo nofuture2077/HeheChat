@@ -3,7 +3,7 @@ import { Group, Badge, Menu, Box } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import PubSub from 'pubsub-js';
 import { ConfigContext } from '@/ApplicationContext';
-import { getSwitcherScenes, getSwitcherStatus, postSwitcherScene, getStreamStatus } from '@/api/switcher';
+import { getSwitcherScenes, getSwitcherStatus, postSwitcherScene, getStreamStatus, getSwitcherConfig } from '@/api/switcher';
 
 interface StreamStatsMessage {
     bitrate_kbps: number | null;
@@ -12,10 +12,10 @@ interface StreamStatsMessage {
     isLive: boolean;
 }
 
-function bitrateColor(bitrate: number | null): string {
+function bitrateColor(bitrate: number | null, yellow = 1000, red = 400): string {
     if (bitrate === null) return 'gray';
-    if (bitrate >= 2500) return 'green';
-    if (bitrate >= 1000) return 'yellow';
+    if (bitrate >= yellow) return 'green';
+    if (bitrate >= red) return 'yellow';
     return 'red';
 }
 
@@ -30,10 +30,16 @@ export function StreamStatusBar() {
     const [scene, setScene] = useState<string | null>(null);
     const [scenes, setScenes] = useState<string[]>([]);
     const [isLive, setIsLive] = useState<boolean>(false);
+    const [yellowThreshold, setYellowThreshold] = useState(1000);
+    const [redThreshold, setRedThreshold] = useState(400);
 
     useEffect(() => {
         const channel = config.getChatChannel();
         if (channel) {
+            getSwitcherConfig(channel).then(cfg => {
+                setYellowThreshold(cfg.yellow_threshold_kbps ?? 1000);
+                setRedThreshold(cfg.red_threshold_kbps ?? 400);
+            }).catch(() => {});
             Promise.all([getSwitcherStatus(channel), getSwitcherScenes(channel), getStreamStatus(channel)]).then(([status, sceneData, streamStatus]) => {
                 setScene(status.scene ?? null);
                 setBitrate(status.bitrate_kbps ?? null);
@@ -102,7 +108,7 @@ export function StreamStatusBar() {
                         backgroundColor: isLive ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-red-6)',
                     }}
                 />
-                <Badge color={bitrateColor(bitrate)} size="sm" radius="sm">
+                <Badge color={bitrateColor(bitrate, yellowThreshold, redThreshold)} size="md" radius="sm">
                     {formatMbit(bitrate)}
                 </Badge>
                 {config.showSceneName && scene && (
@@ -113,7 +119,7 @@ export function StreamStatusBar() {
                         }
                     }}>
                         <Menu.Target>
-                            <Badge color="gray" size="sm" radius="sm" style={{ cursor: 'pointer' }}>
+                            <Badge color="gray" size="md" radius="sm" style={{ cursor: 'pointer' }}>
                                 {scene}
                             </Badge>
                         </Menu.Target>

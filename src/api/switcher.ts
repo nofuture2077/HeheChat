@@ -28,6 +28,8 @@ export interface SwitcherConfig {
     stop_stream_after_raid_delay_ms?: number;
     stream_start_message?: string | null;
     stream_stop_message?: string | null;
+    yellow_threshold_kbps?: number;
+    red_threshold_kbps?: number;
 }
 
 export interface SwitcherRule {

@@ -41,6 +41,8 @@ const DEFAULT_CONFIG: SwitcherConfig = {
     stop_stream_after_raid_delay_ms: 95000,
     stream_start_message: null,
     stream_stop_message: null,
+    yellow_threshold_kbps: 1000,
+    red_threshold_kbps: 400,
 };
 
 export function ProviderConfigTab() {
@@ -157,6 +159,24 @@ export function ProviderConfigTab() {
                         }}
                     />
                     <Text fs="italic" size="14px">Show the current OBS scene name below the header</Text>
+                    <NumberInput
+                        label="Yellow threshold (Mbit/s)"
+                        description="Bitrate below which the indicator turns yellow"
+                        value={(form.yellow_threshold_kbps ?? 1000) / 1000}
+                        min={0}
+                        step={0.1}
+                        decimalScale={1}
+                        onChange={v => setField('yellow_threshold_kbps', Math.round((Number(v) || 1) * 1000))}
+                    />
+                    <NumberInput
+                        label="Red threshold (Mbit/s)"
+                        description="Bitrate below which the indicator turns red"
+                        value={(form.red_threshold_kbps ?? 400) / 1000}
+                        min={0}
+                        step={0.1}
+                        decimalScale={1}
+                        onChange={v => setField('red_threshold_kbps', Math.round((Number(v) || 0.4) * 1000))}
+                    />
                 </Stack>
             </Fieldset>
 
