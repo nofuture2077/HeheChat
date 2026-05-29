@@ -321,6 +321,62 @@ export async function getGlobalEmotes() {
     }
 }
 
+export async function getGlobal7TVEmotes(): Promise<Map<string, sevenTVEmote>> {
+    const cached = await EmoteStore.getEmotes(EmotePrefix.SEVENTV, 'global');
+    if (cached?.emotes && Array.isArray(cached.emotes) && cached.emotes.length > 0) {
+        const map = new Map<string, sevenTVEmote>();
+        cached.emotes.forEach(e => map.set(e.name, e));
+        return map;
+    }
+
+    try {
+        const response = await fetch('https://7tv.io/v3/emote-sets/global');
+        if (!response.ok) {
+            throw new Error(`Failed to fetch global 7TV emotes: ${response.statusText}`);
+        }
+        const data = await response.json();
+        const emotes: any[] = Array.isArray(data?.emotes) ? data.emotes : [];
+        const map = new Map<string, sevenTVEmote>();
+        emotes.forEach((e: any) => {
+            if (e?.name && e?.data) map.set(e.name, { name: e.name, data: e.data });
+        });
+        await EmoteStore.storeEmotes(EmotePrefix.SEVENTV, 'global', Array.from(map.values()));
+        return map;
+    } catch (error) {
+        console.error('Error fetching global 7TV emotes:', error);
+        return new Map();
+    }
+}
+
+function render7TVEmote(
+    emoteMap: Map<string, any> | undefined,
+    text: string,
+    key: string,
+    Component: typeof EmoteComponent | typeof EmoteComponentSimple,
+    large?: boolean
+) {
+    if (!emoteMap) return null;
+    const emote = emoteMap.get(text);
+    if (!emote || !emote.data) return null;
+
+    const emoteData = emote.data;
+    if (!emoteData.host || !emoteData.host.url || !emoteData.host.files ||
+        !Array.isArray(emoteData.host.files) || emoteData.host.files.length < 4) {
+        console.warn(`Invalid emote data structure for ${text}:`, emoteData);
+        return null;
+    }
+
+    return <Component
+        key={key}
+        imageUrl={`${emoteData.host.url}/${emoteData.host.files[1].name}`}
+        largeImageUrl={`${emoteData.host.url}/${emoteData.host.files[3].name}`}
+        name={text}
+        marginL={emoteData.flags ? '-1.5em' : undefined}
+        large={large}
+        type='7 TV'
+    />;
+}
+
 export interface ChatEmotes {
     emotes: Map<string, any>,
     updateChannel: (channel: string) => Promise<void>;
@@ -408,11 +464,13 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 try {
                     const globalBadgesData = await getGlobalBadges();
                     const globalEmoteData = await getGlobalEmotes();
+                    const globalSevenTV = await getGlobal7TVEmotes();
                     if (globalEmoteData) {
                         DEFAULT_CHAT_EMOTES.emotes.set('global', {
                             user: { name: 'global' },
                             channelEmotes: toMap(globalEmoteData, (ba: any) => ba.name),
                             channelBadges: toMap(globalBadgesData, (ba: any) => ba.set_id),
+                            sevenTVEmotes: globalSevenTV,
                         });
                     }
                 } catch (error) {
@@ -421,7 +479,8 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                     if (!DEFAULT_CHAT_EMOTES.emotes.has('global')) {
                         DEFAULT_CHAT_EMOTES.emotes.set('global', {
                             channelBadges: new Map(),
-                            channelEmotes: new Map()
+                            channelEmotes: new Map(),
+                            sevenTVEmotes: new Map()
                         });
                     }
                 }
@@ -609,31 +668,11 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             return <EmoteComponentSimple key={key} imageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '1.0'})} largeImageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '2.0'})} name={text} large={large} type='Twitch'/>;
         }
 
-        if (channelEmotes?.sevenTVEmotes) {
-            const emote = channelEmotes.sevenTVEmotes.get(text);
-            if (!emote || !emote.data) {
-                return text;
-            }
+        const channel7TV = render7TVEmote(channelEmotes?.sevenTVEmotes, text, key, EmoteComponentSimple, large);
+        if (channel7TV) return channel7TV;
 
-            const emoteData = emote.data;
-
-            // Validate emote data structure
-            if (!emoteData.host || !emoteData.host.url || !emoteData.host.files || 
-                !Array.isArray(emoteData.host.files) || emoteData.host.files.length < 4) {
-                console.warn(`Invalid emote data structure for ${text}:`, emoteData);
-                return text;
-            }
-            
-            // Create the emote component
-            return <EmoteComponentSimple 
-                key={key} 
-                imageUrl={`${emoteData.host.url}/${emoteData.host.files[1].name}`} 
-                largeImageUrl={`${emoteData.host.url}/${emoteData.host.files[3].name}`} 
-                name={text} 
-                marginL={emoteData.flags ? '-1.5em' : undefined} 
-                type='7 TV'
-            />;
-        }
+        const global7TV = render7TVEmote(globalEmotes?.sevenTVEmotes, text, key, EmoteComponentSimple, large);
+        if (global7TV) return global7TV;
 
         return text;
     },
@@ -663,35 +702,13 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 return <EmoteComponent key={key} imageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '1.0'})} largeImageUrl={buildEmoteImageUrl(emote?.id! || '', {size: large ? '3.0' : '2.0'})} name={text} large={large} type='Twitch'/>;
             }
             
-            // Check if sevenTVEmotes exists
-            if (!channelEmotes?.sevenTVEmotes) {
-                return text;
-            }
-            
-            // Try to get the emote data
-            const emote = channelEmotes.sevenTVEmotes.get(text);
-            if (!emote || !emote.data) {
-                return text;
-            }
-            
-            const emoteData = emote.data;
-            
-            // Validate emote data structure
-            if (!emoteData.host || !emoteData.host.url || !emoteData.host.files || 
-                !Array.isArray(emoteData.host.files) || emoteData.host.files.length < 4) {
-                console.warn(`Invalid emote data structure for ${text}:`, emoteData);
-                return text;
-            }
-            
-            // Create the emote component
-            return <EmoteComponent 
-                key={key} 
-                imageUrl={`${emoteData.host.url}/${emoteData.host.files[1].name}`} 
-                largeImageUrl={`${emoteData.host.url}/${emoteData.host.files[3].name}`} 
-                name={text} 
-                marginL={emoteData.flags ? '-1.5em' : undefined} 
-                type='7 TV'
-            />;
+            const channel7TV = render7TVEmote(channelEmotes?.sevenTVEmotes, text, key, EmoteComponent, large);
+            if (channel7TV) return channel7TV;
+
+            const global7TV = render7TVEmote(globalEmotes?.sevenTVEmotes, text, key, EmoteComponent, large);
+            if (global7TV) return global7TV;
+
+            return text;
         } catch (error) {
             console.error(`Error getting emote for ${text}:`, error);
             return text;
@@ -898,6 +915,30 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 }
             } catch (channelEmotesError) {
                 console.error('Error getting channel emotes:', channelEmotesError);
+            }
+
+            // Try to add global 7TV emotes
+            try {
+                const globalEmotes = DEFAULT_CHAT_EMOTES.emotes.get('global');
+                if (globalEmotes?.sevenTVEmotes) {
+                    try {
+                        const entries = Array.from(globalEmotes.sevenTVEmotes.entries()) as [string, sevenTVEmote][];
+                        const globalSevenTVEmotes = entries
+                            .filter(entry => entry[0].toLowerCase().includes(lowerFilter))
+                            .map(entry => ({
+                                name: entry[0],
+                                data: entry[1].data,
+                                type: '7TV'
+                            }));
+                        if (globalSevenTVEmotes.length > 0) {
+                            emoteList.set('Global 7TV Emotes', globalSevenTVEmotes);
+                        }
+                    } catch (globalSevenTVError) {
+                        console.error('Error processing global 7TV emotes:', globalSevenTVError);
+                    }
+                }
+            } catch (globalSevenTVOuterError) {
+                console.error('Error getting global 7TV emotes:', globalSevenTVOuterError);
             }
             
             // Try to add channel-specific Twitch emotes
