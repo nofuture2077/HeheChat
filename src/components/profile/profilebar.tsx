@@ -1,28 +1,19 @@
 import { useContext, useState } from "react";
 import { ChatEmotesContext, ProfileContext } from '@/ApplicationContext'
-import { AvatarGroup, Avatar, Text, Paper, ActionIcon, Stack, Modal, Fieldset, TextInput, Group, Button, Title, ScrollArea } from '@mantine/core';
+import { AvatarGroup, Avatar, Text, Paper, ActionIcon, Stack, Modal, Fieldset, TextInput, Group, Button } from '@mantine/core';
 import { useDisclosure } from "@mantine/hooks";
 import { Profile } from "@/commons/profile";
-import { IconPlus, IconX } from '@tabler/icons-react'
+import { IconPlus } from '@tabler/icons-react'
 import { DragDropContext, Droppable, Draggable, DroppableProvided, DraggableProvided, DropResult } from '@hello-pangea/dnd';
 import classes from './profilebar.module.css'
 import { ChatEmotes } from "@/commons/emotes";
-import { SettingsTab } from "@/components/settings/settings";
-import { OverlayDrawer } from "@/pages/Chat.page";
 
-export const ProfileBarDrawer: OverlayDrawer = {
-    name: 'profileBar',
-    component: ProfileBar,
-    size: 280,
-    position: 'left',
+export interface ProfileSelectorProps {
+    onProfileSwitched?: () => void;
+    onCreateProfileRequested?: () => void;
 }
 
-export interface ProfileBarProps {
-    close: () => void;
-    openSettings: (tab?: SettingsTab) => void;
-}
-
-export function ProfileBar(props: ProfileBarProps) {
+export function ProfileSelector(props: ProfileSelectorProps) {
     const activeProfile = useContext(ProfileContext);
     const emotes = useContext(ChatEmotesContext);
     const [createProfileOpen, createProfileHandler] = useDisclosure(false);
@@ -39,42 +30,33 @@ export function ProfileBar(props: ProfileBarProps) {
         items.splice(result.destination.index, 0, reorderedItem);
 
         try {
-            // Update the profiles on the server first
             await activeProfile.setProfiles(items);
-            // Then update local state
             setProfiles(items);
         } catch (error) {
             console.error('Error updating profiles order:', error);
-            // Refresh the profiles list from the context to ensure consistency
             setProfiles(activeProfile.listProfiles());
         }
     }
 
-    return <Stack h='100vh' gap={0} className={classes.profileBar}>
-        <Group justify="space-between" p="md">
-            <Title order={4}>
-                Profiles
-            </Title>
-            <Button onClick={props.close} variant='subtle' color='primary'>
-                <IconX />
-            </Button>
-        </Group>
-        <ScrollArea>
-            <Stack h="100%" justify='flex-start' flex="1">
-                <DragDropContext onDragEnd={handleOnDragEnd}>
-                    <Droppable droppableId="profiles">
-                        {(provided) => (
-                            ProfileListComp(provided, profiles, activeProfile, emotes, props.close)
-                        )}
-                    </Droppable>
-                </DragDropContext>
-                <ActionIcon size={32} radius="xl" variant="filled" color='primary' m='0 auto 20px' onClick={createProfileHandler.open}>
-                    <IconPlus />
-                </ActionIcon>
-                {createProfileOpen ? <CreateProfileView activeProfile={activeProfile} close={() => { props.close(); props.openSettings("Chat") }} /> : null}
-            </Stack>
-        </ScrollArea>
-    </Stack>
+    const handleProfileSwitched = () => {
+        props.onProfileSwitched?.();
+    };
+
+    return (
+        <Stack gap="xs">
+            <DragDropContext onDragEnd={handleOnDragEnd}>
+                <Droppable droppableId="profiles">
+                    {(provided) => (
+                        ProfileListComp(provided, profiles, activeProfile, emotes, handleProfileSwitched)
+                    )}
+                </Droppable>
+            </DragDropContext>
+            <ActionIcon size={32} radius="xl" variant="filled" color='primary' m='0 auto 20px' onClick={createProfileHandler.open}>
+                <IconPlus />
+            </ActionIcon>
+            {createProfileOpen ? <CreateProfileView activeProfile={activeProfile} close={() => { createProfileHandler.close(); props.onCreateProfileRequested?.(); }} /> : null}
+        </Stack>
+    );
 }
 
 function ProfileListComp(provided: DroppableProvided, profiles: Profile[], activeProfile: Profile, emotes: ChatEmotes, close: () => void) {

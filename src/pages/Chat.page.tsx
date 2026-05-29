@@ -27,7 +27,6 @@ import { TwitchDrawer } from '../components/twitch/twitchview';
 import { TwitchPlayer } from '../components/twitch/twitchplayer';
 import { TwitchClipsPlayer } from '../components/twitch/twitchclipsplayer';
 import { ModActions, deleteMessage, timeoutUser, banUser, unbanUser, raidUser, shoutoutUser, modUser, unmodUser, vipUser, unvipUser, unraid } from '../components/chat/mod/modactions';
-import { ProfileBarDrawer } from '../components/profile/profilebar';
 import { Storage } from '../components/chat/chatstorage';
 import { EventStorage, EventData } from '../components/events/eventstorage';
 import { AlertSystem } from '../components/alerts/alertplayer';
@@ -655,15 +654,14 @@ export function ChatPage() {
         return (
             <div className={classes.desktopVideoLayout}>
                 <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={closeDrawerAndUpdateURL} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
-                    {drawer ? <drawer.component 
-                        style={{overflow: 'visible'}} 
-                        height="100dvh" 
-                        modActions={modActions} 
-                        close={closeDrawerAndUpdateURL} 
-                        openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} 
+                    {drawer ? <drawer.component
+                        style={{overflow: 'visible'}}
+                        height="100dvh"
+                        modActions={modActions}
+                        close={closeDrawerAndUpdateURL}
                         openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }}
                         openDrawer={(drawer: OverlayDrawer) => { setDrawer(drawer); drawerHandler.open() }}
-                        {...drawer.props} 
+                        {...drawer.props}
                         openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }}
                     ></drawer.component> : null}
                 </Drawer>
@@ -693,12 +691,13 @@ export function ChatPage() {
                     <div className={classes.resizeHandle} onMouseDown={handleMouseDown} />
                     {/* Chat Header */}
                     <div className={classes.chatHeader}>
-                        <Button fw={300} p={0} style={{overflow: 'visible'}} variant='transparent' color='primary' size='sm' onClick={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} leftSection={<HeaderLogo height={20}/>}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflow: 'visible' }}>
+                            <HeaderLogo height={20}/>
                             <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <Text fw={700} size="sm">HEHE</Text>
-                                <Text fw={300} size="sm">Chat{premium.isPremium ? ' Pro' : ''}</Text>
+                                <Text fw={700} size="sm" c='primary'>HEHE</Text>
+                                <Text fw={300} size="sm" c='primary'>Chat{premium.isPremium ? ' Pro' : ''}</Text>
                             </div>
-                        </Button>
+                        </div>
                         
                         <div style={{ display: 'flex', gap: '4px' }}>
                             <ActionIcon variant='transparent' color='primary' size='sm' onClick={() => { setDrawer({...SettingsDrawer}); drawerHandler.open() }}>
@@ -774,7 +773,6 @@ export function ChatPage() {
                     openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab} }); drawerHandler.open() }}
                     openEvents={() => { setDrawer(EventDrawer); drawerHandler.open() }}
                     openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }}
-                    openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }}
                     toggleShortcuts={() => setShortcutsVisible(!shortcutsVisible)}
                     showShortcutsToggle={!!(config.shortcuts && config.shortcuts.length)}
                     currentClipId={currentClipId}
@@ -801,15 +799,14 @@ export function ChatPage() {
                 </Affix>
 
                 <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={closeDrawerAndUpdateURL} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
-                    {drawer ? <drawer.component 
-                        style={{overflow: 'visible'}} 
-                        height="100dvh" 
-                        modActions={modActions} 
-                        close={closeDrawerAndUpdateURL} 
-                        openProfileBar={() => { setDrawer(ProfileBarDrawer); drawerHandler.open() }} 
+                    {drawer ? <drawer.component
+                        style={{overflow: 'visible'}}
+                        height="100dvh"
+                        modActions={modActions}
+                        close={closeDrawerAndUpdateURL}
                         openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab}}); drawerHandler.open() }}
                         openDrawer={(drawer: OverlayDrawer) => { setDrawer(drawer); drawerHandler.open() }}
-                        {...drawer.props} 
+                        {...drawer.props}
                         openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }}
                     ></drawer.component> : null}
                 </Drawer>

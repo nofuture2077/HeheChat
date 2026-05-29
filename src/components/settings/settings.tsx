@@ -50,6 +50,8 @@ import { GeneralVideoSettings } from './general/GeneralVideoSettings';
 import { GeneralAccountSettings } from './general/GeneralAccountSettings';
 import { GeneralChannelsSection } from './general/GeneralChannelsSection';
 import { GeneralBotSettings } from './general/GeneralBotSettings';
+import { GeneralProfileSettings } from './general/GeneralProfileSettings';
+import { ProfileSelector } from '../profile/profilebar';
 
 // Chat
 import { ChatChannelsSettings, ChatTopSection } from './chat/ChatChannelsSettings';
@@ -92,7 +94,7 @@ export const SettingsDrawer: OverlayDrawer = {
 }
 
 export type SettingsTab =
-  | 'General' | 'General/UI' | 'General/Video' | 'General/Account'
+  | 'General' | 'General/UI' | 'General/Video' | 'General/Account' | 'General/Profiles'
   | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events' | 'Chat/Bot'
   | 'Mod'
   | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/Reroll'
@@ -106,7 +108,6 @@ export type SettingsTab =
 
 export interface SettingsProperties {
   close: () => void;
-  openProfileBar: () => void;
   openUserProfile: () => void;
   tab?: SettingsTab;
 }
@@ -130,6 +131,7 @@ const NAV_GROUPS: NavGroup[] = [
     children: [
       { id: 'General/Video', label: 'Video Player', icon: IconDeviceTv },
       { id: 'General/Account', label: 'Account', icon: IconUser },
+      { id: 'General/Profiles', label: 'Profiles', icon: IconUsers },
     ],
   },
   {
@@ -207,6 +209,7 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'General/UI': 'General › UI',
   'General/Video': 'General › Video Player',
   'General/Account': 'General › Account',
+  'General/Profiles': 'General › Profiles',
   'Chat': 'Chat',
   'Chat/Channels': 'Chat › TTS',
   'Chat/Appearance': 'Chat › Appearance',
@@ -334,7 +337,13 @@ export function Settings(props: SettingsProperties) {
   const renderContentBody = () => {
     switch (active) {
       case 'General/Video': return <GeneralVideoSettings />;
-      case 'General/Account': return <GeneralAccountSettings close={props.close} openProfileBar={props.openProfileBar} openUserProfile={props.openUserProfile} />;
+      case 'General/Account': return <GeneralAccountSettings close={props.close} openUserProfile={props.openUserProfile} />;
+      case 'General/Profiles': return (
+        <Stack mt={30} mb={30} gap={30}>
+          <GeneralProfileSettings />
+          <ProfileSelector onCreateProfileRequested={() => nav('Chat')} />
+        </Stack>
+      );
       case 'Chat/Channels': return <ChatChannelsSettings />;
       case 'Chat/Appearance': return <ChatAppearanceSettings />;
       case 'Chat/Events': return <ChatEventsSettings />;

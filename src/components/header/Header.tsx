@@ -1,4 +1,4 @@
-import { Container, ActionIcon, Button, Text, Stack } from '@mantine/core';
+import { Container, ActionIcon, Group, Text, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
 import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard, IconBroadcast } from '@tabler/icons-react';
@@ -17,7 +17,6 @@ export function Header(props: {
     openSettings: (tab?: SettingsTab) => void,
     openEvents: () => void,
     openTwitch: () => void,
-    openProfileBar: () => void,
     toggleShortcuts: () => void,
     showShortcutsToggle: boolean,
     currentClipId: string | null,
@@ -49,14 +48,13 @@ export function Header(props: {
             </style>
             <Container className={classes.inner}>
                 
-                <Button fw={300} p={0} style={{overflow: 'visible'}} variant='transparent' color='primary' size='lg' onClick={props.openProfileBar} leftSection={<HeaderLogo height={28}/>}>
-                    
-                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <Text fw={700}>HEHE</Text>
-                            <Text fw={300}>Chat{premium.isPremium ? ' Pro' : ''}</Text>
-                        </div>
-                    
-                </Button>
+                <Group gap={8} align='center' style={{ overflow: 'visible' }}>
+                    <HeaderLogo height={28}/>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Text fw={700} c='primary'>HEHE</Text>
+                        <Text fw={300} c='primary'>Chat{premium.isPremium ? ' Pro' : ''}</Text>
+                    </div>
+                </Group>
                 
 <div className={classes.rightGroup}>
                     
