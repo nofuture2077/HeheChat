@@ -1,12 +1,17 @@
-import { TagsInput, Stack, Select, Fieldset, Space, Text, Image, Alert } from '@mantine/core';
+import { TagsInput, Stack, Select, Fieldset, Space, Text, Image, Alert, Slider } from '@mantine/core';
 import { useContext } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 
 export function ChatTopSection() {
     const config = useContext(ConfigContext);
+    const fontSizeMarks = [14, 18, 22, 26].map(x => ({ value: x, label: x + "px" }));
 
     return (
         <>
+            <Fieldset legend="Font Size" variant='filled'>
+                <Slider w="calc(100% - 20px)" m="10" value={config.fontSize} onChange={config.setFontSize} min={14} max={26} label={(value) => `${value} px`} marks={fontSizeMarks} />
+            </Fieldset>
+
             <Fieldset legend="Messages" variant='filled'>
                 <Select label="Max Messages" data={['20', '40', '60', '100', '200', '500']} value={config.maxMessages + ''} onChange={(value) => config.setMaxMessages(Number(value))} />
                 {config.maxMessages === 20 && (

@@ -1,13 +1,20 @@
-import { Button, Group, useMantineColorScheme } from '@mantine/core';
+import { Stack, useMantineColorScheme } from '@mantine/core';
+import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
 
 export function ColorSchemeToggle() {
-  const { setColorScheme } = useMantineColorScheme();
+  const { colorScheme, setColorScheme } = useMantineColorScheme();
 
   return (
-    <Group justify="space-around">
-      <Button variant="light" onClick={() => setColorScheme('light')}>Light</Button>
-      <Button variant="light" onClick={() => setColorScheme('dark')}>Dark</Button>
-      <Button variant="light" onClick={() => setColorScheme('auto')}>Auto</Button>
-    </Group>
+    <Stack>
+      <GradientSegmentedControl
+        data={[
+          { label: 'Light', value: 'light' },
+          { label: 'Dark', value: 'dark' },
+          { label: 'Auto', value: 'auto' },
+        ]}
+        value={colorScheme}
+        setValue={(value) => setColorScheme(value as 'light' | 'dark' | 'auto')}
+      />
+    </Stack>
   );
 }

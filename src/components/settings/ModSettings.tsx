@@ -2,7 +2,7 @@ import { Stack, Switch, TagsInput, Fieldset, Text, Space } from '@mantine/core';
 import { useContext } from 'react';
 import { useForceUpdate } from '@mantine/hooks';
 import { ConfigContext } from '@/ApplicationContext';
-import { ModActionType } from '@/components/chat/mod/modactions'
+import { ModActionType } from '@/components/chat/mod/modactions';
 
 const modActions: ModActionType[] = ['ban', 'timeout', 'delete', 'mod', 'unmod', 'vip', 'unvip', 'unban'];
 
@@ -24,6 +24,12 @@ export function ModSettings() {
         <Stack mt={30} mb={30} gap={30}>
             <Fieldset legend="Enable Mod Tool" variant="filled">
                 <Switch checked={config.modToolsEnabled} onChange={(event) => config.setModToolsEnabled(event.currentTarget.checked)} label="Mod Tools Enabled" size="lg" />
+            </Fieldset>
+
+            <Fieldset legend="Raid Targets" variant="filled">
+                <TagsInput placeholder="" value={config.raidTargets} onChange={(targets) => config.setRaidTargets(targets.map(c => c.toLowerCase().substring(0, 25).trim()))} />
+                <Space h="xs" />
+                <Text fs="italic" size='14px'>List of potential raid targets. You will see who is online in raid view</Text>
             </Fieldset>
 
             <Fieldset legend="Mod Messages" variant="filled">

@@ -1,8 +1,8 @@
-import { Container, ActionIcon, Group, Text, Stack } from '@mantine/core';
+import { Container, ActionIcon, Group, Text, Stack, Popover, UnstyledButton, Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
-import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard, IconBroadcast } from '@tabler/icons-react';
-import { useContext, useEffect } from 'react';
+import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard, IconRefresh } from '@tabler/icons-react';
+import { useContext, useEffect, useState } from 'react';
 import { ConfigContext, ProfileContext, PremiumContext, LoginContextContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
 import { HeaderLogo } from './HeaderLogo';
@@ -10,8 +10,25 @@ import { TwitchPlayer } from '@/components/twitch/twitchplayer'
 import { TwitchClipsPlayer } from '@/components/twitch/twitchclipsplayer';
 import { AlertStatusIndicator } from '../alerts/AlertStatusIndicator';
 import { BitrateIndicator } from '../switcher/BitrateIndicator';
-import { ConnectionStatusIndicator } from './ConnectionStatusIndicator';
-import { useConnectionStatus } from '@/commons/connectionStatus';
+import { useConnectionStatus, type ConnectionStateName } from '@/commons/connectionStatus';
+
+function connectionColor(state: ConnectionStateName): string {
+    switch (state) {
+        case 'connected': return 'green';
+        case 'connecting':
+        case 'reconnecting': return 'yellow';
+        case 'disconnected': return 'red';
+    }
+}
+
+function connectionLabel(state: ConnectionStateName): string {
+    switch (state) {
+        case 'connected': return 'Connected';
+        case 'connecting': return 'Connecting…';
+        case 'reconnecting': return 'Reconnecting…';
+        case 'disconnected': return 'Disconnected';
+    }
+}
 
 export function Header(props: {
     openSettings: (tab?: SettingsTab) => void,
@@ -28,7 +45,8 @@ export function Header(props: {
     const premium = useContext(PremiumContext);
     const loginContext = useContext(LoginContextContext);
     const connectionStatus = useConnectionStatus();
-    
+    const [popoverOpened, setPopoverOpened] = useState(false);
+
     useEffect(() => {
         const clipSub = PubSub.subscribe("CLIP-CLICK", (msg: any, data: { clipId: string }) => {
             props.setCurrentClipId(data.clipId);
@@ -39,54 +57,97 @@ export function Header(props: {
         };
     }, []);
 
+    const isConnected = connectionStatus.state === 'connected';
+    const isBusy = connectionStatus.state === 'connecting' || connectionStatus.state === 'reconnecting';
+
     return (
         <Stack gap={0}>
             <style>
                 {`.mantine-Button-label {
                     overflow: visible;
+                }
+                @keyframes hehePulse {
+                    0% { box-shadow: 0 0 0 0 currentColor; }
+                    70% { box-shadow: 0 0 0 6px transparent; }
+                    100% { box-shadow: 0 0 0 0 transparent; }
                 }`}
             </style>
             <Container className={classes.inner}>
-                
-                <Group gap={8} align='center' style={{ overflow: 'visible' }}>
-                    <HeaderLogo height={28}/>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Text fw={700} c='primary'>HEHE</Text>
-                        <Text fw={300} c='primary'>Chat{premium.isPremium ? ' Pro' : ''}</Text>
-                    </div>
-                </Group>
-                
+
+                <Popover
+                    opened={popoverOpened}
+                    onChange={setPopoverOpened}
+                    position="bottom-start"
+                    withArrow
+                    shadow="md"
+                    withinPortal
+                >
+                    <Popover.Target>
+                        <UnstyledButton onClick={() => setPopoverOpened(o => !o)}>
+                            <Group gap={8} align='center' style={{ overflow: 'visible', position: 'relative' }}>
+                                <HeaderLogo height={28} />
+                                <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                                    <Text fw={700} c='primary'>HEHE</Text>
+                                    <Text fw={300} c='primary'>Chat{premium.isPremium ? ' Pro' : ''}</Text>
+                                    <span
+                                        style={{
+                                            position: 'absolute',
+                                            top: -2,
+                                            right: -10,
+                                            width: 8,
+                                            height: 8,
+                                            borderRadius: '50%',
+                                            backgroundColor: `var(--mantine-color-${connectionColor(connectionStatus.state)}-6)`,
+                                            boxShadow: isBusy ? `0 0 0 0 var(--mantine-color-${connectionColor(connectionStatus.state)}-6)` : undefined,
+                                            animation: isBusy ? 'hehePulse 1.4s infinite' : undefined,
+                                        }}
+                                    />
+                                </div>
+                            </Group>
+                        </UnstyledButton>
+                    </Popover.Target>
+                    <Popover.Dropdown>
+                        <Button
+                            variant={isConnected ? 'light' : 'filled'}
+                            color={connectionColor(connectionStatus.state)}
+                            leftSection={<IconRefresh size={14} />}
+                            loading={isBusy}
+                            onClick={() => {
+                                connectionStatus.forceReconnect();
+                            }}
+                        >
+                            {connectionLabel(connectionStatus.state)}{isConnected ? '' : ' — Reconnect'}
+                        </Button>
+                    </Popover.Dropdown>
+                </Popover>
+
 <div className={classes.rightGroup}>
-                    
+
                     <ActionIcon variant='transparent' color='primary' size='44px' onClick={() => props.openSettings()}>
                         <IconSettings />
                     </ActionIcon>
-                    
-                    {props.showShortcutsToggle ? 
+
+                    {props.showShortcutsToggle ?
                         (<ActionIcon variant='transparent' color='primary' onClick={props.toggleShortcuts} size='44px'>
                             <IconKeyboard/>
                         </ActionIcon>)
                     : null}
+
+                    <ActionIcon variant='transparent' color='primary' size='44px' onClick={props.openTwitch}>
+                        <IconBrandTwitch/>
+                    </ActionIcon>
 
                     <ActionIcon variant='transparent' color='primary' size='44px' onClick={props.openEvents}>
                         <AlertStatusIndicator>
                             <IconBell />
                         </AlertStatusIndicator>
                     </ActionIcon>
-                    <ActionIcon variant='transparent' color='primary' size='44px' onClick={connectionStatus.forceReconnect}>
-                        <ConnectionStatusIndicator>
-                            <IconBroadcast />
-                        </ConnectionStatusIndicator>
-                    </ActionIcon>
-                    <ActionIcon variant='transparent' color='primary' size='44px' onClick={props.openTwitch}>
-                        <IconBrandTwitch/>
-                    </ActionIcon>
                 </div>
             </Container>
             {props.currentClipId ? <TwitchClipsPlayer clipId={props.currentClipId} onClose={() => props.setCurrentClipId(null)}/> : config.showVideo ? (<Container p={0}>
                 <TwitchPlayer hideViewer={
-                    loginContext.user && config.getChatChannel() === loginContext.user.name 
-                        ? config.hideOwnViewers 
+                    loginContext.user && config.getChatChannel() === loginContext.user.name
+                        ? config.hideOwnViewers
                         : config.hideViewers
                 }/>
             </Container>): null}

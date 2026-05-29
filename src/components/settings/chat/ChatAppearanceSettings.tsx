@@ -10,8 +10,6 @@ export function ChatAppearanceSettings() {
             <Fieldset legend="Chat cosmetics" variant='filled'>
                 <Stack>
                     <Switch checked={config.reloadOnReturnToApp} onChange={(event) => config.setReloadOnReturnToApp(event.currentTarget.checked)} label="Reload on Return" size="lg" />
-                    <Switch checked={config.showVideo} onChange={(event) => config.setShowVideo(event.currentTarget.checked)} label="Video Player" size="lg" />
-                    <Switch checked={config.desktopVideoMode} onChange={(event) => config.setDesktopVideoMode(event.currentTarget.checked)} label="Desktop Video Mode" size="lg" />
                     <Switch checked={config.chatEnabled} onChange={(event) => config.setChatEnabled(event.currentTarget.checked)} label="Chat Input" size="lg" />
                     <Switch checked={config.showTimestamp} onChange={(event) => config.setShowTimestamp(event.currentTarget.checked)} label="Timestamp" size="lg" />
                     <Switch checked={config.showProfilePicture} onChange={(event) => config.setShowProfilePicture(event.currentTarget.checked)} label="Profile Picture" size="lg" />
@@ -19,8 +17,6 @@ export function ChatAppearanceSettings() {
                     <Switch checked={config.showSubBadges} onChange={(event) => config.setShowSubBadges(event.currentTarget.checked)} label="Sub Badges" size="lg" />
                     <Switch checked={config.showPredictions} onChange={(event) => config.setShowPredictions(event.currentTarget.checked)} label="Prediction Badges" size="lg" />
                     <Switch checked={config.showOtherBadges} onChange={(event) => config.setShowOtherBadges(event.currentTarget.checked)} label="Other Badges" size="lg" />
-                    <Switch checked={config.hideViewers} onChange={(event) => config.setHideViewers(event.currentTarget.checked)} label="Hide Viewers" size="lg" />
-                    <Switch checked={config.hideOwnViewers} onChange={(event) => config.setHideOwnViewers(event.currentTarget.checked)} label="Hide Own Viewers" size="lg" />
                     <Switch checked={config.hideHypetrain} onChange={(event) => config.setHideHypetrain(event.currentTarget.checked)} label="Hide Hypetrain" size="lg" />
                     <Switch checked={config.hidePrediction} onChange={(event) => config.setHidePrediction(event.currentTarget.checked)} label="Hide Predictions" size="lg" />
                     <Switch checked={config.hidePoll} onChange={(event) => config.setHideePoll(event.currentTarget.checked)} label="Hide Polls" size="lg" />
