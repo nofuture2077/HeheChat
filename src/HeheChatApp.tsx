@@ -6,6 +6,7 @@ import { useDidUpdate, useNetwork, useDocumentVisibility } from '@mantine/hooks'
 import { useCallback, useEffect, useState, useRef } from 'react';
 import { ConnectionStatusProvider } from './commons/connectionStatus';
 import { useWakeLock } from './hooks/useWakeLock';
+import { useVersionCheck } from './hooks/useVersionCheck';
 import { initializeStoragePatches } from './commons/patches';
 import { Router } from './Router';
 import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext, PremiumContext } from './ApplicationContext';
@@ -152,6 +153,17 @@ export default function HeheChat() {
     
     // Initialize wake lock to keep display on while using the app
     const { isSupported: wakeLockSupported, isActive: wakeLockActive, requestWakeLock, releaseWakeLock, error: wakeLockError } = useWakeLock();
+
+    // Detect new versions while the PWA is running so a long-lived session
+    // (iPhone home-screen launch) doesn't drift on an old build.
+    useVersionCheck({
+        checkInterval: 30 * 60 * 1000,
+        remoteManifestUrl: `${import.meta.env.VITE_SINK_URL}/manifest.json`,
+        onNewVersionDetected: (_current, latest) => {
+            if (latest) localStorage.setItem('hehe-current-version', latest);
+            window.location.reload();
+        }
+    });
 
     useDidUpdate(() => {
         // Use debounced save to prevent excessive API calls

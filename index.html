@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" manifest="cache.manifest">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="manifest" href="manifest.json" />
@@ -15,6 +15,18 @@
     <title>HEHEChat</title>
     <title>Twitchs finest chat app</title>
     <script>
+      // Recovery shim: if a hashed bundle 404s (stale cached HTML referencing
+      // a JS hash that no longer exists), force a one-shot cache-busting reload.
+      window.addEventListener('error', (e) => {
+        const t = e && e.target;
+        if (!t || (t.tagName !== 'SCRIPT' && t.tagName !== 'LINK')) return;
+        const src = t.src || t.href || '';
+        if (!src.includes('/assets/')) return;
+        if (sessionStorage.getItem('hehe-reload-recovery')) return;
+        sessionStorage.setItem('hehe-reload-recovery', '1');
+        location.replace(location.pathname + '?cb=' + Date.now());
+      }, true);
+
       // Register service worker for PWA and push notifications
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
