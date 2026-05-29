@@ -65,6 +65,8 @@ export function ChatPage() {
     const [chatMessages, setChatMessages] = useThrottledState<HeheMessage[]>([], 500);
     const [usernames, setUsernames] = useState<Set<string>>(new Set());
     const [shouldScroll, setShouldScroll] = useState(true);
+    const shouldScrollRef = useRef(true);
+    useEffect(() => { shouldScrollRef.current = shouldScroll; }, [shouldScroll]);
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
     
@@ -580,6 +582,17 @@ export function ChatPage() {
             scrollToBottom();
         }
     }, [chatMessages, shouldScroll]);
+
+    useEffect(() => {
+        const viewportEl = viewport.current;
+        const contentEl = viewportEl?.firstElementChild as HTMLElement | null;
+        if (!viewportEl || !contentEl) return;
+        const obs = new ResizeObserver(() => {
+            if (shouldScrollRef.current) scrollToBottom();
+        });
+        obs.observe(contentEl);
+        return () => obs.disconnect();
+    }, []);
 
     const openModView = (channel: string, channelId: string, username: string) => {
         ModDrawer.props = { channel, channelId, username };
