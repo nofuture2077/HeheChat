@@ -3,7 +3,8 @@ import '@mantine/notifications/styles.css';
 import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { useDidUpdate, useNetwork, useDocumentVisibility } from '@mantine/hooks';
-import { useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
+import { ConnectionStatusProvider } from './commons/connectionStatus';
 import { useWakeLock } from './hooks/useWakeLock';
 import { initializeStoragePatches } from './commons/patches';
 import { Router } from './Router';
@@ -121,7 +122,11 @@ export default function HeheChat() {
         loading: true
     });
     const backendWorkerRef = useRef<Worker | undefined>(undefined);
-    
+
+    const forceReconnect = useCallback(() => {
+        backendWorkerRef.current?.postMessage({ type: 'RECONNECT' });
+    }, []);
+
     // Create a debounced save function to prevent excessive API calls
     const debouncedSaveProfile = useRef(
         debounce(async (profileToSave: Profile) => {
@@ -282,14 +287,31 @@ export default function HeheChat() {
             }
         });
     
+        // Track the latest connection state to decide whether to re-kick after wake.
+        let latestConnectionState: string = 'connecting';
+        const psConnStatus = PubSub.subscribe('WS-connectionStatus', (_msg, data: { state?: string }) => {
+            if (data?.state) latestConnectionState = data.state;
+        });
+
         // Set up a listener for network/visibility changes
+        let retryKickTimeout: ReturnType<typeof setTimeout> | undefined;
         const handleNetworkOrVisibilityChange = () => {
-            if (networkStatus.online && documentVisible && backendWorkerRef.current) {
+            const online = window.navigator.onLine !== false;
+            const visible = document.visibilityState !== 'hidden';
+            if (online && visible && backendWorkerRef.current) {
                 console.log("Network or visibility changed, forcing reconnection");
                 backendWorkerRef.current.postMessage({ type: 'RECONNECT' });
+                // If the first kick doesn't land us back to connected within 2s
+                // (e.g. half-open socket close was a no-op), kick again.
+                if (retryKickTimeout) clearTimeout(retryKickTimeout);
+                retryKickTimeout = setTimeout(() => {
+                    if (latestConnectionState !== 'connected' && backendWorkerRef.current) {
+                        backendWorkerRef.current.postMessage({ type: 'RECONNECT' });
+                    }
+                }, 2000);
             }
         };
-        
+
         // Initial setup
         window.addEventListener('online', handleNetworkOrVisibilityChange);
         document.addEventListener('visibilitychange', handleNetworkOrVisibilityChange);
@@ -297,9 +319,11 @@ export default function HeheChat() {
         return () => {
             const stopMessage = { type: 'STOP' };
             backendWorkerRef.current?.postMessage(stopMessage);
+            if (retryKickTimeout) clearTimeout(retryKickTimeout);
             PubSub.unsubscribe(psAlertConfig);
             PubSub.unsubscribe(psReplayEvent);
             PubSub.unsubscribe(psWSSend);
+            PubSub.unsubscribe(psConnStatus);
             
             // Remove event listeners
             window.removeEventListener('online', handleNetworkOrVisibilityChange);
@@ -919,7 +943,9 @@ export default function HeheChat() {
                     <LoginContextContext.Provider value={appLogin}>
                         <ChatEmotesContext.Provider value={chatEmotes}>
                             <PremiumContext.Provider value={appPremium}>
-                                <Router/>
+                                <ConnectionStatusProvider forceReconnect={forceReconnect}>
+                                    <Router/>
+                                </ConnectionStatusProvider>
                             </PremiumContext.Provider>
                         </ChatEmotesContext.Provider>
                     </LoginContextContext.Provider>

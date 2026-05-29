@@ -10,6 +10,7 @@ import { MobileAppPrompt } from '../components/chat/MobileAppPrompt';
 import { ShortcutView } from '../components/shortcuts/ShortcutView';
 import { AppShell } from '@mantine/core';
 import { Header } from '../components/header/Header';
+import { ConnectionStatusBanner } from '../components/header/ConnectionStatusBanner';
 import { HeaderLogo } from '../components/header/HeaderLogo';
 import { EventDrawer } from '../components/events/eventdrawer';
 import { ChatInput } from '../components/chat/ChatInput';
@@ -98,7 +99,6 @@ export function ChatPage() {
         return saved !== null ? JSON.parse(saved) : true;
     });
     const [currentClipId, setCurrentClipId] = useState<string | null>(null);
-    const [connectionWarning, setConnectionWarning] = useState<string | null>(null);
     const notificationIdsRef = useRef<string[]>([]);
     const [unplayedEvents, setUnplayedEvents] = useState<EventData[]>([]);
     const [showUnplayedBanner, setShowUnplayedBanner] = useState(false);
@@ -770,7 +770,7 @@ export function ChatPage() {
     return (
         <AppShell>
             <AppShell.Header>
-                <Header 
+                <Header
                     openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab} }); drawerHandler.open() }}
                     openEvents={() => { setDrawer(EventDrawer); drawerHandler.open() }}
                     openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }}
@@ -780,6 +780,7 @@ export function ChatPage() {
                     currentClipId={currentClipId}
                     setCurrentClipId={setCurrentClipId}
                 />
+                <ConnectionStatusBanner />
             </AppShell.Header>
 
             <AppShell.Main>

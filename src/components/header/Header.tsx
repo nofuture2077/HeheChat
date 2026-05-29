@@ -1,7 +1,7 @@
 import { Container, ActionIcon, Button, Text, Stack } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
-import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard } from '@tabler/icons-react';
+import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard, IconBroadcast } from '@tabler/icons-react';
 import { useContext, useEffect } from 'react';
 import { ConfigContext, ProfileContext, PremiumContext, LoginContextContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
@@ -10,6 +10,8 @@ import { TwitchPlayer } from '@/components/twitch/twitchplayer'
 import { TwitchClipsPlayer } from '@/components/twitch/twitchclipsplayer';
 import { AlertStatusIndicator } from '../alerts/AlertStatusIndicator';
 import { BitrateIndicator } from '../switcher/BitrateIndicator';
+import { ConnectionStatusIndicator } from './ConnectionStatusIndicator';
+import { useConnectionStatus } from '@/commons/connectionStatus';
 
 export function Header(props: {
     openSettings: (tab?: SettingsTab) => void,
@@ -26,6 +28,7 @@ export function Header(props: {
     const profile = useContext(ProfileContext);
     const premium = useContext(PremiumContext);
     const loginContext = useContext(LoginContextContext);
+    const connectionStatus = useConnectionStatus();
     
     useEffect(() => {
         const clipSub = PubSub.subscribe("CLIP-CLICK", (msg: any, data: { clipId: string }) => {
@@ -71,6 +74,11 @@ export function Header(props: {
                         <AlertStatusIndicator>
                             <IconBell />
                         </AlertStatusIndicator>
+                    </ActionIcon>
+                    <ActionIcon variant='transparent' color='primary' size='44px' onClick={connectionStatus.forceReconnect}>
+                        <ConnectionStatusIndicator>
+                            <IconBroadcast />
+                        </ConnectionStatusIndicator>
                     </ActionIcon>
                     <ActionIcon variant='transparent' color='primary' size='44px' onClick={props.openTwitch}>
                         <IconBrandTwitch/>
