@@ -76,7 +76,7 @@ export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: str
     });
 }
 
-const importantBadgeIndex = ['moderator', 'lead_moderator', 'vip', 'staff', 'partner', 'broadcaster', 'ambassador'].reduce((obj: any, key: string) => {obj[key] = 'showImportantBadges'; return obj}, {});
+const importantBadgeIndex = ['moderator', 'lead_moderator', 'vip', 'staff', 'partner', 'broadcaster', 'ambassador', 'mod-founder'].reduce((obj: any, key: string) => {obj[key] = 'showImportantBadges'; return obj}, {});
 const subscriberBadgeIndex = ['subscriber', 'founder'].reduce((obj: any, key: string) => {obj[key] = 'showSubBadges'; return obj}, {});
 const predictionBadgeIndex = ['predictions'].reduce((obj: any, key: string) => {obj[key] = 'showPredictions'; return obj}, {});
 
