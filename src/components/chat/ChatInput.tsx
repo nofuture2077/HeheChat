@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect, useMemo } from 'react';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
-import { postSwitcherScene, postStreamStart, postStreamStop } from '@/api/switcher';
+import { postSwitcherScene, postStreamStart, postStreamStop, getSwitcherScenes } from '@/api/switcher';
+import { notifications } from '@mantine/notifications';
 import PubSub from 'pubsub-js';
 import { ChannelPicker } from './ChannelPicker';
 import { Textarea, ActionIcon, rem, Flex, Stack, Combobox, useCombobox, Alert, Button, Group } from '@mantine/core';
@@ -42,12 +43,20 @@ export function ChatInput(props: ChatInputProps) {
         }
     }, []);
 
+    const chatChannelForScenes = config.getChatChannel();
     useEffect(() => {
         const sub = PubSub.subscribe('WS-sceneList', (_msg: string, data: { scenes: string[] }) => {
             setSceneList(data.scenes ?? []);
         });
+        if (chatChannelForScenes) {
+            getSwitcherScenes(chatChannelForScenes)
+                .then(d => setSceneList(d.scenes ?? []))
+                .catch(() => setSceneList([]));
+        } else {
+            setSceneList([]);
+        }
         return () => { PubSub.unsubscribe(sub); };
-    }, []);
+    }, [chatChannelForScenes]);
 
     // Save message history to localStorage whenever it changes
     useEffect(() => {
@@ -76,8 +85,9 @@ export function ChatInput(props: ChatInputProps) {
     interface Command {
         value: string;
         label: string;
+        requiresBridge?: boolean;
     }
-    
+
     const commands: Command[] = [
         { value: '/raid', label: '/raid [username] - Raid another channel' },
         { value: '/unraid', label: '/unraid - Cancel an ongoing raid' },
@@ -87,9 +97,9 @@ export function ChatInput(props: ChatInputProps) {
         { value: '/timeout', label: '/timeout [username] [seconds] - Timeout a user for specified duration' },
         { value: '/massban', label: '/massban - Open mass ban tool to ban multiple users' },
         { value: '/premium', label: '/premium - Show ad for HeheChat Pro' },
-        { value: '/scene', label: '/scene [name] - Switch OBS scene' },
-        { value: '/start', label: '/start - Start OBS stream (requires confirmation)' },
-        { value: '/stop', label: '/stop - Stop OBS stream (requires confirmation)' },
+        { value: '/scene', label: '/scene [name] - Switch OBS scene', requiresBridge: true },
+        { value: '/start', label: '/start - Start OBS stream (requires confirmation)', requiresBridge: true },
+        { value: '/stop', label: '/stop - Stop OBS stream (requires confirmation)', requiresBridge: true },
     ];
 
     const loginContext = useContext(LoginContextContext);
@@ -107,6 +117,15 @@ export function ChatInput(props: ChatInputProps) {
         const channelname = config.getChatChannel();
         const channelId = emotes.getChannelId(channelname || '');
         const isMod = isModerator(channelId);
+
+        if ((cmd === 'scene' || cmd === 'start' || cmd === 'stop') && sceneList.length === 0) {
+            notifications.show({
+                title: 'OBS Scene switcher not connected',
+                message: 'Connect the OBS bridge to use this command.',
+                color: 'red',
+            });
+            return true;
+        }
 
         if (cmd === 'scene') {
             const sceneName = args.join(' ');
@@ -219,12 +238,14 @@ export function ChatInput(props: ChatInputProps) {
     interface ComboboxItem {
         value: string;
         label: string;
+        disabled?: boolean;
     }
 
     const getFilteredItems = (): ComboboxItem[] => {
         const words = inputText.split(' ');
         const currentWord = words[words.length - 1];
-        
+        const bridgeConnected = sceneList.length > 0;
+
         // Handle command autocomplete
         if (currentWord.startsWith('/')) {
             const channelId = emotes.getChannelId(config.getChatChannel() || '');
@@ -246,7 +267,14 @@ export function ChatInput(props: ChatInputProps) {
 
             return availableCommands
                 .filter(cmd => cmd.value.toLowerCase().includes(currentWord.toLowerCase()))
-                .map(cmd => ({ value: cmd.value, label: cmd.label }));
+                .map(cmd => {
+                    const disabled = !!cmd.requiresBridge && !bridgeConnected;
+                    return {
+                        value: cmd.value,
+                        label: disabled ? `${cmd.label} — OBS Scene switcher not connected` : cmd.label,
+                        disabled,
+                    };
+                });
         }
         
         // Handle username autocomplete for @ mentions
@@ -435,7 +463,7 @@ export function ChatInput(props: ChatInputProps) {
                             onKeyDown={event => {
                                 if (event.key === "Enter") {
                                     // If combobox is open with exactly one option, select it
-                                    if (combobox.dropdownOpened && filtered.length === 1) {
+                                    if (combobox.dropdownOpened && filtered.length === 1 && !filtered[0].disabled) {
                                         const value = filtered[0].value;
                                         const words = inputText.split(' ');
                                         if (words.length > 1) {
@@ -515,7 +543,7 @@ export function ChatInput(props: ChatInputProps) {
                     (<Combobox.Dropdown className={inputClasses.comboboxDropdown}>
                         <Combobox.Options>
                             {filtered.map((item: ComboboxItem) => (
-                                <Combobox.Option value={item.value} key={item.value}>
+                                <Combobox.Option value={item.value} key={item.value} disabled={item.disabled}>
                                     {item.label}
                                 </Combobox.Option>
                             ))}

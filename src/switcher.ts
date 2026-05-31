@@ -25,6 +25,8 @@ function calcDelay(attempts: number) {
     return Math.min(INITIAL_DELAY * Math.pow(BACKOFF, attempts), MAX_DELAY);
 }
 
+const delay = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
 const obs = new OBSWebSocket();
 let heheWs: WebSocket | null = null;
 let obsConnected = false;
@@ -117,6 +119,59 @@ async function sendSceneList() {
     }
 }
 
+// ── Action verification ───────────────────────────────────────────────────────
+
+// Poll OBS until the stream reaches the desired state. StartStream/StopStream
+// are asynchronous in OBS, so the call returning does not mean the state changed.
+async function verifyStreamState(desiredActive: boolean, timeoutMs = 6000): Promise<{ ok: boolean; outputActive: boolean }> {
+    const deadline = Date.now() + timeoutMs;
+    let outputActive = !desiredActive;
+    while (Date.now() <= deadline) {
+        try {
+            ({ outputActive } = await obs.call('GetStreamStatus'));
+            if (outputActive === desiredActive) return { ok: true, outputActive };
+        } catch {
+            // OBS may be mid-transition — keep polling
+        }
+        await delay(400);
+    }
+    return { ok: false, outputActive };
+}
+
+async function handleStreamCommand(id: string | undefined, command: 'startStream' | 'stopStream') {
+    const desiredActive = command === 'startStream';
+    if (!obsConnected) {
+        sendToHehe({ type: 'commandAck', id, command, success: false, reason: 'obs-disconnected' });
+        return;
+    }
+    try {
+        await obs.call(desiredActive ? 'StartStream' : 'StopStream');
+    } catch {
+        // May throw if already in the desired state or mid-transition —
+        // verification below decides whether the action actually took effect.
+    }
+    const { ok, outputActive } = await verifyStreamState(desiredActive);
+    sendToHehe({ type: 'commandAck', id, command, success: ok, outputActive });
+}
+
+async function handleSetScene(id: string | undefined, scene: string | undefined) {
+    if (!obsConnected || !scene) {
+        sendToHehe({ type: 'commandAck', id, command: 'setScene', success: false, scene, reason: 'obs-disconnected' });
+        return;
+    }
+    let success = false;
+    let current = scene;
+    try {
+        await obs.call('SetCurrentProgramScene', { sceneName: scene });
+        const { currentProgramSceneName } = await obs.call('GetCurrentProgramScene');
+        current = currentProgramSceneName;
+        success = currentProgramSceneName === scene;
+    } catch {
+        success = false; // scene may not exist
+    }
+    sendToHehe({ type: 'commandAck', id, command: 'setScene', success, scene: current });
+}
+
 // ── HeheServer connection ─────────────────────────────────────────────────────
 
 function connectHehe() {
@@ -129,7 +184,7 @@ function connectHehe() {
     });
 
     heheWs.addEventListener('message', async (event) => {
-        let msg: { type: string; channel?: string; scene?: string; message?: string };
+        let msg: { type: string; id?: string; channel?: string; scene?: string; message?: string };
         try { msg = JSON.parse(event.data); } catch { return; }
 
         if (msg.type === 'obs-client-ready') {
@@ -138,24 +193,17 @@ function connectHehe() {
         }
 
         if (msg.type === 'setScene') {
-            if (!obsConnected || !msg.scene) return;
-            try {
-                await obs.call('SetCurrentProgramScene', { sceneName: msg.scene });
-            } catch {
-                // scene may not exist
-            }
+            await handleSetScene(msg.id, msg.scene);
             return;
         }
 
         if (msg.type === 'startStream') {
-            if (!obsConnected) return;
-            try { await obs.call('StartStream'); } catch { }
+            await handleStreamCommand(msg.id, 'startStream');
             return;
         }
 
         if (msg.type === 'stopStream') {
-            if (!obsConnected) return;
-            try { await obs.call('StopStream'); } catch { }
+            await handleStreamCommand(msg.id, 'stopStream');
             return;
         }
     });
