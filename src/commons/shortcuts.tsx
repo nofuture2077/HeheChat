@@ -80,7 +80,6 @@ class ShortCutHandler {
     }
 
     handle(shortCut: ShortCut, channelId: string, inputValue: string) {
-        console.log(shortCut, channelId, inputValue);
         switch (shortCut.type) {
             case 'chat':
                 // Send chat message
@@ -95,7 +94,9 @@ class ShortCutHandler {
                 // Create clip
                 PubSub.publish('WSSEND', {
                     type: 'createClip',
-                    channelId
+                    channelId,
+                    title: inputValue || undefined,
+                    duration: parseInt(shortCut.params[0] || '30', 10)
                 });
                 break;
 
