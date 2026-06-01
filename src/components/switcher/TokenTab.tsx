@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { Stack, TextInput, PasswordInput, ActionIcon, Fieldset, Text, Button } from '@mantine/core';
+import { Stack, TextInput, PasswordInput, Fieldset, Text, Button } from '@mantine/core';
 import { IconCopy, IconCheck } from '@tabler/icons-react';
 import { ConfigContext } from '@/ApplicationContext';
 import { getSwitcherClientToken } from '@/api/switcher';
@@ -41,23 +41,6 @@ export function TokenTab() {
 
     return (
         <Stack mt={16} gap={16} p="md">
-            <Fieldset legend="OBS Client Token" variant="filled">
-                <Stack gap="xs">
-                    <Text size="sm" c="dimmed">
-                        Enter this token in the HeheChat OBS plugin to connect your OBS instance.
-                    </Text>
-                    <TextInput
-                        value={obsToken}
-                        readOnly
-                        rightSection={
-                            <ActionIcon variant="subtle" onClick={handleCopy}>
-                                {copied ? <IconCheck size={16} /> : <IconCopy size={16} />}
-                            </ActionIcon>
-                        }
-                    />
-                </Stack>
-            </Fieldset>
-
             <Fieldset legend="OBS Browser Source" variant="filled">
                 <Stack gap="xs">
                     <Text size="sm" c="dimmed">
@@ -85,7 +68,7 @@ export function TokenTab() {
                         {urlCopied ? 'Copied!' : 'Copy Browser Source URL'}
                     </Button>
                     <Text size="xs" c="dimmed">
-                        The OBS WebSocket password will be included in the URL. This is safe for local OBS use.
+                        The OBS WebSocket password will be included in the URL. Enter it before copying the link. This is safe for local OBS use.
                     </Text>
                 </Stack>
             </Fieldset>
