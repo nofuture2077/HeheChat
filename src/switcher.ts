@@ -31,6 +31,14 @@ const obs = new OBSWebSocket();
 let heheWs: WebSocket | null = null;
 let obsConnected = false;
 let heheConnected = false;
+let streamActive = false;
+let streamStatusKnown = false;
+
+function updateStreamStatus(outputActive: boolean | undefined) {
+    if (typeof outputActive !== 'boolean') return;
+    streamActive = outputActive;
+    streamStatusKnown = true;
+}
 
 let obsReconnectTimer: ReturnType<typeof setTimeout> | undefined;
 let heheReconnectTimer: ReturnType<typeof setTimeout> | undefined;
@@ -87,6 +95,7 @@ async function connectObs() {
 
 obs.on('ConnectionClosed', () => {
     obsConnected = false;
+    streamStatusKnown = false;
     updateStatus();
     scheduleObsReconnect();
 });
@@ -100,6 +109,7 @@ obs.on('SceneListChanged', ({ scenes }) => {
 });
 
 obs.on('StreamStateChanged', ({ outputActive, outputState }) => {
+    updateStreamStatus(outputActive);
     sendToHehe({ type: 'streamStatus', outputActive, outputState });
 });
 
@@ -113,6 +123,7 @@ async function sendSceneList() {
     }
     try {
         const { outputActive, outputReconnecting } = await obs.call('GetStreamStatus');
+        updateStreamStatus(outputActive);
         sendToHehe({ type: 'streamStatus', outputActive, outputReconnecting });
     } catch {
         // OBS not ready yet
@@ -129,6 +140,7 @@ async function verifyStreamState(desiredActive: boolean, timeoutMs = 6000): Prom
     while (Date.now() <= deadline) {
         try {
             ({ outputActive } = await obs.call('GetStreamStatus'));
+            updateStreamStatus(outputActive);
             if (outputActive === desiredActive) return { ok: true, outputActive };
         } catch {
             // OBS may be mid-transition — keep polling
@@ -250,6 +262,75 @@ document.addEventListener('visibilitychange', () => {
 });
 
 window.addEventListener('online', forceReconnect);
+
+// ── Version check ─────────────────────────────────────────────────────────────
+// Reload to a new build, but only while OBS is confirmed not streaming, so a
+// long-running browser source eventually drifts to latest without disrupting a
+// live broadcast.
+
+const VERSION_CHECK_INTERVAL = 30 * 60 * 1000;
+const IDLE_POLL_INTERVAL = 5000;
+const STORAGE_KEY_LAST_CHECK = 'hehe-version-last-check';
+const STORAGE_KEY_CURRENT_VERSION = 'hehe-current-version';
+
+let pendingReload = false;
+
+async function getCurrentVersion(): Promise<string> {
+    const stored = localStorage.getItem(STORAGE_KEY_CURRENT_VERSION);
+    if (stored) return stored;
+    try {
+        const resp = await fetch('/manifest.json');
+        if (resp.ok) {
+            const m = await resp.json();
+            const v: string = m.version || '0.0.1';
+            localStorage.setItem(STORAGE_KEY_CURRENT_VERSION, v);
+            return v;
+        }
+    } catch {
+        // fall through
+    }
+    return '0.0.1';
+}
+
+async function checkRemoteVersion() {
+    const sinkUrl = import.meta.env.VITE_SINK_URL;
+    if (!sinkUrl) return;
+    try {
+        const current = await getCurrentVersion();
+        const resp = await fetch(`${sinkUrl}/manifest.json?t=${Date.now()}`, {
+            cache: 'no-cache',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+            },
+        });
+        if (!resp.ok) return;
+        const m = await resp.json();
+        const latest: string | undefined = m.version;
+        if (!latest) return;
+        localStorage.setItem(STORAGE_KEY_LAST_CHECK, Date.now().toString());
+        if (current.replace(/^v/, '') !== latest.replace(/^v/, '')) {
+            localStorage.setItem(STORAGE_KEY_CURRENT_VERSION, latest);
+            pendingReload = true;
+        }
+    } catch (err) {
+        console.warn('Version check failed:', err);
+    }
+}
+
+function shouldCheckNow(): boolean {
+    const last = localStorage.getItem(STORAGE_KEY_LAST_CHECK);
+    if (!last) return true;
+    return Date.now() - parseInt(last, 10) >= VERSION_CHECK_INTERVAL;
+}
+
+if (shouldCheckNow()) checkRemoteVersion();
+setInterval(() => { if (shouldCheckNow()) checkRemoteVersion(); }, VERSION_CHECK_INTERVAL);
+setInterval(() => {
+    if (pendingReload && streamStatusKnown && !streamActive) {
+        location.reload();
+    }
+}, IDLE_POLL_INTERVAL);
 
 // ── Startup ───────────────────────────────────────────────────────────────────
 

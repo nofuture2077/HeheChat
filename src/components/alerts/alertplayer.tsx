@@ -29,6 +29,7 @@ class AlertPlayer {
     mainAudioGain?: GainNode;
     currentSource?: AudioBufferSourceNode | MediaElementAudioSourceNode;
     playing: boolean = false;
+    visualPlaying: boolean = false;
     paused: boolean = false;
     muted: boolean = false;
     queue: Event[] = [];
@@ -98,6 +99,14 @@ class AlertPlayer {
     interrupted(): boolean {
         //@ts-ignore
         return this.audioContext !== undefined && this.audioContext.state === 'interrupted';
+    }
+
+    idle(): boolean {
+        return (
+            !this.playing &&
+            !this.visualPlaying &&
+            this.queue.length - this.index <= 0
+        );
     }
 
     initialize() {

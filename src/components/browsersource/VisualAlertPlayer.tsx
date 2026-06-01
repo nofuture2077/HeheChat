@@ -142,12 +142,14 @@ export default function VisualAlertPlayer() {
       setMediaData(preloaded);
       setIsVisible(true);
       setTimestamp(Date.now());
+      AlertSystem.visualPlaying = true;
 
       // Set timeout to hide alert
       alertTimeoutId = setTimeout(() => {
         setIsVisible(false);
         setCurrentAlert(null);
         setMediaData(null);
+        AlertSystem.visualPlaying = false;
         alertTimeoutId = undefined;
       }, data.duration) as unknown as number;
     });
@@ -161,6 +163,7 @@ export default function VisualAlertPlayer() {
       setIsVisible(false);
       setCurrentAlert(null);
       setMediaData(null);
+      AlertSystem.visualPlaying = false;
     };
   }, []);
 
