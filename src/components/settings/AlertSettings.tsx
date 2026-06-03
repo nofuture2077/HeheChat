@@ -114,7 +114,8 @@ export function AlertSettings() {
                     config: {
                         userPickEnabled: false,
                         userPickChannelPointReward: null,
-                        rerollTriggers: []
+                        rerollTriggers: [],
+                        chatMessage: null
                     }
                 };
                 console.log('Creating default config:', defaultConfig);

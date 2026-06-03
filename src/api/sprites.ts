@@ -20,6 +20,7 @@ export interface RerollConfig {
     userPickEnabled: boolean;
     userPickChannelPointReward: string | null;
     rerollTriggers: RerollTrigger[];
+    chatMessage: string | null;
   },
   enabled: boolean;
 }
@@ -189,6 +190,7 @@ export const updateRerollConfig = async (
       userPickEnabled: boolean;
       userPickChannelPointReward: string | null;
       rerollTriggers: RerollTrigger[];
+      chatMessage: string | null;
     },
     enabled: boolean;
   }

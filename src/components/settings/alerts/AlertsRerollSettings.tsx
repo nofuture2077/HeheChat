@@ -22,7 +22,7 @@ export function AlertsRerollSettings() {
         try {
             const cfg = await getRerollConfig(username);
             if (!cfg) {
-                setRerollConfig({ channel: username, enabled: true, config: { userPickEnabled: false, userPickChannelPointReward: null, rerollTriggers: [] } });
+                setRerollConfig({ channel: username, enabled: true, config: { userPickEnabled: false, userPickChannelPointReward: null, rerollTriggers: [], chatMessage: null } });
             } else {
                 setRerollConfig(cfg);
             }
@@ -216,6 +216,28 @@ export function AlertsRerollSettings() {
                         >
                             Add Trigger
                         </Button>
+                    </Stack>
+
+                    <Stack gap={4}>
+                        <Text size="sm">Chat message on reroll</Text>
+                        <TextInput
+                            placeholder="e.g. ${username} rerolled and got ${sprite}!"
+                            value={rerollConfig.config.chatMessage || ''}
+                            onChange={(ev) => {
+                                const value = ev.target.value;
+                                setRerollConfig({ ...rerollConfig, config: { ...rerollConfig.config, chatMessage: value === '' ? null : value } });
+                            }}
+                            onBlur={() => {
+                                (async () => {
+                                    setIsSavingRerollConfig(true);
+                                    try { await updateRerollConfig(rerollConfig.channel, { enabled: rerollConfig.enabled, config: rerollConfig.config }); }
+                                    catch (error) { console.error('Failed to update reroll config:', error); }
+                                    finally { setIsSavingRerollConfig(false); }
+                                })();
+                            }}
+                            disabled={!rerollConfig.enabled || isSavingRerollConfig}
+                        />
+                        <Text fs="italic" size='14px'>Sent to chat after a reroll. Available variables: <Text span ff="monospace">{'${username}'}</Text> and <Text span ff="monospace">{'${sprite}'}</Text>. Leave empty to disable.</Text>
                     </Stack>
 
                     <Fieldset legend="User Pick Configuration" variant="filled">
