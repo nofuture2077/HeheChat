@@ -1,10 +1,12 @@
-import { TextInput, Fieldset, Stack, Text } from '@mantine/core';
-import { useState, useEffect } from 'react';
+import { TextInput, Fieldset, Stack, Text, Switch } from '@mantine/core';
+import { useState, useEffect, useContext } from 'react';
+import { ConfigContext } from '../../../ApplicationContext';
 
 export function ConnectSoundAlertsSettings() {
     const [overlayUrl, setOverlayUrl] = useState("");
     const [connected, setConnected] = useState(false);
     const state = localStorage.getItem('hehe-token_state') || '';
+    const config = useContext(ConfigContext);
 
     useEffect(() => {
         fetch(import.meta.env.VITE_BACKEND_URL + "/soundalerts/get?state=" + state)
@@ -20,6 +22,12 @@ export function ConnectSoundAlertsSettings() {
     return (
         <Stack mt={30} mb={30} gap={30}>
             <Fieldset legend="SoundAlerts Config" variant="filled">
+                <Switch
+                    label="Enable SoundAlerts"
+                    checked={!config.deactivatedAlerts['soundalerts']}
+                    onChange={(ev) => config.setDeactivatedAlerts('soundalerts', !ev.currentTarget.checked)}
+                    mb={12}
+                />
                 <Text size="sm" mb={10}>
                     To connect SoundAlerts with HeheChat:
                     <ol>

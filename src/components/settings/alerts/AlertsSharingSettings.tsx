@@ -113,9 +113,9 @@ export function AlertsSharingSettings() {
                                 );
                             })}
                             <Divider label='Blerps' labelPosition="center" mt='xs' />
-                            <Switch disabled={!config.activatedShares.includes(channel)} checked={!config.deactivatedAlerts["blerp"]} key="blerp" label="Blerps" size="lg" mb="md" description='All Blerps' />
+                            <Switch disabled={!config.activatedShares.includes(channel)} checked={!config.deactivatedAlerts["blerp"]} key="blerp" label="Blerps" size="lg" mb="md" description='All Blerps' onChange={(event) => { config.setDeactivatedAlerts("blerp", !event.currentTarget.checked); forceUpdate(); }} />
                             <Divider label='SoundAlerts' labelPosition="center" mt='xs' />
-                            <Switch disabled={!config.activatedShares.includes(channel)} checked={!config.deactivatedAlerts["soundalerts"]} key="soundalerts" label="SoundAlerts" size="lg" mb="md" description='All SoundAlerts' />
+                            <Switch disabled={!config.activatedShares.includes(channel)} checked={!config.deactivatedAlerts["soundalerts"]} key="soundalerts" label="SoundAlerts" size="lg" mb="md" description='All SoundAlerts' onChange={(event) => { config.setDeactivatedAlerts("soundalerts", !event.currentTarget.checked); forceUpdate(); }} />
                         </Stack>
                     </Fieldset>
                 );

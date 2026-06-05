@@ -1,5 +1,6 @@
-import { TextInput, Fieldset, Stack, Text } from '@mantine/core';
-import { useState, useEffect } from 'react';
+import { TextInput, Fieldset, Stack, Text, Switch } from '@mantine/core';
+import { useState, useEffect, useContext } from 'react';
+import { ConfigContext } from '../../../ApplicationContext';
 
 function extractBlerpRoom(input: string): string {
     const match = input.match(/\/([^/]+)$/);
@@ -9,6 +10,7 @@ function extractBlerpRoom(input: string): string {
 export function ConnectBlerpSettings() {
     const [roomId, setRoomId] = useState("");
     const state = localStorage.getItem('hehe-token_state') || '';
+    const config = useContext(ConfigContext);
 
     useEffect(() => {
         fetch(import.meta.env.VITE_BACKEND_URL + "/blerp/get?state=" + state)
@@ -24,6 +26,12 @@ export function ConnectBlerpSettings() {
     return (
         <Stack mt={30} mb={30} gap={30}>
             <Fieldset legend="Blerp Config" variant="filled">
+                <Switch
+                    label="Enable Blerp"
+                    checked={!config.deactivatedAlerts['blerp']}
+                    onChange={(ev) => config.setDeactivatedAlerts('blerp', !ev.currentTarget.checked)}
+                    mb={12}
+                />
                 <Text size="sm" mb={10}>
                     To connect Blerp with HeheChat:
                     <ol>
