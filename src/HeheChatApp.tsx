@@ -189,7 +189,7 @@ export default function HeheChat() {
                 profileData.config.readAllMessages ??= false;
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 profileData.config.systemMessageInChat.streak ??= true;
-                profileData.config.showMissedAlertsButton ??= true;
+                profileData.config.missedAlertsWindow ??= '15m';
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);
@@ -452,7 +452,7 @@ export default function HeheChat() {
     const setReloadOnReturnToApp = (value: boolean) => updateConfig('reloadOnReturnToApp', value);
     const setRainMode = (value: boolean) => updateConfig('rainMode', value);
     const setReadAllMessages = (value: boolean) => updateConfig('readAllMessages', value);
-    const setShowMissedAlertsButton = (value: boolean) => updateConfig('showMissedAlertsButton', value);
+    const setMissedAlertsWindow = (value: string) => updateConfig('missedAlertsWindow', value);
     const setShowBitrateIndicator = (value: boolean) => updateConfig('showBitrateIndicator', value);
     const setShowSceneName = (value: boolean) => updateConfig('showSceneName', value);
     const setShowSceneSwitchNotifications = (value: boolean) => updateConfig('showSceneSwitchNotifications', value);
@@ -717,7 +717,7 @@ export default function HeheChat() {
         setReloadOnReturnToApp,
         setRainMode,
         setReadAllMessages,
-        setShowMissedAlertsButton,
+        setMissedAlertsWindow,
         setShowBitrateIndicator,
         setShowSceneName,
         setShowSceneSwitchNotifications

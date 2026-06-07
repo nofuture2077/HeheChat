@@ -520,21 +520,6 @@ export function ChatPage() {
         if (!AlertSystem.status()) {
             AlertSystem.initialize();
         }
-        if (networkStatus.online && isVisible) {
-            EventStorage.load(config.channels, config.ignoredUsers).then(events => {
-                const unplayed = events
-                    .filter(e => !e.played && AlertSystem.shouldBePlayedInApp(e as unknown as Event))
-                    .sort((a, b) => a.date - b.date);
-                if (unplayed.length > 0) {
-                    setUnplayedEvents(unplayed);
-                    setShowUnplayedBanner(true);
-                    if (unplayedBannerTimerRef.current) clearTimeout(unplayedBannerTimerRef.current);
-                    unplayedBannerTimerRef.current = setTimeout(() => {
-                        setShowUnplayedBanner(false);
-                    }, 15000);
-                }
-            });
-        }
         setTimeout(() => {
             scrollToBottom();
         }, 5000);
@@ -556,6 +541,27 @@ export function ChatPage() {
         const newState = saved !== null ? JSON.parse(saved) : true;
         setShortcutsVisible(newState);
     }, [profile.guid]);
+
+    // Fetch missed alerts on load and on re-entry, filtered to the configured window
+    useEffect(() => {
+        const isVisible = documentVisible === 'visible';
+        if (!networkStatus.online || !isVisible || config.channels.length === 0 || config.missedAlertsWindow === 'none') return;
+        const windowMs: Record<string, number> = { '15m': 15 * 60 * 1000, '1h': 60 * 60 * 1000, '1d': 24 * 60 * 60 * 1000 };
+        const cutoff = Date.now() - (windowMs[config.missedAlertsWindow] ?? 15 * 60 * 1000);
+        EventStorage.load(config.channels, config.ignoredUsers).then(events => {
+            const unplayed = events
+                .filter(e => !e.played
+                    && AlertSystem.shouldBePlayedInApp(e as unknown as Event)
+                    && e.date >= cutoff)
+                .sort((a, b) => a.date - b.date);
+            if (unplayed.length > 0) {
+                setUnplayedEvents(unplayed);
+                setShowUnplayedBanner(true);
+                if (unplayedBannerTimerRef.current) clearTimeout(unplayedBannerTimerRef.current);
+                unplayedBannerTimerRef.current = setTimeout(() => setShowUnplayedBanner(false), 15000);
+            }
+        });
+    }, [documentVisible, networkStatus.online, config.channels, config.ignoredUsers, config.missedAlertsWindow]);
 
     // Cleanup unplayed events banner timer on unmount
     useEffect(() => {
@@ -744,7 +750,7 @@ export function ChatPage() {
                             <NewsDisplay />
                             {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                             <PinManager/>
-                            {showUnplayedBanner && config.showMissedAlertsButton && (
+                            {showUnplayedBanner && config.missedAlertsWindow !== 'none' && (
                                 <Button size="xl" radius="xl" color="teal" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} className={classes.missedAlertsButton}>
                                     Play {unplayedEvents.length} missed alert{unplayedEvents.length !== 1 ? 's' : ''}
                                 </Button>

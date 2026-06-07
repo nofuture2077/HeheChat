@@ -63,7 +63,7 @@ export interface ConfigData {
     shortcuts: ShortCut[],
     reloadOnReturnToApp: boolean,
     rainMode: boolean,
-    showMissedAlertsButton: boolean,
+    missedAlertsWindow: string,
     showBitrateIndicator: boolean,
     showSceneName: boolean,
     showSceneSwitchNotifications: boolean
@@ -125,7 +125,7 @@ export interface Config extends ConfigData {
     setReloadOnReturnToApp: (val: boolean) => void;
     setRainMode: (val: boolean) => void;
     setReadAllMessages: (val: boolean) => void;
-    setShowMissedAlertsButton: (val: boolean) => void;
+    setMissedAlertsWindow: (val: string) => void;
     setShowBitrateIndicator: (val: boolean) => void;
     setShowSceneName: (val: boolean) => void;
     setShowSceneSwitchNotifications: (val: boolean) => void;
@@ -201,7 +201,7 @@ export const DEFAULT_CONFIG: Config = {
     reloadOnReturnToApp: true,
     rainMode: false,
     readAllMessages: false,
-    showMissedAlertsButton: true,
+    missedAlertsWindow: '15m',
     showBitrateIndicator: true,
     showSceneName: true,
     showSceneSwitchNotifications: true,
@@ -258,7 +258,7 @@ export const DEFAULT_CONFIG: Config = {
     setReloadOnReturnToApp: (val) => {},
     setRainMode: (val) => {},
     setReadAllMessages: (val) => {},
-    setShowMissedAlertsButton: (val) => {},
+    setMissedAlertsWindow: (_val: string) => {},
     setShowBitrateIndicator: (val) => {},
     setShowSceneName: (val) => {},
     setShowSceneSwitchNotifications: (val) => {},

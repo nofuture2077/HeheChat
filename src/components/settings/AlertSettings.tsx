@@ -1,4 +1,4 @@
-import { Divider, Paper, Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space, Modal, Group, Button, NumberInput, Select } from '@mantine/core';
+import { Divider, Paper, Stack, Text, Switch, Fieldset, Anchor, Slider, TagsInput, Table, TextInput, ActionIcon, Space, Modal, Group, Button, NumberInput, Select, SegmentedControl } from '@mantine/core';
 import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
 import { useForceUpdate, useDisclosure } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
@@ -303,16 +303,18 @@ export function AlertSettings() {
 
             <Fieldset legend="Missed Alerts" variant="filled" key="missed-alerts">
                 <Stack>
-                    <Switch
-                        checked={config.showMissedAlertsButton}
-                        onChange={(event) => {
-                            config.setShowMissedAlertsButton(event.currentTarget.checked);
-                            forceUpdate();
-                        }}
-                        label="Show missed alerts button"
-                        size="lg"
+                    <Text size="sm">Replay window</Text>
+                    <SegmentedControl
+                        value={config.missedAlertsWindow}
+                        onChange={(value: string) => { config.setMissedAlertsWindow(value); forceUpdate(); }}
+                        data={[
+                            { label: 'None', value: 'none' },
+                            { label: '15m', value: '15m' },
+                            { label: '1h', value: '1h' },
+                            { label: '1d', value: '1d' },
+                        ]}
                     />
-                    <Text fs="italic" size='14px'>Show a button when returning to the app if there are unplayed alerts</Text>
+                    <Text fs="italic" size='14px'>Show a button on load or return to the app for unplayed alerts within this window. None disables the feature.</Text>
                 </Stack>
             </Fieldset>
 
