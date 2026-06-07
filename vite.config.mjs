@@ -40,7 +40,8 @@ export default defineConfig({
         admin: './admin.html',
         collection: './collection.html',
         alert: './alert.html',
-        switcher: './switcher.html'
+        switcher: './switcher.html',
+        chat: './chat.html'
       }
     }
   },

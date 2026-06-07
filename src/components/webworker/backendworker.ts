@@ -219,7 +219,8 @@ self.onmessage = async (e) => {
             await backendReady;
             if ((data.type === "subscribe" && data.source === "HeheChat App") ||
                 (data.type === "sink" && data.source === "Replay App") ||
-                (data.type === "sink" && data.source === "Browsersource")) {
+                (data.type === "sink" && data.source === "Browsersource") ||
+                (data.type === "sink" && data.source === "ChatBrowserSource")) {
                 initRequest = data;
             }
 
@@ -232,7 +233,8 @@ self.onmessage = async (e) => {
                     // (init requests are already handled by the connection logic)
                     if (!((data.type === "subscribe" && data.source === "HeheChat App") ||
                         (data.type === "sink" && data.source === "Replay App") ||
-                        (data.type === "sink" && data.source === "Browsersource"))) {
+                        (data.type === "sink" && data.source === "Browsersource") ||
+                        (data.type === "sink" && data.source === "ChatBrowserSource"))) {
                         console.log("Message will be lost as it's not an init request");
                     }
                 }

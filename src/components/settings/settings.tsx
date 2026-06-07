@@ -57,6 +57,7 @@ import { ProfileSelector } from '../profile/profilebar';
 import { ChatChannelsSettings, ChatTopSection } from './chat/ChatChannelsSettings';
 import { ChatAppearanceSettings } from './chat/ChatAppearanceSettings';
 import { ChatEventsSettings } from './chat/ChatEventsSettings';
+import { ChatBrowserSourceSettings } from './chat/ChatBrowserSourceSettings';
 
 // Alerts
 import { AlertsAudioSettings, AlertSoundOutputSection } from './alerts/AlertsAudioSettings';
@@ -95,7 +96,7 @@ export const SettingsDrawer: OverlayDrawer = {
 
 export type SettingsTab =
   | 'General' | 'General/UI' | 'General/Video' | 'General/Account' | 'General/Profiles'
-  | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events' | 'Chat/Bot'
+  | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events' | 'Chat/Bot' | 'Chat/BrowserSource'
   | 'Mod'
   | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/Reroll'
   | 'Notifications' | 'Notifications/StreamStart' | 'Notifications/ChatMention'
@@ -141,6 +142,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Chat/Appearance', label: 'Appearance', icon: IconPalette },
       { id: 'Chat/Events', label: 'Events', icon: IconCalendarEvent },
       { id: 'Chat/Bot', label: 'Bot', icon: IconRobot },
+      { id: 'Chat/BrowserSource', label: 'Browser Source', icon: IconLink },
     ],
   },
   { id: 'Mod', label: 'Mod', icon: IconSword },
@@ -215,6 +217,7 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Chat/Appearance': 'Chat › Appearance',
   'Chat/Events': 'Chat › Events',
   'Chat/Bot': 'Chat › Bot',
+  'Chat/BrowserSource': 'Chat › Browser Source',
   'Mod': 'Mod',
   'Alerts': 'Alerts',
   'Alerts/Audio': 'Alerts › Audio',
@@ -348,6 +351,7 @@ export function Settings(props: SettingsProperties) {
       case 'Chat/Appearance': return <ChatAppearanceSettings />;
       case 'Chat/Events': return <ChatEventsSettings />;
       case 'Chat/Bot': return <Stack mt={30} mb={30} gap={30}><GeneralBotSettings /></Stack>;
+      case 'Chat/BrowserSource': return <ChatBrowserSourceSettings />;
       case 'Mod': return <ModSettings />;
       case 'Alerts/Audio': return <AlertsAudioSettings />;
       case 'Alerts/Sharing': return <AlertsSharingSettings />;
