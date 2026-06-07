@@ -142,11 +142,17 @@ export class SystemMessage {
     }
 }
 
+export type YTMessagePart =
+    | { type: 'text'; content: string }
+    | { type: 'emoji'; url: string; alt: string };
+
 export class YTChatMessage {
     type: 'ytchat' = 'ytchat';
     id: string;
     text: string;
+    parts?: YTMessagePart[];
     authorName: string;
+    authorColor?: string;
     authorProfileImageUrl?: string;
     channelId: string;
     isMembership?: boolean;
@@ -167,7 +173,9 @@ export class YTChatMessage {
         isMembership?: boolean,
         isVerified?: boolean,
         isModerator?: boolean,
-        isOwner?: boolean
+        isOwner?: boolean,
+        parts?: YTMessagePart[],
+        authorColor?: string
     ) {
         this.id = id;
         this.text = text;
@@ -180,10 +188,13 @@ export class YTChatMessage {
         this.isVerified = isVerified;
         this.isModerator = isModerator;
         this.isOwner = isOwner;
+        this.parts = parts;
+        this.authorColor = authorColor;
     }
 
     static deserialize(json: string): YTChatMessage {
         const data = JSON.parse(json);
+        console.debug('[YTChatMessage] raw payload:', data);
         return new YTChatMessage(
             data.id,
             data.text,
@@ -195,7 +206,9 @@ export class YTChatMessage {
             data.isMembership,
             data.isVerified,
             data.isModerator,
-            data.isOwner
+            data.isOwner,
+            data.parts,
+            data.authorColor
         );
     }
 }

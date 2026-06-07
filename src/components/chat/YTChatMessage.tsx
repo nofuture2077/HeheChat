@@ -2,12 +2,21 @@ import classes from './ChatMessage.module.css';
 import { ConfigContext, ChatEmotesContext } from '../../ApplicationContext';
 import { useContext } from 'react';
 import { formatTime } from '../../commons/helper';
-import { YTChatMessage } from '../../commons/message';
+import { YTChatMessage, YTMessagePart } from '../../commons/message';
 import { IconBrandYoutube, IconShieldCheckFilled, IconCrown, IconShieldFilled } from '@tabler/icons-react';
 
 interface YTChatMessageProps {
     msg: YTChatMessage;
     forceTimestamp?: boolean;
+}
+
+function renderParts(parts: YTMessagePart[], fontSize: number) {
+    return parts.map((part, i) => {
+        if (part.type === 'emoji') {
+            return <img key={i} src={part.url} alt={part.alt} style={{ height: fontSize * 1.4, width: 'auto', verticalAlign: 'middle', margin: '0 1px' }} />;
+        }
+        return <span key={i}>{part.content}</span>;
+    });
 }
 
 export function YTChatMessageComp(props: YTChatMessageProps) {
@@ -65,16 +74,20 @@ export function YTChatMessageComp(props: YTChatMessageProps) {
             </span>
             
             {/* Username */}
-            <span 
-                className={classes.username} 
-                style={{ color: '#FF0000' }}
+            <span
+                className={classes.username}
+                style={{ color: props.msg.authorColor ?? (props.msg.isOwner ? '#FFD600' : props.msg.isModerator ? '#5E84F1' : props.msg.isMembership ? '#2BA640' : undefined) }}
             >
-                {props.msg.authorName}
+                {props.msg.authorName.startsWith('@') ? props.msg.authorName.slice(1) : props.msg.authorName}
             </span>
             <span>: </span>
-            
+
             {/* Message Text */}
-            <span className={classes.text}>{props.msg.text}</span>
+            <span className={classes.text}>
+                {props.msg.parts && props.msg.parts.length > 0
+                    ? renderParts(props.msg.parts, config.fontSize)
+                    : props.msg.text}
+            </span>
         </div>
     );
 }
