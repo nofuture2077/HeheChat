@@ -1,11 +1,19 @@
-import { TextInput, Fieldset, Stack, Text, Button, Badge, Group } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, Button, Badge, Group, Alert } from '@mantine/core';
 import { useState, useEffect } from 'react';
-import { IconBrandYoutube } from '@tabler/icons-react';
+import { IconBrandYoutube, IconInfoCircle } from '@tabler/icons-react';
+
+const CHANNEL_ID_REGEX = /^UC[\w-]{22}$/;
+
+function validateChannelId(id: string): string | null {
+    if (!id.trim()) return 'Channel ID is required.';
+    if (!CHANNEL_ID_REGEX.test(id.trim())) return 'Channel ID must start with "UC" and be 24 characters long (e.g. UCxxxxxxxxxxxxxxxxxxxxx).';
+    return null;
+}
 
 export function ConnectYouTubeSettings() {
     const [connected, setConnected] = useState(false);
     const [channelId, setChannelId] = useState("");
-    const [channelName, setChannelName] = useState("");
+    const [channelIdError, setChannelIdError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const state = localStorage.getItem('hehe-token_state') || '';
 
@@ -20,11 +28,9 @@ export function ConnectYouTubeSettings() {
             if (data.connected) {
                 setConnected(true);
                 setChannelId(data.channel_id || '');
-                setChannelName(data.channel_name || '');
             } else {
                 setConnected(false);
                 setChannelId('');
-                setChannelName('');
             }
         } catch {
             setConnected(false);
@@ -34,13 +40,15 @@ export function ConnectYouTubeSettings() {
     };
 
     const save = async () => {
-        if (!channelId.trim()) { alert('Please enter a YouTube Channel-ID'); return; }
+        const error = validateChannelId(channelId);
+        if (error) { setChannelIdError(error); return; }
+        setChannelIdError(null);
         setLoading(true);
         try {
             const data = await fetch(`${import.meta.env.VITE_BACKEND_URL}/youtube/set-channel?state=${state}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ channel_id: channelId, channel_name: channelName })
+                body: JSON.stringify({ channel_id: channelId.trim() })
             }).then(r => r.json());
             if (data.success) setConnected(true);
             else alert('Error connecting: ' + (data.error || 'Unknown error'));
@@ -59,8 +67,6 @@ export function ConnectYouTubeSettings() {
             if (data.success) {
                 setConnected(false);
                 setChannelId('');
-                setChannelName('');
-                alert('YouTube connection disconnected');
             } else {
                 alert('Error disconnecting: ' + (data.error || 'Unknown error'));
             }
@@ -86,26 +92,33 @@ export function ConnectYouTubeSettings() {
                             <Badge color="green" size="lg" leftSection={<IconBrandYoutube size={16} />}>✅ Connected</Badge>
                         </Group>
                         <Text size="sm" fw={500}><strong>Channel-ID:</strong> {channelId}</Text>
-                        {channelName && <Text size="sm" fw={500}><strong>Channel Name:</strong> {channelName}</Text>}
                         <Text size="sm" c="dimmed">💡 When you start a livestream, chat messages will automatically appear in HeheChat.</Text>
                         <Button color="red" variant="light" onClick={disconnect} disabled={loading}>Disconnect YouTube</Button>
                     </Stack>
                 ) : (
                     <Stack gap="md">
                         <Text size="sm">Connect your YouTube channel by entering your Channel-ID below.</Text>
-                        <TextInput label="YouTube Channel-ID" placeholder="UCxxxxxxxxxxxxxxxxxxxxx" value={channelId} onChange={(ev) => setChannelId(ev.target.value)} description="Your channel ID starts with 'UC'" />
-                        <TextInput label="Channel Name (optional)" placeholder="My YouTube Channel" value={channelName} onChange={(ev) => setChannelName(ev.target.value)} />
-                        <Button color="red" leftSection={<IconBrandYoutube size={20} />} onClick={save} disabled={!channelId || loading}>
+                        <TextInput
+                            label="YouTube Channel-ID"
+                            placeholder="UCxxxxxxxxxxxxxxxxxxxxx"
+                            value={channelId}
+                            onChange={(ev) => { setChannelId(ev.target.value); setChannelIdError(null); }}
+                            error={channelIdError}
+                            description='24 characters, always starts with "UC"'
+                        />
+                        <Alert icon={<IconInfoCircle size={16} />} color="gray" variant="light" title="Where to find your Channel ID">
+                            <Text size="sm" mb={4}>Your Channel ID is a 24-character string starting with <strong>UC</strong>.</Text>
+                            <Text size="sm" mb={4}>To find it:</Text>
+                            <ol style={{ margin: '4px 0 0 16px', padding: 0, fontSize: '13px' }}>
+                                <li>Open <a href="https://studio.youtube.com" target="_blank" rel="noopener noreferrer">YouTube Studio</a></li>
+                                <li>Go to <strong>Customization → Basic info</strong></li>
+                                <li>Your Channel ID is shown under <strong>Channel URL</strong> (the part after <code>/channel/</code>)</li>
+                            </ol>
+                            <Text size="xs" c="dimmed" mt={6}>Alternatively, go to your channel page, click "More" → "Share" → "Copy channel ID".</Text>
+                        </Alert>
+                        <Button color="red" leftSection={<IconBrandYoutube size={20} />} onClick={save} disabled={loading}>
                             {loading ? 'Connecting...' : 'Connect YouTube'}
                         </Button>
-                        <details>
-                            <summary style={{ cursor: 'pointer', fontSize: '14px', color: '#868e96' }}>How to find your Channel-ID</summary>
-                            <ol style={{ marginTop: '10px', fontSize: '14px', color: '#495057' }}>
-                                <li>Go to <a href="https://studio.youtube.com" target="_blank" rel="noopener noreferrer">YouTube Studio</a></li>
-                                <li>Click on "Customization" → "Basic info"</li>
-                                <li>Your Channel-ID is listed under "Channel URL"</li>
-                            </ol>
-                        </details>
                     </Stack>
                 )}
             </Fieldset>
