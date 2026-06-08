@@ -86,7 +86,7 @@ export default function ChatSourceApp({ token, showSystem, maxMessages, fontSize
             }
 
             if (data.type === 'msg') {
-                const msg = parseMessage(data.message);
+                const msg = parseMessage(data.data.message);
                 if (isSystemMessageType(msg) && !showSystem) return;
                 setMessages((prev) => {
                     const next = [...prev, msg];
