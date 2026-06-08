@@ -1,37 +1,12 @@
-import { Stack, Text, Switch, Fieldset, ActionIcon, Group, TextInput, NumberInput } from '@mantine/core';
+import { Stack, Text, Switch, Fieldset, ActionIcon, Group, TextInput, NumberInput, Select, ColorInput } from '@mantine/core';
 import { useContext, useState, useEffect } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 import { IconCopy } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 
-function buildChatUrl(sink: string, opts: {
-    fontSize: number;
-    maxMessages: number;
-    padding: number;
-    showSystem: boolean;
-    width: string;
-    height: string;
-}) {
-    const base = new URL('chat.html', import.meta.env.VITE_SINK_URL).href;
-    const parts = [`token=${encodeURIComponent(sink)}`];
-    if (opts.showSystem) parts.push('showSystem');
-    parts.push(`maxMessages=${opts.maxMessages}`);
-    parts.push(`fontSize=${opts.fontSize}`);
-    if (opts.width && opts.width !== '100%') parts.push(`width=${encodeURIComponent(opts.width)}`);
-    if (opts.height && opts.height !== '100%') parts.push(`height=${encodeURIComponent(opts.height)}`);
-    if (opts.padding !== 4) parts.push(`padding=${opts.padding}`);
-    return `${base}#${parts.join('&')}`;
-}
-
 export function ChatBrowserSourceSettings() {
     const config = useContext(ConfigContext);
     const [sink, setSink] = useState<string | undefined>(undefined);
-    const [fontSize, setFontSize] = useState(config.fontSize ?? 14);
-    const [maxMessages, setMaxMessages] = useState(50);
-    const [padding, setPadding] = useState(4);
-    const [showSystem, setShowSystem] = useState(false);
-    const [width, setWidth] = useState('');
-    const [height, setHeight] = useState('');
 
     useEffect(() => {
         const state = localStorage.getItem('hehe-token_state') || '';
@@ -41,7 +16,7 @@ export function ChatBrowserSourceSettings() {
     }, []);
 
     const chatUrl = sink
-        ? buildChatUrl(sink, { fontSize, maxMessages, padding, showSystem, width: width || '100%', height: height || '100%' })
+        ? `${new URL('chat.html', import.meta.env.VITE_SINK_URL).href}#token=${encodeURIComponent(sink)}`
         : '';
 
     const copyUrl = async () => {
@@ -58,56 +33,8 @@ export function ChatBrowserSourceSettings() {
             <Fieldset legend="Chat Browser Source" variant="filled">
                 <Stack gap="md">
                     <Text fs="italic" size="14px">
-                        Add this URL as a browser source in OBS to display chat as an overlay.
+                        Add this URL as a browser source in OBS to display chat as an overlay. All settings below are saved to your profile and take effect immediately in the browser source.
                     </Text>
-
-                    <NumberInput
-                        label="Font Size (px)"
-                        value={fontSize}
-                        onChange={val => setFontSize(Number(val))}
-                        min={8}
-                        max={48}
-                    />
-
-                    <NumberInput
-                        label="Max Messages"
-                        value={maxMessages}
-                        onChange={val => setMaxMessages(Number(val))}
-                        min={5}
-                        max={500}
-                    />
-
-                    <NumberInput
-                        label="Padding (px)"
-                        value={padding}
-                        onChange={val => setPadding(Number(val))}
-                        min={0}
-                        max={80}
-                    />
-
-                    <TextInput
-                        label="Width"
-                        placeholder="100%"
-                        value={width}
-                        onChange={e => setWidth(e.currentTarget.value)}
-                        description="CSS value, e.g. 400px or 100%"
-                    />
-
-                    <TextInput
-                        label="Height"
-                        placeholder="100%"
-                        value={height}
-                        onChange={e => setHeight(e.currentTarget.value)}
-                        description="CSS value, e.g. 600px or 100%"
-                    />
-
-                    <Switch
-                        label="Show System Messages"
-                        description="Raids, follows, subs, etc."
-                        checked={showSystem}
-                        onChange={e => setShowSystem(e.currentTarget.checked)}
-                        size="lg"
-                    />
 
                     {sink ? (
                         <Stack gap="xs">
@@ -127,6 +54,174 @@ export function ChatBrowserSourceSettings() {
                     ) : (
                         <Text size="sm" c="dimmed">Loading token…</Text>
                     )}
+                </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Appearance" variant="filled">
+                <Stack gap="md">
+                    <NumberInput
+                        label="Font Size (px)"
+                        value={config.chatBsFontSize ?? 14}
+                        onChange={val => config.setChatBsFontSize(Number(val))}
+                        min={8}
+                        max={48}
+                    />
+                    <ColorInput
+                        label="Text Color"
+                        description="Leave empty to use the default chat colors"
+                        value={config.chatBsTextColor ?? ''}
+                        onChange={val => config.setChatBsTextColor(val)}
+                        placeholder="inherit"
+
+                    />
+                    <Switch
+                        label="Transparent Background"
+                        description="No background — ideal for OBS overlays"
+                        checked={config.chatBsTransparentBg ?? true}
+                        onChange={e => config.setChatBsTransparentBg(e.currentTarget.checked)}
+                        size="lg"
+                    />
+                    <Switch
+                        label="Text Shadow"
+                        description="Adds a drop shadow behind text for readability on bright backgrounds"
+                        checked={config.chatBsTextShadow ?? true}
+                        onChange={e => config.setChatBsTextShadow(e.currentTarget.checked)}
+                        size="lg"
+                    />
+                    <Select
+                        label="Message Background"
+                        description="Adds a semi-transparent box behind each message"
+                        value={config.chatBsMsgBackground ?? 'none'}
+                        onChange={val => config.setChatBsMsgBackground((val ?? 'none') as 'none' | 'dark' | 'light')}
+                        data={[
+                            { value: 'none', label: 'None' },
+                            { value: 'dark', label: 'Dark (semi-transparent black)' },
+                            { value: 'light', label: 'Light (semi-transparent white)' },
+                        ]}
+                    />
+                </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Layout" variant="filled">
+                <Stack gap="md">
+                    <TextInput
+                        label="Width"
+                        placeholder="100%"
+                        value={config.chatBsWidth ?? '100%'}
+                        onChange={e => config.setChatBsWidth(e.currentTarget.value)}
+                        description="CSS value, e.g. 400px or 100%"
+                    />
+                    <TextInput
+                        label="Height"
+                        placeholder="100%"
+                        value={config.chatBsHeight ?? '100%'}
+                        onChange={e => config.setChatBsHeight(e.currentTarget.value)}
+                        description="CSS value, e.g. 600px or 100%"
+                    />
+                    <NumberInput
+                        label="Padding (px)"
+                        value={config.chatBsPadding ?? 4}
+                        onChange={val => config.setChatBsPadding(Number(val))}
+                        min={0}
+                        max={80}
+                    />
+                </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Messages" variant="filled">
+                <Stack gap="md">
+                    <NumberInput
+                        label="Max Visible Messages"
+                        value={config.chatBsMaxMessages ?? 5}
+                        onChange={val => config.setChatBsMaxMessages(Number(val))}
+                        min={1}
+                        max={100}
+                    />
+                    <NumberInput
+                        label="Message Lifetime (seconds)"
+                        description="Messages disappear after this many seconds. Set to 0 to keep forever."
+                        value={config.chatBsMessageLifetime ?? 15}
+                        onChange={val => config.setChatBsMessageLifetime(Number(val))}
+                        min={0}
+                        max={300}
+                    />
+                    <Switch
+                        label="Show System Messages"
+                        description="Raids, follows, subs, etc."
+                        checked={config.chatBsShowSystem ?? false}
+                        onChange={e => config.setChatBsShowSystem(e.currentTarget.checked)}
+                        size="lg"
+                    />
+                    <Switch
+                        label="Show Username"
+                        checked={config.chatBsShowUsername ?? true}
+                        onChange={e => config.setChatBsShowUsername(e.currentTarget.checked)}
+                        size="lg"
+                    />
+                </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Animations" variant="filled">
+                <Stack gap="md">
+                    <Select
+                        label="Animate In"
+                        value={config.chatBsAnimateIn ?? 'slide'}
+                        onChange={val => config.setChatBsAnimateIn((val ?? 'slide') as 'slide' | 'fade' | 'none')}
+                        data={[
+                            { value: 'slide', label: 'Slide up' },
+                            { value: 'fade', label: 'Fade in' },
+                            { value: 'none', label: 'None' },
+                        ]}
+                    />
+                    <Select
+                        label="Animate Out"
+                        value={config.chatBsAnimateOut ?? 'fade'}
+                        onChange={val => config.setChatBsAnimateOut((val ?? 'fade') as 'fade' | 'none')}
+                        data={[
+                            { value: 'fade', label: 'Fade out' },
+                            { value: 'none', label: 'None' },
+                        ]}
+                    />
+                </Stack>
+            </Fieldset>
+
+            <Fieldset legend="Badges" variant="filled">
+                <Stack gap="md">
+                    <Switch
+                        label="Important Badges"
+                        description="Moderator, broadcaster, VIP, staff, partner"
+                        checked={config.chatBsShowImportantBadges ?? true}
+                        onChange={e => config.setChatBsShowImportantBadges(e.currentTarget.checked)}
+                        size="lg"
+                    />
+                    <Switch
+                        label="Subscriber Badges"
+                        description="Subscriber and founder badges"
+                        checked={config.chatBsShowSubBadges ?? true}
+                        onChange={e => config.setChatBsShowSubBadges(e.currentTarget.checked)}
+                        size="lg"
+                    />
+                    <Switch
+                        label="Other Badges"
+                        description="Any badge not in the above categories"
+                        checked={config.chatBsShowOtherBadges ?? false}
+                        onChange={e => config.setChatBsShowOtherBadges(e.currentTarget.checked)}
+                        size="lg"
+                    />
+                    <Switch
+                        label="7TV Badges"
+                        description="7TV cosmetic badges"
+                        checked={config.chatBsShow7TVBadges ?? true}
+                        onChange={e => config.setChatBsShow7TVBadges(e.currentTarget.checked)}
+                        size="lg"
+                    />
+                    <Switch
+                        label="HeheChat Badges"
+                        description="HeheChat admin and pro badges"
+                        checked={config.chatBsShowHeheBadges ?? true}
+                        onChange={e => config.setChatBsShowHeheBadges(e.currentTarget.checked)}
+                        size="lg"
+                    />
                 </Stack>
             </Fieldset>
         </Stack>

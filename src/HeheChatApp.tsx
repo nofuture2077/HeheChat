@@ -456,6 +456,25 @@ export default function HeheChat() {
     const setShowBitrateIndicator = (value: boolean) => updateConfig('showBitrateIndicator', value);
     const setShowSceneName = (value: boolean) => updateConfig('showSceneName', value);
     const setShowSceneSwitchNotifications = (value: boolean) => updateConfig('showSceneSwitchNotifications', value);
+    const setChatBsTransparentBg = (value: boolean) => updateConfig('chatBsTransparentBg', value);
+    const setChatBsTextColor = (value: string) => updateConfig('chatBsTextColor', value);
+    const setChatBsMessageLifetime = (value: number) => updateConfig('chatBsMessageLifetime', value);
+    const setChatBsAnimateIn = (value: 'slide' | 'fade' | 'none') => updateConfig('chatBsAnimateIn', value);
+    const setChatBsAnimateOut = (value: 'fade' | 'none') => updateConfig('chatBsAnimateOut', value);
+    const setChatBsFontSize = (value: number) => updateConfig('chatBsFontSize', value);
+    const setChatBsMaxMessages = (value: number) => updateConfig('chatBsMaxMessages', value);
+    const setChatBsPadding = (value: number) => updateConfig('chatBsPadding', value);
+    const setChatBsWidth = (value: string) => updateConfig('chatBsWidth', value);
+    const setChatBsHeight = (value: string) => updateConfig('chatBsHeight', value);
+    const setChatBsShowSystem = (value: boolean) => updateConfig('chatBsShowSystem', value);
+    const setChatBsShowImportantBadges = (value: boolean) => updateConfig('chatBsShowImportantBadges', value);
+    const setChatBsShowSubBadges = (value: boolean) => updateConfig('chatBsShowSubBadges', value);
+    const setChatBsShowOtherBadges = (value: boolean) => updateConfig('chatBsShowOtherBadges', value);
+    const setChatBsShow7TVBadges = (value: boolean) => updateConfig('chatBsShow7TVBadges', value);
+    const setChatBsShowHeheBadges = (value: boolean) => updateConfig('chatBsShowHeheBadges', value);
+    const setChatBsTextShadow = (value: boolean) => updateConfig('chatBsTextShadow', value);
+    const setChatBsShowUsername = (value: boolean) => updateConfig('chatBsShowUsername', value);
+    const setChatBsMsgBackground = (value: 'none' | 'dark' | 'light') => updateConfig('chatBsMsgBackground', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -720,7 +739,26 @@ export default function HeheChat() {
         setMissedAlertsWindow,
         setShowBitrateIndicator,
         setShowSceneName,
-        setShowSceneSwitchNotifications
+        setShowSceneSwitchNotifications,
+        setChatBsTransparentBg,
+        setChatBsTextColor,
+        setChatBsMessageLifetime,
+        setChatBsAnimateIn,
+        setChatBsAnimateOut,
+        setChatBsFontSize,
+        setChatBsMaxMessages,
+        setChatBsPadding,
+        setChatBsWidth,
+        setChatBsHeight,
+        setChatBsShowSystem,
+        setChatBsShowImportantBadges,
+        setChatBsShowSubBadges,
+        setChatBsShowOtherBadges,
+        setChatBsShow7TVBadges,
+        setChatBsShowHeheBadges,
+        setChatBsTextShadow,
+        setChatBsShowUsername,
+        setChatBsMsgBackground,
     };
 
     const appLogin = {

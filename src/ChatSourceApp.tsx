@@ -5,8 +5,8 @@ import { ProfileContext, ChatEmotesContext, ConfigContext } from './ApplicationC
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { DEFAULT_CONFIG } from './commons/config';
 import { HeheMessage, parseMessage, isSystemMessageType, isYTChatMessageType, HeheChatMessage, YTChatMessage, SystemMessage } from './commons/message';
-import { ChatMessageComp } from './components/chat/ChatMessage';
-import { YTChatMessageComp } from './components/chat/YTChatMessage';
+import { ChatMessageBrowserSource } from './components/chat/ChatMessageBrowserSource';
+import { YTChatMessageBrowserSource } from './components/chat/YTChatMessageBrowserSource';
 import { SystemMessageComp } from './components/chat/systemmessage';
 import { ModActions } from './components/chat/mod/modactions';
 import { useDocumentVisibility, useNetwork } from '@mantine/hooks';
@@ -28,21 +28,23 @@ const NOOP_MOD_ACTIONS: ModActions = {
     unvipUser: () => {},
 };
 
-interface ChatSourceAppProps {
-    token: string | undefined;
-    showSystem: boolean;
-    maxMessages: number;
-    fontSize: number;
-    width: string;
-    height: string;
-    padding: number;
+interface TrackedMessage {
+    msg: HeheMessage;
+    addedAt: number;
+    exiting: boolean;
 }
 
-export default function ChatSourceApp({ token, showSystem, maxMessages, fontSize, width, height, padding }: ChatSourceAppProps) {
+interface ChatSourceAppProps {
+    token: string | undefined;
+}
+
+const FADE_OUT_MS = 600;
+
+export default function ChatSourceApp({ token }: ChatSourceAppProps) {
     const backendWorkerRef = useRef<Worker | undefined>(undefined);
     const [profile, setProfile] = useState<Profile>({ ...DEFAULT_PROFILE });
     const [chatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
-    const [messages, setMessages] = useState<HeheMessage[]>([]);
+    const [messages, setMessages] = useState<TrackedMessage[]>([]);
     const bottomRef = useRef<HTMLDivElement>(null);
     const documentVisible = useDocumentVisibility();
     const networkStatus = useNetwork();
@@ -89,19 +91,12 @@ export default function ChatSourceApp({ token, showSystem, maxMessages, fontSize
 
             if (data.type === 'msg') {
                 const msg = parseMessage(data.data.message);
-                if (isSystemMessageType(msg) && !showSystem) return;
-                setMessages((prev) => {
-                    const next = [...prev, msg];
-                    return next.length > maxMessages ? next.slice(next.length - maxMessages) : next;
-                });
+                setMessages((prev) => [...prev, { msg, addedAt: Date.now(), exiting: false }]);
             }
 
             if (data.type === 'ytchat') {
                 const msg = parseMessage(data.data.message);
-                setMessages((prev) => {
-                    const next = [...prev, msg];
-                    return next.length > maxMessages ? next.slice(next.length - maxMessages) : next;
-                });
+                setMessages((prev) => [...prev, { msg, addedAt: Date.now(), exiting: false }]);
             }
         };
 
@@ -132,54 +127,156 @@ export default function ChatSourceApp({ token, showSystem, maxMessages, fontSize
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
+    // Message lifetime / expiry ticker
+    useEffect(() => {
+        const cfg = profile.config;
+        const maxMsg = cfg.chatBsMaxMessages ?? 5;
+        const showSystem = cfg.chatBsShowSystem ?? false;
+        const lifetime = cfg.chatBsMessageLifetime ?? 15;
+
+        const interval = setInterval(() => {
+            const now = Date.now();
+            setMessages((prev) => {
+                // filter out system messages if showSystem is off
+                let next = prev.filter(m => {
+                    if (isSystemMessageType(m.msg) && !showSystem) return false;
+                    return true;
+                });
+
+                // cap to maxMessages
+                if (next.length > maxMsg) next = next.slice(next.length - maxMsg);
+
+                if (lifetime <= 0) return next;
+
+                // mark expired messages as exiting
+                let changed = false;
+                const marked = next.map(m => {
+                    if (!m.exiting && now - m.addedAt > lifetime * 1000) {
+                        changed = true;
+                        return { ...m, exiting: true };
+                    }
+                    return m;
+                });
+                return changed ? marked : next;
+            });
+        }, 500);
+
+        return () => clearInterval(interval);
+    }, [profile.config]);
+
+    const handleAnimationEnd = (id: string) => {
+        setMessages(prev => prev.filter(m => {
+            const msgId = isSystemMessageType(m.msg) ? 'system-' + m.msg.id : m.msg.id;
+            return !(msgId === id && m.exiting);
+        }));
+    };
+
+    const cfg = profile.config;
+    const animateIn = cfg.chatBsAnimateIn ?? 'slide';
+    const animateOut = cfg.chatBsAnimateOut ?? 'fade';
+    const transparentBg = cfg.chatBsTransparentBg ?? true;
+    const textColor = cfg.chatBsTextColor || undefined;
+    const textShadow = cfg.chatBsTextShadow ?? true;
+    const msgBg = cfg.chatBsMsgBackground ?? 'none';
+    const fontSize = cfg.chatBsFontSize ?? 14;
+    const width = cfg.chatBsWidth || '100%';
+    const height = cfg.chatBsHeight || '100%';
+    const padding = cfg.chatBsPadding ?? 4;
+
+    const bsConfig = {
+        ...DEFAULT_CONFIG,
+        ...cfg,
+        fontSize,
+        showImportantBadges: cfg.chatBsShowImportantBadges ?? true,
+        showSubBadges: cfg.chatBsShowSubBadges ?? true,
+        showOtherBadges: cfg.chatBsShowOtherBadges ?? false,
+        show7TVCosmetics: cfg.chatBsShow7TVBadges ?? true,
+    };
+
+    const msgBgStyle = msgBg === 'dark'
+        ? { background: 'rgba(0,0,0,0.45)', borderRadius: 4, padding: '2px 5px', marginBottom: 2 }
+        : msgBg === 'light'
+        ? { background: 'rgba(255,255,255,0.15)', borderRadius: 4, padding: '2px 5px', marginBottom: 2 }
+        : { marginBottom: 2 };
+
+    const getInAnimation = () => {
+        if (animateIn === 'slide') return 'chatBsSlideIn 0.3s ease-out';
+        if (animateIn === 'fade') return 'chatBsFadeIn 0.3s ease-out';
+        return undefined;
+    };
+
+    const getOutAnimation = () => {
+        if (animateOut === 'fade') return `chatBsFadeOut ${FADE_OUT_MS}ms ease-in forwards`;
+        return undefined;
+    };
+
     return (
-        <MantineProvider defaultColorScheme="auto" theme={theme}>
+        <MantineProvider defaultColorScheme="dark" theme={theme}>
+            <style>{`
+                @keyframes chatBsSlideIn {
+                    from { transform: translateY(16px); opacity: 0; }
+                    to   { transform: translateY(0);    opacity: 1; }
+                }
+                @keyframes chatBsFadeIn {
+                    from { opacity: 0; }
+                    to   { opacity: 1; }
+                }
+                @keyframes chatBsFadeOut {
+                    from { opacity: 1; }
+                    to   { opacity: 0; }
+                }
+            `}</style>
             <ProfileContext.Provider value={profile}>
                 <ChatEmotesContext.Provider value={chatEmotes}>
-                    <ConfigContext.Provider value={{ ...DEFAULT_CONFIG, ...profile.config, fontSize }}>
+                    <ConfigContext.Provider value={bsConfig}>
                         <div style={{
                             width,
                             height,
-                            background: 'transparent',
+                            background: transparentBg ? 'transparent' : '#1a1a1a',
                             overflow: 'hidden',
                             display: 'flex',
                             flexDirection: 'column',
                             padding,
                             boxSizing: 'border-box',
-                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
                             fontSize,
+                            color: textColor,
+                            textShadow: textShadow ? '0 1px 3px rgba(0,0,0,0.85)' : undefined,
                         }}>
                             <div style={{ overflowY: 'scroll', display: 'flex', flexDirection: 'column', scrollbarWidth: 'none', flex: 1, minHeight: 0 }}>
                                 <div style={{ flex: 1 }} />
-                                {messages.map((msg) => {
-                                    if (isSystemMessageType(msg)) {
-                                        return (
-                                            <div key={'system-' + msg.id} style={{ flexShrink: 0 }}>
+                                {messages.map((tracked) => {
+                                    const { msg, exiting } = tracked;
+                                    const isSystem = isSystemMessageType(msg);
+                                    const isYT = isYTChatMessageType(msg);
+                                    const key = isSystem ? 'system-' + msg.id : msg.id;
+
+                                    const wrapperStyle: React.CSSProperties = {
+                                        flexShrink: 0,
+                                        animation: exiting ? getOutAnimation() : getInAnimation(),
+                                        ...msgBgStyle,
+                                    };
+
+                                    return (
+                                        <div
+                                            key={key}
+                                            style={wrapperStyle}
+                                            onAnimationEnd={exiting ? () => handleAnimationEnd(key) : undefined}
+                                        >
+                                            {isSystem && (
                                                 <SystemMessageComp
                                                     msg={msg as SystemMessage}
                                                     modActions={NOOP_MOD_ACTIONS}
                                                     moderatedChannel={{}}
                                                 />
-                                            </div>
-                                        );
-                                    }
-                                    if (isYTChatMessageType(msg)) {
-                                        return (
-                                            <div key={'ytchat-' + msg.id} style={{ flexShrink: 0 }}>
-                                                <YTChatMessageComp msg={msg as YTChatMessage} />
-                                            </div>
-                                        );
-                                    }
-                                    return (
-                                        <div key={msg.id} style={{ flexShrink: 0 }}>
-                                            <ChatMessageComp
-                                                msg={msg as HeheChatMessage}
-                                                deletedMessages={{}}
-                                                moderatedChannel={{}}
-                                                setReplyMsg={() => {}}
-                                                openModView={() => {}}
-                                                modActions={NOOP_MOD_ACTIONS}
-                                            />
+                                            )}
+                                            {isYT && <YTChatMessageBrowserSource msg={msg as YTChatMessage} />}
+                                            {!isSystem && !isYT && (
+                                                <ChatMessageBrowserSource
+                                                    msg={msg as HeheChatMessage}
+                                                    hideHeheBadges={!(cfg.chatBsShowHeheBadges ?? true)}
+                                                />
+                                            )}
                                         </div>
                                     );
                                 })}

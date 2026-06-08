@@ -25,6 +25,7 @@ interface ChatMessageProps {
     setReplyMsg: (msg?: HeheChatMessage) => void;
     hideReply?: boolean;
     forceTimestamp?: boolean;
+    hideHeheBadges?: boolean;
     openModView: (channel: string, channelId: string, username: string) => void;
     modActions: ModActions;
 }
@@ -262,9 +263,9 @@ export function ChatMessageComp(props: ChatMessageProps) {
                             size={config.fontSize}
                         />
                     )}
-                    {
+                    {!props.hideHeheBadges && (
                         props.msg.userInfo.isHeheAdmin ? <img alt={"HeheChat Admin"} src="/hehebadge_admin.webp"/> : props.msg.userInfo.isHehePro ? <img alt={"HeheChat Pro User"} src="/hehebadge.webp"/> : null
-                    }
+                    )}
                 </span>
                 <span 
                     ref={config.show7TVCosmetics ? usernameRef : undefined}

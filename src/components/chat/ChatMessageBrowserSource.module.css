@@ -1,0 +1,39 @@
+.msg {
+    padding: 0.15rem 0;
+    max-width: 100%;
+    width: 100%;
+    word-wrap: break-word;
+    overflow: hidden;
+    font-weight: 500;
+}
+
+.badges {
+    line-height: 1rem;
+    margin-right: 0.2rem;
+}
+
+.badges img {
+    vertical-align: middle;
+    margin: 0 2px;
+    height: 1.5em;
+}
+
+.text img {
+    vertical-align: bottom;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.firstBadge {
+    font-size: 10px;
+    color: rgb(100, 255, 131);
+    margin-right: 4px;
+}
+
+.highlightBadge {
+    font-size: 10px;
+    color: #3273db;
+    margin-right: 4px;
+}

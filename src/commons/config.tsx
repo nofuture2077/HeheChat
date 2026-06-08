@@ -66,7 +66,26 @@ export interface ConfigData {
     missedAlertsWindow: string,
     showBitrateIndicator: boolean,
     showSceneName: boolean,
-    showSceneSwitchNotifications: boolean
+    showSceneSwitchNotifications: boolean,
+    chatBsTransparentBg: boolean,
+    chatBsTextColor: string,
+    chatBsMessageLifetime: number,
+    chatBsAnimateIn: 'slide' | 'fade' | 'none',
+    chatBsAnimateOut: 'fade' | 'none',
+    chatBsFontSize: number,
+    chatBsMaxMessages: number,
+    chatBsPadding: number,
+    chatBsWidth: string,
+    chatBsHeight: string,
+    chatBsShowSystem: boolean,
+    chatBsShowImportantBadges: boolean,
+    chatBsShowSubBadges: boolean,
+    chatBsShowOtherBadges: boolean,
+    chatBsShow7TVBadges: boolean,
+    chatBsShowHeheBadges: boolean,
+    chatBsTextShadow: boolean,
+    chatBsShowUsername: boolean,
+    chatBsMsgBackground: 'none' | 'dark' | 'light',
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -129,6 +148,25 @@ export interface Config extends ConfigData {
     setShowBitrateIndicator: (val: boolean) => void;
     setShowSceneName: (val: boolean) => void;
     setShowSceneSwitchNotifications: (val: boolean) => void;
+    setChatBsTransparentBg: (val: boolean) => void;
+    setChatBsTextColor: (val: string) => void;
+    setChatBsMessageLifetime: (val: number) => void;
+    setChatBsAnimateIn: (val: 'slide' | 'fade' | 'none') => void;
+    setChatBsAnimateOut: (val: 'fade' | 'none') => void;
+    setChatBsFontSize: (val: number) => void;
+    setChatBsMaxMessages: (val: number) => void;
+    setChatBsPadding: (val: number) => void;
+    setChatBsWidth: (val: string) => void;
+    setChatBsHeight: (val: string) => void;
+    setChatBsShowSystem: (val: boolean) => void;
+    setChatBsShowImportantBadges: (val: boolean) => void;
+    setChatBsShowSubBadges: (val: boolean) => void;
+    setChatBsShowOtherBadges: (val: boolean) => void;
+    setChatBsShow7TVBadges: (val: boolean) => void;
+    setChatBsShowHeheBadges: (val: boolean) => void;
+    setChatBsTextShadow: (val: boolean) => void;
+    setChatBsShowUsername: (val: boolean) => void;
+    setChatBsMsgBackground: (val: 'none' | 'dark' | 'light') => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -205,6 +243,25 @@ export const DEFAULT_CONFIG: Config = {
     showBitrateIndicator: true,
     showSceneName: true,
     showSceneSwitchNotifications: true,
+    chatBsTransparentBg: true,
+    chatBsTextColor: '',
+    chatBsMessageLifetime: 15,
+    chatBsAnimateIn: 'slide',
+    chatBsAnimateOut: 'fade',
+    chatBsFontSize: 14,
+    chatBsMaxMessages: 5,
+    chatBsPadding: 4,
+    chatBsWidth: '100%',
+    chatBsHeight: '100%',
+    chatBsShowSystem: false,
+    chatBsShowImportantBadges: true,
+    chatBsShowSubBadges: true,
+    chatBsShowOtherBadges: false,
+    chatBsShow7TVBadges: true,
+    chatBsShowHeheBadges: true,
+    chatBsTextShadow: true,
+    chatBsShowUsername: true,
+    chatBsMsgBackground: 'none',
     setChannels: () => {},
     setIgnoredUsers: () => {},
     setMaxMessages: (value: number) => {},
@@ -262,6 +319,25 @@ export const DEFAULT_CONFIG: Config = {
     setShowBitrateIndicator: (val) => {},
     setShowSceneName: (val) => {},
     setShowSceneSwitchNotifications: (val) => {},
+    setChatBsTransparentBg: () => {},
+    setChatBsTextColor: () => {},
+    setChatBsMessageLifetime: () => {},
+    setChatBsAnimateIn: () => {},
+    setChatBsAnimateOut: () => {},
+    setChatBsFontSize: () => {},
+    setChatBsMaxMessages: () => {},
+    setChatBsPadding: () => {},
+    setChatBsWidth: () => {},
+    setChatBsHeight: () => {},
+    setChatBsShowSystem: () => {},
+    setChatBsShowImportantBadges: () => {},
+    setChatBsShowSubBadges: () => {},
+    setChatBsShowOtherBadges: () => {},
+    setChatBsShow7TVBadges: () => {},
+    setChatBsShowHeheBadges: () => {},
+    setChatBsTextShadow: () => {},
+    setChatBsShowUsername: () => {},
+    setChatBsMsgBackground: () => {},
 };
 
 export const DB_VERSION = 9;
