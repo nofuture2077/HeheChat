@@ -1,6 +1,6 @@
 import classes from './ChatMessageBrowserSource.module.css';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
-import { useContext } from 'react';
+import { memo, useContext } from 'react';
 import { use7TVUsernameCosmetics } from './use7TVCosmetics';
 import { SevenTVBadgeComponent } from './SevenTVBadge';
 import { adjustColorForContrast } from '../../commons/helper';
@@ -28,7 +28,7 @@ interface Props {
     hideHeheBadges?: boolean;
 }
 
-export function ChatMessageBrowserSource({ msg, hideHeheBadges }: Props) {
+export const ChatMessageBrowserSource = memo(function ChatMessageBrowserSource({ msg, hideHeheBadges }: Props) {
     const config = useContext(ConfigContext);
     const emotes = useContext(ChatEmotesContext);
     const login = useContext(LoginContextContext);
@@ -81,4 +81,4 @@ export function ChatMessageBrowserSource({ msg, hideHeheBadges }: Props) {
             <span className={classes.text}>{parsedPartsToHtml(msg.parts || [], channel, msg.msgType === 'power_ups_gigantified_emote', config, emotes, login)}</span>
         </div>
     );
-}
+});

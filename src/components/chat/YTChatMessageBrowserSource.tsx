@@ -1,6 +1,6 @@
 import classes from './ChatMessageBrowserSource.module.css';
 import { ConfigContext } from '../../ApplicationContext';
-import { useContext } from 'react';
+import { memo, useContext } from 'react';
 import { YTChatMessage, YTMessagePart } from '../../commons/message';
 import { IconBrandYoutube, IconShieldCheckFilled, IconCrown, IconShieldFilled } from '@tabler/icons-react';
 
@@ -17,7 +17,7 @@ interface Props {
     msg: YTChatMessage;
 }
 
-export function YTChatMessageBrowserSource({ msg }: Props) {
+export const YTChatMessageBrowserSource = memo(function YTChatMessageBrowserSource({ msg }: Props) {
     const config = useContext(ConfigContext);
 
     return (
@@ -55,4 +55,4 @@ export function YTChatMessageBrowserSource({ msg }: Props) {
             </span>
         </div>
     );
-}
+});

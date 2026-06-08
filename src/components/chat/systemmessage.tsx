@@ -3,7 +3,7 @@ import { formatTime, formatString } from '../../commons/helper';
 import { Text, ActionIcon } from "@mantine/core"
 import classes from './systemmessage.module.css';
 import { IconSpeakerphone } from '@tabler/icons-react';
-import { useContext } from 'react';
+import { memo, useContext } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../ApplicationContext';
 import { ModActions } from './mod/modactions';
 import { getEventStyle } from '../events/eventhelper';
@@ -53,7 +53,7 @@ const messages = {
     'streak': '${username} stream streak ${amount:whole}///${text}',
 };
 
-export function SystemMessageComp(props: SystemMessageProps) {
+export const SystemMessageComp = memo(function SystemMessageComp(props: SystemMessageProps) {
     const login = useContext(LoginContextContext);
     const config = useContext(ConfigContext);
     const emotes = useContext(ChatEmotesContext);
@@ -94,4 +94,4 @@ export function SystemMessageComp(props: SystemMessageProps) {
                 </Text>
                 {textParts.length === 2 ? <Text key="msg-second" fw={500} style={{fontSize: config.fontSize}}>{parsedPartsToHtml(msgParts, channel, false, config, emotes, login)}</Text>: null}
         </div>;
-}
+});
