@@ -45,7 +45,6 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
     const [profile, setProfile] = useState<Profile>({ ...DEFAULT_PROFILE });
     const [chatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
     const [messages, setMessages] = useState<TrackedMessage[]>([]);
-    const bottomRef = useRef<HTMLDivElement>(null);
     const documentVisible = useDocumentVisibility();
     const networkStatus = useNetwork();
 
@@ -122,10 +121,6 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
         }
         return () => { if (timeoutId) clearTimeout(timeoutId); };
     }, [networkStatus.online, documentVisible]);
-
-    useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
 
     // Message lifetime / expiry ticker
     useEffect(() => {
@@ -236,6 +231,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
                             overflow: 'hidden',
                             display: 'flex',
                             flexDirection: 'column',
+                            justifyContent: 'flex-end',
                             padding,
                             boxSizing: 'border-box',
                             fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
@@ -243,8 +239,6 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
                             color: textColor,
                             textShadow: textShadow ? '0 1px 3px rgba(0,0,0,0.85)' : undefined,
                         }}>
-                            <div style={{ overflowY: 'scroll', display: 'flex', flexDirection: 'column', scrollbarWidth: 'none', flex: 1, minHeight: 0 }}>
-                                <div style={{ flex: 1 }} />
                                 {messages.map((tracked) => {
                                     const { msg, exiting } = tracked;
                                     const isSystem = isSystemMessageType(msg);
@@ -280,8 +274,6 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
                                         </div>
                                     );
                                 })}
-                                <div ref={bottomRef} />
-                            </div>
                         </div>
                     </ConfigContext.Provider>
                 </ChatEmotesContext.Provider>
