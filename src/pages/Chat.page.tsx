@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useContext, useCallback } from 'react';
+import { useState, useEffect, useRef, useContext, useCallback, useMemo } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext, PremiumContext } from '../ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, ActionIcon, Text } from '@mantine/core';
@@ -124,6 +124,15 @@ export function ChatPage() {
 
     const messageIndex = toMap(chatMessages, m => m.id);
 
+    const filteredMessages = useMemo(() =>
+        chatMessages.filter(msg => {
+            if (!(msg instanceof SystemMessage)) return true;
+            const eventMainType = EventTypeMapping[msg.data.type as EventType] as SystemMessageMainType;
+            return msg.data.type === 'announcement' || !!config.systemMessageInChat[eventMainType];
+        }),
+        [chatMessages, config.systemMessageInChat]
+    );
+
     const scrollToBottom = () => {
         if (viewport.current) {
             viewport.current!.scrollTo({ top: viewport.current!.scrollHeight + 60 });
@@ -136,13 +145,6 @@ export function ChatPage() {
     const addMessage = (msg: HeheMessage, user: string, maxMessages: number) => {
         if (config.ignoredUsers.indexOf(user) !== -1) {
             return;
-        }
-        if (msg instanceof SystemMessage) {
-            const eventType = msg.data.type as EventType;
-            const eventMainType = EventTypeMapping[eventType] as SystemMessageMainType;
-            if (msg.data.type !== 'announcement' && !config.systemMessageInChat[eventMainType]) {
-                return;
-            }
         }
         if (msg.id && messageIndex.has(msg.id)) {
             return;
@@ -774,7 +776,7 @@ export function ChatPage() {
                             )}
                             <ScrollArea viewportRef={viewport} h="100%" type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
                                 <Space h={8}></Space>
-                                <Chat messages={chatMessages} openModView={config.rainMode ? () => {} : openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={config.rainMode ? () => {} : (msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
+                                <Chat messages={filteredMessages} openModView={config.rainMode ? () => {} : openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={config.rainMode ? () => {} : (msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
                                 <Space h={8}></Space>
                             </ScrollArea>
                         </div>
@@ -843,7 +845,7 @@ export function ChatPage() {
                 )}
                 <ScrollArea viewportRef={viewport} pos='absolute' w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
                     <Space h={48}></Space>
-                    <Chat messages={chatMessages} openModView={config.rainMode ? () => {} : openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={config.rainMode ? () => {} : (msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
+                    <Chat messages={filteredMessages} openModView={config.rainMode ? () => {} : openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={config.rainMode ? () => {} : (msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
                 </ScrollArea>
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
