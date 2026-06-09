@@ -156,10 +156,13 @@ export const RadialDial: React.FC<RadialDialProps> = ({
               key={index}
               disabled={action.disabled}
               variant="default"
-              size={72}
-              radius="xl"
               className={`${styles.actionButton} ${hoveredIndex === index ? styles.hovered : ''}`}
               style={{
+                width: 72,
+                height: 72,
+                minWidth: 72,
+                minHeight: 72,
+                borderRadius: '50%',
                 transform: `translate(${x}px, ${y}px) scale(1)`,
                 transitionDelay: `${index * 0.03}s`,
               }}
