@@ -4,7 +4,8 @@ import { MantineProvider } from '@mantine/core';
 import { ProfileContext, ChatEmotesContext, ConfigContext } from './ApplicationContext';
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { DEFAULT_CONFIG } from './commons/config';
-import { HeheMessage, parseMessage, isSystemMessageType, isYTChatMessageType, HeheChatMessage, YTChatMessage, SystemMessage } from './commons/message';
+import { HeheMessage, parseMessage, isSystemMessageType, isYTChatMessageType, HeheChatMessage, YTChatMessage, SystemMessage, SystemMessageMainType } from './commons/message';
+import { EventTypeMapping } from './commons/events';
 import { ChatMessageBrowserSource } from './components/chat/ChatMessageBrowserSource';
 import { YTChatMessageBrowserSource } from './components/chat/YTChatMessageBrowserSource';
 import { SystemMessageComp } from './components/chat/systemmessage';
@@ -110,9 +111,15 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
                 const msg = parseMessage(data.data.message);
                 setMessages((prev) => {
                     const cfg = profileRef.current.config;
-                    if (isSystemMessageType(msg) && !(cfg.chatBsShowSystem ?? false)) return prev;
-                    const ignoredUsers = (cfg.chatBsIgnoredUsers ?? []).map((u: string) => u.toLowerCase());
-                    if (!isSystemMessageType(msg) && ignoredUsers.includes((msg as HeheChatMessage).userInfo?.displayName?.toLowerCase())) return prev;
+                    if (isSystemMessageType(msg)) {
+                        if (!(cfg.chatBsShowSystem ?? false)) return prev;
+                        const sysMsg = msg as SystemMessage;
+                        const mainType = EventTypeMapping[sysMsg.data?.type] as SystemMessageMainType | undefined;
+                        if (mainType && cfg.systemMessageInChat[mainType] === false) return prev;
+                    } else {
+                        const ignoredUsers = (cfg.chatBsIgnoredUsers ?? []).map((u: string) => u.toLowerCase());
+                        if (ignoredUsers.includes((msg as HeheChatMessage).userInfo?.displayName?.toLowerCase())) return prev;
+                    }
                     return [...prev, { msg, addedAt: Date.now(), exiting: false }];
                 });
             }
@@ -151,15 +158,17 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
         const cfg = profile.config;
         const maxMsg = cfg.chatBsMaxMessages ?? 5;
         const showSystem = cfg.chatBsShowSystem ?? false;
+        const systemMessageInChat = cfg.systemMessageInChat;
         const lifetime = cfg.chatBsMessageLifetime ?? 15;
 
         const interval = setInterval(() => {
             const now = Date.now();
             setMessages((prev) => {
-                // filter out system messages if showSystem is off
                 let next = prev.filter(m => {
-                    if (isSystemMessageType(m.msg) && !showSystem) return false;
-                    return true;
+                    if (!isSystemMessageType(m.msg)) return true;
+                    if (!showSystem) return false;
+                    const mainType = EventTypeMapping[(m.msg as SystemMessage).data?.type] as SystemMessageMainType | undefined;
+                    return !mainType || systemMessageInChat[mainType] !== false;
                 });
 
                 // cap to maxMessages

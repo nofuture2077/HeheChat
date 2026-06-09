@@ -630,15 +630,11 @@ export default function HeheChat() {
     }
 
     const setSystemMessageInChat = (type: SystemMessageMainType, val: boolean) => {
-        const sm = profile.config.systemMessageInChat;
-        sm[type] = val;
-        updateConfig('systemMessageInChat', sm);
+        updateConfig('systemMessageInChat', { ...profile.config.systemMessageInChat, [type]: val });
     }
 
     const setHideEvents = (type: SystemMessageMainType, val: boolean) => {
-        const he = profile.config.hideEvents;
-        he[type] = val;
-        updateConfig('hideEvents', he);
+        updateConfig('hideEvents', { ...profile.config.hideEvents, [type]: val });
     }
 
     const setDeactivatedAlerts = (type: string, val: boolean) => {
