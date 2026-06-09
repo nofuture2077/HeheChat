@@ -156,6 +156,8 @@ export const RadialDial: React.FC<RadialDialProps> = ({
               key={index}
               disabled={action.disabled}
               variant="default"
+              size={72}
+              radius="xl"
               className={`${styles.actionButton} ${hoveredIndex === index ? styles.hovered : ''}`}
               style={{
                 transform: `translate(${x}px, ${y}px) scale(1)`,
