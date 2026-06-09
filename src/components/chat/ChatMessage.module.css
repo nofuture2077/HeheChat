@@ -5,7 +5,8 @@
     width: 100%;
     word-wrap: break-word;
     overflow: hidden;
-    font-weight: 500; 
+    font-weight: 500;
+    line-height: 1.25;
     user-select: none;
     -webkit-user-select: none;
 }
@@ -59,7 +60,7 @@
 }
 
 .channel img {
-    height: 1.5em;
+    height: 1.25em;
     vertical-align: middle;
     border-radius: 50%;
 }
@@ -72,11 +73,12 @@
 .badges img {
     vertical-align: middle;
     margin: 0px 2px;
-    height: 1.5em;
+    height: 1.25em;
  }
 
 .text img {
    vertical-align: bottom;
+   max-height: 1.25em;
 }
 
 .username {

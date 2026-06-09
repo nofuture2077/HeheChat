@@ -1,4 +1,4 @@
-import { Stack, Text, Switch, Fieldset, ActionIcon, Group, TextInput, NumberInput, Select, ColorInput } from '@mantine/core';
+import { Stack, Text, Switch, Fieldset, ActionIcon, Group, TextInput, NumberInput, Select, ColorInput, TagsInput } from '@mantine/core';
 import { useContext, useState, useEffect } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 import { IconCopy } from '@tabler/icons-react';
@@ -59,6 +59,13 @@ export function ChatBrowserSourceSettings() {
 
             <Fieldset legend="Appearance" variant="filled">
                 <Stack gap="md">
+                    <TextInput
+                        label="Font Family"
+                        description='CSS font-family value, e.g. "Arial" or "Roboto, sans-serif". Leave empty for default.'
+                        placeholder="default"
+                        value={config.chatBsFontFamily ?? ''}
+                        onChange={e => config.setChatBsFontFamily(e.currentTarget.value)}
+                    />
                     <NumberInput
                         label="Font Size (px)"
                         value={config.chatBsFontSize ?? 14}
@@ -119,6 +126,14 @@ export function ChatBrowserSourceSettings() {
                         description="CSS value, e.g. 600px or 100%"
                     />
                     <NumberInput
+                        label="Message Spacing (px)"
+                        description="Vertical gap between messages"
+                        value={config.chatBsMsgSpacing ?? 2}
+                        onChange={val => config.setChatBsMsgSpacing(Number(val))}
+                        min={0}
+                        max={40}
+                    />
+                    <NumberInput
                         label="Padding (px)"
                         value={config.chatBsPadding ?? 4}
                         onChange={val => config.setChatBsPadding(Number(val))}
@@ -151,6 +166,13 @@ export function ChatBrowserSourceSettings() {
                         checked={config.chatBsShowSystem ?? false}
                         onChange={e => config.setChatBsShowSystem(e.currentTarget.checked)}
                         size="lg"
+                    />
+                    <TagsInput
+                        label="Ignored Usernames"
+                        description="Messages from these users will be hidden. Press Enter to add."
+                        placeholder="username"
+                        value={config.chatBsIgnoredUsers ?? []}
+                        onChange={val => config.setChatBsIgnoredUsers(val)}
                     />
                     <Switch
                         label="Show Username"

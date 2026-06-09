@@ -86,6 +86,9 @@ export interface ConfigData {
     chatBsTextShadow: boolean,
     chatBsShowUsername: boolean,
     chatBsMsgBackground: 'none' | 'dark' | 'light',
+    chatBsIgnoredUsers: string[],
+    chatBsMsgSpacing: number,
+    chatBsFontFamily: string,
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -167,6 +170,9 @@ export interface Config extends ConfigData {
     setChatBsTextShadow: (val: boolean) => void;
     setChatBsShowUsername: (val: boolean) => void;
     setChatBsMsgBackground: (val: 'none' | 'dark' | 'light') => void;
+    setChatBsIgnoredUsers: (val: string[]) => void;
+    setChatBsMsgSpacing: (val: number) => void;
+    setChatBsFontFamily: (val: string) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -338,6 +344,12 @@ export const DEFAULT_CONFIG: Config = {
     setChatBsTextShadow: () => {},
     setChatBsShowUsername: () => {},
     setChatBsMsgBackground: () => {},
+    chatBsIgnoredUsers: [],
+    setChatBsIgnoredUsers: () => {},
+    chatBsMsgSpacing: 2,
+    chatBsFontFamily: '',
+    setChatBsMsgSpacing: () => {},
+    setChatBsFontFamily: () => {},
 };
 
 export const DB_VERSION = 9;

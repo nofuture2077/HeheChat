@@ -60,6 +60,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
     const [profile, setProfile] = useState<Profile>({ ...DEFAULT_PROFILE });
     const [chatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
     const [messages, setMessages] = useState<TrackedMessage[]>([]);
+    const profileRef = useRef<Profile>({ ...DEFAULT_PROFILE });
     const documentVisible = useDocumentVisibility();
     const networkStatus = useNetwork();
 
@@ -78,6 +79,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
 
             if (data.type === 'profile') {
                 const p: Profile = data.profile;
+                profileRef.current = p;
                 setProfile(p);
                 (p.config.channels || []).forEach((channel: string) => {
                     chatEmotes.updateChannel(channel);
@@ -86,6 +88,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
 
             if (data.type === 'sharedata') {
                 const p: Profile = data.profile;
+                profileRef.current = p;
                 setProfile(p);
                 (p.config.channels || []).forEach((channel: string) => {
                     chatEmotes.updateChannel(channel);
@@ -105,7 +108,13 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
 
             if (data.type === 'msg') {
                 const msg = parseMessage(data.data.message);
-                setMessages((prev) => [...prev, { msg, addedAt: Date.now(), exiting: false }]);
+                setMessages((prev) => {
+                    const cfg = profileRef.current.config;
+                    if (isSystemMessageType(msg) && !(cfg.chatBsShowSystem ?? false)) return prev;
+                    const ignoredUsers = (cfg.chatBsIgnoredUsers ?? []).map((u: string) => u.toLowerCase());
+                    if (!isSystemMessageType(msg) && ignoredUsers.includes((msg as HeheChatMessage).userInfo?.displayName?.toLowerCase())) return prev;
+                    return [...prev, { msg, addedAt: Date.now(), exiting: false }];
+                });
             }
 
             if (data.type === 'ytchat') {
@@ -194,11 +203,12 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
     }), [cfg]);
 
     const msgBg = cfg.chatBsMsgBackground ?? 'none';
+    const msgSpacing = cfg.chatBsMsgSpacing ?? 2;
     const msgBgStyle = useMemo<React.CSSProperties>(() => msgBg === 'dark'
-        ? { background: 'rgba(0,0,0,0.45)', borderRadius: 4, padding: '2px 5px', marginBottom: 2 }
+        ? { background: 'rgba(0,0,0,0.45)', borderRadius: 4, padding: '2px 5px', marginBottom: msgSpacing }
         : msgBg === 'light'
-        ? { background: 'rgba(255,255,255,0.15)', borderRadius: 4, padding: '2px 5px', marginBottom: 2 }
-        : { marginBottom: 2 }, [msgBg]);
+        ? { background: 'rgba(255,255,255,0.15)', borderRadius: 4, padding: '2px 5px', marginBottom: msgSpacing }
+        : { marginBottom: msgSpacing }, [msgBg, msgSpacing]);
 
     const animateIn = cfg.chatBsAnimateIn ?? 'slide';
     const animateOut = cfg.chatBsAnimateOut ?? 'fade';
@@ -208,17 +218,15 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
     const outAnimation = animateOut === 'fade' ? `chatBsFadeOut ${FADE_OUT_MS}ms ease-in forwards` : undefined;
 
     const fontSize = bsConfig.fontSize;
+
     const containerStyle = useMemo<React.CSSProperties>(() => ({
         width: cfg.chatBsWidth || '100%',
         height: cfg.chatBsHeight || '100%',
         background: (cfg.chatBsTransparentBg ?? true) ? 'transparent' : '#1a1a1a',
         overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-end',
         padding: cfg.chatBsPadding ?? 4,
         boxSizing: 'border-box',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+        fontFamily: cfg.chatBsFontFamily || '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
         fontSize,
         color: cfg.chatBsTextColor || undefined,
         textShadow: (cfg.chatBsTextShadow ?? true) ? '0 1px 3px rgba(0,0,0,0.85)' : undefined,
@@ -234,7 +242,8 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
                 <ChatEmotesContext.Provider value={chatEmotes}>
                     <ConfigContext.Provider value={bsConfig}>
                         <div style={containerStyle}>
-                            {messages.map((tracked) => {
+                        <div style={{ display: 'flex', flexDirection: 'column-reverse', height: '100%', overflow: 'hidden' }}>
+                            {[...messages].reverse().map((tracked) => {
                                 const { msg, exiting } = tracked;
                                 const isSystem = isSystemMessageType(msg);
                                 const isYT = isYTChatMessageType(msg);
@@ -270,6 +279,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
                                     </div>
                                 );
                             })}
+                        </div>
                         </div>
                     </ConfigContext.Provider>
                 </ChatEmotesContext.Provider>

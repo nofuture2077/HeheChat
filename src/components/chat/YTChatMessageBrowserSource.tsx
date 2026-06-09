@@ -43,7 +43,7 @@ export const YTChatMessageBrowserSource = memo(function YTChatMessageBrowserSour
                 <>
                     <span
                         className={classes.username}
-                        style={{ color: msg.authorColor ?? (msg.isOwner ? '#FFD600' : msg.isModerator ? '#5E84F1' : msg.isMembership ? '#2BA640' : undefined) }}
+                        style={{ color: msg.authorColor ?? (msg.isOwner ? '#FFD600' : msg.isModerator ? '#5E84F1' : msg.isMembership ? '#2BA640' : '#ffffff') }}
                     >
                         {msg.authorName.startsWith('@') ? msg.authorName.slice(1) : msg.authorName}
                     </span>

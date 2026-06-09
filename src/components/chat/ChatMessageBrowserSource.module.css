@@ -5,6 +5,7 @@
     word-wrap: break-word;
     overflow: hidden;
     font-weight: 500;
+    line-height: 1.25;
 }
 
 .badges {
@@ -15,11 +16,12 @@
 .badges img {
     vertical-align: middle;
     margin: 0 2px;
-    height: 1.5em;
+    height: 1.25em;
 }
 
 .text img {
     vertical-align: bottom;
+    max-height: 1.25em;
 }
 
 .username {

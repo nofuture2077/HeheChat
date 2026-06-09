@@ -475,6 +475,9 @@ export default function HeheChat() {
     const setChatBsTextShadow = (value: boolean) => updateConfig('chatBsTextShadow', value);
     const setChatBsShowUsername = (value: boolean) => updateConfig('chatBsShowUsername', value);
     const setChatBsMsgBackground = (value: 'none' | 'dark' | 'light') => updateConfig('chatBsMsgBackground', value);
+    const setChatBsIgnoredUsers = (value: string[]) => updateConfig('chatBsIgnoredUsers', value);
+    const setChatBsMsgSpacing = (value: number) => updateConfig('chatBsMsgSpacing', value);
+    const setChatBsFontFamily = (value: string) => updateConfig('chatBsFontFamily', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -759,6 +762,9 @@ export default function HeheChat() {
         setChatBsTextShadow,
         setChatBsShowUsername,
         setChatBsMsgBackground,
+        setChatBsIgnoredUsers,
+        setChatBsMsgSpacing,
+        setChatBsFontFamily,
     };
 
     const appLogin = {

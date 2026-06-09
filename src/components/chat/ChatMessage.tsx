@@ -6,7 +6,7 @@ import { useContext, useState, useRef } from 'react';
 import { use7TVUsernameCosmetics } from './use7TVCosmetics';
 import { SevenTVBadgeComponent } from './SevenTVBadge';
 import { IconArrowBackUp, IconTrash, IconClock, IconHammer, IconCopy, IconUser } from '@tabler/icons-react';
-import { Text, useComputedColorScheme } from '@mantine/core';
+import { Text, Image, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useLongPress } from "@uidotdev/usehooks";
 import { TimeoutView, BanView, DeleteMessageView } from './mod/modview';
@@ -264,7 +264,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
                         />
                     )}
                     {!props.hideHeheBadges && (
-                        props.msg.userInfo.isHeheAdmin ? <img alt={"HeheChat Admin"} src="/hehebadge_admin.webp"/> : props.msg.userInfo.isHehePro ? <img alt={"HeheChat Pro User"} src="/hehebadge.webp"/> : null
+                        props.msg.userInfo.isHeheAdmin ? <Image alt={"HeheChat Admin"} src="/hehebadge_admin.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'bottom'}} /> : props.msg.userInfo.isHehePro ? <Image alt={"HeheChat Pro User"} src="/hehebadge.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'bottom'}} /> : null
                     )}
                 </span>
                 <span 

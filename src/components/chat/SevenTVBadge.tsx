@@ -1,4 +1,5 @@
 import React from 'react';
+import { Image } from '@mantine/core';
 import { SevenTVBadge } from './7tvcosmetics';
 
 interface SevenTVBadgeProps {
@@ -38,20 +39,15 @@ export function SevenTVBadgeComponent({ badge, size = 18, className = '' }: Seve
     }
 
     return (
-        <img
+        <Image
             src={imageUrl}
             alt={badge.name}
             title={badge.tooltip || badge.name}
             className={`seventv-badge ${className}`}
-            style={{
-                display: 'inline-block',
-                verticalAlign: 'middle',
-                marginRight: '2px'
-            }}
-            onError={(e) => {
-                // Hide the image if it fails to load
-                (e.target as HTMLImageElement).style.display = 'none';
-            }}
+            h='1.25em'
+            w='auto'
+            display='inline'
+            style={{ verticalAlign: 'bottom', marginRight: '2px' }}
         />
     );
 }

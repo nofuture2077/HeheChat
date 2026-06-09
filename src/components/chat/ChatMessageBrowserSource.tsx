@@ -1,6 +1,7 @@
 import classes from './ChatMessageBrowserSource.module.css';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { memo, useContext } from 'react';
+import { Image } from '@mantine/core';
 import { use7TVUsernameCosmetics } from './use7TVCosmetics';
 import { SevenTVBadgeComponent } from './SevenTVBadge';
 import { adjustColorForContrast } from '../../commons/helper';
@@ -60,9 +61,9 @@ export const ChatMessageBrowserSource = memo(function ChatMessageBrowserSource({
                 )}
                 {!hideHeheBadges && (
                     msg.userInfo.isHeheAdmin
-                        ? <img alt="HeheChat Admin" src="/hehebadge_admin.webp" />
+                        ? <Image alt="HeheChat Admin" src="/hehebadge_admin.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'bottom'}} />
                         : msg.userInfo.isHehePro
-                        ? <img alt="HeheChat Pro" src="/hehebadge.webp" />
+                        ? <Image alt="HeheChat Pro" src="/hehebadge.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'bottom'}} />
                         : null
                 )}
             </span>
@@ -71,7 +72,7 @@ export const ChatMessageBrowserSource = memo(function ChatMessageBrowserSource({
                     <span
                         ref={config.show7TVCosmetics ? usernameRef : undefined}
                         className={classes.username}
-                        style={config.show7TVCosmetics && hasCosmetics ? {} : { color: adjustedColor }}
+                        style={adjustedColor !== undefined ? { color: adjustedColor } : {}}
                     >
                         {msg.userInfo.displayName}
                     </span>
