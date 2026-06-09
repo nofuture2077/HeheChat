@@ -137,6 +137,13 @@ export function ChatPage() {
         if (config.ignoredUsers.indexOf(user) !== -1) {
             return;
         }
+        if (msg instanceof SystemMessage) {
+            const eventType = msg.data.type as EventType;
+            const eventMainType = EventTypeMapping[eventType] as SystemMessageMainType;
+            if (msg.data.type !== 'announcement' && !config.systemMessageInChat[eventMainType]) {
+                return;
+            }
+        }
         if (msg.id && messageIndex.has(msg.id)) {
             return;
         }
@@ -493,7 +500,7 @@ export function ChatPage() {
             PubSub.unsubscribe(massBanSub);
             config.off(chatHandler);
         };
-    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, config.ignoreTTS, config.readAllMessages, loginContext.user]);
+    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, config.ignoreTTS, config.readAllMessages, config.systemMessageInChat, loginContext.user]);
 
     // Track document visibility changes for reload functionality
     useEffect(() => {
