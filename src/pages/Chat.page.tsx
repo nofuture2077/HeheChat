@@ -147,6 +147,16 @@ export function ChatPage() {
             return;
         }
         if (msg.id && messageIndex.has(msg.id)) {
+            if (!(msg instanceof SystemMessage) || messageIndex.get(msg.id) instanceof SystemMessage) {
+                return;
+            }
+            const eventMainType = EventTypeMapping[msg.data.type as EventType] as SystemMessageMainType;
+            if (msg.data.type !== 'announcement' && !config.systemMessageInChat[eventMainType]) {
+                return;
+            }
+            // System message replaces existing non-system message
+            messageIndex.set(msg.id, msg);
+            setChatMessages(prev => prev.map(m => m.id === msg.id ? msg : m));
             return;
         }
         messageIndex.set(msg.id, msg);
@@ -178,13 +188,20 @@ export function ChatPage() {
             }
 
             if (msg.id && messageIndex.has(msg.id)) {
+                if (!(msg instanceof SystemMessage) || messageIndex.get(msg.id) instanceof SystemMessage) {
+                    continue;
+                }
+                // System message replaces existing non-system message
+                const idx = newMessages.findIndex(m => m.id === msg.id);
+                if (idx !== -1) newMessages[idx] = msg;
+                messageIndex.set(msg.id, msg);
                 continue;
             }
 
             // Track username from new messages
             if (msg.type === 'chat') {
                 usernames.push(msg.userInfo.userName.toLowerCase());
-                
+
             }
             messageIndex.set(msg.id, msg);
             newMessages.push(msg);
