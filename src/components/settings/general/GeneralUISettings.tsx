@@ -1,4 +1,4 @@
-import { Stack, Fieldset, Switch, TagsInput, Alert } from '@mantine/core';
+import { Stack, Fieldset, TagsInput, Alert, Text } from '@mantine/core';
 import { useContext, useMemo } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 import { ColorSchemeToggle } from '../../colorscheme/colorscheme';
@@ -20,27 +20,21 @@ export function GeneralUISettings() {
 
     return (
         <Stack mt={30} mb={30} gap={20}>
+            <ColorSchemeToggle />
             <Fieldset legend="Channels" variant='filled'>
-                <Stack gap="xs">
-                    <Alert variant="transparent" color="blue" icon={<IconInfoCircle />} p={0}>
-                        Channels determine which Twitch chats you read and which alerts you receive.
-                    </Alert>
+                <Stack gap="sm">
                     <TagsInput
-                        placeholder=""
+                        placeholder="Add a channel…"
                         value={config.channels}
                         onChange={(channels) => config.setChannels(channels.map(c => c.toLowerCase().substring(0, 25).trim()))}
                     />
-                    {unauthorizedChannels.length > 0 && (
+                    {unauthorizedChannels.length > 0 ? (
                         <Alert variant="light" color="orange" title="Missing Authorization" icon={<IconInfoCircle />}>
                             Some channels ({unauthorizedChannels.join(', ')}) have not authorized hehechat yet. Please ask them to join or going into a shared chat to see their messages.
                         </Alert>
+                    ) : (
+                        <Text size="xs" c="dimmed">Channels determine which Twitch chats you read and which alerts you receive.</Text>
                     )}
-                </Stack>
-            </Fieldset>
-            <Fieldset legend="Appearance" variant='filled'>
-                <Stack gap="md">
-                    <ColorSchemeToggle />
-                    <Switch checked={config.rainMode} onChange={(event) => config.setRainMode(event.currentTarget.checked)} label="Rain Mode" size="lg" />
                 </Stack>
             </Fieldset>
         </Stack>

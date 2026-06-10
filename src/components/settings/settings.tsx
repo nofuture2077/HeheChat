@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Tooltip, UnstyledButton, Title, rem, Button, ScrollArea, Text, Divider, Stack, Group, Alert } from '@mantine/core';
+import { Tooltip, UnstyledButton, Title, rem, Button, ScrollArea, Text, Divider, Stack, Group, Alert, Center, Switch } from '@mantine/core';
 import {
   IconHome2,
   IconX,
@@ -39,7 +39,7 @@ import {
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ModSettings } from './ModSettings';
-import { PremiumContext } from '@/ApplicationContext';
+import { PremiumContext, ConfigContext } from '@/ApplicationContext';
 import { NotificationEnableSection, NotificationStreamStartSettings, NotificationChatMentionSettings } from './NotificationSettings';
 import { OverlayDrawer } from '@/pages/Chat.page';
 import { DiscordInfo } from './DiscordInfo';
@@ -63,6 +63,7 @@ import { Chat7TVSettings } from './chat/Chat7TVSettings';
 // Alerts
 import { AlertsAudioSettings, AlertSoundOutputSection } from './alerts/AlertsAudioSettings';
 import { AlertsSharingSettings } from './alerts/AlertsSharingSettings';
+import { AlertsActiveSettings } from './alerts/AlertsActiveSettings';
 import { AlertsEditorSettings } from './alerts/AlertsEditorSettings';
 import { AlertsFiltersSettings } from './alerts/AlertsFiltersSettings';
 import { AlertsRerollSettings } from './alerts/AlertsRerollSettings';
@@ -96,10 +97,10 @@ export const SettingsDrawer: OverlayDrawer = {
 }
 
 export type SettingsTab =
-  | 'General' | 'General/UI' | 'General/Video' | 'General/Account' | 'General/Profiles'
-  | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events' | 'Chat/Bot' | 'Chat/BrowserSource' | 'Chat/SevenTV'
+  | 'General' | 'General/UI' | 'General/Account' | 'General/Profiles'
+  | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events' | 'Chat/Bot' | 'Chat/BrowserSource' | 'Chat/SevenTV' | 'Chat/Video'
   | 'Mod'
-  | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/Reroll'
+  | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/ActiveAlerts' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/Reroll'
   | 'Notifications' | 'Notifications/StreamStart' | 'Notifications/ChatMention'
   | 'Connect' | 'Connect/ElevenLabs' | 'Connect/SoundAlerts' | 'Connect/Blerp'
   | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube'
@@ -131,7 +132,6 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: 'General', label: 'General', icon: IconHome2,
     children: [
-      { id: 'General/Video', label: 'Video Player', icon: IconDeviceTv },
       { id: 'General/Account', label: 'Account', icon: IconUser },
       { id: 'General/Profiles', label: 'Profiles', icon: IconUsers },
     ],
@@ -139,21 +139,23 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: 'Chat', label: 'Chat', icon: IconMessageChatbot,
     children: [
-      { id: 'Chat/Channels', label: 'TTS', icon: IconUsers },
       { id: 'Chat/Appearance', label: 'Appearance', icon: IconPalette },
       { id: 'Chat/Events', label: 'Chat Events', icon: IconCalendarEvent },
+      { id: 'Chat/SevenTV', label: '7TV', icon: IconSettings },
+      { id: 'Chat/Channels', label: 'TTS', icon: IconUsers },
+      { id: 'Chat/Video', label: 'Video Player', icon: IconDeviceTv },
       { id: 'Chat/Bot', label: 'Bot', icon: IconRobot },
       { id: 'Chat/BrowserSource', label: 'Browser Source', icon: IconLink },
-      { id: 'Chat/SevenTV', label: '7TV', icon: IconSettings },
     ],
   },
   {
     id: 'Alerts', label: 'Alerts', icon: IconBell,
     children: [
       { id: 'Alerts/Editor', label: 'Editor', icon: IconPencil },
-      { id: 'Alerts/Sharing', label: 'Sharing & Types', icon: IconShare },
+      { id: 'Alerts/ActiveAlerts', label: 'Active Alerts', icon: IconBell },
       { id: 'Alerts/Audio', label: 'Audio', icon: IconVolume },
       { id: 'Alerts/Filters', label: 'Sidebar', icon: IconFilter },
+      { id: 'Alerts/Sharing', label: 'Sharing', icon: IconShare },
       { id: 'Alerts/Reroll', label: 'Reroll', icon: IconRepeat },
     ],
   },
@@ -210,7 +212,7 @@ function resolveInitialTab(tab?: SettingsTab): SettingsTab {
 const tabLabels: Partial<Record<SettingsTab, string>> = {
   'General': 'General',
   'General/UI': 'General › UI',
-  'General/Video': 'General › Video Player',
+  'Chat/Video': 'Chat › Video Player',
   'General/Account': 'General › Account',
   'General/Profiles': 'General › Profiles',
   'Chat': 'Chat',
@@ -223,7 +225,8 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Mod': 'Mod',
   'Alerts': 'Alerts',
   'Alerts/Audio': 'Alerts › Audio',
-  'Alerts/Sharing': 'Alerts › Sharing & Types',
+  'Alerts/Sharing': 'Alerts › Sharing',
+  'Alerts/ActiveAlerts': 'Alerts › Active Alerts',
   'Alerts/Editor': 'Alerts › Editor',
   'Alerts/Filters': 'Alerts › Filters',
   'Alerts/Reroll': 'Alerts › Reroll',
@@ -255,6 +258,7 @@ export function Settings(props: SettingsProperties) {
   const [active, setActive] = useState<SettingsTab>(resolveInitialTab(props.tab));
   const [premiumRefreshKey, setPremiumRefreshKey] = useState(0);
   const premium = useContext(PremiumContext);
+  const config = useContext(ConfigContext);
 
   const nav = (tab: SettingsTab) => setActive(tab);
 
@@ -306,6 +310,19 @@ export function Settings(props: SettingsProperties) {
     }
   };
 
+  const renderSubMenuFooter = (groupId: SettingsTab) => {
+    switch (groupId) {
+      case 'General':
+        return (
+          <Center>
+            <Switch checked={config.rainMode} onChange={(event) => config.setRainMode(event.currentTarget.checked)} label="Rain Mode" size="lg" />
+          </Center>
+        );
+      default:
+        return null;
+    }
+  };
+
   const renderSubMenu = (group: NavGroup) => {
     const pinned = renderPinnedContent(group.id);
     return (
@@ -331,6 +348,7 @@ export function Settings(props: SettingsProperties) {
             );
           })}
         </Stack>
+        {renderSubMenuFooter(group.id)}
       </Stack>
     );
   };
@@ -353,7 +371,7 @@ export function Settings(props: SettingsProperties) {
 
   const renderContentBody = () => {
     switch (active) {
-      case 'General/Video': return <GeneralVideoSettings />;
+      case 'Chat/Video': return <GeneralVideoSettings />;
       case 'General/Account': return <GeneralAccountSettings close={props.close} openUserProfile={props.openUserProfile} />;
       case 'General/Profiles': return (
         <Stack mt={30} mb={30} gap={30}>
@@ -370,6 +388,7 @@ export function Settings(props: SettingsProperties) {
       case 'Mod': return <ModSettings />;
       case 'Alerts/Audio': return <AlertsAudioSettings />;
       case 'Alerts/Sharing': return <AlertsSharingSettings />;
+      case 'Alerts/ActiveAlerts': return <AlertsActiveSettings />;
       case 'Alerts/Editor': return <AlertsEditorSettings />;
       case 'Alerts/Filters': return <AlertsFiltersSettings />;
       case 'Alerts/Reroll': return <AlertsRerollSettings />;

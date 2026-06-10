@@ -39,44 +39,43 @@ export function ConnectFossabotSettings() {
             <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
                 Fossabot is a chat bot for Twitch. Use the generated commands below to create Fossabot commands that list top bit and subgift alerts triggered by your viewers, so you can display them in chat on demand.
             </Alert>
-            <Fieldset legend="Fossabot Bit Alerts" variant="filled">
-                <Text size="sm" mb={10}>
-                    Copy the command below and paste it into Fossabot to create a command that displays bit alerts triggered by your viewers.
-                    This command will show the top bit alerts sorted by amount.
-                </Text>
-                <Textarea
-                    label="Fossabot Command"
-                    placeholder={bitLoading ? "Loading..." : "Fossabot command will appear here"}
-                    value={bitCommand}
-                    readOnly
-                    minRows={4}
-                    maxRows={6}
-                    rightSection={
-                        <ActionIcon onClick={() => navigator.clipboard.writeText(bitCommand)} disabled={!bitCommand || bitLoading}>
-                            <IconCopy size="1rem" />
-                        </ActionIcon>
-                    }
-                />
-            </Fieldset>
-
-            <Fieldset legend="Fossabot Subgift Alerts" variant="filled">
-                <Text size="sm" mb={10}>
-                    Copy the command below and paste it into Fossabot to create a command that displays subgift alerts triggered by your viewers.
-                    This command will show the top subgift alerts sorted by amount.
-                </Text>
-                <Textarea
-                    label="Fossabot Subgift Command"
-                    placeholder={subgiftLoading ? "Loading..." : "Fossabot subgift command will appear here"}
-                    value={subgiftCommand}
-                    readOnly
-                    minRows={4}
-                    maxRows={6}
-                    rightSection={
-                        <ActionIcon onClick={() => navigator.clipboard.writeText(subgiftCommand)} disabled={!subgiftCommand || subgiftLoading}>
-                            <IconCopy size="1rem" />
-                        </ActionIcon>
-                    }
-                />
+            <Fieldset legend="Fossabot Commands" variant="filled">
+                <Stack>
+                    <Text size="sm">
+                        Copy the command below and paste it into Fossabot to create a command that displays bit alerts triggered by your viewers.
+                        This command will show the top bit alerts sorted by amount.
+                    </Text>
+                    <Textarea
+                        label="Bit Alerts Command"
+                        placeholder={bitLoading ? "Loading..." : "Fossabot command will appear here"}
+                        value={bitCommand}
+                        readOnly
+                        minRows={4}
+                        maxRows={6}
+                        rightSection={
+                            <ActionIcon onClick={() => navigator.clipboard.writeText(bitCommand)} disabled={!bitCommand || bitLoading}>
+                                <IconCopy size="1rem" />
+                            </ActionIcon>
+                        }
+                    />
+                    <Text size="sm" mt="xs">
+                        Copy the command below and paste it into Fossabot to create a command that displays subgift alerts triggered by your viewers.
+                        This command will show the top subgift alerts sorted by amount.
+                    </Text>
+                    <Textarea
+                        label="Subgift Alerts Command"
+                        placeholder={subgiftLoading ? "Loading..." : "Fossabot subgift command will appear here"}
+                        value={subgiftCommand}
+                        readOnly
+                        minRows={4}
+                        maxRows={6}
+                        rightSection={
+                            <ActionIcon onClick={() => navigator.clipboard.writeText(subgiftCommand)} disabled={!subgiftCommand || subgiftLoading}>
+                                <IconCopy size="1rem" />
+                            </ActionIcon>
+                        }
+                    />
+                </Stack>
             </Fieldset>
         </Stack>
     );
