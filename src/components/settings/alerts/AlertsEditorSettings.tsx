@@ -1,7 +1,7 @@
-import { Stack, Fieldset, Table, Anchor, ActionIcon, Space, Group, Text, Button, TextInput, Modal } from '@mantine/core';
+import { Stack, Fieldset, Table, Anchor, ActionIcon, Space, Group, Alert, Text, Button, TextInput, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useState, useEffect } from 'react';
-import { IconLink, IconPlus, IconTrash, IconCopy } from '@tabler/icons-react';
+import { IconLink, IconPlus, IconTrash, IconCopy, IconInfoCircle } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 
 interface EditorData {
@@ -72,8 +72,26 @@ export function AlertsEditorSettings() {
         }
     };
 
+    const firstEditorUrl = editors.length > 0 ? import.meta.env.VITE_EDITOR_URL + "?token=" + editors[0].token : null;
+
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" title="Alert Editor" icon={<IconInfoCircle />}>
+                The Alert Editor lets you design and configure sound and visual events that play when Twitch events happen — Subscriptions, Bits, Follows, and Raids. You can create multiple editor links and share them with your mods or trusted collaborators. Each link gives independent access to the editor, and you can revoke any link at any time by deleting it.
+            </Alert>
+            {firstEditorUrl && (
+                <Button
+                    component="a"
+                    href={firstEditorUrl}
+                    target="_blank"
+                    color="primary"
+                    variant="light"
+                    leftSection={<IconLink size={16} />}
+                    style={{ alignSelf: 'center' }}
+                >
+                    Go To Editor
+                </Button>
+            )}
             <Fieldset legend="Alert Editor" variant="filled">
                 <Table>
                     <Table.Thead>

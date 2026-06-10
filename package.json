@@ -1,7 +1,7 @@
 {
   "name": "hehe-chat",
   "private": true,
-  "version": "0.37.16",
+  "version": "0.37.18",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

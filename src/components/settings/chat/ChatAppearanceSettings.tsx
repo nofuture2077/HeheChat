@@ -1,4 +1,4 @@
-import { Switch, Stack, Fieldset, Text } from '@mantine/core';
+import { Switch, Stack, Fieldset } from '@mantine/core';
 import { useContext } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 
@@ -25,9 +25,6 @@ export function ChatAppearanceSettings() {
                     <Switch checked={config.hideAdBreak} onChange={(event) => config.setHideAdBreak(event.currentTarget.checked)} label="Hide Ad Break" size="lg" />
                     <Switch checked={config.disableEmoteDialog} onChange={(event) => config.setDisableEmoteDialog(event.currentTarget.checked)} label="Disable Emote Dialog" size="lg" />
                     <Switch checked={config.show7TVCosmetics} onChange={(event) => config.setShow7TVCosmetics(event.currentTarget.checked)} label="7TV Username Paints" size="lg" />
-                    <Switch checked={config.rainMode} onChange={(event) => config.setRainMode(event.currentTarget.checked)} label="Rain Mode" size="lg" />
-                    <Switch checked={config.readAllMessages} onChange={(event) => config.setReadAllMessages(event.currentTarget.checked)} label="Read All Messages *" size="lg" />
-                    <Text fs="italic" size='14px'>(*) HeheChatPro required</Text>
                 </Stack>
             </Fieldset>
         </Stack>

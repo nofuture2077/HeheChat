@@ -1,4 +1,4 @@
-import { TagsInput, Stack, Select, Fieldset, Space, Text, Image, Alert, Slider } from '@mantine/core';
+import { TagsInput, Stack, Select, Fieldset, Space, Text, Image, Alert, Slider, Switch } from '@mantine/core';
 import { useContext } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 
@@ -36,6 +36,12 @@ export function ChatChannelsSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Fieldset legend="Read All Messages" variant="filled">
+                <Switch checked={config.readAllMessages} onChange={(event) => config.setReadAllMessages(event.currentTarget.checked)} label="Read All Messages *" size="lg" />
+                <Space h="xs" />
+                <Text fs="italic" size='14px'>(*) HeheChatPro required</Text>
+            </Fieldset>
+
             <Fieldset legend="!tts Users" variant="filled">
                 <TagsInput placeholder="" value={config.freeTTS} onChange={(freeTTS) => config.setFreeTTS(freeTTS.map(c => c.toLowerCase().substring(0, 50).trim()))} />
                 <Space h="xs" />

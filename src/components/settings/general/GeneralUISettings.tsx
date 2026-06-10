@@ -1,11 +1,47 @@
-import { Stack, Fieldset } from '@mantine/core';
+import { Stack, Fieldset, Switch, TagsInput, Alert } from '@mantine/core';
+import { useContext, useMemo } from 'react';
+import { ConfigContext } from '@/ApplicationContext';
 import { ColorSchemeToggle } from '../../colorscheme/colorscheme';
+import { useChannels } from '@/hooks/useChannels';
+import { IconInfoCircle } from '@tabler/icons-react';
 
 export function GeneralUISettings() {
+    const config = useContext(ConfigContext);
+    const { channels: authorizedChannels, loading } = useChannels();
+
+    const unauthorizedChannels = useMemo(() => {
+        if (loading || !authorizedChannels || !config.channels || config.channels.length === 0) {
+            return [];
+        }
+        return config.channels.filter(configChannel =>
+            !authorizedChannels.some(channel => channel.toLowerCase() === configChannel.toLowerCase())
+        );
+    }, [authorizedChannels, config.channels, loading]);
+
     return (
-        <Stack mt={30} mb={30} gap={30}>
-            <Fieldset legend="Color Mode" variant='filled'>
-                <ColorSchemeToggle />
+        <Stack mt={30} mb={30} gap={20}>
+            <Fieldset legend="Channels" variant='filled'>
+                <Stack gap="xs">
+                    <Alert variant="transparent" color="blue" icon={<IconInfoCircle />} p={0}>
+                        Channels determine which Twitch chats you read and which alerts you receive.
+                    </Alert>
+                    <TagsInput
+                        placeholder=""
+                        value={config.channels}
+                        onChange={(channels) => config.setChannels(channels.map(c => c.toLowerCase().substring(0, 25).trim()))}
+                    />
+                    {unauthorizedChannels.length > 0 && (
+                        <Alert variant="light" color="orange" title="Missing Authorization" icon={<IconInfoCircle />}>
+                            Some channels ({unauthorizedChannels.join(', ')}) have not authorized hehechat yet. Please ask them to join or going into a shared chat to see their messages.
+                        </Alert>
+                    )}
+                </Stack>
+            </Fieldset>
+            <Fieldset legend="Appearance" variant='filled'>
+                <Stack gap="md">
+                    <ColorSchemeToggle />
+                    <Switch checked={config.rainMode} onChange={(event) => config.setRainMode(event.currentTarget.checked)} label="Rain Mode" size="lg" />
+                </Stack>
             </Fieldset>
         </Stack>
     );

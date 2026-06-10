@@ -48,7 +48,6 @@ import { ShortcutSettings } from './ShortcutSettings';
 import { GeneralUISettings } from './general/GeneralUISettings';
 import { GeneralVideoSettings } from './general/GeneralVideoSettings';
 import { GeneralAccountSettings } from './general/GeneralAccountSettings';
-import { GeneralChannelsSection } from './general/GeneralChannelsSection';
 import { GeneralBotSettings } from './general/GeneralBotSettings';
 import { GeneralProfileSettings } from './general/GeneralProfileSettings';
 import { ProfileSelector } from '../profile/profilebar';
@@ -145,22 +144,14 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Chat/BrowserSource', label: 'Browser Source', icon: IconLink },
     ],
   },
-  { id: 'Mod', label: 'Mod', icon: IconSword },
   {
     id: 'Alerts', label: 'Alerts', icon: IconBell,
     children: [
-      { id: 'Alerts/Audio', label: 'Audio', icon: IconVolume },
-      { id: 'Alerts/Sharing', label: 'Sharing', icon: IconShare },
       { id: 'Alerts/Editor', label: 'Editor', icon: IconPencil },
-      { id: 'Alerts/Filters', label: 'Filters', icon: IconFilter },
+      { id: 'Alerts/Sharing', label: 'Sharing', icon: IconShare },
+      { id: 'Alerts/Audio', label: 'Audio', icon: IconVolume },
+      { id: 'Alerts/Filters', label: 'Sidebar', icon: IconFilter },
       { id: 'Alerts/Reroll', label: 'Reroll', icon: IconRepeat },
-    ],
-  },
-  {
-    id: 'Notifications', label: 'Notifications', icon: IconUserUp,
-    children: [
-      { id: 'Notifications/StreamStart', label: 'Stream Start', icon: IconBell },
-      { id: 'Notifications/ChatMention', label: 'Chat Mention', icon: IconMessageChatbot },
     ],
   },
   {
@@ -183,6 +174,14 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Switcher/Provider', label: 'Provider', icon: IconSettings },
       { id: 'Switcher/Rules', label: 'Rules', icon: IconList },
       { id: 'Switcher/Tokens', label: 'Tokens', icon: IconKey },
+    ],
+  },
+  { id: 'Mod', label: 'Mod', icon: IconSword },
+  {
+    id: 'Notifications', label: 'Notifications', icon: IconUserUp,
+    children: [
+      { id: 'Notifications/StreamStart', label: 'Stream Start', icon: IconBell },
+      { id: 'Notifications/ChatMention', label: 'Chat Mention', icon: IconMessageChatbot },
     ],
   },
   {
@@ -264,10 +263,7 @@ export function Settings(props: SettingsProperties) {
     switch (groupId) {
       case 'General':
         return (
-          <Stack gap={30}>
-            <GeneralUISettings />
-            <GeneralChannelsSection />
-          </Stack>
+          <GeneralUISettings />
         );
       case 'Chat':
         return <ChatTopSection />;
