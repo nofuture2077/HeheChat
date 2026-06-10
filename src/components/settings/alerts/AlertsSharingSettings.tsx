@@ -1,4 +1,5 @@
-import { Stack, Text, Switch, Fieldset, Space, Divider, TagsInput } from '@mantine/core';
+import { Stack, Text, Switch, Fieldset, Space, Divider, TagsInput, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
@@ -65,6 +66,9 @@ export function AlertsSharingSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+                Share your alert sounds with other streamers so they can use them on their channel, and receive alerts from channels that share with you. Use the per-channel toggles below to enable received alerts, then enable or disable individual alert types per channel.
+            </Alert>
             <Fieldset legend="Share Alerts with" variant="filled">
                 <TagsInput placeholder="" value={config.shares} onChange={(s) => setShares(s.map(c => c.toLowerCase().substring(0, 25).trim()))} />
                 <Space h="xs" />

@@ -1,4 +1,5 @@
-import { TextInput, Fieldset, Stack, Text, Switch } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, Switch, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { ConfigContext } from '../../../ApplicationContext';
 
@@ -21,6 +22,9 @@ export function ConnectSoundAlertsSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+                SoundAlerts lets your viewers trigger sound effects via Channel Points or bits. Connecting the overlay URL allows HeheChat to receive and display SoundAlert events in your chat and alert feed.
+            </Alert>
             <Fieldset legend="SoundAlerts Config" variant="filled">
                 <Switch
                     label="Enable SoundAlerts"

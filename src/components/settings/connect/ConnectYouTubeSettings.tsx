@@ -79,6 +79,9 @@ export function ConnectYouTubeSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+                Connect your YouTube channel to receive live chat messages from your YouTube streams directly in HeheChat alongside your Twitch chat.
+            </Alert>
             <Fieldset legend="YouTube Chat" variant="filled">
                 <Text size="sm" mb={10}>
                     Connect your YouTube channel to receive live chat messages from your YouTube streams in HeheChat.

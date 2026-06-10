@@ -1,4 +1,5 @@
-import { Textarea, Fieldset, Stack, Text, ActionIcon } from '@mantine/core';
+import { Textarea, Fieldset, Stack, Text, ActionIcon, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { IconCopy } from '@tabler/icons-react';
 import { ProfileContext, ConfigContext } from '@/ApplicationContext';
@@ -35,6 +36,9 @@ export function ConnectFossabotSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+                Fossabot is a chat bot for Twitch. Use the generated commands below to create Fossabot commands that list top bit and subgift alerts triggered by your viewers, so you can display them in chat on demand.
+            </Alert>
             <Fieldset legend="Fossabot Bit Alerts" variant="filled">
                 <Text size="sm" mb={10}>
                     Copy the command below and paste it into Fossabot to create a command that displays bit alerts triggered by your viewers.

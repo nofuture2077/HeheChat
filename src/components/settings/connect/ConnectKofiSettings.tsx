@@ -1,4 +1,5 @@
-import { TextInput, Fieldset, Stack, Text, ActionIcon } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, ActionIcon, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 import { IconCopy } from '@tabler/icons-react';
 
@@ -21,6 +22,9 @@ export function ConnectKofiSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+                Ko-fi lets your supporters send donations, buy memberships, or purchase from your shop. Connect via webhook so HeheChat can receive Ko-fi donation events and show them in your alert feed.
+            </Alert>
             <Fieldset legend="Ko-fi Integration" variant="filled">
                 <Text size="sm" mb={10}>
                     To integrate Ko-fi with HeheChat, follow these steps:

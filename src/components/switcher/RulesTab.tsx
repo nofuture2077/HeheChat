@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 import {
-    Stack, Table, Button, ActionIcon, Switch, Group, Modal,
-    Select, NumberInput, Text, Badge, TextInput,
+    Stack, Button, ActionIcon, Switch, Group, Modal,
+    Select, NumberInput, Text, Badge, TextInput, Card,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconPencil, IconTrash, IconPlus } from '@tabler/icons-react';
@@ -189,60 +189,48 @@ export function RulesTab() {
             {sorted.length === 0 ? (
                 <Text size="sm" c="dimmed">No rules configured.</Text>
             ) : (
-                <Table striped withTableBorder>
-                    <Table.Thead>
-                        <Table.Tr>
-                            <Table.Th>#</Table.Th>
-                            <Table.Th>Condition</Table.Th>
-                            <Table.Th>Scene</Table.Th>
-                            <Table.Th>Group</Table.Th>
-                            <Table.Th>On</Table.Th>
-                            <Table.Th></Table.Th>
-                        </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                        {sorted.map(rule => (
-                            <Table.Tr key={rule.id}>
-                                <Table.Td>{rule.priority}</Table.Td>
-                                <Table.Td>
-                                    <Text size="xs">
-                                        {rule.condition.metric} {rule.condition.operator} {rule.condition.value}
+                <Stack gap="sm">
+                    {sorted.map(rule => (
+                        <Card key={rule.id} withBorder p="sm" radius="md">
+                            <Group justify="space-between" wrap="nowrap" align="flex-start">
+                                <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+                                    <Group gap="xs" wrap="wrap">
+                                        <Badge size="sm" variant="outline" color="gray">#{rule.priority}</Badge>
+                                        <Text size="sm" fw={500}>
+                                            {rule.condition.metric} {rule.condition.operator} {rule.condition.value}
+                                        </Text>
                                         {rule.condition.duration_ms > 0 && (
-                                            <Badge size="xs" ml={4} variant="light">
-                                                {rule.condition.duration_ms}ms
-                                            </Badge>
+                                            <Badge size="xs" variant="light">{rule.condition.duration_ms}ms</Badge>
                                         )}
-                                    </Text>
-                                </Table.Td>
-                                <Table.Td>
-                                    <Text size="xs">{rule.target_scene || '—'}</Text>
-                                </Table.Td>
-                                <Table.Td>
-                                    {rule.scene_group
-                                        ? <Badge size="xs" variant="light" color="blue">{rule.scene_group}</Badge>
-                                        : <Text size="xs" c="dimmed">—</Text>}
-                                </Table.Td>
-                                <Table.Td>
+                                    </Group>
+                                    <Group gap="xs" wrap="wrap">
+                                        <Text size="xs" c="dimmed">Scene:</Text>
+                                        <Text size="xs">{rule.target_scene || '—'}</Text>
+                                        {rule.scene_group && (
+                                            <Badge size="xs" variant="light" color="blue">{rule.scene_group}</Badge>
+                                        )}
+                                    </Group>
+                                    {rule.chat_message && (
+                                        <Text size="xs" c="dimmed" fs="italic" truncate>{rule.chat_message}</Text>
+                                    )}
+                                </Stack>
+                                <Group gap="xs" wrap="nowrap">
                                     <Switch
                                         size="sm"
                                         checked={rule.enabled}
                                         onChange={e => handleToggle(rule, e.currentTarget.checked)}
                                     />
-                                </Table.Td>
-                                <Table.Td>
-                                    <Group gap={4}>
-                                        <ActionIcon size="sm" variant="subtle" onClick={() => openEdit(rule)}>
-                                            <IconPencil size={14} />
-                                        </ActionIcon>
-                                        <ActionIcon size="sm" variant="subtle" color="red" onClick={() => handleDelete(rule)}>
-                                            <IconTrash size={14} />
-                                        </ActionIcon>
-                                    </Group>
-                                </Table.Td>
-                            </Table.Tr>
-                        ))}
-                    </Table.Tbody>
-                </Table>
+                                    <ActionIcon variant="subtle" onClick={() => openEdit(rule)}>
+                                        <IconPencil size={16} />
+                                    </ActionIcon>
+                                    <ActionIcon variant="subtle" color="red" onClick={() => handleDelete(rule)}>
+                                        <IconTrash size={16} />
+                                    </ActionIcon>
+                                </Group>
+                            </Group>
+                        </Card>
+                    ))}
+                </Stack>
             )}
         </Stack>
     );
