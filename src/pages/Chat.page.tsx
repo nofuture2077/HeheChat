@@ -386,19 +386,6 @@ export function ChatPage() {
     }, [config, profile]);
 
     useEffect(() => {
-        if (profile.name === 'default' && !config.channels.length) {
-            setTimeout(() => {
-                if (loginContext.user) {
-                    config.setChannels([loginContext.user!.name]);
-                }
-                setDrawer({...SettingsDrawer, props: {tab: 'Chat'} });
-                drawerHandler.open();
-            }, 7000);
-        }
-        config.loadShares();
-    }, []);
-
-    useEffect(() => {
         if (!config.channels || !config.channels.length || !loginContext.user) {
             return;
         }
