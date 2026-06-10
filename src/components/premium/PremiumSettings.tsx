@@ -1,84 +1,30 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { Stack, Title, Tabs, Text, Group, Divider } from '@mantine/core';
-import { IconCrown, IconTicket, IconBrandPaypal, IconHistory, IconGift } from '@tabler/icons-react';
+import React, { useContext } from 'react';
+import { Stack, Text, Divider } from '@mantine/core';
 import { PremiumContext } from '@/ApplicationContext';
-import { PremiumDetails } from '../premium/PremiumDetails';
-import { RedeemCode } from '../premium/RedeemCode';
-import { PayPalSubscription } from '../premium/PayPalSubscription';
-import { DonationPremium } from '../premium/DonationPremium';
-import classes from './Premium.module.css';
+import { PremiumDetails } from './PremiumDetails';
 
-export const PremiumSettings: React.FC = () => {
+export const PremiumSettings: React.FC<{ refreshKey?: number }> = ({ refreshKey }) => {
   const premium = useContext(PremiumContext);
-  const [activeTab, setActiveTab] = useState<string | null>('redeem');
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  // Set initial tab based on premium status
-  useEffect(() => {
-    setActiveTab(premium.isPremium ? 'details' : 'donate');
-  }, [premium.isPremium]);
-
-  const handleSuccess = () => {
-    // Force a refresh of the premium details
-    setRefreshKey(prev => prev + 1);
-    // Switch to the details tab to show the updated subscription
-    setActiveTab('details');
-  };
 
   return (
     <Stack key={refreshKey} gap="md">
-      <Group justify="space-between" mt="md">
-        <Title order={3} className={classes.premiumDetailsHeader}>
-          <IconCrown className={classes.premiumIcon} size={24} />
-          HeheChat Pro
-        </Title>
-      </Group>
-
       {!premium.isPremium && (
         <>
-          <Text>
-            Upgrade to HeheChat Pro to unlock premium features and support the development of HeheChat.
-          </Text>
-
-          <div className={classes.premiumFeatureList}>
+          <Text>Upgrade to HeheChat Pro to unlock premium features and support the development of HeheChat.</Text>
+          <div>
             <Text fw={600} mb="xs">Premium Features:</Text>
             <ul style={{ paddingLeft: '20px', margin: 0 }}>
-              <li>Deluxe TTS Voices</li>
-              <li>Push Notifications</li>
-              <li>Read all chat messages</li>
-              <li>Cool HeheChat Badge</li>
+              <li>Deluxe TTS Voices (ElevenLabs AI)</li>
+              <li>Push Notifications for stream events</li>
+              <li>Read All Chat Messages via TTS</li>
+              <li>OBS Remote / Scene Switcher</li>
+              <li>Cool HeheChat Pro Badge in chat</li>
             </ul>
           </div>
-
-          <Divider my="sm" />
+          <Divider />
         </>
       )}
-
-      <Tabs value={activeTab} onChange={setActiveTab}>
-        <Tabs.List>
-            <Tabs.Tab value="details" leftSection={<IconCrown size="1rem" />}>
-            </Tabs.Tab>
-            <Tabs.Tab value="donate" leftSection={<IconGift size="1rem" />}>
-            </Tabs.Tab>
-            <Tabs.Tab value="redeem" leftSection={<IconTicket size="1rem" />}>
-            </Tabs.Tab>
-            <Tabs.Tab value="history" leftSection={<IconHistory size="1rem" />}>
-            </Tabs.Tab>
-        </Tabs.List>
-
-        <Tabs.Panel value="donate" pt="xs">
-          <DonationPremium />
-        </Tabs.Panel>
-        <Tabs.Panel value="details" pt="xs">
-          <PremiumDetails />
-        </Tabs.Panel>
-        <Tabs.Panel value="history" pt="xs">
-          <Text>Subscription history will be displayed here.</Text>
-        </Tabs.Panel>
-        <Tabs.Panel value="redeem" pt="xs">
-          <RedeemCode onSuccess={handleSuccess} />
-        </Tabs.Panel>
-      </Tabs>
+      <PremiumDetails />
     </Stack>
   );
 };

@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Tooltip, UnstyledButton, Title, rem, Button, ScrollArea, Text, Divider, Stack, Group, Alert, Center, Switch } from '@mantine/core';
+import { Tooltip, UnstyledButton, Title, rem, Button, ScrollArea, Text, Stack, Group, Alert, Center, Switch } from '@mantine/core';
 import {
   IconHome2,
   IconX,
@@ -28,7 +28,6 @@ import {
   IconDeviceTv,
   IconTicket,
   IconGift,
-  IconHistory,
   IconSettings,
   IconList,
   IconKey,
@@ -85,7 +84,7 @@ import { TokenTab } from '../switcher/TokenTab';
 import { PremiumRequired } from '../switcher/PremiumRequired';
 
 // Premium
-import { PremiumDetails } from '../premium/PremiumDetails';
+import { PremiumSettings } from '../premium/PremiumSettings';
 import { DonationPremium } from '../premium/DonationPremium';
 import { RedeemCode } from '../premium/RedeemCode';
 
@@ -106,7 +105,7 @@ export type SettingsTab =
   | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube'
   | 'Shortcuts'
   | 'Switcher' | 'Switcher/Provider' | 'Switcher/Rules' | 'Switcher/Tokens'
-  | 'Premium' | 'Premium/Donate' | 'Premium/Redeem' | 'Premium/History'
+  | 'Premium' | 'Premium/Donate' | 'Premium/Redeem'
   | 'Discord';
 
 export interface SettingsProperties {
@@ -194,7 +193,6 @@ const NAV_GROUPS: NavGroup[] = [
     children: [
       { id: 'Premium/Donate', label: 'Donate', icon: IconGift },
       { id: 'Premium/Redeem', label: 'Redeem', icon: IconTicket },
-      { id: 'Premium/History', label: 'History', icon: IconHistory },
     ],
   },
   { id: 'Discord', label: 'Discord', icon: IconBrandDiscord },
@@ -250,7 +248,6 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Premium': 'Premium',
   'Premium/Donate': 'Premium › Donate',
   'Premium/Redeem': 'Premium › Redeem',
-  'Premium/History': 'Premium › History',
   'Discord': 'Discord',
 };
 
@@ -284,27 +281,7 @@ export function Settings(props: SettingsProperties) {
           </Alert>
         );
       case 'Premium':
-        return (
-          <Stack key={premiumRefreshKey} gap="md">
-            {!premium.isPremium && (
-              <>
-                <Text>Upgrade to HeheChat Pro to unlock premium features and support the development of HeheChat.</Text>
-                <div>
-                  <Text fw={600} mb="xs">Premium Features:</Text>
-                  <ul style={{ paddingLeft: '20px', margin: 0 }}>
-                    <li>Deluxe TTS Voices (ElevenLabs AI)</li>
-                    <li>Push Notifications for stream events</li>
-                    <li>Read All Chat Messages via TTS</li>
-                    <li>OBS Remote / Scene Switcher</li>
-                    <li>Cool HeheChat Pro Badge in chat</li>
-                  </ul>
-                </div>
-                <Divider />
-              </>
-            )}
-            <PremiumDetails />
-          </Stack>
-        );
+        return <PremiumSettings refreshKey={premiumRefreshKey} />;
       default:
         return null;
     }
@@ -429,7 +406,6 @@ export function Settings(props: SettingsProperties) {
       );
       case 'Premium/Donate': return <DonationPremium />;
       case 'Premium/Redeem': return <RedeemCode onSuccess={() => { setPremiumRefreshKey(k => k + 1); setActive('Premium'); }} />;
-      case 'Premium/History': return <Stack mt={30}><Text>Subscription history will be displayed here.</Text></Stack>;
       case 'Discord': return <DiscordInfo />;
       default: return null;
     }

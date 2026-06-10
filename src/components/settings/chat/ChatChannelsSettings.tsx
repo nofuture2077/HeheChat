@@ -36,6 +36,9 @@ export function ChatChannelsSettings() {
         <Stack mt={30} mb={30} gap={30}>
             <Fieldset legend="TTS" variant="filled">
                 <Stack gap="md">
+                    <Alert color="blue" variant="light">
+                        All Chat TTS features require a <strong>Read Chat</strong> alert with <strong>TTS Text</strong> options configured in Alert Editor.
+                    </Alert>
                     <Switch checked={config.readAllMessages} onChange={(event) => config.setReadAllMessages(event.currentTarget.checked)} label="Read All Messages" description="HeheChatPro required" size="lg" />
                     <TagsInput label="!tts Users" placeholder="" value={config.freeTTS} onChange={(freeTTS) => config.setFreeTTS(freeTTS.map(c => c.toLowerCase().substring(0, 50).trim()))} description='Users who can use "!tts" in chat. Use "all" to give everyone free TTS.' />
                     <TagsInput label="Ignore TTS Users" placeholder="" value={config.ignoreTTS} onChange={(ignoreTTS) => config.setIgnoreTTS(ignoreTTS.map(c => c.toLowerCase().substring(0, 50).trim()))} description="Users in this list will be ignored by Read All Messages." />
