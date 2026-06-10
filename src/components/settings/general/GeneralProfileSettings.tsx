@@ -1,4 +1,5 @@
-import { TextInput, Button, ActionIcon, Modal, Fieldset, Group, Stack } from '@mantine/core';
+import { TextInput, Button, ActionIcon, Modal, Fieldset, Group, Stack, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
 import { IconTrash, IconPencil, IconCopy } from '@tabler/icons-react';
 import { useContext, useState } from 'react';
@@ -12,6 +13,10 @@ export function GeneralProfileSettings() {
     const [cloneOpen, cloneHandler] = useDisclosure(false);
 
     return (
+        <Stack gap="md">
+        <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+            Profiles let you save and switch between different HeheChat configurations — useful if you stream on multiple channels or want separate setups for different occasions. Each profile stores its own settings independently. Clone a profile to reuse your current setup as a starting point.
+        </Alert>
         <Fieldset legend="Current Profile" variant='filled'>
             <Stack>
                 <TextInput value={profile.name} readOnly disabled rightSection={
@@ -38,6 +43,7 @@ export function GeneralProfileSettings() {
                 <Button variant="filled" color="pink" leftSection={<IconTrash size={14} />} onClick={confirmDeleteHandler.open}>Delete</Button>
             </Stack>
         </Fieldset>
+        </Stack>
     );
 }
 

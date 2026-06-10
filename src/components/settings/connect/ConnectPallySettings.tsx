@@ -1,4 +1,5 @@
-import { TextInput, Fieldset, Stack, Text } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 
 export function ConnectPallySettings() {
@@ -22,6 +23,9 @@ export function ConnectPallySettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+                Pally.gg is a donation and campaign platform for streamers. Connect your API key and campaign slug so HeheChat can receive Pally.gg donation events and display them in your alert feed.
+            </Alert>
             <Fieldset legend="Pally.gg Config" variant="filled">
                 <Text size="sm" mb={10}>
                     To connect Pally.gg with HeheChat:

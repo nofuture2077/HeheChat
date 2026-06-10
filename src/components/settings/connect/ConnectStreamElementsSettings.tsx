@@ -1,4 +1,5 @@
-import { TextInput, Fieldset, Stack, Text } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 
 export function ConnectStreamElementsSettings() {
@@ -17,6 +18,9 @@ export function ConnectStreamElementsSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+                StreamElements provides donation and tip alerts. Connect your JWT token so HeheChat can receive StreamElements tip events and display them in your chat and alert feed.
+            </Alert>
             <Fieldset legend="Streamelements Config" variant="filled">
                 <Text size="sm" mb={10}>
                     To connect StreamElements with HeheChat:

@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Tooltip, UnstyledButton, Title, rem, Button, ScrollArea, Text, Divider, Stack, Group } from '@mantine/core';
+import { Tooltip, UnstyledButton, Title, rem, Button, ScrollArea, Text, Divider, Stack, Group, Alert } from '@mantine/core';
 import {
   IconHome2,
   IconX,
@@ -35,6 +35,7 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconRobot,
+  IconInfoCircle,
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ModSettings } from './ModSettings';
@@ -57,6 +58,7 @@ import { ChatChannelsSettings, ChatTopSection } from './chat/ChatChannelsSetting
 import { ChatAppearanceSettings } from './chat/ChatAppearanceSettings';
 import { ChatEventsSettings } from './chat/ChatEventsSettings';
 import { ChatBrowserSourceSettings } from './chat/ChatBrowserSourceSettings';
+import { Chat7TVSettings } from './chat/Chat7TVSettings';
 
 // Alerts
 import { AlertsAudioSettings, AlertSoundOutputSection } from './alerts/AlertsAudioSettings';
@@ -95,7 +97,7 @@ export const SettingsDrawer: OverlayDrawer = {
 
 export type SettingsTab =
   | 'General' | 'General/UI' | 'General/Video' | 'General/Account' | 'General/Profiles'
-  | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events' | 'Chat/Bot' | 'Chat/BrowserSource'
+  | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events' | 'Chat/Bot' | 'Chat/BrowserSource' | 'Chat/SevenTV'
   | 'Mod'
   | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/Reroll'
   | 'Notifications' | 'Notifications/StreamStart' | 'Notifications/ChatMention'
@@ -103,7 +105,7 @@ export type SettingsTab =
   | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube'
   | 'Shortcuts'
   | 'Switcher' | 'Switcher/Provider' | 'Switcher/Rules' | 'Switcher/Tokens'
-  | 'Premium' | 'Premium/Status' | 'Premium/Donate' | 'Premium/Redeem' | 'Premium/History'
+  | 'Premium' | 'Premium/Donate' | 'Premium/Redeem' | 'Premium/History'
   | 'Discord';
 
 export interface SettingsProperties {
@@ -139,16 +141,17 @@ const NAV_GROUPS: NavGroup[] = [
     children: [
       { id: 'Chat/Channels', label: 'TTS', icon: IconUsers },
       { id: 'Chat/Appearance', label: 'Appearance', icon: IconPalette },
-      { id: 'Chat/Events', label: 'Events', icon: IconCalendarEvent },
+      { id: 'Chat/Events', label: 'Chat Events', icon: IconCalendarEvent },
       { id: 'Chat/Bot', label: 'Bot', icon: IconRobot },
       { id: 'Chat/BrowserSource', label: 'Browser Source', icon: IconLink },
+      { id: 'Chat/SevenTV', label: '7TV', icon: IconSettings },
     ],
   },
   {
     id: 'Alerts', label: 'Alerts', icon: IconBell,
     children: [
       { id: 'Alerts/Editor', label: 'Editor', icon: IconPencil },
-      { id: 'Alerts/Sharing', label: 'Sharing', icon: IconShare },
+      { id: 'Alerts/Sharing', label: 'Sharing & Types', icon: IconShare },
       { id: 'Alerts/Audio', label: 'Audio', icon: IconVolume },
       { id: 'Alerts/Filters', label: 'Sidebar', icon: IconFilter },
       { id: 'Alerts/Reroll', label: 'Reroll', icon: IconRepeat },
@@ -169,11 +172,11 @@ const NAV_GROUPS: NavGroup[] = [
   },
   { id: 'Shortcuts', label: 'Shortcuts', icon: IconKeyboard },
   {
-    id: 'Switcher', label: 'Switcher', icon: IconSwitchHorizontal,
+    id: 'Switcher', label: 'OBS Remote', icon: IconSwitchHorizontal,
     children: [
       { id: 'Switcher/Provider', label: 'Provider', icon: IconSettings },
       { id: 'Switcher/Rules', label: 'Rules', icon: IconList },
-      { id: 'Switcher/Tokens', label: 'Tokens', icon: IconKey },
+      { id: 'Switcher/Tokens', label: 'Browsersource', icon: IconKey },
     ],
   },
   { id: 'Mod', label: 'Mod', icon: IconSword },
@@ -187,7 +190,6 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: 'Premium', label: 'Premium', icon: IconCrown,
     children: [
-      { id: 'Premium/Status', label: 'Status', icon: IconCrown },
       { id: 'Premium/Donate', label: 'Donate', icon: IconGift },
       { id: 'Premium/Redeem', label: 'Redeem', icon: IconTicket },
       { id: 'Premium/History', label: 'History', icon: IconHistory },
@@ -214,13 +216,14 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Chat': 'Chat',
   'Chat/Channels': 'Chat › TTS',
   'Chat/Appearance': 'Chat › Appearance',
-  'Chat/Events': 'Chat › Events',
+  'Chat/Events': 'Chat › Chat Events',
   'Chat/Bot': 'Chat › Bot',
   'Chat/BrowserSource': 'Chat › Browser Source',
+  'Chat/SevenTV': 'Chat › 7TV',
   'Mod': 'Mod',
   'Alerts': 'Alerts',
   'Alerts/Audio': 'Alerts › Audio',
-  'Alerts/Sharing': 'Alerts › Sharing',
+  'Alerts/Sharing': 'Alerts › Sharing & Types',
   'Alerts/Editor': 'Alerts › Editor',
   'Alerts/Filters': 'Alerts › Filters',
   'Alerts/Reroll': 'Alerts › Reroll',
@@ -237,12 +240,11 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Connect/Fossabot': 'Connect › Fossabot',
   'Connect/YouTube': 'Connect › YouTube',
   'Shortcuts': 'Shortcuts',
-  'Switcher': 'Switcher',
-  'Switcher/Provider': 'Switcher › Provider',
-  'Switcher/Rules': 'Switcher › Rules',
-  'Switcher/Tokens': 'Switcher › Tokens',
+  'Switcher': 'OBS Remote',
+  'Switcher/Provider': 'OBS Remote › Provider',
+  'Switcher/Rules': 'OBS Remote › Rules',
+  'Switcher/Tokens': 'OBS Remote › Browsersource',
   'Premium': 'Premium',
-  'Premium/Status': 'Premium › Status',
   'Premium/Donate': 'Premium › Donate',
   'Premium/Redeem': 'Premium › Redeem',
   'Premium/History': 'Premium › History',
@@ -271,12 +273,28 @@ export function Settings(props: SettingsProperties) {
         return <NotificationEnableSection />;
       case 'Alerts':
         return <AlertSoundOutputSection />;
+      case 'Switcher':
+        return (
+          <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+            OBS Remote / Scene Switcher automatically switches OBS scenes based on your stream's health metrics (bitrate, RTT). It connects to your stream ingest provider and OBS WebSocket to react to stream state changes in real time. Requires Premium.
+          </Alert>
+        );
       case 'Premium':
         return (
           <Stack key={premiumRefreshKey} gap="md">
             {!premium.isPremium && (
               <>
                 <Text>Upgrade to HeheChat Pro to unlock premium features and support the development of HeheChat.</Text>
+                <div>
+                  <Text fw={600} mb="xs">Premium Features:</Text>
+                  <ul style={{ paddingLeft: '20px', margin: 0 }}>
+                    <li>Deluxe TTS Voices (ElevenLabs AI)</li>
+                    <li>Push Notifications for stream events</li>
+                    <li>Read All Chat Messages via TTS</li>
+                    <li>OBS Remote / Scene Switcher</li>
+                    <li>Cool HeheChat Pro Badge in chat</li>
+                  </ul>
+                </div>
                 <Divider />
               </>
             )}
@@ -348,6 +366,7 @@ export function Settings(props: SettingsProperties) {
       case 'Chat/Events': return <ChatEventsSettings />;
       case 'Chat/Bot': return <Stack mt={30} mb={30} gap={30}><GeneralBotSettings /></Stack>;
       case 'Chat/BrowserSource': return <ChatBrowserSourceSettings />;
+      case 'Chat/SevenTV': return <Chat7TVSettings />;
       case 'Mod': return <ModSettings />;
       case 'Alerts/Audio': return <AlertsAudioSettings />;
       case 'Alerts/Sharing': return <AlertsSharingSettings />;
@@ -365,31 +384,32 @@ export function Settings(props: SettingsProperties) {
       case 'Connect/Fossabot': return <ConnectFossabotSettings />;
       case 'Connect/YouTube': return <ConnectYouTubeSettings />;
       case 'Shortcuts': return <ShortcutSettings />;
-      case 'Switcher/Provider': return premium.isPremium ? <ProviderConfigTab /> : <PremiumRequired />;
-      case 'Switcher/Rules': return premium.isPremium ? <RulesTab /> : <PremiumRequired />;
-      case 'Switcher/Tokens': return premium.isPremium ? <TokenTab /> : <PremiumRequired />;
-      case 'Premium/Status': return (
-        <Stack key={premiumRefreshKey} mt={30} mb={30} gap="md">
-          {!premium.isPremium && (
-            <>
-              <Text>Upgrade to HeheChat Pro to unlock premium features and support the development of HeheChat.</Text>
-              <div>
-                <Text fw={600} mb="xs">Premium Features:</Text>
-                <ul style={{ paddingLeft: '20px', margin: 0 }}>
-                  <li>Deluxe TTS Voices</li>
-                  <li>Push Notifications</li>
-                  <li>Read all chat messages</li>
-                  <li>Cool HeheChat Badge</li>
-                </ul>
-              </div>
-              <Divider my="sm" />
-            </>
-          )}
-          <PremiumDetails />
+      case 'Switcher/Provider': return (
+        <Stack mt={30} mb={30} gap={30}>
+          <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+            Configure your stream ingest provider (e.g. nginx-rtmp, SRT server). HeheChat monitors the incoming stream signal from this provider to detect when your stream goes online or offline and trigger scene switches automatically. Scene switching on stream stop requires the HeheChat Browser Source to be added as a source in OBS (see Chat › Browser Source for the URL).
+          </Alert>
+          {premium.isPremium ? <ProviderConfigTab /> : <PremiumRequired />}
+        </Stack>
+      );
+      case 'Switcher/Rules': return (
+        <Stack mt={30} mb={30} gap={30}>
+          <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+            Rules define which OBS scene to switch to based on stream metrics like bitrate or RTT. For example: switch to a "Low Bitrate" scene when bitrate drops below a threshold, or switch to "Starting Soon" when the stream goes offline. Rules that trigger on stream stop require the HeheChat Browser Source to be added as a source in OBS (see Chat › Browser Source for the URL).
+          </Alert>
+          {premium.isPremium ? <RulesTab /> : <PremiumRequired />}
+        </Stack>
+      );
+      case 'Switcher/Tokens': return (
+        <Stack mt={30} mb={30} gap={30}>
+          <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+            Add this page as a Browser Source in OBS to enable automatic scene switching. Enter your OBS WebSocket URL and password, then copy the generated URL and paste it into an OBS Browser Source.
+          </Alert>
+          {premium.isPremium ? <TokenTab /> : <PremiumRequired />}
         </Stack>
       );
       case 'Premium/Donate': return <DonationPremium />;
-      case 'Premium/Redeem': return <RedeemCode onSuccess={() => { setPremiumRefreshKey(k => k + 1); setActive('Premium/Status'); }} />;
+      case 'Premium/Redeem': return <RedeemCode onSuccess={() => { setPremiumRefreshKey(k => k + 1); setActive('Premium'); }} />;
       case 'Premium/History': return <Stack mt={30}><Text>Subscription history will be displayed here.</Text></Stack>;
       case 'Discord': return <DiscordInfo />;
       default: return null;

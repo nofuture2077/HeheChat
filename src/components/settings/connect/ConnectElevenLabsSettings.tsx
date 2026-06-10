@@ -1,4 +1,5 @@
-import { TextInput, Fieldset, Stack, Text } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 
 export function ConnectElevenLabsSettings() {
@@ -17,6 +18,9 @@ export function ConnectElevenLabsSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+                ElevenLabs provides high-quality AI text-to-speech voices for TTS alerts and chat. Connect your account with an API key to unlock Deluxe TTS Voices (Premium feature). Usage counts against your ElevenLabs quota — be mindful when sharing alerts with AI-TTS enabled.
+            </Alert>
             <Fieldset legend="Elevenlabs Config" variant="filled">
                 <Text size="sm" mb={10}>
                     To connect ElevenLabs with HeheChat:

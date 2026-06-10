@@ -1,4 +1,5 @@
-import { Stack, Text, Switch, Fieldset } from '@mantine/core';
+import { Stack, Switch, Fieldset, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
@@ -27,6 +28,9 @@ export function AlertsFiltersSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+                Choose which event types appear in the sidebar drawer. Events shown here are collected in real time and can be replayed later — useful for reviewing subs, raids, and donations you may have missed during your stream.
+            </Alert>
             <Fieldset legend="Hide Events" variant='filled'>
                 <Stack>
                     {hideEventsValues.map(eventType => (
@@ -42,12 +46,6 @@ export function AlertsFiltersSettings() {
                         checked={config.skipEmotesInTTS}
                         onChange={(event) => { config.setSkipEmotesInTTS(event.currentTarget.checked); forceUpdate(); }}
                         label="Skip emotes in TTS"
-                        size="lg"
-                    />
-                    <Switch
-                        checked={config.skip7TVEmotesInTTS}
-                        onChange={(event) => { config.setSkip7TVEmotesInTTS(event.currentTarget.checked); forceUpdate(); }}
-                        label="Skip 7TV emotes in TTS"
                         size="lg"
                     />
                     <Switch

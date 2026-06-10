@@ -1,4 +1,5 @@
-import { TextInput, Fieldset, Stack, Text, Switch } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, Switch, Alert } from '@mantine/core';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { ConfigContext } from '../../../ApplicationContext';
 
@@ -25,6 +26,9 @@ export function ConnectBlerpSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+                Blerp lets viewers play sound clips during your stream via Channel Points. Connect your Blerp room so HeheChat can receive and display Blerp events in your chat and alert feed.
+            </Alert>
             <Fieldset legend="Blerp Config" variant="filled">
                 <Switch
                     label="Enable Blerp"
