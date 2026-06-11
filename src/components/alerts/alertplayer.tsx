@@ -933,6 +933,8 @@ class AlertPlayer {
         eventData: any;
         skipReason?: string;
     }) {
+        this.currentlyPlaying = event;
+
         const onEnd = () => {
             console.log('Stop Playing');
             this.stopPlaying();
@@ -961,11 +963,12 @@ class AlertPlayer {
 
             this.startPlaying();
             // Direct access to blerp audio without proxy
-            this.getAudioInfo(alertInfo.audioUrl!).then((audioInfo) => {
-                PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration || 5}); // Default to 5 seconds if duration unknown
-                this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
-            }, onError);
-            return;
+            return new Promise<void>((resolve, reject) => {
+                this.getAudioInfo(alertInfo.audioUrl!).then((audioInfo) => {
+                    PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration || 5});
+                    this.playAudio(1.0, audioInfo, 0).then(() => { onEnd(); resolve(); }, (err) => { onError(err); reject(err); });
+                }, (err) => { onError(err); reject(err); });
+            });
         }
 
         // Handle soundalerts (direct audio URL)
@@ -982,11 +985,12 @@ class AlertPlayer {
             }
 
             this.startPlaying();
-            this.getAudioInfo(alertInfo.audioUrl!).then((audioInfo) => {
-                PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration || 5});
-                this.playAudio(1.0, audioInfo, 0).then(onEnd, onError);
-            }, onError);
-            return;
+            return new Promise<void>((resolve, reject) => {
+                this.getAudioInfo(alertInfo.audioUrl!).then((audioInfo) => {
+                    PubSub.publish('AlertPlayer-update', {duration: audioInfo?.duration || 5});
+                    this.playAudio(1.0, audioInfo, 0).then(() => { onEnd(); resolve(); }, (err) => { onError(err); reject(err); });
+                }, (err) => { onError(err); reject(err); });
+            });
         }
 
         // At this point we have a standard alert
@@ -1014,7 +1018,6 @@ class AlertPlayer {
         const sink = localStorage.getItem('hehe-sink') || '';
         this.startPlaying();
         console.log('Start playing');
-        this.currentlyPlaying = event;
         const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", {
             ...vars,
             text: (eventData && eventData.text) ? this.parsedPartsToTTSText(eventData.text.parts || eventData.text) : undefined
