@@ -29,6 +29,7 @@ export interface ConfigData {
     showSubBadges: boolean;
     showPredictions: boolean;
     showOtherBadges: boolean;
+    maxBadges: number;
     hideViewers: boolean;
     hideOwnViewers: boolean;
     hideHypetrain: boolean;
@@ -90,6 +91,7 @@ export interface ConfigData {
     chatBsIgnoredUsers: string[],
     chatBsMsgSpacing: number,
     chatBsFontFamily: string,
+    chatBsMaxBadges: number,
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -104,6 +106,7 @@ export interface Config extends ConfigData {
     setShowSubBadges: (value: boolean) => void;
     setShowPredictions: (value: boolean) => void;
     setShowOtherBadges: (value: boolean) => void;
+    setMaxBadges: (val: number) => void;
     getChatChannel: () => string | undefined;
     setChatChannel: (channel: string) => void;
     setChatEnabled: (val: boolean) => void;
@@ -175,6 +178,7 @@ export interface Config extends ConfigData {
     setChatBsIgnoredUsers: (val: string[]) => void;
     setChatBsMsgSpacing: (val: number) => void;
     setChatBsFontFamily: (val: string) => void;
+    setChatBsMaxBadges: (val: number) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -192,6 +196,7 @@ export const DEFAULT_CONFIG: Config = {
     showSubBadges: true,
     showPredictions: false,
     showOtherBadges: false,
+    maxBadges: 3,
     fontSize: 14,
     compactMode: false,
     modToolsEnabled: false,
@@ -352,8 +357,11 @@ export const DEFAULT_CONFIG: Config = {
     setChatBsIgnoredUsers: () => {},
     chatBsMsgSpacing: 2,
     chatBsFontFamily: '',
+    chatBsMaxBadges: 3,
     setChatBsMsgSpacing: () => {},
     setChatBsFontFamily: () => {},
+    setChatBsMaxBadges: () => {},
+    setMaxBadges: () => {},
 };
 
 export const DB_VERSION = 9;

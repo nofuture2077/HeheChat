@@ -12,7 +12,7 @@ import { useLongPress } from "@uidotdev/usehooks";
 import { TimeoutView, BanView, DeleteMessageView } from './mod/modview';
 import { formatTime, adjustColorForContrast, joinWithSpace } from '../../commons/helper';
 import { ModActions } from './mod/modactions';
-import { Config, ConfigKey } from '../../commons/config';
+import { Config } from '../../commons/config';
 import { ChatEmotes } from '../../commons/emotes';
 import { EmoteComponent } from '../emote/emote';
 import { HeheChatMessage, ParsedMessagePart } from '../../commons/message';
@@ -83,13 +83,63 @@ const predictionBadgeIndex = ['predictions'].reduce((obj: any, key: string) => {
 
 const badgeIndex = {...importantBadgeIndex, ...subscriberBadgeIndex, ...predictionBadgeIndex};
 
-function getBadge(config: Config, emotes: ChatEmotes, channel: string, key: string, index: string) {
-    const [badge, version] = key.split(',');
-    const requireSetting = badgeIndex[badge];
-    if (requireSetting && config[requireSetting as ConfigKey] || !requireSetting && config.showOtherBadges) {
-        return emotes.getBadge(channel, key, index);
+
+import { SevenTVUserCosmetics } from './7tvcosmetics';
+
+function getPrioritizedBadges(
+    config: Config,
+    emotes: ChatEmotes,
+    channel: string,
+    badges: Record<string, string>,
+    sevenTVCosmetics: SevenTVUserCosmetics | null,
+    isHeheAdmin: boolean,
+    isHehePro: boolean,
+    hideHeheBadges: boolean,
+    fontSize: number
+): React.ReactNode[] {
+    const max = config.maxBadges ?? 3;
+    const result: React.ReactNode[] = [];
+    const entries = Object.entries(badges);
+
+    for (const [k, v] of entries) {
+        if (result.length >= max) break;
+        if (importantBadgeIndex[k] && config.showImportantBadges) {
+            const node = emotes.getBadge(channel, `${k},${v}`, k);
+            if (node) result.push(node);
+        }
     }
-    return '';
+    for (const [k, v] of entries) {
+        if (result.length >= max) break;
+        if (subscriberBadgeIndex[k] && config.showSubBadges) {
+            const node = emotes.getBadge(channel, `${k},${v}`, k);
+            if (node) result.push(node);
+        }
+    }
+    if (!hideHeheBadges && result.length < max && config.show7TVCosmetics && sevenTVCosmetics?.badge) {
+        result.push(<SevenTVBadgeComponent key="seventv-badge" badge={sevenTVCosmetics.badge} size={fontSize} />);
+    }
+    if (!hideHeheBadges && result.length < max) {
+        if (isHeheAdmin) {
+            result.push(<Image key="hehe-admin" alt="HeheChat Admin" src="/hehebadge_admin.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'text-bottom'}} />);
+        } else if (isHehePro) {
+            result.push(<Image key="hehe-pro" alt="HeheChat Pro User" src="/hehebadge.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'text-bottom'}} />);
+        }
+    }
+    for (const [k, v] of entries) {
+        if (result.length >= max) break;
+        if (predictionBadgeIndex[k] && config.showPredictions) {
+            const node = emotes.getBadge(channel, `${k},${v}`, k);
+            if (node) result.push(node);
+        }
+    }
+    for (const [k, v] of entries) {
+        if (result.length >= max) break;
+        if (!badgeIndex[k] && config.showOtherBadges) {
+            const node = emotes.getBadge(channel, `${k},${v}`, k);
+            if (node) result.push(node);
+        }
+    }
+    return result;
 }
 
 export function ChatMessageComp(props: ChatMessageProps) {
@@ -256,17 +306,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
                 {(config.showProfilePicture && !props.hideReply) ? <span key='channel' className={classes.channel}>{emotes.getLogo(channel)}</span>: null}
                 {config.showTimestamp || props.forceTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span> : null}
                 <span className={classes.badges}>
-                    {Object.entries(props.msg.userInfo.badges).map((entry, index) =>  getBadge(config, emotes, channel, entry.join(','), index.toString()))}
-                    {config.show7TVCosmetics && cosmetics?.badge && (
-                        <SevenTVBadgeComponent 
-                            key="seventv-badge" 
-                            badge={cosmetics.badge} 
-                            size={config.fontSize}
-                        />
-                    )}
-                    {!props.hideHeheBadges && (
-                        props.msg.userInfo.isHeheAdmin ? <Image alt={"HeheChat Admin"} src="/hehebadge_admin.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'text-bottom'}} /> : props.msg.userInfo.isHehePro ? <Image alt={"HeheChat Pro User"} src="/hehebadge.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'text-bottom'}} /> : null
-                    )}
+                    {getPrioritizedBadges(config, emotes, channel, props.msg.userInfo.badges, cosmetics, props.msg.userInfo.isHeheAdmin, props.msg.userInfo.isHehePro, props.hideHeheBadges ?? false, config.fontSize)}
                 </span>
                 <span 
                     ref={config.show7TVCosmetics ? usernameRef : undefined}

@@ -244,6 +244,13 @@ export function ChatBrowserSourceSettings() {
                         onChange={e => config.setChatBsShowHeheBadges(e.currentTarget.checked)}
                         size="lg"
                     />
+                    <NumberInput
+                        label="Max Badges"
+                        value={config.chatBsMaxBadges ?? 3}
+                        onChange={val => config.setChatBsMaxBadges(Number(val))}
+                        min={0}
+                        max={5}
+                    />
                 </Stack>
             </Fieldset>
         </Stack>

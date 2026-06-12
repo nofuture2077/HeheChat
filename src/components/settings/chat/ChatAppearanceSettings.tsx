@@ -1,4 +1,4 @@
-import { Switch, Stack, Fieldset } from '@mantine/core';
+import { Switch, Stack, Fieldset, NumberInput } from '@mantine/core';
 import { useContext } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
 
@@ -7,23 +7,35 @@ export function ChatAppearanceSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
-            <Fieldset legend="Chat cosmetics" variant='filled'>
+            <Fieldset legend="Basic" variant='filled'>
                 <Stack>
-                    <Switch checked={config.reloadOnReturnToApp} onChange={(event) => config.setReloadOnReturnToApp(event.currentTarget.checked)} label="Reload on Return" size="lg" />
-                    <Switch checked={config.chatEnabled} onChange={(event) => config.setChatEnabled(event.currentTarget.checked)} label="Chat Input" size="lg" />
                     <Switch checked={config.showTimestamp} onChange={(event) => config.setShowTimestamp(event.currentTarget.checked)} label="Timestamp" size="lg" />
                     <Switch checked={config.showProfilePicture} onChange={(event) => config.setShowProfilePicture(event.currentTarget.checked)} label="Profile Picture" size="lg" />
+                </Stack>
+            </Fieldset>
+            <Fieldset legend="Badges" variant='filled'>
+                <Stack>
                     <Switch checked={config.showImportantBadges} onChange={(event) => config.setShowImportantBadges(event.currentTarget.checked)} label="Important Badges" size="lg" />
                     <Switch checked={config.showSubBadges} onChange={(event) => config.setShowSubBadges(event.currentTarget.checked)} label="Sub Badges" size="lg" />
                     <Switch checked={config.showPredictions} onChange={(event) => config.setShowPredictions(event.currentTarget.checked)} label="Prediction Badges" size="lg" />
                     <Switch checked={config.showOtherBadges} onChange={(event) => config.setShowOtherBadges(event.currentTarget.checked)} label="Other Badges" size="lg" />
+                    <NumberInput label="Max Badges" value={config.maxBadges ?? 3} onChange={val => config.setMaxBadges(Number(val))} min={0} max={5} />
+                </Stack>
+            </Fieldset>
+<Fieldset legend="Input" variant='filled'>
+                <Stack>
+                    <Switch checked={config.chatEnabled} onChange={(event) => config.setChatEnabled(event.currentTarget.checked)} label="Chat Input" size="lg" />
+                    <Switch checked={config.disableEmoteDialog} onChange={(event) => config.setDisableEmoteDialog(event.currentTarget.checked)} label="Disable Emote Dialog" size="lg" />
+                </Stack>
+            </Fieldset>
+            <Fieldset legend="Events" variant='filled'>
+                <Stack>
                     <Switch checked={config.hideHypetrain} onChange={(event) => config.setHideHypetrain(event.currentTarget.checked)} label="Hide Hypetrain" size="lg" />
                     <Switch checked={config.hidePrediction} onChange={(event) => config.setHidePrediction(event.currentTarget.checked)} label="Hide Predictions" size="lg" />
                     <Switch checked={config.hidePoll} onChange={(event) => config.setHideePoll(event.currentTarget.checked)} label="Hide Polls" size="lg" />
                     <Switch checked={config.hideShoutout} onChange={(event) => config.setHideShoutout(event.currentTarget.checked)} label="Hide Shoutouts" size="lg" />
                     <Switch checked={config.hideRaid} onChange={(event) => config.setHideRaid(event.currentTarget.checked)} label="Hide Raids" size="lg" />
                     <Switch checked={config.hideAdBreak} onChange={(event) => config.setHideAdBreak(event.currentTarget.checked)} label="Hide Ad Break" size="lg" />
-                    <Switch checked={config.disableEmoteDialog} onChange={(event) => config.setDisableEmoteDialog(event.currentTarget.checked)} label="Disable Emote Dialog" size="lg" />
                 </Stack>
             </Fieldset>
         </Stack>

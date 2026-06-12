@@ -19,6 +19,7 @@ export function ChatTopSection() {
                     )}
                     <TagsInput label="Ignored Users" placeholder="" value={config.ignoredUsers} onChange={(users) => config.setIgnoredUsers(users.map(u => u.toLowerCase().substring(0, 25).trim()))} description="Messages from these users (e.g. bots) will not show in your Chat." />
 
+                    <Switch checked={config.reloadOnReturnToApp} onChange={(event) => config.setReloadOnReturnToApp(event.currentTarget.checked)} label="Reload on Return" description="Reload HeheChat on App-Switch to not miss messages" size="lg" />
                     <Switch checked={config.compactMode} onChange={(event) => config.setCompactMode(event.currentTarget.checked)} label="Compact Mode" description="Reduces line height for a denser chat view." size="lg" />
                     <Stack gap={0} mb="md">
                         <Text size="sm">Font Size</Text>

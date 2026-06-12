@@ -190,6 +190,8 @@ export default function HeheChat() {
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 profileData.config.systemMessageInChat.streak ??= true;
                 profileData.config.missedAlertsWindow ??= '15m';
+                profileData.config.maxBadges ??= 3;
+                profileData.config.chatBsMaxBadges ??= 3;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);
@@ -420,6 +422,7 @@ export default function HeheChat() {
     const setShowSubBadges = (value: boolean) => updateConfig('showSubBadges', value);
     const setShowPredictions = (value: boolean) => updateConfig('showPredictions', value);
     const setShowOtherBadges = (value: boolean) => updateConfig('showOtherBadges', value);
+    const setMaxBadges = (value: number) => updateConfig('maxBadges', value);
     const setFontSize = (value: number) => updateConfig('fontSize', value);
     const setCompactMode = (value: boolean) => updateConfig('compactMode', value);
     const setModToolsEnabled = (value: boolean) => updateConfig('modToolsEnabled', value);
@@ -479,6 +482,7 @@ export default function HeheChat() {
     const setChatBsIgnoredUsers = (value: string[]) => updateConfig('chatBsIgnoredUsers', value);
     const setChatBsMsgSpacing = (value: number) => updateConfig('chatBsMsgSpacing', value);
     const setChatBsFontFamily = (value: string) => updateConfig('chatBsFontFamily', value);
+    const setChatBsMaxBadges = (value: number) => updateConfig('chatBsMaxBadges', value);
 
     const getChatChannel = () => {
         if (profile.config.channels.includes(profile.config.chatChannel || '')) {
@@ -763,6 +767,8 @@ export default function HeheChat() {
         setChatBsIgnoredUsers,
         setChatBsMsgSpacing,
         setChatBsFontFamily,
+        setChatBsMaxBadges,
+        setMaxBadges,
     };
 
     const appLogin = {
