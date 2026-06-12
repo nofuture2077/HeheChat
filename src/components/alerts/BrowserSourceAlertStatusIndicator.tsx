@@ -18,7 +18,7 @@ export function BrowserSourceAlertStatusIndicator(_props: BrowserSourceAlertStat
     isChecking 
   } = useVersionCheck({
     checkInterval: 30 * 60 * 1000, // Check every 30 minutes
-    remoteManifestUrl: `${import.meta.env.VITE_SINK_URL}/manifest.json`,
+    remoteManifestUrl: window.location.origin + '/manifest.json',
     onNewVersionDetected: (current, latest) => {
       console.log(`New version detected: ${current} -> ${latest}`);
       // Start countdown for update

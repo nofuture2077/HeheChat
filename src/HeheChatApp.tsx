@@ -158,7 +158,7 @@ export default function HeheChat() {
     // (iPhone home-screen launch) doesn't drift on an old build.
     useVersionCheck({
         checkInterval: 30 * 60 * 1000,
-        remoteManifestUrl: `${import.meta.env.VITE_SINK_URL}/manifest.json`,
+        remoteManifestUrl: window.location.origin + '/manifest.json',
         onNewVersionDetected: (_current, latest) => {
             if (latest) localStorage.setItem('hehe-current-version', latest);
             window.location.reload();
