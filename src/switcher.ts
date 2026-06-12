@@ -1,3 +1,4 @@
+import { version } from '../package.json';
 import OBSWebSocket from 'obs-websocket-js';
 
 const params = new URLSearchParams(location.search);
@@ -192,7 +193,7 @@ function connectHehe() {
     heheWs.addEventListener('open', () => {
         heheConnected = true;
         updateStatus();
-        heheWs!.send(JSON.stringify({ type: 'obs-client', token }));
+        heheWs!.send(JSON.stringify({ type: 'obs-client', token, version }));
     });
 
     heheWs.addEventListener('message', async (event) => {
