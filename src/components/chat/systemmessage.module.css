@@ -36,31 +36,35 @@
     line-height: 1.25 !important;
 }
 
-.raid, .announcement, .hypetrain {
+.msg:nth-child(odd) {
+    background-image: linear-gradient(rgba(255,255,255,0.05), rgba(255,255,255,0.05));
+}
+
+.msg.raid, .msg.announcement, .msg.hypetrain {
     background-color: #db32bcb0;
 }
 
-.follow, .channelPointRedemption {
+.msg.follow, .msg.channelPointRedemption {
     background-color: #7932db80;
 }
 
-.streak {
+.msg.streak {
     background-color: #db8c3280;
 }
 
-.delete, .timeout, .ban, .unban, .mod, .unmod, .vip, .unvip {
+.msg.delete, .msg.timeout, .msg.ban, .msg.unban, .msg.mod, .msg.unmod, .msg.vip, .msg.unvip {
     background-color: #db326d80;
 }
 
-.cheer, .donation, .blerp,  .sub_1000, .sub_2000, .sub_3000, .sub_Prime, .subgift_1000, .subgift_2000, .subgift_3000, .subgiftb_1000, .subgiftb_2000, .subgiftb_3000, .kofisub, .kofidono, .kofishop {
+.msg.cheer, .msg.donation, .msg.blerp, .msg.sub_1000, .msg.sub_2000, .msg.sub_3000, .msg.sub_Prime, .msg.subgift_1000, .msg.subgift_2000, .msg.subgift_3000, .msg.subgiftb_1000, .msg.subgiftb_2000, .msg.subgiftb_3000, .msg.kofisub, .msg.kofidono, .msg.kofishop {
     background-color: #32db3980;
 }
 
-.streamOnline, .streamOffline {
+.msg.streamOnline, .msg.streamOffline {
     background-color: #3248db80;
 }
 
-.seventv_emote_add, .seventv_emote_remove {
+.msg.seventv_emote_add, .msg.seventv_emote_remove {
     background-color: #9532dbd4;
 }
 
