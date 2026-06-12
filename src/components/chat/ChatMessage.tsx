@@ -240,14 +240,15 @@ export function ChatMessageComp(props: ChatMessageProps) {
     deleted && msgClasses.push(classes.deleted);
     props.msg.isFirst && msgClasses.push(classes.first);
     props.msg.isHighlight && msgClasses.push(classes.highlight);
+    config.compactMode && msgClasses.push(classes.compact);
     const largeEmote = props.msg.msgType === 'power_ups_gigantified_emote';
     const badge = props.msg.isFirst ? <span className={classes.firstBadge} key="first-badge">FIRST MESSAGE</span> : props.msg.isHighlight ? <span className={classes.highlightBadge} key="highlight-badge">HIGHLIGHT</span> : null;
 
     return (
         <>
-            <div 
+            <div
                 ref={messageRef}
-                className={msgClasses.join(' ')} 
+                className={msgClasses.join(' ')}
                 onContextMenu={(e) => e.preventDefault()} // Prevent right-click menu
                 {...longPressEvent}
             >

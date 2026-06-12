@@ -421,6 +421,7 @@ export default function HeheChat() {
     const setShowPredictions = (value: boolean) => updateConfig('showPredictions', value);
     const setShowOtherBadges = (value: boolean) => updateConfig('showOtherBadges', value);
     const setFontSize = (value: number) => updateConfig('fontSize', value);
+    const setCompactMode = (value: boolean) => updateConfig('compactMode', value);
     const setModToolsEnabled = (value: boolean) => updateConfig('modToolsEnabled', value);
     const setPlayAlerts = (value: boolean) => updateConfig('playAlerts', value);
     const setShowVideo = (value: boolean) => updateConfig('showVideo', value);
@@ -698,6 +699,7 @@ export default function HeheChat() {
         setVideoQuality,
         getChatChannel,
         setFontSize,
+        setCompactMode,
         setModToolsEnabled,
         setRaidTargets,
         setFreeTTS,

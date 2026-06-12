@@ -39,6 +39,7 @@ export interface ConfigData {
     hideAdBreak: boolean;
     disableEmoteDialog: boolean;
     fontSize: number;
+    compactMode: boolean;
     modToolsEnabled: boolean;
     raidTargets: string[];
     playAlerts: boolean;
@@ -110,6 +111,7 @@ export interface Config extends ConfigData {
     off: (handler: MessageHandler) => void;
     fireMessage: (channel: string, text: string, replyTo?: string) => void;
     setFontSize: (val: number) => void;
+    setCompactMode: (val: boolean) => void;
     setModToolsEnabled: (val: boolean) => void;
     setRaidTargets: (val: string[]) => void;
     setPlayAlerts: (val: boolean) => void;
@@ -191,6 +193,7 @@ export const DEFAULT_CONFIG: Config = {
     showPredictions: false,
     showOtherBadges: false,
     fontSize: 14,
+    compactMode: false,
     modToolsEnabled: false,
     raidTargets: [],
     playAlerts: false,
@@ -287,6 +290,7 @@ export const DEFAULT_CONFIG: Config = {
     off: (handler: MessageHandler) => {},
     fireMessage: (channel: string, text: string, replyTo?: string) => {},
     setFontSize: (val) => {},
+    setCompactMode: (val) => {},
     setModToolsEnabled: (val) => {},
     setRaidTargets: (val) => {},
     setPlayAlerts: (val) => {},

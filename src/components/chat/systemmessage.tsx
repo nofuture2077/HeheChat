@@ -86,7 +86,7 @@ export const SystemMessageComp = memo(function SystemMessageComp(props: SystemMe
     }
 
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)} style={{ verticalAlign: 'middle' }}><IconSpeakerphone size={22} /></ActionIcon> : null;
-    return <div className={[classes.msg, classes[props.msg.subType], classes[props.msg.data.color]].join(' ')}>
+    return <div className={[classes.msg, classes[props.msg.subType], classes[props.msg.data.color], config.compactMode ? classes.compact : ''].join(' ')}>
                 {config.showProfilePicture ? <span className={classes.logo}>{emotes.getLogo(props.msg.data.channel)}</span> : null}
                 {config.showTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)} </span> : null}
                 <Text {...style} key="msg-main" fw={700} style={{fontSize: config.fontSize, color: "light-dark(black, white)"}} span>

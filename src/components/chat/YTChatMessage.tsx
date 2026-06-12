@@ -24,6 +24,7 @@ export function YTChatMessageComp(props: YTChatMessageProps) {
     const emotes = useContext(ChatEmotesContext);
 
     const msgClasses = [classes.msg];
+    config.compactMode && msgClasses.push(classes.compact);
     const channelName = props.msg.target.substring(1);
 
     return (

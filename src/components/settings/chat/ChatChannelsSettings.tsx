@@ -19,7 +19,8 @@ export function ChatTopSection() {
                     )}
                     <TagsInput label="Ignored Users" placeholder="" value={config.ignoredUsers} onChange={(users) => config.setIgnoredUsers(users.map(u => u.toLowerCase().substring(0, 25).trim()))} description="Messages from these users (e.g. bots) will not show in your Chat." />
 
-                    <Stack gap={0}>
+                    <Switch checked={config.compactMode} onChange={(event) => config.setCompactMode(event.currentTarget.checked)} label="Compact Mode" description="Reduces line height for a denser chat view." size="lg" />
+                    <Stack gap={0} mb="md">
                         <Text size="sm">Font Size</Text>
                         <Slider w="calc(100% - 20px)" m="10" value={config.fontSize} onChange={config.setFontSize} min={14} max={26} label={(value) => `${value} px`} marks={fontSizeMarks} />
                     </Stack>

@@ -1,14 +1,19 @@
 .msg {
     padding: 0.2rem 12px;
+    line-height: 1.5;
     position: relative;
     max-width: 100%;
     width: 100%;
     word-wrap: break-word;
     overflow: hidden;
     font-weight: 500;
-    line-height: 1.25;
     user-select: none;
     -webkit-user-select: none;
+}
+
+
+.compact {
+    line-height: 1.25 !important;
 }
 
 .msg:nth-child(odd) {

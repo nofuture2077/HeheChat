@@ -1,5 +1,6 @@
 .msg {
-    padding: 6px;
+    padding: 0.2rem 12px;
+    line-height: 1.5;
     text-align: center;
 
     max-width: 100%;
@@ -28,6 +29,11 @@
         margin-right: 6px;
         vertical-align: bottom;
     }
+}
+
+
+.compact {
+    line-height: 1.25 !important;
 }
 
 .raid, .announcement, .hypetrain {
