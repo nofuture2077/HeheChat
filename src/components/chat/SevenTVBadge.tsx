@@ -47,7 +47,7 @@ export function SevenTVBadgeComponent({ badge, size = 18, className = '' }: Seve
             h='1.25em'
             w='auto'
             display='inline'
-            style={{ verticalAlign: 'bottom', marginRight: '2px' }}
+            style={{ verticalAlign: 'text-bottom', marginRight: '2px' }}
         />
     );
 }

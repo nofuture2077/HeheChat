@@ -130,7 +130,7 @@ function getBadgeImageHtml(badges: Map<string, BadgeSet>, setId: string, version
   const version = badgeSet.versions.find(v => v.id === versionId);
   if (!version) return null;
 
-  return <Image alt={version.title} src={version.image_url_2x} h='1.25em' w='auto' display='inline' style={{verticalAlign: 'bottom'}} />;
+  return <Image alt={version.title} src={version.image_url_2x} h='1.25em' w='auto' display='inline' style={{verticalAlign: 'text-bottom'}} />;
 }
 
 export async function get7TVEmotes(userId: string, username: string) {

@@ -28,14 +28,14 @@ export const EmoteComponent: React.FC<EmoteComponentProps> = ({ imageUrl, largeI
         </Stack>
       }
     >
-      <Image src={large ? largeImageUrl : imageUrl} alt={name} w='auto' h='1.25em' style={{marginLeft: marginL, verticalAlign: 'bottom'}} display='inline' />
+      <Image src={large ? largeImageUrl : imageUrl} alt={name} w='auto' h='1.25em' style={{marginLeft: marginL, verticalAlign: 'text-bottom'}} display='inline' />
     </Tooltip>
   );
 };
 
 export const EmoteComponentSimple: React.FC<EmoteComponentProps> = ({ imageUrl, largeImageUrl, name, type, marginL, large }) => {
   return (
-      <img src={large ? largeImageUrl : imageUrl} alt={name} style={{marginLeft: marginL, display: 'inline', verticalAlign: 'bottom', height: "1.25rem", width: "auto"}}  />
+      <img src={large ? largeImageUrl : imageUrl} alt={name} style={{marginLeft: marginL, display: 'inline', verticalAlign: 'text-bottom', height: "1.25rem", width: "auto"}}  />
   );
 };
 

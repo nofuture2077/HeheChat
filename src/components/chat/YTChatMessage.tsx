@@ -13,7 +13,7 @@ interface YTChatMessageProps {
 function renderParts(parts: YTMessagePart[], fontSize: number) {
     return parts.map((part, i) => {
         if (part.type === 'emoji') {
-            return <img key={i} src={part.url} alt={part.alt} style={{ height: fontSize * 1.4, width: 'auto', verticalAlign: 'middle', margin: '0 1px' }} />;
+            return <img key={i} src={part.url} alt={part.alt} style={{ height: fontSize * 1.4, width: 'auto', verticalAlign: 'text-bottom', margin: '0 1px' }} />;
         }
         return <span key={i}>{part.content}</span>;
     });

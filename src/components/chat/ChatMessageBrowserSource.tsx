@@ -61,9 +61,9 @@ export const ChatMessageBrowserSource = memo(function ChatMessageBrowserSource({
                 )}
                 {!hideHeheBadges && (
                     msg.userInfo.isHeheAdmin
-                        ? <Image alt="HeheChat Admin" src="/hehebadge_admin.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'bottom'}} />
+                        ? <Image alt="HeheChat Admin" src="/hehebadge_admin.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'text-bottom'}} />
                         : msg.userInfo.isHehePro
-                        ? <Image alt="HeheChat Pro" src="/hehebadge.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'bottom'}} />
+                        ? <Image alt="HeheChat Pro" src="/hehebadge.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'text-bottom'}} />
                         : null
                 )}
             </span>

@@ -265,7 +265,7 @@ export function ChatMessageComp(props: ChatMessageProps) {
                         />
                     )}
                     {!props.hideHeheBadges && (
-                        props.msg.userInfo.isHeheAdmin ? <Image alt={"HeheChat Admin"} src="/hehebadge_admin.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'bottom'}} /> : props.msg.userInfo.isHehePro ? <Image alt={"HeheChat Pro User"} src="/hehebadge.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'bottom'}} /> : null
+                        props.msg.userInfo.isHeheAdmin ? <Image alt={"HeheChat Admin"} src="/hehebadge_admin.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'text-bottom'}} /> : props.msg.userInfo.isHehePro ? <Image alt={"HeheChat Pro User"} src="/hehebadge.webp" h='1.25em' w='auto' display='inline' style={{verticalAlign: 'text-bottom'}} /> : null
                     )}
                 </span>
                 <span 
