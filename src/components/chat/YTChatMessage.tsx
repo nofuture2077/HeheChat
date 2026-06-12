@@ -31,25 +31,26 @@ export function YTChatMessageComp(props: YTChatMessageProps) {
         <div className={msgClasses.join(' ')}>
             {/* YouTube Logo als Channel-Indikator */}
             {config.showProfilePicture ? <span className={classes.channel}>{emotes.getLogo(channelName)}</span> : null}
-            
+
             {/* Timestamp */}
             {config.showTimestamp || props.forceTimestamp ? (
                 <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)}</span>
             ) : null}
-            
+
             {/* Badges */}
             <span className={classes.badges}>
+
                 {/* YouTube-Icon Badge */}
-                <IconBrandYoutube size={config.fontSize * 1.2} color="#FF0000" style={{ verticalAlign: 'middle', marginRight: '2px' }} />
+                <IconBrandYoutube color="#FF0000" />
                 
                 {/* Owner Badge */}
                 {props.msg.isOwner && (
-                    <IconCrown size={config.fontSize * 1.2} color="#FFD700" style={{ verticalAlign: 'middle', marginRight: '2px' }} title="Channel Owner" />
+                    <IconCrown size={config.fontSize * 1.2} color="#FFD700" title="Channel Owner" />
                 )}
                 
                 {/* Moderator Badge */}
                 {props.msg.isModerator && !props.msg.isOwner && (
-                    <IconShieldFilled size={config.fontSize * 1.2} color="#5E84F1" style={{ verticalAlign: 'middle', marginRight: '2px' }} title="Moderator" />
+                    <IconShieldFilled color="#5E84F1" title="Moderator" />
                 )}
                 
                 {/* Membership Badge */}
@@ -61,7 +62,6 @@ export function YTChatMessageComp(props: YTChatMessageProps) {
                         padding: '2px 6px', 
                         borderRadius: '3px',
                         marginRight: '4px',
-                        verticalAlign: 'middle',
                         fontWeight: 'bold'
                     }}>
                         MEMBER
@@ -70,7 +70,7 @@ export function YTChatMessageComp(props: YTChatMessageProps) {
                 
                 {/* Verified Badge */}
                 {props.msg.isVerified && (
-                    <IconShieldCheckFilled size={config.fontSize * 1.2} color="#606060" style={{ verticalAlign: 'middle', marginRight: '2px' }} title="Verified" />
+                    <IconShieldCheckFilled size={config.fontSize * 1.2} color="#606060" title="Verified" />
                 )}
             </span>
             

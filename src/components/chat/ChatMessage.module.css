@@ -66,7 +66,7 @@
 
 .channel img {
     height: 1.25em;
-    vertical-align: middle;
+    vertical-align: text-bottom;
     border-radius: 50%;
 }
 
@@ -75,14 +75,14 @@
     margin-right: 0.2rem;
 }
 
-.badges img {
-    vertical-align: middle;
+.badges img, .badges svg {
+    vertical-align: text-bottom;
     margin: 0px 2px;
     height: 1.25em;
  }
 
 .text img {
-   vertical-align: bottom;
+   vertical-align: text-bottom;
    max-height: 1.25em;
 }
 

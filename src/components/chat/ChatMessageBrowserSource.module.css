@@ -14,13 +14,13 @@
 }
 
 .badges img {
-    vertical-align: middle;
+    vertical-align: text-bottom;
     margin: 0 2px;
     height: 1.25em;
 }
 
 .text img {
-    vertical-align: bottom;
+    vertical-align: text-bottom;
     max-height: 1.25em;
 }
 
