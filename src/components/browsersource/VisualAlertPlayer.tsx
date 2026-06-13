@@ -81,6 +81,7 @@ export default function VisualAlertPlayer() {
           event.username,
           event.useLastSpriteFilename || false,
           event.userSeed,
+          event.selectedSpriteFilename,
         );
         
         if (!spriteData) {

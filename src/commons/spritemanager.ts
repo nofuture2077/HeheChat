@@ -282,20 +282,17 @@ export class SpriteManager {
       // Use weighted selection for reroll too
       const userHash = this.generateSimpleHash(`${username}${channel}${Date.now()}`); // Add timestamp for different result
       selectedImage = this.selectImageWithWeighting(availableImages, userHash, spriteAssignment.mod, spriteAssignment.filenames);
-      
-      // Report back to server that reroll is complete
-      // The backend will keep selectedFilename unchanged and set lastFilename to the new sprite
-      completeReroll(channel, username, selectedImage.name)
-        .then(success => {
-          if (success) {
-            console.log(`Reroll completed for ${username} in ${channel}`);
-          } else {
-            console.error(`Failed to complete reroll for ${username} in ${channel}`);
-          }
-        })
-        .catch(error => {
-          console.error('Error completing reroll:', error);
-        });
+
+      // Report back to server and use the canonical filename it returns.
+      // If another client won the race, the server returns 409 with lastFilename so both clients converge.
+      const canonicalFilename = await completeReroll(channel, username, selectedImage.name);
+      if (canonicalFilename && canonicalFilename !== selectedImage.name) {
+        const canonicalImage = sortedImages.find(img => img.name === canonicalFilename);
+        if (canonicalImage) {
+          selectedImage = canonicalImage;
+        }
+      }
+      console.log(`Reroll completed for ${username} in ${channel}: ${selectedImage.name}`);
     } else {
       // If no other images available, keep current
       const foundImage = sortedImages.find(img => img.name === currentFilename);
@@ -315,6 +312,7 @@ export class SpriteManager {
     username: string,
     useLast: boolean,
     userSeed?: string,
+    overrideFilename?: string,
   ): Promise<{
     selectedImage: ExtractedImage;
     prefixClass: string;
@@ -370,6 +368,15 @@ export class SpriteManager {
       let selectedImage: ExtractedImage;
       let newAssignment = false;
       
+      // If a specific filename was pre-selected (e.g. forwarded from the app), use it directly
+      if (overrideFilename) {
+        const overrideImage = sortedImages.find(img => img.name === overrideFilename);
+        if (overrideImage) {
+          const prefixRank = this.getPrefixRank(overrideImage.name, cacheEntry.sortedPrefixes);
+          return { selectedImage: overrideImage, prefixClass: `prefix-${prefixRank}`, selectedFilename: overrideImage.name };
+        }
+      }
+
       // Handle reroll if pending
       if (spriteAssignment?.rerollPending) {
         selectedImage = await this.handleRerollIfPending(sortedImages, spriteAssignment, channel, username);

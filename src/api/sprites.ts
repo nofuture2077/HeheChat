@@ -96,7 +96,7 @@ export const completeReroll = async (
   channel: string,
   username: string,
   newFilename: string
-): Promise<boolean> => {
+): Promise<string | null> => {
   try {
     const token = localStorage.getItem('hehe-token_state') || '';
     const sink = localStorage.getItem('hehe-sink') || '';
@@ -107,15 +107,20 @@ export const completeReroll = async (
       },
       body: JSON.stringify({ newFilename }),
     });
-    
-    if (!response.ok) {
-      throw new Error(`Failed to complete reroll: ${response.statusText}`);
+
+    if (response.ok) {
+      return newFilename;
     }
-    
-    return true;
+
+    if (response.status === 409) {
+      const body = await response.json();
+      return body.lastFilename ?? null;
+    }
+
+    throw new Error(`Failed to complete reroll: ${response.statusText}`);
   } catch (error) {
     console.error('Error completing reroll:', error);
-    return false;
+    return null;
   }
 };
 
