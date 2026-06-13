@@ -858,7 +858,6 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             }
             
             if (!filter || typeof filter !== 'string') {
-                console.warn(`Invalid filter: ${filter}`);
                 filter = ''; // Use empty string as default
             }
             
