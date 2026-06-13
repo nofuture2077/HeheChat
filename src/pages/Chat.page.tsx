@@ -685,7 +685,7 @@ export function ChatPage() {
     if (isDesktopVideoMode) {
         return (
             <div className={classes.desktopVideoLayout}>
-                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={closeDrawerAndUpdateURL} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
+                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={closeDrawerAndUpdateURL} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position} trapFocus={false}>
                     {drawer ? <drawer.component
                         style={{overflow: 'visible'}}
                         height="100dvh"
@@ -830,7 +830,7 @@ export function ChatPage() {
                     </Stack>
                 </Affix>
 
-                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={closeDrawerAndUpdateURL} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position}>
+                <Drawer className={classes.dialog} zIndex={300} opened={drawerOpen} onClose={closeDrawerAndUpdateURL} withCloseButton={false} padding={0} size={drawer?.size} position={drawer?.position} trapFocus={false}>
                     {drawer ? <drawer.component
                         style={{overflow: 'visible'}}
                         height="100dvh"

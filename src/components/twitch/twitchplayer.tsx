@@ -105,95 +105,98 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
         }
         return getDimension();
     });
-    const [hasStorageAccess, setHasStorageAccess] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
     const [touchTimeout, setTouchTimeout] = useState<NodeJS.Timeout | null>(null);
-    
+
     // Use custom dimensions if provided, otherwise use calculated dimensions
     const w = props.customWidth || dimensions[0];
     const h = props.customHeight || dimensions[1];
     const containerId = props.fullSize ? 'twitch-embed-fullsize' : 'twitch-embed';
 
-    // Request storage access for Twitch embed
-    const requestStorageAccessForTwitch = useCallback(async () => {
-        // Check if Storage Access API is available
-        if (!('requestStorageAccess' in document)) {
-            console.warn('Storage Access API not supported');
-            return true; // Assume access if API not available
-        }
+    // Refs so effects that run once can still access the latest values
+    const channelRef = useRef(channel);
+    channelRef.current = channel;
+    const configRef = useRef(config);
+    configRef.current = config;
+    const loginContextRef = useRef(loginContext);
+    loginContextRef.current = loginContext;
+    const propsRef = useRef(props);
+    propsRef.current = props;
+    const dimensionsRef = useRef({ w, h });
+    dimensionsRef.current = { w, h };
+    const containerIdRef = useRef(containerId);
+    containerIdRef.current = containerId;
 
-        try {
-            // Check if we already have access
-            const hasAccess = await document.hasStorageAccess();
-            if (hasAccess) {
-                setHasStorageAccess(true);
-                return true;
+    // Create the player exactly once on mount (or when the Twitch script first loads).
+    // All subsequent changes (channel, quality, size) are handled by separate effects below.
+    useEffect(() => {
+        const initPlayer = async () => {
+            if (!channelRef.current || !containerRef.current || !window.Twitch) return;
+
+            let storageAccess = true;
+            if ('requestStorageAccess' in document) {
+                try {
+                    storageAccess = await document.hasStorageAccess();
+                    if (!storageAccess) {
+                        await document.requestStorageAccess();
+                        storageAccess = true;
+                    }
+                } catch {
+                    storageAccess = false;
+                }
             }
 
-            // Request access (must be called from user gesture)
-            await document.requestStorageAccess();
-            console.log('Storage access granted for Twitch embed');
-            setHasStorageAccess(true);
-            return true;
-        } catch (error) {
-            console.error('Failed to get storage access for Twitch:', error);
-            setHasStorageAccess(false);
-            return false;
-        }
-    }, []);
 
-    const addGlobalStyle = useCallback(() => {
-        // Create and inject global style that targets iframe content
-        const style = document.createElement('style');
-        style.textContent = `
-            .tw-card-body { display: none !important; }
-        `;
-        document.head.appendChild(style);
-    }, [containerId]);
+            if (playerRef.current) playerRef.current = null;
+            if (containerRef.current) containerRef.current.innerHTML = '';
 
-    const createPlayer = useCallback(async () => {
-        if (!channel || !containerRef.current || !window.Twitch) return;
+            const isMuted = propsRef.current.muted !== undefined ? propsRef.current.muted : true;
+            const { w: currentW, h: currentH } = dimensionsRef.current;
 
-        // Request storage access before creating the embed
-        const storageAccess = await requestStorageAccessForTwitch();
+            const embed = new window.Twitch!.Embed(containerIdRef.current, {
+                width: currentW,
+                height: currentH,
+                channel: channelRef.current,
+                parent: [window.location.hostname],
+                autoplay: true,
+                layout: "video",
+                muted: isMuted,
+                storage: { enabled: storageAccess }
+            });
 
-        // Clean up existing player
-        if (playerRef.current) {
-            playerRef.current = null;
-        }
-        if (containerRef.current) {
-            containerRef.current.innerHTML = '';
-        }
+            embed.addEventListener('ready', () => {
+                playerRef.current = embed;
+                const player = embed.getPlayer();
+                if (loginContextRef.current.accessToken) {
+                    player.setQuality(configRef.current.videoQuality);
+                }
+                player.setMuted(isMuted);
 
-        const isMuted = props.muted !== undefined ? props.muted : true;
-
-        const options = {
-            width: w,
-            height: h,
-            channel,
-            parent: [window.location.hostname],
-            autoplay: true,
-            layout: "video",
-            muted: isMuted,
-            storage: { enabled: storageAccess }
+                // Hide viewer count bar if needed
+                const style = document.createElement('style');
+                style.textContent = `.tw-card-body { display: none !important; }`;
+                document.head.appendChild(style);
+            });
         };
 
-        const embed = new window.Twitch.Embed(containerId, options);
-        embed.addEventListener('ready', () => {
-            playerRef.current = embed;
-            
-            if (loginContext.accessToken) {
-                const player = embed.getPlayer();
-                player.setQuality(config.videoQuality);
-                player.setMuted(isMuted);
-            }
+        if (!window.Twitch && !document.getElementById('twitch-embed-script')) {
+            const script = document.createElement('script');
+            script.id = 'twitch-embed-script';
+            script.src = 'https://player.twitch.tv/js/embed/v1.js';
+            script.async = true;
+            script.onload = () => initPlayer();
+            document.body.appendChild(script);
+        } else {
+            initPlayer();
+        }
 
-            // Add global style to try to hide the description
-            addGlobalStyle();
-        });
-    }, [channel, loginContext.accessToken, w, h, props.muted, requestStorageAccessForTwitch, addGlobalStyle]);
+        return () => {
+            if (containerRef.current) containerRef.current.innerHTML = '';
+            playerRef.current = null;
+        };
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Handle resize
+    // Handle resize — update iframe dimensions without recreating the player
     const handleResize = useCallback(
         debounce(() => {
             const [newW, newH] = getDimension();
@@ -201,41 +204,26 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
         }, 250),
         []
     );
-
     useViewportWidthCallback(handleResize);
 
-    // Create player on mount or when script loads
     useEffect(() => {
-        if (!window.Twitch && !document.getElementById('twitch-embed-script')) {
-            const script = document.createElement('script');
-            script.id = 'twitch-embed-script';
-            script.src = 'https://player.twitch.tv/js/embed/v1.js';
-            script.async = true;
-            script.onload = createPlayer;
-            document.body.appendChild(script);
-        } else {
-            createPlayer();
+        if (!containerRef.current) return;
+        const iframe = containerRef.current.querySelector('iframe');
+        if (iframe) {
+            iframe.width = String(w);
+            iframe.height = String(h);
         }
+    }, [w, h]);
 
-        return () => {
-            handleResize.cancel();
-            if (containerRef.current) {
-                containerRef.current.innerHTML = '';
-            }
-            playerRef.current = null;
-        };
-    }, [createPlayer]);
-
-    // Handle channel or audio changes
+    // Handle channel switches — call setChannel() on the existing player, no recreation
     useEffect(() => {
         if (!channel || !playerRef.current) return;
-
         const isMuted = props.muted !== undefined ? props.muted : true;
         const player = playerRef.current.getPlayer();
         player.setChannel(channel);
         player.setMuted(isMuted);
         player.setQuality(config.videoQuality);
-    }, [channel, props.muted]);
+    }, [channel, props.muted]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const handleTouchStart = () => {
         setIsHovered(true);
