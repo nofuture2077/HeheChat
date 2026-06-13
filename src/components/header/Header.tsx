@@ -1,4 +1,4 @@
-import { Container, ActionIcon, Group, Text, Stack, Popover, UnstyledButton, Button } from '@mantine/core';
+import { Container, ActionIcon, Group, Text, Stack, Popover, UnstyledButton, Divider } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
 import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard, IconRefresh } from '@tabler/icons-react';
@@ -9,6 +9,7 @@ import { HeaderLogo } from './HeaderLogo';
 import { TwitchPlayer } from '@/components/twitch/twitchplayer'
 import { TwitchClipsPlayer } from '@/components/twitch/twitchclipsplayer';
 import { AlertStatusIndicator } from '../alerts/AlertStatusIndicator';
+import { AlertSystem } from '../alerts/alertplayer';
 import { BitrateIndicator } from '../switcher/BitrateIndicator';
 import { useConnectionStatus, type ConnectionStateName } from '@/commons/connectionStatus';
 
@@ -28,6 +29,47 @@ function connectionLabel(state: ConnectionStateName): string {
         case 'reconnecting': return 'Reconnecting…';
         case 'disconnected': return 'Disconnected';
     }
+}
+
+function StatusRow(props: {
+    label: string;
+    sublabel: string;
+    color: string;
+    ok: boolean;
+    loading?: boolean;
+    onAction: () => void;
+    actionLabel: string;
+}) {
+    return (
+        <Group justify="space-between" px={4} py={2} style={{
+            borderRadius: 6,
+            background: props.ok ? 'transparent' : `var(--mantine-color-${props.color}-light)`,
+        }}>
+            <Group gap={8}>
+                <span style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    flexShrink: 0,
+                    backgroundColor: `var(--mantine-color-${props.color}-6)`,
+                }} />
+                <Stack gap={0}>
+                    <Text size="sm" fw={500}>{props.label}</Text>
+                    <Text size="xs" c="dimmed">{props.sublabel}</Text>
+                </Stack>
+            </Group>
+            <ActionIcon
+                variant={props.ok ? 'subtle' : 'filled'}
+                color={props.ok ? 'gray' : props.color}
+                size="sm"
+                loading={props.loading}
+                onClick={props.onAction}
+                title={props.actionLabel}
+            >
+                <IconRefresh size={12} />
+            </ActionIcon>
+        </Group>
+    );
 }
 
 export function Header(props: {
@@ -59,6 +101,11 @@ export function Header(props: {
 
     const isConnected = connectionStatus.state === 'connected';
     const isBusy = connectionStatus.state === 'connecting' || connectionStatus.state === 'reconnecting';
+    const [alertSystemRunning, setAlertSystemRunning] = useState(AlertSystem.status());
+    useEffect(() => {
+        const id = setInterval(() => setAlertSystemRunning(AlertSystem.status()), 1000);
+        return () => clearInterval(id);
+    }, []);
 
     return (
         <Stack gap={0}>
@@ -106,18 +153,38 @@ export function Header(props: {
                             </Group>
                         </UnstyledButton>
                     </Popover.Target>
-                    <Popover.Dropdown>
-                        <Button
-                            variant={isConnected ? 'light' : 'filled'}
-                            color={connectionColor(connectionStatus.state)}
-                            leftSection={<IconRefresh size={14} />}
-                            loading={isBusy}
-                            onClick={() => {
-                                connectionStatus.forceReconnect();
-                            }}
-                        >
-                            {connectionLabel(connectionStatus.state)}{isConnected ? '' : ' — Reconnect'}
-                        </Button>
+                    <Popover.Dropdown p="sm" style={{ minWidth: 200 }}>
+                        <Stack gap={4}>
+                            <StatusRow
+                                label="Server"
+                                sublabel={connectionLabel(connectionStatus.state)}
+                                color={connectionColor(connectionStatus.state)}
+                                ok={isConnected}
+                                loading={isBusy}
+                                onAction={() => connectionStatus.forceReconnect()}
+                                actionLabel="Reconnect"
+                            />
+                            <StatusRow
+                                label="Alert Player"
+                                sublabel={alertSystemRunning ? 'Running' : 'Not running'}
+                                color={alertSystemRunning ? 'green' : 'red'}
+                                ok={alertSystemRunning}
+                                onAction={() => AlertSystem.recover()}
+                                actionLabel="Restart"
+                            />
+                            <Divider my={4} />
+                            <Group justify="space-between" px={4}>
+                                <Text size="sm" c="dimmed">Reload Page</Text>
+                                <ActionIcon
+                                    variant="filled"
+                                    color="red"
+                                    size="sm"
+                                    onClick={() => window.location.reload()}
+                                >
+                                    <IconRefresh size={12} />
+                                </ActionIcon>
+                            </Group>
+                        </Stack>
                     </Popover.Dropdown>
                 </Popover>
 
