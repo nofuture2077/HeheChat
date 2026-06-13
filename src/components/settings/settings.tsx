@@ -35,6 +35,7 @@ import {
   IconChevronRight,
   IconRobot,
   IconInfoCircle,
+  IconWifi,
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ModSettings } from './ModSettings';
@@ -76,6 +77,7 @@ import { ConnectPallySettings } from './connect/ConnectPallySettings';
 import { ConnectKofiSettings } from './connect/ConnectKofiSettings';
 import { ConnectFossabotSettings } from './connect/ConnectFossabotSettings';
 import { ConnectYouTubeSettings } from './connect/ConnectYouTubeSettings';
+import { ConnectStatusSettings } from './connect/ConnectStatusSettings';
 
 // Switcher
 import { ProviderConfigTab } from '../switcher/ProviderConfigTab';
@@ -280,6 +282,8 @@ export function Settings(props: SettingsProperties) {
             OBS Remote / Scene Switcher automatically switches OBS scenes based on your stream's health metrics (bitrate, RTT). It connects to your stream ingest provider and OBS WebSocket to react to stream state changes in real time. Requires Premium.
           </Alert>
         );
+      case 'Connect':
+        return <ConnectStatusSettings />;
       case 'Premium':
         return <PremiumSettings refreshKey={premiumRefreshKey} />;
       default:
