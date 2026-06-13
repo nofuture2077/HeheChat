@@ -111,6 +111,9 @@ class AlertPlayer {
 
     initialize() {
         console.log('Alert system initialized');
+        if (this.audioContext && this.audioContext.state !== 'closed') {
+            this.audioContext.close().catch(() => {});
+        }
         this.audioContext = new (window.AudioContext)();
         this.mainAudioGain = this.audioContext.createGain();
         this.mainAudioGain.gain.value = 0;
@@ -460,8 +463,23 @@ class AlertPlayer {
         }
     }
 
+    // Recover from suspended/interrupted/closed AudioContext (e.g. after audio device disconnect on iOS)
+    recover(): void {
+        if (!this.audioContext || this.audioContext.state === 'closed') {
+            this.initialize();
+        } else if (this.audioContext.state === 'suspended' || this.audioContext.state === 'interrupted' as AudioContextState) {
+            this.audioContext.resume().then(() => {
+                console.log('AudioContext resumed after device change');
+                PubSub.publish('AlertPlayer-update');
+            }).catch(() => {
+                this.initialize();
+                PubSub.publish('AlertPlayer-update');
+            });
+        }
+    }
+
     // Handle audio context interruption with resume and fallback reinitialization
-    private handleAudioInterruption(): void {
+    handleAudioInterruption(): void {
         console.log("Audio context interrupted, attempting to resume");
         this.stopPlaying();
         

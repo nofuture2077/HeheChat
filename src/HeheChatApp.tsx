@@ -45,9 +45,16 @@ function debounce<T extends (...args: any[]) => any>(
 
 window.addEventListener("click", () => {
     if (!AlertSystem.status()) {
-        AlertSystem.initialize();
-    } 
-}); 
+        AlertSystem.recover();
+    }
+});
+
+// Periodic health check: recover from suspended/interrupted state (e.g. audio device disconnect on iOS)
+setInterval(() => {
+    if (!AlertSystem.status()) {
+        AlertSystem.recover();
+    }
+}, 30000);
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
