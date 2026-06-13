@@ -83,13 +83,6 @@ export function AdminRouter() {
         />
         <NavLink
           href="#"
-          label="Analytics"
-          leftSection={<IconChartBar size="1rem" />}
-          active={activeSection === 'analytics'}
-          onClick={() => setActiveSection('analytics')}
-        />
-        <NavLink
-          href="#"
           label="News Management"
           leftSection={<IconNews size="1rem" />}
           active={activeSection === 'news'}
