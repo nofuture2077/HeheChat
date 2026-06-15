@@ -479,10 +479,6 @@ export function ChatPage() {
 
         setShouldScroll(true);
 
-        setTimeout(() => {
-            scrollToBottom();
-        }, 5000);
-
         (config.channels || []).forEach(channel => {
             emotes.updateChannel(channel).then(forceUpdate);
         });
@@ -533,9 +529,6 @@ export function ChatPage() {
         if (!AlertSystem.status()) {
             AlertSystem.initialize();
         }
-        setTimeout(() => {
-            scrollToBottom();
-        }, 5000);
 
         // Check connections when component mounts
         checkConnections();
