@@ -153,8 +153,8 @@ export function Header(props: {
                             </Group>
                         </UnstyledButton>
                     </Popover.Target>
-                    <Popover.Dropdown p="sm" style={{ minWidth: 200 }}>
-                        <Stack gap={4}>
+                    <Popover.Dropdown style={{ minWidth: 200, padding: 0, background: 'transparent', border: 'none'}}>
+                        <Stack gap={4} className='glass-panel' style={{padding: 10}}>
                             <StatusRow
                                 label="Server"
                                 sublabel={connectionLabel(connectionStatus.state)}
