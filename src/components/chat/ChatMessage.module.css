@@ -9,6 +9,7 @@
     font-weight: 500;
     user-select: none;
     -webkit-user-select: none;
+    background-color: light-dark(#fef5fe, #090309);
 }
 
 
@@ -17,7 +18,7 @@
 }
 
 .msg:nth-child(odd) {
-    background-image: linear-gradient(rgba(255,255,255,0.05), rgba(255,255,255,0.05));
+    background-image: light-dark(linear-gradient(rgba(0,0,0,0.05), rgba(0,0,0,0.05)), linear-gradient(rgba(255,255,255,0.05), rgba(255,255,255,0.05)));
 }
 
 .msg.deleted {
