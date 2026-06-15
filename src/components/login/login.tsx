@@ -9,6 +9,7 @@ import { LOGIN_SCOPES, AUTH_VERSION } from '@/commons/login';
 import { EmoteStore } from '@/components/chat/emotestorage';
 import PubSub from 'pubsub-js'
 import { DEFAULT_CHAT_EMOTES } from '@/commons/emotes'
+import classes from './login.module.css'
 
 function getQueryVariable(query: String, variable: String): string | undefined {
     var vars = query.split('&');
@@ -136,10 +137,12 @@ export default function Login(props: LoginProps) {
         alignSelf: 'stretch',
         margin: '8px 0',
     };
+    const wrapperClassName = `${classes.wrapper} ${disabled ? classes.wrapperLoading : ''}`.trim();
+
     return (
-        <div style={wrapperStyle}>
+        <div className={wrapperClassName} style={wrapperStyle}>
             <button disabled={disabled} style={btnStyle} onClick={onClick}>
-                <IconLink size={20} /> Login with Twitch 
+                <IconLink size={20} /> Login with Twitch
             </button>
             <div style={dividerStyle} />
             <Menu position="bottom-end" withinPortal>

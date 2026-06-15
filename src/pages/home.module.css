@@ -7,6 +7,17 @@
     align-items: center;
     position: relative;
     gap: 2rem;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
 }
 
 .logosmall {
@@ -19,10 +30,154 @@
     max-width: 250px;
 }
 
+.logoBreathe {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    animation: logo-breathe 4.5s ease-in-out infinite,
+               logo-hue 9s ease-in-out infinite;
+    transform-origin: center;
+    will-change: transform, filter;
+}
+
 .nofuture {
     position: absolute;
     bottom: 24px;
     left: 50%;
     transform: translateX(-50%);
-    width: 120px !important;
+    width: 120px;
+    z-index: 2;
+}
+
+.bgLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.45;
+    will-change: transform;
+    mix-blend-mode: screen;
+}
+
+.blobMagenta {
+    width: 60vmax;
+    height: 60vmax;
+    top: -20vmax;
+    left: -15vmax;
+    background: radial-gradient(circle at 30% 30%, #DB32BC 0%, rgba(219, 50, 188, 0) 70%);
+    animation: blob-drift-1 22s ease-in-out infinite;
+}
+
+.blobPink {
+    width: 55vmax;
+    height: 55vmax;
+    bottom: -18vmax;
+    right: -18vmax;
+    background: radial-gradient(circle at 60% 60%, #ff1493 0%, rgba(255, 20, 147, 0) 70%);
+    animation: blob-drift-2 26s ease-in-out infinite;
+}
+
+.blobViolet {
+    width: 50vmax;
+    height: 50vmax;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 50% 50%, #854bcb 0%, rgba(133, 75, 203, 0) 70%);
+    animation: blob-drift-3 18s ease-in-out infinite;
+    opacity: 0.30;
+}
+
+:where([data-mantine-color-scheme="light"]) .blob {
+    opacity: 0.28;
+    mix-blend-mode: multiply;
+}
+
+:where([data-mantine-color-scheme="light"]) .blobViolet {
+    opacity: 0.22;
+}
+
+.structure {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90vmin;
+    height: 90vmin;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.18;
+    animation: structure-spin 90s linear infinite;
+    will-change: transform;
+}
+
+:where([data-mantine-color-scheme="light"]) .structure {
+    opacity: 0.14;
+}
+
+.vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(ellipse at center,
+        rgba(0, 0, 0, 0) 40%,
+        rgba(0, 0, 0, 0.35) 100%);
+}
+
+:where([data-mantine-color-scheme="light"]) .vignette {
+    background: radial-gradient(ellipse at center,
+        rgba(0, 0, 0, 0) 40%,
+        rgba(0, 0, 0, 0.10) 100%);
+}
+
+@keyframes blob-drift-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(8vmax, 4vmax) scale(1.08); }
+    66%      { transform: translate(-4vmax, 6vmax) scale(0.95); }
+}
+
+@keyframes blob-drift-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    40%      { transform: translate(-6vmax, -5vmax) scale(1.1); }
+    75%      { transform: translate(4vmax, -3vmax) scale(0.92); }
+}
+
+@keyframes blob-drift-3 {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50%      { transform: translate(-45%, -55%) scale(1.12); }
+}
+
+@keyframes structure-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes logo-breathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.03); }
+}
+
+@keyframes logo-hue {
+    0%, 100% { filter: drop-shadow(0 0 18px rgba(255, 20, 147, 0.30)) hue-rotate(0deg); }
+    50%      { filter: drop-shadow(0 0 34px rgba(255, 20, 147, 0.60)) hue-rotate(15deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .blob,
+    .blobMagenta,
+    .blobPink,
+    .blobViolet,
+    .structure,
+    .logoBreathe {
+        animation: none;
+    }
 }
