@@ -7,7 +7,7 @@ import { formatString, deterministicSample } from "@/commons/helper";
 import { silence } from "./silence";
 import PubSub from 'pubsub-js';
 import { AlertConfig } from "@/components/events/alertconfigstorage";
-import { formatEventText } from "@/components/events/eventlist";
+import { formatEventText } from "@/components/events/EventList";
 import { DEFAULT_CHAT_EMOTES } from "@/commons/emotes";
 import { ParsedMessagePart } from "@/commons/message";
 import { buildEmoteImageUrl } from '../../commons/twitch';

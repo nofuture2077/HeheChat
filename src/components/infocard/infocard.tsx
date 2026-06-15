@@ -14,13 +14,14 @@ export interface InfoCardProperties {
   left?: ReactElementLike;
   right?: ReactElementLike;
   showPremium?: boolean;
+  className?: string;
   onClick?: () => void;
 }
 
 export function InfoCard(props: InfoCardProperties) {
   const emotes = useContext(ChatEmotesContext);
   return (
-     <Group className={classes.card} onClick={props.onClick} gap={'xs'} p={10} justify='space-between' style={{flexWrap: 'nowrap'}}>
+     <Group className={[classes.card, props.className].join(' ')} onClick={props.onClick} gap={'xs'} p={10} justify='space-between' style={{flexWrap: 'nowrap'}}>
       {props.channel ? <span key='infocard-channel' className={classes.channel}>{emotes.getLogo(props.channel)}</span> : null}
       {props.left || null}
         <Stack gap={0} style={{flexGrow: 5}}>

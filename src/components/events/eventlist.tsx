@@ -1,4 +1,3 @@
-import classes from './eventdrawer.module.css'
 import { ScrollArea, Text, ThemeIcon, ActionIcon } from '@mantine/core';
 import { IconBoltFilled, IconCheck, IconReload, IconTrain } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
@@ -13,6 +12,7 @@ import { useForceUpdate } from '@mantine/hooks';
 import { IconGiftFilled, IconCoinBitcoinFilled, IconUserHeart, IconSparkles, IconMoneybag, IconPlant, IconBellRinging, IconAffiliate, IconSpeakerphone, IconMusic } from '@tabler/icons-react';
 import { formatString } from "@/commons/helper";
 import { ReactElementLike } from 'prop-types';
+import classes from './EventList.module.css';
 
 function getIcon(event: EventData, key: string) {
     const style: any = {variant: 'transparent'};
@@ -162,6 +162,7 @@ export function EventList() {
                 {events.map((event, i)=> <InfoCard 
                     key={'event' + i} 
                     channel={event.channel} 
+                    className={classes.event}
                     name={event.username} 
                     date={event.date} 
                     text={formatEventText(event)} 

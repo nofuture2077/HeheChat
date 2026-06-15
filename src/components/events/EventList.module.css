@@ -1,0 +1,7 @@
+.event {
+    background-color: light-dark(#fef5fe, #030103);
+}
+
+.event:nth-child(odd) {
+    background-image: light-dark(linear-gradient(rgba(0,0,0,0.05), rgba(0,0,0,0.05)), linear-gradient(rgba(255,255,255,0.05), rgba(255,255,255,0.05)));
+}

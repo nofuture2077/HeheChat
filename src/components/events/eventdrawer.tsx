@@ -3,7 +3,7 @@ import { Title, Button, Group } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
 import { OverlayDrawer } from '@/pages/Chat.page';
 import { AlertControl } from './alertcontrol';
-import { EventList } from './eventlist';
+import { EventList } from './EventList';
 
 export const EventDrawer: OverlayDrawer = {
     name: 'events',
