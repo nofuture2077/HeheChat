@@ -52,7 +52,7 @@ export function HomePage() {
       </div>
 
       <div>
-        <Image height={28} width={120} src={nofuture} className={classes.nofuture} />
+        <Image src={nofuture} className={classes.nofuture} />
       </div>
       <Text size="xs" c="dimmed" style={{ position: 'absolute', bottom: '22px', right: '22px', textAlign: 'center', zIndex: 2 }}>
           v{version}
