@@ -126,6 +126,7 @@ export function ConnectStatusSettings() {
                 title="Reinitialize All Services"
                 centered
                 size="sm"
+                zIndex={1000}
             >
                 <Text size="sm" mb="lg">
                     This will reconnect all configured services. Ongoing events may be interrupted briefly. Continue?
