@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import { useForceUpdate } from "@mantine/hooks";
 import PubSub from "pubsub-js";
 import { formatSeconds } from "@/commons/helper"
-import { formatEventText } from "@/components/events/EventList"
+import { formatEventText } from "@/components/events/eventlist"
 
 export interface AlertControlProps {}
 

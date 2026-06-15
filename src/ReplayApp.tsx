@@ -5,7 +5,7 @@ import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { ConfigContext, ProfileContext } from './ApplicationContext';
 import { initializeStoragePatches } from './commons/patches';
 import { theme } from './theme';
-import { EventList } from './components/events/EventList';
+import { EventList } from './components/events/eventlist';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { version } from '../package.json';
 
