@@ -53,19 +53,18 @@ export function ReloadAlertsButton({ onActivate }: { onActivate?: () => void } =
     <Button
       size="xl"
       radius="xl"
-      color="#ff1493"
       leftSection={<IconRefresh size={24} />}
       onClick={handleClick}
+      className="glass-pink-button"
       style={{
-        padding: '16px 24px',
+        padding: '8px 16px',
         fontSize: '18px',
         width: '100%',
         height: '200px',
         maxWidth: '400px',
         margin: '0 auto',
         display: 'flex',
-        justifyContent: 'center',
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
+        justifyContent: 'center'
       }}
     >
       Activate Alerts

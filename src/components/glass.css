@@ -1,0 +1,70 @@
+/* Opaque surface with glass-style borders and a subtle top highlight */
+.glass-surface {
+    border: 1px solid light-dark(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0.08));
+    box-shadow: inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.06));
+}
+
+/* Separator lines that replace hard mantine borders */
+.glass-border-bottom {
+    border-bottom: 1px solid light-dark(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0.08)) !important;
+    box-shadow: inset 0 -1px 0 light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.04));
+}
+
+.glass-border-top {
+    border-top: 1px solid light-dark(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0.08)) !important;
+    box-shadow: inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.04));
+}
+
+.glass-border-right {
+    border-right: 1px solid light-dark(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0.08)) !important;
+    box-shadow: inset -1px 0 0 light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.04));
+}
+
+.glass-panel {
+    background: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.10));
+    border-radius: 16px;
+    box-shadow:
+        0 2px 12px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.3)),
+        inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.12));
+    position: relative;
+}
+
+.glass-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        135deg,
+        light-dark(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.07)) 0%,
+        transparent 50%
+    );
+    pointer-events: none;
+}
+
+.glass-pink-button {
+    background: linear-gradient(45deg, #DB32BC, #ff1493) !important;
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow:
+        0 2px 16px rgba(219, 50, 188, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.glass-pink-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, transparent 100%);
+    pointer-events: none;
+    border-radius: inherit;
+}

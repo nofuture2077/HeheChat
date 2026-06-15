@@ -1,0 +1,28 @@
+.glassCard {
+    padding: 8px 12px;
+    margin: 2px 8px;
+}
+
+.glassButton {
+    position: relative;
+    border-radius: 50% !important;
+    width: 42px !important;
+    height: 42px !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    overflow: hidden;
+}
+
+.glassButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 45%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 100%);
+    border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+    pointer-events: none;
+}

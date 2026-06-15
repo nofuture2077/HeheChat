@@ -1,4 +1,5 @@
-import { Group, ActionIcon, Text, Modal, TextInput, Button, Stack, Badge, Card } from '@mantine/core';
+import { Group, ActionIcon, Text, Modal, TextInput, Button, Stack, Badge } from '@mantine/core';
+import classes from './ShortcutView.module.css';
 import { useContext, useState, useEffect } from 'react';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
 import { ShortCut, shortcutHandler } from '@/commons/shortcuts';
@@ -110,7 +111,7 @@ export function ShortcutView() {
     };
 
     return (
-        <Card withBorder radius="md" p="xs" mx="xs" my={2}>
+        <div className={`glass-panel ${classes.glassCard}`}>
             <Group justify="center" gap="lg" wrap="nowrap">
                 {config.shortcuts.map((shortcut) => {
                     let Icon;
@@ -135,8 +136,6 @@ export function ShortcutView() {
                                 onClick={() => handleShortcutClick(shortcut)}
                                 style={{
                                     backgroundColor: shortcut.color,
-                                    width: '42px',
-                                    height: '42px'
                                 }}
                             >
                                 <Icon size={18}/>
@@ -187,6 +186,6 @@ export function ShortcutView() {
                     </Group>
                 </Stack>
             </Modal>
-        </Card>
+        </div>
     );
 }

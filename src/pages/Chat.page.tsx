@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useContext, useCallback, useMemo } from 'react';
 import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext, PremiumContext } from '../ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork } from '@mantine/hooks';
-import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, ActionIcon, Text } from '@mantine/core';
+import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, ActionIcon, Text, useComputedColorScheme } from '@mantine/core';
 import { IconAlertTriangle, IconDeviceDesktop, IconRepeat, IconMessagePause, IconSettings, IconKeyboard, IconBell, IconBrandTwitch, IconPlayerPlay } from '@tabler/icons-react';
 import PubSub from 'pubsub-js';
 import { notifications } from '@mantine/notifications';
@@ -59,6 +59,15 @@ export function ChatPage() {
     const viewport = useRef<HTMLDivElement>(null);
     const footer = useRef<HTMLDivElement>(null);
     const { width, height } = useViewportSize();
+    const colorScheme = useComputedColorScheme('dark');
+    const isDark = colorScheme === 'dark';
+    const headerGradient = isDark
+        ? 'linear-gradient(to bottom, #1f1720 0%, #171317 100%)'
+        : 'linear-gradient(to bottom, rgba(180,80,160,0.10) 0%, rgba(180,80,160,0.04) 100%), var(--mantine-color-gray-0)';
+    const footerGradient = isDark
+        ? 'linear-gradient(to bottom, #171317 0%, #1f1720 100%)'
+        : 'linear-gradient(to bottom, rgba(180,80,160,0.04) 0%, rgba(180,80,160,0.10) 100%), var(--mantine-color-gray-0)';
+    const barBorderTop = isDark ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(0,0,0,0.07)';
     const config = useContext(ConfigContext);
     const profile = useContext(ProfileContext);
     const premium = useContext(PremiumContext);
@@ -757,7 +766,7 @@ export function ChatPage() {
                             {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                             <PinManager/>
                             {showUnplayedBanner && config.missedAlertsWindow !== 'none' && (
-                                <Button size="xl" radius="xl" color="teal" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} className={classes.missedAlertsButton}>
+                                <Button size="xl" radius="xl" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} className={`glass-pink-button ${classes.missedAlertsButton}`}>
                                     Play {unplayedEvents.length} missed alert{unplayedEvents.length !== 1 ? 's' : ''}
                                 </Button>
                             )}
@@ -793,7 +802,7 @@ export function ChatPage() {
     // Original layout for mobile or when video is not shown
     return (
         <AppShell>
-            <AppShell.Header>
+            <AppShell.Header withBorder={false} style={{ background: headerGradient, boxShadow: isDark ? '0 1px 0 rgba(255,255,255,0.07)' : '0 1px 0 rgba(0,0,0,0.07)' }}>
                 <Header
                     openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab} }); drawerHandler.open() }}
                     openEvents={() => { setDrawer(EventDrawer); drawerHandler.open() }}
@@ -810,10 +819,10 @@ export function ChatPage() {
                 <MobileAppPrompt />
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
-                        {config.showBitrateIndicator && <div style={{ display: 'flex', justifyContent: 'center' }}><StreamStatusBar /></div>}
+                        {config.showBitrateIndicator && <div style={{ display: 'flex', justifyContent: 'center', marginTop: 0 }}><StreamStatusBar /></div>}
                         <NewsDisplay />
                         {showUnplayedBanner && (
-                            <Button size="xl" radius="xl" color="#ff1493" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} style={{ padding: '16px 24px', fontSize: '18px', width: '100%', maxWidth: '400px', margin: '0 auto', display: 'flex', justifyContent: 'center', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)' }}>
+                            <Button size="xl" radius="xl" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} className="glass-pink-button" style={{ padding: '16px 24px', fontSize: '18px', width: '100%', maxWidth: '400px', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
                                 Play {unplayedEvents.length} missed alert{unplayedEvents.length !== 1 ? 's' : ''}
                             </Button>
                         )}
@@ -846,7 +855,7 @@ export function ChatPage() {
                 </ScrollArea>
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
-            <AppShell.Footer >
+            <AppShell.Footer withBorder={false} style={{ background: footerGradient, borderTop: barBorderTop, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)' }}>
                 {config.chatEnabled ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView} usernames={Array.from(usernames)}/></div> : null}
             </AppShell.Footer>
         </AppShell>

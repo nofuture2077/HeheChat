@@ -31,9 +31,9 @@ export function EmoteGrid({ channel, searchText, onEmoteSelect, emoteList, isMan
     if (!visible || !channel || emoteList.size === 0) return null;
 
     return (
-        <Paper 
-            shadow="xl" 
-            p="md" 
+        <Paper
+            shadow="xl"
+            p="md"
             className={styles.container}
         >
             {isManuallyOpen && onClose && (

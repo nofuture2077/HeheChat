@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import { Group, Badge, Menu, Box } from '@mantine/core';
+import { Group, Badge, Menu, Box, useComputedColorScheme } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
 import PubSub from 'pubsub-js';
 import { ConfigContext } from '@/ApplicationContext';
@@ -26,6 +26,11 @@ function formatMbit(bitrate: number | null): string {
 
 export function StreamStatusBar() {
     const config = useContext(ConfigContext);
+    const colorScheme = useComputedColorScheme('dark');
+    const isDark = colorScheme === 'dark';
+    const bg = isDark
+        ? 'linear-gradient(to bottom, #171317 0%, #141114 100%)'
+        : 'linear-gradient(to bottom, rgba(180,80,160,0.04) 0%, rgba(180,80,160,0.02) 100%), var(--mantine-color-gray-0)';
     const [bitrate, setBitrate] = useState<number | null>(null);
     const [scene, setScene] = useState<string | null>(null);
     const [scenes, setScenes] = useState<string[]>([]);
@@ -91,11 +96,12 @@ export function StreamStatusBar() {
             px="md"
             py={6}
             style={{
-                background: 'var(--mantine-color-body)',
+                background: bg,
                 borderRadius: '0 0 var(--mantine-radius-md) var(--mantine-radius-md)',
                 display: 'inline-flex',
-                border: '1px solid var(--mantine-color-default-border)',
+                border: '1px solid light-dark(rgba(0, 0, 0, 0.07), rgba(255, 255, 255, 0.08))',
                 borderTop: 'none',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
             }}
         >
             <Group align="center" gap="xs">

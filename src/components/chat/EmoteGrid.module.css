@@ -5,11 +5,16 @@
   right: 0;
   max-height: 300px;
   z-index: 1000;
-  background-color: #1A1A1A;
   overflow: hidden;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   font-size: 2rem;
+  background: light-dark(rgba(245, 245, 245, 0.4), rgba(30, 30, 30, 0.4)) !important;
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.10)) !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 2px 12px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.3)),
+    inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.12)) !important;
 }
 
 /* Mobile-specific styles */
@@ -63,7 +68,7 @@
   }
   
   .emoteContainer:active {
-    background-color: #2A2A2A;
+    background-color: light-dark(rgba(0, 0, 0, 0.12), rgba(255, 255, 255, 0.12));
     transform: scale(0.95);
   }
 }
@@ -81,7 +86,7 @@
 .categoryTitle {
   margin-bottom: 10px;
   font-weight: 700;
-  color: white;
+  color: light-dark(var(--mantine-color-dark-7), var(--mantine-color-gray-0));
 }
 
 .emoteContainer {
@@ -96,5 +101,5 @@
 }
 
 .emoteContainer:hover {
-  background-color: #2A2A2A;
+  background-color: light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.08));
 }

@@ -1,7 +1,6 @@
 .chatInput {
     position: relative;
-    background-color: light-dark(#ffffff, #1A1A1A);
-    border-radius: 8px;
+    background: transparent;
     padding: 4px;
 }
 
