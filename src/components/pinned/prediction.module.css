@@ -1,7 +1,26 @@
 .prediction {
+    position: relative;
     overflow: hidden;
     cursor: pointer;
-    background: light-dark(var(--mantine-color-white), var(--mantine-color-black));
-    border: 1px solid #333;
+    background: light-dark(rgba(0, 0, 0, 0.04), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.10));
+    box-shadow:
+        0 2px 12px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.3)),
+        inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.12));
     transition: all 1s ease-out;
+}
+
+.prediction::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        135deg,
+        light-dark(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.07)) 0%,
+        transparent 50%
+    );
+    pointer-events: none;
 }

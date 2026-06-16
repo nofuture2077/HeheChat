@@ -6,10 +6,32 @@
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    background: linear-gradient(to right, var(--mantine-color-skyblue-9), var(--mantine-color-paleviolet-5));
-    border: 1px solid light-dark(#ddd, #333);;
+    background: linear-gradient(
+        to right,
+        color-mix(in srgb, var(--mantine-color-skyblue-9) 60%, transparent),
+        color-mix(in srgb, var(--mantine-color-paleviolet-5) 60%, transparent)
+    );
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid light-dark(rgba(0, 0, 0, 0.08), rgba(255, 255, 255, 0.10));
+    box-shadow:
+        0 2px 12px light-dark(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.3)),
+        inset 0 1px 0 light-dark(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.12));
     transition: all 1s ease-out;
     color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+}
+
+.hypetrain::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        135deg,
+        light-dark(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.07)) 0%,
+        transparent 50%
+    );
+    pointer-events: none;
 }
 
 .content {
@@ -49,5 +71,18 @@
 }
 
 .goldenkappa {
-    background: linear-gradient(135deg, #eba73c, #d69122, #bf7600)
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, #eba73c 60%, transparent),
+        color-mix(in srgb, #d69122 60%, transparent),
+        color-mix(in srgb, #bf7600 60%, transparent)
+    );
+}
+
+.goldenkappa::before {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.4) 0%,
+        transparent 50%
+    );
 }
