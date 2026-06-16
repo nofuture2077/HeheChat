@@ -91,7 +91,7 @@ export function ShortcutSettings() {
     };
 
     return (
-        <Stack mt={30} mb={30} gap={30}>
+        <Stack mt={30} mb={30} gap={30} p={'lg'}>
             <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
                 Shortcuts are quick-action buttons shown in the chat toolbar. Each shortcut can clip, add a stream marker, send a chat message, run an ad, toggle a config value, or switch an OBS scene. Enable "Confirm" to require a confirmation tap before the action fires.
             </Alert>

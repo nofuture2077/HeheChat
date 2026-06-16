@@ -53,10 +53,8 @@ export function TwitchView(props: TwitchViewProps) {
     }, [activeTab]);
 
     return (<nav className={classes.navbar}>
-        <Group justify='space-between' p='md' className={classes.header}>
-            <Title order={4}>
-                Twitch Streams
-            </Title>
+        <Group justify='space-between' className={classes.header}>
+            <Text fw={700} c='primary'>Twitch Streams</Text>
             <Group>
                 {login.user?.name && (
                     <ActionIcon 

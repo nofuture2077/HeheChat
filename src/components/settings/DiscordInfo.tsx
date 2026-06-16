@@ -5,7 +5,7 @@ export function DiscordInfo() {
   const discordLink = "https://discord.gg/VzBVvM4kyz";
 
   return (
-    <Stack mt={30} mb={30} gap={30}>
+    <Stack mt={30} mb={30} gap={30} p='lg'>
       <Fieldset legend="HeheChat Discord Community" variant="filled">
         <Stack gap="md">
           <Group justify="center" mt="md">

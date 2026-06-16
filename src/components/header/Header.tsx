@@ -125,7 +125,6 @@ export function Header(props: {
                     opened={popoverOpened}
                     onChange={setPopoverOpened}
                     position="bottom-start"
-                    withArrow
                     shadow="md"
                     withinPortal
                 >

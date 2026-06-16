@@ -21,7 +21,7 @@ export function ModSettings() {
     const config = useContext(ConfigContext);
     const forceUpdate = useForceUpdate();
     return (
-        <Stack mt={30} mb={30} gap={30}>
+        <Stack mt={30} mb={30} gap={30} p='lg'>
             <Fieldset legend="Enable Mod Tool" variant="filled">
                 <Switch checked={config.modToolsEnabled} onChange={(event) => config.setModToolsEnabled(event.currentTarget.checked)} label="Mod Tools Enabled" size="lg" />
             </Fieldset>

@@ -430,7 +430,7 @@ export function Settings(props: SettingsProperties) {
   return (
     <nav className={classes.navbar} style={{ overflow: 'hidden' }}>
       <div className={classes.header}>
-        <Title order={4}>Settings — {tabLabels[active] ?? active}</Title>
+        <Text fw={700} c='primary'>Settings › {tabLabels[active] ?? active}</Text>
         <Button onClick={props.close} variant='subtle' color='primary'><IconX /></Button>
       </div>
       <div className={classes.wrapper}>
@@ -452,7 +452,7 @@ export function Settings(props: SettingsProperties) {
           })}
         </div>
         <div className={classes.main}>
-          <ScrollArea h="calc(100vh - 60px)" maw="100%" className={classes.active} scrollbars="y">
+          <ScrollArea h="calc(100vh - 36px)" maw="100%" className={classes.active} scrollbars="y">
             {renderContent()}
           </ScrollArea>
         </div>
