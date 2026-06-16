@@ -14,13 +14,14 @@ import inputClasses from './ChatInput.module.css';
 import { ModActions } from './mod/modactions';
 import { getUserId } from '@/components/chat/mod/modactions';
 
-interface ChatInputProps { 
-    close: () => void, 
-    replyToMsg?: HeheChatMessage, 
+interface ChatInputProps {
+    close: () => void,
+    replyToMsg?: HeheChatMessage,
     setReplyMsg: (msg?: HeheChatMessage) => void,
     openModView: (channel: string, channelId: string, username: string) => void;
     modActions: ModActions;
     usernames: string[];
+    onEmoteGridChange?: (open: boolean) => void;
 }
 
 export function ChatInput(props: ChatInputProps) {
@@ -374,9 +375,10 @@ export function ChatInput(props: ChatInputProps) {
     };
 
     const toggleEmoteGrid = () => {
-        setIsEmoteGridOpen(!isEmoteGridOpen);
-        // Reset manually closed state when opening
-        if (!isEmoteGridOpen) {
+        const next = !isEmoteGridOpen;
+        setIsEmoteGridOpen(next);
+        props.onEmoteGridChange?.(next);
+        if (next) {
             setManuallyClosedEmoteGrid(false);
         }
     };
@@ -384,6 +386,7 @@ export function ChatInput(props: ChatInputProps) {
     const handleEmoteGridClose = () => {
         setIsEmoteGridOpen(false);
         setManuallyClosedEmoteGrid(true);
+        props.onEmoteGridChange?.(false);
     };
 
 

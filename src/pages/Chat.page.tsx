@@ -78,6 +78,7 @@ export function ChatPage() {
     useEffect(() => { shouldScrollRef.current = shouldScroll; }, [shouldScroll]);
     const [drawer, setDrawer] = useState<OverlayDrawer | undefined>(undefined);
     const [drawerOpen, drawerHandler] = useDisclosure(false);
+    const [emoteGridOpen, setEmoteGridOpen] = useState(false);
     
     // Custom drawer close handler that also updates the URL
     const closeDrawerAndUpdateURL = useCallback(() => {
@@ -775,9 +776,9 @@ export function ChatPage() {
 
                         {/* Chat Messages */}
                         <div className={classes.chatMessages} style={{ position: 'relative' }}>
-                            {!shouldScroll && !config.rainMode && (
+                            {!shouldScroll && !config.rainMode && !emoteGridOpen && (
                                 <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 10 }}>
-                                    <Button size="xs" onClick={scrollToBottom} leftSection={<IconMessagePause size={14} />} variant="gradient" radius={"lg"}>New Messages</Button>
+                                    <Button size="xs" onClick={scrollToBottom} leftSection={<IconMessagePause size={14} />} variant="gradient" radius={"lg"} className="glass-pink-button">New Messages</Button>
                                 </div>
                             )}
                             <ScrollArea viewportRef={viewport} h="100%" type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
@@ -790,7 +791,7 @@ export function ChatPage() {
                         {/* Chat Input */}
                         {config.chatEnabled && (
                             <div className={classes.chatInput}>
-                                <ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView} usernames={Array.from(usernames)}/>
+                                <ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView} usernames={Array.from(usernames)} onEmoteGridChange={setEmoteGridOpen}/>
                             </div>
                         )}
                     </div>
@@ -844,9 +845,9 @@ export function ChatPage() {
                         openUserProfile={() => { setDrawer({...UserCardDrawer}); drawerHandler.open() }}
                     ></drawer.component> : null}
                 </Drawer>
-                {(drawerOpen || shouldScroll || config.rainMode) ? null : (
+                {(drawerOpen || shouldScroll || config.rainMode || emoteGridOpen) ? null : (
                     <Affix position={{ bottom: 10 + (footer.current ? footer.current.scrollHeight : 0), left: 0 }}>
-                        <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" radius={"lg"}>New Messages</Button>
+                        <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" radius={"lg"} className="glass-pink-button">New Messages</Button>
                     </Affix>
                 )}
                 <ScrollArea viewportRef={viewport} pos='absolute' w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
@@ -856,7 +857,7 @@ export function ChatPage() {
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
             <AppShell.Footer withBorder={false} style={{ background: footerGradient, borderTop: barBorderTop, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)' }}>
-                {config.chatEnabled ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView} usernames={Array.from(usernames)}/></div> : null}
+                {config.chatEnabled ? <div ref={footer}><ChatInput close={chatInputHandler.close} replyToMsg={replyMsg} setReplyMsg={setReplyMsg} modActions={modActions} openModView={openModView} usernames={Array.from(usernames)} onEmoteGridChange={setEmoteGridOpen}/></div> : null}
             </AppShell.Footer>
         </AppShell>
     );
