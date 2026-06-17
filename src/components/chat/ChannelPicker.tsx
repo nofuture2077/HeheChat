@@ -30,7 +30,7 @@ export function ChannelPicker(props: ChannelPickerProps) {
         key={item}
         className={classes.menuItem}
       >
-        <Image src={chatEmotes.getLogo(item)?.props.src} width={32} height={32} style={{borderRadius: 16}}/>
+        <Image src={chatEmotes.getLogo(item)?.props.src} width={38} height={38} style={{borderRadius: 19}}/>
       </Menu.Item>
     ));
     
@@ -43,23 +43,23 @@ export function ChannelPicker(props: ChannelPickerProps) {
         zIndex={1000} // Ensure high z-index for expanded mode
       >
         <Menu.Target>
-            {props.value ? 
-              <Image 
-                src={chatEmotes.getLogo(props.value)?.props.src} 
-                width={32} 
-                height={32} 
-                style={{borderRadius: 16, display: 'block'}}
+            {props.value ?
+              <Image
+                src={chatEmotes.getLogo(props.value)?.props.src}
+                width={44}
+                height={44}
+                style={{display: 'block'}}
                 className={classes.channelImage}
-              /> : 
-              <Image 
-                width={32} 
-                height={32} 
-                style={{borderRadius: 16, display: 'block'}}
+              /> :
+              <Image
+                width={44}
+                height={44}
+                style={{display: 'block'}}
                 className={classes.channelImage}
               />
             }
         </Menu.Target>
-        <Menu.Dropdown>{items}</Menu.Dropdown>
+        <Menu.Dropdown className={classes.dropdown}>{items}</Menu.Dropdown>
       </Menu>
     );
   }

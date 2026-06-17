@@ -6,7 +6,7 @@ import PubSub from 'pubsub-js';
 import { ChannelPicker } from './ChannelPicker';
 import { Textarea, ActionIcon, rem, Flex, Stack, Combobox, useCombobox, Alert, Button, Group } from '@mantine/core';
 import { EmoteGrid } from './EmoteGrid';
-import { IconSend, IconX, IconMoodSmile } from '@tabler/icons-react';
+import { IconSend, IconX, IconSticker } from '@tabler/icons-react';
 import { HeheChatMessage } from '../../commons/message';
 import { ChatMessageComp } from './ChatMessage';
 import classes from './ChatMessage.module.css';
@@ -419,6 +419,7 @@ export function ChatInput(props: ChatInputProps) {
             <Flex justify="space-between" gap={'md'} align="center" m="6px 12px 22px 12px">
                 <Combobox
                     store={combobox}
+                    classNames={{ dropdown: inputClasses.comboboxDropdown }}
                     onOptionSubmit={(value) => {
                         // Scene autocomplete replaces the whole input
                         if (value.startsWith('/scene ')) {
@@ -446,7 +447,7 @@ export function ChatInput(props: ChatInputProps) {
                             onChange={(event) => {
                                 const newValue = event.currentTarget.value;
                                 setInputText(newValue);
-                                
+
                                 const items = getFilteredItems();
 
                                 if (items.length > 0) {
@@ -455,14 +456,15 @@ export function ChatInput(props: ChatInputProps) {
                                     combobox.closeDropdown();
                                 }
                             }}
-                            radius="md"
+                            classNames={{ root: inputClasses.inputWrapper }}
                             size="md"
                             w="100%"
                             autosize
                             minRows={1}
                             maxRows={3}
                             placeholder={props.replyToMsg ? ("Reply to " + props.replyToMsg.userInfo.displayName + " in " + chatChannel) : ("Chat in " + chatChannel)}
-                            rightSectionWidth={84}
+                            rightSectionWidth={90}
+                            leftSectionWidth={44}
                             onKeyDown={event => {
                                 if (event.key === "Enter") {
                                     // If combobox is open with exactly one option, select it
@@ -524,26 +526,34 @@ export function ChatInput(props: ChatInputProps) {
                                     />
                                 </div>}
                             rightSection={
-                                <Flex gap={4} align="center">
-                                    <ActionIcon 
-                                        size={32} 
-                                        radius="xl" 
-                                        variant="transparent" 
-                                        color={'primary'} 
+                                <Flex gap={6} align="center" pr={4}>
+                                    <ActionIcon
+                                        size={36}
+                                        radius="xl"
+                                        variant="transparent"
+                                        color="gray"
+                                        className={inputClasses.emoteButton}
                                         onClick={toggleEmoteGrid}
                                     >
-                                        <IconMoodSmile style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
+                                        <IconSticker style={{ width: rem(20), height: rem(20) }} stroke={1.5} />
                                     </ActionIcon>
-                                    <ActionIcon size={32} radius="xl" variant="transparent" color='primary' onClick={() => { sendMessage(inputText, false) }}>
-                                        <IconSend style={{ width: rem(18), height: rem(18) }} stroke={1.5} />
+                                    <ActionIcon
+                                        size={36}
+                                        radius="xl"
+                                        variant="transparent"
+                                        color="primary"
+                                        className={inputClasses.sendButton}
+                                        onClick={() => { sendMessage(inputText, false) }}
+                                    >
+                                        <IconSend style={{ width: rem(18), height: rem(18) }} stroke={2} />
                                     </ActionIcon>
                                 </Flex>
                             }
                         />
                     </Combobox.Target>
 
-                    {filtered.length ? 
-                    (<Combobox.Dropdown className={inputClasses.comboboxDropdown}>
+                    {filtered.length ?
+                    (<Combobox.Dropdown>
                         <Combobox.Options>
                             {filtered.map((item: ComboboxItem) => (
                                 <Combobox.Option value={item.value} key={item.value} disabled={item.disabled}>

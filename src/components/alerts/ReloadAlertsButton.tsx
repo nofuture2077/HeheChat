@@ -59,7 +59,7 @@ export function ReloadAlertsButton({ onActivate }: { onActivate?: () => void } =
       style={{
         padding: '8px 16px',
         fontSize: '18px',
-        width: '100%',
+        width: '95%',
         height: '200px',
         maxWidth: '400px',
         margin: '0 auto',
