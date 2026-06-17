@@ -163,7 +163,7 @@ async function handleStreamCommand(id: string | undefined, command: 'startStream
         // May throw if already in the desired state or mid-transition —
         // verification below decides whether the action actually took effect.
     }
-    const { ok, outputActive } = await verifyStreamState(desiredActive);
+    const { ok, outputActive } = await verifyStreamState(desiredActive, desiredActive ? 15_000 : 6_000);
     sendToHehe({ type: 'commandAck', id, command, success: ok, outputActive });
 }
 
@@ -199,6 +199,11 @@ function connectHehe() {
     heheWs.addEventListener('message', async (event) => {
         let msg: { type: string; id?: string; channel?: string; scene?: string; message?: string };
         try { msg = JSON.parse(event.data); } catch { return; }
+
+        if (msg.type === 'heartbeat') {
+            sendToHehe({ type: 'pong' });
+            return;
+        }
 
         if (msg.type === 'obs-client-ready') {
             if (obsConnected) await sendSceneList();
