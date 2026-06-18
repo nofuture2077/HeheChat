@@ -54,8 +54,8 @@ function StatusRow(props: {
                     backgroundColor: `var(--mantine-color-${props.color}-6)`,
                 }} />
                 <Stack gap={0}>
-                    <Text size="sm" fw={500}>{props.label}</Text>
-                    <Text size="xs" c="dimmed">{props.sublabel}</Text>
+                    <Text size="sm" fw={700}>{props.label}</Text>
+                    <Text size="xs">{props.sublabel}</Text>
                 </Stack>
             </Group>
             <ActionIcon
@@ -66,7 +66,7 @@ function StatusRow(props: {
                 onClick={props.onAction}
                 title={props.actionLabel}
             >
-                <IconRefresh size={12} />
+                <IconRefresh size={18} />
             </ActionIcon>
         </Group>
     );
@@ -173,14 +173,14 @@ export function Header(props: {
                             />
                             <Divider my={4} />
                             <Group justify="space-between" px={4}>
-                                <Text size="sm" c="dimmed">Reload Page</Text>
+                                <Text size="sm" fw={700}>Reload Page</Text>
                                 <ActionIcon
-                                    variant="filled"
-                                    color="red"
+                                    variant="subtle"
+                                    color="greay"
                                     size="sm"
                                     onClick={() => window.location.reload()}
                                 >
-                                    <IconRefresh size={12} />
+                                    <IconRefresh size={18} />
                                 </ActionIcon>
                             </Group>
                         </Stack>
