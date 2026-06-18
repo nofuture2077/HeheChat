@@ -33,12 +33,10 @@ let heheWs: WebSocket | null = null;
 let obsConnected = false;
 let heheConnected = false;
 let streamActive = false;
-let streamStatusKnown = false;
 
 function updateStreamStatus(outputActive: boolean | undefined) {
     if (typeof outputActive !== 'boolean') return;
     streamActive = outputActive;
-    streamStatusKnown = true;
 }
 
 let obsReconnectTimer: ReturnType<typeof setTimeout> | undefined;
@@ -96,7 +94,6 @@ async function connectObs() {
 
 obs.on('ConnectionClosed', () => {
     obsConnected = false;
-    streamStatusKnown = false;
     updateStatus();
     scheduleObsReconnect();
 });
@@ -333,7 +330,7 @@ function shouldCheckNow(): boolean {
 if (shouldCheckNow()) checkRemoteVersion();
 setInterval(() => { if (shouldCheckNow()) checkRemoteVersion(); }, VERSION_CHECK_INTERVAL);
 setInterval(() => {
-    if (pendingReload && streamStatusKnown && !streamActive) {
+    if (pendingReload && !streamActive) {
         location.reload();
     }
 }, IDLE_POLL_INTERVAL);
