@@ -300,7 +300,7 @@ async function checkRemoteVersion() {
     if (!sinkUrl) return;
     try {
         const current = await getCurrentVersion();
-        const resp = await fetch(`${sinkUrl}/manifest.json?t=${Date.now()}`, {
+        const resp = await fetch(window.location.origin +`/manifest.json?t=${Date.now()}`, {
             cache: 'no-cache',
             headers: {
                 'Cache-Control': 'no-cache, no-store, must-revalidate',
