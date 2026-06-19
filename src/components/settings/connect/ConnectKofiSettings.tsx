@@ -1,4 +1,4 @@
-import { TextInput, Fieldset, Stack, Text, ActionIcon, Alert, Button, Badge, Group } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, ActionIcon, Alert, Button, Checkbox, Group } from '@mantine/core';
 import { IconInfoCircle, IconCopy, IconPlug } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 
@@ -65,9 +65,19 @@ export function ConnectKofiSettings() {
                     {connected ? (
                         <Stack gap="sm">
                             <Group>
-                                <Badge color="green" size="lg">✅ Connected</Badge>
+                                <Checkbox
+                                    defaultChecked
+                                    readOnly
+                                    color="lime.4"
+                                    size="md"
+                                    />
+                                    <div>
+                                        <Text>Configured</Text>
+                                        <Text size="xs" c="dimmed">
+                                        Your Ko-fi account is configured via webhook
+                                        </Text>
+                                    </div>
                             </Group>
-                            <Text size="sm">Setup completed. Your Ko-fi account is connected via webhook.</Text>
                             <Button color="red" variant="light" onClick={disconnect} loading={loading}>Disconnect Ko-fi</Button>
                         </Stack>
                     ) : (

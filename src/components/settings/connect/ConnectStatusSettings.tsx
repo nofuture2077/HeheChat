@@ -18,6 +18,8 @@ interface ConnectionStatus {
     soundalerts?: ServiceStatus;
     pallygg?: ServiceStatus;
     youtube?: ServiceStatus;
+    elevenlabs?: ServiceStatus;
+    kofi?: ServiceStatus;
 }
 
 interface Connection {
@@ -28,18 +30,20 @@ interface Connection {
 type ServiceKey = keyof ConnectionStatus;
 
 const SERVICES: { key: ServiceKey; label: string; color: string; apiKey: string; canReinit: boolean }[] = [
-    { key: 'sevenTV',       label: '7TV',           color: 'blue',   apiKey: 'seventv',        canReinit: true },
-    { key: 'streamelements',label: 'StreamElements', color: 'teal',   apiKey: 'streamelements', canReinit: true },
-    { key: 'blerp',         label: 'Blerp',          color: 'orange', apiKey: 'blerp',          canReinit: true },
-    { key: 'soundalerts',   label: 'SoundAlerts',    color: 'violet', apiKey: 'soundalerts',    canReinit: true },
-    { key: 'pallygg',       label: 'Pally.gg',       color: 'grape',  apiKey: 'pallygg',        canReinit: true },
-    { key: 'youtube',       label: 'YouTube',        color: 'red',    apiKey: 'youtube',        canReinit: false },
+    { key: 'sevenTV', label: '7TV', color: 'blue', apiKey: 'seventv', canReinit: true },
+    { key: 'streamelements', label: 'StreamElements', color: 'teal', apiKey: 'streamelements', canReinit: true },
+    { key: 'blerp', label: 'Blerp', color: 'orange', apiKey: 'blerp', canReinit: true },
+    { key: 'soundalerts', label: 'SoundAlerts', color: 'violet', apiKey: 'soundalerts', canReinit: true },
+    { key: 'pallygg', label: 'Pally.gg', color: 'grape', apiKey: 'pallygg', canReinit: true },
+    { key: 'youtube', label: 'YouTube', color: 'red', apiKey: 'youtube', canReinit: false },
+    { key: 'elevenlabs', label: 'ElevenLabs', color: 'blue', apiKey: 'elevenlabs', canReinit: false },
+    { key: 'kofi', label: 'Ko-fi', color: 'blue', apiKey: 'kofi', canReinit: false },
 ];
 
-function serviceState(status: ServiceStatus | undefined): 'connected' | 'disconnected' | 'unconfigured' {
+function serviceState(status: ServiceStatus | undefined): 'active' | 'configured' | 'unconfigured' {
     if (!status) return 'unconfigured';
-    if (status.connected) return 'connected';
-    return 'disconnected';
+    if (status.connected) return 'active';
+    return 'configured';
 }
 
 export function ConnectStatusSettings() {
@@ -153,15 +157,15 @@ export function ConnectStatusSettings() {
                     {SERVICES.map(({ key, label, color, apiKey, canReinit }) => {
                         const status = mergedStatus[key];
                         const state = noConnection ? 'unconfigured' : serviceState(status);
-                        const badgeColor = state === 'connected' ? color : state === 'disconnected' ? 'yellow' : 'gray';
-                        const stateLabel = state === 'connected' ? 'Connected' : state === 'disconnected' ? 'Disconnected' : 'Not configured';
+                        const badgeColor = state === 'active' ? color : state === 'configured' ? 'yellow' : 'gray';
+                        const stateLabel = state === 'active' ? 'Active' : state === 'configured' ? 'Configured (Idle)' : 'Not configured';
 
                         return (
                             <Card key={key} withBorder padding="sm" radius="md">
                                 <Group justify="space-between" wrap="nowrap">
                                     <Stack gap={4}>
                                         <Text fw={600} size="sm">{label}</Text>
-                                        <Badge size="xs" color={badgeColor} variant={state === 'connected' ? 'filled' : 'light'}>
+                                        <Badge size="xs" color={badgeColor} variant={state === 'active' ? 'filled' : 'light'}>
                                             {stateLabel}
                                         </Badge>
                                         {status?.channelname && (

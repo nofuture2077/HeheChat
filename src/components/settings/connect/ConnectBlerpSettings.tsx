@@ -1,4 +1,4 @@
-import { TextInput, Fieldset, Stack, Text, Switch, Alert, Button, Badge, Group } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, Switch, Alert, Button, Checkbox, Group } from '@mantine/core';
 import { IconInfoCircle, IconPlug } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { ConfigContext } from '../../../ApplicationContext';
@@ -73,9 +73,19 @@ export function ConnectBlerpSettings() {
                     {connected ? (
                         <Stack gap="sm">
                             <Group>
-                                <Badge color="green" size="lg">✅ Connected</Badge>
+                                <Checkbox
+                                    defaultChecked
+                                    readOnly
+                                    color="lime.4"
+                                    size="md"
+                                    />
+                                    <div>
+                                        <Text>Configured</Text>
+                                        <Text size="xs" c="dimmed">
+                                        Room ID: {roomId}
+                                        </Text>
+                                    </div>
                             </Group>
-                            <Text size="sm">Setup completed. Your Blerp room is connected (Room ID: {roomId}).</Text>
                             <Button color="red" variant="light" onClick={disconnect} loading={loading}>Disconnect Blerp</Button>
                         </Stack>
                     ) : (

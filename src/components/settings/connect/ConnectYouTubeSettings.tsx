@@ -1,4 +1,4 @@
-import { TextInput, Fieldset, Stack, Text, Button, Badge, Group, Alert } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, Button, Badge, Checkbox, Group, Alert } from '@mantine/core';
 import { useState, useEffect } from 'react';
 import { IconBrandYoutube, IconInfoCircle } from '@tabler/icons-react';
 
@@ -89,9 +89,19 @@ export function ConnectYouTubeSettings() {
                     ) : connected ? (
                         <Stack gap="sm">
                             <Group>
-                                <Badge color="green" size="lg">✅ Connected</Badge>
+                                <Checkbox
+                                    defaultChecked
+                                    readOnly
+                                    color="lime.4"
+                                    size="md"
+                                    />
+                                    <div>
+                                        <Text>Configured</Text>
+                                        <Text size="xs" c="dimmed">
+                                        Channel ID: {channelId}
+                                        </Text>
+                                    </div>
                             </Group>
-                            <Text size="sm">Setup completed. Your YouTube channel is connected (Channel ID: {channelId}).</Text>
                             <Text size="sm" c="dimmed">💡 When you start a livestream, chat messages will automatically appear in HeheChat.</Text>
                             <Button color="red" variant="light" onClick={disconnect} loading={loading}>Disconnect YouTube</Button>
                         </Stack>

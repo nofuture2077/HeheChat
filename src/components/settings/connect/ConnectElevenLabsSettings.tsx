@@ -1,4 +1,4 @@
-import { TextInput, Fieldset, Stack, Text, Alert, Button, Badge, Group } from '@mantine/core';
+import { TextInput, Fieldset, Stack, Text, Alert, Button, Checkbox, Group } from '@mantine/core';
 import { IconInfoCircle, IconPlug } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 
@@ -57,9 +57,19 @@ export function ConnectElevenLabsSettings() {
                     {connected ? (
                         <Stack gap="sm">
                             <Group>
-                                <Badge color="green" size="lg">✅ Connected</Badge>
+                                <Checkbox
+                                    defaultChecked
+                                    readOnly
+                                    color="lime.4"
+                                    size="md"
+                                    />
+                                    <div>
+                                        <Text>Configured</Text>
+                                        <Text size="xs" c="dimmed">
+                                        Your ElevenLabs account is configured.
+                                        </Text>
+                                    </div>
                             </Group>
-                            <Text size="sm">Setup completed. Your ElevenLabs account is connected.</Text>
                             <Button color="red" variant="light" onClick={disconnect} loading={loading}>Disconnect ElevenLabs</Button>
                         </Stack>
                     ) : (
