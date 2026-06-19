@@ -149,12 +149,6 @@ export function ConnectStatusSettings() {
 
                 {error && <Alert color="red" icon={<IconAlertCircle />}>{error}</Alert>}
 
-                {noConnection && (
-                    <Alert color="gray" icon={<IconWifiOff />}>
-                        No active connection found. Open HeheChat in your browser first.
-                    </Alert>
-                )}
-
                 <SimpleGrid cols={2} spacing="sm">
                     {SERVICES.map(({ key, label, color, apiKey, canReinit }) => {
                         const status = mergedStatus[key];

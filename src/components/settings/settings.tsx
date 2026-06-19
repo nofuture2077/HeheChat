@@ -163,6 +163,7 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: 'Connect', label: 'Connect', icon: IconLink,
     children: [
+      { id: 'Connect/YouTube', label: 'YouTube', icon: IconBrandYoutube },
       { id: 'Connect/ElevenLabs', label: 'ElevenLabs', icon: IconHeadphones },
       { id: 'Connect/SoundAlerts', label: 'SoundAlerts', icon: IconVolume },
       { id: 'Connect/Blerp', label: 'Blerp', icon: IconMusic },
@@ -170,7 +171,6 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Connect/Pally', label: 'Pally.gg', icon: IconGift },
       { id: 'Connect/Kofi', label: 'Ko-fi', icon: IconGift },
       { id: 'Connect/Fossabot', label: 'Fossabot', icon: IconSettings },
-      { id: 'Connect/YouTube', label: 'YouTube', icon: IconBrandYoutube },
     ],
   },
   { id: 'Shortcuts', label: 'Shortcuts', icon: IconKeyboard },

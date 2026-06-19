@@ -82,48 +82,48 @@ export function ConnectYouTubeSettings() {
             <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
                 Connect your YouTube channel to receive live chat messages from your YouTube streams directly in HeheChat alongside your Twitch chat.
             </Alert>
-            <Fieldset legend="YouTube Chat" variant="filled">
-                <Text size="sm" mb={10}>
-                    Connect your YouTube channel to receive live chat messages from your YouTube streams in HeheChat.
-                </Text>
-
-                {loading ? (
-                    <Badge color="gray" size="lg" mb="md">Loading...</Badge>
-                ) : connected ? (
-                    <Stack gap="sm">
-                        <Group>
-                            <Badge color="green" size="lg" leftSection={<IconBrandYoutube size={16} />}>✅ Connected</Badge>
-                        </Group>
-                        <Text size="sm" fw={500}><strong>Channel-ID:</strong> {channelId}</Text>
-                        <Text size="sm" c="dimmed">💡 When you start a livestream, chat messages will automatically appear in HeheChat.</Text>
-                        <Button color="red" variant="light" onClick={disconnect} disabled={loading}>Disconnect YouTube</Button>
-                    </Stack>
-                ) : (
-                    <Stack gap="md">
-                        <Text size="sm">Connect your YouTube channel by entering your Channel-ID below.</Text>
-                        <TextInput
-                            label="YouTube Channel-ID"
-                            placeholder="UCxxxxxxxxxxxxxxxxxxxxx"
-                            value={channelId}
-                            onChange={(ev) => { setChannelId(ev.target.value); setChannelIdError(null); }}
-                            error={channelIdError}
-                            description='24 characters, always starts with "UC"'
-                        />
-                        <Alert icon={<IconInfoCircle size={16} />} color="gray" variant="light" title="Where to find your Channel ID">
-                            <Text size="sm" mb={4}>Your Channel ID is a 24-character string starting with <strong>UC</strong>.</Text>
-                            <Text size="sm" mb={4}>To find it:</Text>
-                            <ol style={{ margin: '4px 0 0 16px', padding: 0, fontSize: '13px' }}>
-                                <li>Open <a href="https://studio.youtube.com" target="_blank" rel="noopener noreferrer">YouTube Studio</a></li>
-                                <li>Go to <strong>Customization → Basic info</strong></li>
-                                <li>Your Channel ID is shown under <strong>Channel URL</strong> (the part after <code>/channel/</code>)</li>
-                            </ol>
-                            <Text size="xs" c="dimmed" mt={6}>Alternatively, go to your channel page, click "More" → "Share" → "Copy channel ID".</Text>
-                        </Alert>
-                        <Button color="red" leftSection={<IconBrandYoutube size={20} />} onClick={save} disabled={loading}>
-                            {loading ? 'Connecting...' : 'Connect YouTube'}
-                        </Button>
-                    </Stack>
-                )}
+            <Fieldset legend="YouTube Config" variant="filled">
+                <Stack gap="md">
+                    {loading ? (
+                        <Badge color="gray" size="lg" mb="md">Loading...</Badge>
+                    ) : connected ? (
+                        <Stack gap="sm">
+                            <Group>
+                                <Badge color="green" size="lg">✅ Connected</Badge>
+                            </Group>
+                            <Text size="sm">Setup completed. Your YouTube channel is connected (Channel ID: {channelId}).</Text>
+                            <Text size="sm" c="dimmed">💡 When you start a livestream, chat messages will automatically appear in HeheChat.</Text>
+                            <Button color="red" variant="light" onClick={disconnect} loading={loading}>Disconnect YouTube</Button>
+                        </Stack>
+                    ) : (
+                        <Stack gap="md">
+                            <Text size="sm">
+                                To connect your YouTube channel with HeheChat:
+                            </Text>
+                            <TextInput
+                                label="YouTube Channel-ID"
+                                placeholder="UCxxxxxxxxxxxxxxxxxxxxx"
+                                value={channelId}
+                                onChange={(ev) => { setChannelId(ev.target.value); setChannelIdError(null); }}
+                                error={channelIdError}
+                                description='24 characters, always starts with "UC"'
+                            />
+                            <Alert icon={<IconInfoCircle size={16} />} color="gray" variant="light" title="Where to find your Channel ID">
+                                <Text size="sm" mb={4}>Your Channel ID is a 24-character string starting with <strong>UC</strong>.</Text>
+                                <Text size="sm" mb={4}>To find it:</Text>
+                                <ol style={{ margin: '4px 0 0 16px', padding: 0, fontSize: '13px' }}>
+                                    <li>Open <a href="https://studio.youtube.com" target="_blank" rel="noopener noreferrer">YouTube Studio</a></li>
+                                    <li>Go to <strong>Customization → Basic info</strong></li>
+                                    <li>Your Channel ID is shown under <strong>Channel URL</strong> (the part after <code>/channel/</code>)</li>
+                                </ol>
+                                <Text size="xs" c="dimmed" mt={6}>Alternatively, go to your channel page, click "More" → "Share" → "Copy channel ID".</Text>
+                            </Alert>
+                            <Button color="red" leftSection={<IconBrandYoutube size={20} />} onClick={save} loading={loading}>
+                                Connect YouTube
+                            </Button>
+                        </Stack>
+                    )}
+                </Stack>
             </Fieldset>
         </Stack>
     );
