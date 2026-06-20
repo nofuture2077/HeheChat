@@ -1,5 +1,5 @@
 import { ScrollArea, Text, ThemeIcon, ActionIcon } from '@mantine/core';
-import { IconBoltFilled, IconCheck, IconReload, IconTrain } from '@tabler/icons-react';
+import { IconBoltFilled, IconCheck, IconReload, IconTrain, IconUsersGroup } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { EventStorage, EventData } from './eventstorage';
 import { ConfigContext, ProfileContext } from '@/ApplicationContext';
@@ -8,13 +8,14 @@ import { ConfigContext, ProfileContext } from '@/ApplicationContext';
 import blerpLogo from '@/res/blerp_logo.svg';
 import soundalertsLogo from '@/res/soundalerts_logo.svg';
 import kofiLogo from '@/res/kofi_logo.svg';
+import twitchLogo from '@/res/twitch_logo.svg';
 import { InfoCard, InfoCardSkeleton } from '../infocard/infocard';
 import { getEventStyle } from '@/components/events/eventhelper';
 import { EventType } from '@/commons/events';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { Dictionary } from 'underscore';
 import { useForceUpdate } from '@mantine/hooks';
-import { IconGiftFilled, IconCoinBitcoinFilled, IconUserHeart, IconSparkles, IconMoneybag, IconPlant, IconBellRinging, IconAffiliate, IconSpeakerphone, IconMusic } from '@tabler/icons-react';
+import { IconGiftFilled, IconCoinBitcoinFilled, IconUserHeart, IconMoneybag, IconSpeakerphone } from '@tabler/icons-react';
 import { formatString } from "@/commons/helper";
 import { ReactElementLike } from 'prop-types';
 import classes from './EventList.module.css';
@@ -53,7 +54,7 @@ const messages: Record<EventType, string> = {
 }
 
 export const icons: Record<EventType, ReactElementLike> = {
-    'raid': <IconSparkles/>,
+    'raid': <IconUsersGroup/>,
     'sub_1000': <IconGiftFilled/>,
     'sub_2000': <IconGiftFilled/>,
     'sub_3000': <IconGiftFilled/>,
@@ -69,7 +70,7 @@ export const icons: Record<EventType, ReactElementLike> = {
     'donation': <IconMoneybag/>,
     'blerp': <img src={blerpLogo} className="monochrome-logo" alt="Blerp" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
     'soundalerts': <img src={soundalertsLogo} className="monochrome-logo" alt="SoundAlerts" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
-    'channelPointRedemption': <IconPlant/>,
+    'channelPointRedemption': <img src={twitchLogo} className="monochrome-logo" alt="Blerp" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
     'kofishop': <img src={kofiLogo} className="monochrome-logo" alt="Ko-fi" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
     'kofidono': <img src={kofiLogo} className="monochrome-logo" alt="Ko-fi" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
     'kofisub': <img src={kofiLogo} className="monochrome-logo" alt="Ko-fi" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
