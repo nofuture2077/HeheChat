@@ -4,6 +4,27 @@ import { IconRefresh, IconAlertCircle, IconWifiOff } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 import { notifications } from '@mantine/notifications';
 
+// Import SVG logo assets directly
+import seventvLogo from '@/res/7tv_logo.svg';
+import streamelementLogo from '@/res/streamelement_logo.svg';
+import blerpLogo from '@/res/blerp_logo.svg';
+import soundalertsLogo from '@/res/soundalerts_logo.svg';
+import pallyggLogo from '@/res/pally_logo.svg';
+import youtubeLogo from '@/res/youtube_logo.svg';
+import elevenlabsLogo from '@/res/elevenlabs_logo.svg';
+import kofiLogo from '@/res/kofi_logo.svg';
+
+const LOGOS: Record<string, string> = {
+    sevenTV: seventvLogo,
+    streamelements: streamelementLogo,
+    blerp: blerpLogo,
+    soundalerts: soundalertsLogo,
+    pallygg: pallyggLogo,
+    youtube: youtubeLogo,
+    elevenlabs: elevenlabsLogo,
+    kofi: kofiLogo,
+};
+
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 interface ServiceStatus {
@@ -124,6 +145,16 @@ export function ConnectStatusSettings() {
 
     return (
         <>
+            <style>{`
+                .monochrome-logo {
+                    filter: brightness(0) opacity(0.65);
+                    transition: all 0.2s ease;
+                }
+                :root[data-mantine-color-scheme="dark"] .monochrome-logo,
+                [data-mantine-color-scheme="dark"] .monochrome-logo {
+                    filter: brightness(0) invert(1) opacity(0.85);
+                }
+            `}</style>
             <Modal
                 opened={confirmOpened}
                 onClose={closeConfirm}
@@ -161,31 +192,57 @@ export function ConnectStatusSettings() {
                         const stateLabel = state === 'active' ? 'Active' : state === 'configured' ? 'Configured (Idle)' : 'Not configured';
 
                         return (
-                            <Card key={key} withBorder padding="sm" radius="md">
-                                <Group justify="space-between" wrap="nowrap">
-                                    <Stack gap={4}>
-                                        <Text fw={600} size="sm">{label}</Text>
-                                        <Badge size="xs" color={badgeColor} variant={state === 'active' ? 'filled' : 'light'}>
-                                            {stateLabel}
-                                        </Badge>
-                                        {status?.channelname && (
-                                            <Text size="xs" c="dimmed">{status.channelname}</Text>
-                                        )}
-                                    </Stack>
-                                    {state !== 'unconfigured' && canReinit && (
-                                        <Tooltip label={`Reinitialize ${label}`}>
-                                            <ActionIcon
-                                                variant="subtle"
-                                                color={color}
-                                                loading={reinitializing[apiKey]}
-                                                onClick={() => reinitialize(apiKey, label)}
-                                            >
-                                                <IconRefresh size={16} />
-                                            </ActionIcon>
-                                        </Tooltip>
-                                    )}
-                                </Group>
-                            </Card>
+                             <Card key={key} withBorder padding="sm" radius="md">
+                                 <Group justify="space-between" wrap="nowrap">
+                                     <Group gap="sm" wrap="nowrap">
+                                         <div
+                                             style={{
+                                                 display: 'flex',
+                                                 alignItems: 'center',
+                                                 justifyContent: 'center',
+                                                 width: 40,
+                                                 height: 40,
+                                                 borderRadius: '8px',
+                                                 backgroundColor: 'var(--mantine-color-default-hover)',
+                                                 border: '1px solid var(--mantine-color-default-border)',
+                                             }}
+                                         >
+                                             <img 
+                                                 src={LOGOS[key]} 
+                                                 alt={label} 
+                                                 className="monochrome-logo"
+                                                 style={{ 
+                                                     width: 24, 
+                                                     height: 24,
+                                                     objectFit: 'contain',
+                                                     opacity: state === 'active' ? 1 : 0.35,
+                                                 }} 
+                                             />
+                                         </div>
+                                         <Stack gap={4}>
+                                             <Text fw={600} size="sm">{label}</Text>
+                                             <Badge size="xs" color={badgeColor} variant={state === 'active' ? 'filled' : 'light'}>
+                                                 {stateLabel}
+                                             </Badge>
+                                             {status?.channelname && (
+                                                 <Text size="xs" c="dimmed">{status.channelname}</Text>
+                                             )}
+                                         </Stack>
+                                     </Group>
+                                     {state !== 'unconfigured' && canReinit && (
+                                         <Tooltip label={`Reinitialize ${label}`}>
+                                             <ActionIcon
+                                                 variant="subtle"
+                                                 color={color}
+                                                 loading={reinitializing[apiKey]}
+                                                 onClick={() => reinitialize(apiKey, label)}
+                                             >
+                                                 <IconRefresh size={16} />
+                                             </ActionIcon>
+                                         </Tooltip>
+                                     )}
+                                 </Group>
+                             </Card>
                         );
                     })}
                 </SimpleGrid>

@@ -3,6 +3,11 @@ import { IconBoltFilled, IconCheck, IconReload, IconTrain } from '@tabler/icons-
 import { useState, useEffect, useContext } from 'react';
 import { EventStorage, EventData } from './eventstorage';
 import { ConfigContext, ProfileContext } from '@/ApplicationContext';
+
+// Import SVG logos directly
+import blerpLogo from '@/res/blerp_logo.svg';
+import soundalertsLogo from '@/res/soundalerts_logo.svg';
+import kofiLogo from '@/res/kofi_logo.svg';
 import { InfoCard, InfoCardSkeleton } from '../infocard/infocard';
 import { getEventStyle } from '@/components/events/eventhelper';
 import { EventType } from '@/commons/events';
@@ -62,12 +67,12 @@ export const icons: Record<EventType, ReactElementLike> = {
     'follow': <IconUserHeart/>,
     'cheer': <IconCoinBitcoinFilled/>,
     'donation': <IconMoneybag/>,
-    'blerp': <IconBellRinging/>,
-    'soundalerts': <IconMusic/>,
+    'blerp': <img src={blerpLogo} className="monochrome-logo" alt="Blerp" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
+    'soundalerts': <img src={soundalertsLogo} className="monochrome-logo" alt="SoundAlerts" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
     'channelPointRedemption': <IconPlant/>,
-    'kofishop': <IconAffiliate/>,
-    'kofidono': <IconAffiliate/>,
-    'kofisub': <IconAffiliate/>,
+    'kofishop': <img src={kofiLogo} className="monochrome-logo" alt="Ko-fi" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
+    'kofidono': <img src={kofiLogo} className="monochrome-logo" alt="Ko-fi" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
+    'kofisub': <img src={kofiLogo} className="monochrome-logo" alt="Ko-fi" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
     'tts': <IconSpeakerphone/>,
     'hypetrain': <IconTrain/>,
     'streak': <IconBoltFilled/>,
@@ -156,6 +161,16 @@ export function EventList() {
 
     return (
         <ScrollArea className={classes.main}>
+            <style>{`
+                .monochrome-logo {
+                    filter: brightness(0) opacity(0.65);
+                    transition: all 0.2s ease;
+                }
+                :root[data-mantine-color-scheme="dark"] .monochrome-logo,
+                [data-mantine-color-scheme="dark"] .monochrome-logo {
+                    filter: brightness(0) invert(1) opacity(0.85);
+                }
+            `}</style>
             <div className={classes.reverse}>
                 {load ? <>{[1,2,3].map(x => <InfoCardSkeleton key={'event' + x}/>)}</> : null}
                 {!load && events.length === 0 ? <Text key='event-noevents' pt='xl' size='xl' ta="center" fw={500}>No Events to show.</Text> : null}

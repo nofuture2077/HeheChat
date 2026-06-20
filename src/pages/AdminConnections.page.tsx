@@ -1,7 +1,32 @@
-import { Container, Title, Text, Button, Alert, Stack, Table, Badge, LoadingOverlay, Card, Group, Anchor } from '@mantine/core';
-import { IconRefresh, IconAlertCircle, IconUsers, IconClock, IconWifi, IconDevices, IconExternalLink, IconEye } from '@tabler/icons-react';
+import { Container, Title, Text, Button, Alert, Stack, Badge, LoadingOverlay, Card, Group, Anchor, Tooltip, Grid } from '@mantine/core';
+import { IconRefresh, IconAlertCircle, IconUsers, IconClock, IconWifi, IconDevices, IconExternalLink } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
+
+// Import SVG logo assets directly
+import seventvLogo from '@/res/7tv_logo.svg';
+import streamelementLogo from '@/res/streamelement_logo.svg';
+import blerpLogo from '@/res/blerp_logo.svg';
+import soundalertsLogo from '@/res/soundalerts_logo.svg';
+import youtubeLogo from '@/res/youtube_logo.svg';
+import pallyLogo from '@/res/pally_logo.svg';
+
+interface GroupedUser {
+  userName: string;
+  userId: string;
+  channels: string[];
+  isLive: boolean;
+  streamInfo?: StreamInfo;
+  services: {
+    sevenTV: { connected: boolean; channel: string };
+    streamelements: { connected: boolean; channel: string };
+    blerp: { connected: boolean; channel: string };
+    soundalerts: { connected: boolean; channel: string };
+    pallygg: { connected: boolean; channel: string };
+    youtube: { connected: boolean; channel: string };
+  };
+  connections: FlatConnection[];
+}
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -157,34 +182,6 @@ export function AdminConnectionsPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const getServiceBadge = (service: '7TV' | 'SE' | 'Blerp' | 'Pally' | 'YT' | 'SoA', connected: boolean) => {
-    if (!connected) return null;
-    
-    const badgeProps = {
-      size: 'sm',
-      radius: 'sm',
-      variant: 'filled',
-      style: { fontWeight: 'bold' }
-    };
-
-    switch (service) {
-      case '7TV':
-        return <Badge {...badgeProps} color="blue">7TV</Badge>;
-      case 'SE':
-        return <Badge {...badgeProps} color="teal">SE</Badge>;
-      case 'Blerp':
-        return <Badge {...badgeProps} color="orange">BLERP</Badge>;
-      case 'Pally':
-        return <Badge {...badgeProps} color="grape">PALLY</Badge>;
-      case 'YT':
-        return <Badge {...badgeProps} color="red">YT</Badge>;
-      case 'SoA':
-        return <Badge {...badgeProps} color="violet">SOA</Badge>;
-      default:
-        return null;
-    }
-  };
-
   const formatStreamDuration = (startTime: number) => {
     const durationSeconds = Math.floor(Date.now() / 1000) - startTime;
     const hours = Math.floor(durationSeconds / 3600);
@@ -192,106 +189,123 @@ export function AdminConnectionsPage() {
     return `${hours}h ${minutes}m`;
   };
 
-  const formatGUID = (guid: string) => {
-    if (!guid) return '';
-    return guid.substring(0, 8) + '...' + guid.substring(guid.length - 4);
+  const renderServiceLogo = (
+    name: string,
+    connected: boolean,
+    channel: string,
+    logoSrc: string
+  ) => {
+    return (
+      <Tooltip 
+        label={connected ? `${name}: Connected (${channel})` : `${name}: Not Connected`}
+        position="top"
+        withArrow
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 36,
+            height: 36,
+            borderRadius: '8px',
+            border: '1px solid',
+            borderColor: connected ? 'var(--mantine-color-default-border)' : 'transparent',
+            backgroundColor: connected ? 'var(--mantine-color-default-hover)' : 'transparent',
+            opacity: connected ? 1 : 0.25,
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <img 
+            src={logoSrc} 
+            alt={name} 
+            className="monochrome-logo"
+            style={{ 
+              width: 20, 
+              height: 20,
+              objectFit: 'contain'
+            }} 
+          />
+        </div>
+      </Tooltip>
+    );
   };
 
-  const rows = connections.map((connection, index) => (
-    <Table.Tr key={`${connection.userName}-${connection.profileId}-${connection.source}-${index}`}>
-      <Table.Td>
-        <Stack gap={4}>
-          <Group gap="xs">
-            <Text fw={500}>{connection.userName}</Text>
-            {connection.streamInfo && (
-              <Badge color="pink" size="xs">LIVE</Badge>
-            )}
-          </Group>
-          <Text size="xs" c="dimmed">{connection.userId}</Text>
-          {connection.streamInfo && (
-            <Group gap="xs" mt={2}>
-              <Badge 
-                size="xs" 
-                color="violet" 
-                leftSection={<IconUsers size="0.7rem" />}
-              >
-                {connection.streamInfo.viewerCount}
-              </Badge>
-              <Badge 
-                size="xs" 
-                color="gray" 
-                leftSection={<IconClock size="0.7rem" />}
-              >
-                {formatStreamDuration(connection.streamInfo.startTime)}
-              </Badge>
-            </Group>
-          )}
-        </Stack>
-      </Table.Td>
-      <Table.Td>
-        <Stack gap={4}>
-          <Text fw={500}>{connection.profileName}</Text>
-          <Text size="xs" c="dimmed" style={{ fontFamily: 'monospace' }}>
-            {formatGUID(connection.guid)}
-          </Text>
-          {connection.streamInfo && connection.streamInfo.title && (
-            <Text size="xs" c="dimmed" fw={500}>
-              {connection.streamInfo.title.length > 30 
-                ? `${connection.streamInfo.title.substring(0, 30)}...` 
-                : connection.streamInfo.title}
-            </Text>
-          )}
-        </Stack>
-      </Table.Td>
-      <Table.Td>
-        <Stack gap={4}>
-          <Text fw={500}>{connection.source}</Text>
-          <Badge size="xs" variant="light" color="gray">{connection.version}</Badge>
-          {connection.streamInfo && connection.streamInfo.category && (
-            <Text size="xs" c="dimmed">
-              {connection.streamInfo.category}
-            </Text>
-          )}
-        </Stack>
-      </Table.Td>
-      <Table.Td>
-        <Group gap="xs" wrap="wrap">
-          {connection.channels.map((channel, channelIndex) => (
-            <Badge 
-              key={channelIndex}
-              variant="light"
-              color="blue"
-              rightSection={
-                <Anchor
-                  href={`https://twitch.tv/${channel}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: 'inherit' }}
-                >
-                  <IconExternalLink size="0.7rem" />
-                </Anchor>
-              }
-            >
-              {channel}
-            </Badge>
-          ))}
-        </Group>
-      </Table.Td>
-      <Table.Td>
-        <Group gap="xs">
-          {getServiceBadge('7TV', connection.sevenTVConnected)}
-          {getServiceBadge('SE', connection.streamElementsConnected)}
-          {getServiceBadge('Blerp', connection.blerpConnected)}
-          {getServiceBadge('SoA', connection.soundalertsConnected)}
-          {getServiceBadge('Pally', connection.pallyggConnected)}
-          {getServiceBadge('YT', connection.youtubeConnected)}
-        </Group>
-      </Table.Td>
-    </Table.Tr>
-  ));
+  // Group connections by userName
+  const groupedUsersMap: Record<string, GroupedUser> = {};
+
+  connections.forEach(conn => {
+    const name = conn.userName;
+    if (!groupedUsersMap[name]) {
+      groupedUsersMap[name] = {
+        userName: name,
+        userId: conn.userId,
+        channels: [],
+        isLive: false,
+        services: {
+          sevenTV: { connected: false, channel: 'N/A' },
+          streamelements: { connected: false, channel: 'N/A' },
+          blerp: { connected: false, channel: 'N/A' },
+          soundalerts: { connected: false, channel: 'N/A' },
+          pallygg: { connected: false, channel: 'N/A' },
+          youtube: { connected: false, channel: 'N/A' },
+        },
+        connections: [],
+      };
+    }
+
+    const user = groupedUsersMap[name];
+
+    // Add unique channels
+    conn.channels.forEach(ch => {
+      if (!user.channels.includes(ch)) {
+        user.channels.push(ch);
+      }
+    });
+
+    // Check if live
+    if (conn.streamInfo) {
+      user.isLive = true;
+      user.streamInfo = conn.streamInfo;
+    }
+
+    // Merge services status
+    if (conn.sevenTVConnected) {
+      user.services.sevenTV = { connected: true, channel: conn.sevenTVChannel };
+    }
+    if (conn.streamElementsConnected) {
+      user.services.streamelements = { connected: true, channel: conn.streamElementsChannel };
+    }
+    if (conn.blerpConnected) {
+      user.services.blerp = { connected: true, channel: conn.blerpChannel };
+    }
+    if (conn.soundalertsConnected) {
+      user.services.soundalerts = { connected: true, channel: conn.soundalertsChannel };
+    }
+    if (conn.pallyggConnected) {
+      user.services.pallygg = { connected: true, channel: conn.pallyggChannel };
+    }
+    if (conn.youtubeConnected) {
+      user.services.youtube = { connected: true, channel: conn.youtubeChannel };
+    }
+
+    user.connections.push(conn);
+  });
+
+  const groupedUsers = Object.values(groupedUsersMap);
 
   return (
     <Container size="xl">
+      <style>{`
+        .monochrome-logo {
+          filter: brightness(0) opacity(0.65);
+          transition: all 0.2s ease;
+        }
+        :root[data-mantine-color-scheme="dark"] .monochrome-logo,
+        [data-mantine-color-scheme="dark"] .monochrome-logo {
+          filter: brightness(0) invert(1) opacity(0.85);
+        }
+      `}</style>
       <Stack gap="md">
         <Group justify="space-between" align="center">
           <div>
@@ -376,38 +390,118 @@ export function AdminConnectionsPage() {
                 </Alert>
               )}
 
-              {!error && connections.length > 0 && (
-                <Table striped highlightOnHover withTableBorder withColumnBorders>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>
-                        <Group gap={4} align="center">
-                          <IconUsers size="0.9rem" />
-                          <Text fw={700}>Username</Text>
-                        </Group>
-                      </Table.Th>
-                      <Table.Th>
-                        <Group gap={4} align="center">
-                          <IconDevices size="0.9rem" />
-                          <Text fw={700}>Profile</Text>
-                        </Group>
-                      </Table.Th>
-                      <Table.Th>
-                        <Group gap={4} align="center">
-                          <IconWifi size="0.9rem" />
-                          <Text fw={700}>Source</Text>
-                        </Group>
-                      </Table.Th>
-                      <Table.Th>
-                        <Text fw={700}>Channels</Text>
-                      </Table.Th>
-                      <Table.Th>
-                        <Text fw={700}>Services</Text>
-                      </Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>{rows}</Table.Tbody>
-                </Table>
+              {!error && groupedUsers.length > 0 && (
+                <Stack gap="md" w="100%">
+                  {groupedUsers.map((user) => (
+                    <Card key={user.userName} withBorder shadow="sm" radius="md" p="md" w="100%">
+                      <Grid align="center" gap="md">
+                        {/* Left Column: Username, UserID, linked Channels, and source tags */}
+                        <Grid.Col span={{ base: 12, md: 8 }}>
+                          <Stack gap="xs">
+                            <Group gap="xs">
+                              <Text fw={700} size="lg" c="blue">{user.userName}</Text>
+                              <Text size="xs" c="dimmed">({user.userId})</Text>
+                              {user.isLive && (
+                                <Badge color="pink" variant="filled" size="xs">LIVE</Badge>
+                              )}
+                            </Group>
+
+                            {user.channels.length > 0 && (
+                              <Group gap="xs" wrap="wrap">
+                                <Text size="xs" fw={600} c="dimmed">Channels:</Text>
+                                {user.channels.map((channel) => (
+                                  <Badge 
+                                    key={channel}
+                                    variant="light"
+                                    color="blue"
+                                    size="sm"
+                                    rightSection={
+                                      <Anchor
+                                        href={`https://twitch.tv/${channel}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}
+                                      >
+                                        <IconExternalLink size="0.75rem" />
+                                      </Anchor>
+                                    }
+                                  >
+                                    {channel}
+                                  </Badge>
+                                ))}
+                              </Group>
+                            )}
+
+                            <Group gap="xs" wrap="wrap">
+                              <Text size="xs" fw={600} c="dimmed">Sources:</Text>
+                              {user.connections.map((conn, idx) => (
+                                <Badge 
+                                  key={`${conn.guid}-${idx}`}
+                                  variant="outline"
+                                  color="gray"
+                                  size="sm"
+                                  tt="none"
+                                >
+                                  {conn.source} ({conn.version})
+                                </Badge>
+                              ))}
+                            </Group>
+                          </Stack>
+                        </Grid.Col>
+
+                        {/* Right Column: Services (monochrome logos) & Live info */}
+                        <Grid.Col span={{ base: 12, md: 4 }}>
+                          <Stack align="flex-start" gap="sm">
+                            <Stack align="flex-start" gap={4}>
+                              <Text size="xs" fw={700} c="dimmed">SERVICES</Text>
+                              <Group gap="xs">
+                                {renderServiceLogo('7TV', user.services.sevenTV.connected, user.services.sevenTV.channel, seventvLogo)}
+                                {renderServiceLogo('StreamElements', user.services.streamelements.connected, user.services.streamelements.channel, streamelementLogo)}
+                                {renderServiceLogo('Blerp', user.services.blerp.connected, user.services.blerp.channel, blerpLogo)}
+                                {renderServiceLogo('SoundAlerts', user.services.soundalerts.connected, user.services.soundalerts.channel, soundalertsLogo)}
+                                {renderServiceLogo('Pally.gg', user.services.pallygg.connected, user.services.pallygg.channel, pallyLogo)}
+                                {renderServiceLogo('YouTube', user.services.youtube.connected, user.services.youtube.channel, youtubeLogo)}
+                              </Group>
+                            </Stack>
+
+                            {user.streamInfo && (
+                              <Card 
+                                withBorder 
+                                shadow="xs" 
+                                p="xs" 
+                                radius="sm" 
+                                w="100%" 
+                                style={{ 
+                                  maxWidth: 400, 
+                                  alignSelf: 'stretch',
+                                  backgroundColor: 'var(--mantine-color-dark-8)'
+                                }}
+                              >
+                                <Stack gap={4}>
+                                  <Text size="xs" fw={700} c="pink">STREAM INFO</Text>
+                                  <Text size="sm" fw={600} lineClamp={1}>{user.streamInfo.title}</Text>
+                                  <Group gap="xs">
+                                    <Text size="xs" c="dimmed">{user.streamInfo.category}</Text>
+                                    <Text size="xs" c="dimmed">•</Text>
+                                    <Group gap={4}>
+                                      <IconUsers size="0.75rem" style={{ color: 'var(--mantine-color-violet-5)' }} />
+                                      <Text size="xs" fw={600}>{user.streamInfo.viewerCount}</Text>
+                                    </Group>
+                                    <Text size="xs" c="dimmed">•</Text>
+                                    <Group gap={4}>
+                                      <IconClock size="0.75rem" style={{ color: 'var(--mantine-color-gray-5)' }} />
+                                      <Text size="xs">{formatStreamDuration(user.streamInfo.startTime)}</Text>
+                                    </Group>
+                                  </Group>
+                                </Stack>
+                              </Card>
+                            )}
+                          </Stack>
+                        </Grid.Col>
+                      </Grid>
+                    </Card>
+                  ))}
+                </Stack>
               )}
             </div>
           </Card.Section>
