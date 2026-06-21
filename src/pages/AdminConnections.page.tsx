@@ -339,199 +339,185 @@ export function AdminConnectionsPage() {
           </Text>
         )}
 
-        <Card withBorder shadow="sm">
-          <Card.Section p="md" withBorder>
-            <Group justify="space-between">
-              <Text fw={700} size="lg">Connection Statistics</Text>
-              <Group gap="md">
-                <Badge size="lg" variant="filled" color="blue" leftSection={<IconUsers size="0.9rem" />}>
-                  {connectionStats.user_count} Users
-                </Badge>
-                <Badge size="lg" variant="filled" color="green" leftSection={<IconWifi size="0.9rem" />}>
-                  {connectionStats.connection_count} Total Connections
-                </Badge>
-                <Badge size="lg" variant="filled" color="orange" leftSection={<IconDevices size="0.9rem" />}>
-                  {connections.length} Active Sources
-                </Badge>
-              </Group>
-            </Group>
-          </Card.Section>
+        <Group justify="space-between">
+          <Text fw={700} size="lg">Connection Statistics</Text>
+          <Group gap="md">
+            <Badge size="lg" variant="filled" color="blue" leftSection={<IconUsers size="0.9rem" />}>
+              {connectionStats.user_count} Users
+            </Badge>
+            <Badge size="lg" variant="filled" color="green" leftSection={<IconWifi size="0.9rem" />}>
+              {connectionStats.connection_count} Total Connections
+            </Badge>
+            <Badge size="lg" variant="filled" color="orange" leftSection={<IconDevices size="0.9rem" />}>
+              {connections.length} Active Sources
+            </Badge>
+          </Group>
+        </Group>
 
-          <Card.Section>
-            <div style={{ position: 'relative' }}>
-              <LoadingOverlay visible={loading} />
-              
-              {error && (
-                <Alert 
-                  icon={<IconAlertCircle size="1rem" />} 
-                  title="Error Loading Connections" 
-                  color="pink"
-                  variant="light"
-                  m="md"
+        <div style={{ position: 'relative' }}>
+          <LoadingOverlay visible={loading} />
+          
+          {error && (
+            <Alert 
+              icon={<IconAlertCircle size="1rem" />} 
+              title="Error Loading Connections" 
+              color="pink"
+              variant="light"
+              m="md"
+            >
+              <Text>{error}</Text>
+              <Button 
+                size="xs" 
+                variant="light" 
+                mt="xs"
+                onClick={fetchConnections}
+              >
+                Try Again
+              </Button>
+            </Alert>
+          )}
+
+          {!error && connections.length === 0 && !loading && (
+            <Alert 
+              icon={<IconWifi size="1rem" />} 
+              title="No Active Connections" 
+              color="blue"
+              variant="light"
+              m="md"
+            >
+              <Text>There are currently no active connections to display.</Text>
+            </Alert>
+          )}
+
+          {!error && groupedUsers.length > 0 && (
+            <Stack gap="md" w="100%">
+              {groupedUsers.map((user) => (
+                <Card
+                  key={user.userName}
+                  withBorder
+                  shadow="sm"
+                  radius="md"
+                  p="md"
+                  w="100%"
                 >
-                  <Text>{error}</Text>
-                  <Button 
-                    size="xs" 
-                    variant="light" 
-                    mt="xs"
-                    onClick={fetchConnections}
-                  >
-                    Try Again
-                  </Button>
-                </Alert>
-              )}
+                  <Stack gap="sm">
+                    <Grid align="center" gap="md">
+                      {/* Left Column: Username, UserID, linked Channels, and source tags */}
+                      <Grid.Col span={{ base: 12, md: 8 }}>
+                        <Stack gap={6}>
+                          <Group gap="xs">
+                            {user.isLive && (
+                              <span
+                                style={{
+                                  width: 8,
+                                  height: 8,
+                                  borderRadius: '50%',
+                                  flexShrink: 0,
+                                }}
+                              />
+                            )}
+                            <Text fw={700} size="lg" c="blue">{user.userName}</Text>
+                            <Text size="xs" c="dimmed">({user.userId})</Text>
+                          </Group>
 
-              {!error && connections.length === 0 && !loading && (
-                <Alert 
-                  icon={<IconWifi size="1rem" />} 
-                  title="No Active Connections" 
-                  color="blue"
-                  variant="light"
-                  m="md"
-                >
-                  <Text>There are currently no active connections to display.</Text>
-                </Alert>
-              )}
-
-              {!error && groupedUsers.length > 0 && (
-                <Stack gap="md" w="100%">
-                  {groupedUsers.map((user) => (
-                    <Card
-                      key={user.userName}
-                      withBorder
-                      shadow="sm"
-                      radius="md"
-                      p="md"
-                      w="100%"
-                      style={{
-                        borderLeft: user.isLive
-                          ? '3px solid var(--mantine-color-pink-6)'
-                          : '3px solid transparent',
-                        transition: 'border-color 0.2s ease',
-                      }}
-                    >
-                      <Stack gap="sm">
-                        <Grid align="center" gap="md">
-                          {/* Left Column: Username, UserID, linked Channels, and source tags */}
-                          <Grid.Col span={{ base: 12, md: 8 }}>
-                            <Stack gap={6}>
-                              <Group gap="xs">
-                                {user.isLive && (
-                                  <span
-                                    style={{
-                                      width: 8,
-                                      height: 8,
-                                      borderRadius: '50%',
-                                      backgroundColor: 'var(--mantine-color-pink-6)',
-                                      flexShrink: 0,
-                                      boxShadow: '0 0 0 3px var(--mantine-color-pink-light)',
-                                    }}
-                                  />
-                                )}
-                                <Text fw={700} size="lg" c="blue">{user.userName}</Text>
-                                <Text size="xs" c="dimmed">({user.userId})</Text>
-                              </Group>
-
-                              {user.channels.length > 0 && (
-                                <Group gap="xs" wrap="wrap">
-                                  <Text size="xs" fw={600} c="dimmed">Channels:</Text>
-                                  {user.channels.map((channel) => (
-                                    <Badge 
-                                      key={channel}
-                                      variant="light"
-                                      color="blue"
-                                      size="sm"
-                                      rightSection={
-                                        <Anchor
-                                          href={`https://twitch.tv/${channel}`}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}
-                                        >
-                                          <IconExternalLink size="0.75rem" />
-                                        </Anchor>
-                                      }
+                          {user.channels.length > 0 && (
+                            <Group gap="xs" wrap="wrap">
+                              <Text size="xs" fw={600} c="dimmed">Channels:</Text>
+                              {user.channels.map((channel) => (
+                                <Badge 
+                                  key={channel}
+                                  variant="light"
+                                  color="blue"
+                                  size="sm"
+                                  rightSection={
+                                    <Anchor
+                                      href={`https://twitch.tv/${channel}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}
                                     >
-                                      {channel}
-                                    </Badge>
-                                  ))}
-                                </Group>
-                              )}
+                                      <IconExternalLink size="0.75rem" />
+                                    </Anchor>
+                                  }
+                                >
+                                  {channel}
+                                </Badge>
+                              ))}
+                            </Group>
+                          )}
 
-                              <Group gap="xs" wrap="wrap">
-                                <Text size="xs" fw={600} c="dimmed">Sources:</Text>
-                                {user.connections.map((conn, idx) => (
-                                  <Badge 
-                                    key={`${conn.guid}-${idx}`}
-                                    variant="outline"
-                                    color="gray"
-                                    size="sm"
-                                    tt="none"
-                                  >
-                                    {conn.source} ({conn.version})
-                                  </Badge>
-                                ))}
-                              </Group>
-                            </Stack>
-                          </Grid.Col>
+                          <Group gap="xs" wrap="wrap">
+                            <Text size="xs" fw={600} c="dimmed">Sources:</Text>
+                            {user.connections.map((conn, idx) => (
+                              <Badge 
+                                key={`${conn.guid}-${idx}`}
+                                variant="outline"
+                                color="gray"
+                                size="sm"
+                                tt="none"
+                              >
+                                {conn.source} ({conn.version})
+                              </Badge>
+                            ))}
+                          </Group>
+                        </Stack>
+                      </Grid.Col>
 
-                          {/* Right Column: Services (monochrome logos) only */}
-                          <Grid.Col span={{ base: 12, md: 4 }}>
-                            <Stack align="flex-start" gap={4}>
-                              <Text size="xs" fw={700} c="dimmed">SERVICES</Text>
-                              <Group gap="xs">
-                                {renderServiceLogo('7TV', user.services.sevenTV.connected, user.services.sevenTV.channel, seventvLogo)}
-                                {renderServiceLogo('StreamElements', user.services.streamelements.connected, user.services.streamelements.channel, streamelementLogo)}
-                                {renderServiceLogo('Blerp', user.services.blerp.connected, user.services.blerp.channel, blerpLogo)}
-                                {renderServiceLogo('SoundAlerts', user.services.soundalerts.connected, user.services.soundalerts.channel, soundalertsLogo)}
-                                {renderServiceLogo('Pally.gg', user.services.pallygg.connected, user.services.pallygg.channel, pallyLogo)}
-                                {renderServiceLogo('YouTube', user.services.youtube.connected, user.services.youtube.channel, youtubeLogo)}
-                              </Group>
-                            </Stack>
-                          </Grid.Col>
-                        </Grid>
+                      {/* Right Column: Services (monochrome logos) only */}
+                      <Grid.Col span={{ base: 12, md: 4 }}>
+                        <Stack align="flex-start" gap={4}>
+                          <Text size="xs" fw={700} c="dimmed">SERVICES</Text>
+                          <Group gap="xs">
+                            {renderServiceLogo('7TV', user.services.sevenTV.connected, user.services.sevenTV.channel, seventvLogo)}
+                            {renderServiceLogo('StreamElements', user.services.streamelements.connected, user.services.streamelements.channel, streamelementLogo)}
+                            {renderServiceLogo('Blerp', user.services.blerp.connected, user.services.blerp.channel, blerpLogo)}
+                            {renderServiceLogo('SoundAlerts', user.services.soundalerts.connected, user.services.soundalerts.channel, soundalertsLogo)}
+                            {renderServiceLogo('Pally.gg', user.services.pallygg.connected, user.services.pallygg.channel, pallyLogo)}
+                            {renderServiceLogo('YouTube', user.services.youtube.connected, user.services.youtube.channel, youtubeLogo)}
+                          </Group>
+                        </Stack>
+                      </Grid.Col>
+                    </Grid>
 
-                        {/* Full-width Stream Info banner */}
-                        {user.streamInfo && (
-                          <Card
-                            withBorder
-                            shadow="none"
-                            p="sm"
-                            radius="sm"
-                            style={{
-                              backgroundColor: 'var(--mantine-color-dark-8)',
-                              borderColor: 'var(--mantine-color-pink-8)',
-                            }}
-                          >
-                            <Stack gap={6}>
-                              <Group justify="space-between" wrap="wrap" gap="sm">
-                                <Badge color="pink" variant="filled" size="xs">LIVE</Badge>
-                                <Group gap="md" wrap="nowrap">
-                                  <Text size="xs" c="dimmed">{user.streamInfo.category}</Text>
-                                  <Group gap={4} wrap="nowrap">
-                                    <IconUsers size="0.75rem" style={{ color: 'var(--mantine-color-violet-5)' }} />
-                                    <Text size="xs" fw={600}>{user.streamInfo.viewerCount.toLocaleString()}</Text>
-                                  </Group>
-                                  <Group gap={4} wrap="nowrap">
-                                    <IconClock size="0.75rem" style={{ color: 'var(--mantine-color-gray-5)' }} />
-                                    <Text size="xs">{formatStreamDuration(user.streamInfo.startTime)}</Text>
-                                  </Group>
-                                </Group>
+                    {/* Full-width Stream Info banner */}
+                    {user.streamInfo && (
+                      <Card
+                        withBorder
+                        shadow="none"
+                        p="sm"
+                        radius="sm"
+                        style={{
+                          backgroundColor: 'var(--mantine-color-dark-8)',
+                          borderColor: 'var(--mantine-color-pink-8)',
+                        }}
+                      >
+                        <Stack gap={6}>
+                          <Group justify="space-between" wrap="wrap" gap="sm">
+                            <Badge color="pink" variant="filled" size="xs">LIVE</Badge>
+                            <Group gap="md" wrap="nowrap">
+                              <Text size="xs" c="dimmed">{user.streamInfo.category}</Text>
+                              <Group gap={4} wrap="nowrap">
+                                <IconUsers size="0.75rem" style={{ color: 'var(--mantine-color-violet-5)' }} />
+                                <Text size="xs" fw={600}>{user.streamInfo.viewerCount.toLocaleString()}</Text>
                               </Group>
-                              <Text size="sm" fw={600} lineClamp={2}>
-                                {user.streamInfo.title}
-                              </Text>
-                            </Stack>
-                          </Card>
-                        )}
-                      </Stack>
-                    </Card>
-                  ))}
-                </Stack>
-              )}
-            </div>
-          </Card.Section>
-        </Card>
+                              <Group gap={4} wrap="nowrap">
+                                <IconClock size="0.75rem" style={{ color: 'var(--mantine-color-gray-5)' }} />
+                                <Text size="xs">{formatStreamDuration(user.streamInfo.startTime)}</Text>
+                              </Group>
+                            </Group>
+                          </Group>
+                          <Text size="sm" fw={600} lineClamp={2}>
+                            {user.streamInfo.title}
+                          </Text>
+                        </Stack>
+                      </Card>
+                    )}
+                  </Stack>
+                </Card>
+              ))}
+            </Stack>
+          )}
+        </div>
       </Stack>
     </Container>
   );
