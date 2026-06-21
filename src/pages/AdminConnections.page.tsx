@@ -488,7 +488,6 @@ export function AdminConnectionsPage() {
                         radius="sm"
                         style={{
                           backgroundColor: 'var(--mantine-color-dark-8)',
-                          borderColor: 'var(--mantine-color-pink-8)',
                         }}
                       >
                         <Stack gap={6}>
