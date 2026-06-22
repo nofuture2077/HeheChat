@@ -760,6 +760,7 @@ class AlertPlayer {
         }
         const exactAlerts: Record<number, EventAlert[]> = {};
         const minAlerts: Record<number, EventAlert[]> = {};
+        const multAlerts: Record<number, EventAlert[]> = {};
         const matchesAlerts: EventAlert[] = [];
 
         alerts.filter(a => !config?.deactivatedAlerts[a.id]).forEach(alert => {
@@ -778,6 +779,13 @@ class AlertPlayer {
                     minAlerts[amount] = [alert];
                 }
             }
+            if (alert.specifier.type === "mult") {
+                if (multAlerts[amount]) {
+                    multAlerts[amount].push(alert)
+                } else {
+                    multAlerts[amount] = [alert];
+                }
+            }
             if (alert.specifier.type === "matches" && alert.specifier.text && 
                 alert.specifier.attribute && (eventData[alert.specifier.attribute] === alert.specifier.text)) {
                     matchesAlerts.push(alert);
@@ -790,6 +798,11 @@ class AlertPlayer {
         }
         if (matchesAlerts.length) {
             return deterministicSample(matchesAlerts, event.triggerId || Math.random() + '');
+        }
+        const matchedMult = Object.keys(multAlerts).map(x => Number(x)).filter(x => x > 0 && eventAmount % x === 0).sort((a, b) => a - b);
+        if (matchedMult.length) {
+            const highestMult = matchedMult[matchedMult.length - 1];
+            return deterministicSample(multAlerts[highestMult], event.triggerId || Math.random() + '');
         }
         const minKeys = Object.keys(minAlerts).map(x => Number(x)).sort((a, b) => a - b);
         const step = minKeys.findLast(x => x <= eventAmount);

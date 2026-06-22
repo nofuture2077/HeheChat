@@ -8,7 +8,7 @@ export type EventMainType = 'sub' | 'subgift' | 'subgiftb' | 'raid' | 'follow' |
 export type EventAlertRestriction = 'none' | 'mod' | 'system';
 
 export type EventAlertSpecifier = {
-    type: 'min' | 'exact' | 'matches';
+    type: 'min' | 'exact' | 'mult' | 'matches';
     amount?: number;
     attribute?: string;
     text?: string;
