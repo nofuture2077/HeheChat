@@ -1,6 +1,6 @@
-import { Stack, Card, Text, Group, Badge, ActionIcon, Alert, Tooltip, Modal, Button, SimpleGrid } from '@mantine/core';
+import { Stack, Card, Text, Group, Badge, ActionIcon, Alert, Tooltip, Modal, Button, Grid } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconRefresh, IconAlertCircle, IconWifiOff } from '@tabler/icons-react';
+import { IconRefresh, IconAlertCircle } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 import { notifications } from '@mantine/notifications';
 
@@ -184,7 +184,7 @@ export function ConnectStatusSettings() {
 
                 {error && <Alert color="red" icon={<IconAlertCircle />}>{error}</Alert>}
 
-                <SimpleGrid cols={2} spacing="sm">
+                <Grid>
                     {SERVICES.map(({ key, label, color, apiKey, canReinit }) => {
                         const status = mergedStatus[key];
                         const state = noConnection ? 'unconfigured' : serviceState(status);
@@ -192,60 +192,62 @@ export function ConnectStatusSettings() {
                         const stateLabel = state === 'active' ? 'Active' : state === 'configured' ? 'Configured (Idle)' : 'Not configured';
 
                         return (
-                             <Card key={key} withBorder padding="sm" radius="md">
-                                 <Group justify="space-between" wrap="nowrap">
-                                     <Group gap="sm" wrap="nowrap">
-                                         <div
-                                             style={{
-                                                 display: 'flex',
-                                                 alignItems: 'center',
-                                                 justifyContent: 'center',
-                                                 width: 40,
-                                                 height: 40,
-                                                 borderRadius: '8px',
-                                                 backgroundColor: 'var(--mantine-color-default-hover)',
-                                                 border: '1px solid var(--mantine-color-default-border)',
-                                             }}
-                                         >
-                                             <img 
-                                                 src={LOGOS[key]} 
-                                                 alt={label} 
-                                                 className="monochrome-logo"
-                                                 style={{ 
-                                                     width: 24, 
-                                                     height: 24,
-                                                     objectFit: 'contain',
-                                                     opacity: state === 'active' ? 1 : 0.35,
-                                                 }} 
-                                             />
-                                         </div>
-                                         <Stack gap={4}>
-                                             <Text fw={600} size="sm">{label}</Text>
-                                             <Badge size="xs" color={badgeColor} variant={state === 'active' ? 'filled' : 'light'}>
-                                                 {stateLabel}
-                                             </Badge>
-                                             {status?.channelname && (
-                                                 <Text size="xs" c="dimmed">{status.channelname}</Text>
-                                             )}
-                                         </Stack>
-                                     </Group>
-                                     {state !== 'unconfigured' && canReinit && (
-                                         <Tooltip label={`Reinitialize ${label}`}>
-                                             <ActionIcon
-                                                 variant="subtle"
-                                                 color={color}
-                                                 loading={reinitializing[apiKey]}
-                                                 onClick={() => reinitialize(apiKey, label)}
-                                             >
-                                                 <IconRefresh size={16} />
-                                             </ActionIcon>
-                                         </Tooltip>
-                                     )}
-                                 </Group>
-                             </Card>
+                            <Grid.Col span={{ base: 12, md: 6 }}>
+                                <Card key={key} withBorder padding="sm" radius="md">
+                                    <Group justify="space-between" wrap="nowrap">
+                                        <Group gap="sm" wrap="nowrap">
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    width: 40,
+                                                    height: 40,
+                                                    borderRadius: '8px',
+                                                    backgroundColor: 'var(--mantine-color-default-hover)',
+                                                    border: '1px solid var(--mantine-color-default-border)',
+                                                }}
+                                            >
+                                                <img 
+                                                    src={LOGOS[key]} 
+                                                    alt={label} 
+                                                    className="monochrome-logo"
+                                                    style={{ 
+                                                        width: 24, 
+                                                        height: 24,
+                                                        objectFit: 'contain',
+                                                        opacity: state === 'active' ? 1 : 0.35,
+                                                    }} 
+                                                />
+                                            </div>
+                                            <Stack gap={4}>
+                                                <Text fw={600} size="sm">{label}</Text>
+                                                <Badge size="xs" color={badgeColor} variant={state === 'active' ? 'filled' : 'light'}>
+                                                    {stateLabel}
+                                                </Badge>
+                                                {status?.channelname ? (
+                                                    <Text size="xs" c="dimmed">{status.channelname}</Text>
+                                                ) : <Text size="xs" c="dimmed">&nbsp;</Text>}
+                                            </Stack>
+                                        </Group>
+                                        {state !== 'unconfigured' && canReinit && (
+                                            <Tooltip label={`Reinitialize ${label}`}>
+                                                <ActionIcon
+                                                    variant="subtle"
+                                                    color={color}
+                                                    loading={reinitializing[apiKey]}
+                                                    onClick={() => reinitialize(apiKey, label)}
+                                                >
+                                                    <IconRefresh size={16} />
+                                                </ActionIcon>
+                                            </Tooltip>
+                                        )}
+                                    </Group>
+                                </Card>
+                            </Grid.Col>
                         );
                     })}
-                </SimpleGrid>
+                </Grid>
 
                 {!noConnection && (
                     <Group justify="flex-end">
