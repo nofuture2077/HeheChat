@@ -25,6 +25,7 @@ export interface ConfigData {
     maxMessages: number;
     showTimestamp: boolean;
     showProfilePicture: boolean;
+    showPlatformLogo: boolean;
     showImportantBadges: boolean;
     showSubBadges: boolean;
     showPredictions: boolean;
@@ -102,6 +103,7 @@ export interface Config extends ConfigData {
     setMaxMessages: (value: number) => void,
     setShowTimestamp: (value: boolean) => void;
     setShowProfilePicture: (value: boolean) => void;
+    setShowPlatformLogo: (value: boolean) => void;
     setShowImportantBadges: (value: boolean) => void;
     setShowSubBadges: (value: boolean) => void;
     setShowPredictions: (value: boolean) => void;
@@ -192,6 +194,7 @@ export const DEFAULT_CONFIG: Config = {
     maxMessages: 200,
     showTimestamp: false,
     showProfilePicture: true,
+    showPlatformLogo: true,
     showImportantBadges: true,
     showSubBadges: true,
     showPredictions: false,
@@ -281,6 +284,7 @@ export const DEFAULT_CONFIG: Config = {
     setMaxMessages: (value: number) => {},
     setShowTimestamp: (value: boolean) => {},
     setShowProfilePicture: (value: boolean) => {},
+    setShowPlatformLogo: (value: boolean) => {},
     setShowImportantBadges: (value: boolean) => {},
     setShowSubBadges: (value: boolean) => {},
     setShowPredictions: (value: boolean) => {},

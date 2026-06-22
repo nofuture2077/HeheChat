@@ -44,6 +44,7 @@ class ShortCutHandler {
             'chatEnabled': () => this.config!.setChatEnabled(!this.config!.chatEnabled),
             'showTimestamp': () => this.config!.setShowTimestamp(!this.config!.showTimestamp),
             'showProfilePicture': () => this.config!.setShowProfilePicture(!this.config!.showProfilePicture),
+            'showPlatformLogo': () => this.config!.setShowPlatformLogo(!this.config!.showPlatformLogo),
             'showImportantBadges': () => this.config!.setShowImportantBadges(!this.config!.showImportantBadges),
             'showSubBadges': () => this.config!.setShowSubBadges(!this.config!.showSubBadges),
             'showPredictions': () => this.config!.setShowPredictions(!this.config!.showPredictions),

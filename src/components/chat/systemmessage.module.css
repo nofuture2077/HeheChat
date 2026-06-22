@@ -29,6 +29,19 @@
         margin-right: 6px;
         vertical-align: text-bottom;
     }
+
+    .platformLogo {
+        width: auto;
+        height: 1.5em;
+        margin-right: 6px;
+        vertical-align: text-bottom;
+        object-fit: contain;
+        filter: brightness(0) opacity(0.65);
+    }
+
+    :global([data-mantine-color-scheme="dark"]) & .platformLogo {
+        filter: brightness(0) invert(1) opacity(0.85);
+    }
 }
 
 

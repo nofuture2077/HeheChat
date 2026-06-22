@@ -425,6 +425,7 @@ export default function HeheChat() {
     const setMaxMessages = (value: number) => updateConfig('maxMessages', value);
     const setShowTimestamp = (value: boolean) => updateConfig('showTimestamp', value);
     const setShowProfilePicture = (value: boolean) => updateConfig('showProfilePicture', value);
+    const setShowPlatformLogo = (value: boolean) => updateConfig('showPlatformLogo', value);
     const setShowImportantBadges = (value: boolean) => updateConfig('showImportantBadges', value);
     const setShowSubBadges = (value: boolean) => updateConfig('showSubBadges', value);
     const setShowPredictions = (value: boolean) => updateConfig('showPredictions', value);
@@ -699,6 +700,7 @@ export default function HeheChat() {
         setMaxMessages,
         setShowTimestamp,
         setShowProfilePicture,
+        setShowPlatformLogo,
         setShowImportantBadges,
         setShowSubBadges,
         setShowPredictions,

@@ -11,12 +11,29 @@ import { EventType } from '../../commons/events';
 import { ParsedMessagePart } from "../../commons/message";
 import { joinWithSpace } from "../../commons/helper";
 import { parsedPartsToHtml } from './ChatMessage';
+import blerpLogo from '@/res/blerp_logo.svg';
+import soundalertsLogo from '@/res/soundalerts_logo.svg';
+import kofiLogo from '@/res/kofi_logo.svg';
+import twitchLogo from '@/res/twitch_logo.svg';
+import streamelementsLogo from '@/res/streamelement_logo.svg';
+import pallyLogo from '@/res/pally_logo.svg';
+import seventvLogo from '@/res/7tv_logo.svg';
 
 export type SystemMessageProps = {
     msg: SystemMessage;
     modActions: ModActions;
     moderatedChannel: {[id: string]: boolean };
 }
+
+const platformIcons: Record<string, string> = {
+    'blerp': blerpLogo,
+    'kofi': kofiLogo,
+    'streamelements': streamelementsLogo,
+    'pally': pallyLogo,
+    'soundalerts': soundalertsLogo,
+    '7tv': seventvLogo,
+    'twitch': twitchLogo,
+};
 
 const messages = {
     'delete': 'A messages from ${username} was deleted',
@@ -42,11 +59,11 @@ const messages = {
     'donation': '${username} donated ${amount}${currency:currency}///${text}',
     'announcement': 'Chat Announcement///${text}',
     'blerp': '${username} played Blerp ${audioTitle}',
-    'soundalerts': '${username} triggered SoundAlert ${overlayMessage}',
+    'soundalerts': '${username} triggered SoundAlert///${overlayMessage}',
     'seventv_emote_add': '${username} added new Emote ${emote} ${emote}',
     'seventv_emote_remove': '${username} removed Emote ${emote}',
     'kofishop': '${username} bought something on ko-fi',
-    'kofidono': '${username} donated ${amount}${currency:currency} on ko-fi',
+    'kofidono': '${username} donated ${amount}${currency:currency} on ko-fi///${text}',
     'kofisub': '${username} subed on ko-fi with tier ${tier}',
     'tts': '${username} triggered tts',
     'hypetrain': 'Hypetrain level ${level:whole}',
@@ -64,6 +81,7 @@ export const SystemMessageComp = memo(function SystemMessageComp(props: SystemMe
     const canShoutout = isModerator || isBroadcaster;
     const modToolsEnabled = config.modToolsEnabled;
     const eventType = props.msg.data.type as EventType;
+    const platform = props.msg.data.platform;
 
     const wordMapper = (type: string, word: string, index: number, arr: string[]) => {
         if ((type === 'seventv_emote_add') && index === arr.length - 2) {
@@ -86,7 +104,11 @@ export const SystemMessageComp = memo(function SystemMessageComp(props: SystemMe
     }
 
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)} style={{ verticalAlign: 'text-bottom' }}><IconSpeakerphone size={22} /></ActionIcon> : null;
+    
+    const platformIcon = platform && platformIcons[platform] ? <img src={platformIcons[platform]} className={classes.platformLogo} alt={platform} /> : null;
+
     return <div className={[classes.msg, classes[props.msg.subType], classes[props.msg.data.color], config.compactMode ? classes.compact : ''].join(' ')}>
+                {config.showPlatformLogo ? platformIcon : null}
                 {config.showProfilePicture ? <span className={classes.logo}>{emotes.getLogo(props.msg.data.channel)}</span> : null}
                 {config.showTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)} </span> : null}
                 <Text {...style} key="msg-main" fw={700} style={{fontSize: config.fontSize, color: "light-dark(black, white)", lineHeight: "inherit"}} span>

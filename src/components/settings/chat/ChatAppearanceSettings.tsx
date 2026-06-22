@@ -11,6 +11,7 @@ export function ChatAppearanceSettings() {
                 <Stack>
                     <Switch checked={config.showTimestamp} onChange={(event) => config.setShowTimestamp(event.currentTarget.checked)} label="Timestamp" size="lg" />
                     <Switch checked={config.showProfilePicture} onChange={(event) => config.setShowProfilePicture(event.currentTarget.checked)} label="Profile Picture" size="lg" />
+                    <Switch checked={config.showPlatformLogo} onChange={(event) => config.setShowPlatformLogo(event.currentTarget.checked)} label="Platform Logo" size="lg" />
                 </Stack>
             </Fieldset>
             <Fieldset legend="Badges" variant='filled'>
