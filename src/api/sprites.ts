@@ -6,7 +6,7 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL;
  * Interface for reroll configuration
  */
 export interface RerollTrigger {
-  type: 'ChannelPointReward' | 'Sub' | 'Giftsub' | 'Bits' | 'Donation';
+  type: 'ChannelPointReward' | 'Sub' | 'Giftsub' | 'Bits' | 'Donation' | 'Streak';
   tier?: 'tier1' | 'tier2' | 'tier3' | 'prime';
   amount?: number;
   operation: 'exact' | 'min';
@@ -132,7 +132,7 @@ export const completeReroll = async (
  */
 export const triggerReroll = async (
   channel: string,
-  username: string
+  username: string,
 ): Promise<{ success: boolean; rerollPending: boolean }> => {
   try {
     const response = await fetch(`${BASE_URL}/api/user-sprite/${channel}/${username}/trigger-reroll`, {

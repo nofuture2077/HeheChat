@@ -92,7 +92,8 @@ export function AlertsRerollSettings() {
                                             { value: 'Bits', label: 'Bits' },
                                             { value: 'Donation', label: 'Donation' },
                                             { value: 'Sub', label: 'Subscription' },
-                                            { value: 'Giftsub', label: 'Gift Sub' }
+                                            { value: 'Giftsub', label: 'Gift Sub' },
+                                            { value: 'Streak', label: 'Watch Streak' },
                                         ]}
                                         disabled={!rerollConfig.enabled || isSavingRerollConfig}
                                     />
@@ -137,7 +138,7 @@ export function AlertsRerollSettings() {
                                         </>
                                     )}
 
-                                    {(trigger.type === 'Bits' || trigger.type === 'Donation') && (
+                                    {(trigger.type === 'Bits' || trigger.type === 'Donation' || trigger.type === 'Streak') && (
                                         <>
                                             <Select
                                                 label="Operation"
@@ -148,7 +149,7 @@ export function AlertsRerollSettings() {
                                                     newTriggers[index] = { ...trigger, operation: value as any };
                                                     setRerollConfig({ ...rerollConfig, config: { ...rerollConfig.config, rerollTriggers: newTriggers } });
                                                 }}
-                                                data={[{ value: 'exact', label: 'Exact' }, { value: 'min', label: 'Minimum' }]}
+                                                data={[{ value: 'exact', label: 'Exact' }, { value: 'min', label: 'Minimum' }, { value: 'mult', label: 'Multiple' }]}
                                                 disabled={!rerollConfig.enabled || isSavingRerollConfig}
                                             />
                                             <NumberInput
