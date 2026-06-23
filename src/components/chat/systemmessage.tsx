@@ -11,13 +11,13 @@ import { EventType } from '../../commons/events';
 import { ParsedMessagePart } from "../../commons/message";
 import { joinWithSpace } from "../../commons/helper";
 import { parsedPartsToHtml } from './ChatMessage';
-import blerpLogo from '@/res/blerp_logo.svg?react';
-import soundalertsLogo from '@/res/soundalerts_logo.svg?react';
-import kofiLogo from '@/res/kofi_logo.svg?react';
-import twitchLogo from '@/res/twitch_logo.svg?react';
-import streamelementsLogo from '@/res/streamelement_logo.svg?react';
-import pallyLogo from '@/res/pally_logo.svg?react';
-import seventvLogo from '@/res/7tv_logo.svg?react';
+import BlerpLogo from '@/res/blerp_logo.svg?react';
+import SoundalertsLogo from '@/res/soundalerts_logo.svg?react';
+import KofiLogo from '@/res/kofi_logo.svg?react';
+import TwitchLogo from '@/res/twitch_logo.svg?react';
+import StreamelementsLogo from '@/res/streamelement_logo.svg?react';
+import PallyLogo from '@/res/pally_logo.svg?react';
+import SeventvLogo from '@/res/7tv_logo.svg?react';
 
 export type SystemMessageProps = {
     msg: SystemMessage;
@@ -26,13 +26,13 @@ export type SystemMessageProps = {
 }
 
 const platformIcons: Record<string, any> = {
-    'blerp': blerpLogo,
-    'kofi': kofiLogo,
-    'streamelements': streamelementsLogo,
-    'pally': pallyLogo,
-    'soundalerts': soundalertsLogo,
-    '7tv': seventvLogo,
-    'twitch': twitchLogo,
+    'blerp': <BlerpLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
+    'kofi': <KofiLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
+    'streamelements': <StreamelementsLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
+    'pally': <PallyLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
+    'soundalerts': <SoundalertsLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
+    '7tv': <SeventvLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
+    'twitch': <TwitchLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
 };
 
 const messages = {
@@ -105,7 +105,7 @@ export const SystemMessageComp = memo(function SystemMessageComp(props: SystemMe
 
     const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)} style={{ verticalAlign: 'text-bottom' }}><IconSpeakerphone size={22} /></ActionIcon> : null;
     
-    const platformIcon = platform && platformIcons[platform] ? <img src={platformIcons[platform]} className={classes.platformLogo} alt={platform} /> : null;
+    const platformIcon = platform && platformIcons[platform] ? platformIcons[platform] : null;
 
     return <div className={[classes.msg, classes[props.msg.subType], classes[props.msg.data.color], config.compactMode ? classes.compact : ''].join(' ')}>
                 {config.showPlatformLogo ? platformIcon : null}

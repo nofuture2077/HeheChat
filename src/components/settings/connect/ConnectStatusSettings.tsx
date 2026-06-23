@@ -181,16 +181,6 @@ export function ConnectStatusSettings() {
 
   return (
     <>
-      <style>{`
-                .monochrome-logo {
-                    filter: brightness(0) opacity(0.65);
-                    transition: all 0.2s ease;
-                }
-                :root[data-mantine-color-scheme="dark"] .monochrome-logo,
-                [data-mantine-color-scheme="dark"] .monochrome-logo {
-                    filter: brightness(0) invert(1) opacity(0.85);
-                }
-            `}</style>
       <Modal
         opened={confirmOpened}
         onClose={closeConfirm}

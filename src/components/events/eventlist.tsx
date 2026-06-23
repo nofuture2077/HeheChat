@@ -5,10 +5,10 @@ import { EventStorage, EventData } from './eventstorage';
 import { ConfigContext, ProfileContext } from '@/ApplicationContext';
 
 // Import SVG logos directly
-import blerpLogo from '@/res/blerp_logo.svg?react';
-import soundalertsLogo from '@/res/soundalerts_logo.svg?react';
-import kofiLogo from '@/res/kofi_logo.svg?react';
-import twitchLogo from '@/res/twitch_logo.svg?react';
+import BlerpLogo from '@/res/blerp_logo.svg?react';
+import SoundalertsLogo from '@/res/soundalerts_logo.svg?react';
+import KofiLogo from '@/res/kofi_logo.svg?react';
+import TwitchLogo from '@/res/twitch_logo.svg?react';
 import { InfoCard, InfoCardSkeleton } from '../infocard/infocard';
 import { getEventStyle } from '@/components/events/eventhelper';
 import { EventType } from '@/commons/events';
@@ -19,6 +19,13 @@ import { IconGiftFilled, IconCoinBitcoinFilled, IconUserHeart, IconMoneybag, Ico
 import { formatString } from "@/commons/helper";
 import { ReactElementLike } from 'prop-types';
 import classes from './EventList.module.css';
+
+const LOGOS: Record<string, any> = {
+  twitch: <TwitchLogo style={{width: 24,height: 24,color: 'var(--mantine-color-text)'}}/>,
+  blerp: <BlerpLogo style={{width: 24,height: 24,color: 'var(--mantine-color-text)'}}/>,
+  soundalerts: <SoundalertsLogo style={{width: 24,height: 24,color: 'var(--mantine-color-text)'}}/>,
+  kofi: <KofiLogo style={{width: 24,height: 24,color: 'var(--mantine-color-text)'}}/>,
+};
 
 function getIcon(event: EventData, key: string) {
     const style: any = {variant: 'transparent'};
@@ -68,12 +75,12 @@ export const icons: Record<EventType, ReactElementLike> = {
     'follow': <IconUserHeart/>,
     'cheer': <IconCoinBitcoinFilled/>,
     'donation': <IconMoneybag/>,
-    'blerp': <img src={blerpLogo as any} alt="Blerp" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
-    'soundalerts': <img src={soundalertsLogo as any} alt="SoundAlerts" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
-    'channelPointRedemption': <img src={twitchLogo as any} alt="Blerp" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
-    'kofishop': <img src={kofiLogo as any} alt="Ko-fi" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
-    'kofidono': <img src={kofiLogo as any} alt="Ko-fi" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
-    'kofisub': <img src={kofiLogo as any} alt="Ko-fi" style={{ width: 18, height: 18, objectFit: 'contain' }} />,
+    'blerp': LOGOS['blerp'],
+    'soundalerts': LOGOS['soundalerts'],
+    'channelPointRedemption': LOGOS['twitch'],
+    'kofishop': LOGOS['kofi'],
+    'kofidono': LOGOS['kofi'],
+    'kofisub': LOGOS['kofi'],
     'tts': <IconSpeakerphone/>,
     'hypetrain': <IconTrain/>,
     'streak': <IconBoltFilled/>,
