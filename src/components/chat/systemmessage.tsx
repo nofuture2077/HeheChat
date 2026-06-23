@@ -26,13 +26,13 @@ export type SystemMessageProps = {
 }
 
 const platformIcons: Record<string, any> = {
-    'blerp': <BlerpLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
-    'kofi': <KofiLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
-    'streamelements': <StreamelementsLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
-    'pally': <PallyLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
-    'soundalerts': <SoundalertsLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
-    '7tv': <SeventvLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
-    'twitch': <TwitchLogo style={{width: "1em",height: "1em",color: 'var(--mantine-color-text)'}}/>,
+    'blerp': <BlerpLogo style={{width: "1em",height: "1em", verticalAlign: "text-bottom", marginRight: "4px", color: 'var(--mantine-color-text)'}}/>,
+    'kofi': <KofiLogo style={{width: "1em",height: "1em", verticalAlign: "text-bottom", marginRight: "4px", color: 'var(--mantine-color-text)'}}/>,
+    'streamelements': <StreamelementsLogo style={{width: "1em",height: "1em", verticalAlign: "text-bottom", marginRight: "4px", color: 'var(--mantine-color-text)'}}/>,
+    'pally': <PallyLogo style={{width: "1em",height: "1em", verticalAlign: "text-bottom", marginRight: "4px", color: 'var(--mantine-color-text)'}}/>,
+    'soundalerts': <SoundalertsLogo style={{width: "1em", verticalAlign: "text-bottom", marginRight: "4px", height: "1em",color: 'var(--mantine-color-text)'}}/>,
+    '7tv': <SeventvLogo style={{width: "1em",height: "1em", verticalAlign: "text-bottom", marginRight: "4px", color: 'var(--mantine-color-text)'}}/>,
+    'twitch': <TwitchLogo style={{width: "1em",height: "1em", verticalAlign: "text-bottom", marginRight: "4px", color: 'var(--mantine-color-text)'}}/>,
 };
 
 const messages = {
@@ -108,8 +108,8 @@ export const SystemMessageComp = memo(function SystemMessageComp(props: SystemMe
     const platformIcon = platform && platformIcons[platform] ? platformIcons[platform] : null;
 
     return <div className={[classes.msg, classes[props.msg.subType], classes[props.msg.data.color], config.compactMode ? classes.compact : ''].join(' ')}>
-                {config.showPlatformLogo ? platformIcon : null}
                 {config.showProfilePicture ? <span className={classes.logo}>{emotes.getLogo(props.msg.data.channel)}</span> : null}
+                {config.showPlatformLogo ? platformIcon : null}
                 {config.showTimestamp ? <span key='timestamp' className={classes.time}>{formatTime(props.msg.date)} </span> : null}
                 <Text {...style} key="msg-main" fw={700} style={{fontSize: config.fontSize, color: "light-dark(black, white)", lineHeight: "inherit"}} span>
                     {joinWithSpace(textParts[0].split(" ").map((value, index, array) => wordMapper(eventType, value, index, array)))}{actions}
