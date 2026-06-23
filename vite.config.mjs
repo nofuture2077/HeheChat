@@ -4,6 +4,7 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 import mkcert from 'vite-plugin-mkcert';
 import fs from 'fs';
 import path from 'path';
+import svgr from 'vite-plugin-svgr';
 
 // Plugin to inject version into manifest.json during build
 function injectVersionPlugin() {
@@ -45,7 +46,7 @@ export default defineConfig({
       }
     }
   },
-  plugins: [react(), tsconfigPaths(), mkcert(), injectVersionPlugin()],
+  plugins: [react(), tsconfigPaths(), mkcert(), injectVersionPlugin(), svgr()],
   base: '#{import.meta.env.VITE_SLUG}',
   test: {
     globals: true,

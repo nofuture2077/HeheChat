@@ -11,13 +11,13 @@ import { EventType } from '../../commons/events';
 import { ParsedMessagePart } from "../../commons/message";
 import { joinWithSpace } from "../../commons/helper";
 import { parsedPartsToHtml } from './ChatMessage';
-import blerpLogo from '@/res/blerp_logo.svg';
-import soundalertsLogo from '@/res/soundalerts_logo.svg';
-import kofiLogo from '@/res/kofi_logo.svg';
-import twitchLogo from '@/res/twitch_logo.svg';
-import streamelementsLogo from '@/res/streamelement_logo.svg';
-import pallyLogo from '@/res/pally_logo.svg';
-import seventvLogo from '@/res/7tv_logo.svg';
+import blerpLogo from '@/res/blerp_logo.svg?react';
+import soundalertsLogo from '@/res/soundalerts_logo.svg?react';
+import kofiLogo from '@/res/kofi_logo.svg?react';
+import twitchLogo from '@/res/twitch_logo.svg?react';
+import streamelementsLogo from '@/res/streamelement_logo.svg?react';
+import pallyLogo from '@/res/pally_logo.svg?react';
+import seventvLogo from '@/res/7tv_logo.svg?react';
 
 export type SystemMessageProps = {
     msg: SystemMessage;
@@ -25,7 +25,7 @@ export type SystemMessageProps = {
     moderatedChannel: {[id: string]: boolean };
 }
 
-const platformIcons: Record<string, string> = {
+const platformIcons: Record<string, any> = {
     'blerp': blerpLogo,
     'kofi': kofiLogo,
     'streamelements': streamelementsLogo,
