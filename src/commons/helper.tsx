@@ -116,9 +116,15 @@ export function formatTime(date: Date): string {
 }
 
 export function formatName(value: string): string {
-    const withoutExtension = value.replace(/\.[^.]+$/, "");
-    const withoutPrefix = withoutExtension.replace(/^[^_]*_/, "");
-    return withoutPrefix;
+    const name = value
+        .replace(/\.[^.]+$/, "")
+        .replace(/^\d+_/, "");
+
+    const parts = name.split("_");
+
+    return parts.length > 1
+        ? parts.slice(0, -1).join("_")
+        : name;
 }
 
 export function formatUsername(value: string): string {

@@ -356,18 +356,17 @@
       selectedTitle.textContent = formatFilename(filename);
       selectedContainer.style.display = 'block';
     }
-    
-    // Format filename by removing prefix and suffix
-    function formatFilename(filename) {
-      // Remove any numeric prefix followed by underscore (e.g., "10_", "42_", etc.)
-      let formattedName = filename.replace(/^\d+_/, '');
-      
-      // Remove ".png" suffix if present
-      if (formattedName.toLowerCase().endsWith('.png')) {
-        formattedName = formattedName.substring(0, formattedName.length - 4);
-      }
-      
-      return formattedName;
+
+    function formatFilename(value) {
+        const name = value
+            .replace(/\.[^.]+$/, "")
+            .replace(/^\d+_/, "");
+
+        const parts = name.split("_");
+
+        return parts.length > 1
+            ? parts.slice(0, -1).join("_")
+            : name;
     }
     
     // Create a grid item for an image
