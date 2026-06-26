@@ -76,6 +76,7 @@ export function Header(props: {
     openSettings: (tab?: SettingsTab) => void,
     openEvents: () => void,
     openTwitch: () => void,
+    forceSevenTVReload: () => Promise<void>,
     toggleShortcuts: () => void,
     showShortcutsToggle: boolean,
     currentClipId: string | null,
@@ -88,6 +89,7 @@ export function Header(props: {
     const loginContext = useContext(LoginContextContext);
     const connectionStatus = useConnectionStatus();
     const [popoverOpened, setPopoverOpened] = useState(false);
+    const [reloadingSevenTV, setReloadingSevenTV] = useState(false);
 
     useEffect(() => {
         const clipSub = PubSub.subscribe("CLIP-CLICK", (msg: any, data: { clipId: string }) => {
@@ -102,6 +104,19 @@ export function Header(props: {
     const isConnected = connectionStatus.state === 'connected';
     const isBusy = connectionStatus.state === 'connecting' || connectionStatus.state === 'reconnecting';
     const [alertSystemRunning, setAlertSystemRunning] = useState(AlertSystem.status());
+    const handleForceSevenTVReload = async () => {
+        if (reloadingSevenTV) {
+            return;
+        }
+
+        setReloadingSevenTV(true);
+        try {
+            await props.forceSevenTVReload();
+        } finally {
+            setReloadingSevenTV(false);
+        }
+    };
+
     useEffect(() => {
         const id = setInterval(() => setAlertSystemRunning(AlertSystem.status()), 1000);
         return () => clearInterval(id);
@@ -171,14 +186,24 @@ export function Header(props: {
                                 onAction={() => AlertSystem.recover()}
                                 actionLabel="Restart"
                             />
+                             <StatusRow
+                                label="7TV"
+                                sublabel={'Force Reload'}
+                                color={'green'}
+                                ok={true}
+                                loading={reloadingSevenTV}
+                                onAction={handleForceSevenTVReload}
+                                actionLabel="Force Reload"
+                            />
                             <Divider my={4} />
                             <Group justify="space-between" px={4}>
                                 <Text size="sm" fw={700}>Reload Page</Text>
                                 <ActionIcon
                                     variant="subtle"
-                                    color="greay"
+                                    color="gray"
                                     size="sm"
                                     onClick={() => window.location.reload()}
+                                    title="Reload page"
                                 >
                                     <IconRefresh size={18} />
                                 </ActionIcon>

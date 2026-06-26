@@ -249,6 +249,25 @@ export function ChatPage() {
         setVideoHeight(h);
     });
 
+    const handleForceSevenTVReload = useCallback(async () => {
+        try {
+            await emotes.forceReloadSevenTV(config.channels || []);
+            notifications.show({
+                title: '7TV refreshed',
+                message: 'Reloaded 7TV emotes for your configured channels.',
+                color: 'green',
+            });
+        } catch (error) {
+            notifications.show({
+                title: '7TV reload failed',
+                message: error instanceof Error ? error.message : 'Unable to reload 7TV emotes right now.',
+                color: 'red',
+            });
+        } finally {
+            forceUpdate();
+        }
+    }, [config.channels, emotes, forceUpdate]);
+
     useEffect(() => {
         forceUpdate();
     }, [replyMsg]);
@@ -808,6 +827,7 @@ export function ChatPage() {
                     openSettings={(tab?: SettingsTab) => { setDrawer({...SettingsDrawer, props: {tab} }); drawerHandler.open() }}
                     openEvents={() => { setDrawer(EventDrawer); drawerHandler.open() }}
                     openTwitch={() => { setDrawer(TwitchDrawer); drawerHandler.open() }}
+                    forceSevenTVReload={handleForceSevenTVReload}
                     toggleShortcuts={() => setShortcutsVisible(!shortcutsVisible)}
                     showShortcutsToggle={!!(config.shortcuts && config.shortcuts.length)}
                     currentClipId={currentClipId}

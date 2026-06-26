@@ -382,6 +382,7 @@ export interface ChatEmotes {
     emotes: Map<string, any>,
     updateChannel: (channel: string) => Promise<void>;
     updateUserInfo: (context: LoginContext, channel: string) => Promise<void>;
+    forceReloadSevenTV: (channels: string[]) => Promise<void>;
     getBadge: (channel: string, badge: string, key: string) => any;
     getEmote: (channel: string, word: string, key: string) => any;
     checkEmote: (channel: string, word: string, key: string, large: boolean) => any;
@@ -394,6 +395,16 @@ export interface ChatEmotes {
 }
 const LOADING_CHAT_EMOTES: {[key: string]: boolean} = {};
 const LOADING_PROFILES: {[key: string]: boolean} = {};
+
+function createEmptyChannelData(channel: string) {
+    return {
+        user: { name: channel },
+        channelBadges: new Map(),
+        channelEmotes: new Map(),
+        cheerEmotes: new Map(),
+        sevenTVEmotes: new Map()
+    };
+}
 
 export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
     emotes: new Map(),
@@ -442,6 +453,70 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
             console.error(`Error updating user emotes for user ID ${userid}:`, error);
         }
     },
+    forceReloadSevenTV: async (channels) => {
+        const uniqueChannels = Array.from(new Set(
+            channels
+                .filter((channel): channel is string => typeof channel === 'string')
+                .map(channel => channel.trim())
+                .filter(Boolean)
+        ));
+        const failedChannels: string[] = [];
+
+        for (const channel of uniqueChannels) {
+            const channelData = DEFAULT_CHAT_EMOTES.emotes.get(channel) || createEmptyChannelData(channel);
+            const previousSevenTVEmotes = channelData.sevenTVEmotes instanceof Map
+                ? new Map(channelData.sevenTVEmotes)
+                : new Map();
+            let user = channelData.user;
+
+            if (!user?.id || user.id === channel) {
+                try {
+                    const users = await EmoteApiClient.getUsersByNames([channel]);
+                    if (Array.isArray(users) && users[0]) {
+                        user = users[0];
+                        channelData.user = user;
+                    }
+                } catch (error) {
+                    console.error(`Error resolving 7TV reload user for ${channel}:`, error);
+                }
+            }
+
+            if (!user?.id) {
+                failedChannels.push(channel);
+                DEFAULT_CHAT_EMOTES.emotes.set(channel, channelData);
+                continue;
+            }
+
+            try {
+                await EmoteStore.clearEmotes(EmotePrefix.SEVENTV, user.id);
+                const data = await EmoteApiClient.get7TVEmotes(user.id, user.name || channel);
+
+                if (data.emoteSetId) {
+                    emoteSetUserNameMap[data.emoteSetId] = user.name || channel;
+                }
+
+                const sevenTVEmotes = toMap(data.emotes, (emote: any) => emote.name);
+                await EmoteStore.storeEmotes(
+                    EmotePrefix.SEVENTV,
+                    user.id,
+                    Array.from(sevenTVEmotes.values()),
+                    data.lastModified,
+                    data.emoteSetId
+                );
+                channelData.sevenTVEmotes = sevenTVEmotes;
+            } catch (error) {
+                console.error(`Error force reloading 7TV emotes for ${channel}:`, error);
+                channelData.sevenTVEmotes = previousSevenTVEmotes;
+                failedChannels.push(channel);
+            }
+
+            DEFAULT_CHAT_EMOTES.emotes.set(channel, channelData);
+        }
+
+        if (failedChannels.length > 0) {
+            throw new Error(`Failed to reload 7TV for: ${failedChannels.join(', ')}`);
+        }
+    },
     updateChannel: async (channel) => {
         if ((DEFAULT_CHAT_EMOTES.emotes.has(channel) && DEFAULT_CHAT_EMOTES.emotes.get(channel)?.emotes) || LOADING_CHAT_EMOTES[channel]) {
             return;
@@ -450,13 +525,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         
         // Initialize channel with default empty structures
         if (!DEFAULT_CHAT_EMOTES.emotes.has(channel)) {
-            DEFAULT_CHAT_EMOTES.emotes.set(channel, {
-                user: { name: channel },
-                channelBadges: new Map(),
-                channelEmotes: new Map(),
-                cheerEmotes: new Map(),
-                sevenTVEmotes: new Map()
-            });
+            DEFAULT_CHAT_EMOTES.emotes.set(channel, createEmptyChannelData(channel));
         }
         
         try {
@@ -560,13 +629,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         
         // Initialize channel with default empty structures if it doesn't exist
         if (!DEFAULT_CHAT_EMOTES.emotes.has(channel)) {
-            DEFAULT_CHAT_EMOTES.emotes.set(channel, {
-                user: { name: channel },
-                channelBadges: new Map(),
-                channelEmotes: new Map(),
-                cheerEmotes: new Map(),
-                sevenTVEmotes: new Map()
-            });
+            DEFAULT_CHAT_EMOTES.emotes.set(channel, createEmptyChannelData(channel));
         }
         
         // Get the current channel data
