@@ -4,12 +4,12 @@ import { useState, useEffect, useContext } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 
 // Import SVG logo assets directly
-import seventvLogo from '@/res/7tv_logo.svg';
-import streamelementLogo from '@/res/streamelement_logo.svg';
-import blerpLogo from '@/res/blerp_logo.svg';
-import soundalertsLogo from '@/res/soundalerts_logo.svg';
-import youtubeLogo from '@/res/youtube_logo.svg';
-import pallyLogo from '@/res/pally_logo.svg';
+import SeventvLogo from '@/res/7tv_logo.svg?react';
+import StreamelementLogo from '@/res/streamelement_logo.svg?react';
+import BlerpLogo from '@/res/blerp_logo.svg?react';
+import SoundalertsLogo from '@/res/soundalerts_logo.svg?react';
+import YoutubeLogo from '@/res/youtube_logo.svg?react';
+import PallyLogo from '@/res/pally_logo.svg?react';
 
 interface GroupedUser {
   userName: string;
@@ -29,6 +29,19 @@ interface GroupedUser {
 }
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+// Map connection source names to distinct Mantine colors
+const SOURCE_COLORS: Record<string, string> = {
+  "replay app": 'blue',
+  "browsersource": 'grape',
+  "hehechat app": 'teal',
+  "scene switcher": 'orange',
+};
+
+const getSourceColor = (source: string): string => {
+  const key = source?.toLowerCase?.() ?? '';
+  return SOURCE_COLORS[key] ?? 'gray';
+};
 
 interface ConnectionStatus {
   sevenTV: {
@@ -193,7 +206,7 @@ export function AdminConnectionsPage() {
     name: string,
     connected: boolean,
     channel: string,
-    logoSrc: string
+    Comp: React.ComponentType<React.ComponentProps<"svg">>
   ) => {
     return (
       <Tooltip 
@@ -216,13 +229,11 @@ export function AdminConnectionsPage() {
             transition: 'all 0.2s ease',
           }}
         >
-          <img 
-            src={logoSrc} 
-            alt={name} 
-            className="monochrome-logo"
+          <Comp
             style={{ 
               width: 20, 
               height: 20,
+              color: 'var(--mantine-color-text)',
               objectFit: 'contain'
             }} 
           />
@@ -299,16 +310,6 @@ export function AdminConnectionsPage() {
 
   return (
     <Container size="xl">
-      <style>{`
-        .monochrome-logo {
-          filter: brightness(0) opacity(0.65);
-          transition: all 0.2s ease;
-        }
-        :root[data-mantine-color-scheme="dark"] .monochrome-logo,
-        [data-mantine-color-scheme="dark"] .monochrome-logo {
-          filter: brightness(0) invert(1) opacity(0.85);
-        }
-      `}</style>
       <Stack gap="md">
         <Group justify="space-between" align="center">
           <div>
@@ -335,7 +336,7 @@ export function AdminConnectionsPage() {
         {lastUpdated && (
           <Text size="xs" c="dimmed">
             <IconClock size="0.8rem" style={{ marginRight: '4px' }} />
-            Last updated: {lastUpdated.toLocaleString()}
+            Last updated: {lastUpdated?.toLocaleString()}
           </Text>
         )}
 
@@ -428,7 +429,7 @@ export function AdminConnectionsPage() {
                                   key={channel}
                                   variant="light"
                                   color="blue"
-                                  size="sm"
+                                  size="lg"
                                   rightSection={
                                     <Anchor
                                       href={`https://twitch.tv/${channel}`}
@@ -452,12 +453,15 @@ export function AdminConnectionsPage() {
                               <Badge 
                                 key={`${conn.guid}-${idx}`}
                                 variant="outline"
-                                color="gray"
-                                size="sm"
+                                color={getSourceColor(conn.source)}
+                                size="lg"
                                 tt="none"
-                              >
-                                {conn.source} ({conn.version})
-                              </Badge>
+                                rightSection={
+                                  <Text component="span" size="xs" c="dimmed" tt="none">
+                                    v{conn.version}
+                                  </Text>
+                                }
+                              >{conn.source}</Badge>
                             ))}
                           </Group>
                         </Stack>
@@ -468,12 +472,12 @@ export function AdminConnectionsPage() {
                         <Stack align="flex-start" gap={4}>
                           <Text size="xs" fw={700} c="dimmed">SERVICES</Text>
                           <Group gap="xs">
-                            {renderServiceLogo('7TV', user.services.sevenTV.connected, user.services.sevenTV.channel, seventvLogo)}
-                            {renderServiceLogo('StreamElements', user.services.streamelements.connected, user.services.streamelements.channel, streamelementLogo)}
-                            {renderServiceLogo('Blerp', user.services.blerp.connected, user.services.blerp.channel, blerpLogo)}
-                            {renderServiceLogo('SoundAlerts', user.services.soundalerts.connected, user.services.soundalerts.channel, soundalertsLogo)}
-                            {renderServiceLogo('Pally.gg', user.services.pallygg.connected, user.services.pallygg.channel, pallyLogo)}
-                            {renderServiceLogo('YouTube', user.services.youtube.connected, user.services.youtube.channel, youtubeLogo)}
+                            {renderServiceLogo('7TV', user.services.sevenTV.connected, user.services.sevenTV.channel, SeventvLogo)}
+                            {renderServiceLogo('StreamElements', user.services.streamelements.connected, user.services.streamelements.channel, StreamelementLogo)}
+                            {renderServiceLogo('Blerp', user.services.blerp.connected, user.services.blerp.channel, BlerpLogo)}
+                            {renderServiceLogo('SoundAlerts', user.services.soundalerts.connected, user.services.soundalerts.channel, SoundalertsLogo)}
+                            {renderServiceLogo('Pally.gg', user.services.pallygg.connected, user.services.pallygg.channel, PallyLogo)}
+                            {renderServiceLogo('YouTube', user.services.youtube.connected, user.services.youtube.channel, YoutubeLogo)}
                           </Group>
                         </Stack>
                       </Grid.Col>
@@ -497,7 +501,7 @@ export function AdminConnectionsPage() {
                               <Text size="xs" c="dimmed">{user.streamInfo.category}</Text>
                               <Group gap={4} wrap="nowrap">
                                 <IconUsers size="0.75rem" style={{ color: 'var(--mantine-color-violet-5)' }} />
-                                <Text size="xs" fw={600}>{user.streamInfo.viewerCount.toLocaleString()}</Text>
+                                <Text size="xs" fw={600}>{user.streamInfo.viewerCount?.toLocaleString()}</Text>
                               </Group>
                               <Group gap={4} wrap="nowrap">
                                 <IconClock size="0.75rem" style={{ color: 'var(--mantine-color-gray-5)' }} />
