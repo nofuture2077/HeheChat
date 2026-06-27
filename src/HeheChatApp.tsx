@@ -199,6 +199,8 @@ export default function HeheChat() {
                 profileData.config.missedAlertsWindow ??= '15m';
                 profileData.config.maxBadges ??= 3;
                 profileData.config.chatBsMaxBadges ??= 3;
+                profileData.config.showBitrateIndicator ??= false;
+                profileData.config.showSceneName ??= false;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);
