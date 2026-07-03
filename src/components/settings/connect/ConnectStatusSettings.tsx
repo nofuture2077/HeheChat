@@ -25,6 +25,7 @@ import PallyggLogo from '@/res/pally_logo.svg?react';
 import YoutubeLogo from '@/res/youtube_logo.svg?react';
 import ElevenlabsLogo from '@/res/elevenlabs_logo.svg?react';
 import KofiLogo from '@/res/kofi_logo.svg?react';
+import TwitchLogo from '@/res/twitch_logo.svg?react';
 
 const LOGOS: Record<string, any> = {
   sevenTV: SeventvLogo,
@@ -35,6 +36,7 @@ const LOGOS: Record<string, any> = {
   youtube: YoutubeLogo,
   elevenlabs: ElevenlabsLogo,
   kofi: KofiLogo,
+  twitch: TwitchLogo,
 };
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -53,6 +55,7 @@ interface ConnectionStatus {
   youtube?: ServiceStatus;
   elevenlabs?: ServiceStatus;
   kofi?: ServiceStatus;
+  twitch?: ServiceStatus;
 }
 
 interface Connection {
@@ -89,6 +92,7 @@ const SERVICES: {
   { key: 'youtube', label: 'YouTube', color: 'red', apiKey: 'youtube', canReinit: false },
   { key: 'elevenlabs', label: 'ElevenLabs', color: 'blue', apiKey: 'elevenlabs', canReinit: false },
   { key: 'kofi', label: 'Ko-fi', color: 'blue', apiKey: 'kofi', canReinit: false },
+  { key: 'twitch', label: 'Twitch', color: 'violet', apiKey: 'twitch', canReinit: true },
 ];
 
 function serviceState(status: ServiceStatus | undefined): 'active' | 'configured' | 'unconfigured' {

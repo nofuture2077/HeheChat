@@ -1,5 +1,5 @@
 import { Container, Title, Text, Button, Alert, Stack, Badge, LoadingOverlay, Card, Group, Anchor, Tooltip, Grid } from '@mantine/core';
-import { IconRefresh, IconAlertCircle, IconUsers, IconClock, IconWifi, IconDevices, IconExternalLink } from '@tabler/icons-react';
+import { IconRefresh, IconAlertCircle, IconUsers, IconClock, IconWifi, IconDevices, IconExternalLink, IconBrandTwitch } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 
@@ -10,6 +10,7 @@ import BlerpLogo from '@/res/blerp_logo.svg?react';
 import SoundalertsLogo from '@/res/soundalerts_logo.svg?react';
 import YoutubeLogo from '@/res/youtube_logo.svg?react';
 import PallyLogo from '@/res/pally_logo.svg?react';
+import TwitchLogo from '@/res/twitch_logo.svg?react';
 
 interface GroupedUser {
   userName: string;
@@ -24,6 +25,7 @@ interface GroupedUser {
     soundalerts: { connected: boolean; channel: string };
     pallygg: { connected: boolean; channel: string };
     youtube: { connected: boolean; channel: string };
+    twitch: { connected: boolean; channel: string };
   };
   connections: FlatConnection[];
 }
@@ -65,6 +67,10 @@ interface ConnectionStatus {
     channelname: string;
   };
   youtube: {
+    connected: boolean;
+    channelname: string;
+  };
+  twitch?: {
     connected: boolean;
     channelname: string;
   };
@@ -118,6 +124,8 @@ interface FlatConnection {
   pallyggChannel: string;
   youtubeConnected: boolean;
   youtubeChannel: string;
+  twitchConnected: boolean;
+  twitchChannel: string;
   connectedAt: number;
   streamInfo?: StreamInfo;
 }
@@ -129,6 +137,7 @@ export function AdminConnectionsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [reinitializingTwitch, setReinitializingTwitch] = useState<Record<string, boolean>>({});
 
   const fetchConnections = async () => {
     const adminToken = localStorage.getItem('hehe-token_state');
@@ -170,6 +179,8 @@ export function AdminConnectionsPage() {
         pallyggChannel: conn.connectionStatus?.pallygg?.channelname || 'N/A',
         youtubeConnected: conn.connectionStatus?.youtube?.connected || false,
         youtubeChannel: conn.connectionStatus?.youtube?.channelname || 'N/A',
+        twitchConnected: conn.connectionStatus?.twitch?.connected || false,
+        twitchChannel: conn.connectionStatus?.twitch?.channelname || 'N/A',
         connectedAt: conn.connectedAt,
         streamInfo: conn.streamInfo
       }));
@@ -194,6 +205,19 @@ export function AdminConnectionsPage() {
     const interval = setInterval(fetchConnections, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  const reinitializeTwitch = async (user: GroupedUser) => {
+    const adminToken = localStorage.getItem('hehe-token_state');
+    const guid = user.connections[0]?.guid;
+    if (!guid) return;
+    setReinitializingTwitch((prev) => ({ ...prev, [user.userName]: true }));
+    try {
+      await fetch(`${BASE_URL}/api/admin/reconnect?token=${adminToken}&guid=${guid}&service=twitch`, { method: 'POST' });
+      await fetchConnections();
+    } finally {
+      setReinitializingTwitch((prev) => ({ ...prev, [user.userName]: false }));
+    }
+  };
 
   const formatStreamDuration = (startTime: number) => {
     const durationSeconds = Math.floor(Date.now() / 1000) - startTime;
@@ -260,6 +284,7 @@ export function AdminConnectionsPage() {
           soundalerts: { connected: false, channel: 'N/A' },
           pallygg: { connected: false, channel: 'N/A' },
           youtube: { connected: false, channel: 'N/A' },
+          twitch: { connected: false, channel: 'N/A' },
         },
         connections: [],
       };
@@ -298,6 +323,9 @@ export function AdminConnectionsPage() {
     }
     if (conn.youtubeConnected) {
       user.services.youtube = { connected: true, channel: conn.youtubeChannel };
+    }
+    if (conn.twitchConnected) {
+      user.services.twitch = { connected: true, channel: conn.twitchChannel };
     }
 
     user.connections.push(conn);
@@ -478,7 +506,20 @@ export function AdminConnectionsPage() {
                             {renderServiceLogo('SoundAlerts', user.services.soundalerts.connected, user.services.soundalerts.channel, SoundalertsLogo)}
                             {renderServiceLogo('Pally.gg', user.services.pallygg.connected, user.services.pallygg.channel, PallyLogo)}
                             {renderServiceLogo('YouTube', user.services.youtube.connected, user.services.youtube.channel, YoutubeLogo)}
+                            {renderServiceLogo('Twitch', user.services.twitch.connected, user.services.twitch.channel, TwitchLogo)}
                           </Group>
+                          <Tooltip label="Reinitialize Twitch EventSub">
+                            <Button
+                              size="xs"
+                              variant="light"
+                              color="violet"
+                              leftSection={<IconBrandTwitch size="0.8rem" />}
+                              loading={reinitializingTwitch[user.userName]}
+                              onClick={() => reinitializeTwitch(user)}
+                            >
+                              Reinit Twitch
+                            </Button>
+                          </Tooltip>
                         </Stack>
                       </Grid.Col>
                     </Grid>
