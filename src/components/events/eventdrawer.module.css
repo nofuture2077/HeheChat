@@ -13,9 +13,9 @@
 .header {
     height: 36px;
     padding: 0 18px;
-    box-shadow: rgba(255, 255, 255, 0.07) 0px 1px 0px;
+    border-bottom: 1px solid var(--mantine-color-default-border);
 }
 
 nav {
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+    background-color: light-dark(#fef5fe, #030103);
 }
