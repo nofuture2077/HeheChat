@@ -42,7 +42,8 @@ export default defineConfig({
         collection: './collection.html',
         alert: './alert.html',
         switcher: './switcher.html',
-        chat: './chat.html'
+        chat: './chat.html',
+        promo: './promo.html'
       }
     }
   },
