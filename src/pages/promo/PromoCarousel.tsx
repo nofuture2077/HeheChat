@@ -6,7 +6,7 @@ import { PINK, PINK_GRADIENT, TEXT_SECONDARY, BORDER, gradientText } from './tok
 export interface CarouselSlide {
   image?: string;
   video?: string;
-  quote: string;
+  quote?: string;
   author: string;
   channel: string;
 }
