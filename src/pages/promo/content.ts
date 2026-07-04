@@ -22,7 +22,7 @@ export const hero = {
   // Last item in this array is rendered in pink gradient
   headline: ['Every Chat. Every Alert.', 'Always in Time.'],
   subline:
-    'Never miss donations, TTS, Blerps or chat messages again. HeheChat orchestrates every interaction — others just receive them.',
+    'Never miss donations, TTS, Blerps or chat messages again. HeheChat orchestrates every stream event - others just receive them.',
   // Set to an image path like '/screenshots/hero.png' when ready
   image: undefined,
   buttons: [
@@ -33,15 +33,14 @@ export const hero = {
 
 export const features = {
   eyebrow: 'Why HeheChat',
-  headline: ['One queue for every alert.', 'One place for every chat.'],
+  headline: ['Reliable IRL chat and alerts', 'With full control instead of chaos'],
   tiles: [
     {
-      title: 'Unified Alert Queue',
-      desc: 'Donations, TTS, Blerps, follows — one sequential queue. Every alert, every time.',
-      dark: true,
-      bg: '#0d0d0d',
-      image: undefined as string | undefined,
-      scatterLogos: true,
+      title: 'Built for IRL',
+      desc: 'Lightweight and mobile-ready. Monitor your stream from anywhere.',
+      dark: false,
+      bg: '#f5f5f5',
+      image: '/img/tile_irl.jpeg',
     },
     {
       title: 'Replay Missed Alerts',
@@ -52,18 +51,19 @@ export const features = {
       image: '/img/tile_replay.png',
     },
         {
-      title: 'Shared Sessions',
+      title: 'Shared Chat',
       desc: 'Multiple streamers, one shared view. Built for co-streams.',
       dark: false,
       bg: '#120820',
       image: '/img/tile_together.jpg',
     },
     {
-      title: 'Built for IRL',
-      desc: 'Lightweight and mobile-ready. Monitor your stream from anywhere.',
-      dark: false,
-      bg: '#f5f5f5',
-      image: '/img/tile_irl.jpeg',
+      title: 'Unified Alert Queue',
+      desc: 'Donations, TTS, Blerps, follows — one sequential queue.',
+      dark: true,
+      bg: '#0d0d0d',
+      image: undefined as string | undefined,
+      scatterLogos: true,
     },
   ],
 };
