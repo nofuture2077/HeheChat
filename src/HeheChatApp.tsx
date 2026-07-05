@@ -201,6 +201,7 @@ export default function HeheChat() {
                 profileData.config.chatBsMaxBadges ??= 3;
                 profileData.config.showBitrateIndicator ??= false;
                 profileData.config.showSceneName ??= false;
+                profileData.config.showMoblinZoom ??= false;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);
@@ -469,6 +470,7 @@ export default function HeheChat() {
     const setMissedAlertsWindow = (value: string) => updateConfig('missedAlertsWindow', value);
     const setShowBitrateIndicator = (value: boolean) => updateConfig('showBitrateIndicator', value);
     const setShowSceneName = (value: boolean) => updateConfig('showSceneName', value);
+    const setShowMoblinZoom = (value: boolean) => updateConfig('showMoblinZoom', value);
     const setShowSceneSwitchNotifications = (value: boolean) => updateConfig('showSceneSwitchNotifications', value);
     const setChatBsTransparentBg = (value: boolean) => updateConfig('chatBsTransparentBg', value);
     const setChatBsTextColor = (value: string) => updateConfig('chatBsTextColor', value);
@@ -755,6 +757,7 @@ export default function HeheChat() {
         setMissedAlertsWindow,
         setShowBitrateIndicator,
         setShowSceneName,
+        setShowMoblinZoom,
         setShowSceneSwitchNotifications,
         setChatBsTransparentBg,
         setChatBsTextColor,

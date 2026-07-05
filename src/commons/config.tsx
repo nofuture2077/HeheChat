@@ -69,6 +69,7 @@ export interface ConfigData {
     missedAlertsWindow: string,
     showBitrateIndicator: boolean,
     showSceneName: boolean,
+    showMoblinZoom: boolean,
     showSceneSwitchNotifications: boolean,
     chatBsTransparentBg: boolean,
     chatBsTextColor: string,
@@ -157,6 +158,7 @@ export interface Config extends ConfigData {
     setMissedAlertsWindow: (val: string) => void;
     setShowBitrateIndicator: (val: boolean) => void;
     setShowSceneName: (val: boolean) => void;
+    setShowMoblinZoom: (val: boolean) => void;
     setShowSceneSwitchNotifications: (val: boolean) => void;
     setChatBsTransparentBg: (val: boolean) => void;
     setChatBsTextColor: (val: string) => void;
@@ -259,6 +261,7 @@ export const DEFAULT_CONFIG: Config = {
     missedAlertsWindow: '15m',
     showBitrateIndicator: false,
     showSceneName: false,
+    showMoblinZoom: false,
     showSceneSwitchNotifications: true,
     chatBsTransparentBg: true,
     chatBsTextColor: '',
@@ -337,6 +340,7 @@ export const DEFAULT_CONFIG: Config = {
     setMissedAlertsWindow: (_val: string) => {},
     setShowBitrateIndicator: (val) => {},
     setShowSceneName: (val) => {},
+    setShowMoblinZoom: (val) => {},
     setShowSceneSwitchNotifications: (val) => {},
     setChatBsTransparentBg: () => {},
     setChatBsTextColor: () => {},

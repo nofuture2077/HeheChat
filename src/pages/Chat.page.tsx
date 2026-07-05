@@ -840,7 +840,7 @@ export function ChatPage() {
                 <MobileAppPrompt />
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
-                        {config.showBitrateIndicator && <div style={{ display: 'flex', justifyContent: 'center', marginTop: 0 }}><StreamStatusBar /></div>}
+                        {(config.showBitrateIndicator || config.showSceneName || (premium.isPremium && config.showMoblinZoom)) && <div style={{ display: 'flex', justifyContent: 'center', marginTop: 0 }}><StreamStatusBar /></div>}
                         <NewsDisplay />
                         {showUnplayedBanner && (
                             <Button size="xl" radius="xl" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} className="glass-pink-button" style={{ padding: '16px 24px', fontSize: '18px', width: '95%', maxWidth: '400px', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>

@@ -75,15 +75,13 @@ export const carousel = {
   slides: [
     {
       video: '/img/slide_moritz.mp4',
-      quote:
-        'Ich nutze HeheChat seit über einem Jahr als IRL Chat App und um meine IRL Alerts abzuspielen. Die Kombination aus Alerts und Chat App habe ich in diesem Umfang noch nirgends gesehen. Gerade die Möglichkeit Alerts ein zweites mal abzuspielen macht es für mich noch angenehmer in IRL Streams mit meiner Community zu interagieren.',
+      quote: 'Ich nutze HeheChat seit über einem Jahr als IRL Chat App und um meine IRL Alerts abzuspielen. Die Kombination aus Alerts und Chat App habe ich in diesem Umfang noch nirgends gesehen. Gerade die Möglichkeit Alerts ein zweites mal abzuspielen macht es für mich noch angenehmer in IRL Streams mit meiner Community zu interagieren.',
       author: 'Moritz - Youtube & Snowboard Legend',
       channel: 'twitch.tv/moritzschmid1',
     },
     {
       video: '/img/slide_knirpz.mp4',
-      quote:
-        undefined,//'Ich kann das alles nicht mehr',
+      quote: 'Für mich ist HeheChat sehr übersichtlich und intuitiv. Ich kann das Design schnell und einfach an meine Umgebung anpassen. Dank der vielen Anpassungsmöglichkeiten kann ich meine Zuschauer noch mehr Teil des Geschehens werden lassen, was mich manchmal meinen Lebenssinn hinterfragen lässt.',
       author: 'Knirpz - Twitch Ambassador',
       channel: 'twitch.tv/knirpz',
     },

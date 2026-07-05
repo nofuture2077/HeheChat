@@ -1,4 +1,11 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(yarn tsc *)",
+      "Bash(node -p \"require\\('./package.json'\\).version\")",
+      "Bash(yarn lint *)"
+    ]
+  },
   "enabledPlugins": {
     "ponytail@ponytail": true
   }

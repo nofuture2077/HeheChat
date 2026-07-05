@@ -77,6 +77,7 @@ import { ConnectPallySettings } from './connect/ConnectPallySettings';
 import { ConnectKofiSettings } from './connect/ConnectKofiSettings';
 import { ConnectFossabotSettings } from './connect/ConnectFossabotSettings';
 import { ConnectYouTubeSettings } from './connect/ConnectYouTubeSettings';
+import { ConnectMoblinSettings } from './connect/ConnectMoblinSettings';
 import { ConnectStatusSettings } from './connect/ConnectStatusSettings';
 
 // Switcher
@@ -104,7 +105,7 @@ export type SettingsTab =
   | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/ActiveAlerts' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/Reroll'
   | 'Notifications' | 'Notifications/StreamStart' | 'Notifications/ChatMention'
   | 'Connect' | 'Connect/ElevenLabs' | 'Connect/SoundAlerts' | 'Connect/Blerp'
-  | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube'
+  | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube' | 'Connect/Moblin'
   | 'Shortcuts'
   | 'Switcher' | 'Switcher/Provider' | 'Switcher/Rules' | 'Switcher/Tokens'
   | 'Premium' | 'Premium/Donate' | 'Premium/Redeem'
@@ -171,6 +172,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Connect/Pally', label: 'Pally.gg', icon: IconGift },
       { id: 'Connect/Kofi', label: 'Ko-fi', icon: IconGift },
       { id: 'Connect/Fossabot', label: 'Fossabot', icon: IconSettings },
+      { id: 'Connect/Moblin', label: 'Moblin', icon: IconVideo },
     ],
   },
   { id: 'Shortcuts', label: 'Shortcuts', icon: IconKeyboard },
@@ -242,6 +244,7 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Connect/Kofi': 'Connect › Ko-fi',
   'Connect/Fossabot': 'Connect › Fossabot',
   'Connect/YouTube': 'Connect › YouTube',
+  'Connect/Moblin': 'Connect › Moblin',
   'Shortcuts': 'Shortcuts',
   'Switcher': 'OBS Remote',
   'Switcher/Provider': 'OBS Remote › Provider',
@@ -383,6 +386,7 @@ export function Settings(props: SettingsProperties) {
       case 'Connect/Kofi': return <ConnectKofiSettings />;
       case 'Connect/Fossabot': return <ConnectFossabotSettings />;
       case 'Connect/YouTube': return <ConnectYouTubeSettings />;
+      case 'Connect/Moblin': return premium.isPremium ? <ConnectMoblinSettings /> : <PremiumRequired />;
       case 'Shortcuts': return <ShortcutSettings />;
       case 'Switcher/Provider': return (
         <Stack mt={30} mb={30} gap={30}>

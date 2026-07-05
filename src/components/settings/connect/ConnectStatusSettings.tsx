@@ -13,6 +13,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconRefresh, IconAlertCircle } from '@tabler/icons-react';
+import MoblinLogo from '@/res/moblin_logo.svg?react';
 import { useState, useEffect } from 'react';
 import { notifications } from '@mantine/notifications';
 
@@ -37,6 +38,7 @@ const LOGOS: Record<string, any> = {
   elevenlabs: ElevenlabsLogo,
   kofi: KofiLogo,
   twitch: TwitchLogo,
+  moblin: MoblinLogo,
 };
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -56,6 +58,7 @@ interface ConnectionStatus {
   elevenlabs?: ServiceStatus;
   kofi?: ServiceStatus;
   twitch?: ServiceStatus;
+  moblin?: ServiceStatus;
 }
 
 interface Connection {
@@ -93,6 +96,7 @@ const SERVICES: {
   { key: 'elevenlabs', label: 'ElevenLabs', color: 'blue', apiKey: 'elevenlabs', canReinit: false },
   { key: 'kofi', label: 'Ko-fi', color: 'blue', apiKey: 'kofi', canReinit: false },
   { key: 'twitch', label: 'Twitch', color: 'violet', apiKey: 'twitch', canReinit: true },
+  { key: 'moblin', label: 'Moblin', color: 'orange', apiKey: 'moblin', canReinit: false },
 ];
 
 function serviceState(status: ServiceStatus | undefined): 'active' | 'configured' | 'unconfigured' {
@@ -109,6 +113,7 @@ export function ConnectStatusSettings() {
   const [reinitializing, setReinitializing] = useState<Record<string, boolean>>({});
   const [confirmOpened, { open: openConfirm, close: closeConfirm }] = useDisclosure(false);
   const [reinitAllLoading, setReinitAllLoading] = useState(false);
+  const [moblinStatus, setMoblinStatus] = useState<ServiceStatus | undefined>(undefined);
 
   const fetchConnections = async () => {
     setLoading(true);
@@ -127,6 +132,11 @@ export function ConnectStatusSettings() {
 
   useEffect(() => {
     fetchConnections();
+    // ponytail: moblin connection state isn't part of /api/connection, fetched separately
+    fetch(`${BASE_URL}/moblin/get?state=${token}`)
+      .then(res => res.json())
+      .then(data => setMoblinStatus(data.configured ? { connected: !!data.connected, channelname: '' } : undefined))
+      .catch(() => {});
   }, []);
 
   // Merge connectionStatus across all active connections (services are user-level)
@@ -139,6 +149,7 @@ export function ConnectStatusSettings() {
       }
     }
   }
+  mergedStatus.moblin = moblinStatus;
 
   const reinitialize = async (apiKey: string, label: string) => {
     setReinitializing((prev) => ({ ...prev, [apiKey]: true }));
@@ -228,7 +239,7 @@ export function ConnectStatusSettings() {
         <Grid>
           {SERVICES.map(({ key, label, color, apiKey, canReinit }) => {
             const status = mergedStatus[key];
-            const state = noConnection ? 'unconfigured' : serviceState(status);
+            const state = noConnection && key !== 'moblin' ? 'unconfigured' : serviceState(status);
             const badgeColor =
               state === 'active' ? color : state === 'configured' ? 'yellow' : 'gray';
             const stateLabel =
