@@ -40,7 +40,7 @@ export const features = {
       desc: 'Lightweight and mobile-ready. Monitor your stream from anywhere.',
       dark: false,
       bg: '#f5f5f5',
-      image: '/img/tile_irl.jpeg',
+      image: '/img/tile_irl.jpg',
     },
     {
       title: 'Replay Missed Alerts',
