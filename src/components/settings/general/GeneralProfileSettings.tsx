@@ -33,6 +33,7 @@ export function GeneralProfileSettings() {
                         confirm={async () => {
                             try {
                                 await profile.deleteProfile(profile.guid);
+                                confirmDeleteHandler.close();
                             } catch (error) {
                                 console.error('Error deleting profile:', error);
                             }

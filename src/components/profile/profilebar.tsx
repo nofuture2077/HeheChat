@@ -18,7 +18,7 @@ export function ProfileSelector(props: ProfileSelectorProps) {
     const emotes = useContext(ChatEmotesContext);
     const [createProfileOpen, createProfileHandler] = useDisclosure(false);
 
-    const [profiles, setProfiles] = useState(activeProfile.listProfiles());
+    const profiles = activeProfile.listProfiles();
 
     async function handleOnDragEnd(result: DropResult) {
         if (!result.destination) {
@@ -31,10 +31,8 @@ export function ProfileSelector(props: ProfileSelectorProps) {
 
         try {
             await activeProfile.setProfiles(items);
-            setProfiles(items);
         } catch (error) {
             console.error('Error updating profiles order:', error);
-            setProfiles(activeProfile.listProfiles());
         }
     }
 
