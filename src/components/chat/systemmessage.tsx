@@ -1,6 +1,6 @@
 import { SystemMessage } from '../../commons/message';
 import { formatTime, formatString } from '../../commons/helper';
-import { Text, ActionIcon } from "@mantine/core"
+import { Text, ActionIcon, Tooltip } from "@mantine/core"
 import classes from './systemmessage.module.css';
 import { IconSpeakerphone } from '@tabler/icons-react';
 import { memo, useContext } from 'react';
@@ -103,7 +103,7 @@ export const SystemMessageComp = memo(function SystemMessageComp(props: SystemMe
         msgParts = props.msg.data.text ? (props.msg.data.text.parts ?? []) : [];
     }
 
-    const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <ActionIcon key='shoutoutAction' variant='subtle' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)} style={{ verticalAlign: 'text-bottom' }}><IconSpeakerphone size={22} /></ActionIcon> : null;
+    const actions = (props.msg.subType === 'raid' && canShoutout && modToolsEnabled) ? <Tooltip key='shoutoutTooltip' label="Give shoutout"><ActionIcon key='shoutoutAction' variant='filled' color='primary' size={26} m="0 6px" onClick={() => props.modActions.shoutoutUser(props.msg.channelId, props.msg.userId)} style={{ verticalAlign: 'text-bottom', cursor: 'pointer' }}><IconSpeakerphone size={22} /></ActionIcon></Tooltip> : null;
     
     const platformIcon = platform && platformIcons[platform] ? platformIcons[platform] : null;
 

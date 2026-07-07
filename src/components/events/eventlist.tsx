@@ -1,8 +1,9 @@
-import { ScrollArea, Text, ThemeIcon, ActionIcon } from '@mantine/core';
+import { ScrollArea, Text, ThemeIcon, ActionIcon, Tooltip } from '@mantine/core';
 import { IconBoltFilled, IconCheck, IconReload, IconTrain, IconUsersGroup } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { EventStorage, EventData } from './eventstorage';
-import { ConfigContext, ProfileContext } from '@/ApplicationContext';
+import { ConfigContext, ProfileContext, LoginContextContext } from '@/ApplicationContext';
+import { getUserId, shoutoutUser } from '@/components/chat/mod/modactions';
 
 // Import SVG logos directly
 import BlerpLogo from '@/res/blerp_logo.svg?react';
@@ -118,10 +119,22 @@ export function formatEventText(event: EventData): string {
 export function EventList() {
     const config = useContext(ConfigContext);
     const profile = useContext(ProfileContext);
+    const login = useContext(LoginContextContext);
     const [events, setEvents] = useState<EventData[]>([]);
     const [load, setLoad] = useState(true);
     const [checkedEvents, setCheckedEvents] = useState<Dictionary<boolean>>({});
     const forceUpdate = useForceUpdate();
+
+    const canShoutout = (channel: string) => {
+        const isModerator = login.moderatedChannels.some(c => c.name === channel);
+        const isBroadcaster = channel === login.user?.name;
+        return config.modToolsEnabled && (isModerator || isBroadcaster);
+    };
+
+    const shoutout = async (event: EventData) => {
+        const [channelData, userData] = await Promise.all([getUserId(event.channel), getUserId(event.username)]);
+        shoutoutUser(channelData.userId, userData.userId);
+    };
 
     useEffect(() => {
         const ignored: string[] = Object.keys(config.hideEvents).filter(
@@ -190,13 +203,24 @@ export function EventList() {
                     date={event.date} 
                     text={formatEventText(event)} 
                     left={getIcon(event, 'infocard-left')} 
-                    onClick={() => replayEvent(event)} 
-                    right={<ActionIcon 
-                        disabled={!AlertSystem.shouldBePlayedInApp(event) && !AlertSystem.shouldBePlayedInBrowsersource(event)} 
-                        variant='transparent' 
-                        key={'infocard-right'}>
-                            {(checkedEvents[event.id] ? <IconCheck/> : <IconReload/>)}
-                    </ActionIcon>}
+                    onClick={() => replayEvent(event)}
+                    right={<>
+                        {event.eventtype === 'raid' && canShoutout(event.channel) ? <Tooltip key='infocard-shoutout-tooltip' label="Give shoutout">
+                            <ActionIcon
+                                variant='filled'
+                                color='primary'
+                                key={'infocard-shoutout'}
+                                onClick={(e) => { e.stopPropagation(); shoutout(event); }}>
+                                    <IconSpeakerphone/>
+                            </ActionIcon>
+                        </Tooltip> : null}
+                        <ActionIcon
+                            disabled={!AlertSystem.shouldBePlayedInApp(event) && !AlertSystem.shouldBePlayedInBrowsersource(event)}
+                            variant='transparent'
+                            key={'infocard-right'}>
+                                {(checkedEvents[event.id] ? <IconCheck/> : <IconReload/>)}
+                        </ActionIcon>
+                    </>}
                 />)}
             </div>
         </ScrollArea>
