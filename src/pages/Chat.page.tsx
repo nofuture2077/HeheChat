@@ -474,6 +474,29 @@ export function ChatPage() {
         });
         const modEventSub = PubSub.subscribe("WS-modevent", onModEvent);
 
+        const gapSub = PubSub.subscribe("WS-gapDetected", (_msg, data: { since: number }) => {
+            const since = data?.since ?? (Date.now() - 60000);
+            // Recover missed chat messages
+            Storage.loadSince(config.channels, config.ignoredUsers, since).then(missed => {
+                missed.forEach(m => addMessage(parseMessage(m.message), m.username, config.maxMessages));
+            });
+            // Recover missed events (de-dupe against queue — items stay in array after playing)
+            if (config.missedAlertsWindow !== 'none') {
+                const windowMs: Record<string, number> = { '15m': 15 * 60 * 1000, '1h': 60 * 60 * 1000, '1d': 24 * 60 * 60 * 1000 };
+                const cutoff = Date.now() - (windowMs[config.missedAlertsWindow] ?? 15 * 60 * 1000);
+                EventStorage.load(config.channels, config.ignoredUsers).then(events => {
+                    const knownIds = new Set(AlertSystem.queue.map((e: Event) => e.id));
+                    events
+                        .filter(e => !e.played
+                            && !knownIds.has(e.id)
+                            && AlertSystem.shouldBePlayedInApp(e as unknown as Event)
+                            && e.date >= cutoff)
+                        .sort((a, b) => a.date - b.date)
+                        .forEach(e => AlertSystem.addEvent(e as unknown as Event));
+                });
+            }
+        });
+
         Storage.load(config.channels, config.ignoredUsers, config.maxMessages).then(rawMessages => {
             const msgs = rawMessages.map(parseMessage);
             setMessages(msgs, config.maxMessages);
@@ -529,6 +552,7 @@ export function ChatPage() {
             PubSub.unsubscribe(eventSub);
             PubSub.unsubscribe(modEventSub);
             PubSub.unsubscribe(massBanSub);
+            PubSub.unsubscribe(gapSub);
             config.off(chatHandler);
         };
     }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, config.ignoreTTS, config.readAllMessages, config.systemMessageInChat, loginContext.user]);

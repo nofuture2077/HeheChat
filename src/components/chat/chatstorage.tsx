@@ -1,5 +1,6 @@
 export interface ChatStorage {
     load: (channels: string[], ignoredUsers: string[], maxMessages?: number) => Promise<string[]>;
+    loadSince: (channels: string[], ignoredUsers: string[], since: number) => Promise<Array<{id: string, message: string, username: string, date: number}>>;
 }
 
 interface ChatMessageData {
@@ -26,6 +27,15 @@ class RemoteChatStorage implements ChatStorage {
         }
         
         return fetch(this.baseUrl + '/chat/history?' + params.join('&')).then(res => res.json()).then(arr => arr.map((x:any) => x.message));
+    }
+
+    async loadSince(channels: string[], ignoredUsers: string[], since: number): Promise<Array<{id: string, message: string, username: string, date: number}>> {
+        const params = [
+            ['channels', (channels || []).join(',')].join('='),
+            ['ignored', (ignoredUsers || []).join(',')].join('='),
+            ['since', since.toString()].join('=')
+        ];
+        return fetch(this.baseUrl + '/chat/messages?' + params.join('&')).then(res => res.json());
     }
 }
 

@@ -29,6 +29,8 @@ let reconnectAttempts = 0;
 let reconnectTimeout: number | undefined;
 let lastHeartbeatReceived = 0;
 let lastEventTimestamp = 0;
+let lastSeq = 0;
+let lastReceivedAt = 0;
 let statusInterval: number | undefined;
 let isClosing = false;
 
@@ -122,6 +124,9 @@ function connectToBackend() {
 
             // Initialize the heartbeat timestamp before sending anything
             lastHeartbeatReceived = Date.now();
+            // Reset seq tracking — fresh connection, no gap detection until first message
+            lastSeq = 0;
+            lastReceivedAt = Date.now();
             startWatchdog();
 
             // Send the initial request if available, augmented with catchup hint
@@ -142,17 +147,28 @@ function connectToBackend() {
                     // Update the heartbeat timestamp
                     lastHeartbeatReceived = Date.now();
 
-                    // Respond to heartbeat with a pong message
+                    // Respond to heartbeat with lastSeq so server can detect drift
                     backendWebsocket?.send(JSON.stringify({
                         type: "pong",
                         timestamp: Date.now(),
-                        originalTimestamp: data.timestamp
+                        originalTimestamp: data.timestamp,
+                        lastSeq
                     }));
                     return;
                 }
 
                 // Any received data implies the connection is alive
                 lastHeartbeatReceived = Date.now();
+
+                // Detect sequence gaps — if seq jumps, we missed messages
+                if (typeof data.seq === 'number') {
+                    if (lastSeq > 0 && data.seq > lastSeq + 1) {
+                        console.warn(`[ws] seq gap detected: expected ${lastSeq + 1}, got ${data.seq}`);
+                        self.postMessage({ type: 'gapDetected', since: lastReceivedAt });
+                    }
+                    lastSeq = data.seq;
+                    lastReceivedAt = Date.now();
+                }
 
                 // Track the latest event timestamp for catchup on reconnect
                 const ts = data?.data?.timestamp ?? data?.timestamp;
