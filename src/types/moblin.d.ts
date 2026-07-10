@@ -37,9 +37,13 @@ export interface MoblinChatPostSegment {
   emote?: string;
 }
 
+// Codable enum case with associated values - the payload nests the actual fields one level
+// deeper under "message", e.g. { message: { user, segments } }
 export interface MoblinChatMessage {
-  user: string;
-  segments: MoblinChatPostSegment[];
+  message: {
+    user: string;
+    segments: MoblinChatPostSegment[];
+  };
 }
 
 export interface MoblinMessage {

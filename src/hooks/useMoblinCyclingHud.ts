@@ -15,6 +15,7 @@ interface Sections {
   speed: boolean;
   gradient: boolean;
   elevation: boolean;
+  debug: boolean;
 }
 
 const defaultSections: Sections = {
@@ -24,6 +25,7 @@ const defaultSections: Sections = {
   speed: true,
   gradient: true,
   elevation: true,
+  debug: false,
 };
 
 // whitelist of chat commands, each toggles exactly one section key - never eval chat text
@@ -35,6 +37,7 @@ const COMMANDS: Record<string, keyof Sections> = {
   gradient: 'gradient',
   elevation: 'elevation',
   ascent: 'elevation',
+  debug: 'debug',
 };
 
 function loadSections(): Sections {
@@ -113,6 +116,7 @@ export function useMoblinCyclingHud(): {
   status: MoblinConnectionStatus;
   error: string | null;
   debug: MoblinDebugInfo;
+  debugVisible: boolean;
 } {
   const [data, setData] = useState<CyclingData | null>(null);
   const [sections, setSections] = useState<Sections>(loadSections);
@@ -156,14 +160,15 @@ export function useMoblinCyclingHud(): {
               }));
               setData(toCyclingData(message.telemetry));
             } else if (message.chat) {
+              const chat = message.chat.message;
               setDebug((d) => ({
                 ...d,
                 chatCount: d.chatCount + 1,
-                lastChatUser: message.chat!.user,
-                lastChatText: segmentsToText(message.chat!.segments),
+                lastChatUser: chat?.user ?? null,
+                lastChatText: segmentsToText(chat?.segments),
                 lastChatRaw: safeStringify(message.chat),
               }));
-              handleChatCommand(message.chat, setSections, (rejectedUser) =>
+              handleChatCommand(chat, setSections, (rejectedUser) =>
                 setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))
               );
             }
@@ -204,7 +209,7 @@ export function useMoblinCyclingHud(): {
     minGradientPercent: MIN_GRADIENT_PERCENT,
   };
 
-  return { data, config, status, error, debug };
+  return { data, config, status, error, debug, debugVisible: sections.debug };
 }
 
 // segments can be missing/malformed on a given payload - never crash the message pipe over it
@@ -214,13 +219,14 @@ function segmentsToText(segments: { text?: string }[] | undefined): string {
 }
 
 function handleChatCommand(
-  chat: { user: string; segments: { text?: string }[] },
+  chat: { user: string; segments: { text?: string }[] } | undefined,
   setSections: Dispatch<SetStateAction<Sections>>,
   onRejected: (user: string) => void
 ) {
+  if (!chat) return;
   const user = (chat.user ?? '').trim().toLowerCase();
   if (!ALLOWED_USERS.includes(user)) {
-    onRejected(chat.user);
+    onRejected(chat.user ?? '');
     return;
   }
 

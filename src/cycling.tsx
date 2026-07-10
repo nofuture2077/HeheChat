@@ -88,7 +88,7 @@ last telemetry raw: ${debug.lastTelemetryRaw ?? '-'}`}
 }
 
 function CyclingRoot() {
-  const { data, config, status, error, debug } = useMoblinCyclingHud();
+  const { data, config, status, error, debug, debugVisible } = useMoblinCyclingHud();
   return (
     <>
       {status === 'error' && (
@@ -98,7 +98,7 @@ function CyclingRoot() {
         <Banner background="#f9a825" color="#000">Mit Moblin verbunden, warte auf erste Telemetriedaten...</Banner>
       )}
       <CyclingHud data={data ?? previewData} config={config} />
-      <DebugPanel status={status} debug={debug} />
+      {debugVisible && <DebugPanel status={status} debug={debug} />}
     </>
   );
 }
