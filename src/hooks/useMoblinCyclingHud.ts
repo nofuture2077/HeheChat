@@ -64,30 +64,74 @@ function toCyclingData(t: MoblinTelemetryData): CyclingData {
   };
 }
 
-export function useMoblinCyclingHud(): { data: CyclingData | null; config: CyclingHudConfig } {
+export type MoblinConnectionStatus = 'waiting' | 'subscribed' | 'error';
+
+// window.moblin may be injected after our script runs, so keep polling until it shows up
+const MOBLIN_POLL_INTERVAL_MS = 500;
+const MOBLIN_WAIT_TIMEOUT_MS = 8000;
+
+export function useMoblinCyclingHud(): {
+  data: CyclingData | null;
+  config: CyclingHudConfig;
+  status: MoblinConnectionStatus;
+  error: string | null;
+} {
   const [data, setData] = useState<CyclingData | null>(null);
   const [sections, setSections] = useState<Sections>(loadSections);
+  const [status, setStatus] = useState<MoblinConnectionStatus>('waiting');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sections));
   }, [sections]);
 
   useEffect(() => {
-    const { moblin } = window;
-    if (!moblin) return undefined;
+    let cancelled = false;
+    let pollId: ReturnType<typeof setInterval> | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    moblin.subscribe({ chat: { prefix: '!' }, telemetry: {} });
-    moblin.onmessage = (message) => {
-      if (message.telemetry) {
-        setData(toCyclingData(message.telemetry));
+    function subscribe(moblin: NonNullable<Window['moblin']>) {
+      try {
+        moblin.subscribe({ chat: { prefix: '!' }, telemetry: {} });
+        moblin.onmessage = (message) => {
+          if (message.telemetry) {
+            setData(toCyclingData(message.telemetry));
+          }
+          if (message.chat) {
+            handleChatCommand(message.chat, setSections);
+          }
+        };
+        setStatus('subscribed');
+        setError(null);
+      } catch (err) {
+        setStatus('error');
+        setError(err instanceof Error ? err.message : String(err));
       }
-      if (message.chat) {
-        handleChatCommand(message.chat, setSections);
+    }
+
+    function poll() {
+      if (cancelled) return;
+      if (window.moblin) {
+        clearInterval(pollId);
+        clearTimeout(timeoutId);
+        subscribe(window.moblin);
       }
-    };
+    }
+
+    pollId = setInterval(poll, MOBLIN_POLL_INTERVAL_MS);
+    timeoutId = setTimeout(() => {
+      if (cancelled || window.moblin) return;
+      clearInterval(pollId);
+      setStatus('error');
+      setError('window.moblin wurde nicht gefunden - läuft diese Seite als Moblin Browser Source?');
+    }, MOBLIN_WAIT_TIMEOUT_MS);
+    poll();
 
     return () => {
-      moblin.onmessage = null;
+      cancelled = true;
+      clearInterval(pollId);
+      clearTimeout(timeoutId);
+      if (window.moblin) window.moblin.onmessage = null;
     };
   }, []);
 
@@ -104,7 +148,7 @@ export function useMoblinCyclingHud(): { data: CyclingData | null; config: Cycli
     minGradientPercent: MIN_GRADIENT_PERCENT,
   };
 
-  return { data, config };
+  return { data, config, status, error };
 }
 
 function handleChatCommand(

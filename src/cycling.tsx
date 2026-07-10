@@ -14,8 +14,30 @@ const previewData: CyclingData = {
 };
 
 function CyclingRoot() {
-  const { data, config } = useMoblinCyclingHud();
-  return <CyclingHud data={data ?? previewData} config={config} />;
+  const { data, config, status, error } = useMoblinCyclingHud();
+  return (
+    <>
+      {status === 'error' && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            padding: '10px 16px',
+            background: '#c62828',
+            color: '#fff',
+            fontFamily: 'sans-serif',
+            fontSize: 14,
+            zIndex: 9999,
+          }}
+        >
+          Moblin-Verbindung fehlgeschlagen: {error}
+        </div>
+      )}
+      <CyclingHud data={data ?? previewData} config={config} />
+    </>
+  );
 }
 
 ReactDOM.createRoot(document.getElementById('cycling')!).render(<CyclingRoot />);
