@@ -52,15 +52,20 @@ function toLocation(t: MoblinTelemetryData): string {
   return parts.length ? parts[0]! : '—';
 }
 
+// telemetry fields can be null/missing on individual messages - fall back to 0 rather than crash on NaN
+function num(value: number | null | undefined): number {
+  return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
 function toCyclingData(t: MoblinTelemetryData): CyclingData {
   return {
-    speedKmh: t.speed * 3.6,
-    dayDistanceKm: t.splitDistance / 1000,
-    totalDistanceKm: t.distance / 1000,
+    speedKmh: num(t.speed) * 3.6,
+    dayDistanceKm: num(t.splitDistance) / 1000,
+    totalDistanceKm: num(t.distance) / 1000,
     location: toLocation(t),
-    gradientPercent: t.slopePercent,
-    elevationGainM: t.altitudeAscent,
-    elevationLossM: t.altitudeDescent,
+    gradientPercent: num(t.slopePercent),
+    elevationGainM: num(t.altitudeAscent),
+    elevationLossM: num(t.altitudeDescent),
   };
 }
 

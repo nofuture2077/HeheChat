@@ -1,3 +1,4 @@
+import { Component, type ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
 import CyclingHud, { type CyclingData } from './components/cycling/CyclingHud';
 import { useMoblinCyclingHud } from './hooks/useMoblinCyclingHud';
@@ -13,47 +14,62 @@ const previewData: CyclingData = {
   elevationLossM: 128,
 };
 
+interface BannerProps {
+  background: string;
+  color: string;
+  children: ReactNode;
+}
+
+function Banner({ background, color, children }: BannerProps) {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        padding: '10px 16px',
+        background,
+        color,
+        fontFamily: 'sans-serif',
+        fontSize: 14,
+        zIndex: 9999,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+// a bad telemetry field must never take the whole overlay down with it
+class HudErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null as Error | null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
+  render() {
+    if (this.state.error) {
+      return <Banner background="#c62828" color="#fff">HUD-Renderfehler: {this.state.error.message}</Banner>;
+    }
+    return this.props.children;
+  }
+}
+
 function CyclingRoot() {
   const { data, config, status, error } = useMoblinCyclingHud();
   return (
     <>
       {status === 'error' && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            padding: '10px 16px',
-            background: '#c62828',
-            color: '#fff',
-            fontFamily: 'sans-serif',
-            fontSize: 14,
-            zIndex: 9999,
-          }}
-        >
-          Moblin-Verbindung fehlgeschlagen: {error}
-        </div>
+        <Banner background="#c62828" color="#fff">Moblin-Verbindung fehlgeschlagen: {error}</Banner>
       )}
       {status === 'subscribed' && !data && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            padding: '10px 16px',
-            background: '#f9a825',
-            color: '#000',
-            fontFamily: 'sans-serif',
-            fontSize: 14,
-            zIndex: 9999,
-          }}
-        >
-          Mit Moblin verbunden, warte auf erste Telemetriedaten...
-        </div>
+        <Banner background="#f9a825" color="#000">Mit Moblin verbunden, warte auf erste Telemetriedaten...</Banner>
       )}
-      <CyclingHud data={data ?? previewData} config={config} />
+      <HudErrorBoundary>
+        <CyclingHud data={data ?? previewData} config={config} />
+      </HudErrorBoundary>
     </>
   );
 }
