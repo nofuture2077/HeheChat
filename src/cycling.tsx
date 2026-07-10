@@ -57,8 +57,35 @@ class HudErrorBoundary extends Component<{ children: ReactNode }, { error: Error
   }
 }
 
+function DebugPanel({ status, debug }: { status: string; debug: ReturnType<typeof useMoblinCyclingHud>['debug'] }) {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        padding: '8px 12px',
+        background: 'rgba(0,0,0,0.75)',
+        color: '#0f0',
+        fontFamily: 'monospace',
+        fontSize: 12,
+        lineHeight: 1.5,
+        zIndex: 9999,
+        whiteSpace: 'pre',
+      }}
+    >
+      {`status: ${status}
+telemetry messages: ${debug.telemetryCount}
+chat messages: ${debug.chatCount}
+last chat user: ${debug.lastChatUser ?? '-'}
+last chat text: ${debug.lastChatText ?? '-'}
+last rejected user: ${debug.lastRejectedUser ?? '-'}`}
+    </div>
+  );
+}
+
 function CyclingRoot() {
-  const { data, config, status, error } = useMoblinCyclingHud();
+  const { data, config, status, error, debug } = useMoblinCyclingHud();
   return (
     <>
       {status === 'error' && (
@@ -70,6 +97,7 @@ function CyclingRoot() {
       <HudErrorBoundary>
         <CyclingHud data={data ?? previewData} config={config} />
       </HudErrorBoundary>
+      <DebugPanel status={status} debug={debug} />
     </>
   );
 }

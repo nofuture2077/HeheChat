@@ -75,16 +75,35 @@ export type MoblinConnectionStatus = 'waiting' | 'subscribed' | 'error';
 const MOBLIN_POLL_INTERVAL_MS = 50;
 const MOBLIN_WAIT_TIMEOUT_MS = 8000;
 
+// on-screen debug info since browser sources in OBS have no reachable devtools
+export interface MoblinDebugInfo {
+  telemetryCount: number;
+  chatCount: number;
+  lastChatUser: string | null;
+  lastChatText: string | null;
+  lastRejectedUser: string | null;
+}
+
+const emptyDebug: MoblinDebugInfo = {
+  telemetryCount: 0,
+  chatCount: 0,
+  lastChatUser: null,
+  lastChatText: null,
+  lastRejectedUser: null,
+};
+
 export function useMoblinCyclingHud(): {
   data: CyclingData | null;
   config: CyclingHudConfig;
   status: MoblinConnectionStatus;
   error: string | null;
+  debug: MoblinDebugInfo;
 } {
   const [data, setData] = useState<CyclingData | null>(null);
   const [sections, setSections] = useState<Sections>(loadSections);
   const [status, setStatus] = useState<MoblinConnectionStatus>('waiting');
   const [error, setError] = useState<string | null>(null);
+  const [debug, setDebug] = useState<MoblinDebugInfo>(emptyDebug);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sections));
@@ -113,9 +132,18 @@ export function useMoblinCyclingHud(): {
       try {
         moblin.onmessage = (message) => {
           if (message.telemetry) {
+            setDebug((d) => ({ ...d, telemetryCount: d.telemetryCount + 1 }));
             setData(toCyclingData(message.telemetry));
           } else if (message.chat) {
-            handleChatCommand(message.chat, setSections);
+            setDebug((d) => ({
+              ...d,
+              chatCount: d.chatCount + 1,
+              lastChatUser: message.chat!.user,
+              lastChatText: message.chat!.segments.map((s) => s.text ?? '').join(''),
+            }));
+            handleChatCommand(message.chat, setSections, (rejectedUser) =>
+              setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))
+            );
           }
         };
         moblin.subscribe({ telemetry: {} });
@@ -150,17 +178,17 @@ export function useMoblinCyclingHud(): {
     minGradientPercent: MIN_GRADIENT_PERCENT,
   };
 
-  return { data, config, status, error };
+  return { data, config, status, error, debug };
 }
 
 function handleChatCommand(
   chat: { user: string; segments: { text?: string }[] },
-  setSections: Dispatch<SetStateAction<Sections>>
+  setSections: Dispatch<SetStateAction<Sections>>,
+  onRejected: (user: string) => void
 ) {
   const user = (chat.user ?? '').trim().toLowerCase();
   if (!ALLOWED_USERS.includes(user)) {
-    // ponytail: temporary debug aid, remove once command auth is confirmed working
-    console.debug('[cyclingHud] chat command rejected, unauthorized user:', JSON.stringify(chat.user));
+    onRejected(chat.user);
     return;
   }
 
