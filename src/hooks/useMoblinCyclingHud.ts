@@ -83,6 +83,8 @@ export interface MoblinDebugInfo {
   lastChatText: string | null;
   lastRejectedUser: string | null;
   lastMessageError: string | null;
+  lastChatRaw: string | null;
+  lastTelemetryRaw: string | null;
 }
 
 const emptyDebug: MoblinDebugInfo = {
@@ -92,7 +94,18 @@ const emptyDebug: MoblinDebugInfo = {
   lastChatText: null,
   lastRejectedUser: null,
   lastMessageError: null,
+  lastChatRaw: null,
+  lastTelemetryRaw: null,
 };
+
+// dumps the actual payload shape on screen so we can see real key names without devtools
+function safeStringify(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
 
 export function useMoblinCyclingHud(): {
   data: CyclingData | null;
@@ -136,7 +149,11 @@ export function useMoblinCyclingHud(): {
           // a bad payload here must never break the moblin message pipe or crash the page
           try {
             if (message.telemetry) {
-              setDebug((d) => ({ ...d, telemetryCount: d.telemetryCount + 1 }));
+              setDebug((d) => ({
+                ...d,
+                telemetryCount: d.telemetryCount + 1,
+                lastTelemetryRaw: safeStringify(message.telemetry),
+              }));
               setData(toCyclingData(message.telemetry));
             } else if (message.chat) {
               setDebug((d) => ({
@@ -144,6 +161,7 @@ export function useMoblinCyclingHud(): {
                 chatCount: d.chatCount + 1,
                 lastChatUser: message.chat!.user,
                 lastChatText: segmentsToText(message.chat!.segments),
+                lastChatRaw: safeStringify(message.chat),
               }));
               handleChatCommand(message.chat, setSections, (rejectedUser) =>
                 setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))

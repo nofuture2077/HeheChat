@@ -80,7 +80,9 @@ chat messages: ${debug.chatCount}
 last chat user: ${debug.lastChatUser ?? '-'}
 last chat text: ${debug.lastChatText ?? '-'}
 last rejected user: ${debug.lastRejectedUser ?? '-'}
-last message error: ${debug.lastMessageError ?? '-'}`}
+last message error: ${debug.lastMessageError ?? '-'}
+last chat raw: ${debug.lastChatRaw ?? '-'}
+last telemetry raw: ${debug.lastTelemetryRaw ?? '-'}`}
     </div>
   );
 }
