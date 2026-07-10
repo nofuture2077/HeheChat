@@ -54,7 +54,7 @@ function loadSections(): Sections {
 }
 
 function toLocation(t: MoblinTelemetryData): string {
-  const parts = [t.city, t.area, t.state, t.country].filter(Boolean);
+  const parts = [t.data.city, t.data.area, t.data.state, t.data.country].filter(Boolean);
   return parts.length ? parts[0]! : '—';
 }
 
@@ -65,15 +65,15 @@ function num(value: number | null | undefined): number {
 
 function toCyclingData(t: MoblinTelemetryData): CyclingData {
   return {
-    speedKmh: num(t.speed) * 3.6,
-    distanceKm: num(t.distance) / 1000,
-    splitDistanceKm: num(t.splitDistance) / 1000,
+    speedKmh: num(t.data.speed) * 3.6,
+    distanceKm: num(t.data.distance) / 1000,
+    splitDistanceKm: num(t.data.splitDistance) / 1000,
     location: toLocation(t),
-    gradientPercent: num(t.slopePercent),
-    elevationGainM: num(t.altitudeAscent),
-    elevationLossM: num(t.altitudeDescent),
-    splitElevationGainM: num(t.splitAltitudeAscent),
-    splitElevationLossM: num(t.splitAltitudeDescent),
+    gradientPercent: num(t.data.slopePercent),
+    elevationGainM: num(t.data.altitudeAscent),
+    elevationLossM: num(t.data.altitudeDescent),
+    splitElevationGainM: num(t.data.splitAltitudeAscent),
+    splitElevationLossM: num(t.data.splitAltitudeDescent),
   };
 }
 
