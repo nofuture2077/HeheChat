@@ -15,6 +15,7 @@ interface Sections {
   speed: boolean;
   gradient: boolean;
   elevation: boolean;
+  split: boolean;
   debug: boolean;
 }
 
@@ -25,6 +26,7 @@ const defaultSections: Sections = {
   speed: true,
   gradient: true,
   elevation: true,
+  split: false,
   debug: false,
 };
 
@@ -37,6 +39,7 @@ const COMMANDS: Record<string, keyof Sections> = {
   gradient: 'gradient',
   elevation: 'elevation',
   ascent: 'elevation',
+  split: 'split',
   debug: 'debug',
 };
 
@@ -63,12 +66,14 @@ function num(value: number | null | undefined): number {
 function toCyclingData(t: MoblinTelemetryData): CyclingData {
   return {
     speedKmh: num(t.speed) * 3.6,
-    dayDistanceKm: num(t.splitDistance) / 1000,
-    totalDistanceKm: num(t.distance) / 1000,
+    distanceKm: num(t.distance) / 1000,
+    splitDistanceKm: num(t.splitDistance) / 1000,
     location: toLocation(t),
     gradientPercent: num(t.slopePercent),
     elevationGainM: num(t.altitudeAscent),
     elevationLossM: num(t.altitudeDescent),
+    splitElevationGainM: num(t.splitAltitudeAscent),
+    splitElevationLossM: num(t.splitAltitudeDescent),
   };
 }
 
@@ -199,11 +204,11 @@ export function useMoblinCyclingHud(): {
   const config: CyclingHudConfig = {
     visible: {
       speed: sections.enabled && sections.speed,
-      dayDistance: sections.enabled && sections.distance,
-      totalDistance: sections.enabled && sections.distance,
+      distance: sections.enabled && sections.distance,
       location: sections.enabled && sections.location,
       gradient: sections.enabled && sections.gradient,
       elevation: sections.enabled && sections.elevation,
+      split: sections.split,
     },
     minSpeedKmh: MIN_SPEED_KMH,
     minGradientPercent: MIN_GRADIENT_PERCENT,

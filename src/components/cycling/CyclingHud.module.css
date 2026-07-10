@@ -50,12 +50,6 @@
   flex: none;
 }
 
-.symbol {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1;
-}
-
 .text {
   font-size: 19px;
   font-weight: 600;
@@ -65,6 +59,18 @@
 .value {
   font-size: 20px;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.chipValues {
+  display: flex;
+  flex-direction: column;
+}
+
+.chipSecondary {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.65);
   white-space: nowrap;
 }
 
@@ -83,10 +89,6 @@
   --accent: #b39ddb;
 }
 
-.distanceTotal {
-  --accent: #9575cd;
-}
-
 /* --- bottom-right: circular gauges --- */
 
 .gaugeRow {
@@ -103,16 +105,17 @@
 
 .elevationPair {
   display: flex;
-  gap: 10px;
+  align-items: flex-end;
+  gap: 12px;
 }
 
 .gauge {
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  width: 84px;
-  height: 84px;
+  width: 108px;
+  height: 108px;
   border-radius: 50%;
   background: rgba(20, 22, 26, 0.7);
   backdrop-filter: blur(8px);
@@ -121,19 +124,48 @@
 }
 
 .gaugeBig {
-  width: 110px;
-  height: 110px;
+  width: 130px;
+  height: 130px;
+}
+
+.gaugeHasSecondary .gaugeMain {
+  margin-top: -12px;
+}
+
+/* icon/value/unit share one baseline across all gauge sizes - the secondary line is
+   positioned absolutely so it never shifts this group */
+.gaugeMain {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.gaugeIconUnit {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 1px;
+}
+
+.gaugeUnitSmall {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .gaugeValue {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 700;
   color: #fff;
-  line-height: 1.1;
+  line-height: 1;
+  letter-spacing: 0.3px;
 }
 
 .gaugeBig .gaugeValue {
-  font-size: 36px;
+  font-size: 50px;
 }
 
 .gaugeUnit {
@@ -141,6 +173,19 @@
   font-weight: 600;
   color: rgba(255, 255, 255, 0.6);
   line-height: 1;
+}
+
+.gaugeSecondary {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .speed {

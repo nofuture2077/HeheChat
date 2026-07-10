@@ -2,21 +2,24 @@ import styles from './CyclingHud.module.css';
 
 export interface CyclingData {
   speedKmh: number;
-  dayDistanceKm: number;
-  totalDistanceKm: number;
+  distanceKm: number;
+  splitDistanceKm: number;
   location: string;
   gradientPercent: number;
   elevationGainM: number;
   elevationLossM: number;
+  splitElevationGainM: number;
+  splitElevationLossM: number;
 }
 
 export interface CyclingHudVisibility {
   speed: boolean;
-  dayDistance: boolean;
-  totalDistance: boolean;
+  distance: boolean;
   location: boolean;
   gradient: boolean;
   elevation: boolean;
+  // when on, distance/elevation also show today's split values alongside the overall ones
+  split: boolean;
 }
 
 export interface CyclingHudConfig {
@@ -29,11 +32,11 @@ export interface CyclingHudConfig {
 const defaultConfig: CyclingHudConfig = {
   visible: {
     speed: true,
-    dayDistance: true,
-    totalDistance: true,
+    distance: true,
     location: true,
     gradient: true,
     elevation: true,
+    split: false,
   },
   minSpeedKmh: 5,
   minGradientPercent: 4,
@@ -106,18 +109,39 @@ function Gauge({
   icon,
   value,
   unit,
+  secondaryValue,
 }: {
   accentClass: string;
   big?: boolean;
   icon?: React.ReactNode;
   value: string;
   unit: string;
+  secondaryValue?: string;
 }) {
   return (
-    <div className={`${styles.gauge} ${big ? styles.gaugeBig : ''} ${accentClass}`}>
-      {icon}
-      <span className={styles.gaugeValue}>{value}</span>
-      <span className={styles.gaugeUnit}>{unit}</span>
+    <div
+      className={`${styles.gauge} ${big ? styles.gaugeBig : ''} ${
+        secondaryValue ? styles.gaugeHasSecondary : ''
+      } ${accentClass}`}
+    >
+      <div className={styles.gaugeMain}>
+        {secondaryValue ? (
+          <>
+            <span className={styles.gaugeIconUnit}>
+              {icon}
+              <span className={styles.gaugeUnitSmall}>{unit}</span>
+            </span>
+            <span className={styles.gaugeValue}>{value}</span>
+          </>
+        ) : (
+          <>
+            {icon}
+            <span className={styles.gaugeValue}>{value}</span>
+            <span className={styles.gaugeUnit}>{unit}</span>
+          </>
+        )}
+      </div>
+      {secondaryValue && <span className={styles.gaugeSecondary}>{secondaryValue}</span>}
     </div>
   );
 }
@@ -134,7 +158,7 @@ export default function CyclingHud({
   const gradientAboveThreshold = Math.abs(data.gradientPercent) >= config.minGradientPercent;
   const showGradient = visible.gradient && gradientAboveThreshold;
   const showElevation = visible.elevation;
-  const showTopChips = visible.location || visible.dayDistance || visible.totalDistance;
+  const showTopChips = visible.location || visible.distance;
   const showBottomGauges = showSpeed || showGradient || showElevation;
 
   return (
@@ -150,25 +174,22 @@ export default function CyclingHud({
             </div>
           )}
           <div className={styles.chipRow}>
-            {visible.dayDistance && (
+            {visible.distance && (
               <div className={`${styles.chip} ${styles.distance}`}>
                 <span className={styles.chipIcon}>
                   <IconRoute />
                 </span>
-                <span className={styles.value}>
-                  {fmt(data.dayDistanceKm, 1)}
-                  <span className={styles.unit}>km</span>
-                </span>
-              </div>
-            )}
-            {visible.totalDistance && (
-              <div className={`${styles.chip} ${styles.distanceTotal}`}>
-                <span className={styles.chipIcon}>
-                  <span className={styles.symbol}>Σ</span>
-                </span>
-                <span className={styles.value}>
-                  {fmt(data.totalDistanceKm, 0)}
-                  <span className={styles.unit}>km</span>
+                <span className={styles.chipValues}>
+                  <span className={styles.value}>
+                    {fmt(visible.split ? data.splitDistanceKm : data.distanceKm, 1)}
+                    <span className={styles.unit}>km</span>
+                  </span>
+                  {visible.split && (
+                    <span className={styles.chipSecondary}>
+                      {fmt(data.distanceKm, 1)}
+                      <span className={styles.unit}>km</span>
+                    </span>
+                  )}
                 </span>
               </div>
             )}
@@ -180,8 +201,20 @@ export default function CyclingHud({
         <div className={`${styles.gaugeRow} ${styles.bottomRight}`}>
           {showElevation && (
             <div className={styles.elevationPair}>
-              <Gauge accentClass={styles.gain} icon={<IconElevationUp />} value={fmt(data.elevationGainM)} unit="m" />
-              <Gauge accentClass={styles.loss} icon={<IconElevationDown />} value={fmt(data.elevationLossM)} unit="m" />
+              <Gauge
+                accentClass={styles.gain}
+                icon={<IconElevationUp />}
+                value={fmt(visible.split ? data.splitElevationGainM : data.elevationGainM)}
+                unit="m"
+                secondaryValue={visible.split ? fmt(data.elevationGainM) : undefined}
+              />
+              <Gauge
+                accentClass={styles.loss}
+                icon={<IconElevationDown />}
+                value={fmt(visible.split ? data.splitElevationLossM : data.elevationLossM)}
+                unit="m"
+                secondaryValue={visible.split ? fmt(data.elevationLossM) : undefined}
+              />
             </div>
           )}
           {showGradient && (

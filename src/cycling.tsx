@@ -6,12 +6,14 @@ import { useMoblinCyclingHud } from './hooks/useMoblinCyclingHud';
 // ponytail: fallback so the design still renders when opened outside a Moblin browser source
 const previewData: CyclingData = {
   speedKmh: 27.4,
-  dayDistanceKm: 42.8,
-  totalDistanceKm: 1834.2,
+  distanceKm: 1834.2,
+  splitDistanceKm: 42.8,
   location: 'Aachen, Deutschland',
   gradientPercent: 6.5,
-  elevationGainM: 312,
+  elevationGainM: 28845,
   elevationLossM: 128,
+  splitElevationGainM: 45,
+  splitElevationLossM: 18,
 };
 
 interface BannerProps {
