@@ -35,6 +35,24 @@ function CyclingRoot() {
           Moblin-Verbindung fehlgeschlagen: {error}
         </div>
       )}
+      {status === 'subscribed' && !data && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            padding: '10px 16px',
+            background: '#f9a825',
+            color: '#000',
+            fontFamily: 'sans-serif',
+            fontSize: 14,
+            zIndex: 9999,
+          }}
+        >
+          Mit Moblin verbunden, warte auf erste Telemetriedaten...
+        </div>
+      )}
       <CyclingHud data={data ?? previewData} config={config} />
     </>
   );

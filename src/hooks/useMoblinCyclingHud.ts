@@ -66,8 +66,8 @@ function toCyclingData(t: MoblinTelemetryData): CyclingData {
 
 export type MoblinConnectionStatus = 'waiting' | 'subscribed' | 'error';
 
-// window.moblin may be injected after our script runs, so keep polling until it shows up
-const MOBLIN_POLL_INTERVAL_MS = 500;
+// moblin is injected as a bare script-global at some point after load, so retry until it shows up
+const MOBLIN_POLL_INTERVAL_MS = 50;
 const MOBLIN_WAIT_TIMEOUT_MS = 8000;
 
 export function useMoblinCyclingHud(): {
@@ -87,20 +87,34 @@ export function useMoblinCyclingHud(): {
 
   useEffect(() => {
     let cancelled = false;
-    let pollId: ReturnType<typeof setInterval> | undefined;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let retryId: ReturnType<typeof setTimeout> | undefined;
+    const deadline = Date.now() + MOBLIN_WAIT_TIMEOUT_MS;
+
+    function waitForMoblin() {
+      if (cancelled) return;
+      if (typeof moblin !== 'undefined') {
+        subscribe();
+        return;
+      }
+      if (Date.now() > deadline) {
+        setStatus('error');
+        setError('moblin wurde nicht gefunden - läuft diese Seite als Moblin Browser Source?');
+        return;
+      }
+      retryId = setTimeout(waitForMoblin, MOBLIN_POLL_INTERVAL_MS);
+    }
 
     function subscribe() {
       try {
-        moblin.subscribe({ chat: { prefix: '!' }, telemetry: {} });
         moblin.onmessage = (message) => {
           if (message.telemetry) {
             setData(toCyclingData(message.telemetry));
-          }
-          if (message.chat) {
+          } else if (message.chat) {
             handleChatCommand(message.chat, setSections);
           }
         };
+        moblin.subscribe({ telemetry: {} });
+        moblin.subscribe({ chat: { prefix: '!' } });
         setStatus('subscribed');
         setError(null);
       } catch (err) {
@@ -109,28 +123,11 @@ export function useMoblinCyclingHud(): {
       }
     }
 
-    function poll() {
-      if (cancelled) return;
-      if (typeof moblin !== 'undefined') {
-        clearInterval(pollId);
-        clearTimeout(timeoutId);
-        subscribe();
-      }
-    }
-
-    pollId = setInterval(poll, MOBLIN_POLL_INTERVAL_MS);
-    timeoutId = setTimeout(() => {
-      if (cancelled || typeof moblin !== 'undefined') return;
-      clearInterval(pollId);
-      setStatus('error');
-      setError('moblin wurde nicht gefunden - läuft diese Seite als Moblin Browser Source?');
-    }, MOBLIN_WAIT_TIMEOUT_MS);
-    poll();
+    waitForMoblin();
 
     return () => {
       cancelled = true;
-      clearInterval(pollId);
-      clearTimeout(timeoutId);
+      clearTimeout(retryId);
       if (typeof moblin !== 'undefined') moblin.onmessage = null;
     };
   }, []);

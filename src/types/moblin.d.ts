@@ -48,8 +48,7 @@ export interface MoblinMessage {
 }
 
 export interface MoblinApi {
-  subscribeTelemetry: (callback: (data: MoblinTelemetryData) => void) => void;
-  subscribe: (options: { chat?: { prefix: string }; telemetry?: Record<string, never> }) => void;
+  subscribe: (options: { chat?: { prefix: string | null }; telemetry?: Record<string, never> }) => void;
   onmessage: ((data: MoblinMessage) => void) | null;
 }
 
