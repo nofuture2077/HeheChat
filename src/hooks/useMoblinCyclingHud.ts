@@ -157,13 +157,19 @@ function handleChatCommand(
   chat: { user: string; segments: { text?: string }[] },
   setSections: Dispatch<SetStateAction<Sections>>
 ) {
-  if (!ALLOWED_USERS.includes(chat.user.toLowerCase())) return;
+  const user = (chat.user ?? '').trim().toLowerCase();
+  if (!ALLOWED_USERS.includes(user)) {
+    // ponytail: temporary debug aid, remove once command auth is confirmed working
+    console.debug('[cyclingHud] chat command rejected, unauthorized user:', JSON.stringify(chat.user));
+    return;
+  }
 
   const text = chat.segments
     .map((s) => s.text ?? '')
     .join('')
     .trim();
-  const [rawCommand, rawArg] = text.slice(1).split(/\s+/);
+  const withoutPrefix = text.startsWith('!') ? text.slice(1) : text;
+  const [rawCommand, rawArg] = withoutPrefix.split(/\s+/);
   const key = COMMANDS[rawCommand?.toLowerCase()];
   if (!key) return;
   if (rawArg !== 'on' && rawArg !== 'off') return;
