@@ -38,8 +38,8 @@ const defaultConfig: CyclingHudConfig = {
     elevation: true,
     split: false,
   },
-  minSpeedKmh: 5,
-  minGradientPercent: 4,
+  minSpeedKmh: 1,
+  minGradientPercent: 2,
 };
 
 function fmt(n: number, digits = 0) {
