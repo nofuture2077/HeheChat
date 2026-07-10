@@ -82,6 +82,7 @@ export interface MoblinDebugInfo {
   lastChatUser: string | null;
   lastChatText: string | null;
   lastRejectedUser: string | null;
+  lastMessageError: string | null;
 }
 
 const emptyDebug: MoblinDebugInfo = {
@@ -90,6 +91,7 @@ const emptyDebug: MoblinDebugInfo = {
   lastChatUser: null,
   lastChatText: null,
   lastRejectedUser: null,
+  lastMessageError: null,
 };
 
 export function useMoblinCyclingHud(): {
@@ -131,19 +133,25 @@ export function useMoblinCyclingHud(): {
     function subscribe() {
       try {
         moblin.onmessage = (message) => {
-          if (message.telemetry) {
-            setDebug((d) => ({ ...d, telemetryCount: d.telemetryCount + 1 }));
-            setData(toCyclingData(message.telemetry));
-          } else if (message.chat) {
-            setDebug((d) => ({
-              ...d,
-              chatCount: d.chatCount + 1,
-              lastChatUser: message.chat!.user,
-              lastChatText: message.chat!.segments.map((s) => s.text ?? '').join(''),
-            }));
-            handleChatCommand(message.chat, setSections, (rejectedUser) =>
-              setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))
-            );
+          // a bad payload here must never break the moblin message pipe or crash the page
+          try {
+            if (message.telemetry) {
+              setDebug((d) => ({ ...d, telemetryCount: d.telemetryCount + 1 }));
+              setData(toCyclingData(message.telemetry));
+            } else if (message.chat) {
+              setDebug((d) => ({
+                ...d,
+                chatCount: d.chatCount + 1,
+                lastChatUser: message.chat!.user,
+                lastChatText: message.chat!.segments.map((s) => s.text ?? '').join(''),
+              }));
+              handleChatCommand(message.chat, setSections, (rejectedUser) =>
+                setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))
+              );
+            }
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            setDebug((d) => ({ ...d, lastMessageError: msg }));
           }
         };
         moblin.subscribe({ telemetry: {} });

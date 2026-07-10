@@ -79,7 +79,8 @@ telemetry messages: ${debug.telemetryCount}
 chat messages: ${debug.chatCount}
 last chat user: ${debug.lastChatUser ?? '-'}
 last chat text: ${debug.lastChatText ?? '-'}
-last rejected user: ${debug.lastRejectedUser ?? '-'}`}
+last rejected user: ${debug.lastRejectedUser ?? '-'}
+last message error: ${debug.lastMessageError ?? '-'}`}
     </div>
   );
 }
@@ -94,12 +95,15 @@ function CyclingRoot() {
       {status === 'subscribed' && !data && (
         <Banner background="#f9a825" color="#000">Mit Moblin verbunden, warte auf erste Telemetriedaten...</Banner>
       )}
-      <HudErrorBoundary>
-        <CyclingHud data={data ?? previewData} config={config} />
-      </HudErrorBoundary>
+      <CyclingHud data={data ?? previewData} config={config} />
       <DebugPanel status={status} debug={debug} />
     </>
   );
 }
 
-ReactDOM.createRoot(document.getElementById('cycling')!).render(<CyclingRoot />);
+// wraps the whole overlay, not just the HUD - a throw anywhere here must never blank the page
+ReactDOM.createRoot(document.getElementById('cycling')!).render(
+  <HudErrorBoundary>
+    <CyclingRoot />
+  </HudErrorBoundary>
+);
