@@ -54,7 +54,7 @@ export interface MoblinApi {
 }
 
 declare global {
-  interface Window {
-    moblin?: MoblinApi;
-  }
+  // injected as a bare script-global at document-start, not on window - always guard with
+  // `typeof moblin !== 'undefined'`, a direct reference throws ReferenceError before that
+  const moblin: MoblinApi;
 }

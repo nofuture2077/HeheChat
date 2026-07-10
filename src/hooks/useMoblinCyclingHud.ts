@@ -90,7 +90,7 @@ export function useMoblinCyclingHud(): {
     let pollId: ReturnType<typeof setInterval> | undefined;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    function subscribe(moblin: NonNullable<Window['moblin']>) {
+    function subscribe() {
       try {
         moblin.subscribe({ chat: { prefix: '!' }, telemetry: {} });
         moblin.onmessage = (message) => {
@@ -111,19 +111,19 @@ export function useMoblinCyclingHud(): {
 
     function poll() {
       if (cancelled) return;
-      if (window.moblin) {
+      if (typeof moblin !== 'undefined') {
         clearInterval(pollId);
         clearTimeout(timeoutId);
-        subscribe(window.moblin);
+        subscribe();
       }
     }
 
     pollId = setInterval(poll, MOBLIN_POLL_INTERVAL_MS);
     timeoutId = setTimeout(() => {
-      if (cancelled || window.moblin) return;
+      if (cancelled || typeof moblin !== 'undefined') return;
       clearInterval(pollId);
       setStatus('error');
-      setError('window.moblin wurde nicht gefunden - läuft diese Seite als Moblin Browser Source?');
+      setError('moblin wurde nicht gefunden - läuft diese Seite als Moblin Browser Source?');
     }, MOBLIN_WAIT_TIMEOUT_MS);
     poll();
 
@@ -131,7 +131,7 @@ export function useMoblinCyclingHud(): {
       cancelled = true;
       clearInterval(pollId);
       clearTimeout(timeoutId);
-      if (window.moblin) window.moblin.onmessage = null;
+      if (typeof moblin !== 'undefined') moblin.onmessage = null;
     };
   }, []);
 
