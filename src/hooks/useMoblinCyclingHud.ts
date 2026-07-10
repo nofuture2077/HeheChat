@@ -143,7 +143,7 @@ export function useMoblinCyclingHud(): {
                 ...d,
                 chatCount: d.chatCount + 1,
                 lastChatUser: message.chat!.user,
-                lastChatText: message.chat!.segments.map((s) => s.text ?? '').join(''),
+                lastChatText: segmentsToText(message.chat!.segments),
               }));
               handleChatCommand(message.chat, setSections, (rejectedUser) =>
                 setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))
@@ -189,6 +189,12 @@ export function useMoblinCyclingHud(): {
   return { data, config, status, error, debug };
 }
 
+// segments can be missing/malformed on a given payload - never crash the message pipe over it
+function segmentsToText(segments: { text?: string }[] | undefined): string {
+  if (!Array.isArray(segments)) return '';
+  return segments.map((s) => s?.text ?? '').join('');
+}
+
 function handleChatCommand(
   chat: { user: string; segments: { text?: string }[] },
   setSections: Dispatch<SetStateAction<Sections>>,
@@ -200,10 +206,7 @@ function handleChatCommand(
     return;
   }
 
-  const text = chat.segments
-    .map((s) => s.text ?? '')
-    .join('')
-    .trim();
+  const text = segmentsToText(chat.segments).trim();
   const withoutPrefix = text.startsWith('!') ? text.slice(1) : text;
   const [rawCommand, rawArg] = withoutPrefix.split(/\s+/);
   const key = COMMANDS[rawCommand?.toLowerCase()];
