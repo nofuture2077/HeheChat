@@ -199,65 +199,52 @@ export default function CyclingHud({
               <span className={styles.text}>{data.location}</span>
             </div>
           )}
-          {showElevation && (
-            <div className={styles.chipRow}>
-              <div className={`${styles.chip} ${styles.gain}`}>
-                <span className={styles.chipIcon}>
-                  <IconElevationUp />
-                </span>
-                <span className={styles.chipValues}>
-                  <span className={styles.value}>
-                    {fmt(visible.split ? data.splitElevationGainM : data.elevationGainM)}
-                    <span className={styles.unit}>m</span>
+          {(visible.distance || showElevation) && (
+            <div className={styles.statsCard}>
+              {visible.distance && (
+                <div className={`${styles.chip} ${styles.distance} ${styles.statsDistance}`}>
+                  <span className={styles.chipIcon}>
+                    <IconRoute />
                   </span>
-                  {visible.split && (
-                    <span className={styles.chipSecondary}>
-                      {fmt(data.elevationGainM)}
-                      <span className={styles.unit}>m</span>
-                    </span>
-                  )}
-                </span>
-              </div>
-              <div className={`${styles.chip} ${styles.loss}`}>
-                <span className={styles.chipIcon}>
-                  <IconElevationDown />
-                </span>
-                <span className={styles.chipValues}>
-                  <span className={styles.value}>
-                    {fmt(visible.split ? data.splitElevationLossM : data.elevationLossM)}
-                    <span className={styles.unit}>m</span>
-                  </span>
-                  {visible.split && (
-                    <span className={styles.chipSecondary}>
-                      {fmt(data.elevationLossM)}
-                      <span className={styles.unit}>m</span>
-                    </span>
-                  )}
-                </span>
-              </div>
-            </div>
-          )}
-          <div className={styles.chipRow}>
-            {visible.distance && (
-              <div className={`${styles.chip} ${styles.distance}`}>
-                <span className={styles.chipIcon}>
-                  <IconRoute />
-                </span>
-                <span className={styles.chipValues}>
-                  <span className={styles.value}>
-                    {fmt(visible.split ? data.splitDistanceKm : data.distanceKm, 1)}
-                    <span className={styles.unit}>km</span>
-                  </span>
-                  {visible.split && (
-                    <span className={styles.chipSecondary}>
-                      {fmt(data.distanceKm, 1)}
+                  <span className={styles.chipValues}>
+                    <span className={styles.value}>
+                      {fmt(visible.split ? data.splitDistanceKm : data.distanceKm, 1)}
                       <span className={styles.unit}>km</span>
                     </span>
-                  )}
-                </span>
-              </div>
-            )}
-          </div>
+                    {visible.split && (
+                      <span className={styles.chipSecondary}>
+                        {fmt(data.distanceKm, 1)}
+                        <span className={styles.unit}>km</span>
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
+              {visible.distance && showElevation && <div className={styles.statsDivider} />}
+              {showElevation && (
+                <div className={styles.statsElevation}>
+                  <div className={`${styles.statsElevationRow} ${styles.gain}`}>
+                    <span className={styles.chipIcon}>
+                      <IconElevationUp />
+                    </span>
+                    <span className={styles.value}>
+                      {fmt(visible.split ? data.splitElevationGainM : data.elevationGainM)}
+                      <span className={styles.unit}>m</span>
+                    </span>
+                  </div>
+                  <div className={`${styles.statsElevationRow} ${styles.loss}`}>
+                    <span className={styles.chipIcon}>
+                      <IconElevationDown />
+                    </span>
+                    <span className={styles.value}>
+                      {fmt(visible.split ? data.splitElevationLossM : data.elevationLossM)}
+                      <span className={styles.unit}>m</span>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 

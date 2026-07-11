@@ -33,10 +33,63 @@
   align-items: center;
   gap: 10px;
   padding: 8px 16px 8px 10px;
-  border-radius: 8px;
-  background: rgba(20, 22, 26, 0.7);
+  border-radius: 12px;
+  background: rgba(20, 22, 26, 0.72);
   backdrop-filter: blur(8px);
-  border: 3px solid var(--accent, #4dd0e1);
+  border: 2px solid var(--accent, #4dd0e1);
+}
+
+/* --- combined distance + elevation card, grouped like a sports-computer stats tile --- */
+
+.statsCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 18px;
+  border-radius: 12px;
+  background: rgba(20, 22, 26, 0.72);
+  backdrop-filter: blur(8px);
+  border: 2px solid var(--accent, #4dd0e1);
+}
+
+.statsDistance {
+  padding: 0;
+  border: none;
+  background: none;
+  backdrop-filter: none;
+}
+
+.statsDistance .value {
+  font-size: 40px;
+}
+
+.statsDistance .chipIcon {
+  width: 32px;
+  height: 32px;
+}
+
+.statsDistance .chipSecondary {
+  font-size: 20px;
+  margin-top: -1px;
+}
+
+.statsDivider {
+  width: 2px;
+  align-self: stretch;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.statsElevation {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+}
+
+.statsElevationRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .chipIcon {
@@ -45,9 +98,8 @@
   justify-content: center;
   width: 26px;
   height: 26px;
-  border-radius: 50%;
-  background: var(--accent, #4dd0e1);
-  color: #14161a;
+  color: var(--accent, #4dd0e1);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
   flex: none;
 }
 
@@ -68,13 +120,16 @@
 .chipValues {
   display: flex;
   flex-direction: column;
+  line-height: 1;
 }
 
 .chipSecondary {
   font-size: 16px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   white-space: nowrap;
+  line-height: 1;
 }
 
 .unit {
@@ -86,11 +141,11 @@
 }
 
 .location {
-  --accent: #ce93d8;
+  --accent: #b0bec5;
 }
 
 .distance {
-  --accent: #b39ddb;
+  --accent: #4dd0e1;
 }
 
 /* --- bottom-right: circular gauges --- */
@@ -116,7 +171,7 @@
   width: 108px;
   height: 108px;
   border-radius: 50%;
-  background: rgba(20, 22, 26, 0.7);
+  background: rgba(20, 22, 26, 0.72);
   backdrop-filter: blur(8px);
   border: 3px solid var(--accent, #4dd0e1);
   color: var(--accent, #4dd0e1);
