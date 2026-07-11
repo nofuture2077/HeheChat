@@ -68,7 +68,7 @@ function IconRoute() {
 
 function IconSpeed() {
   return (
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M4 15a8 8 0 1 1 16 0" />
       <path d="M12 15l4-4" />
       <circle cx="12" cy="15" r="1.2" fill="currentColor" stroke="none" />
@@ -78,7 +78,7 @@ function IconSpeed() {
 
 function IconIncline() {
   return (
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M3 17l7-9 4 5 7-9" />
       <path d="M17 4h4v4" />
     </svg>
@@ -103,8 +103,30 @@ function IconElevationDown() {
   );
 }
 
+// intensity steps for the ascent gauge: bigger hill + hotter color the steeper the slope
+function gradientLevel(gradientPercent: number) {
+  const abs = Math.abs(gradientPercent);
+  if (abs < 5) return 1;
+  if (abs < 8) return 2;
+  if (abs < 13) return 3;
+  return 4;
+}
+
+// speed color steps
+function speedLevel(speedKmh: number) {
+  if (speedKmh < 20) return 0;
+  if (speedKmh < 25) return 1;
+  if (speedKmh < 30) return 2;
+  if (speedKmh < 35) return 3;
+  if (speedKmh < 50) return 4;
+  return 5;
+}
+
 function Gauge({
   accentClass,
+  levelClass,
+  mountainClass,
+  extreme,
   big,
   icon,
   value,
@@ -112,6 +134,9 @@ function Gauge({
   secondaryValue,
 }: {
   accentClass: string;
+  levelClass?: string;
+  mountainClass?: string;
+  extreme?: boolean;
   big?: boolean;
   icon?: React.ReactNode;
   value: string;
@@ -122,8 +147,9 @@ function Gauge({
     <div
       className={`${styles.gauge} ${big ? styles.gaugeBig : ''} ${
         secondaryValue ? styles.gaugeHasSecondary : ''
-      } ${accentClass}`}
+      } ${accentClass} ${levelClass ?? ''} ${extreme ? styles.pulseExtreme : ''}`}
     >
+      {mountainClass && <div className={`${styles.mountain} ${mountainClass}`} />}
       <div className={styles.gaugeMain}>
         {secondaryValue ? (
           <>
@@ -158,8 +184,8 @@ export default function CyclingHud({
   const gradientAboveThreshold = Math.abs(data.gradientPercent) >= config.minGradientPercent;
   const showGradient = visible.gradient && gradientAboveThreshold;
   const showElevation = visible.elevation;
-  const showTopChips = visible.location || visible.distance;
-  const showBottomGauges = showSpeed || showGradient || showElevation;
+  const showTopChips = visible.location || visible.distance || showElevation;
+  const showBottomGauges = showSpeed || showGradient;
 
   return (
     <div className={styles.root}>
@@ -171,6 +197,44 @@ export default function CyclingHud({
                 <IconPin />
               </span>
               <span className={styles.text}>{data.location}</span>
+            </div>
+          )}
+          {showElevation && (
+            <div className={styles.chipRow}>
+              <div className={`${styles.chip} ${styles.gain}`}>
+                <span className={styles.chipIcon}>
+                  <IconElevationUp />
+                </span>
+                <span className={styles.chipValues}>
+                  <span className={styles.value}>
+                    {fmt(visible.split ? data.splitElevationGainM : data.elevationGainM)}
+                    <span className={styles.unit}>m</span>
+                  </span>
+                  {visible.split && (
+                    <span className={styles.chipSecondary}>
+                      {fmt(data.elevationGainM)}
+                      <span className={styles.unit}>m</span>
+                    </span>
+                  )}
+                </span>
+              </div>
+              <div className={`${styles.chip} ${styles.loss}`}>
+                <span className={styles.chipIcon}>
+                  <IconElevationDown />
+                </span>
+                <span className={styles.chipValues}>
+                  <span className={styles.value}>
+                    {fmt(visible.split ? data.splitElevationLossM : data.elevationLossM)}
+                    <span className={styles.unit}>m</span>
+                  </span>
+                  {visible.split && (
+                    <span className={styles.chipSecondary}>
+                      {fmt(data.elevationLossM)}
+                      <span className={styles.unit}>m</span>
+                    </span>
+                  )}
+                </span>
+              </div>
             </div>
           )}
           <div className={styles.chipRow}>
@@ -199,28 +263,27 @@ export default function CyclingHud({
 
       {showBottomGauges && (
         <div className={`${styles.gaugeRow} ${styles.bottomRight}`}>
-          {showElevation && (
-            <div className={styles.elevationPair}>
-              <Gauge
-                accentClass={styles.gain}
-                icon={<IconElevationUp />}
-                value={fmt(visible.split ? data.splitElevationGainM : data.elevationGainM)}
-                unit="m"
-                secondaryValue={visible.split ? fmt(data.elevationGainM) : undefined}
-              />
-              <Gauge
-                accentClass={styles.loss}
-                icon={<IconElevationDown />}
-                value={fmt(visible.split ? data.splitElevationLossM : data.elevationLossM)}
-                unit="m"
-                secondaryValue={visible.split ? fmt(data.elevationLossM) : undefined}
-              />
-            </div>
-          )}
           {showGradient && (
-            <Gauge accentClass={styles.gradient} icon={<IconIncline />} value={fmt(data.gradientPercent, 1)} unit="%" />
+            <Gauge
+              accentClass={styles.gradient}
+              levelClass={styles[`gradientLevel${gradientLevel(data.gradientPercent)}`]}
+              mountainClass={styles[`mountain${gradientLevel(data.gradientPercent)}`]}
+              extreme={Math.abs(data.gradientPercent) >= 13}
+              icon={<IconIncline />}
+              value={fmt(data.gradientPercent, 1)}
+              unit="%"
+            />
           )}
-          {showSpeed && <Gauge accentClass={styles.speed} big icon={<IconSpeed />} value={fmt(data.speedKmh, 0)} unit="km/h" />}
+          {showSpeed && (
+            <Gauge
+              accentClass={styles.speed}
+              levelClass={styles[`speedLevel${speedLevel(data.speedKmh)}`]}
+              big
+              icon={<IconSpeed />}
+              value={fmt(data.speedKmh, 0)}
+              unit="km/h"
+            />
+          )}
         </div>
       )}
     </div>

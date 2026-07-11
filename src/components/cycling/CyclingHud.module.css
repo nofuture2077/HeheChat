@@ -3,7 +3,7 @@
   inset: 0;
   width: 1920px;
   height: 1080px;
-  font-family: 'Rajdhani', sans-serif;
+  font-family: Rajdhani, sans-serif;
   color: #fff;
   pointer-events: none;
   user-select: none;
@@ -36,6 +36,7 @@
   border-radius: 8px;
   background: rgba(20, 22, 26, 0.7);
   backdrop-filter: blur(8px);
+  border: 3px solid var(--accent, #4dd0e1);
 }
 
 .chipIcon {
@@ -44,7 +45,7 @@
   justify-content: center;
   width: 26px;
   height: 26px;
-  border-radius: 6px;
+  border-radius: 50%;
   background: var(--accent, #4dd0e1);
   color: #14161a;
   flex: none;
@@ -59,6 +60,8 @@
 .value {
   font-size: 20px;
   font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   white-space: nowrap;
 }
 
@@ -69,15 +72,16 @@
 
 .chipSecondary {
   font-size: 16px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.65);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
 }
 
 .unit {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   margin-left: 2px;
 }
 
@@ -103,17 +107,12 @@
   right: 40px;
 }
 
-.elevationPair {
-  display: flex;
-  align-items: flex-end;
-  gap: 12px;
-}
-
 .gauge {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   width: 108px;
   height: 108px;
   border-radius: 50%;
@@ -121,6 +120,100 @@
   backdrop-filter: blur(8px);
   border: 3px solid var(--accent, #4dd0e1);
   color: var(--accent, #4dd0e1);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* --- ascent gauge: hill silhouette grows + heats up with slope intensity --- */
+
+.mountain {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+  transition: height 0.3s ease, background 0.3s ease;
+}
+
+.gradientLevel1 {
+  background: rgba(46, 125, 50, 0.35);
+  border-color: rgba(46, 125, 50, 0.8);
+}
+
+.mountain1 {
+  height: 22%;
+  background: linear-gradient(to top, #2e7d32, #a5d6a7);
+}
+
+.gradientLevel2 {
+  background: rgba(249, 168, 37, 0.35);
+  border-color: rgba(249, 168, 37, 0.8);
+}
+
+.mountain2 {
+  height: 42%;
+  background: linear-gradient(to top, #f9a825, #fff59d);
+}
+
+.gradientLevel3 {
+  background: rgba(230, 81, 0, 0.4);
+  border-color: rgba(230, 81, 0, 0.85);
+}
+
+.mountain3 {
+  height: 62%;
+  background: linear-gradient(to top, #e65100, #ffb74d);
+}
+
+.gradientLevel4 {
+  background: rgba(183, 28, 28, 0.45);
+  border-color: rgba(183, 28, 28, 0.9);
+}
+
+.mountain4 {
+  height: 88%;
+  background: linear-gradient(to top, #b71c1c, #ef5350);
+}
+
+@keyframes pulse-extreme {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.pulse-extreme {
+  animation: pulse-extreme 0.8s ease-in-out infinite;
+}
+
+/* --- speed gauge: background heats up in steps of km/h --- */
+
+.speedLevel1 {
+  background: rgba(76, 175, 80, 0.35);
+  border-color: rgba(76, 175, 80, 0.8);
+}
+
+.speedLevel2 {
+  background: rgba(251, 192, 45, 0.4);
+  border-color: rgba(251, 192, 45, 0.85);
+}
+
+.speedLevel3 {
+  background: rgba(255, 152, 0, 0.4);
+  border-color: rgba(255, 152, 0, 0.85);
+}
+
+.speedLevel4 {
+  background: rgba(244, 67, 54, 0.4);
+  border-color: rgba(244, 67, 54, 0.85);
+}
+
+.speedLevel5 {
+  background: rgba(183, 28, 28, 0.55);
+  border-color: rgba(183, 28, 28, 0.9);
 }
 
 .gaugeBig {
@@ -135,10 +228,14 @@
 /* icon/value/unit share one baseline across all gauge sizes - the secondary line is
    positioned absolutely so it never shifts this group */
 .gaugeMain {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 1px;
+  color: #fff;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.7));
 }
 
 .gaugeIconUnit {
@@ -149,34 +246,38 @@
 }
 
 .gaugeUnitSmall {
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.55);
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   line-height: 1;
   text-transform: uppercase;
 }
 
 .gaugeValue {
-  font-size: 30px;
+  font-size: 36px;
   font-weight: 700;
   color: #fff;
   line-height: 1;
   letter-spacing: 0.3px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 .gaugeBig .gaugeValue {
-  font-size: 50px;
+  font-size: 58px;
 }
 
 .gaugeUnit {
-  font-size: 12px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
   line-height: 1;
 }
 
 .gaugeSecondary {
   position: absolute;
+  z-index: 1;
   bottom: 16px;
   left: 0;
   right: 0;
