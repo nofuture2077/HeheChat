@@ -174,7 +174,7 @@ export const faq = {
     {
       question: 'Can I use my StreamElements alerts?',
       answer:
-        'Not as-is, sorry — StreamElements alerts are built for IRL streaming setups and don’t translate 1:1 into HeheChat. The good news: you don’t have to start from scratch. HeheChat ships with an alert template that fits most setups out of the box, and you can fully customize it to match your style. If you get stuck, our [Discord](https://discord.gg/fMRACPqNhD) is happy to help.',
+        'StreamElements alerts aren’t built and optimize for IRL streaming setups and don’t translate 1:1 into HeheChat. The good news: you don’t have to start from scratch. HeheChat ships with an alert template that fits most setups out of the box, and you can fully customize it to match your style. If you get stuck, our [Discord](https://discord.gg/fMRACPqNhD) is happy to help.',
     },
     {
       question: 'I have problems / alerts don’t work',
