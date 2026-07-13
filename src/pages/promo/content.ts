@@ -85,20 +85,26 @@ export const carousel = {
       author: 'Knirpz - Twitch Ambassador',
       channel: 'twitch.tv/knirpz',
     },
-        {
+    /*{
       video: '/img/slide_minuself.mp4',
       quote:
         undefined,//'Ich kann das alles nicht mehr',
       author: 'MinusElf - IRL Streamerin',
       channel: 'twitch.tv/minuself',
-    },
+    },*/
     {
+      video: '/img/slide_simon.mp4',
+      quote: 'Meine ersten IRL-Streams habe ich noch mit einem ziemlich gurkigen Handy gemacht. HeheChat lief darauf super, weil die App auch für einfache Smartphones gut optimiert ist. Gerade als Hobby-Streamer behält man alle Alerts im Blick und kann während des Streams ganz entspannt moderieren – inklusive Timeouts und Bans.',
+      author: 'Simon - Technik Nerd, Moderator & Streamer',
+      channel: 'twitch.tv/simon_offiziell',
+    },
+    /*{
       video: '/img/slide_jonsman.mp4',
       quote:
         undefined,//"I run co-streams every week. Shared sessions make it feel like we're all in the same room.",
       author: 'Jonsman - IRL Streamer',
       channel: 'twitch.tv/jonsman',
-    },
+    },*/
   ],
 };
 
