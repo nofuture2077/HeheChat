@@ -43,6 +43,14 @@ const COMMANDS: Record<string, keyof Sections> = {
   debug: 'debug',
 };
 
+function getQueryVariable(query: string, variable: string): string | undefined {
+  for (const pair of query.split('&')) {
+    const [key, value] = pair.split('=');
+    if (decodeURIComponent(key) === variable) return decodeURIComponent(value);
+  }
+  return undefined;
+}
+
 function loadSections(): Sections {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -78,6 +86,15 @@ function toCyclingData(t: MoblinTelemetryData): CyclingData {
 }
 
 export type MoblinConnectionStatus = 'waiting' | 'subscribed' | 'error';
+
+const INITIAL_RECONNECT_DELAY_MS = 1000;
+const MAX_RECONNECT_DELAY_MS = 30000;
+const RECONNECT_BACKOFF = 1.5;
+
+function calcReconnectDelay(attempts: number): number {
+  const delay = INITIAL_RECONNECT_DELAY_MS * RECONNECT_BACKOFF ** attempts;
+  return Math.min(delay, MAX_RECONNECT_DELAY_MS);
+}
 
 // moblin is injected as a bare script-global at some point after load, so retry until it shows up
 const MOBLIN_POLL_INTERVAL_MS = 50;
@@ -133,6 +150,88 @@ export function useMoblinCyclingHud(): {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sections));
   }, [sections]);
 
+  // telemetry comes from HeheServer over a plain WebSocket, using the same browser-source
+  // sink token as chat/alert sources - independent of any Moblin browser-source lifecycle,
+  // so it keeps updating while backgrounded/not rendered by Moblin
+  useEffect(() => {
+    const token = getQueryVariable(window.location.hash.substring(1), 'token');
+
+    if (!token) {
+      setStatus('error');
+      setError('Fehlender Token - wurde diese URL aus HeheChat > Settings > Connect > Moblin kopiert?');
+      return undefined;
+    }
+
+    const heheWsUrl = import.meta.env.VITE_BACKEND_URL.replace('https://', 'wss://').replace('http://', 'ws://');
+
+    let cancelled = false;
+    let ws: WebSocket | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+    let attempts = 0;
+
+    function connect() {
+      if (cancelled) return;
+      ws = new WebSocket(heheWsUrl);
+
+      ws.addEventListener('open', () => {
+        attempts = 0;
+        ws!.send(JSON.stringify({ type: 'sink', token }));
+        setStatus('subscribed');
+        setError(null);
+      });
+
+      ws.addEventListener('message', (event) => {
+        let msg: { type?: string; data?: MoblinTelemetryData['data'] };
+        try {
+          msg = JSON.parse(event.data);
+        } catch {
+          return;
+        }
+
+        if (msg.type === 'heartbeat') {
+          ws!.send(JSON.stringify({ type: 'pong' }));
+          return;
+        }
+
+        if (msg.type === 'Telemetry' && msg.data) {
+          setDebug((d) => ({
+            ...d,
+            telemetryCount: d.telemetryCount + 1,
+            lastTelemetryRaw: safeStringify(msg.data),
+          }));
+          setData(toCyclingData({ data: msg.data }));
+        }
+      });
+
+      ws.addEventListener('close', () => {
+        if (cancelled) return;
+        setStatus('waiting');
+        const delay = calcReconnectDelay(attempts);
+        attempts += 1;
+        reconnectTimer = setTimeout(connect, delay);
+      });
+    }
+
+    connect();
+
+    function onVisible() {
+      if (document.visibilityState === 'visible' && ws?.readyState !== WebSocket.OPEN) {
+        clearTimeout(reconnectTimer);
+        connect();
+      }
+    }
+    document.addEventListener('visibilitychange', onVisible);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(reconnectTimer);
+      document.removeEventListener('visibilitychange', onVisible);
+      ws?.close();
+    };
+  }, []);
+
+  // HUD toggle chat commands still come from Moblin's own browser-source chat relay
+  // (unaffected by the telemetry-backgrounding bug) - best effort, no error UI if absent
   useEffect(() => {
     let cancelled = false;
     let retryId: ReturnType<typeof setTimeout> | undefined;
@@ -140,55 +239,35 @@ export function useMoblinCyclingHud(): {
 
     function waitForMoblin() {
       if (cancelled) return;
-      if (typeof moblin !== 'undefined') {
-        subscribe();
+      if (typeof moblin === 'undefined') {
+        if (Date.now() <= deadline) retryId = setTimeout(waitForMoblin, MOBLIN_POLL_INTERVAL_MS);
         return;
       }
-      if (Date.now() > deadline) {
-        setStatus('error');
-        setError('moblin wurde nicht gefunden - läuft diese Seite als Moblin Browser Source?');
-        return;
-      }
-      retryId = setTimeout(waitForMoblin, MOBLIN_POLL_INTERVAL_MS);
-    }
-
-    function subscribe() {
       try {
+        const prevOnMessage = moblin.onmessage;
         moblin.onmessage = (message) => {
-          // a bad payload here must never break the moblin message pipe or crash the page
+          prevOnMessage?.(message);
+          if (!message.chat) return;
           try {
-            if (message.telemetry) {
-              setDebug((d) => ({
-                ...d,
-                telemetryCount: d.telemetryCount + 1,
-                lastTelemetryRaw: safeStringify(message.telemetry),
-              }));
-              setData(toCyclingData(message.telemetry));
-            } else if (message.chat) {
-              const chat = message.chat.message;
-              setDebug((d) => ({
-                ...d,
-                chatCount: d.chatCount + 1,
-                lastChatUser: chat?.user ?? null,
-                lastChatText: segmentsToText(chat?.segments),
-                lastChatRaw: safeStringify(message.chat),
-              }));
-              handleChatCommand(chat, setSections, (rejectedUser) =>
-                setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))
-              );
-            }
+            const chat = message.chat.message;
+            setDebug((d) => ({
+              ...d,
+              chatCount: d.chatCount + 1,
+              lastChatUser: chat?.user ?? null,
+              lastChatText: segmentsToText(chat?.segments),
+              lastChatRaw: safeStringify(message.chat),
+            }));
+            handleChatCommand(chat, setSections, (rejectedUser) =>
+              setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))
+            );
           } catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
             setDebug((d) => ({ ...d, lastMessageError: msg }));
           }
         };
-        moblin.subscribe({ telemetry: {} });
         moblin.subscribe({ chat: { prefix: '!' } });
-        setStatus('subscribed');
-        setError(null);
-      } catch (err) {
-        setStatus('error');
-        setError(err instanceof Error ? err.message : String(err));
+      } catch {
+        // Moblin chat relay is optional - telemetry doesn't depend on it
       }
     }
 
@@ -197,7 +276,6 @@ export function useMoblinCyclingHud(): {
     return () => {
       cancelled = true;
       clearTimeout(retryId);
-      if (typeof moblin !== 'undefined') moblin.onmessage = null;
     };
   }, []);
 

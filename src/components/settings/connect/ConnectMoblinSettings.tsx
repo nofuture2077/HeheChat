@@ -10,11 +10,12 @@ export function ConnectMoblinSettings() {
     const [configured, setConfigured] = useState(false);
     const [connected, setConnected] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [sink, setSink] = useState<string | undefined>(undefined);
     const state = localStorage.getItem('hehe-token_state') || '';
 
     useEffect(() => {
         setLoading(true);
-        fetch(import.meta.env.VITE_BACKEND_URL + '/moblin/get?state=' + state)
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/moblin/get?state=${state}`)
             .then(res => res.json())
             .then((data) => {
                 if (data.configured) {
@@ -26,10 +27,20 @@ export function ConnectMoblinSettings() {
             .finally(() => setLoading(false));
     }, []);
 
+    useEffect(() => {
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/sink/get?state=${state}`)
+            .then(res => res.json())
+            .then(data => setSink(data.sink));
+    }, []);
+
+    const telemetryUrl = sink
+        ? `${new URL('cycling.html', import.meta.env.VITE_SINK_URL).href}#token=${encodeURIComponent(sink)}`
+        : '';
+
     const save = async () => {
         setLoading(true);
         try {
-            const res = await fetch(import.meta.env.VITE_BACKEND_URL + '/moblin/set?state=' + state + '&password=' + encodeURIComponent(password));
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/moblin/set?state=${state}&password=${encodeURIComponent(password)}`);
             const data = await res.json();
             setConfigured(true);
             setWsUrl(data.wsUrl || '');
@@ -45,7 +56,7 @@ export function ConnectMoblinSettings() {
         if (!confirm('Are you sure you want to disconnect Moblin?')) return;
         setLoading(true);
         try {
-            await fetch(import.meta.env.VITE_BACKEND_URL + '/moblin/set?state=' + state + '&password=');
+            await fetch(`${import.meta.env.VITE_BACKEND_URL}/moblin/set?state=${state}&password=`);
             setConfigured(false);
             setConnected(false);
             setWsUrl('');
@@ -81,11 +92,11 @@ export function ConnectMoblinSettings() {
                                 </div>
                             </Group>
                             <TextInput
-                                label="WebSocket URL"
-                                description="Enter this URL in Moblin → Settings → Remote Control"
-                                value={wsUrl}
-                                readOnly
-                                rightSection={
+                              label="WebSocket URL"
+                              description="Enter this URL in Moblin → Settings → Remote Control"
+                              value={wsUrl}
+                              readOnly
+                              rightSection={
                                     <ActionIcon variant="subtle" onClick={() => navigator.clipboard.writeText(wsUrl)}>
                                         <IconCopy size="1rem" />
                                     </ActionIcon>
@@ -106,16 +117,16 @@ export function ConnectMoblinSettings() {
                                 </ol>
                             </Text>
                             <PasswordInput
-                                label="Password"
-                                placeholder="Enter a password for Moblin to use"
-                                value={password}
-                                onChange={(ev) => setPassword(ev.target.value)}
+                              label="Password"
+                              placeholder="Enter a password for Moblin to use"
+                              value={password}
+                              onChange={(ev) => setPassword(ev.target.value)}
                             />
                             <Button
-                                leftSection={<IconPlug size={20} />}
-                                onClick={save}
-                                loading={loading}
-                                disabled={!password.trim()}
+                              leftSection={<IconPlug size={20} />}
+                              onClick={save}
+                              loading={loading}
+                              disabled={!password.trim()}
                             >
                                 Connect Moblin
                             </Button>
@@ -123,13 +134,37 @@ export function ConnectMoblinSettings() {
                     )}
                 </Stack>
             </Fieldset>
+            <Fieldset legend="Cycling Telemetry Browser Source" variant="filled">
+                <Stack gap="md">
+                    <Text fs="italic" size="14px">
+                        Add this URL as a browser source in OBS to show the cycling HUD.
+                        Unlike Moblin&apos;s own browser source, this keeps updating even
+                        while the source isn&apos;t visible.
+                    </Text>
+                    {sink ? (
+                        <TextInput
+                          label="Browser Source URL"
+                          value={telemetryUrl}
+                          readOnly
+                          styles={{ input: { fontFamily: 'monospace', fontSize: 11 } }}
+                          rightSection={
+                                <ActionIcon variant="subtle" onClick={() => navigator.clipboard.writeText(telemetryUrl)}>
+                                    <IconCopy size="1rem" />
+                                </ActionIcon>
+                            }
+                        />
+                    ) : (
+                        <Text size="sm" c="dimmed">Loading token…</Text>
+                    )}
+                </Stack>
+            </Fieldset>
             <Fieldset legend="Stream Status Bar" variant="filled">
                 <Stack gap="sm">
                     <Switch
-                        label="Show Moblin Control"
-                        size="lg"
-                        checked={config.showMoblinZoom}
-                        onChange={e => config.setShowMoblinZoom(e.currentTarget.checked)}
+                      label="Show Moblin Control"
+                      size="lg"
+                      checked={config.showMoblinZoom}
+                      onChange={e => config.setShowMoblinZoom(e.currentTarget.checked)}
                     />
                     <Text fs="italic" size="14px">Show Moblin scene switcher and zoom control in the stream status bar</Text>
                 </Stack>
