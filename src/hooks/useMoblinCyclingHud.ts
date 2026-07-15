@@ -1,6 +1,7 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import type { MoblinTelemetryData } from '../types/moblin';
 import type { CyclingData, CyclingHudConfig } from '../components/cycling/CyclingHud';
+import { parseMessage, isSystemMessageType, HeheChatMessage } from '../commons/message';
 
 // only this streamer may issue chat commands, checked case-insensitively against the chat display name
 const ALLOWED_USERS = ['nofuture2077'];
@@ -96,10 +97,6 @@ function calcReconnectDelay(attempts: number): number {
   return Math.min(delay, MAX_RECONNECT_DELAY_MS);
 }
 
-// moblin is injected as a bare script-global at some point after load, so retry until it shows up
-const MOBLIN_POLL_INTERVAL_MS = 50;
-const MOBLIN_WAIT_TIMEOUT_MS = 8000;
-
 // on-screen debug info since browser sources in OBS have no reachable devtools
 export interface MoblinDebugInfo {
   telemetryCount: number;
@@ -150,9 +147,9 @@ export function useMoblinCyclingHud(): {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sections));
   }, [sections]);
 
-  // telemetry comes from HeheServer over a plain WebSocket, using the same browser-source
-  // sink token as chat/alert sources - independent of any Moblin browser-source lifecycle,
-  // so it keeps updating while backgrounded/not rendered by Moblin
+  // telemetry and chat both come from HeheServer over a plain WebSocket, using the same
+  // browser-source sink token as chat/alert sources - independent of any Moblin browser-source
+  // lifecycle, so both keep updating while backgrounded/not rendered by Moblin
   useEffect(() => {
     const token = getQueryVariable(window.location.hash.substring(1), 'token');
 
@@ -181,7 +178,11 @@ export function useMoblinCyclingHud(): {
       });
 
       ws.addEventListener('message', (event) => {
-        let msg: { type?: string; data?: MoblinTelemetryData['data'] };
+        let msg: {
+          type?: string;
+          data?: MoblinTelemetryData['data'] & { message?: string };
+          profile?: { config?: { channels?: string[] } };
+        };
         try {
           msg = JSON.parse(event.data);
         } catch {
@@ -190,6 +191,25 @@ export function useMoblinCyclingHud(): {
 
         if (msg.type === 'heartbeat') {
           ws!.send(JSON.stringify({ type: 'pong' }));
+          return;
+        }
+
+        // sharedata arrives right after the sink handshake - use it to subscribe to the
+        // channel(s) we belong to, which is what actually starts the live chat feed
+        if (msg.type === 'sharedata') {
+          const channels = msg.profile?.config?.channels ?? [];
+          if (channels.length) {
+            ws!.send(JSON.stringify({
+              type: 'subscribe',
+              token,
+              channels: Object.fromEntries(channels.map((c) => [c, true])),
+            }));
+          }
+          return;
+        }
+
+        if (msg.type === 'msg') {
+          handleIncomingChat(msg.data?.message, setSections, setDebug);
           return;
         }
 
@@ -230,55 +250,6 @@ export function useMoblinCyclingHud(): {
     };
   }, []);
 
-  // HUD toggle chat commands still come from Moblin's own browser-source chat relay
-  // (unaffected by the telemetry-backgrounding bug) - best effort, no error UI if absent
-  useEffect(() => {
-    let cancelled = false;
-    let retryId: ReturnType<typeof setTimeout> | undefined;
-    const deadline = Date.now() + MOBLIN_WAIT_TIMEOUT_MS;
-
-    function waitForMoblin() {
-      if (cancelled) return;
-      if (typeof moblin === 'undefined') {
-        if (Date.now() <= deadline) retryId = setTimeout(waitForMoblin, MOBLIN_POLL_INTERVAL_MS);
-        return;
-      }
-      try {
-        const prevOnMessage = moblin.onmessage;
-        moblin.onmessage = (message) => {
-          prevOnMessage?.(message);
-          if (!message.chat) return;
-          try {
-            const chat = message.chat.message;
-            setDebug((d) => ({
-              ...d,
-              chatCount: d.chatCount + 1,
-              lastChatUser: chat?.user ?? null,
-              lastChatText: segmentsToText(chat?.segments),
-              lastChatRaw: safeStringify(message.chat),
-            }));
-            handleChatCommand(chat, setSections, (rejectedUser) =>
-              setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))
-            );
-          } catch (err) {
-            const msg = err instanceof Error ? err.message : String(err);
-            setDebug((d) => ({ ...d, lastMessageError: msg }));
-          }
-        };
-        moblin.subscribe({ chat: { prefix: '!' } });
-      } catch {
-        // Moblin chat relay is optional - telemetry doesn't depend on it
-      }
-    }
-
-    waitForMoblin();
-
-    return () => {
-      cancelled = true;
-      clearTimeout(retryId);
-    };
-  }, []);
-
   const config: CyclingHudConfig = {
     visible: {
       speed: sections.enabled && sections.speed,
@@ -295,26 +266,46 @@ export function useMoblinCyclingHud(): {
   return { data, config, status, error, debug, debugVisible: sections.debug };
 }
 
-// segments can be missing/malformed on a given payload - never crash the message pipe over it
-function segmentsToText(segments: { text?: string }[] | undefined): string {
-  if (!Array.isArray(segments)) return '';
-  return segments.map((s) => s?.text ?? '').join('');
+// a bad chat payload here must never break the WS message pipe or crash the page
+function handleIncomingChat(
+  rawLine: string | undefined,
+  setSections: Dispatch<SetStateAction<Sections>>,
+  setDebug: Dispatch<SetStateAction<MoblinDebugInfo>>
+) {
+  if (!rawLine) return;
+  try {
+    const msg = parseMessage(rawLine);
+    if (isSystemMessageType(msg)) return;
+    const chat = msg as HeheChatMessage;
+    setDebug((d) => ({
+      ...d,
+      chatCount: d.chatCount + 1,
+      lastChatUser: chat.userInfo?.userName ?? null,
+      lastChatText: chat.text,
+      lastChatRaw: safeStringify(rawLine),
+    }));
+    handleChatCommand(chat.userInfo?.userName, chat.text, setSections, (rejectedUser) =>
+      setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    setDebug((d) => ({ ...d, lastMessageError: msg }));
+  }
 }
 
 function handleChatCommand(
-  chat: { user: string; segments: { text?: string }[] } | undefined,
+  user: string | undefined,
+  text: string | undefined,
   setSections: Dispatch<SetStateAction<Sections>>,
   onRejected: (user: string) => void
 ) {
-  if (!chat) return;
-  const user = (chat.user ?? '').trim().toLowerCase();
-  if (!ALLOWED_USERS.includes(user)) {
-    onRejected(chat.user ?? '');
+  const normalizedUser = (user ?? '').trim().toLowerCase();
+  if (!ALLOWED_USERS.includes(normalizedUser)) {
+    onRejected(user ?? '');
     return;
   }
 
-  const text = segmentsToText(chat.segments).trim();
-  const withoutPrefix = text.startsWith('!') ? text.slice(1) : text;
+  const withoutPrefix = (text ?? '').trim().replace(/^!/, '');
   const [rawCommand, rawArg] = withoutPrefix.split(/\s+/);
   const key = COMMANDS[rawCommand?.toLowerCase()];
   if (!key) return;
