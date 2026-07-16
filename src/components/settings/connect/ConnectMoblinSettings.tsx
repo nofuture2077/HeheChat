@@ -1,4 +1,4 @@
-import { TextInput, PasswordInput, Fieldset, Stack, Text, Alert, Button, Checkbox, Group, ActionIcon, Badge, Switch } from '@mantine/core';
+import { TextInput, PasswordInput, Fieldset, Stack, Text, Alert, Button, Checkbox, Group, ActionIcon, Badge, Switch, NumberInput } from '@mantine/core';
 import { IconInfoCircle, IconPlug, IconCopy } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
@@ -167,6 +167,142 @@ export function ConnectMoblinSettings() {
                       onChange={e => config.setShowMoblinZoom(e.currentTarget.checked)}
                     />
                     <Text fs="italic" size="14px">Show Moblin scene switcher and zoom control in the stream status bar</Text>
+                </Stack>
+            </Fieldset>
+            <Fieldset legend="Cycling HUD Sections" variant="filled">
+                <Stack gap="sm">
+                    <Text fs="italic" size="14px">Choose which sections the cycling telemetry HUD shows on stream</Text>
+                    <Switch
+                      label="Enabled"
+                      checked={config.cyclingHudEnabled}
+                      onChange={e => config.setCyclingHudEnabled(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Location"
+                      checked={config.cyclingHudLocation}
+                      onChange={e => config.setCyclingHudLocation(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Distance"
+                      checked={config.cyclingHudDistance}
+                      onChange={e => config.setCyclingHudDistance(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Speed"
+                      checked={config.cyclingHudSpeed}
+                      onChange={e => config.setCyclingHudSpeed(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Gradient"
+                      checked={config.cyclingHudGradient}
+                      onChange={e => config.setCyclingHudGradient(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Elevation"
+                      checked={config.cyclingHudElevation}
+                      onChange={e => config.setCyclingHudElevation(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Split"
+                      checked={config.cyclingHudSplit}
+                      onChange={e => config.setCyclingHudSplit(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Debug overlay"
+                      checked={config.cyclingHudDebug}
+                      onChange={e => config.setCyclingHudDebug(e.currentTarget.checked)}
+                    />
+                </Stack>
+            </Fieldset>
+            <Fieldset legend="Cycling HUD Timing & Thresholds" variant="filled">
+                <Stack gap="sm">
+                    <NumberInput
+                      label="Display delay"
+                      description="Delays the HUD to match your stream's video delay, in seconds"
+                      min={0}
+                      max={20}
+                      value={config.cyclingHudDelaySeconds}
+                      onChange={value => config.setCyclingHudDelaySeconds(Number(value) || 0)}
+                    />
+                    <NumberInput
+                      label="Minimum speed to show speed/slope"
+                      description="Speed gauge (and, if enabled below, the slope gauge) only shows above this speed, in km/h"
+                      min={0}
+                      step={0.5}
+                      value={config.cyclingHudMinSpeedKmh}
+                      onChange={value => config.setCyclingHudMinSpeedKmh(Number(value) || 0)}
+                    />
+                    <NumberInput
+                      label="Minimum slope to show"
+                      description="Slope gauge only shows when the gradient magnitude (uphill or downhill) is at least this, in %"
+                      min={0}
+                      step={0.5}
+                      value={config.cyclingHudMinGradientPercent}
+                      onChange={value => config.setCyclingHudMinGradientPercent(Number(value) || 0)}
+                    />
+                    <Switch
+                      label="Only show slope while moving"
+                      checked={config.cyclingHudGradientOnlyWhenMoving}
+                      onChange={e => {
+                          config.setCyclingHudGradientOnlyWhenMoving(e.currentTarget.checked);
+                      }}
+                    />
+                    <NumberInput
+                      label="Hide delay"
+                      description="Keep the speed/slope gauges visible for this many seconds after they drop below their threshold, instead of disappearing immediately"
+                      min={0}
+                      max={30}
+                      value={config.cyclingHudHideLingerSeconds}
+                      onChange={value => config.setCyclingHudHideLingerSeconds(Number(value) || 0)}
+                    />
+                </Stack>
+            </Fieldset>
+            <Fieldset legend="Pause Counter" variant="filled">
+                <Stack gap="sm">
+                    <Text fs="italic" size="14px">
+                        Tracks how long you&apos;ve stopped moving and shows it where the speed
+                        gauge normally is. A break only counts once you&apos;ve been below the
+                        speed threshold above for a while, and only ends once you&apos;re clearly
+                        moving again - so a quick stop to lock the bike and walk into a shop
+                        on foot doesn&apos;t end the break early.
+                    </Text>
+                    <Switch
+                      label="Show pause counter"
+                      checked={config.cyclingHudPauseEnabled}
+                      onChange={e => {
+                          config.setCyclingHudPauseEnabled(e.currentTarget.checked);
+                      }}
+                    />
+                    <NumberInput
+                      label="Count as a break after"
+                      description="Seconds below the speed threshold before it's counted as a break, in seconds"
+                      min={0}
+                      max={300}
+                      value={config.cyclingHudPauseStartAfterSeconds}
+                      onChange={value => {
+                          config.setCyclingHudPauseStartAfterSeconds(Number(value) || 0);
+                      }}
+                    />
+                    <NumberInput
+                      label="Resume speed"
+                      description="Speed you need to exceed to end the break, in km/h"
+                      min={0}
+                      step={0.5}
+                      value={config.cyclingHudPauseResumeSpeedKmh}
+                      onChange={value => {
+                          config.setCyclingHudPauseResumeSpeedKmh(Number(value) || 0);
+                      }}
+                    />
+                    <NumberInput
+                      label="Minimum distance between breaks"
+                      description="You must ride at least this far (since the start, or since the last break ended) before a new break can be counted, in meters"
+                      min={0}
+                      step={10}
+                      value={config.cyclingHudPauseMinDistanceM}
+                      onChange={value => {
+                          config.setCyclingHudPauseMinDistanceM(Number(value) || 0);
+                      }}
+                    />
                 </Stack>
             </Fieldset>
         </Stack>

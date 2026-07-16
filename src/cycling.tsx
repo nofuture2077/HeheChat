@@ -81,7 +81,6 @@ telemetry messages: ${debug.telemetryCount}
 chat messages: ${debug.chatCount}
 last chat user: ${debug.lastChatUser ?? '-'}
 last chat text: ${debug.lastChatText ?? '-'}
-last rejected user: ${debug.lastRejectedUser ?? '-'}
 last message error: ${debug.lastMessageError ?? '-'}
 last chat raw: ${debug.lastChatRaw ?? '-'}
 last telemetry raw: ${debug.lastTelemetryRaw ?? '-'}`}
@@ -90,7 +89,7 @@ last telemetry raw: ${debug.lastTelemetryRaw ?? '-'}`}
 }
 
 function CyclingRoot() {
-  const { data, config, status, error, debug, debugVisible } = useMoblinCyclingHud();
+  const { data, config, pause, status, error, debug, debugVisible } = useMoblinCyclingHud();
   return (
     <>
       {status === 'error' && (
@@ -99,7 +98,7 @@ function CyclingRoot() {
       {status === 'subscribed' && !data && (
         <Banner background="#f9a825" color="#000">Mit Moblin verbunden, warte auf erste Telemetriedaten...</Banner>
       )}
-      <CyclingHud data={data ?? previewData} config={config} />
+      <CyclingHud data={data ?? previewData} config={config} pause={pause} />
       {debugVisible && <DebugPanel status={status} debug={debug} />}
     </>
   );

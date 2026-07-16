@@ -202,6 +202,23 @@ export default function HeheChat() {
                 profileData.config.showBitrateIndicator ??= false;
                 profileData.config.showSceneName ??= false;
                 profileData.config.showMoblinZoom ??= false;
+                profileData.config.cyclingHudEnabled ??= true;
+                profileData.config.cyclingHudLocation ??= true;
+                profileData.config.cyclingHudDistance ??= true;
+                profileData.config.cyclingHudSpeed ??= true;
+                profileData.config.cyclingHudGradient ??= true;
+                profileData.config.cyclingHudElevation ??= true;
+                profileData.config.cyclingHudSplit ??= false;
+                profileData.config.cyclingHudDebug ??= false;
+                profileData.config.cyclingHudDelaySeconds ??= 10;
+                profileData.config.cyclingHudMinSpeedKmh ??= 1;
+                profileData.config.cyclingHudMinGradientPercent ??= 1;
+                profileData.config.cyclingHudGradientOnlyWhenMoving ??= true;
+                profileData.config.cyclingHudHideLingerSeconds ??= 10;
+                profileData.config.cyclingHudPauseEnabled ??= false;
+                profileData.config.cyclingHudPauseStartAfterSeconds ??= 30;
+                profileData.config.cyclingHudPauseResumeSpeedKmh ??= 7;
+                profileData.config.cyclingHudPauseMinDistanceM ??= 100;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);
@@ -471,6 +488,23 @@ export default function HeheChat() {
     const setShowBitrateIndicator = (value: boolean) => updateConfig('showBitrateIndicator', value);
     const setShowSceneName = (value: boolean) => updateConfig('showSceneName', value);
     const setShowMoblinZoom = (value: boolean) => updateConfig('showMoblinZoom', value);
+    const setCyclingHudEnabled = (value: boolean) => updateConfig('cyclingHudEnabled', value);
+    const setCyclingHudLocation = (value: boolean) => updateConfig('cyclingHudLocation', value);
+    const setCyclingHudDistance = (value: boolean) => updateConfig('cyclingHudDistance', value);
+    const setCyclingHudSpeed = (value: boolean) => updateConfig('cyclingHudSpeed', value);
+    const setCyclingHudGradient = (value: boolean) => updateConfig('cyclingHudGradient', value);
+    const setCyclingHudElevation = (value: boolean) => updateConfig('cyclingHudElevation', value);
+    const setCyclingHudSplit = (value: boolean) => updateConfig('cyclingHudSplit', value);
+    const setCyclingHudDebug = (value: boolean) => updateConfig('cyclingHudDebug', value);
+    const setCyclingHudDelaySeconds = (value: number) => updateConfig('cyclingHudDelaySeconds', value);
+    const setCyclingHudMinSpeedKmh = (value: number) => updateConfig('cyclingHudMinSpeedKmh', value);
+    const setCyclingHudMinGradientPercent = (value: number) => updateConfig('cyclingHudMinGradientPercent', value);
+    const setCyclingHudGradientOnlyWhenMoving = (value: boolean) => updateConfig('cyclingHudGradientOnlyWhenMoving', value);
+    const setCyclingHudHideLingerSeconds = (value: number) => updateConfig('cyclingHudHideLingerSeconds', value);
+    const setCyclingHudPauseEnabled = (value: boolean) => updateConfig('cyclingHudPauseEnabled', value);
+    const setCyclingHudPauseStartAfterSeconds = (value: number) => updateConfig('cyclingHudPauseStartAfterSeconds', value);
+    const setCyclingHudPauseResumeSpeedKmh = (value: number) => updateConfig('cyclingHudPauseResumeSpeedKmh', value);
+    const setCyclingHudPauseMinDistanceM = (value: number) => updateConfig('cyclingHudPauseMinDistanceM', value);
     const setShowSceneSwitchNotifications = (value: boolean) => updateConfig('showSceneSwitchNotifications', value);
     const setChatBsTransparentBg = (value: boolean) => updateConfig('chatBsTransparentBg', value);
     const setChatBsTextColor = (value: string) => updateConfig('chatBsTextColor', value);
@@ -758,6 +792,23 @@ export default function HeheChat() {
         setShowBitrateIndicator,
         setShowSceneName,
         setShowMoblinZoom,
+        setCyclingHudEnabled,
+        setCyclingHudLocation,
+        setCyclingHudDistance,
+        setCyclingHudSpeed,
+        setCyclingHudGradient,
+        setCyclingHudElevation,
+        setCyclingHudSplit,
+        setCyclingHudDebug,
+        setCyclingHudDelaySeconds,
+        setCyclingHudMinSpeedKmh,
+        setCyclingHudMinGradientPercent,
+        setCyclingHudGradientOnlyWhenMoving,
+        setCyclingHudHideLingerSeconds,
+        setCyclingHudPauseEnabled,
+        setCyclingHudPauseStartAfterSeconds,
+        setCyclingHudPauseResumeSpeedKmh,
+        setCyclingHudPauseMinDistanceM,
         setShowSceneSwitchNotifications,
         setChatBsTransparentBg,
         setChatBsTextColor,

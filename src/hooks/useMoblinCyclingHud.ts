@@ -1,13 +1,7 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import type { MoblinTelemetryData } from '../types/moblin';
-import type { CyclingData, CyclingHudConfig } from '../components/cycling/CyclingHud';
+import type { CyclingData, CyclingHudConfig, PauseInfo } from '../components/cycling/CyclingHud';
 import { parseMessage, isSystemMessageType, HeheChatMessage } from '../commons/message';
-
-// only this streamer may issue chat commands, checked case-insensitively against the chat display name
-const ALLOWED_USERS = ['nofuture2077'];
-const STORAGE_KEY = 'cyclingHud.sections';
-const MIN_SPEED_KMH = 10;
-const MIN_GRADIENT_PERCENT = 2;
 
 interface Sections {
   enabled: boolean;
@@ -31,18 +25,149 @@ const defaultSections: Sections = {
   debug: false,
 };
 
-// whitelist of chat commands, each toggles exactly one section key - never eval chat text
-const COMMANDS: Record<string, keyof Sections> = {
-  telemetry: 'enabled',
-  location: 'location',
-  distance: 'distance',
-  speed: 'speed',
-  gradient: 'gradient',
-  elevation: 'elevation',
-  ascent: 'elevation',
-  split: 'split',
-  debug: 'debug',
+// profile.config keys carrying each section's toggle, set via Settings > Connect > Moblin
+const CONFIG_KEYS: Record<keyof Sections, string> = {
+  enabled: 'cyclingHudEnabled',
+  location: 'cyclingHudLocation',
+  distance: 'cyclingHudDistance',
+  speed: 'cyclingHudSpeed',
+  gradient: 'cyclingHudGradient',
+  elevation: 'cyclingHudElevation',
+  split: 'cyclingHudSplit',
+  debug: 'cyclingHudDebug',
 };
+
+function sectionsFromConfig(profileConfig: Record<string, unknown> | undefined): Sections {
+  const result = { ...defaultSections };
+  for (const key of Object.keys(CONFIG_KEYS) as (keyof Sections)[]) {
+    const value = profileConfig?.[CONFIG_KEYS[key]];
+    if (typeof value === 'boolean') result[key] = value;
+  }
+  return result;
+}
+
+interface Thresholds {
+  delaySeconds: number;
+  minSpeedKmh: number;
+  minGradientPercent: number;
+  gradientOnlyWhenMoving: boolean;
+  hideLingerSeconds: number;
+  pauseEnabled: boolean;
+  pauseStartAfterSeconds: number;
+  pauseResumeSpeedKmh: number;
+  pauseMinDistanceM: number;
+}
+
+const defaultThresholds: Thresholds = {
+  delaySeconds: 10,
+  minSpeedKmh: 1,
+  minGradientPercent: 1,
+  gradientOnlyWhenMoving: true,
+  hideLingerSeconds: 10,
+  pauseEnabled: false,
+  pauseStartAfterSeconds: 30,
+  pauseResumeSpeedKmh: 5,
+  pauseMinDistanceM: 100,
+};
+
+// profile.config keys carrying each threshold, set via Settings > Connect > Moblin
+const THRESHOLD_CONFIG_KEYS: Record<keyof Thresholds, string> = {
+  delaySeconds: 'cyclingHudDelaySeconds',
+  minSpeedKmh: 'cyclingHudMinSpeedKmh',
+  minGradientPercent: 'cyclingHudMinGradientPercent',
+  gradientOnlyWhenMoving: 'cyclingHudGradientOnlyWhenMoving',
+  hideLingerSeconds: 'cyclingHudHideLingerSeconds',
+  pauseEnabled: 'cyclingHudPauseEnabled',
+  pauseStartAfterSeconds: 'cyclingHudPauseStartAfterSeconds',
+  pauseResumeSpeedKmh: 'cyclingHudPauseResumeSpeedKmh',
+  pauseMinDistanceM: 'cyclingHudPauseMinDistanceM',
+};
+
+const THRESHOLD_BOOLEAN_KEYS: (keyof Thresholds)[] = ['gradientOnlyWhenMoving', 'pauseEnabled'];
+
+function thresholdsFromConfig(profileConfig: Record<string, unknown> | undefined): Thresholds {
+  const result: Record<string, unknown> = { ...defaultThresholds };
+  for (const key of Object.keys(THRESHOLD_CONFIG_KEYS) as (keyof Thresholds)[]) {
+    const value = profileConfig?.[THRESHOLD_CONFIG_KEYS[key]];
+    const expectBoolean = THRESHOLD_BOOLEAN_KEYS.includes(key);
+    if (typeof value === (expectBoolean ? 'boolean' : 'number')) result[key] = value;
+  }
+  return result as unknown as Thresholds;
+}
+
+const emptyPause: PauseInfo = { onBreak: false, currentBreakSeconds: 0, totalBreakSeconds: 0 };
+
+type PauseThresholds = Pick<
+  Thresholds,
+  'pauseEnabled' | 'minSpeedKmh' | 'pauseStartAfterSeconds' | 'pauseResumeSpeedKmh' | 'pauseMinDistanceM'
+>;
+
+// tracks stopped time as "breaks": counts once stopped for pauseStartAfterSeconds, and only
+// ends once speed clears pauseResumeSpeedKmh - so briefly walking the bike around (GPS still
+// moving at walking pace) doesn't end the break early. Also requires pauseMinDistanceM of riding
+// since the ride start (or since the previous break ended) before a break can start, so idling
+// before setting off - or a quick on/off-the-bike shuffle - doesn't get counted
+function usePauseTracking(
+  speedKmh: number,
+  distanceKm: number,
+  thresholds: PauseThresholds
+): PauseInfo {
+  const [pause, setPause] = useState<PauseInfo>(emptyPause);
+  const speedRef = useRef(speedKmh);
+  speedRef.current = speedKmh;
+  const distanceRef = useRef(distanceKm);
+  distanceRef.current = distanceKm;
+
+  const {
+    pauseEnabled, minSpeedKmh, pauseStartAfterSeconds, pauseResumeSpeedKmh, pauseMinDistanceM,
+  } = thresholds;
+
+  useEffect(() => {
+    if (!pauseEnabled) {
+      setPause(emptyPause);
+      return undefined;
+    }
+
+    let notMovingSince: number | null = null;
+    let breakStart: number | null = null;
+    let totalBreakMs = 0;
+    let baselineDistanceKm: number | null = null;
+
+    const id = setInterval(() => {
+      const now = Date.now();
+      const speed = speedRef.current;
+      const distance = distanceRef.current;
+
+      if (baselineDistanceKm === null) baselineDistanceKm = distance;
+      const riddenEnough = distance - baselineDistanceKm >= pauseMinDistanceM / 1000;
+
+      if (breakStart === null) {
+        if (riddenEnough && speed < minSpeedKmh) {
+          if (notMovingSince === null) notMovingSince = now;
+          if (now - notMovingSince >= pauseStartAfterSeconds * 1000) breakStart = notMovingSince;
+        } else {
+          notMovingSince = null;
+        }
+      } else if (speed >= pauseResumeSpeedKmh) {
+        totalBreakMs += now - breakStart;
+        breakStart = null;
+        notMovingSince = null;
+        baselineDistanceKm = distance;
+      }
+
+      const currentBreakMs = breakStart !== null ? now - breakStart : 0;
+      setPause({
+        onBreak: breakStart !== null,
+        currentBreakSeconds: Math.floor(currentBreakMs / 1000),
+        totalBreakSeconds: Math.floor((totalBreakMs + currentBreakMs) / 1000),
+      });
+    }, 1000);
+
+    return () => clearInterval(id);
+  }, [pauseEnabled, minSpeedKmh, pauseStartAfterSeconds, pauseResumeSpeedKmh, pauseMinDistanceM]);
+
+  return pause;
+}
 
 function getQueryVariable(query: string, variable: string): string | undefined {
   for (const pair of query.split('&')) {
@@ -50,16 +175,6 @@ function getQueryVariable(query: string, variable: string): string | undefined {
     if (decodeURIComponent(key) === variable) return decodeURIComponent(value);
   }
   return undefined;
-}
-
-function loadSections(): Sections {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultSections;
-    return { ...defaultSections, ...JSON.parse(raw) };
-  } catch {
-    return defaultSections;
-  }
 }
 
 function toLocation(t: MoblinTelemetryData): string {
@@ -103,7 +218,6 @@ export interface MoblinDebugInfo {
   chatCount: number;
   lastChatUser: string | null;
   lastChatText: string | null;
-  lastRejectedUser: string | null;
   lastMessageError: string | null;
   lastChatRaw: string | null;
   lastTelemetryRaw: string | null;
@@ -114,7 +228,6 @@ const emptyDebug: MoblinDebugInfo = {
   chatCount: 0,
   lastChatUser: null,
   lastChatText: null,
-  lastRejectedUser: null,
   lastMessageError: null,
   lastChatRaw: null,
   lastTelemetryRaw: null,
@@ -132,22 +245,23 @@ function safeStringify(value: unknown): string {
 export function useMoblinCyclingHud(): {
   data: CyclingData | null;
   config: CyclingHudConfig;
+  pause: PauseInfo;
   status: MoblinConnectionStatus;
   error: string | null;
   debug: MoblinDebugInfo;
   debugVisible: boolean;
 } {
   const [data, setData] = useState<CyclingData | null>(null);
-  const [sections, setSections] = useState<Sections>(loadSections);
+  const [sections, setSections] = useState<Sections>(defaultSections);
+  const [thresholds, setThresholds] = useState<Thresholds>(defaultThresholds);
   const [status, setStatus] = useState<MoblinConnectionStatus>('waiting');
   const [error, setError] = useState<string | null>(null);
   const [debug, setDebug] = useState<MoblinDebugInfo>(emptyDebug);
+  // telemetry is buffered here and released after delaySeconds, to line the HUD up with the
+  // stream's video delay - see the flush effect below
+  const bufferRef = useRef<{ t: number; data: CyclingData }[]>([]);
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sections));
-  }, [sections]);
-
-  // telemetry and chat both come from HeheServer over a plain WebSocket, using the same
+  // telemetry comes from HeheServer over a plain WebSocket, using the same
   // browser-source sink token as chat/alert sources - independent of any Moblin browser-source
   // lifecycle, so both keep updating while backgrounded/not rendered by Moblin
   useEffect(() => {
@@ -172,7 +286,7 @@ export function useMoblinCyclingHud(): {
 
       ws.addEventListener('open', () => {
         attempts = 0;
-        ws!.send(JSON.stringify({ type: 'sink', token }));
+        ws!.send(JSON.stringify({ type: 'sink', source: 'Telemetry HUD', token }));
         setStatus('subscribed');
         setError(null);
       });
@@ -181,7 +295,7 @@ export function useMoblinCyclingHud(): {
         let msg: {
           type?: string;
           data?: MoblinTelemetryData['data'] & { message?: string };
-          profile?: { config?: { channels?: string[] } };
+          profile?: { config?: Record<string, unknown> & { channels?: string[] } };
         };
         try {
           msg = JSON.parse(event.data);
@@ -195,7 +309,8 @@ export function useMoblinCyclingHud(): {
         }
 
         // sharedata arrives right after the sink handshake - use it to subscribe to the
-        // channel(s) we belong to, which is what actually starts the live chat feed
+        // channel(s) we belong to (starts the telemetry feed) and to read the HUD section
+        // toggles from Settings > Connect > Moblin
         if (msg.type === 'sharedata') {
           const channels = msg.profile?.config?.channels ?? [];
           if (channels.length) {
@@ -205,11 +320,15 @@ export function useMoblinCyclingHud(): {
               channels: Object.fromEntries(channels.map((c) => [c, true])),
             }));
           }
+          setSections(sectionsFromConfig(msg.profile?.config));
+          setThresholds(thresholdsFromConfig(msg.profile?.config));
           return;
         }
 
+        // chat itself isn't used for HUD control anymore (moved to Settings > Connect > Moblin),
+        // but keep receiving it - a future feature will show chat overlaid on the HUD
         if (msg.type === 'msg') {
-          handleIncomingChat(msg.data?.message, setSections, setDebug);
+          handleIncomingChat(msg.data?.message, setDebug);
           return;
         }
 
@@ -219,7 +338,7 @@ export function useMoblinCyclingHud(): {
             telemetryCount: d.telemetryCount + 1,
             lastTelemetryRaw: safeStringify(msg.data),
           }));
-          setData(toCyclingData({ data: msg.data }));
+          bufferRef.current.push({ t: Date.now(), data: toCyclingData({ data: msg.data }) });
         }
       });
 
@@ -250,6 +369,23 @@ export function useMoblinCyclingHud(): {
     };
   }, []);
 
+  // releases buffered telemetry once it's old enough, so the HUD lags behind live by delaySeconds
+  useEffect(() => {
+    const delayMs = thresholds.delaySeconds * 1000;
+    const id = setInterval(() => {
+      const now = Date.now();
+      const buffer = bufferRef.current;
+      let released: CyclingData | undefined;
+      while (buffer.length && now - buffer[0].t >= delayMs) {
+        released = buffer.shift()!.data;
+      }
+      if (released) setData(released);
+    }, 200);
+    return () => clearInterval(id);
+  }, [thresholds.delaySeconds]);
+
+  const pause = usePauseTracking(data?.speedKmh ?? 0, data?.distanceKm ?? 0, thresholds);
+
   const config: CyclingHudConfig = {
     visible: {
       speed: sections.enabled && sections.speed,
@@ -259,17 +395,18 @@ export function useMoblinCyclingHud(): {
       elevation: sections.enabled && sections.elevation,
       split: sections.split,
     },
-    minSpeedKmh: MIN_SPEED_KMH,
-    minGradientPercent: MIN_GRADIENT_PERCENT,
+    minSpeedKmh: thresholds.minSpeedKmh,
+    minGradientPercent: thresholds.minGradientPercent,
+    gradientOnlyWhenMoving: thresholds.gradientOnlyWhenMoving,
+    hideLingerMs: thresholds.hideLingerSeconds * 1000,
   };
 
-  return { data, config, status, error, debug, debugVisible: sections.debug };
+  return { data, config, pause, status, error, debug, debugVisible: sections.debug };
 }
 
 // a bad chat payload here must never break the WS message pipe or crash the page
 function handleIncomingChat(
   rawLine: string | undefined,
-  setSections: Dispatch<SetStateAction<Sections>>,
   setDebug: Dispatch<SetStateAction<MoblinDebugInfo>>
 ) {
   if (!rawLine) return;
@@ -284,32 +421,8 @@ function handleIncomingChat(
       lastChatText: chat.text,
       lastChatRaw: safeStringify(rawLine),
     }));
-    handleChatCommand(chat.userInfo?.userName, chat.text, setSections, (rejectedUser) =>
-      setDebug((d) => ({ ...d, lastRejectedUser: rejectedUser }))
-    );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     setDebug((d) => ({ ...d, lastMessageError: msg }));
   }
-}
-
-function handleChatCommand(
-  user: string | undefined,
-  text: string | undefined,
-  setSections: Dispatch<SetStateAction<Sections>>,
-  onRejected: (user: string) => void
-) {
-  const normalizedUser = (user ?? '').trim().toLowerCase();
-  if (!ALLOWED_USERS.includes(normalizedUser)) {
-    onRejected(user ?? '');
-    return;
-  }
-
-  const withoutPrefix = (text ?? '').trim().replace(/^!/, '');
-  const [rawCommand, rawArg] = withoutPrefix.split(/\s+/);
-  const key = COMMANDS[rawCommand?.toLowerCase()];
-  if (!key) return;
-  if (rawArg !== 'on' && rawArg !== 'off') return;
-
-  setSections((prev) => ({ ...prev, [key]: rawArg === 'on' }));
 }

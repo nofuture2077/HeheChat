@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import styles from './CyclingHud.module.css';
 
 export interface CyclingData {
@@ -27,6 +28,10 @@ export interface CyclingHudConfig {
   // dynamic elements hide themselves below these thresholds
   minSpeedKmh: number;
   minGradientPercent: number;
+  // when on, the slope gauge also requires speed >= minSpeedKmh to show
+  gradientOnlyWhenMoving: boolean;
+  // once a dynamic element drops below its threshold, it lingers this long before hiding
+  hideLingerMs: number;
 }
 
 const defaultConfig: CyclingHudConfig = {
@@ -39,8 +44,42 @@ const defaultConfig: CyclingHudConfig = {
     split: false,
   },
   minSpeedKmh: 1,
-  minGradientPercent: 2,
+  minGradientPercent: 1,
+  gradientOnlyWhenMoving: true,
+  hideLingerMs: 10000,
 };
+
+// keeps a dynamic element visible for lingerMs after it becomes inactive, fading it out
+// smoothly at the end instead of an abrupt disappearance
+function useLingering(active: boolean, lingerMs: number): { visible: boolean; fading: boolean } {
+  const [visible, setVisible] = useState(active);
+  const [fading, setFading] = useState(false);
+  const visibleRef = useRef(visible);
+  visibleRef.current = visible;
+
+  useEffect(() => {
+    if (active) {
+      setFading(false);
+      setVisible(true);
+      return undefined;
+    }
+    if (!visibleRef.current) return undefined;
+
+    const fadeLeadMs = Math.min(600, lingerMs);
+    const fadeTimer = setTimeout(() => setFading(true), Math.max(0, lingerMs - fadeLeadMs));
+    const hideTimer = setTimeout(() => {
+      setVisible(false);
+      setFading(false);
+    }, lingerMs);
+
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [active, lingerMs]);
+
+  return { visible, fading };
+}
 
 function fmt(n: number, digits = 0) {
   return n.toLocaleString('de-DE', { minimumFractionDigits: digits, maximumFractionDigits: digits });
@@ -76,6 +115,15 @@ function IconSpeed() {
   );
 }
 
+function IconPause() {
+  return (
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" stroke="none">
+      <rect x="6" y="5" width="4" height="14" rx="1" />
+      <rect x="14" y="5" width="4" height="14" rx="1" />
+    </svg>
+  );
+}
+
 function IconIncline() {
   return (
     <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="2">
@@ -100,6 +148,40 @@ function IconElevationDown() {
       <path d="M12 5v14" />
       <path d="M6 13l6 6 6-6" />
     </svg>
+  );
+}
+
+export interface PauseInfo {
+  onBreak: boolean;
+  currentBreakSeconds: number;
+  totalBreakSeconds: number;
+}
+
+const defaultPause: PauseInfo = { onBreak: false, currentBreakSeconds: 0, totalBreakSeconds: 0 };
+
+function formatDuration(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  const ss = String(s).padStart(2, '0');
+  return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`;
+}
+
+function PauseGauge({
+  currentSeconds,
+  totalSeconds,
+}: {
+  currentSeconds: number;
+  totalSeconds: number;
+}) {
+  return (
+    <div className={`${styles.gauge} ${styles.gaugeBig} ${styles.pause}`}>
+      <div className={styles.gaugeMain}>
+        <IconPause />
+        <span className={`${styles.gaugeValue} ${styles.pauseValue}`}>{formatDuration(currentSeconds)}</span>
+      </div>
+      <span className={styles.gaugeSecondary}>{`Σ ${formatDuration(totalSeconds)}`}</span>
+    </div>
   );
 }
 
@@ -128,6 +210,7 @@ function Gauge({
   mountainClass,
   extreme,
   big,
+  fading,
   icon,
   value,
   unit,
@@ -138,6 +221,7 @@ function Gauge({
   mountainClass?: string;
   extreme?: boolean;
   big?: boolean;
+  fading?: boolean;
   icon?: React.ReactNode;
   value: string;
   unit: string;
@@ -147,7 +231,7 @@ function Gauge({
     <div
       className={`${styles.gauge} ${big ? styles.gaugeBig : ''} ${
         secondaryValue ? styles.gaugeHasSecondary : ''
-      } ${accentClass} ${levelClass ?? ''} ${extreme ? styles.pulseExtreme : ''}`}
+      } ${accentClass} ${levelClass ?? ''} ${extreme ? styles.pulseExtreme : ''} ${fading ? styles.fadingOut : ''}`}
     >
       {mountainClass && <div className={`${styles.mountain} ${mountainClass}`} />}
       <div className={styles.gaugeMain}>
@@ -175,17 +259,28 @@ function Gauge({
 export default function CyclingHud({
   data,
   config = defaultConfig,
+  pause = defaultPause,
 }: {
   data: CyclingData;
   config?: CyclingHudConfig;
+  pause?: PauseInfo;
 }) {
   const { visible } = config;
-  const showSpeed = visible.speed && data.speedKmh >= config.minSpeedKmh;
+  const isMoving = data.speedKmh >= config.minSpeedKmh;
+  const speedActive = visible.speed && isMoving && !pause.onBreak;
   const gradientAboveThreshold = Math.abs(data.gradientPercent) >= config.minGradientPercent;
-  const showGradient = visible.gradient && gradientAboveThreshold;
+  const gradientMovingOk = !config.gradientOnlyWhenMoving || isMoving;
+  const gradientActive = visible.gradient && gradientAboveThreshold && gradientMovingOk;
+
+  const speedLinger = useLingering(speedActive, config.hideLingerMs);
+  const gradientLinger = useLingering(gradientActive, config.hideLingerMs);
+  const showSpeed = speedLinger.visible && !pause.onBreak;
+  const showGradient = gradientLinger.visible;
+  const showPause = pause.onBreak;
+
   const showElevation = visible.elevation;
   const showTopChips = visible.location || visible.distance || showElevation;
-  const showBottomGauges = showSpeed || showGradient;
+  const showBottomGauges = showSpeed || showGradient || showPause;
 
   return (
     <div className={styles.root}>
@@ -256,20 +351,29 @@ export default function CyclingHud({
               levelClass={styles[`gradientLevel${gradientLevel(data.gradientPercent)}`]}
               mountainClass={styles[`mountain${gradientLevel(data.gradientPercent)}`]}
               extreme={Math.abs(data.gradientPercent) >= 13}
+              fading={gradientLinger.fading}
               icon={<IconIncline />}
               value={fmt(data.gradientPercent, 1)}
               unit="%"
             />
           )}
-          {showSpeed && (
-            <Gauge
-              accentClass={styles.speed}
-              levelClass={styles[`speedLevel${speedLevel(data.speedKmh)}`]}
-              big
-              icon={<IconSpeed />}
-              value={fmt(data.speedKmh, 0)}
-              unit="km/h"
+          {showPause ? (
+            <PauseGauge
+              currentSeconds={pause.currentBreakSeconds}
+              totalSeconds={pause.totalBreakSeconds}
             />
+          ) : (
+            showSpeed && (
+              <Gauge
+                accentClass={styles.speed}
+                levelClass={styles[`speedLevel${speedLevel(data.speedKmh)}`]}
+                big
+                fading={speedLinger.fading}
+                icon={<IconSpeed />}
+                value={fmt(data.speedKmh, 0)}
+                unit="km/h"
+              />
+            )
           )}
         </div>
       )}

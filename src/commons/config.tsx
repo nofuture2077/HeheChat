@@ -70,6 +70,23 @@ export interface ConfigData {
     showBitrateIndicator: boolean,
     showSceneName: boolean,
     showMoblinZoom: boolean,
+    cyclingHudEnabled: boolean,
+    cyclingHudLocation: boolean,
+    cyclingHudDistance: boolean,
+    cyclingHudSpeed: boolean,
+    cyclingHudGradient: boolean,
+    cyclingHudElevation: boolean,
+    cyclingHudSplit: boolean,
+    cyclingHudDebug: boolean,
+    cyclingHudDelaySeconds: number,
+    cyclingHudMinSpeedKmh: number,
+    cyclingHudMinGradientPercent: number,
+    cyclingHudGradientOnlyWhenMoving: boolean,
+    cyclingHudHideLingerSeconds: number,
+    cyclingHudPauseEnabled: boolean,
+    cyclingHudPauseStartAfterSeconds: number,
+    cyclingHudPauseResumeSpeedKmh: number,
+    cyclingHudPauseMinDistanceM: number,
     showSceneSwitchNotifications: boolean,
     chatBsTransparentBg: boolean,
     chatBsTextColor: string,
@@ -159,6 +176,23 @@ export interface Config extends ConfigData {
     setShowBitrateIndicator: (val: boolean) => void;
     setShowSceneName: (val: boolean) => void;
     setShowMoblinZoom: (val: boolean) => void;
+    setCyclingHudEnabled: (val: boolean) => void;
+    setCyclingHudLocation: (val: boolean) => void;
+    setCyclingHudDistance: (val: boolean) => void;
+    setCyclingHudSpeed: (val: boolean) => void;
+    setCyclingHudGradient: (val: boolean) => void;
+    setCyclingHudElevation: (val: boolean) => void;
+    setCyclingHudSplit: (val: boolean) => void;
+    setCyclingHudDebug: (val: boolean) => void;
+    setCyclingHudDelaySeconds: (val: number) => void;
+    setCyclingHudMinSpeedKmh: (val: number) => void;
+    setCyclingHudMinGradientPercent: (val: number) => void;
+    setCyclingHudGradientOnlyWhenMoving: (val: boolean) => void;
+    setCyclingHudHideLingerSeconds: (val: number) => void;
+    setCyclingHudPauseEnabled: (val: boolean) => void;
+    setCyclingHudPauseStartAfterSeconds: (val: number) => void;
+    setCyclingHudPauseResumeSpeedKmh: (val: number) => void;
+    setCyclingHudPauseMinDistanceM: (val: number) => void;
     setShowSceneSwitchNotifications: (val: boolean) => void;
     setChatBsTransparentBg: (val: boolean) => void;
     setChatBsTextColor: (val: string) => void;
@@ -262,6 +296,23 @@ export const DEFAULT_CONFIG: Config = {
     showBitrateIndicator: false,
     showSceneName: false,
     showMoblinZoom: false,
+    cyclingHudEnabled: true,
+    cyclingHudLocation: true,
+    cyclingHudDistance: true,
+    cyclingHudSpeed: true,
+    cyclingHudGradient: true,
+    cyclingHudElevation: true,
+    cyclingHudSplit: false,
+    cyclingHudDebug: false,
+    cyclingHudDelaySeconds: 10,
+    cyclingHudMinSpeedKmh: 1,
+    cyclingHudMinGradientPercent: 1,
+    cyclingHudGradientOnlyWhenMoving: true,
+    cyclingHudHideLingerSeconds: 10,
+    cyclingHudPauseEnabled: false,
+    cyclingHudPauseStartAfterSeconds: 30,
+    cyclingHudPauseResumeSpeedKmh: 8,
+    cyclingHudPauseMinDistanceM: 100,
     showSceneSwitchNotifications: true,
     chatBsTransparentBg: true,
     chatBsTextColor: '',
@@ -341,6 +392,23 @@ export const DEFAULT_CONFIG: Config = {
     setShowBitrateIndicator: (val) => {},
     setShowSceneName: (val) => {},
     setShowMoblinZoom: (val) => {},
+    setCyclingHudEnabled: (val) => {},
+    setCyclingHudLocation: (val) => {},
+    setCyclingHudDistance: (val) => {},
+    setCyclingHudSpeed: (val) => {},
+    setCyclingHudGradient: (val) => {},
+    setCyclingHudElevation: (val) => {},
+    setCyclingHudSplit: (val) => {},
+    setCyclingHudDebug: (val) => {},
+    setCyclingHudDelaySeconds: (val) => {},
+    setCyclingHudMinSpeedKmh: (val) => {},
+    setCyclingHudMinGradientPercent: (val) => {},
+    setCyclingHudGradientOnlyWhenMoving: (val) => {},
+    setCyclingHudHideLingerSeconds: (val) => {},
+    setCyclingHudPauseEnabled: (val) => {},
+    setCyclingHudPauseStartAfterSeconds: (val) => {},
+    setCyclingHudPauseResumeSpeedKmh: (val) => {},
+    setCyclingHudPauseMinDistanceM: (val) => {},
     setShowSceneSwitchNotifications: (val) => {},
     setChatBsTransparentBg: () => {},
     setChatBsTextColor: () => {},
