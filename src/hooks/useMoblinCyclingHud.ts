@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 
 import type { MoblinTelemetryData } from '../types/moblin';
 import type { CyclingData, CyclingHudConfig, PauseInfo } from '../components/cycling/CyclingHud';
 import { parseMessage, isSystemMessageType, HeheChatMessage } from '../commons/message';
+import { version } from '../../package.json';
 
 interface Sections {
   enabled: boolean;
@@ -95,7 +96,9 @@ function thresholdsFromConfig(profileConfig: Record<string, unknown> | undefined
   return result as unknown as Thresholds;
 }
 
-const emptyPause: PauseInfo = { onBreak: false, currentBreakSeconds: 0, totalBreakSeconds: 0 };
+const emptyPause: PauseInfo = {
+  onBreak: false, currentBreakSeconds: 0, totalBreakSeconds: 0, breakCount: 0,
+};
 
 type PauseThresholds = Pick<
   Thresholds,
@@ -131,6 +134,7 @@ function usePauseTracking(
     let notMovingSince: number | null = null;
     let breakStart: number | null = null;
     let totalBreakMs = 0;
+    let breakCount = 0;
     let baselineDistanceKm: number | null = null;
 
     const id = setInterval(() => {
@@ -150,6 +154,7 @@ function usePauseTracking(
         }
       } else if (speed >= pauseResumeSpeedKmh) {
         totalBreakMs += now - breakStart;
+        breakCount += 1;
         breakStart = null;
         notMovingSince = null;
         baselineDistanceKm = distance;
@@ -160,6 +165,7 @@ function usePauseTracking(
         onBreak: breakStart !== null,
         currentBreakSeconds: Math.floor(currentBreakMs / 1000),
         totalBreakSeconds: Math.floor((totalBreakMs + currentBreakMs) / 1000),
+        breakCount,
       });
     }, 1000);
 
@@ -317,6 +323,8 @@ export function useMoblinCyclingHud(): {
             ws!.send(JSON.stringify({
               type: 'subscribe',
               token,
+              source: 'Telemetry HUD',
+              version,
               channels: Object.fromEntries(channels.map((c) => [c, true])),
             }));
           }
