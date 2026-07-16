@@ -3,7 +3,11 @@
     "allow": [
       "Bash(yarn tsc *)",
       "Bash(node -p \"require\\('./package.json'\\).version\")",
-      "Bash(yarn lint *)"
+      "Bash(yarn lint *)",
+      "Bash(npx eslint *)",
+      "Bash(yarn stylelint *)",
+      "Bash(git diff *)",
+      "Bash(yarn vitest *)"
     ]
   },
   "enabledPlugins": {
