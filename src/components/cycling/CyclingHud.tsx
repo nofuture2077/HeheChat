@@ -165,25 +165,26 @@ const defaultPause: PauseInfo = {
 function formatDuration(totalSeconds: number): string {
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = totalSeconds % 60;
-  const ss = String(s).padStart(2, '0');
-  return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`;
+  return h > 0 ? `${h}:${String(m).padStart(2, '0')}` : `${m}m`;
 }
 
 function PauseGauge({
   currentSeconds,
+  totalSeconds,
   breakCount,
 }: {
   currentSeconds: number;
+  totalSeconds: number;
   breakCount: number;
 }) {
   return (
     <div className={`${styles.gauge} ${styles.gaugeBig} ${styles.pause}`}>
+      <span className={styles.pauseBadge}>{breakCount}</span>
       <div className={styles.gaugeMain}>
         <IconPause />
         <span className={`${styles.gaugeValue} ${styles.pauseValue}`}>{formatDuration(currentSeconds)}</span>
       </div>
-      <span className={styles.gaugeSecondary}>{`Breaks: ${breakCount}`}</span>
+      <span className={styles.gaugeSecondary}>{`Σ ${formatDuration(totalSeconds)}`}</span>
     </div>
   );
 }
@@ -363,6 +364,7 @@ export default function CyclingHud({
           {showPause ? (
             <PauseGauge
               currentSeconds={pause.currentBreakSeconds}
+              totalSeconds={pause.totalBreakSeconds}
               breakCount={pause.breakCount}
             />
           ) : (

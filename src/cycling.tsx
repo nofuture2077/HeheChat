@@ -5,15 +5,15 @@ import { useMoblinCyclingHud } from './hooks/useMoblinCyclingHud';
 
 // ponytail: fallback so the design still renders when opened outside a Moblin browser source
 const previewData: CyclingData = {
-  speedKmh: 23.4,
-  distanceKm: 1834.2,
-  splitDistanceKm: 42.8,
-  location: 'Aachen, Deutschland',
-  gradientPercent: 23.5,
-  elevationGainM: 28845,
-  elevationLossM: 128,
-  splitElevationGainM: 45,
-  splitElevationLossM: 18,
+  speedKmh: 0,
+  distanceKm: 0,
+  splitDistanceKm: 0,
+  location: 'Tokyo, Japan',
+  gradientPercent: 0,
+  elevationGainM: 0,
+  elevationLossM: 0,
+  splitElevationGainM: 0,
+  splitElevationLossM: 0,
 };
 
 interface BannerProps {
@@ -94,9 +94,6 @@ function CyclingRoot() {
     <>
       {status === 'error' && (
         <Banner background="#c62828" color="#fff">Moblin-Verbindung fehlgeschlagen: {error}</Banner>
-      )}
-      {status === 'subscribed' && !data && (
-        <Banner background="#f9a825" color="#000">Mit Moblin verbunden, warte auf erste Telemetriedaten...</Banner>
       )}
       <CyclingHud data={data ?? previewData} config={config} pause={pause} />
       {debugVisible && <DebugPanel status={status} debug={debug} />}

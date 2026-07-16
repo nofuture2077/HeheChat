@@ -355,10 +355,32 @@
 
 .pause {
   --accent: #ba68c8;
+  overflow: visible;
 }
 
 .pauseValue {
   font-size: 30px;
+}
+
+.pauseBadge {
+  position: absolute;
+  z-index: 2;
+  top: -10px;
+  right: -10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 4px;
+  border-radius: 50%;
+  background: rgba(20, 22, 26, 0.9);
+  border: 3px solid var(--accent, #ba68c8);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
 }
 
 .gradient {
