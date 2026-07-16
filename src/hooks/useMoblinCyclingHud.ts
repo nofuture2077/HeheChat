@@ -377,6 +377,13 @@ export function useMoblinCyclingHud(): {
           return;
         }
 
+        // pushed whenever the user changes settings elsewhere while this source stays open
+        if (msg.type === 'profile') {
+          setSections(sectionsFromConfig(msg.profile?.config));
+          setThresholds(thresholdsFromConfig(msg.profile?.config));
+          return;
+        }
+
         // chat itself isn't used for HUD control anymore (moved to Settings > Connect > Moblin),
         // but keep receiving it - a future feature will show chat overlaid on the HUD
         if (msg.type === 'msg') {
