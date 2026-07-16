@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import type { MoblinTelemetryData } from '../types/moblin';
 import type { CyclingData, CyclingHudConfig, PauseInfo } from '../components/cycling/CyclingHud';
-import { parseMessage, isSystemMessageType, HeheChatMessage } from '../commons/message';
+import { parseMessage, isSystemMessageType, HeheChatMessage, SystemMessage } from '../commons/message';
 import { version } from '../../package.json';
 
 interface Sections {
@@ -100,6 +100,28 @@ const emptyPause: PauseInfo = {
   onBreak: false, currentBreakSeconds: 0, totalBreakSeconds: 0, breakCount: 0,
 };
 
+const PAUSE_STORAGE_KEY = 'cyclingHudPauseStats';
+
+// ponytail: survives a browser-source reload; resetSignal (new stream) still wipes it via clearPauseStorage
+function loadPauseStorage(): { totalBreakMs: number; breakCount: number } {
+  try {
+    const raw = localStorage.getItem(PAUSE_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (parsed && typeof parsed.totalBreakMs === 'number' && typeof parsed.breakCount === 'number') return parsed;
+  } catch {
+    // ignore corrupt/unavailable storage
+  }
+  return { totalBreakMs: 0, breakCount: 0 };
+}
+
+function savePauseStorage(totalBreakMs: number, breakCount: number): void {
+  try {
+    localStorage.setItem(PAUSE_STORAGE_KEY, JSON.stringify({ totalBreakMs, breakCount }));
+  } catch {
+    // ignore unavailable storage
+  }
+}
+
 type PauseThresholds = Pick<
   Thresholds,
   'pauseEnabled' | 'minSpeedKmh' | 'pauseStartAfterSeconds' | 'pauseResumeSpeedKmh' | 'pauseMinDistanceM'
@@ -109,17 +131,29 @@ type PauseThresholds = Pick<
 // ends once speed clears pauseResumeSpeedKmh - so briefly walking the bike around (GPS still
 // moving at walking pace) doesn't end the break early. Also requires pauseMinDistanceM of riding
 // since the ride start (or since the previous break ended) before a break can start, so idling
-// before setting off - or a quick on/off-the-bike shuffle - doesn't get counted
+// before setting off - or a quick on/off-the-bike shuffle - doesn't get counted. Waits for real
+// telemetry (hasData) before capturing the baseline distance, since Moblin's trip distance isn't
+// reset per stream - capturing it too early (e.g. against the 0 fallback before data arrives)
+// would let a carried-over distance look like it was just ridden. Also fully resets (via
+// resetSignal, bumped on a "streamOnline" event) on each new stream, since the browser source
+// isn't reloaded between streams and leftover ridden distance from a previous stream would
+// otherwise satisfy pauseMinDistanceM instantly at the next stream's start
 function usePauseTracking(
   speedKmh: number,
   distanceKm: number,
-  thresholds: PauseThresholds
+  thresholds: PauseThresholds,
+  hasData: boolean,
+  resetSignal: number
 ): PauseInfo {
   const [pause, setPause] = useState<PauseInfo>(emptyPause);
   const speedRef = useRef(speedKmh);
   speedRef.current = speedKmh;
   const distanceRef = useRef(distanceKm);
   distanceRef.current = distanceKm;
+  const hasDataRef = useRef(hasData);
+  hasDataRef.current = hasData;
+  // first mount should restore saved stats; a later resetSignal bump (new stream) should wipe them
+  const isFirstRunRef = useRef(true);
 
   const {
     pauseEnabled, minSpeedKmh, pauseStartAfterSeconds, pauseResumeSpeedKmh, pauseMinDistanceM,
@@ -131,13 +165,18 @@ function usePauseTracking(
       return undefined;
     }
 
+    const stored = isFirstRunRef.current ? loadPauseStorage() : { totalBreakMs: 0, breakCount: 0 };
+    isFirstRunRef.current = false;
+    savePauseStorage(stored.totalBreakMs, stored.breakCount);
     let notMovingSince: number | null = null;
     let breakStart: number | null = null;
-    let totalBreakMs = 0;
-    let breakCount = 0;
+    let totalBreakMs = stored.totalBreakMs;
+    let breakCount = stored.breakCount;
     let baselineDistanceKm: number | null = null;
 
     const id = setInterval(() => {
+      if (!hasDataRef.current) return;
+
       const now = Date.now();
       const speed = speedRef.current;
       const distance = distanceRef.current;
@@ -158,6 +197,7 @@ function usePauseTracking(
         breakStart = null;
         notMovingSince = null;
         baselineDistanceKm = distance;
+        savePauseStorage(totalBreakMs, breakCount);
       }
 
       const currentBreakMs = breakStart !== null ? now - breakStart : 0;
@@ -170,7 +210,10 @@ function usePauseTracking(
     }, 1000);
 
     return () => clearInterval(id);
-  }, [pauseEnabled, minSpeedKmh, pauseStartAfterSeconds, pauseResumeSpeedKmh, pauseMinDistanceM]);
+  }, [
+    pauseEnabled, minSpeedKmh, pauseStartAfterSeconds, pauseResumeSpeedKmh,
+    pauseMinDistanceM, resetSignal,
+  ]);
 
   return pause;
 }
@@ -262,6 +305,7 @@ export function useMoblinCyclingHud(): {
   const [thresholds, setThresholds] = useState<Thresholds>(defaultThresholds);
   const [status, setStatus] = useState<MoblinConnectionStatus>('waiting');
   const [error, setError] = useState<string | null>(null);
+  const [streamStartSignal, setStreamStartSignal] = useState(0);
   const [debug, setDebug] = useState<MoblinDebugInfo>(emptyDebug);
   // telemetry is buffered here and released after delaySeconds, to line the HUD up with the
   // stream's video delay - see the flush effect below
@@ -336,6 +380,19 @@ export function useMoblinCyclingHud(): {
         // chat itself isn't used for HUD control anymore (moved to Settings > Connect > Moblin),
         // but keep receiving it - a future feature will show chat overlaid on the HUD
         if (msg.type === 'msg') {
+          // a fresh stream start means the rider hasn't ridden anything yet this session, even
+          // though Moblin's cumulative distance isn't reset - use it to reset pause tracking so
+          // leftover distance from a previous stream can't immediately satisfy pauseMinDistanceM
+          if (msg.data?.message) {
+            try {
+              const parsed = parseMessage(msg.data.message);
+              if (isSystemMessageType(parsed) && (parsed as SystemMessage).subType === 'streamOnline') {
+                setStreamStartSignal((s) => s + 1);
+              }
+            } catch {
+              // ignore malformed lines - handleIncomingChat below already guards its own parse
+            }
+          }
           handleIncomingChat(msg.data?.message, setDebug);
           return;
         }
@@ -392,7 +449,9 @@ export function useMoblinCyclingHud(): {
     return () => clearInterval(id);
   }, [thresholds.delaySeconds]);
 
-  const pause = usePauseTracking(data?.speedKmh ?? 0, data?.distanceKm ?? 0, thresholds);
+  const pause = usePauseTracking(
+    data?.speedKmh ?? 0, data?.distanceKm ?? 0, thresholds, data !== null, streamStartSignal
+  );
 
   const config: CyclingHudConfig = {
     visible: {
