@@ -514,7 +514,7 @@ export default function HeheChat() {
     const setCyclingHudPauseMinDistanceM = (value: number) => updateConfig('cyclingHudPauseMinDistanceM', value);
     const setCyclingHudMaxHeartRateBpm = (value: number) => updateConfig('cyclingHudMaxHeartRateBpm', value);
     const setCyclingHudAveragePowerWatts = (value: number) => updateConfig('cyclingHudAveragePowerWatts', value);
-    const setCyclingHudTheme = (value: 'classic' | 'mono') => updateConfig('cyclingHudTheme', value);
+    const setCyclingHudTheme = (value: 'classic' | 'mono' | 'cockpit') => updateConfig('cyclingHudTheme', value);
     const setShowSceneSwitchNotifications = (value: boolean) => updateConfig('showSceneSwitchNotifications', value);
     const setChatBsTransparentBg = (value: boolean) => updateConfig('chatBsTransparentBg', value);
     const setChatBsTextColor = (value: string) => updateConfig('chatBsTextColor', value);

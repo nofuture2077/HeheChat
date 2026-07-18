@@ -92,7 +92,7 @@ export interface ConfigData {
     cyclingHudPauseMinDistanceM: number,
     cyclingHudMaxHeartRateBpm: number,
     cyclingHudAveragePowerWatts: number,
-    cyclingHudTheme: 'classic' | 'mono',
+    cyclingHudTheme: 'classic' | 'mono' | 'cockpit',
     showSceneSwitchNotifications: boolean,
     chatBsTransparentBg: boolean,
     chatBsTextColor: string,
@@ -204,7 +204,7 @@ export interface Config extends ConfigData {
     setCyclingHudPauseMinDistanceM: (val: number) => void;
     setCyclingHudMaxHeartRateBpm: (val: number) => void;
     setCyclingHudAveragePowerWatts: (val: number) => void;
-    setCyclingHudTheme: (val: 'classic' | 'mono') => void;
+    setCyclingHudTheme: (val: 'classic' | 'mono' | 'cockpit') => void;
     setShowSceneSwitchNotifications: (val: boolean) => void;
     setChatBsTransparentBg: (val: boolean) => void;
     setChatBsTextColor: (val: string) => void;

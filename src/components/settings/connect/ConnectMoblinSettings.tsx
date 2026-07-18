@@ -177,9 +177,10 @@ export function ConnectMoblinSettings() {
                       data={[
                           { value: 'classic', label: 'Classic (dark glass, colored zones)' },
                           { value: 'mono', label: 'Minimal (flat, grayscale, single accent)' },
+                          { value: 'cockpit', label: 'Cockpit (telemetry strip, green accent)' },
                       ]}
                       value={config.cyclingHudTheme}
-                      onChange={value => config.setCyclingHudTheme((value as 'classic' | 'mono') ?? 'classic')}
+                      onChange={value => config.setCyclingHudTheme((value as 'classic' | 'mono' | 'cockpit') ?? 'classic')}
                       allowDeselect={false}
                     />
                 </Stack>
