@@ -1,4 +1,4 @@
-import { TextInput, PasswordInput, Fieldset, Stack, Text, Alert, Button, Checkbox, Group, ActionIcon, Badge, Switch, NumberInput } from '@mantine/core';
+import { TextInput, PasswordInput, Fieldset, Stack, Text, Alert, Button, Checkbox, Group, ActionIcon, Badge, Switch, NumberInput, Select } from '@mantine/core';
 import { IconInfoCircle, IconPlug, IconCopy } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { ConfigContext } from '@/ApplicationContext';
@@ -34,7 +34,7 @@ export function ConnectMoblinSettings() {
     }, []);
 
     const telemetryUrl = sink
-        ? `${new URL('cycling.html', import.meta.env.VITE_SINK_URL).href}#token=${encodeURIComponent(sink)}`
+        ? `${new URL(import.meta.env.VITE_SINK_URL.replaceAll('browsersource', 'hud')).href}#token=${encodeURIComponent(sink)}`
         : '';
 
     const save = async () => {
@@ -169,6 +169,21 @@ export function ConnectMoblinSettings() {
                     <Text fs="italic" size="14px">Show Moblin scene switcher and zoom control in the stream status bar</Text>
                 </Stack>
             </Fieldset>
+            <Fieldset legend="Cycling HUD Theme" variant="filled">
+                <Stack gap="sm">
+                    <Text fs="italic" size="14px">Choose the overall visual style of the cycling telemetry HUD</Text>
+                    <Select
+                      label="Theme"
+                      data={[
+                          { value: 'classic', label: 'Classic (dark glass, colored zones)' },
+                          { value: 'mono', label: 'Minimal (flat, grayscale, single accent)' },
+                      ]}
+                      value={config.cyclingHudTheme}
+                      onChange={value => config.setCyclingHudTheme((value as 'classic' | 'mono') ?? 'classic')}
+                      allowDeselect={false}
+                    />
+                </Stack>
+            </Fieldset>
             <Fieldset legend="Cycling HUD Sections" variant="filled">
                 <Stack gap="sm">
                     <Text fs="italic" size="14px">Choose which sections the cycling telemetry HUD shows on stream</Text>
@@ -203,9 +218,24 @@ export function ConnectMoblinSettings() {
                       onChange={e => config.setCyclingHudElevation(e.currentTarget.checked)}
                     />
                     <Switch
+                      label="Heart rate"
+                      checked={config.cyclingHudHeartRate}
+                      onChange={e => config.setCyclingHudHeartRate(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Power"
+                      checked={config.cyclingHudPower}
+                      onChange={e => config.setCyclingHudPower(e.currentTarget.checked)}
+                    />
+                    <Switch
                       label="Split"
                       checked={config.cyclingHudSplit}
                       onChange={e => config.setCyclingHudSplit(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Show max speed/gradient"
+                      checked={config.cyclingHudShowMax}
+                      onChange={e => config.setCyclingHudShowMax(e.currentTarget.checked)}
                     />
                     <Switch
                       label="Debug overlay"
@@ -254,6 +284,30 @@ export function ConnectMoblinSettings() {
                       max={30}
                       value={config.cyclingHudHideLingerSeconds}
                       onChange={value => config.setCyclingHudHideLingerSeconds(Number(value) || 0)}
+                    />
+                </Stack>
+            </Fieldset>
+            <Fieldset legend="Heart Rate & Power Zones" variant="filled">
+                <Stack gap="sm">
+                    <Text fs="italic" size="14px">
+                        Used to color the heart rate/power gauges by zone. Heart rate and power
+                        only show when a sensor is actually reporting data.
+                    </Text>
+                    <NumberInput
+                      label="Max heart rate"
+                      description="Your maximum heart rate, in bpm - used to calculate heart rate zones"
+                      min={100}
+                      max={230}
+                      value={config.cyclingHudMaxHeartRateBpm}
+                      onChange={value => config.setCyclingHudMaxHeartRateBpm(Number(value) || 0)}
+                    />
+                    <NumberInput
+                      label="Average power"
+                      description="Your average/threshold power, in watts - used to calculate power zones"
+                      min={50}
+                      max={500}
+                      value={config.cyclingHudAveragePowerWatts}
+                      onChange={value => config.setCyclingHudAveragePowerWatts(Number(value) || 0)}
                     />
                 </Stack>
             </Fieldset>

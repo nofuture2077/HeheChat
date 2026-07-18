@@ -208,6 +208,8 @@ export default function HeheChat() {
                 profileData.config.cyclingHudSpeed ??= true;
                 profileData.config.cyclingHudGradient ??= true;
                 profileData.config.cyclingHudElevation ??= true;
+                profileData.config.cyclingHudHeartRate ??= true;
+                profileData.config.cyclingHudPower ??= true;
                 profileData.config.cyclingHudSplit ??= false;
                 profileData.config.cyclingHudDebug ??= false;
                 profileData.config.cyclingHudDelaySeconds ??= 10;
@@ -219,6 +221,8 @@ export default function HeheChat() {
                 profileData.config.cyclingHudPauseStartAfterSeconds ??= 30;
                 profileData.config.cyclingHudPauseResumeSpeedKmh ??= 7;
                 profileData.config.cyclingHudPauseMinDistanceM ??= 100;
+                profileData.config.cyclingHudMaxHeartRateBpm ??= 190;
+                profileData.config.cyclingHudAveragePowerWatts ??= 250;
                 setProfile(profileData);
                 AlertSystem.updateProfile(profileData);
                 const order = data.profiles.split(',').filter(x => x);
@@ -494,7 +498,10 @@ export default function HeheChat() {
     const setCyclingHudSpeed = (value: boolean) => updateConfig('cyclingHudSpeed', value);
     const setCyclingHudGradient = (value: boolean) => updateConfig('cyclingHudGradient', value);
     const setCyclingHudElevation = (value: boolean) => updateConfig('cyclingHudElevation', value);
+    const setCyclingHudHeartRate = (value: boolean) => updateConfig('cyclingHudHeartRate', value);
+    const setCyclingHudPower = (value: boolean) => updateConfig('cyclingHudPower', value);
     const setCyclingHudSplit = (value: boolean) => updateConfig('cyclingHudSplit', value);
+    const setCyclingHudShowMax = (value: boolean) => updateConfig('cyclingHudShowMax', value);
     const setCyclingHudDebug = (value: boolean) => updateConfig('cyclingHudDebug', value);
     const setCyclingHudDelaySeconds = (value: number) => updateConfig('cyclingHudDelaySeconds', value);
     const setCyclingHudMinSpeedKmh = (value: number) => updateConfig('cyclingHudMinSpeedKmh', value);
@@ -505,6 +512,9 @@ export default function HeheChat() {
     const setCyclingHudPauseStartAfterSeconds = (value: number) => updateConfig('cyclingHudPauseStartAfterSeconds', value);
     const setCyclingHudPauseResumeSpeedKmh = (value: number) => updateConfig('cyclingHudPauseResumeSpeedKmh', value);
     const setCyclingHudPauseMinDistanceM = (value: number) => updateConfig('cyclingHudPauseMinDistanceM', value);
+    const setCyclingHudMaxHeartRateBpm = (value: number) => updateConfig('cyclingHudMaxHeartRateBpm', value);
+    const setCyclingHudAveragePowerWatts = (value: number) => updateConfig('cyclingHudAveragePowerWatts', value);
+    const setCyclingHudTheme = (value: 'classic' | 'mono') => updateConfig('cyclingHudTheme', value);
     const setShowSceneSwitchNotifications = (value: boolean) => updateConfig('showSceneSwitchNotifications', value);
     const setChatBsTransparentBg = (value: boolean) => updateConfig('chatBsTransparentBg', value);
     const setChatBsTextColor = (value: string) => updateConfig('chatBsTextColor', value);
@@ -798,7 +808,10 @@ export default function HeheChat() {
         setCyclingHudSpeed,
         setCyclingHudGradient,
         setCyclingHudElevation,
+        setCyclingHudHeartRate,
+        setCyclingHudPower,
         setCyclingHudSplit,
+        setCyclingHudShowMax,
         setCyclingHudDebug,
         setCyclingHudDelaySeconds,
         setCyclingHudMinSpeedKmh,
@@ -809,6 +822,9 @@ export default function HeheChat() {
         setCyclingHudPauseStartAfterSeconds,
         setCyclingHudPauseResumeSpeedKmh,
         setCyclingHudPauseMinDistanceM,
+        setCyclingHudMaxHeartRateBpm,
+        setCyclingHudAveragePowerWatts,
+        setCyclingHudTheme,
         setShowSceneSwitchNotifications,
         setChatBsTransparentBg,
         setChatBsTextColor,

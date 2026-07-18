@@ -43,8 +43,7 @@ export default defineConfig({
         alert: './alert.html',
         switcher: './switcher.html',
         chat: './chat.html',
-        promo: './promo.html',
-        cycling: './cycling.html'
+        promo: './promo.html'
       }
     }
   },

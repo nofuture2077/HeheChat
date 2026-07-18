@@ -76,7 +76,10 @@ export interface ConfigData {
     cyclingHudSpeed: boolean,
     cyclingHudGradient: boolean,
     cyclingHudElevation: boolean,
+    cyclingHudHeartRate: boolean,
+    cyclingHudPower: boolean,
     cyclingHudSplit: boolean,
+    cyclingHudShowMax: boolean,
     cyclingHudDebug: boolean,
     cyclingHudDelaySeconds: number,
     cyclingHudMinSpeedKmh: number,
@@ -87,6 +90,9 @@ export interface ConfigData {
     cyclingHudPauseStartAfterSeconds: number,
     cyclingHudPauseResumeSpeedKmh: number,
     cyclingHudPauseMinDistanceM: number,
+    cyclingHudMaxHeartRateBpm: number,
+    cyclingHudAveragePowerWatts: number,
+    cyclingHudTheme: 'classic' | 'mono',
     showSceneSwitchNotifications: boolean,
     chatBsTransparentBg: boolean,
     chatBsTextColor: string,
@@ -182,7 +188,10 @@ export interface Config extends ConfigData {
     setCyclingHudSpeed: (val: boolean) => void;
     setCyclingHudGradient: (val: boolean) => void;
     setCyclingHudElevation: (val: boolean) => void;
+    setCyclingHudHeartRate: (val: boolean) => void;
+    setCyclingHudPower: (val: boolean) => void;
     setCyclingHudSplit: (val: boolean) => void;
+    setCyclingHudShowMax: (val: boolean) => void;
     setCyclingHudDebug: (val: boolean) => void;
     setCyclingHudDelaySeconds: (val: number) => void;
     setCyclingHudMinSpeedKmh: (val: number) => void;
@@ -193,6 +202,9 @@ export interface Config extends ConfigData {
     setCyclingHudPauseStartAfterSeconds: (val: number) => void;
     setCyclingHudPauseResumeSpeedKmh: (val: number) => void;
     setCyclingHudPauseMinDistanceM: (val: number) => void;
+    setCyclingHudMaxHeartRateBpm: (val: number) => void;
+    setCyclingHudAveragePowerWatts: (val: number) => void;
+    setCyclingHudTheme: (val: 'classic' | 'mono') => void;
     setShowSceneSwitchNotifications: (val: boolean) => void;
     setChatBsTransparentBg: (val: boolean) => void;
     setChatBsTextColor: (val: string) => void;
@@ -302,7 +314,10 @@ export const DEFAULT_CONFIG: Config = {
     cyclingHudSpeed: true,
     cyclingHudGradient: true,
     cyclingHudElevation: true,
+    cyclingHudHeartRate: true,
+    cyclingHudPower: true,
     cyclingHudSplit: false,
+    cyclingHudShowMax: false,
     cyclingHudDebug: false,
     cyclingHudDelaySeconds: 10,
     cyclingHudMinSpeedKmh: 1,
@@ -313,6 +328,9 @@ export const DEFAULT_CONFIG: Config = {
     cyclingHudPauseStartAfterSeconds: 30,
     cyclingHudPauseResumeSpeedKmh: 8,
     cyclingHudPauseMinDistanceM: 100,
+    cyclingHudMaxHeartRateBpm: 190,
+    cyclingHudAveragePowerWatts: 250,
+    cyclingHudTheme: 'classic',
     showSceneSwitchNotifications: true,
     chatBsTransparentBg: true,
     chatBsTextColor: '',
@@ -398,7 +416,10 @@ export const DEFAULT_CONFIG: Config = {
     setCyclingHudSpeed: (val) => {},
     setCyclingHudGradient: (val) => {},
     setCyclingHudElevation: (val) => {},
+    setCyclingHudHeartRate: (val) => {},
+    setCyclingHudPower: (val) => {},
     setCyclingHudSplit: (val) => {},
+    setCyclingHudShowMax: (val) => {},
     setCyclingHudDebug: (val) => {},
     setCyclingHudDelaySeconds: (val) => {},
     setCyclingHudMinSpeedKmh: (val) => {},
@@ -409,6 +430,9 @@ export const DEFAULT_CONFIG: Config = {
     setCyclingHudPauseStartAfterSeconds: (val) => {},
     setCyclingHudPauseResumeSpeedKmh: (val) => {},
     setCyclingHudPauseMinDistanceM: (val) => {},
+    setCyclingHudMaxHeartRateBpm: (val) => {},
+    setCyclingHudAveragePowerWatts: (val) => {},
+    setCyclingHudTheme: (val) => {},
     setShowSceneSwitchNotifications: (val) => {},
     setChatBsTransparentBg: () => {},
     setChatBsTextColor: () => {},
