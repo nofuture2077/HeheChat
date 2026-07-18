@@ -199,6 +199,42 @@ export function ConnectMoblinSettings() {
                       onChange={e => config.setCyclingHudLocation(e.currentTarget.checked)}
                     />
                     <Switch
+                      label="Location: City"
+                      ml="md"
+                      checked={config.cyclingHudLocationCity}
+                      onChange={e => config.setCyclingHudLocationCity(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Location: Region"
+                      ml="md"
+                      checked={config.cyclingHudLocationRegion}
+                      onChange={e => config.setCyclingHudLocationRegion(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Location: Country"
+                      ml="md"
+                      checked={config.cyclingHudLocationCountry}
+                      onChange={e => config.setCyclingHudLocationCountry(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Location: Country flag"
+                      ml="md"
+                      checked={config.cyclingHudLocationFlag}
+                      onChange={e => config.setCyclingHudLocationFlag(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Location: Temperature"
+                      ml="md"
+                      checked={config.cyclingHudLocationTemperature}
+                      onChange={e => config.setCyclingHudLocationTemperature(e.currentTarget.checked)}
+                    />
+                    <Switch
+                      label="Location: Local time"
+                      ml="md"
+                      checked={config.cyclingHudLocationLocalTime}
+                      onChange={e => config.setCyclingHudLocationLocalTime(e.currentTarget.checked)}
+                    />
+                    <Switch
                       label="Distance"
                       checked={config.cyclingHudDistance}
                       onChange={e => config.setCyclingHudDistance(e.currentTarget.checked)}

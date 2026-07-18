@@ -72,6 +72,12 @@ export interface ConfigData {
     showMoblinZoom: boolean,
     cyclingHudEnabled: boolean,
     cyclingHudLocation: boolean,
+    cyclingHudLocationCity: boolean,
+    cyclingHudLocationRegion: boolean,
+    cyclingHudLocationCountry: boolean,
+    cyclingHudLocationFlag: boolean,
+    cyclingHudLocationTemperature: boolean,
+    cyclingHudLocationLocalTime: boolean,
     cyclingHudDistance: boolean,
     cyclingHudSpeed: boolean,
     cyclingHudGradient: boolean,
@@ -184,6 +190,12 @@ export interface Config extends ConfigData {
     setShowMoblinZoom: (val: boolean) => void;
     setCyclingHudEnabled: (val: boolean) => void;
     setCyclingHudLocation: (val: boolean) => void;
+    setCyclingHudLocationCity: (val: boolean) => void;
+    setCyclingHudLocationRegion: (val: boolean) => void;
+    setCyclingHudLocationCountry: (val: boolean) => void;
+    setCyclingHudLocationFlag: (val: boolean) => void;
+    setCyclingHudLocationTemperature: (val: boolean) => void;
+    setCyclingHudLocationLocalTime: (val: boolean) => void;
     setCyclingHudDistance: (val: boolean) => void;
     setCyclingHudSpeed: (val: boolean) => void;
     setCyclingHudGradient: (val: boolean) => void;
@@ -310,6 +322,12 @@ export const DEFAULT_CONFIG: Config = {
     showMoblinZoom: false,
     cyclingHudEnabled: true,
     cyclingHudLocation: true,
+    cyclingHudLocationCity: true,
+    cyclingHudLocationRegion: false,
+    cyclingHudLocationCountry: false,
+    cyclingHudLocationFlag: true,
+    cyclingHudLocationTemperature: false,
+    cyclingHudLocationLocalTime: false,
     cyclingHudDistance: true,
     cyclingHudSpeed: true,
     cyclingHudGradient: true,
@@ -412,6 +430,12 @@ export const DEFAULT_CONFIG: Config = {
     setShowMoblinZoom: (val) => {},
     setCyclingHudEnabled: (val) => {},
     setCyclingHudLocation: (val) => {},
+    setCyclingHudLocationCity: (val) => {},
+    setCyclingHudLocationRegion: (val) => {},
+    setCyclingHudLocationCountry: (val) => {},
+    setCyclingHudLocationFlag: (val) => {},
+    setCyclingHudLocationTemperature: (val) => {},
+    setCyclingHudLocationLocalTime: (val) => {},
     setCyclingHudDistance: (val) => {},
     setCyclingHudSpeed: (val) => {},
     setCyclingHudGradient: (val) => {},

@@ -204,6 +204,12 @@ export default function HeheChat() {
                 profileData.config.showMoblinZoom ??= false;
                 profileData.config.cyclingHudEnabled ??= true;
                 profileData.config.cyclingHudLocation ??= true;
+                profileData.config.cyclingHudLocationCity ??= true;
+                profileData.config.cyclingHudLocationRegion ??= false;
+                profileData.config.cyclingHudLocationCountry ??= false;
+                profileData.config.cyclingHudLocationFlag ??= true;
+                profileData.config.cyclingHudLocationTemperature ??= false;
+                profileData.config.cyclingHudLocationLocalTime ??= false;
                 profileData.config.cyclingHudDistance ??= true;
                 profileData.config.cyclingHudSpeed ??= true;
                 profileData.config.cyclingHudGradient ??= true;
@@ -494,6 +500,12 @@ export default function HeheChat() {
     const setShowMoblinZoom = (value: boolean) => updateConfig('showMoblinZoom', value);
     const setCyclingHudEnabled = (value: boolean) => updateConfig('cyclingHudEnabled', value);
     const setCyclingHudLocation = (value: boolean) => updateConfig('cyclingHudLocation', value);
+    const setCyclingHudLocationCity = (value: boolean) => updateConfig('cyclingHudLocationCity', value);
+    const setCyclingHudLocationRegion = (value: boolean) => updateConfig('cyclingHudLocationRegion', value);
+    const setCyclingHudLocationCountry = (value: boolean) => updateConfig('cyclingHudLocationCountry', value);
+    const setCyclingHudLocationFlag = (value: boolean) => updateConfig('cyclingHudLocationFlag', value);
+    const setCyclingHudLocationTemperature = (value: boolean) => updateConfig('cyclingHudLocationTemperature', value);
+    const setCyclingHudLocationLocalTime = (value: boolean) => updateConfig('cyclingHudLocationLocalTime', value);
     const setCyclingHudDistance = (value: boolean) => updateConfig('cyclingHudDistance', value);
     const setCyclingHudSpeed = (value: boolean) => updateConfig('cyclingHudSpeed', value);
     const setCyclingHudGradient = (value: boolean) => updateConfig('cyclingHudGradient', value);
@@ -804,6 +816,12 @@ export default function HeheChat() {
         setShowMoblinZoom,
         setCyclingHudEnabled,
         setCyclingHudLocation,
+        setCyclingHudLocationCity,
+        setCyclingHudLocationRegion,
+        setCyclingHudLocationCountry,
+        setCyclingHudLocationFlag,
+        setCyclingHudLocationTemperature,
+        setCyclingHudLocationLocalTime,
         setCyclingHudDistance,
         setCyclingHudSpeed,
         setCyclingHudGradient,
