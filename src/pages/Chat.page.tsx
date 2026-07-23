@@ -484,7 +484,7 @@ export function ChatPage() {
             if (config.missedAlertsWindow !== 'none') {
                 const windowMs: Record<string, number> = { '15m': 15 * 60 * 1000, '1h': 60 * 60 * 1000, '1d': 24 * 60 * 60 * 1000 };
                 const cutoff = Date.now() - (windowMs[config.missedAlertsWindow] ?? 15 * 60 * 1000);
-                EventStorage.load(config.channels, config.ignoredUsers).then(events => {
+                EventStorage.load(config.channels, config.ignoredUsers, since).then(events => {
                     const knownIds = new Set(AlertSystem.queue.map((e: Event) => e.id));
                     events
                         .filter(e => !e.played

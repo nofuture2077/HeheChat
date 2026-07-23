@@ -16,7 +16,7 @@ export interface EventData {
 
 export interface EventStorage {
     store: (event: EventData) => Promise<void>;
-    load: (channels: string[], ignored: string[]) => Promise<EventData[]>;
+    load: (channels: string[], ignored: string[], since?: number) => Promise<EventData[]>;
 }
 
 class RemoteEventStorage implements EventStorage {
@@ -29,8 +29,12 @@ class RemoteEventStorage implements EventStorage {
         return Promise.resolve();
     }
 
-    async load(channels: string[], ignored: string[]): Promise<EventData[]> {
-        return fetch(this.baseUrl + '/event/history?' + [['channels', channels.join(',')].join('='), ['ignored', ignored.join(',')].join('=')].join('&')).then(res => res.json());
+    async load(channels: string[], ignored: string[], since?: number): Promise<EventData[]> {
+        const params = [['channels', channels.join(',')].join('='), ['ignored', ignored.join(',')].join('=')];
+        if (since !== undefined) {
+            params.push(['since', since.toString()].join('='));
+        }
+        return fetch(this.baseUrl + '/event/history?' + params.join('&')).then(res => res.json());
     }
 }
 
