@@ -33,6 +33,7 @@ let lastSeq = 0;
 let lastReceivedAt = 0;
 let statusInterval: number | undefined;
 let isClosing = false;
+let hasConnectedBefore = false;
 
 function stateName(state: ConnectionState): 'connecting' | 'connected' | 'disconnected' | 'reconnecting' {
     switch (state) {
@@ -124,6 +125,15 @@ function connectToBackend() {
 
             // Initialize the heartbeat timestamp before sending anything
             lastHeartbeatReceived = Date.now();
+
+            // A reconnect's seq always restarts at 0 on both client and server, so the
+            // seq-gap check below can never catch messages missed while disconnected —
+            // that's exactly the window it needs to catch. Flag it explicitly instead.
+            if (hasConnectedBefore) {
+                self.postMessage({ type: 'gapDetected', since: lastReceivedAt });
+            }
+            hasConnectedBefore = true;
+
             // Reset seq tracking — fresh connection, no gap detection until first message
             lastSeq = 0;
             lastReceivedAt = Date.now();
