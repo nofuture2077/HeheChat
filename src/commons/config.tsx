@@ -123,6 +123,13 @@ export interface ConfigData {
     chatBsMsgSpacing: number,
     chatBsFontFamily: string,
     chatBsMaxBadges: number,
+    showGpxMap: boolean,
+    showGpxElevationMap: boolean,
+    showGpxPosition: boolean,
+    showGpxElevationPosition: boolean,
+    showGpxRemainingDistance: boolean,
+    showGpxRemainingElevation: boolean,
+    gpxMapRadius: number | null,
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -241,6 +248,13 @@ export interface Config extends ConfigData {
     setChatBsMsgSpacing: (val: number) => void;
     setChatBsFontFamily: (val: string) => void;
     setChatBsMaxBadges: (val: number) => void;
+    setShowGpxMap: (val: boolean) => void;
+    setShowGpxElevationMap: (val: boolean) => void;
+    setShowGpxPosition: (val: boolean) => void;
+    setShowGpxElevationPosition: (val: boolean) => void;
+    setShowGpxRemainingDistance: (val: boolean) => void;
+    setShowGpxRemainingElevation: (val: boolean) => void;
+    setGpxMapRadius: (val: number | null) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -486,6 +500,20 @@ export const DEFAULT_CONFIG: Config = {
     setChatBsFontFamily: () => {},
     setChatBsMaxBadges: () => {},
     setMaxBadges: () => {},
+    showGpxMap: false,
+    showGpxElevationMap: false,
+    showGpxPosition: false,
+    showGpxElevationPosition: false,
+    showGpxRemainingDistance: false,
+    showGpxRemainingElevation: false,
+    gpxMapRadius: null,
+    setShowGpxMap: () => {},
+    setShowGpxElevationMap: () => {},
+    setShowGpxPosition: () => {},
+    setShowGpxElevationPosition: () => {},
+    setShowGpxRemainingDistance: () => {},
+    setShowGpxRemainingElevation: () => {},
+    setGpxMapRadius: () => {},
 };
 
 export const DB_VERSION = 9;

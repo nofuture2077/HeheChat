@@ -202,6 +202,13 @@ export default function HeheChat() {
                 profileData.config.showBitrateIndicator ??= false;
                 profileData.config.showSceneName ??= false;
                 profileData.config.showMoblinZoom ??= false;
+                profileData.config.showGpxMap ??= false;
+                profileData.config.showGpxElevationMap ??= false;
+                profileData.config.showGpxPosition ??= false;
+                profileData.config.showGpxElevationPosition ??= false;
+                profileData.config.showGpxRemainingDistance ??= false;
+                profileData.config.showGpxRemainingElevation ??= false;
+                profileData.config.gpxMapRadius ??= null;
                 profileData.config.cyclingHudEnabled ??= true;
                 profileData.config.cyclingHudLocation ??= true;
                 profileData.config.cyclingHudLocationCity ??= true;
@@ -498,6 +505,13 @@ export default function HeheChat() {
     const setShowBitrateIndicator = (value: boolean) => updateConfig('showBitrateIndicator', value);
     const setShowSceneName = (value: boolean) => updateConfig('showSceneName', value);
     const setShowMoblinZoom = (value: boolean) => updateConfig('showMoblinZoom', value);
+    const setShowGpxMap = (value: boolean) => updateConfig('showGpxMap', value);
+    const setShowGpxElevationMap = (value: boolean) => updateConfig('showGpxElevationMap', value);
+    const setShowGpxPosition = (value: boolean) => updateConfig('showGpxPosition', value);
+    const setShowGpxElevationPosition = (value: boolean) => updateConfig('showGpxElevationPosition', value);
+    const setShowGpxRemainingDistance = (value: boolean) => updateConfig('showGpxRemainingDistance', value);
+    const setShowGpxRemainingElevation = (value: boolean) => updateConfig('showGpxRemainingElevation', value);
+    const setGpxMapRadius = (value: number | null) => updateConfig('gpxMapRadius', value);
     const setCyclingHudEnabled = (value: boolean) => updateConfig('cyclingHudEnabled', value);
     const setCyclingHudLocation = (value: boolean) => updateConfig('cyclingHudLocation', value);
     const setCyclingHudLocationCity = (value: boolean) => updateConfig('cyclingHudLocationCity', value);
@@ -814,6 +828,13 @@ export default function HeheChat() {
         setShowBitrateIndicator,
         setShowSceneName,
         setShowMoblinZoom,
+        setShowGpxMap,
+        setShowGpxElevationMap,
+        setShowGpxPosition,
+        setShowGpxElevationPosition,
+        setShowGpxRemainingDistance,
+        setShowGpxRemainingElevation,
+        setGpxMapRadius,
         setCyclingHudEnabled,
         setCyclingHudLocation,
         setCyclingHudLocationCity,

@@ -36,6 +36,7 @@ import {
   IconRobot,
   IconInfoCircle,
   IconWifi,
+  IconMapPin,
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ModSettings } from './ModSettings';
@@ -79,6 +80,7 @@ import { ConnectFossabotSettings } from './connect/ConnectFossabotSettings';
 import { ConnectYouTubeSettings } from './connect/ConnectYouTubeSettings';
 import { ConnectMoblinSettings } from './connect/ConnectMoblinSettings';
 import { ConnectStatusSettings } from './connect/ConnectStatusSettings';
+import { GpxSettings } from './cycling/GpxSettings';
 
 // Switcher
 import { ProviderConfigTab } from '../switcher/ProviderConfigTab';
@@ -105,7 +107,7 @@ export type SettingsTab =
   | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/ActiveAlerts' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/Reroll'
   | 'Notifications' | 'Notifications/StreamStart' | 'Notifications/ChatMention'
   | 'Connect' | 'Connect/ElevenLabs' | 'Connect/SoundAlerts' | 'Connect/Blerp'
-  | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube' | 'Connect/Moblin'
+  | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube' | 'Connect/Moblin' | 'Connect/Gpx'
   | 'Shortcuts'
   | 'Switcher' | 'Switcher/Provider' | 'Switcher/Rules' | 'Switcher/Tokens'
   | 'Premium' | 'Premium/Donate' | 'Premium/Redeem'
@@ -173,6 +175,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Connect/Kofi', label: 'Ko-fi', icon: IconGift },
       { id: 'Connect/Fossabot', label: 'Fossabot', icon: IconSettings },
       { id: 'Connect/Moblin', label: 'Moblin', icon: IconVideo },
+      { id: 'Connect/Gpx', label: 'GPX Track', icon: IconMapPin },
     ],
   },
   { id: 'Shortcuts', label: 'Shortcuts', icon: IconKeyboard },
@@ -245,6 +248,7 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Connect/Fossabot': 'Connect › Fossabot',
   'Connect/YouTube': 'Connect › YouTube',
   'Connect/Moblin': 'Connect › Moblin',
+  'Connect/Gpx': 'Connect › GPX Track',
   'Shortcuts': 'Shortcuts',
   'Switcher': 'OBS Remote',
   'Switcher/Provider': 'OBS Remote › Provider',
@@ -387,6 +391,7 @@ export function Settings(props: SettingsProperties) {
       case 'Connect/Fossabot': return <ConnectFossabotSettings />;
       case 'Connect/YouTube': return <ConnectYouTubeSettings />;
       case 'Connect/Moblin': return premium.isPremium ? <ConnectMoblinSettings /> : <PremiumRequired />;
+      case 'Connect/Gpx': return <GpxSettings />;
       case 'Shortcuts': return <ShortcutSettings />;
       case 'Switcher/Provider': return (
         <Stack mt={30} mb={30} gap={30}>
