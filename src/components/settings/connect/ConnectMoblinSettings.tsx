@@ -1,19 +1,16 @@
 import { TextInput, PasswordInput, Fieldset, Stack, Text, Alert, Button, Checkbox, Group, ActionIcon, Badge, Switch, NumberInput, Select } from '@mantine/core';
 import { IconInfoCircle, IconPlug, IconCopy } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
-import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
-import { GpxApiClient } from '@/api/gpx';
+import { ConfigContext } from '@/ApplicationContext';
 
 export function ConnectMoblinSettings() {
     const config = useContext(ConfigContext);
-    const loginContext = useContext(LoginContextContext);
     const [password, setPassword] = useState('');
     const [wsUrl, setWsUrl] = useState('');
     const [configured, setConfigured] = useState(false);
     const [connected, setConnected] = useState(false);
     const [loading, setLoading] = useState(false);
     const [sink, setSink] = useState<string | undefined>(undefined);
-    const [gpxToken, setGpxToken] = useState<string | undefined>(undefined);
     const state = localStorage.getItem('hehe-token_state') || '';
 
     useEffect(() => {
@@ -36,14 +33,8 @@ export function ConnectMoblinSettings() {
             .then(data => setSink(data.sink));
     }, []);
 
-    useEffect(() => {
-        const token = loginContext.accessToken;
-        if (!token) return;
-        GpxApiClient.client(token).then(data => setGpxToken(data.token)).catch(() => undefined);
-    }, [loginContext.accessToken]);
-
     const telemetryUrl = sink
-        ? `${new URL(import.meta.env.VITE_SINK_URL.replaceAll('browsersource', 'hud')).href}#token=${encodeURIComponent(sink)}${gpxToken ? `&gpxToken=${encodeURIComponent(gpxToken)}` : ''}`
+        ? `${new URL(import.meta.env.VITE_SINK_URL.replaceAll('browsersource', 'hud')).href}#token=${encodeURIComponent(sink)}`
         : '';
 
     const save = async () => {

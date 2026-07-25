@@ -24,18 +24,6 @@ export class GpxApiClient {
   }
 
   /**
-   * Get (or auto-create) the per-user token authenticating the cycling-hud websocket client
-   * @param token The auth token
-   */
-  static async client(token: string) {
-    const response = await fetch(`${API_BASE_URL}/gpx/client?token=${encodeURIComponent(token)}`);
-    if (!response.ok) {
-      throw new Error(response.statusText);
-    }
-    return response.json() as Promise<{ token: string }>;
-  }
-
-  /**
    * List uploaded GPX files
    * @param token The auth token
    */
