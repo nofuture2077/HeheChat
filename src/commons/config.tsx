@@ -87,6 +87,7 @@ export interface ConfigData {
     cyclingHudSplit: boolean,
     cyclingHudShowMax: boolean,
     cyclingHudDebug: boolean,
+    cyclingHudShowLogo: boolean,
     cyclingHudDelaySeconds: number,
     cyclingHudMinSpeedKmh: number,
     cyclingHudMinGradientPercent: number,
@@ -196,6 +197,7 @@ export interface Config extends ConfigData {
     setShowSceneName: (val: boolean) => void;
     setShowMoblinZoom: (val: boolean) => void;
     setCyclingHudEnabled: (val: boolean) => void;
+    setCyclingHudShowLogo: (val: boolean) => void;
     setCyclingHudLocation: (val: boolean) => void;
     setCyclingHudLocationCity: (val: boolean) => void;
     setCyclingHudLocationRegion: (val: boolean) => void;
@@ -351,6 +353,7 @@ export const DEFAULT_CONFIG: Config = {
     cyclingHudSplit: false,
     cyclingHudShowMax: false,
     cyclingHudDebug: false,
+    cyclingHudShowLogo: false,
     cyclingHudDelaySeconds: 10,
     cyclingHudMinSpeedKmh: 1,
     cyclingHudMinGradientPercent: 1,
@@ -443,6 +446,7 @@ export const DEFAULT_CONFIG: Config = {
     setShowSceneName: (val) => {},
     setShowMoblinZoom: (val) => {},
     setCyclingHudEnabled: (val) => {},
+    setCyclingHudShowLogo: (val) => {},
     setCyclingHudLocation: (val) => {},
     setCyclingHudLocationCity: (val) => {},
     setCyclingHudLocationRegion: (val) => {},

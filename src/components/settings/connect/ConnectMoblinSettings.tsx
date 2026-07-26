@@ -1,7 +1,16 @@
-import { TextInput, PasswordInput, Fieldset, Stack, Text, Alert, Button, Checkbox, Group, ActionIcon, Badge, Switch, NumberInput, Select } from '@mantine/core';
-import { IconInfoCircle, IconPlug, IconCopy } from '@tabler/icons-react';
-import { useState, useEffect, useContext } from 'react';
+import { TextInput, PasswordInput, Fieldset, Stack, Text, Alert, Button, Checkbox, Group, ActionIcon, Badge, Switch, NumberInput, Select, FileButton, Loader } from '@mantine/core';
+import { IconInfoCircle, IconPlug, IconCopy, IconUpload, IconTrash } from '@tabler/icons-react';
+import { useState, useEffect, useContext, useRef } from 'react';
+import { notifications } from '@mantine/notifications';
 import { ConfigContext } from '@/ApplicationContext';
+
+const MAX_LOGO_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+interface LogoMeta {
+    filename: string;
+    mimeType: string;
+    sizeBytes: number;
+}
 
 export function ConnectMoblinSettings() {
     const config = useContext(ConfigContext);
@@ -11,6 +20,10 @@ export function ConnectMoblinSettings() {
     const [connected, setConnected] = useState(false);
     const [loading, setLoading] = useState(false);
     const [sink, setSink] = useState<string | undefined>(undefined);
+    const [logo, setLogo] = useState<LogoMeta | null>(null);
+    const [logoLoading, setLogoLoading] = useState(false);
+    const [logoUploading, setLogoUploading] = useState(false);
+    const logoResetRef = useRef<() => void>(null);
     const state = localStorage.getItem('hehe-token_state') || '';
 
     useEffect(() => {
@@ -32,6 +45,54 @@ export function ConnectMoblinSettings() {
             .then(res => res.json())
             .then(data => setSink(data.sink));
     }, []);
+
+    useEffect(() => {
+        setLogoLoading(true);
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logo?token=${encodeURIComponent(state)}`)
+            .then(res => res.json())
+            .then(data => setLogo(data))
+            .catch(() => notifications.show({ title: 'Error', message: 'Failed to load logo', color: 'red' }))
+            .finally(() => setLogoLoading(false));
+    }, []);
+
+    const handleLogoUpload = async (file: File | null) => {
+        if (!file) return;
+        if (file.size > MAX_LOGO_FILE_SIZE) {
+            notifications.show({ title: 'File too large', message: 'Logo files must be smaller than 5MB', color: 'red' });
+            logoResetRef.current?.();
+            return;
+        }
+        setLogoUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('logo', file);
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logo/upload?token=${encodeURIComponent(state)}`, {
+                method: 'POST',
+                body: formData
+            });
+            if (!res.ok) throw new Error(res.statusText);
+            const data = await res.json();
+            setLogo(data);
+            notifications.show({ title: 'Uploaded', message: `${file.name} uploaded successfully`, color: 'green' });
+        } catch {
+            notifications.show({ title: 'Error', message: 'Failed to upload logo', color: 'red' });
+        } finally {
+            setLogoUploading(false);
+            logoResetRef.current?.();
+        }
+    };
+
+    const handleLogoRemove = async () => {
+        try {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/logo?token=${encodeURIComponent(state)}`, {
+                method: 'DELETE'
+            });
+            if (!res.ok) throw new Error(res.statusText);
+            setLogo(null);
+        } catch {
+            notifications.show({ title: 'Error', message: 'Failed to remove logo', color: 'red' });
+        }
+    };
 
     const telemetryUrl = sink
         ? `${new URL(import.meta.env.VITE_SINK_URL.replaceAll('browsersource', 'hud')).href}#token=${encodeURIComponent(sink)}`
@@ -182,6 +243,32 @@ export function ConnectMoblinSettings() {
                       value={config.cyclingHudTheme}
                       onChange={value => config.setCyclingHudTheme((value as 'classic' | 'mono' | 'cockpit') ?? 'classic')}
                       allowDeselect={false}
+                    />
+                </Stack>
+            </Fieldset>
+            <Fieldset legend="Cycling HUD Logo" variant="filled">
+                <Stack gap="sm">
+                    <Text fs="italic" size="14px">Upload a custom logo (PNG or SVG) to show on the cycling telemetry HUD</Text>
+                    <Group>
+                        <FileButton resetRef={logoResetRef} onChange={handleLogoUpload} accept="image/png,image/svg+xml">
+                            {(props) => (
+                                <Button {...props} leftSection={<IconUpload size={18} />} loading={logoUploading}>
+                                    {logo ? 'Replace logo' : 'Upload logo'}
+                                </Button>
+                            )}
+                        </FileButton>
+                        {logo && (
+                            <ActionIcon color="red" variant="subtle" onClick={handleLogoRemove}>
+                                <IconTrash size={16} />
+                            </ActionIcon>
+                        )}
+                        {logoLoading && <Loader size="sm" />}
+                    </Group>
+                    {logo && <Text size="sm" c="dimmed">{logo.filename}</Text>}
+                    <Switch
+                      label="Show logo"
+                      checked={config.cyclingHudShowLogo}
+                      onChange={e => config.setCyclingHudShowLogo(e.currentTarget.checked)}
                     />
                 </Stack>
             </Fieldset>

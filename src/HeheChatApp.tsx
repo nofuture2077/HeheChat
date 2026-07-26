@@ -225,6 +225,7 @@ export default function HeheChat() {
                 profileData.config.cyclingHudPower ??= true;
                 profileData.config.cyclingHudSplit ??= false;
                 profileData.config.cyclingHudDebug ??= false;
+                profileData.config.cyclingHudShowLogo ??= false;
                 profileData.config.cyclingHudDelaySeconds ??= 10;
                 profileData.config.cyclingHudMinSpeedKmh ??= 1;
                 profileData.config.cyclingHudMinGradientPercent ??= 1;
@@ -529,6 +530,7 @@ export default function HeheChat() {
     const setCyclingHudSplit = (value: boolean) => updateConfig('cyclingHudSplit', value);
     const setCyclingHudShowMax = (value: boolean) => updateConfig('cyclingHudShowMax', value);
     const setCyclingHudDebug = (value: boolean) => updateConfig('cyclingHudDebug', value);
+    const setCyclingHudShowLogo = (value: boolean) => updateConfig('cyclingHudShowLogo', value);
     const setCyclingHudDelaySeconds = (value: number) => updateConfig('cyclingHudDelaySeconds', value);
     const setCyclingHudMinSpeedKmh = (value: number) => updateConfig('cyclingHudMinSpeedKmh', value);
     const setCyclingHudMinGradientPercent = (value: number) => updateConfig('cyclingHudMinGradientPercent', value);
@@ -852,6 +854,7 @@ export default function HeheChat() {
         setCyclingHudSplit,
         setCyclingHudShowMax,
         setCyclingHudDebug,
+        setCyclingHudShowLogo,
         setCyclingHudDelaySeconds,
         setCyclingHudMinSpeedKmh,
         setCyclingHudMinGradientPercent,
