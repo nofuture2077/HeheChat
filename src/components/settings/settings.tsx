@@ -36,7 +36,6 @@ import {
   IconRobot,
   IconInfoCircle,
   IconWifi,
-  IconMapPin,
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ModSettings } from './ModSettings';
@@ -80,13 +79,13 @@ import { ConnectFossabotSettings } from './connect/ConnectFossabotSettings';
 import { ConnectYouTubeSettings } from './connect/ConnectYouTubeSettings';
 import { ConnectMoblinSettings } from './connect/ConnectMoblinSettings';
 import { ConnectStatusSettings } from './connect/ConnectStatusSettings';
-import { GpxSettings } from './cycling/GpxSettings';
 
 // Switcher
 import { ProviderConfigTab } from '../switcher/ProviderConfigTab';
 import { RulesTab } from '../switcher/RulesTab';
 import { TokenTab } from '../switcher/TokenTab';
 import { PremiumRequired } from '../switcher/PremiumRequired';
+import { MoblinHudSettings } from '../switcher/MoblinHudSettings';
 
 // Premium
 import { PremiumSettings } from '../premium/PremiumSettings';
@@ -107,9 +106,9 @@ export type SettingsTab =
   | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/ActiveAlerts' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/Reroll'
   | 'Notifications' | 'Notifications/StreamStart' | 'Notifications/ChatMention'
   | 'Connect' | 'Connect/ElevenLabs' | 'Connect/SoundAlerts' | 'Connect/Blerp'
-  | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube' | 'Connect/Moblin' | 'Connect/Gpx'
+  | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube' | 'Connect/Moblin'
   | 'Shortcuts'
-  | 'Switcher' | 'Switcher/Provider' | 'Switcher/Rules' | 'Switcher/Tokens'
+  | 'Switcher' | 'Switcher/Provider' | 'Switcher/Rules' | 'Switcher/Tokens' | 'Switcher/MoblinHud'
   | 'Premium' | 'Premium/Donate' | 'Premium/Redeem'
   | 'Discord';
 
@@ -175,7 +174,6 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Connect/Kofi', label: 'Ko-fi', icon: IconGift },
       { id: 'Connect/Fossabot', label: 'Fossabot', icon: IconSettings },
       { id: 'Connect/Moblin', label: 'Moblin', icon: IconVideo },
-      { id: 'Connect/Gpx', label: 'GPX Track', icon: IconMapPin },
     ],
   },
   { id: 'Shortcuts', label: 'Shortcuts', icon: IconKeyboard },
@@ -185,6 +183,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Switcher/Provider', label: 'Provider', icon: IconSettings },
       { id: 'Switcher/Rules', label: 'Rules', icon: IconList },
       { id: 'Switcher/Tokens', label: 'Browsersource', icon: IconKey },
+      { id: 'Switcher/MoblinHud', label: 'Moblin HUD', icon: IconVideo },
     ],
   },
   { id: 'Mod', label: 'Mod', icon: IconSword },
@@ -248,12 +247,12 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Connect/Fossabot': 'Connect › Fossabot',
   'Connect/YouTube': 'Connect › YouTube',
   'Connect/Moblin': 'Connect › Moblin',
-  'Connect/Gpx': 'Connect › GPX Track',
   'Shortcuts': 'Shortcuts',
   'Switcher': 'OBS Remote',
   'Switcher/Provider': 'OBS Remote › Provider',
   'Switcher/Rules': 'OBS Remote › Rules',
   'Switcher/Tokens': 'OBS Remote › Browsersource',
+  'Switcher/MoblinHud': 'OBS Remote › Moblin HUD',
   'Premium': 'Premium',
   'Premium/Donate': 'Premium › Donate',
   'Premium/Redeem': 'Premium › Redeem',
@@ -391,7 +390,6 @@ export function Settings(props: SettingsProperties) {
       case 'Connect/Fossabot': return <ConnectFossabotSettings />;
       case 'Connect/YouTube': return <ConnectYouTubeSettings />;
       case 'Connect/Moblin': return premium.isPremium ? <ConnectMoblinSettings /> : <PremiumRequired />;
-      case 'Connect/Gpx': return <GpxSettings />;
       case 'Shortcuts': return <ShortcutSettings />;
       case 'Switcher/Provider': return (
         <Stack mt={30} mb={30} gap={30}>
@@ -415,6 +413,14 @@ export function Settings(props: SettingsProperties) {
             Add this page as a Browser Source in OBS to enable automatic scene switching. Enter your OBS WebSocket URL and password, then copy the generated URL and paste it into an OBS Browser Source.
           </Alert>
           {premium.isPremium ? <TokenTab /> : <PremiumRequired />}
+        </Stack>
+      );
+      case 'Switcher/MoblinHud': return (
+        <Stack mt={30} mb={30} gap={30}>
+          <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+            Configure the cycling telemetry HUD shown as an OBS browser source for Moblin streams, including theme, logo, sections and GPX track.
+          </Alert>
+          {premium.isPremium ? <MoblinHudSettings /> : <PremiumRequired />}
         </Stack>
       );
       case 'Premium/Donate': return <DonationPremium />;
