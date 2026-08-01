@@ -61,7 +61,7 @@ export function RecentEventsPanel() {
     }
 
     return (
-        <Stack gap={0} style={{position: 'absolute', width: '100%'}}>
+        <Stack gap={0}>
             {recent.reverse().map((event, i) => (
                 <InfoCard
                     key={'recent-event-' + i}
