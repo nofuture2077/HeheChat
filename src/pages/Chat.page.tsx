@@ -745,7 +745,7 @@ export function ChatPage() {
     }, [isResizing, handleMouseMove, handleMouseUp]);
 
     const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);
-    const affixOffset = headerHeight + recentEventsHeight + (config.showBitrateIndicator ? 0 : 8);
+    const affixOffset = headerHeight + (config.showBitrateIndicator ? 0 : 8);
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
     const isDesktopVideoMode = config.desktopVideoMode && (config.showVideo || currentClipId) && !isMobile;
 
@@ -888,10 +888,11 @@ export function ChatPage() {
 
             <AppShell.Main>
                 <MobileAppPrompt />
-            
+
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
-                        {(config.showBitrateIndicator || config.showSceneName || (premium.isPremium && config.showMoblinZoom)) && <div style={{ display: 'flex', justifyContent: 'center', marginTop: 0 }}><StreamStatusBar /></div>}
+                        {(config.showBitrateIndicator || config.showSceneName || (premium.isPremium && config.showMoblinZoom)) && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}><StreamStatusBar /></div>}
+                        <Space h={recentEventsHeight || 30}/>
                         <NewsDisplay />
                         {showUnplayedBanner && (
                             <Button size="xl" radius="xl" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} className="glass-pink-button" style={{ padding: '16px 24px', fontSize: '18px', width: '95%', maxWidth: '400px', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
