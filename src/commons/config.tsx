@@ -131,6 +131,8 @@ export interface ConfigData {
     showGpxRemainingDistance: boolean,
     showGpxRemainingElevation: boolean,
     gpxMapRadius: number | null,
+    recentEventsCount: number,
+    recentEventsCompact: boolean,
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -257,6 +259,8 @@ export interface Config extends ConfigData {
     setShowGpxRemainingDistance: (val: boolean) => void;
     setShowGpxRemainingElevation: (val: boolean) => void;
     setGpxMapRadius: (val: number | null) => void;
+    setRecentEventsCount: (val: number) => void;
+    setRecentEventsCompact: (val: boolean) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -518,6 +522,10 @@ export const DEFAULT_CONFIG: Config = {
     setShowGpxRemainingDistance: () => {},
     setShowGpxRemainingElevation: () => {},
     setGpxMapRadius: () => {},
+    recentEventsCount: 0,
+    recentEventsCompact: true,
+    setRecentEventsCount: () => {},
+    setRecentEventsCompact: () => {},
 };
 
 export const DB_VERSION = 9;

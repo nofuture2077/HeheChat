@@ -513,6 +513,8 @@ export default function HeheChat() {
     const setShowGpxRemainingDistance = (value: boolean) => updateConfig('showGpxRemainingDistance', value);
     const setShowGpxRemainingElevation = (value: boolean) => updateConfig('showGpxRemainingElevation', value);
     const setGpxMapRadius = (value: number | null) => updateConfig('gpxMapRadius', value);
+    const setRecentEventsCount = (value: number) => updateConfig('recentEventsCount', value);
+    const setRecentEventsCompact = (value: boolean) => updateConfig('recentEventsCompact', value);
     const setCyclingHudEnabled = (value: boolean) => updateConfig('cyclingHudEnabled', value);
     const setCyclingHudLocation = (value: boolean) => updateConfig('cyclingHudLocation', value);
     const setCyclingHudLocationCity = (value: boolean) => updateConfig('cyclingHudLocationCity', value);
@@ -837,6 +839,8 @@ export default function HeheChat() {
         setShowGpxRemainingDistance,
         setShowGpxRemainingElevation,
         setGpxMapRadius,
+        setRecentEventsCount,
+        setRecentEventsCompact,
         setCyclingHudEnabled,
         setCyclingHudLocation,
         setCyclingHudLocationCity,

@@ -13,6 +13,7 @@ import { Header } from '../components/header/Header';
 import { ConnectionStatusBanner } from '../components/header/ConnectionStatusBanner';
 import { HeaderLogo } from '../components/header/HeaderLogo';
 import { EventDrawer } from '../components/events/eventdrawer';
+import { RecentEventsPanel } from '../components/events/recenteventspanel';
 import { ChatInput } from '../components/chat/ChatInput';
 import { StreamStatusBar } from '../components/switcher/StreamStatusBar';
 import { HelixModeratedChannel } from '@twurple/api';
@@ -797,6 +798,8 @@ export function ChatPage() {
                                 <IconBrandTwitch size={16}/>
                             </ActionIcon>
                         </div>
+
+                        
                     </div>
 
                     {/* Chat Content */}
@@ -809,6 +812,7 @@ export function ChatPage() {
                             <NewsDisplay />
                             {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                             <PinManager/>
+                            
                             {showUnplayedBanner && config.missedAlertsWindow !== 'none' && (
                                 <Button size="xl" radius="xl" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} className={`glass-pink-button ${classes.missedAlertsButton}`}>
                                     Play {unplayedEvents.length} missed alert{unplayedEvents.length !== 1 ? 's' : ''}
@@ -858,10 +862,12 @@ export function ChatPage() {
                     setCurrentClipId={setCurrentClipId}
                 />
                 <ConnectionStatusBanner />
+                <RecentEventsPanel/>
             </AppShell.Header>
 
             <AppShell.Main>
                 <MobileAppPrompt />
+            
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
                         {(config.showBitrateIndicator || config.showSceneName || (premium.isPremium && config.showMoblinZoom)) && <div style={{ display: 'flex', justifyContent: 'center', marginTop: 0 }}><StreamStatusBar /></div>}
@@ -873,6 +879,7 @@ export function ChatPage() {
                         )}
                         {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
                         <PinManager/>
+                        
                         <ReloadAlertsButton onActivate={() => setShowUnplayedBanner(false)} />
                     </Stack>
                 </Affix>
@@ -894,10 +901,11 @@ export function ChatPage() {
                         <Button ml={(width - 166) / 2} onClick={scrollToBottom} leftSection={<IconMessagePause />} variant="gradient" radius={"lg"} className="glass-pink-button">New Messages</Button>
                     </Affix>
                 )}
-                <ScrollArea viewportRef={viewport} pos='absolute' w={width} h={height - (footer.current ? footer.current.scrollHeight : 0)} type="never" onScrollPositionChange={onScrollPositionChange} style={{ fontSize: config.fontSize }}>
-                    <Space h={48}></Space>
-                    <Chat messages={filteredMessages} openModView={config.rainMode ? () => {} : openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={config.rainMode ? () => {} : (msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
-                </ScrollArea>
+                <div style={{ position: 'relative', height: height - (footer.current ? footer.current.scrollHeight : 0) }}>
+                    <ScrollArea viewportRef={viewport} pos='absolute' top={0} w={width} h="100%" style={{ fontSize: config.fontSize }} type="never" onScrollPositionChange={onScrollPositionChange}>
+                        <Chat messages={filteredMessages} openModView={config.rainMode ? () => {} : openModView} moderatedChannel={moderatedChannel} modActions={modActions} deletedMessages={deletedMessagesIndex} setReplyMsg={config.rainMode ? () => {} : (msg) => { if (msg) { setReplyMsg(msg); config.setChatChannel(msg.target.substring(1)); chatInputHandler.open(); } }} />
+                    </ScrollArea>
+                </div>
                 <Space h={footer.current ? footer.current.scrollHeight + 5 : 20}></Space>
             </AppShell.Main>
             <AppShell.Footer withBorder={false} style={{ background: footerGradient, borderTop: barBorderTop, boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.07)' }}>

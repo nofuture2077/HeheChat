@@ -1,4 +1,4 @@
-import { Switch, Stack, Fieldset, Alert } from '@mantine/core';
+import { Switch, Stack, Fieldset, Alert, Select } from '@mantine/core';
 import { IconInfoCircle } from '@tabler/icons-react';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext } from 'react';
@@ -29,6 +29,16 @@ export function ChatEventsSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            <Fieldset legend="Recent Events Panel" variant="filled">
+                <Stack>
+                    <Select
+                        label="Show latest events above chat"
+                        data={['Off', '3', '5']}
+                        value={config.recentEventsCount === 0 ? 'Off' : config.recentEventsCount + ''}
+                        onChange={(value) => { config.setRecentEventsCount(value === 'Off' ? 0 : Number(value)); forceUpdate(); }}
+                    />
+                </Stack>
+            </Fieldset>
             <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
                 Control which Twitch and platform events appear as messages directly in your chat feed. Disable event types you don't want cluttering your chat view — they can still trigger alerts independently.
             </Alert>

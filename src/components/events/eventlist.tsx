@@ -28,7 +28,7 @@ const LOGOS: Record<string, any> = {
   kofi: <KofiLogo style={{width: 24,height: 24,color: 'var(--mantine-color-text)'}}/>,
 };
 
-function getIcon(event: EventData, key: string) {
+export function getIcon(event: EventData, key: string) {
     const style: any = {variant: 'transparent'};
     getEventStyle(event, style);
     const icon = icons[event.eventtype as EventType];
@@ -116,32 +116,17 @@ export function formatEventText(event: EventData): string {
     return formatString(messageTemplate, {...event, ...additionalData});
 }
 
-export function EventList() {
+export function useEventFeed() {
     const config = useContext(ConfigContext);
-    const profile = useContext(ProfileContext);
-    const login = useContext(LoginContextContext);
     const [events, setEvents] = useState<EventData[]>([]);
     const [load, setLoad] = useState(true);
-    const [checkedEvents, setCheckedEvents] = useState<Dictionary<boolean>>({});
-    const forceUpdate = useForceUpdate();
-
-    const canShoutout = (channel: string) => {
-        const isModerator = login.moderatedChannels.some(c => c.name === channel);
-        const isBroadcaster = channel === login.user?.name;
-        return config.modToolsEnabled && (isModerator || isBroadcaster);
-    };
-
-    const shoutout = async (event: EventData) => {
-        const [channelData, userData] = await Promise.all([getUserId(event.channel), getUserId(event.username)]);
-        shoutoutUser(channelData.userId, userData.userId);
-    };
 
     useEffect(() => {
         const ignored: string[] = Object.keys(config.hideEvents).filter(
             // @ts-ignore
             (key: string) => config.hideEvents[key]
         );
-        
+
         EventStorage?.load(config.channels, ignored).then((events) => {
             setEvents(events);
             setLoad(false);
@@ -159,6 +144,28 @@ export function EventList() {
             PubSub.unsubscribe(eventSub);
         }
     }, []);
+
+    return { events, load };
+}
+
+export function EventList() {
+    const config = useContext(ConfigContext);
+    const profile = useContext(ProfileContext);
+    const login = useContext(LoginContextContext);
+    const { events, load } = useEventFeed();
+    const [checkedEvents, setCheckedEvents] = useState<Dictionary<boolean>>({});
+    const forceUpdate = useForceUpdate();
+
+    const canShoutout = (channel: string) => {
+        const isModerator = login.moderatedChannels.some(c => c.name === channel);
+        const isBroadcaster = channel === login.user?.name;
+        return config.modToolsEnabled && (isModerator || isBroadcaster);
+    };
+
+    const shoutout = async (event: EventData) => {
+        const [channelData, userData] = await Promise.all([getUserId(event.channel), getUserId(event.username)]);
+        shoutoutUser(channelData.userId, userData.userId);
+    };
 
     const replayEvent = (data: EventData) => {
         if (AlertSystem.shouldBePlayedInBrowsersource(data) && !checkedEvents[data.id]) {
