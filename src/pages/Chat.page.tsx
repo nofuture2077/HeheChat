@@ -104,6 +104,8 @@ export function ChatPage() {
     const networkStatus = useNetwork();
     const prevDocumentVisible = useRef(true); // Start with true to detect first hide->show transition
     const [videoHeight, setVideoHeight] = useState(0);
+    const [recentEventsHeight, setRecentEventsHeight] = useState(0);
+    const recentEventsRef = useRef<HTMLDivElement>(null);
     // Load shortcuts visible state from localStorage with profile.guid based key
     const [shortcutsVisible, setShortcutsVisible] = useState(() => {
         const key = `hehe-shortcuts-visible-${profile.guid}`;
@@ -660,6 +662,25 @@ export function ChatPage() {
         return () => obs.disconnect();
     }, []);
 
+    useEffect(() => {
+        const wrapper = recentEventsRef.current;
+        if (!wrapper) return;
+        // ponytail: RecentEventsPanel renders position:absolute (mounts/unmounts with its
+        // content), so the wrapper's own offsetHeight stays 0 — track the child directly
+        // and re-bind whenever it mounts/unmounts.
+        const resizeObs = new ResizeObserver(entries => setRecentEventsHeight(entries[0].target.getBoundingClientRect().height));
+        const bindChild = () => {
+            resizeObs.disconnect();
+            const el = wrapper.firstElementChild;
+            if (el) resizeObs.observe(el);
+            else setRecentEventsHeight(0);
+        };
+        bindChild();
+        const mutationObs = new MutationObserver(bindChild);
+        mutationObs.observe(wrapper, { childList: true });
+        return () => { resizeObs.disconnect(); mutationObs.disconnect(); };
+    }, []);
+
     const openModView = (channel: string, channelId: string, username: string) => {
         ModDrawer.props = { channel, channelId, username };
         setDrawer(ModDrawer);
@@ -724,7 +745,7 @@ export function ChatPage() {
     }, [isResizing, handleMouseMove, handleMouseUp]);
 
     const headerHeight = 36 + ((config.showVideo || currentClipId) ? videoHeight : 0);
-    const affixOffset = headerHeight + (config.showBitrateIndicator ? 0 : 8);
+    const affixOffset = headerHeight + recentEventsHeight + (config.showBitrateIndicator ? 0 : 8);
     const isMobile = /Mobi|Android/i.test(navigator.userAgent);
     const isDesktopVideoMode = config.desktopVideoMode && (config.showVideo || currentClipId) && !isMobile;
 
@@ -862,7 +883,7 @@ export function ChatPage() {
                     setCurrentClipId={setCurrentClipId}
                 />
                 <ConnectionStatusBanner />
-                <RecentEventsPanel/>
+                <div ref={recentEventsRef}><RecentEventsPanel/></div>
             </AppShell.Header>
 
             <AppShell.Main>
