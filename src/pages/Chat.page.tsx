@@ -892,6 +892,7 @@ export function ChatPage() {
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
                         {(config.showBitrateIndicator || config.showSceneName || (premium.isPremium && config.showMoblinZoom)) && <div style={{ position: 'absolute', top: -recentEventsHeight - 8, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}><StreamStatusBar /></div>}
+                        <div style={{marginTop: recentEventsHeight ? -16 : 17}}></div>
                         <NewsDisplay />
                         {showUnplayedBanner && (
                             <Button size="xl" radius="xl" leftSection={<IconPlayerPlay size={24} />} onClick={handleUnplayedBannerClick} className="glass-pink-button" style={{ padding: '16px 24px', fontSize: '18px', width: '95%', maxWidth: '400px', margin: '0 auto', display: 'flex', justifyContent: 'center' }}>
