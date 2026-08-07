@@ -19,6 +19,7 @@ interface AudioInfo {
     audioBuffer?: AudioBuffer;
     audioUrl?: string;
     videoElement?: HTMLVideoElement;
+    speed?: number;
 }
 
 let cheerPrefixes = ['Cheer', 'BibleThump', 'cheerwhal', 'Corgo', 'uni', 'ShowLove', 'Party', 'SeemsGood', 'Pride', 'Kappa', 'FrankerZ', 'HeyGuys', 'DansGame', 'EleGiggle', 'TriHard', 'Kreygasm', '4Head', 'SwiftRage', 'NotLikeThis', 'FailFish', 'VoHiYo', 'PJSalt', 'MrDestructoid', 'bday', 'RIPCheer', 'Shamrock'];
@@ -183,7 +184,8 @@ class AlertPlayer {
                 return;
             }
             
-            const { duration, audioBuffer, audioUrl, videoElement } = audioInfo;
+            const { duration, audioBuffer, audioUrl, videoElement, speed } = audioInfo;
+            const playbackRate = speed ?? 1.0;
             
             // Clean up any existing audio source
             this.cleanupCurrentSource();
@@ -223,8 +225,9 @@ class AlertPlayer {
                         handleInterruption();
                     };
                     
+                    videoElement.playbackRate = playbackRate;
                     videoElement.play();
-                    
+
                     // Update media session metadata
                     if ('mediaSession' in navigator) {
                         this.updateMediaSessionMetadata();
@@ -238,6 +241,7 @@ class AlertPlayer {
                     // Play from decoded buffer
                     const source = this.audioContext.createBufferSource();
                     source.buffer = audioBuffer;
+                    source.playbackRate.value = playbackRate;
                     source.connect(gainNode);
                     
                     this.currentSource = source;
@@ -280,6 +284,7 @@ class AlertPlayer {
                         try {
                             const source = this.audioContext!.createBufferSource();
                             source.buffer = decodedData;
+                            source.playbackRate.value = playbackRate;
                             source.connect(gainNode);
                             
                             this.currentSource = source;
@@ -706,13 +711,14 @@ class AlertPlayer {
         }
     }
 
-    async tts(ttsMessage: string, channel: string, voice: string, voiceType: string, state: string, sink: string) {
+    async tts(ttsMessage: string, channel: string, voice: string, voiceType: string, state: string, sink: string, voiceParams?: Record<string, string | number>) {
         // Skip if explicitly disabled
         if (voiceType === "none") return;
 
         // Resolve which voice to use
         let resolvedVoiceType = voiceType;
         let resolvedVoice = voice;
+        let resolvedVoiceParams = voiceParams;
 
         if (voiceType === "default") {
             const defaultVoice = this.alertConfig[channel]?.data?.config?.defaultVoice;
@@ -722,6 +728,7 @@ class AlertPlayer {
             }
             resolvedVoiceType = defaultVoice.voiceType;
             resolvedVoice = defaultVoice.voiceSpecifier;
+            resolvedVoiceParams = voiceParams?.speed !== undefined ? voiceParams : defaultVoice.voiceParams;
         }
 
         // Choose engine
@@ -730,8 +737,12 @@ class AlertPlayer {
             : await this.googleTTS(ttsMessage, channel, resolvedVoice, state, sink);
 
         if (!audioData) return;
-        return this.getAudioInfo("data:audio/mp3;base64," + audioData);
-
+        const audioInfo = await this.getAudioInfo("data:audio/mp3;base64," + audioData);
+        if (audioInfo) {
+            const speed = Number(resolvedVoiceParams?.speed);
+            audioInfo.speed = Number.isFinite(speed) ? Math.min(4.0, Math.max(0.5, speed)) : 1.0;
+        }
+        return audioInfo;
     }
 
     async wait(duration: number, minDuration: number): Promise<void> {
@@ -1062,7 +1073,7 @@ class AlertPlayer {
             : (this.config?.playAlerts ?? false);
 
         try {
-            const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, event.channel, alert.audio.tts.voiceSpecifier, alert.audio.tts.voiceType, state, sink) : undefined;
+            const ttsAudio = (alert.audio?.tts && ttsMessage) ? await this.tts(ttsMessage, event.channel, alert.audio.tts.voiceSpecifier, alert.audio.tts.voiceType, state, sink, alert.audio.tts.voiceParams) : undefined;
             const jingleAudio = alert.audio?.jingle ? await this.getAudioInfo(this.getAudioFileData(alert.audio.jingle, alertConfig)) : undefined;
 
             console.log('Audio', ttsAudio, jingleAudio);
