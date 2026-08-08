@@ -22,7 +22,7 @@ import { PremiumDrawer } from '../components/premium/DonationPremium';
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { MassBanDrawer } from '../components/chat/mod/massban';
-import { HeheMessage, parseMessage, HeheChatMessage, SystemMessage, SystemMessageMainType } from '../commons/message';
+import { HeheMessage, parseMessage, HeheChatMessage, SystemMessage, SystemMessageMainType, shouldReadMessage, ttsSpamTracker } from '../commons/message';
 import { EventType, EventTypeMapping } from '../commons/events';
 import { TwitchDrawer } from '../components/twitch/twitchview';
 import { TwitchPlayer } from '../components/twitch/twitchplayer';
@@ -444,8 +444,15 @@ export function ChatPage() {
             if (config.readAllMessages && premium.isPremium && message.type === 'chat') {
                 // Check if the user is not in the ignoreTTS list
                 const username = data.username.toLowerCase();
-                if (!config.ignoreTTS || !config.ignoreTTS.includes(username)) {
+                const passesSmartFilter = !config.smartFilter.enabled || shouldReadMessage(message, config.smartFilter);
+                if ((!config.ignoreTTS || !config.ignoreTTS.includes(username)) && passesSmartFilter) {
                     const date = Date.now();
+
+                    if (config.smartFilter.enabled && config.smartFilter.skipSpam &&
+                        (ttsSpamTracker.isRepeatFromUser(username, message.text, date) || ttsSpamTracker.isCopypasta(username, message.text, date))) {
+                        addMessage(message, data.username, config.maxMessages);
+                        return;
+                    }
 
                     const tts: Event = {
                         id: -1,

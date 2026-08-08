@@ -49,6 +49,7 @@ export class HeheChatMessage {
     isFirst?: boolean;
     isHighlight?: boolean;
     msgType?: string;
+    replyParentMessageId?: string | null;
 
     constructor(
         id: string,
@@ -60,7 +61,8 @@ export class HeheChatMessage {
         channelId: string,
         isFirst?: boolean,
         isHighlight?: boolean,
-        msgType?: string
+        msgType?: string,
+        replyParentMessageId?: string | null
     ) {
         this.id = id;
         this.text = text;
@@ -72,6 +74,7 @@ export class HeheChatMessage {
         this.isFirst = isFirst;
         this.isHighlight = isHighlight;
         this.msgType = msgType;
+        this.replyParentMessageId = replyParentMessageId;
     }
 
     static deserialize(json: string): HeheChatMessage {
@@ -86,7 +89,8 @@ export class HeheChatMessage {
             data.channelId,
             data.isFirst,
             data.isHighlight,
-            data.msgType
+            data.msgType,
+            data.replyParentMessageId
         );
     }
 }
@@ -244,3 +248,89 @@ export function isSystemMessageType(msg: HeheMessage) {
 export function isYTChatMessageType(msg: HeheMessage) {
     return msg.type === 'ytchat';
 }
+
+export interface SmartFilterConfig {
+    enabled: boolean;
+    skipEmoteOnly: boolean;
+    skipReplies: boolean;
+    skipShort: boolean;
+    minWords: number;
+    skipLong: boolean;
+    maxWords: number;
+    skipLinks: boolean;
+    skipSpam: boolean;
+}
+
+function isRepetitiveText(text: string): boolean {
+    // ponytail: naive heuristic, revisit if it misfires on real chat samples
+    const words = text.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (words.length >= 3) {
+        const counts = new Map<string, number>();
+        for (const word of words) {
+            counts.set(word, (counts.get(word) || 0) + 1);
+        }
+        const maxCount = Math.max(...counts.values());
+        if (maxCount >= 3 && maxCount / words.length > 0.5) {
+            return true;
+        }
+    }
+    const collapsed = text.replace(/(.)\1{2,}/g, '$1');
+    return text.length >= 6 && collapsed.length / text.length < 0.5;
+}
+
+export function shouldReadMessage(msg: HeheChatMessage, filter: SmartFilterConfig): boolean {
+    const text = msg.text.trim();
+
+    if (filter.skipEmoteOnly && msg.parts.every(p => p.type === 'emote' || p.type === 'cheermote' || !p.text.trim())) {
+        return false;
+    }
+    if (filter.skipReplies && msg.replyParentMessageId) {
+        return false;
+    }
+    const wordCount = text.split(/\s+/).filter(Boolean).length;
+    if (filter.skipShort && wordCount < filter.minWords) {
+        return false;
+    }
+    if (filter.skipLong && wordCount > filter.maxWords) {
+        return false;
+    }
+    if (filter.skipLinks && text.split(/\s+/).some(word => word.startsWith('http://') || word.startsWith('https://'))) {
+        return false;
+    }
+    if (filter.skipSpam && isRepetitiveText(text)) {
+        return false;
+    }
+    return true;
+}
+
+const SPAM_WINDOW_MS = 30_000;
+const COPYPASTA_BUFFER_SIZE = 20;
+
+class SpamTracker {
+    private lastByUser = new Map<string, { text: string; date: number }>();
+    private recent: { text: string; user: string; date: number }[] = [];
+
+    private normalize(text: string): string {
+        return text.trim().toLowerCase();
+    }
+
+    isRepeatFromUser(user: string, text: string, now: number): boolean {
+        const normalized = this.normalize(text);
+        const last = this.lastByUser.get(user);
+        this.lastByUser.set(user, { text: normalized, date: now });
+        return !!last && last.text === normalized && now - last.date < SPAM_WINDOW_MS;
+    }
+
+    isCopypasta(user: string, text: string, now: number): boolean {
+        const normalized = this.normalize(text);
+        this.recent = this.recent.filter(entry => now - entry.date < SPAM_WINDOW_MS);
+        const isDuplicate = this.recent.some(entry => entry.user !== user && entry.text === normalized);
+        this.recent.push({ text: normalized, user, date: now });
+        if (this.recent.length > COPYPASTA_BUFFER_SIZE) {
+            this.recent.shift();
+        }
+        return isDuplicate;
+    }
+}
+
+export const ttsSpamTracker = new SpamTracker();

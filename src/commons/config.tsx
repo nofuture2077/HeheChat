@@ -1,5 +1,17 @@
-import { SystemMessageMainType } from '../commons/message';
+import { SystemMessageMainType, SmartFilterConfig } from '../commons/message';
 import { ShortCut } from './shortcuts';
+
+export const DEFAULT_SMART_FILTER: SmartFilterConfig = {
+    enabled: false,
+    skipEmoteOnly: true,
+    skipReplies: true,
+    skipShort: true,
+    minWords: 2,
+    skipLong: false,
+    maxWords: 40,
+    skipLinks: true,
+    skipSpam: true
+};
 
 export type MessageHandler = {id?: number, handle: (channel: string, text: string, replyTo?: string) => void};
 
@@ -62,6 +74,7 @@ export interface ConfigData {
     freeTTS: string[],
     ignoreTTS: string[],
     readAllMessages: boolean,
+    smartFilter: SmartFilterConfig,
     deactivatedAlerts: Record<string, boolean>,
     shortcuts: ShortCut[],
     reloadOnReturnToApp: boolean,
@@ -194,6 +207,7 @@ export interface Config extends ConfigData {
     setReloadOnReturnToApp: (val: boolean) => void;
     setRainMode: (val: boolean) => void;
     setReadAllMessages: (val: boolean) => void;
+    setSmartFilter: (val: Partial<SmartFilterConfig>) => void;
     setMissedAlertsWindow: (val: string) => void;
     setShowBitrateIndicator: (val: boolean) => void;
     setShowSceneName: (val: boolean) => void;
@@ -336,6 +350,7 @@ export const DEFAULT_CONFIG: Config = {
     reloadOnReturnToApp: true,
     rainMode: false,
     readAllMessages: false,
+    smartFilter: DEFAULT_SMART_FILTER,
     missedAlertsWindow: '15m',
     showBitrateIndicator: false,
     showSceneName: false,
@@ -445,6 +460,7 @@ export const DEFAULT_CONFIG: Config = {
     setReloadOnReturnToApp: (val) => {},
     setRainMode: (val) => {},
     setReadAllMessages: (val) => {},
+    setSmartFilter: (val) => {},
     setMissedAlertsWindow: (_val: string) => {},
     setShowBitrateIndicator: (val) => {},
     setShowSceneName: (val) => {},
