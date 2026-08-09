@@ -565,7 +565,7 @@ export function ChatPage() {
             PubSub.unsubscribe(gapSub);
             config.off(chatHandler);
         };
-    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, config.ignoreTTS, config.readAllMessages, config.systemMessageInChat, loginContext.user]);
+    }, [config.channels, config.ignoredUsers, config.raidTargets, profile.guid, config.maxMessages, config.freeTTS, config.ignoreTTS, config.readAllMessages, config.smartFilter, config.systemMessageInChat, loginContext.user]);
 
     // Track document visibility changes for reload functionality
     useEffect(() => {
