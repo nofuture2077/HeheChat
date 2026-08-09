@@ -152,7 +152,7 @@ export class SpriteManager {
           );
           
           images.push({
-            name: filename,
+            name: filename.split('/').pop() as string,
             data: base64,
             mime
           });

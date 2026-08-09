@@ -260,10 +260,11 @@
         zip.forEach((relativePath, zipEntry) => {
           if (!zipEntry.dir && isImageFile(relativePath)) {
             imageCount++;
+            const filename = relativePath.split('/').pop();
             const promise = zipEntry.async("blob").then(blob => {
               const imageUrl = URL.createObjectURL(blob);
-              extractedImages[relativePath] = imageUrl;
-              return { name: relativePath, url: imageUrl };
+              extractedImages[filename] = imageUrl;
+              return { name: filename, url: imageUrl };
             });
             imagePromises.push(promise);
           }
