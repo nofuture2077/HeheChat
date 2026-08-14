@@ -36,6 +36,8 @@ export default function Login(props: LoginProps) {
     const tokenStored: string | null = (authVersion && Number(authVersion) >= AUTH_VERSION) ? localStorage.getItem('hehe-token') : null;
     const token: string | undefined = window.location.hash ? getQueryVariable(hash, "access_token") : undefined;
     const tokenState = window.location.hash ? getQueryVariable(hash, "state") : undefined;
+    const userIdFromHash: string | undefined = window.location.hash ? getQueryVariable(hash, "userid") : undefined;
+    const userIdStored: string | null = localStorage.getItem('hehe-userid');
     const [waitover, setWaitOver] = useState<boolean>(false);
 
     useEffect(() => {
@@ -50,46 +52,46 @@ export default function Login(props: LoginProps) {
             return;
         }
 
-        if (tokenStored || token) {
+        if (token && localStorage.getItem('hehe-token_state') !== tokenState) {
+            console.error('[login] Token mismatched... not logged in');
+            return;
+        }
+
+        const userId = (token ? userIdFromHash : userIdStored) || '';
+
+        if ((tokenStored || token) && userId) {
             const authProvider = new StaticAuthProvider(props.clientId, tokenStored || token || '');
             const api = new ApiClient({authProvider});
-            api.getTokenInfo().then((tokenInfo) => {
-                const userId = tokenInfo.userId || '';
-                DEFAULT_CHAT_EMOTES.updateUserEmote(userId);
-                api.users.getAuthenticatedUser({id: userId}).then((user) => {
-                    loginContext.setUser(user);
-                });
 
-                api.moderation.getModeratedChannelsPaginated({id: tokenInfo.userId || ''}).getAll().then((moderatedChannels) => {
-                    loginContext.setModeratedChannels(moderatedChannels);
-                });
+            DEFAULT_CHAT_EMOTES.updateUserEmote(userId);
+            api.users.getAuthenticatedUser({id: userId}).then((user) => {
+                loginContext.setUser(user);
+            });
 
-                if (tokenStored) {
-                    loginContext.setAccessToken(tokenStored);
-                }
-                if (token) {
-                    if (localStorage.getItem('hehe-token_state') !== tokenState) {
-                        console.error('Token mismatched... not logged in');
-                        return;
-                    }
-                    loginContext.setAccessToken(token);
-                    localStorage.setItem('hehe-token', token);
-                    localStorage.setItem('hehe-auth-version', AUTH_VERSION + "");
-                    const redirectUrl = encodeURI(window.location.origin + window.location.pathname.replace("index.html", ""));
-                    document.location = redirectUrl;
-                }
-            }, (err) => {
-                console.error(err);
-                localStorage.removeItem('hehe-token');
-                localStorage.removeItem('hehe-token_state');
-                loginContext.setAccessToken(undefined);
-                // Clear emote cache on logout/token error
-                if (loginContext.user) {
-                    EmoteStore.clearUserEmotes(loginContext.user.id).catch(console.error);
-                }
+            api.moderation.getModeratedChannelsPaginated({id: userId}).getAll().then((moderatedChannels) => {
+                loginContext.setModeratedChannels(moderatedChannels);
+            }).catch((err) => {
+                console.error('[login] failed to load moderated channels', err);
+            });
+
+            if (tokenStored) {
+                loginContext.setAccessToken(tokenStored);
+            }
+            if (token) {
+                loginContext.setAccessToken(token);
+                localStorage.setItem('hehe-token', token);
+                localStorage.setItem('hehe-userid', userId);
+                localStorage.setItem('hehe-auth-version', AUTH_VERSION + "");
                 const redirectUrl = encodeURI(window.location.origin + window.location.pathname.replace("index.html", ""));
                 document.location = redirectUrl;
-            });
+            }
+        } else if (tokenStored && !userId) {
+            // Stored token predates userid caching (old AUTH_VERSION) - drop it and force a fresh login.
+            console.error('[login] no cached userid for stored token, clearing session');
+            localStorage.removeItem('hehe-token');
+            localStorage.removeItem('hehe-token_state');
+            localStorage.removeItem('hehe-userid');
+            loginContext.setAccessToken(undefined);
         }
     }, [token]);
 
