@@ -1,8 +1,31 @@
-import { StaticAuthProvider, AuthProvider } from '@twurple/auth';
+import { StaticAuthProvider, AuthProvider, AccessTokenWithUserId } from '@twurple/auth';
 import { ApiClient, HelixUser, HelixModeratedChannel } from '@twurple/api';
 import { toMap } from '@/commons/helper';
 
 export const AUTH_VERSION = 16;
+
+// Twurple's StaticAuthProvider always calls Twitch's /oauth2/validate endpoint on its
+// first use to resolve the token's userId, even if we already know it. That call fails
+// for users whose network blocks id.twitch.tv. Since we already have a trusted userId
+// from our own backend's token exchange, this provider supplies it directly and skips
+// that network round-trip entirely.
+export function createTrustedAuthProvider(clientId: string, accessToken: string, userId: string): AuthProvider {
+    const token: AccessTokenWithUserId = {
+        accessToken,
+        refreshToken: null,
+        scope: [],
+        expiresIn: null,
+        obtainmentTimestamp: 0,
+        userId,
+    };
+    return {
+        clientId,
+        getCurrentScopesForUser: () => [],
+        getAccessTokenForUser: async () => token,
+        getAccessTokenForIntent: async () => token,
+        getAnyAccessToken: async () => token,
+    };
+}
 
 export const LOGIN_SCOPES = [
     "bits:read",

@@ -1,11 +1,10 @@
 import { Menu } from '@mantine/core';
-import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient } from '@twurple/api';
 import { IconLink, IconChevronDown } from '@tabler/icons-react';
 import React, { useEffect, useContext, useState } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 import { generateGUID } from '@/commons/helper';
-import { LOGIN_SCOPES, AUTH_VERSION } from '@/commons/login';
+import { LOGIN_SCOPES, AUTH_VERSION, createTrustedAuthProvider } from '@/commons/login';
 import { EmoteStore } from '@/components/chat/emotestorage';
 import PubSub from 'pubsub-js'
 import { DEFAULT_CHAT_EMOTES } from '@/commons/emotes'
@@ -60,7 +59,7 @@ export default function Login(props: LoginProps) {
         const userId = (token ? userIdFromHash : userIdStored) || '';
 
         if ((tokenStored || token) && userId) {
-            const authProvider = new StaticAuthProvider(props.clientId, tokenStored || token || '');
+            const authProvider = createTrustedAuthProvider(props.clientId, tokenStored || token || '', userId);
             const api = new ApiClient({authProvider});
 
             DEFAULT_CHAT_EMOTES.updateUserEmote(userId);
