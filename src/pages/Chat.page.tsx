@@ -317,7 +317,7 @@ export function ChatPage() {
             if (!token) return;
             
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/connection?token=${token}`);
-            if (handleUnauthorized(response)) return;
+            if (handleUnauthorized(response.status)) return;
             const data: ConnectionsResponse = await response.json();
             
             // Clear previous notifications
@@ -524,6 +524,8 @@ export function ChatPage() {
 
                     await EmoteStore.storeUserEmotes(userId, userEmotesResult);
                 }
+            }).catch((err: any) => {
+                if (!handleUnauthorized(err?.statusCode)) console.error('[chat] failed to load user emotes', err);
             });
         }
 

@@ -12,7 +12,7 @@ export const fetchPremiumStatus = async (token: string) => {
       'Expires': '0'
     }
   });
-  if (handleUnauthorized(response)) return null;
+  if (handleUnauthorized(response.status)) return null;
   return response.json();
 };
 

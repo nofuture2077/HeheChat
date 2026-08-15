@@ -4,7 +4,7 @@ import { IconLink, IconChevronDown } from '@tabler/icons-react';
 import React, { useEffect, useContext, useState } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 import { generateGUID } from '@/commons/helper';
-import { LOGIN_SCOPES, AUTH_VERSION, createTrustedAuthProvider } from '@/commons/login';
+import { LOGIN_SCOPES, AUTH_VERSION, createTrustedAuthProvider, handleUnauthorized } from '@/commons/login';
 import { EmoteStore } from '@/components/chat/emotestorage';
 import PubSub from 'pubsub-js'
 import { DEFAULT_CHAT_EMOTES } from '@/commons/emotes'
@@ -65,12 +65,14 @@ export default function Login(props: LoginProps) {
             DEFAULT_CHAT_EMOTES.updateUserEmote(userId);
             api.users.getAuthenticatedUser({id: userId}).then((user) => {
                 loginContext.setUser(user);
+            }).catch((err) => {
+                if (!handleUnauthorized(err?.statusCode)) console.error('[login] failed to load user', err);
             });
 
             api.moderation.getModeratedChannelsPaginated({id: userId}).getAll().then((moderatedChannels) => {
                 loginContext.setModeratedChannels(moderatedChannels);
             }).catch((err) => {
-                console.error('[login] failed to load moderated channels', err);
+                if (!handleUnauthorized(err?.statusCode)) console.error('[login] failed to load moderated channels', err);
             });
 
             if (tokenStored) {

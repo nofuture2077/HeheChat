@@ -131,8 +131,8 @@ export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
 };
 
 // ponytail: backend token expiry only surfaces as a 401 on any authed call, so callers must check for it explicitly
-export function handleUnauthorized(response: Response) {
-    if (response.status === 401) {
+export function handleUnauthorized(status: number) {
+    if (status === 401) {
         localStorage.removeItem('hehe-token');
         localStorage.removeItem('hehe-token_state');
         localStorage.removeItem('hehe-userid');
@@ -145,7 +145,12 @@ export function handleUnauthorized(response: Response) {
 export async function getUserId(context: LoginContext) {
     const api = context.getApiClient();
 
-    return (await api.getTokenInfo()).userId;
+    try {
+        return (await api.getTokenInfo()).userId;
+    } catch (error: any) {
+        if (!handleUnauthorized(error?.statusCode)) throw error;
+        return undefined;
+    }
 }
 
 export async function getUserdata(context: LoginContext, usernames: string[]) {
@@ -168,8 +173,8 @@ export async function getUserdata(context: LoginContext, usernames: string[]) {
             console.warn('No users found or empty array returned for usernames:', usernames);
             return new Map();
         }
-    } catch (error) {
-        console.error('Error fetching user data:', error);
+    } catch (error: any) {
+        if (!handleUnauthorized(error?.statusCode)) console.error('Error fetching user data:', error);
         return new Map();
     }
 }
