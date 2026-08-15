@@ -310,7 +310,7 @@ export function ChatPage() {
     // Function to check connections and show warnings if needed
     const checkConnections = useCallback(async () => {
         try {
-            if (!config.checkBrowsersourceConnection || !config.browserSourceAudio) {
+            if (!profile.guid || !config.checkBrowsersourceConnection || !config.browserSourceAudio) {
                 return;
             }
             const token = localStorage.getItem('hehe-token_state') || '';
