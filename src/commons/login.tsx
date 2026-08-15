@@ -130,6 +130,18 @@ export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
     setModeratedChannels: (channels: HelixModeratedChannel[]) => {}
 };
 
+// ponytail: backend token expiry only surfaces as a 401 on any authed call, so callers must check for it explicitly
+export function handleUnauthorized(response: Response) {
+    if (response.status === 401) {
+        localStorage.removeItem('hehe-token');
+        localStorage.removeItem('hehe-token_state');
+        localStorage.removeItem('hehe-userid');
+        window.location.reload();
+        return true;
+    }
+    return false;
+}
+
 export async function getUserId(context: LoginContext) {
     const api = context.getApiClient();
 

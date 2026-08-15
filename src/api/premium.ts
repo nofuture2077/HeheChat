@@ -1,3 +1,5 @@
+import { handleUnauthorized } from '@/commons/login';
+
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || '';
 
 export const fetchPremiumStatus = async (token: string) => {
@@ -10,6 +12,7 @@ export const fetchPremiumStatus = async (token: string) => {
       'Expires': '0'
     }
   });
+  if (handleUnauthorized(response)) return null;
   return response.json();
 };
 

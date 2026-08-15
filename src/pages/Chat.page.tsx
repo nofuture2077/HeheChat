@@ -18,6 +18,7 @@ import { ChatInput } from '../components/chat/ChatInput';
 import { StreamStatusBar } from '../components/switcher/StreamStatusBar';
 import { HelixModeratedChannel } from '@twurple/api';
 import { SettingsDrawer, SettingsTab } from '../components/settings/settings';
+import { handleUnauthorized } from '../commons/login';
 import { PremiumDrawer } from '../components/premium/DonationPremium';
 import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
@@ -316,6 +317,7 @@ export function ChatPage() {
             if (!token) return;
             
             const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/connection?token=${token}`);
+            if (handleUnauthorized(response)) return;
             const data: ConnectionsResponse = await response.json();
             
             // Clear previous notifications
