@@ -1,4 +1,4 @@
-import { Box, Text } from '@mantine/core';
+import { Anchor, Box, Group, Text } from '@mantine/core';
 import { HeaderLogo } from '@/components/header/HeaderLogo';
 import { BG, BORDER } from './tokens';
 
@@ -15,6 +15,14 @@ export function PromoFooter({ copyright }: Props) {
       <Text size="xs" style={{ color: 'rgba(255,255,255,0.25)' }}>
         © {new Date().getFullYear()} {copyright}
       </Text>
+      <Group justify="center" gap="md" mt={8}>
+        <Anchor href="/imprint.html" size="xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          Imprint
+        </Anchor>
+        <Anchor href="/privacy.html" size="xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          Privacy Policy
+        </Anchor>
+      </Group>
     </Box>
   );
 }

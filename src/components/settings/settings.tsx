@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react';
-import { Tooltip, UnstyledButton, Title, rem, Button, ScrollArea, Text, Stack, Group, Alert, Center, Switch } from '@mantine/core';
+import { Tooltip, UnstyledButton, Title, rem, Button, ScrollArea, Text, Stack, Group, Alert, Center, Switch, Anchor } from '@mantine/core';
 import {
   IconHome2,
   IconX,
@@ -301,9 +301,15 @@ export function Settings(props: SettingsProperties) {
     switch (groupId) {
       case 'General':
         return (
-          <Center>
-            <Switch checked={config.rainMode} onChange={(event) => config.setRainMode(event.currentTarget.checked)} label="Rain Mode" size="lg" />
-          </Center>
+          <Stack gap="md">
+            <Center>
+              <Switch checked={config.rainMode} onChange={(event) => config.setRainMode(event.currentTarget.checked)} label="Rain Mode" size="lg" />
+            </Center>
+            <Group justify="center" gap="md">
+              <Anchor href="/imprint.html" size="xs" c="dimmed">Imprint</Anchor>
+              <Anchor href="/privacy.html" size="xs" c="dimmed">Privacy Policy</Anchor>
+            </Group>
+          </Stack>
         );
       default:
         return null;

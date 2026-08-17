@@ -1,5 +1,5 @@
 import Login from '@/components/login/login';
-import { Image, Text } from '@mantine/core';
+import { Anchor, Group, Image, Text } from '@mantine/core';
 import classes from './home.module.css'
 import nofuture from "./NoFuture.svg"
 // Import version from package.json
@@ -54,9 +54,11 @@ export function HomePage() {
       <div>
         <Image src={nofuture} className={classes.nofuture} />
       </div>
-      <Text size="xs" c="dimmed" style={{ position: 'absolute', bottom: '22px', right: '22px', textAlign: 'center', zIndex: 2 }}>
-          v{version}
-      </Text>
+      <Group gap="xs" style={{ position: 'absolute', bottom: '22px', right: '22px', zIndex: 2 }}>
+        <Anchor href="/imprint.html" size="xs" c="dimmed">Imprint</Anchor>
+        <Anchor href="/privacy.html" size="xs" c="dimmed">Privacy Policy</Anchor>
+        <Text size="xs" c="dimmed">v{version}</Text>
+      </Group>
     </div>
   );
 }
