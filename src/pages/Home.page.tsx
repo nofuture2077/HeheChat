@@ -55,8 +55,7 @@ export function HomePage() {
         <Image src={nofuture} className={classes.nofuture} />
       </div>
       <Group gap="xs" style={{ position: 'absolute', bottom: '22px', right: '22px', zIndex: 2 }}>
-        <Anchor href="/imprint.html" size="xs" c="dimmed">Imprint</Anchor>
-        <Anchor href="/privacy.html" size="xs" c="dimmed">Privacy Policy</Anchor>
+        <Anchor href="https://get.hehechat.io" size="xs" c="dimmed">Info</Anchor>
         <Text size="xs" c="dimmed">v{version}</Text>
       </Group>
     </div>

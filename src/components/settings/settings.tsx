@@ -305,10 +305,6 @@ export function Settings(props: SettingsProperties) {
             <Center>
               <Switch checked={config.rainMode} onChange={(event) => config.setRainMode(event.currentTarget.checked)} label="Rain Mode" size="lg" />
             </Center>
-            <Group justify="center" gap="md">
-              <Anchor href="/imprint.html" size="xs" c="dimmed">Imprint</Anchor>
-              <Anchor href="/privacy.html" size="xs" c="dimmed">Privacy Policy</Anchor>
-            </Group>
           </Stack>
         );
       default:
