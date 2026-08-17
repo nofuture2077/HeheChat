@@ -171,6 +171,11 @@ export function GpxSettings() {
                           checked={config.showGpxRemainingElevation}
                           onChange={e => config.setShowGpxRemainingElevation(e.currentTarget.checked)}
                         />
+                        <Switch
+                          label="Show waypoints"
+                          checked={config.showGpxWaypoints}
+                          onChange={e => config.setShowGpxWaypoints(e.currentTarget.checked)}
+                        />
                         <Text size="sm" mt="sm">Map radius</Text>
                         <SegmentedControl
                           value={config.gpxMapRadius === null ? 'full' : String(config.gpxMapRadius)}

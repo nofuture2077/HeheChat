@@ -143,6 +143,7 @@ export interface ConfigData {
     showGpxElevationPosition: boolean,
     showGpxRemainingDistance: boolean,
     showGpxRemainingElevation: boolean,
+    showGpxWaypoints: boolean,
     gpxMapRadius: number | null,
     recentEventsCount: number,
     recentEventsCompact: boolean,
@@ -272,6 +273,7 @@ export interface Config extends ConfigData {
     setShowGpxElevationPosition: (val: boolean) => void;
     setShowGpxRemainingDistance: (val: boolean) => void;
     setShowGpxRemainingElevation: (val: boolean) => void;
+    setShowGpxWaypoints: (val: boolean) => void;
     setGpxMapRadius: (val: number | null) => void;
     setRecentEventsCount: (val: number) => void;
     setRecentEventsCompact: (val: boolean) => void;
@@ -530,6 +532,7 @@ export const DEFAULT_CONFIG: Config = {
     showGpxElevationPosition: false,
     showGpxRemainingDistance: false,
     showGpxRemainingElevation: false,
+    showGpxWaypoints: false,
     gpxMapRadius: null,
     setShowGpxMap: () => {},
     setShowGpxElevationMap: () => {},
@@ -537,6 +540,7 @@ export const DEFAULT_CONFIG: Config = {
     setShowGpxElevationPosition: () => {},
     setShowGpxRemainingDistance: () => {},
     setShowGpxRemainingElevation: () => {},
+    setShowGpxWaypoints: () => {},
     setGpxMapRadius: () => {},
     recentEventsCount: 0,
     recentEventsCompact: true,

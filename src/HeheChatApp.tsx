@@ -209,6 +209,7 @@ export default function HeheChat() {
                 profileData.config.showGpxElevationPosition ??= false;
                 profileData.config.showGpxRemainingDistance ??= false;
                 profileData.config.showGpxRemainingElevation ??= false;
+                profileData.config.showGpxWaypoints ??= false;
                 profileData.config.gpxMapRadius ??= null;
                 profileData.config.cyclingHudEnabled ??= true;
                 profileData.config.cyclingHudLocation ??= true;
@@ -514,6 +515,7 @@ export default function HeheChat() {
     const setShowGpxElevationPosition = (value: boolean) => updateConfig('showGpxElevationPosition', value);
     const setShowGpxRemainingDistance = (value: boolean) => updateConfig('showGpxRemainingDistance', value);
     const setShowGpxRemainingElevation = (value: boolean) => updateConfig('showGpxRemainingElevation', value);
+    const setShowGpxWaypoints = (value: boolean) => updateConfig('showGpxWaypoints', value);
     const setGpxMapRadius = (value: number | null) => updateConfig('gpxMapRadius', value);
     const setRecentEventsCount = (value: number) => updateConfig('recentEventsCount', value);
     const setRecentEventsCompact = (value: boolean) => updateConfig('recentEventsCompact', value);
@@ -841,6 +843,7 @@ export default function HeheChat() {
         setShowGpxElevationPosition,
         setShowGpxRemainingDistance,
         setShowGpxRemainingElevation,
+        setShowGpxWaypoints,
         setGpxMapRadius,
         setRecentEventsCount,
         setRecentEventsCompact,
