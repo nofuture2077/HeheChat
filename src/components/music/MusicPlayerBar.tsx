@@ -1,8 +1,15 @@
 import { useContext } from 'react';
 import { Group, ActionIcon, Text, Stack, Slider } from '@mantine/core';
 import { IconPlayerPlay, IconPlayerPause, IconPlayerSkipForward, IconVolume } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import classes from './MusicPlayerBar.module.css';
 import { MusicContext } from '@/ApplicationContext';
+
+function reportError(promise: Promise<void>) {
+    promise.catch((err) => {
+        notifications.show({ title: 'Spotify', message: err?.message || 'Something went wrong', color: 'red' });
+    });
+}
 
 export function MusicPlayerBar() {
     const music = useContext(MusicContext);
@@ -21,13 +28,13 @@ export function MusicPlayerBar() {
                       variant="filled"
                       size="md"
                       radius="xl"
-                      onClick={() => track?.isPlaying ? music.pause() : music.play()}
+                      onClick={() => reportError(track?.isPlaying ? music.pause() : music.play())}
                     >
                         {track?.isPlaying
                             ? <IconPlayerPause size={16} />
                             : <IconPlayerPlay size={16} />}
                     </ActionIcon>
-                    <ActionIcon variant="filled" size="md" radius="xl" onClick={() => music.skip()}>
+                    <ActionIcon variant="filled" size="md" radius="xl" onClick={() => reportError(music.skip())}>
                         <IconPlayerSkipForward size={16} />
                     </ActionIcon>
                 </Group>
@@ -40,7 +47,7 @@ export function MusicPlayerBar() {
                       min={0}
                       max={100}
                       value={track?.volumePercent ?? 0}
-                      onChange={(value) => music.setVolume(value)}
+                      onChange={(value) => reportError(music.setVolume(value))}
                     />
                 </Group>
             </Group>

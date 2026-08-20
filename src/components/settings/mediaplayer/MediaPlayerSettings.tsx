@@ -1,8 +1,15 @@
 import { useContext, useEffect, useState } from 'react';
 import { Stack, Fieldset, Select, Group, ActionIcon, Text, Slider, Alert } from '@mantine/core';
 import { IconPlayerPlay, IconPlayerPause, IconPlayerSkipForward, IconVolume, IconInfoCircle } from '@tabler/icons-react';
+import { notifications } from '@mantine/notifications';
 import { MusicContext } from '@/ApplicationContext';
 import { getSpotifyPlaylists, SpotifyPlaylist, spotifyToken } from '@/api/spotify';
+
+function reportError(promise: Promise<void>) {
+    promise.catch((err) => {
+        notifications.show({ title: 'Spotify', message: err?.message || 'Something went wrong', color: 'red' });
+    });
+}
 
 export function MediaPlayerSettings() {
     const music = useContext(MusicContext);
@@ -66,15 +73,15 @@ export function MediaPlayerSettings() {
                         <ActionIcon
                           size="lg"
                           variant="filled"
-                          onClick={() => music.currentTrack?.isPlaying
+                          onClick={() => reportError(music.currentTrack?.isPlaying
                               ? music.pause()
-                              : music.play(music.settings.playlistUri || undefined)}
+                              : music.play(music.settings.playlistUri || undefined))}
                         >
                             {music.currentTrack?.isPlaying
                                 ? <IconPlayerPause size={18} />
                                 : <IconPlayerPlay size={18} />}
                         </ActionIcon>
-                        <ActionIcon size="lg" variant="filled" onClick={() => music.skip()}>
+                        <ActionIcon size="lg" variant="filled" onClick={() => reportError(music.skip())}>
                             <IconPlayerSkipForward size={18} />
                         </ActionIcon>
                     </Group>
@@ -88,7 +95,7 @@ export function MediaPlayerSettings() {
                           min={0}
                           max={100}
                           value={music.currentTrack?.volumePercent ?? 0}
-                          onChange={(value) => music.setVolume(value)}
+                          onChange={(value) => reportError(music.setVolume(value))}
                           label={(value) => `${value}%`}
                         />
                     </Stack>

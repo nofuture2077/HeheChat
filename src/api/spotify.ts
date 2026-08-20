@@ -56,36 +56,48 @@ export async function getSpotifyStatus(state: string): Promise<SpotifyStatus> {
     return res.json();
 }
 
+async function assertOk(res: Response, fallbackMessage: string): Promise<void> {
+    if (res.ok) return;
+    if (res.status === 404) {
+        throw new Error('No active Spotify device found. Open Spotify on a device first.');
+    }
+    throw new Error(fallbackMessage);
+}
+
 export async function playSpotify(state: string, context_uri?: string): Promise<void> {
-    await fetch(`${BASE_URL}/spotify/play`, {
+    const res = await fetch(`${BASE_URL}/spotify/play`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state, context_uri }),
     });
+    await assertOk(res, 'Failed to start playback');
 }
 
 export async function pauseSpotify(state: string): Promise<void> {
-    await fetch(`${BASE_URL}/spotify/pause`, {
+    const res = await fetch(`${BASE_URL}/spotify/pause`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state }),
     });
+    await assertOk(res, 'Failed to pause playback');
 }
 
 export async function skipSpotify(state: string): Promise<void> {
-    await fetch(`${BASE_URL}/spotify/skip`, {
+    const res = await fetch(`${BASE_URL}/spotify/skip`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state }),
     });
+    await assertOk(res, 'Failed to skip track');
 }
 
 export async function setSpotifyVolume(state: string, value: number): Promise<void> {
-    await fetch(`${BASE_URL}/spotify/volume`, {
+    const res = await fetch(`${BASE_URL}/spotify/volume`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ state, value }),
     });
+    await assertOk(res, 'Failed to set volume');
 }
 
 export async function getSpotifySettings(state: string): Promise<SpotifySettings> {
