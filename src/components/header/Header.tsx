@@ -1,7 +1,7 @@
 import { Container, ActionIcon, Group, Text, Stack, Popover, UnstyledButton, Divider } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import classes from './Header.module.css';
-import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard, IconRefresh } from '@tabler/icons-react';
+import { IconBrandTwitch, IconSettings, IconBell, IconKeyboard, IconRefresh, IconMusic } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
 import { ConfigContext, ProfileContext, PremiumContext, LoginContextContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
@@ -79,6 +79,8 @@ export function Header(props: {
     forceSevenTVReload: () => Promise<void>,
     toggleShortcuts: () => void,
     showShortcutsToggle: boolean,
+    toggleMusicPlayer?: () => void,
+    showMusicPlayerToggle?: boolean,
     currentClipId: string | null,
     setCurrentClipId: (currentClipId: string | null) => void
 }) {
@@ -221,6 +223,12 @@ export function Header(props: {
                     {props.showShortcutsToggle ?
                         (<ActionIcon variant='transparent' color='primary' onClick={props.toggleShortcuts} size='44px'>
                             <IconKeyboard/>
+                        </ActionIcon>)
+                    : null}
+
+                    {props.showMusicPlayerToggle ?
+                        (<ActionIcon variant='transparent' color='primary' onClick={props.toggleMusicPlayer} size='44px'>
+                            <IconMusic/>
                         </ActionIcon>)
                     : null}
 

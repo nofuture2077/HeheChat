@@ -9,8 +9,9 @@ import { useWakeLock } from './hooks/useWakeLock';
 import { useVersionCheck } from './hooks/useVersionCheck';
 import { initializeStoragePatches } from './commons/patches';
 import { Router } from './Router';
-import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext, PremiumContext } from './ApplicationContext';
+import { ConfigContext, LoginContextContext, ChatEmotesContext, ProfileContext, PremiumContext, MusicContext } from './ApplicationContext';
 import { Premium, DEFAULT_PREMIUM } from './commons/premium';
+import { Music, DEFAULT_MUSIC, musicController } from './commons/music';
 import * as premiumApi from './api/premium';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import { StaticAuthProvider } from '@twurple/auth';
@@ -1128,6 +1129,39 @@ export default function HeheChat() {
         processPayment
     };
 
+    const [music, setMusic] = useState<Music>(DEFAULT_MUSIC);
+
+    useEffect(() => {
+        const buildMusicValue = (): Music => ({
+            connected: musicController.connected,
+            currentTrack: musicController.currentTrack,
+            queue: musicController.queue,
+            settings: musicController.settings,
+            refreshStatus: () => musicController.refreshStatus(),
+            refreshQueue: () => musicController.refreshQueue(),
+            play: (context_uri?: string) => musicController.play(context_uri),
+            pause: () => musicController.pause(),
+            skip: () => musicController.skip(),
+            setVolume: (value: number) => musicController.setVolume(value),
+            duck: () => musicController.duck(),
+            restoreVolume: () => musicController.restoreVolume(),
+            updateSettings: (partial) => musicController.updateSettings(partial),
+            submitSongRequest: (query, requester, source) => musicController.submitSongRequest(query, requester, source),
+            approve: (id: string) => musicController.approve(id),
+            reject: (id: string) => musicController.reject(id),
+        });
+
+        musicController.setChangeListener(() => setMusic(buildMusicValue()));
+        setMusic(buildMusicValue());
+        musicController.refreshStatus();
+        musicController.refreshQueue();
+
+        return () => {
+            musicController.setChangeListener(null);
+            musicController.stopPolling();
+        };
+    }, []);
+
     return (
         <MantineProvider defaultColorScheme="auto" theme={theme}>
             <Notifications position="top-right" limit={5} />
@@ -1136,9 +1170,11 @@ export default function HeheChat() {
                     <LoginContextContext.Provider value={appLogin}>
                         <ChatEmotesContext.Provider value={chatEmotes}>
                             <PremiumContext.Provider value={appPremium}>
-                                <ConnectionStatusProvider forceReconnect={forceReconnect}>
-                                    <Router/>
-                                </ConnectionStatusProvider>
+                                <MusicContext.Provider value={music}>
+                                    <ConnectionStatusProvider forceReconnect={forceReconnect}>
+                                        <Router/>
+                                    </ConnectionStatusProvider>
+                                </MusicContext.Provider>
                             </PremiumContext.Provider>
                         </ChatEmotesContext.Provider>
                     </LoginContextContext.Provider>
