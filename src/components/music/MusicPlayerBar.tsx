@@ -1,31 +1,42 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { Group, ActionIcon, Text, Stack, Slider } from '@mantine/core';
-import { IconPlayerPlay, IconPlayerPause, IconPlayerSkipForward, IconVolume } from '@tabler/icons-react';
+import { IconPlayerPlay, IconPlayerPause, IconPlayerSkipForward, IconVolume, IconMusic } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import classes from './MusicPlayerBar.module.css';
 import { MusicContext } from '@/ApplicationContext';
 
 function reportError(promise: Promise<void>) {
     promise.catch((err) => {
-        notifications.show({ title: 'Spotify', message: err?.message || 'Something went wrong', color: 'red' });
+        notifications.show({
+            id: 'spotify-error',
+            title: 'Spotify',
+            message: err?.message || 'Something went wrong',
+            color: 'pink',
+        });
     });
 }
 
 export function MusicPlayerBar() {
     const music = useContext(MusicContext);
     const track = music.currentTrack;
+    const [draggingVolume, setDraggingVolume] = useState<number | null>(null);
+    const volume = draggingVolume ?? track?.volumePercent ?? 0;
 
     return (
         <div className={`glass-panel ${classes.glassCard}`}>
             <Group justify="space-between" gap="sm" wrap="nowrap">
-                <Stack gap={0} style={{ minWidth: 0, flex: 1 }}>
-                    <Text size="sm" fw={600} truncate>{track?.name || 'Nothing playing'}</Text>
-                    <Text size="xs" c="dimmed" truncate>{track?.artist || ''}</Text>
-                </Stack>
+                <Group gap={8} wrap="nowrap" style={{ minWidth: 0, flex: 1 }}>
+                    <IconMusic size={16} className={classes.noteIcon} />
+                    <Stack gap={0} style={{ minWidth: 0 }}>
+                        <Text size="sm" fw={600} truncate>{track?.name || 'Nothing playing'}</Text>
+                        <Text size="xs" c="dimmed" truncate>{track?.artist || ''}</Text>
+                    </Stack>
+                </Group>
 
-                <Group gap={4} wrap="nowrap">
+                <Group gap={6} wrap="nowrap">
                     <ActionIcon
-                      variant="filled"
+                      variant="gradient"
+                      className="glass-pink-button"
                       size="md"
                       radius="xl"
                       onClick={() => reportError(track?.isPlaying ? music.pause() : music.play())}
@@ -34,7 +45,13 @@ export function MusicPlayerBar() {
                             ? <IconPlayerPause size={16} />
                             : <IconPlayerPlay size={16} />}
                     </ActionIcon>
-                    <ActionIcon variant="filled" size="md" radius="xl" onClick={() => reportError(music.skip())}>
+                    <ActionIcon
+                      variant="gradient"
+                      className="glass-pink-button"
+                      size="md"
+                      radius="xl"
+                      onClick={() => reportError(music.skip())}
+                    >
                         <IconPlayerSkipForward size={16} />
                     </ActionIcon>
                 </Group>
@@ -44,10 +61,15 @@ export function MusicPlayerBar() {
                     <Slider
                       style={{ flex: 1 }}
                       size="sm"
+                      color="pink"
                       min={0}
                       max={100}
-                      value={track?.volumePercent ?? 0}
-                      onChange={(value) => reportError(music.setVolume(value))}
+                      value={volume}
+                      onChange={setDraggingVolume}
+                      onChangeEnd={(value) => {
+                          setDraggingVolume(null);
+                          reportError(music.setVolume(value));
+                      }}
                     />
                 </Group>
             </Group>

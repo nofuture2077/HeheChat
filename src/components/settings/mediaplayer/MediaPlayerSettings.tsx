@@ -7,7 +7,12 @@ import { getSpotifyPlaylists, SpotifyPlaylist, spotifyToken } from '@/api/spotif
 
 function reportError(promise: Promise<void>) {
     promise.catch((err) => {
-        notifications.show({ title: 'Spotify', message: err?.message || 'Something went wrong', color: 'red' });
+        notifications.show({
+            id: 'spotify-error',
+            title: 'Spotify',
+            message: err?.message || 'Something went wrong',
+            color: 'pink',
+        });
     });
 }
 
@@ -15,6 +20,7 @@ export function MediaPlayerSettings() {
     const music = useContext(MusicContext);
     const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
     const [loadingPlaylists, setLoadingPlaylists] = useState(false);
+    const [draggingVolume, setDraggingVolume] = useState<number | null>(null);
 
     useEffect(() => {
         if (!music.connected) return;
@@ -40,9 +46,9 @@ export function MediaPlayerSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
-            <Fieldset legend="Now Playing" variant="filled">
+            <Fieldset legend="Now Playing" variant="filled" className="glass-surface">
                 <Stack gap="sm">
-                    <Text size="sm" fw={600}>
+                    <Text size="sm" fw={600} c="pink">
                         {music.currentTrack?.name || 'Nothing playing'}
                     </Text>
                     <Text size="xs" c="dimmed">
@@ -51,7 +57,7 @@ export function MediaPlayerSettings() {
                 </Stack>
             </Fieldset>
 
-            <Fieldset legend="Controls" variant="filled">
+            <Fieldset legend="Controls" variant="filled" className="glass-surface">
                 <Stack gap="md">
                     <Select
                       label="Playlist"
@@ -72,7 +78,9 @@ export function MediaPlayerSettings() {
                     <Group justify="center" gap="md">
                         <ActionIcon
                           size="lg"
-                          variant="filled"
+                          variant="gradient"
+                          className="glass-pink-button"
+                          radius="xl"
                           onClick={() => reportError(music.currentTrack?.isPlaying
                               ? music.pause()
                               : music.play(music.settings.playlistUri || undefined))}
@@ -81,7 +89,13 @@ export function MediaPlayerSettings() {
                                 ? <IconPlayerPause size={18} />
                                 : <IconPlayerPlay size={18} />}
                         </ActionIcon>
-                        <ActionIcon size="lg" variant="filled" onClick={() => reportError(music.skip())}>
+                        <ActionIcon
+                          size="lg"
+                          variant="gradient"
+                          className="glass-pink-button"
+                          radius="xl"
+                          onClick={() => reportError(music.skip())}
+                        >
                             <IconPlayerSkipForward size={18} />
                         </ActionIcon>
                     </Group>
@@ -92,10 +106,15 @@ export function MediaPlayerSettings() {
                             <Text size="sm">Volume</Text>
                         </Group>
                         <Slider
+                          color="pink"
                           min={0}
                           max={100}
-                          value={music.currentTrack?.volumePercent ?? 0}
-                          onChange={(value) => reportError(music.setVolume(value))}
+                          value={draggingVolume ?? music.currentTrack?.volumePercent ?? 0}
+                          onChange={setDraggingVolume}
+                          onChangeEnd={(value) => {
+                              setDraggingVolume(null);
+                              reportError(music.setVolume(value));
+                          }}
                           label={(value) => `${value}%`}
                         />
                     </Stack>
