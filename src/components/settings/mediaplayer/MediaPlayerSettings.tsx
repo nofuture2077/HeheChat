@@ -79,7 +79,6 @@ export function MediaPlayerSettings() {
                         <ActionIcon
                           size="lg"
                           variant="gradient"
-                          className="glass-pink-button"
                           radius="xl"
                           onClick={() => reportError(music.currentTrack?.isPlaying
                               ? music.pause()
@@ -92,7 +91,6 @@ export function MediaPlayerSettings() {
                         <ActionIcon
                           size="lg"
                           variant="gradient"
-                          className="glass-pink-button"
                           radius="xl"
                           onClick={() => reportError(music.skip())}
                         >

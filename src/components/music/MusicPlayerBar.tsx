@@ -36,7 +36,6 @@ export function MusicPlayerBar() {
                 <Group gap={6} wrap="nowrap">
                     <ActionIcon
                       variant="gradient"
-                      className="glass-pink-button"
                       size="md"
                       radius="xl"
                       onClick={() => reportError(track?.isPlaying ? music.pause() : music.play())}
@@ -47,7 +46,6 @@ export function MusicPlayerBar() {
                     </ActionIcon>
                     <ActionIcon
                       variant="gradient"
-                      className="glass-pink-button"
                       size="md"
                       radius="xl"
                       onClick={() => reportError(music.skip())}
