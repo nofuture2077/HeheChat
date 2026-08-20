@@ -73,6 +73,7 @@ export function parsedPartsToHtml(parsedParts: ParsedMessagePart[], channel: str
             };
             case 'text': return joinWithSpace(part.text!.split(' ').map((word, index) => wordMapper(word, channel, partIndex, index, config, emotes, login)));
             case 'mention': return wordMapper(part.text, channel, partIndex, 0, config, emotes, login)
+            case 'gif': return <img key={partIndex} src={part.gif?.url} alt={part.text || 'gif'} style={{borderRadius: '.4rem', display: 'block', maxHeight: '200px'}} />;
         }
     });
 }

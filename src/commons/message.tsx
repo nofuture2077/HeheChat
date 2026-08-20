@@ -20,7 +20,7 @@ interface UserInfo {
 }
 
 export interface ParsedMessagePart {
-    type: 'text' | 'emote' | 'cheermote' | 'mention';
+    type: 'text' | 'emote' | 'cheermote' | 'mention' | 'gif';
     text: string;
     id?: string;
     name: string;
@@ -34,6 +34,10 @@ export interface ParsedMessagePart {
     cheermote?: {
         bits: number;
         prefix: string;
+    },
+    gif?: {
+        id: string;
+        url: string;
     }
 }
 
