@@ -933,7 +933,7 @@ export function ChatPage() {
                             </Button>
                         )}
                         {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
-                        {musicPlayerVisible && music.connected && <MusicPlayerBar />}
+                        {config.mediaPlayerEnabled && musicPlayerVisible && music.connected && <MusicPlayerBar />}
                         <PinManager/>
                         
                         <ReloadAlertsButton onActivate={() => setShowUnplayedBanner(false)} />
