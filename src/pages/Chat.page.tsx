@@ -924,7 +924,7 @@ export function ChatPage() {
 
                 <Affix position={{top: affixOffset}} w="100%">
                     <Stack align='stretch' gap="md">
-                        {(config.showBitrateIndicator || config.showSceneName || (premium.isPremium && config.showMoblinZoom)) && <div style={{ position: 'absolute', top: -recentEventsHeight - 8, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}><StreamStatusBar /></div>}
+                        {premium.isPremium && (config.showBitrateIndicator || config.showSceneName || config.showMoblinZoom) && <div style={{ position: 'absolute', top: -recentEventsHeight - 8, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}><StreamStatusBar /></div>}
                         <div style={{marginTop: recentEventsHeight ? -16 : 17}}></div>
                         <NewsDisplay />
                         {showUnplayedBanner && (
