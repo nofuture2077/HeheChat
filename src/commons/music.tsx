@@ -56,6 +56,7 @@ export const DEFAULT_SPOTIFY_SETTINGS: SpotifySettings = {
     chatCommandEnabled: false,
     channelPointsEnabled: false,
     channelPointsRewardTitle: '',
+    autoApproveEnabled: false,
     playlistUri: null,
     playlistName: null,
 };

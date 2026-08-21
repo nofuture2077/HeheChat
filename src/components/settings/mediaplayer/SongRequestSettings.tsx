@@ -45,6 +45,14 @@ export function SongRequestSettings() {
                           channelPointsRewardTitle: event.currentTarget.value,
                       })}
                     />
+                    <Switch
+                      label="Auto-approve song requests"
+                      description="Skip manual approval and add matched tracks straight to the Spotify queue"
+                      checked={music.settings.autoApproveEnabled}
+                      onChange={(event) => music.updateSettings({
+                          autoApproveEnabled: event.currentTarget.checked,
+                      })}
+                    />
                 </Stack>
             </Fieldset>
 
