@@ -1,0 +1,9 @@
+.glassCard {
+    padding: 8px 12px;
+    margin: 2px 8px;
+}
+
+.noteIcon {
+    flex-shrink: 0;
+    color: #ff1493;
+}

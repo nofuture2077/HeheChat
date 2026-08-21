@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useContext, useCallback, useMemo } from 'react';
-import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext, PremiumContext } from '../ApplicationContext';
+import { ChatEmotesContext, ConfigContext, LoginContextContext, ProfileContext, PremiumContext, MusicContext } from '../ApplicationContext';
 import { useViewportSize, useDisclosure, useForceUpdate, useThrottledState, useDocumentVisibility, useNetwork } from '@mantine/hooks';
 import { ScrollArea, Affix, Drawer, Button, Space, Badge, Stack, ActionIcon, Text, useComputedColorScheme } from '@mantine/core';
-import { IconAlertTriangle, IconDeviceDesktop, IconRepeat, IconMessagePause, IconSettings, IconKeyboard, IconBell, IconBrandTwitch, IconPlayerPlay } from '@tabler/icons-react';
+import { IconAlertTriangle, IconDeviceDesktop, IconRepeat, IconMessagePause, IconSettings, IconKeyboard, IconBell, IconBrandTwitch, IconPlayerPlay, IconMusic } from '@tabler/icons-react';
 import PubSub from 'pubsub-js';
 import { notifications } from '@mantine/notifications';
 import { Chat } from '../components/chat/Chat';
 import { MobileAppPrompt } from '../components/chat/MobileAppPrompt';
 import { ShortcutView } from '../components/shortcuts/ShortcutView';
+import { MusicPlayerBar } from '../components/music/MusicPlayerBar';
 import { AppShell } from '@mantine/core';
 import { Header } from '../components/header/Header';
 import { ConnectionStatusBanner } from '../components/header/ConnectionStatusBanner';
@@ -73,6 +74,7 @@ export function ChatPage() {
     const config = useContext(ConfigContext);
     const profile = useContext(ProfileContext);
     const premium = useContext(PremiumContext);
+    const music = useContext(MusicContext);
     const [chatMessages, setChatMessages] = useThrottledState<HeheMessage[]>([], 500);
     const [usernames, setUsernames] = useState<Set<string>>(new Set());
     const [shouldScroll, setShouldScroll] = useState(true);
@@ -110,6 +112,11 @@ export function ChatPage() {
     // Load shortcuts visible state from localStorage with profile.guid based key
     const [shortcutsVisible, setShortcutsVisible] = useState(() => {
         const key = `hehe-shortcuts-visible-${profile.guid}`;
+        const saved = localStorage.getItem(key);
+        return saved !== null ? JSON.parse(saved) : true;
+    });
+    const [musicPlayerVisible, setMusicPlayerVisible] = useState(() => {
+        const key = `hehe-music-player-visible-${profile.guid}`;
         const saved = localStorage.getItem(key);
         return saved !== null ? JSON.parse(saved) : true;
     });
@@ -607,6 +614,12 @@ export function ChatPage() {
         localStorage.setItem(key, JSON.stringify(shortcutsVisible));
     }, [shortcutsVisible, profile.guid]);
 
+    // Save music player visible state to localStorage when it changes
+    useEffect(() => {
+        const key = `hehe-music-player-visible-${profile.guid}`;
+        localStorage.setItem(key, JSON.stringify(musicPlayerVisible));
+    }, [musicPlayerVisible, profile.guid]);
+
     // Load shortcuts visible state when profile changes
     useEffect(() => {
         const key = `hehe-shortcuts-visible-${profile.guid}`;
@@ -821,6 +834,12 @@ export function ChatPage() {
                                 </ActionIcon>
                             )}
 
+                            {music.connected && (
+                                <ActionIcon variant='transparent' color='primary' onClick={() => setMusicPlayerVisible(!musicPlayerVisible)} size='sm'>
+                                    <IconMusic size={16}/>
+                                </ActionIcon>
+                            )}
+
                             <ActionIcon variant='transparent' color='primary' size='sm' onClick={() => { setDrawer(EventDrawer); drawerHandler.open() }}>
                                 <AlertStatusIndicator>
                                     <IconBell size={16} />
@@ -843,6 +862,7 @@ export function ChatPage() {
                             {!online ? <Badge color="red" size="sm">No internet connection...</Badge> : null}
                             <NewsDisplay />
                             {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
+                            {musicPlayerVisible && music.connected && <MusicPlayerBar />}
                             <PinManager/>
                             
                             {showUnplayedBanner && config.missedAlertsWindow !== 'none' && (
@@ -890,6 +910,8 @@ export function ChatPage() {
                     forceSevenTVReload={handleForceSevenTVReload}
                     toggleShortcuts={() => setShortcutsVisible(!shortcutsVisible)}
                     showShortcutsToggle={!!(config.shortcuts && config.shortcuts.length)}
+                    toggleMusicPlayer={() => setMusicPlayerVisible(!musicPlayerVisible)}
+                    showMusicPlayerToggle={music.connected}
                     currentClipId={currentClipId}
                     setCurrentClipId={setCurrentClipId}
                 />
@@ -911,6 +933,7 @@ export function ChatPage() {
                             </Button>
                         )}
                         {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
+                        {musicPlayerVisible && music.connected && <MusicPlayerBar />}
                         <PinManager/>
                         
                         <ReloadAlertsButton onActivate={() => setShowUnplayedBanner(false)} />
