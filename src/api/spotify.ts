@@ -20,6 +20,7 @@ export interface SpotifySettings {
     chatCommandEnabled: boolean;
     channelPointsEnabled: boolean;
     channelPointsRewardTitle: string;
+    autoApproveEnabled: boolean;
     playlistUri: string | null;
     playlistName: string | null;
 }
@@ -143,10 +144,8 @@ export async function submitSpotifyQueue(
 }
 
 export async function approveSpotifyQueue(id: string, state: string): Promise<void> {
-    await fetch(`${BASE_URL}/spotify/queue/${id}/approve`, {
+    await fetch(`${BASE_URL}/spotify/queue/${id}/approve?state=${encodeURIComponent(state)}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state }),
     });
 }
 
