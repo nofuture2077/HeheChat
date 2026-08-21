@@ -202,6 +202,7 @@ export default function HeheChat() {
                 profileData.config.maxBadges ??= 3;
                 profileData.config.chatBsMaxBadges ??= 3;
                 profileData.config.showBitrateIndicator ??= false;
+                profileData.config.mediaPlayerEnabled ??= false;
                 profileData.config.showSceneName ??= false;
                 profileData.config.showMoblinZoom ??= false;
                 profileData.config.showGpxMap ??= false;
@@ -510,6 +511,7 @@ export default function HeheChat() {
     const setShowBitrateIndicator = (value: boolean) => updateConfig('showBitrateIndicator', value);
     const setShowSceneName = (value: boolean) => updateConfig('showSceneName', value);
     const setShowMoblinZoom = (value: boolean) => updateConfig('showMoblinZoom', value);
+    const setMediaPlayerEnabled = (value: boolean) => updateConfig('mediaPlayerEnabled', value);
     const setShowGpxMap = (value: boolean) => updateConfig('showGpxMap', value);
     const setShowGpxElevationMap = (value: boolean) => updateConfig('showGpxElevationMap', value);
     const setShowGpxPosition = (value: boolean) => updateConfig('showGpxPosition', value);
@@ -838,6 +840,7 @@ export default function HeheChat() {
         setShowBitrateIndicator,
         setShowSceneName,
         setShowMoblinZoom,
+        setMediaPlayerEnabled,
         setShowGpxMap,
         setShowGpxElevationMap,
         setShowGpxPosition,

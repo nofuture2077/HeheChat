@@ -83,6 +83,7 @@ export interface ConfigData {
     showBitrateIndicator: boolean,
     showSceneName: boolean,
     showMoblinZoom: boolean,
+    mediaPlayerEnabled: boolean,
     cyclingHudEnabled: boolean,
     cyclingHudLocation: boolean,
     cyclingHudLocationCity: boolean,
@@ -213,6 +214,7 @@ export interface Config extends ConfigData {
     setShowBitrateIndicator: (val: boolean) => void;
     setShowSceneName: (val: boolean) => void;
     setShowMoblinZoom: (val: boolean) => void;
+    setMediaPlayerEnabled: (val: boolean) => void;
     setCyclingHudEnabled: (val: boolean) => void;
     setCyclingHudShowLogo: (val: boolean) => void;
     setCyclingHudLocation: (val: boolean) => void;
@@ -357,6 +359,7 @@ export const DEFAULT_CONFIG: Config = {
     showBitrateIndicator: false,
     showSceneName: false,
     showMoblinZoom: false,
+    mediaPlayerEnabled: false,
     cyclingHudEnabled: true,
     cyclingHudLocation: true,
     cyclingHudLocationCity: true,
@@ -467,6 +470,7 @@ export const DEFAULT_CONFIG: Config = {
     setShowBitrateIndicator: (val) => {},
     setShowSceneName: (val) => {},
     setShowMoblinZoom: (val) => {},
+    setMediaPlayerEnabled: (val) => {},
     setCyclingHudEnabled: (val) => {},
     setCyclingHudShowLogo: (val) => {},
     setCyclingHudLocation: (val) => {},

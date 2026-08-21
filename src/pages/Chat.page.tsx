@@ -834,7 +834,7 @@ export function ChatPage() {
                                 </ActionIcon>
                             )}
 
-                            {music.connected && (
+                            {config.mediaPlayerEnabled && music.connected && (
                                 <ActionIcon variant='transparent' color='primary' onClick={() => setMusicPlayerVisible(!musicPlayerVisible)} size='sm'>
                                     <IconMusic size={16}/>
                                 </ActionIcon>
@@ -862,7 +862,7 @@ export function ChatPage() {
                             {!online ? <Badge color="red" size="sm">No internet connection...</Badge> : null}
                             <NewsDisplay />
                             {shortcutsVisible && !!(config.shortcuts && config.shortcuts.length) && <ShortcutView />}
-                            {musicPlayerVisible && music.connected && <MusicPlayerBar />}
+                            {config.mediaPlayerEnabled && musicPlayerVisible && music.connected && <MusicPlayerBar />}
                             <PinManager/>
                             
                             {showUnplayedBanner && config.missedAlertsWindow !== 'none' && (
@@ -911,7 +911,7 @@ export function ChatPage() {
                     toggleShortcuts={() => setShortcutsVisible(!shortcutsVisible)}
                     showShortcutsToggle={!!(config.shortcuts && config.shortcuts.length)}
                     toggleMusicPlayer={() => setMusicPlayerVisible(!musicPlayerVisible)}
-                    showMusicPlayerToggle={music.connected}
+                    showMusicPlayerToggle={config.mediaPlayerEnabled && music.connected}
                     currentClipId={currentClipId}
                     setCurrentClipId={setCurrentClipId}
                 />

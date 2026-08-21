@@ -1,8 +1,8 @@
 import { useContext, useEffect, useState } from 'react';
-import { Stack, Fieldset, Select, Group, ActionIcon, Text, Slider, Alert } from '@mantine/core';
+import { Stack, Fieldset, Select, Group, ActionIcon, Text, Slider, Alert, Switch } from '@mantine/core';
 import { IconPlayerPlay, IconPlayerPause, IconPlayerSkipForward, IconVolume, IconInfoCircle } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { MusicContext } from '@/ApplicationContext';
+import { MusicContext, ConfigContext } from '@/ApplicationContext';
 import { getSpotifyPlaylists, SpotifyPlaylist, spotifyToken } from '@/api/spotify';
 
 function reportError(promise: Promise<void>) {
@@ -18,6 +18,7 @@ function reportError(promise: Promise<void>) {
 
 export function MediaPlayerSettings() {
     const music = useContext(MusicContext);
+    const config = useContext(ConfigContext);
     const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
     const [loadingPlaylists, setLoadingPlaylists] = useState(false);
     const [draggingVolume, setDraggingVolume] = useState<number | null>(null);
@@ -31,9 +32,19 @@ export function MediaPlayerSettings() {
             .finally(() => setLoadingPlaylists(false));
     }, [music.connected]);
 
+    const enabledToggle = (
+        <Switch
+          label="Enable media player"
+          description="Show the media player toggle in the header and the media player itself"
+          checked={config.mediaPlayerEnabled}
+          onChange={(event) => config.setMediaPlayerEnabled(event.currentTarget.checked)}
+        />
+    );
+
     if (!music.connected) {
         return (
             <Stack mt={30} mb={30} gap={30}>
+                {enabledToggle}
                 <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
                     Connect your Spotify account under Connect › Spotify to enable media
                     player controls.
@@ -46,6 +57,7 @@ export function MediaPlayerSettings() {
 
     return (
         <Stack mt={30} mb={30} gap={30}>
+            {enabledToggle}
             <Fieldset legend="Now Playing" variant="filled" className="glass-surface">
                 <Stack gap="sm">
                     <Text size="sm" fw={600} c="pink">
