@@ -114,10 +114,26 @@ export function MoblinHudSettings() {
                       data={[
                           { value: 'classic', label: 'Classic (dark glass, colored zones)' },
                           { value: 'mono', label: 'Minimal (flat, grayscale, single accent)' },
-                          { value: 'cockpit', label: 'Cockpit (telemetry strip, green accent)' },
+                          { value: 'matrix', label: 'Matrix (green accent)' },
+                          { value: 'japan', label: 'Japan (red & white, minimal accent)' },
                       ]}
                       value={config.cyclingHudTheme}
-                      onChange={value => config.setCyclingHudTheme((value as 'classic' | 'mono' | 'cockpit') ?? 'classic')}
+                      onChange={value => config.setCyclingHudTheme((value as 'classic' | 'mono' | 'matrix' | 'japan') ?? 'classic')}
+                      allowDeselect={false}
+                    />
+                </Stack>
+            </Fieldset>
+            <Fieldset legend="Cycling HUD Layout" variant="filled">
+                <Stack gap="sm">
+                    <Text fs="italic" size="14px">Choose the arrangement of widgets on the cycling telemetry HUD</Text>
+                    <Select
+                      label="Layout"
+                      data={[
+                          { value: 'default', label: 'Default' },
+                          { value: 'cockpit', label: 'Cockpit (telemetry strip arrangement)' },
+                      ]}
+                      value={config.cyclingHudLayout}
+                      onChange={value => config.setCyclingHudLayout((value as 'default' | 'cockpit') ?? 'default')}
                       allowDeselect={false}
                     />
                 </Stack>

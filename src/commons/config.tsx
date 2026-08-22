@@ -113,7 +113,8 @@ export interface ConfigData {
     cyclingHudPauseMinDistanceM: number,
     cyclingHudMaxHeartRateBpm: number,
     cyclingHudAveragePowerWatts: number,
-    cyclingHudTheme: 'classic' | 'mono' | 'cockpit',
+    cyclingHudTheme: 'classic' | 'mono' | 'matrix' | 'japan',
+    cyclingHudLayout: 'default' | 'cockpit',
     showSceneSwitchNotifications: boolean,
     chatBsTransparentBg: boolean,
     chatBsTextColor: string,
@@ -244,7 +245,8 @@ export interface Config extends ConfigData {
     setCyclingHudPauseMinDistanceM: (val: number) => void;
     setCyclingHudMaxHeartRateBpm: (val: number) => void;
     setCyclingHudAveragePowerWatts: (val: number) => void;
-    setCyclingHudTheme: (val: 'classic' | 'mono' | 'cockpit') => void;
+    setCyclingHudTheme: (val: 'classic' | 'mono' | 'matrix' | 'japan') => void;
+    setCyclingHudLayout: (val: 'default' | 'cockpit') => void;
     setShowSceneSwitchNotifications: (val: boolean) => void;
     setChatBsTransparentBg: (val: boolean) => void;
     setChatBsTextColor: (val: string) => void;
@@ -390,6 +392,7 @@ export const DEFAULT_CONFIG: Config = {
     cyclingHudMaxHeartRateBpm: 190,
     cyclingHudAveragePowerWatts: 250,
     cyclingHudTheme: 'classic',
+    cyclingHudLayout: 'default',
     showSceneSwitchNotifications: true,
     chatBsTransparentBg: true,
     chatBsTextColor: '',
@@ -501,6 +504,7 @@ export const DEFAULT_CONFIG: Config = {
     setCyclingHudMaxHeartRateBpm: (val) => {},
     setCyclingHudAveragePowerWatts: (val) => {},
     setCyclingHudTheme: (val) => {},
+    setCyclingHudLayout: (val) => {},
     setShowSceneSwitchNotifications: (val) => {},
     setChatBsTransparentBg: () => {},
     setChatBsTextColor: () => {},
