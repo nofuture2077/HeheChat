@@ -143,7 +143,7 @@ export function useEventFeed() {
         return () => {
             PubSub.unsubscribe(eventSub);
         }
-    }, []);
+    }, [config.channels, config.hideEvents]);
 
     return { events, load };
 }
