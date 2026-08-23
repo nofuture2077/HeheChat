@@ -12,8 +12,9 @@ export function useWakeLock() {
     isActive: false,
     error: null,
   });
-  
+
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  const requestingRef = useRef(false);
 
   const requestWakeLock = useCallback(async () => {
     if (!state.isSupported) {
@@ -21,68 +22,90 @@ export function useWakeLock() {
       return;
     }
 
-    // Don't request if we already have an active wake lock
-    if (wakeLockRef.current) {
+    // Don't request if we already have an active wake lock or a request in flight
+    if (wakeLockRef.current || requestingRef.current) {
       return;
     }
 
+    requestingRef.current = true;
+
     try {
-      wakeLockRef.current = await navigator.wakeLock.request('screen');
-      
-      setState(prev => ({ 
-        ...prev, 
-        isActive: true, 
-        error: null 
+      const sentinel = await navigator.wakeLock.request('screen');
+      wakeLockRef.current = sentinel;
+
+      setState(prev => ({
+        ...prev,
+        isActive: true,
+        error: null
       }));
 
-      // Listen for wake lock release
-      wakeLockRef.current.addEventListener('release', () => {
-        setState(prev => ({ 
-          ...prev, 
-          isActive: false 
+      // Listen for wake lock release (e.g. iOS releasing it on visibility loss)
+      sentinel.addEventListener('release', () => {
+        if (wakeLockRef.current === sentinel) {
+          wakeLockRef.current = null;
+        }
+        setState(prev => ({
+          ...prev,
+          isActive: false
         }));
       });
 
       console.log('Screen wake lock activated');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to request wake lock';
-      setState(prev => ({ 
-        ...prev, 
+      setState(prev => ({
+        ...prev,
         error: errorMessage,
-        isActive: false 
+        isActive: false
       }));
       console.error('Failed to request wake lock:', error);
+    } finally {
+      requestingRef.current = false;
     }
   }, [state.isSupported]);
 
-  const releaseWakeLock = async () => {
+  const releaseWakeLock = useCallback(async () => {
     if (wakeLockRef.current) {
       try {
         await wakeLockRef.current.release();
         wakeLockRef.current = null;
-        setState(prev => ({ 
-          ...prev, 
+        setState(prev => ({
+          ...prev,
           isActive: false,
-          error: null 
+          error: null
         }));
         console.log('Screen wake lock released');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to release wake lock';
-        setState(prev => ({ 
-          ...prev, 
-          error: errorMessage 
+        setState(prev => ({
+          ...prev,
+          error: errorMessage
         }));
         console.error('Failed to release wake lock:', error);
       }
     }
-  };
+  }, []);
 
+  // Reacquire the wake lock when the page becomes visible again (iOS releases it on backgrounding)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !wakeLockRef.current) {
+        void requestWakeLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [requestWakeLock]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (wakeLockRef.current) {
         wakeLockRef.current.release();
+        wakeLockRef.current = null;
       }
     };
   }, []);
