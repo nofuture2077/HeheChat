@@ -13,13 +13,17 @@
     input, textarea { width: 100%; margin-top: 4px; padding: 8px; background: #111; color: #fff; border: 1px solid #333; border-radius: 4px; font: inherit; }
     textarea { min-height: 140px; resize: vertical; }
     button { margin-top: 20px; padding: 10px 20px; background: #ff1493; color: #fff; border: none; border-radius: 4px; font: inherit; cursor: pointer; }
+    button:disabled { opacity: 0.6; cursor: default; }
+    #status { margin-top: 16px; font-size: 0.9rem; }
+    #status.error { color: #ff6b6b; }
+    #status.success { color: #6bffb0; }
   </style>
 </head>
 <body>
   <p><a href="https://get.hehechat.io/">&larr; Back</a></p>
   <h1>Contact</h1>
-  <p>Fill out the form and your mail client will open with the message ready to send.</p>
-  <form action="mailto:nofuture2077@posteo.de" method="post" enctype="text/plain">
+  <p>Fill out the form below to send us a message.</p>
+  <form id="contact-form">
     <label for="name">Name
       <input type="text" id="name" name="name" required />
     </label>
@@ -30,6 +34,42 @@
       <textarea id="message" name="message" required></textarea>
     </label>
     <button type="submit">Send</button>
+    <p id="status"></p>
   </form>
+  <script>
+    const BACKEND_URL = 'https://api.hehechat.io';
+    const form = document.getElementById('contact-form');
+    const status = document.getElementById('status');
+    const button = form.querySelector('button');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      button.disabled = true;
+      status.className = '';
+      status.textContent = 'Sending…';
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/contact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: form.name.value,
+            email: form.email.value,
+            message: form.message.value
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'failed to send message');
+        status.className = 'success';
+        status.textContent = 'Message sent, thank you!';
+        form.reset();
+      } catch (error) {
+        status.className = 'error';
+        status.textContent = error.message || 'Something went wrong, please try again later.';
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>
