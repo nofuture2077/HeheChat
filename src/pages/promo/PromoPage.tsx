@@ -18,7 +18,7 @@ export default function PromoPage() {
       <PromoHero {...hero} />
       <PromoFeatures {...features} />
       <PromoServices {...services} />
-      <PromoPricing {...pricing} />
+      {/* <PromoPricing {...pricing} /> */}
       <PromoCarousel {...carousel} />
       <PromoPwaBanner {...pwa} />
       <PromoFaq {...faq} />
