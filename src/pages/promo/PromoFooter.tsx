@@ -22,6 +22,9 @@ export function PromoFooter({ copyright }: Props) {
         <Anchor href="/privacy.html" size="xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
           Privacy Policy
         </Anchor>
+        <Anchor href="/contact.html" size="xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          Contact
+        </Anchor>
       </Group>
     </Box>
   );

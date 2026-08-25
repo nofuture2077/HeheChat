@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
+  <title>Contact — HeheChat</title>
+  <style>
+    body { background: #000; color: #fff; font-family: system-ui, sans-serif; max-width: 640px; margin: 0 auto; padding: 40px 24px 80px; line-height: 1.6; }
+    a { color: #ff1493; }
+    h1 { font-size: 1.5rem; }
+    p { opacity: 0.85; }
+    label { display: block; margin-top: 16px; font-size: 0.9rem; opacity: 0.85; }
+    input, textarea { width: 100%; margin-top: 4px; padding: 8px; background: #111; color: #fff; border: 1px solid #333; border-radius: 4px; font: inherit; }
+    textarea { min-height: 140px; resize: vertical; }
+    button { margin-top: 20px; padding: 10px 20px; background: #ff1493; color: #fff; border: none; border-radius: 4px; font: inherit; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <p><a href="https://get.hehechat.io/">&larr; Back</a></p>
+  <h1>Contact</h1>
+  <p>Fill out the form and your mail client will open with the message ready to send.</p>
+  <form action="mailto:nofuture2077@posteo.de" method="post" enctype="text/plain">
+    <label for="name">Name
+      <input type="text" id="name" name="name" required />
+    </label>
+    <label for="email">Your Email
+      <input type="email" id="email" name="email" required />
+    </label>
+    <label for="message">Message
+      <textarea id="message" name="message" required></textarea>
+    </label>
+    <button type="submit">Send</button>
+  </form>
+</body>
+</html>
