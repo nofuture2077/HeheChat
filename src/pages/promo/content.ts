@@ -9,7 +9,7 @@
 export const nav = {
   links: [
     { label: 'Features', href: '#features' },
-    { label: 'Pricing', href: '#pricing' },
+    // { label: 'Pricing', href: '#pricing' },
     { label: 'In the Wild', href: '#wild' },
     { label: 'PWA', href: '#pwa' },
     { label: 'FAQ', href: '#faq' },
