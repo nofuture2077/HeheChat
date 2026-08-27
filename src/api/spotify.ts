@@ -25,6 +25,13 @@ export interface SpotifySettings {
     playlistName: string | null;
 }
 
+export interface SpotifyDevice {
+    id: string;
+    name: string;
+    type: string;
+    isActive: boolean;
+}
+
 export interface SpotifyPlaylist {
     id: string;
     name: string;
@@ -116,6 +123,20 @@ export async function updateSpotifySettings(
         body: JSON.stringify({ state, ...settings }),
     });
     return res.json();
+}
+
+export async function getSpotifyDevices(state: string): Promise<SpotifyDevice[]> {
+    const res = await fetch(`${BASE_URL}/spotify/devices?state=${encodeURIComponent(state)}`);
+    return res.json();
+}
+
+export async function selectSpotifyDevice(state: string, deviceId: string): Promise<void> {
+    const res = await fetch(`${BASE_URL}/spotify/device`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ state, deviceId }),
+    });
+    await assertOk(res, 'Failed to switch Spotify device');
 }
 
 export async function getSpotifyPlaylists(state: string): Promise<SpotifyPlaylist[]> {
