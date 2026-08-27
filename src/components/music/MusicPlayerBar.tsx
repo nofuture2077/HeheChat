@@ -1,9 +1,9 @@
 import { useContext, useState } from 'react';
 import { Group, ActionIcon, Text, Stack, Slider } from '@mantine/core';
-import { IconPlayerPlay, IconPlayerPause, IconPlayerSkipForward, IconVolume, IconMusic } from '@tabler/icons-react';
+import { IconPlayerPlay, IconPlayerPause, IconPlayerSkipForward, IconVolume, IconMusic, IconCheck, IconX } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import classes from './MusicPlayerBar.module.css';
-import { MusicContext } from '@/ApplicationContext';
+import { MusicContext, ConfigContext } from '@/ApplicationContext';
 
 function reportError(promise: Promise<void>) {
     promise.catch((err) => {
@@ -18,9 +18,13 @@ function reportError(promise: Promise<void>) {
 
 export function MusicPlayerBar() {
     const music = useContext(MusicContext);
+    const config = useContext(ConfigContext);
     const track = music.currentTrack;
     const [draggingVolume, setDraggingVolume] = useState<number | null>(null);
     const volume = draggingVolume ?? track?.volumePercent ?? 0;
+    const pending = music.queue
+        .filter(item => item.status === 'pending')
+        .slice(0, config.songRequestDisplayCount);
 
     return (
         <div className={`glass-panel ${classes.glassCard}`}>
@@ -29,7 +33,7 @@ export function MusicPlayerBar() {
                     <IconMusic size={16} className={classes.noteIcon} />
                     <Stack gap={0} style={{ minWidth: 0 }}>
                         <Text size="sm" fw={600} truncate>{track?.name || 'Nothing playing'}</Text>
-                        <Text size="xs" c="dimmed" truncate>{track?.artist || ''}</Text>
+                        <Text size="xs" c="gray.3" truncate>{track?.artist || ''}</Text>
                     </Stack>
                 </Group>
 
@@ -71,6 +75,27 @@ export function MusicPlayerBar() {
                     />
                 </Group>
             </Group>
+
+            {pending.length > 0 && (
+                <Stack gap={4} mt={6}>
+                    {pending.map(item => (
+                        <Group key={item.id} justify="space-between" gap="xs" wrap="nowrap" className={classes.requestRow}>
+                            <Text size="xs" truncate style={{ minWidth: 0, flex: 1 }}>
+                                {item.trackName || item.query}
+                                {item.requesterUsername ? ` · ${item.requesterUsername}` : ''}
+                            </Text>
+                            <Group gap={2} wrap="nowrap">
+                                <ActionIcon size="sm" color="green" variant="light" onClick={() => music.approve(item.id)}>
+                                    <IconCheck size={14} />
+                                </ActionIcon>
+                                <ActionIcon size="sm" color="red" variant="light" onClick={() => music.reject(item.id)}>
+                                    <IconX size={14} />
+                                </ActionIcon>
+                            </Group>
+                        </Group>
+                    ))}
+                </Stack>
+            )}
         </div>
     );
 }

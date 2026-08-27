@@ -149,6 +149,7 @@ export interface ConfigData {
     gpxMapRadius: number | null,
     recentEventsCount: number,
     recentEventsCompact: boolean,
+    songRequestDisplayCount: number,
 }
 
 export type ConfigKey = keyof ConfigData;
@@ -281,6 +282,7 @@ export interface Config extends ConfigData {
     setGpxMapRadius: (val: number | null) => void;
     setRecentEventsCount: (val: number) => void;
     setRecentEventsCompact: (val: boolean) => void;
+    setSongRequestDisplayCount: (val: number) => void;
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -554,6 +556,8 @@ export const DEFAULT_CONFIG: Config = {
     recentEventsCompact: true,
     setRecentEventsCount: () => {},
     setRecentEventsCompact: () => {},
+    songRequestDisplayCount: 3,
+    setSongRequestDisplayCount: () => {},
 };
 
 export const DB_VERSION = 9;

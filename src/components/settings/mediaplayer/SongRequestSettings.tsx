@@ -1,14 +1,29 @@
 import { useContext } from 'react';
-import { Stack, Fieldset, Switch, TextInput, Text, Group, ActionIcon, Alert } from '@mantine/core';
+import { Stack, Fieldset, Switch, TextInput, Text, Group, ActionIcon, Alert, Select } from '@mantine/core';
 import { IconCheck, IconX, IconInfoCircle } from '@tabler/icons-react';
-import { MusicContext } from '@/ApplicationContext';
+import { MusicContext, ConfigContext } from '@/ApplicationContext';
 
 export function SongRequestSettings() {
     const music = useContext(MusicContext);
+    const config = useContext(ConfigContext);
+
+    const displayCountSetting = (
+        <Select
+          label="Requests shown in chat view"
+          description="How many pending song requests to show in the chat's media player bar"
+          data={['Off', '3', '5', '10']}
+          value={config.songRequestDisplayCount === 0 ? 'Off' : `${config.songRequestDisplayCount}`}
+          onChange={(value) => config.setSongRequestDisplayCount(value === 'Off' || !value ? 0 : Number(value))}
+          allowDeselect={false}
+        />
+    );
 
     if (!music.connected) {
         return (
             <Stack mt={30} mb={30} gap={30}>
+                <Fieldset legend="Song Requests" variant="filled">
+                    {displayCountSetting}
+                </Fieldset>
                 <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
                     Connect your Spotify account under Connect › Spotify to enable song requests.
                 </Alert>
@@ -53,6 +68,7 @@ export function SongRequestSettings() {
                           autoApproveEnabled: event.currentTarget.checked,
                       })}
                     />
+                    {displayCountSetting}
                 </Stack>
             </Fieldset>
 

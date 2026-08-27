@@ -83,6 +83,7 @@ import { ConnectStatusSettings } from './connect/ConnectStatusSettings';
 import { ConnectSpotifySettings } from './connect/ConnectSpotifySettings';
 
 // Media Player
+import { MediaPlayerTopSection } from './mediaplayer/MediaPlayerTopSection';
 import { MediaPlayerSettings } from './mediaplayer/MediaPlayerSettings';
 import { SongRequestSettings } from './mediaplayer/SongRequestSettings';
 
@@ -187,8 +188,8 @@ const NAV_GROUPS: NavGroup[] = [
   {
     id: 'MediaPlayer', label: 'Media Player', icon: IconMusic,
     children: [
-      { id: 'MediaPlayer/Controls', label: 'Now Playing / Controls', icon: IconMusic },
-      { id: 'MediaPlayer/SongRequests', label: 'Song Requests', icon: IconHeadphones },
+      { id: 'MediaPlayer/Controls', label: 'Now Playing', icon: IconMusic },
+      { id: 'MediaPlayer/SongRequests', label: 'Requests', icon: IconHeadphones },
     ],
   },
   { id: 'Shortcuts', label: 'Shortcuts', icon: IconKeyboard },
@@ -264,8 +265,8 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Connect/Moblin': 'Connect › Moblin',
   'Connect/Spotify': 'Connect › Spotify',
   'MediaPlayer': 'Media Player',
-  'MediaPlayer/Controls': 'Media Player › Now Playing / Controls',
-  'MediaPlayer/SongRequests': 'Media Player › Song Requests',
+  'MediaPlayer/Controls': 'Media Player › Now Playing',
+  'MediaPlayer/SongRequests': 'Media Player › Requests',
   'Shortcuts': 'Shortcuts',
   'Switcher': 'OBS Remote',
   'Switcher/Provider': 'OBS Remote › Provider',
@@ -309,6 +310,8 @@ export function Settings(props: SettingsProperties) {
         );
       case 'Connect':
         return <ConnectStatusSettings />;
+      case 'MediaPlayer':
+        return <MediaPlayerTopSection />;
       case 'Premium':
         return <PremiumSettings refreshKey={premiumRefreshKey} />;
       default:

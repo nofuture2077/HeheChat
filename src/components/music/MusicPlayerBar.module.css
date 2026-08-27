@@ -7,3 +7,7 @@
     flex-shrink: 0;
     color: #ff1493;
 }
+
+.requestRow {
+    padding: 2px 0;
+}
