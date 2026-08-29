@@ -16,7 +16,7 @@ import * as premiumApi from './api/premium';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import { StaticAuthProvider } from '@twurple/auth';
 import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
-import { ConfigKey, DEFAULT_CONFIG, DEFAULT_SMART_FILTER, MessageHandler } from './commons/config';
+import { ConfigKey, DEFAULT_CONFIG, DEFAULT_CHAT_SMART_FILTER, DEFAULT_ALERT_SMART_FILTER, MessageHandler } from './commons/config';
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { generateGUID } from './commons/helper';
@@ -195,7 +195,8 @@ export default function HeheChat() {
                 profileData.config.browserSourceVisual ??= true;
                 profileData.config.show7TVCosmetics ??= true;
                 profileData.config.readAllMessages ??= false;
-                profileData.config.smartFilter ??= { ...DEFAULT_SMART_FILTER };
+                profileData.config.smartFilter ??= { ...DEFAULT_CHAT_SMART_FILTER };
+                profileData.config.alertSmartFilter ??= { ...DEFAULT_ALERT_SMART_FILTER };
                 profileData.config.visualAlertDelay = profileData.config.visualAlertDelay === undefined ? 8 : profileData.config.visualAlertDelay;
                 profileData.config.systemMessageInChat.streak ??= true;
                 profileData.config.missedAlertsWindow ??= '15m';
@@ -507,6 +508,7 @@ export default function HeheChat() {
     const setRainMode = (value: boolean) => updateConfig('rainMode', value);
     const setReadAllMessages = (value: boolean) => updateConfig('readAllMessages', value);
     const setSmartFilter = (value: Partial<SmartFilterConfig>) => updateConfig('smartFilter', { ...profile.config.smartFilter, ...value });
+    const setAlertSmartFilter = (value: Partial<SmartFilterConfig>) => updateConfig('alertSmartFilter', { ...profile.config.alertSmartFilter, ...value });
     const setMissedAlertsWindow = (value: string) => updateConfig('missedAlertsWindow', value);
     const setShowBitrateIndicator = (value: boolean) => updateConfig('showBitrateIndicator', value);
     const setShowSceneName = (value: boolean) => updateConfig('showSceneName', value);
@@ -838,6 +840,7 @@ export default function HeheChat() {
         setRainMode,
         setReadAllMessages,
         setSmartFilter,
+        setAlertSmartFilter,
         setMissedAlertsWindow,
         setShowBitrateIndicator,
         setShowSceneName,

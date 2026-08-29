@@ -265,6 +265,15 @@ export interface SmartFilterConfig {
     skipSpam: boolean;
 }
 
+function isRepeatingPattern(text: string): boolean {
+    // ponytail: only catches exact full-string tiling, not partial/trailing mismatches
+    return [1, 2, 3, 4].some(len => {
+        if (text.length < len * 3) return false;
+        const pattern = text.slice(0, len);
+        return pattern.repeat(Math.ceil(text.length / len)).slice(0, text.length) === text;
+    });
+}
+
 function isRepetitiveText(text: string): boolean {
     // ponytail: naive heuristic, revisit if it misfires on real chat samples
     const words = text.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -279,7 +288,10 @@ function isRepetitiveText(text: string): boolean {
         }
     }
     const collapsed = text.replace(/(.)\1{2,}/g, '$1');
-    return text.length >= 6 && collapsed.length / text.length < 0.5;
+    if (text.length >= 6 && collapsed.length / text.length < 0.5) {
+        return true;
+    }
+    return isRepeatingPattern(text.replace(/\s+/g, ''));
 }
 
 export function shouldReadMessage(msg: HeheChatMessage, filter: SmartFilterConfig): boolean {
@@ -302,6 +314,29 @@ export function shouldReadMessage(msg: HeheChatMessage, filter: SmartFilterConfi
         return false;
     }
     if (filter.skipSpam && isRepetitiveText(text)) {
+        return false;
+    }
+    return true;
+}
+
+export function shouldPlayTTSText(
+    rawText: string, username: string, filter: SmartFilterConfig, now: number
+): boolean {
+    const text = rawText.trim();
+    const wordCount = text.split(/\s+/).filter(Boolean).length;
+    if (filter.skipShort && wordCount < filter.minWords) {
+        return false;
+    }
+    if (filter.skipLong && wordCount > filter.maxWords) {
+        return false;
+    }
+    if (filter.skipLinks && text.split(/\s+/).some(word => word.startsWith('http://') || word.startsWith('https://'))) {
+        return false;
+    }
+    const isSpam = filter.skipSpam && (isRepetitiveText(text) ||
+        ttsSpamTracker.isRepeatFromUser(username, text, now) ||
+        ttsSpamTracker.isCopypasta(username, text, now));
+    if (isSpam) {
         return false;
     }
     return true;

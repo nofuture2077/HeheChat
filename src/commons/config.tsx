@@ -1,11 +1,23 @@
 import { SystemMessageMainType, SmartFilterConfig } from '../commons/message';
 import { ShortCut } from './shortcuts';
 
-export const DEFAULT_SMART_FILTER: SmartFilterConfig = {
-    enabled: false,
+export const DEFAULT_CHAT_SMART_FILTER: SmartFilterConfig = {
+    enabled: true,
     skipEmoteOnly: true,
     skipReplies: true,
     skipShort: true,
+    minWords: 2,
+    skipLong: true,
+    maxWords: 40,
+    skipLinks: true,
+    skipSpam: true
+};
+
+export const DEFAULT_ALERT_SMART_FILTER: SmartFilterConfig = {
+    enabled: true,
+    skipEmoteOnly: false,
+    skipReplies: false,
+    skipShort: false,
     minWords: 2,
     skipLong: false,
     maxWords: 40,
@@ -75,6 +87,7 @@ export interface ConfigData {
     ignoreTTS: string[],
     readAllMessages: boolean,
     smartFilter: SmartFilterConfig,
+    alertSmartFilter: SmartFilterConfig,
     deactivatedAlerts: Record<string, boolean>,
     shortcuts: ShortCut[],
     reloadOnReturnToApp: boolean,
@@ -212,6 +225,7 @@ export interface Config extends ConfigData {
     setRainMode: (val: boolean) => void;
     setReadAllMessages: (val: boolean) => void;
     setSmartFilter: (val: Partial<SmartFilterConfig>) => void;
+    setAlertSmartFilter: (val: Partial<SmartFilterConfig>) => void;
     setMissedAlertsWindow: (val: string) => void;
     setShowBitrateIndicator: (val: boolean) => void;
     setShowSceneName: (val: boolean) => void;
@@ -358,7 +372,8 @@ export const DEFAULT_CONFIG: Config = {
     reloadOnReturnToApp: true,
     rainMode: false,
     readAllMessages: false,
-    smartFilter: DEFAULT_SMART_FILTER,
+    smartFilter: DEFAULT_CHAT_SMART_FILTER,
+    alertSmartFilter: DEFAULT_ALERT_SMART_FILTER,
     missedAlertsWindow: '15m',
     showBitrateIndicator: false,
     showSceneName: false,
@@ -471,6 +486,7 @@ export const DEFAULT_CONFIG: Config = {
     setRainMode: (val) => {},
     setReadAllMessages: (val) => {},
     setSmartFilter: (val) => {},
+    setAlertSmartFilter: (val) => {},
     setMissedAlertsWindow: (_val: string) => {},
     setShowBitrateIndicator: (val) => {},
     setShowSceneName: (val) => {},

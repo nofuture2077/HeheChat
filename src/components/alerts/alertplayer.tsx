@@ -9,7 +9,7 @@ import PubSub from 'pubsub-js';
 import { AlertConfig } from "@/components/events/alertconfigstorage";
 import { formatEventText } from "@/components/events/eventlist";
 import { DEFAULT_CHAT_EMOTES } from "@/commons/emotes";
-import { ParsedMessagePart } from "@/commons/message";
+import { ParsedMessagePart, shouldPlayTTSText } from "@/commons/message";
 import { buildEmoteImageUrl } from '../../commons/twitch';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
@@ -1049,9 +1049,14 @@ class AlertPlayer {
         const sink = localStorage.getItem('hehe-sink') || '';
         this.startPlaying();
         console.log('Start playing');
-        const ttsMessage = this.cleanMessage(formatString(alert.audio?.tts?.text || "", {
+        const rawTtsText = (eventData && eventData.text)
+            ? this.parsedPartsToTTSText(eventData.text.parts || eventData.text) : undefined;
+        const smartFilter = this.config?.alertSmartFilter;
+        const blockedBySmartFilter = !!(smartFilter?.enabled &&
+            rawTtsText && !shouldPlayTTSText(rawTtsText, event.username, smartFilter, Date.now()));
+        const ttsMessage = blockedBySmartFilter ? undefined : this.cleanMessage(formatString(alert.audio?.tts?.text || "", {
             ...vars,
-            text: (eventData && eventData.text) ? this.parsedPartsToTTSText(eventData.text.parts || eventData.text) : undefined
+            text: rawTtsText
         }), true, event.channel);
 
         // Chain audio playback with proper error handling - use mode to determine which setting to check

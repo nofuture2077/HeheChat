@@ -37,6 +37,7 @@ import {
   IconInfoCircle,
   IconWifi,
   IconBrandSpotify,
+  IconShieldOff,
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ModSettings } from './ModSettings';
@@ -67,6 +68,7 @@ import { AlertsSharingSettings } from './alerts/AlertsSharingSettings';
 import { AlertsActiveSettings } from './alerts/AlertsActiveSettings';
 import { AlertsEditorSettings } from './alerts/AlertsEditorSettings';
 import { AlertsFiltersSettings } from './alerts/AlertsFiltersSettings';
+import { AlertsSpamFilterSettings } from './alerts/AlertsSpamFilterSettings';
 import { AlertsRerollSettings } from './alerts/AlertsRerollSettings';
 
 // Connect
@@ -110,7 +112,7 @@ export type SettingsTab =
   | 'General' | 'General/UI' | 'General/Account' | 'General/Profiles'
   | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events' | 'Chat/Bot' | 'Chat/BrowserSource' | 'Chat/SevenTV' | 'Chat/Video'
   | 'Mod'
-  | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/ActiveAlerts' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/Reroll'
+  | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/ActiveAlerts' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/SpamFiltering' | 'Alerts/Reroll'
   | 'Notifications' | 'Notifications/StreamStart' | 'Notifications/ChatMention'
   | 'Connect' | 'Connect/ElevenLabs' | 'Connect/SoundAlerts' | 'Connect/Blerp'
   | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube' | 'Connect/Moblin' | 'Connect/Spotify'
@@ -166,6 +168,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Alerts/ActiveAlerts', label: 'Active Alerts', icon: IconBell },
       { id: 'Alerts/Audio', label: 'Audio', icon: IconVolume },
       { id: 'Alerts/Filters', label: 'Sidebar', icon: IconFilter },
+      { id: 'Alerts/SpamFiltering', label: 'Spam Filtering', icon: IconShieldOff },
       { id: 'Alerts/Sharing', label: 'Sharing', icon: IconShare },
       { id: 'Alerts/Reroll', label: 'Reroll', icon: IconRepeat },
     ],
@@ -249,6 +252,7 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Alerts/ActiveAlerts': 'Alerts › Active Alerts',
   'Alerts/Editor': 'Alerts › Editor',
   'Alerts/Filters': 'Alerts › Filters',
+  'Alerts/SpamFiltering': 'Alerts › Spam Filtering',
   'Alerts/Reroll': 'Alerts › Reroll',
   'Notifications': 'Notifications',
   'Notifications/StreamStart': 'Notifications › Stream Start',
@@ -402,6 +406,7 @@ export function Settings(props: SettingsProperties) {
       case 'Alerts/ActiveAlerts': return <AlertsActiveSettings />;
       case 'Alerts/Editor': return <AlertsEditorSettings />;
       case 'Alerts/Filters': return <AlertsFiltersSettings />;
+      case 'Alerts/SpamFiltering': return <AlertsSpamFilterSettings />;
       case 'Alerts/Reroll': return <AlertsRerollSettings />;
       case 'Notifications/StreamStart': return <NotificationStreamStartSettings />;
       case 'Notifications/ChatMention': return <NotificationChatMentionSettings />;
