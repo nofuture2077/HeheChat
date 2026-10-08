@@ -25,6 +25,20 @@ interface AudioInfo {
 let cheerPrefixes = ['Cheer', 'BibleThump', 'cheerwhal', 'Corgo', 'uni', 'ShowLove', 'Party', 'SeemsGood', 'Pride', 'Kappa', 'FrankerZ', 'HeyGuys', 'DansGame', 'EleGiggle', 'TriHard', 'Kreygasm', '4Head', 'SwiftRage', 'NotLikeThis', 'FailFish', 'VoHiYo', 'PJSalt', 'MrDestructoid', 'bday', 'RIPCheer', 'Shamrock'];
 let cheerPrefixesRegExp = cheerPrefixes.map(x => new RegExp(`\\b${x}\\d+\\b`, "gi"))
 
+// ponytail: 3 tries, 500ms/1s backoff; retries network errors, 5xx and 429 only
+async function fetchWithRetry(url: string, tries = 3, delay = 500): Promise<Response> {
+    try {
+        const res = await fetch(url);
+        if (res.ok || tries <= 1 || (res.status < 500 && res.status !== 429)) return res;
+        console.warn(`Fetch failed with status ${res.status}, retrying`, url);
+    } catch (err) {
+        if (tries <= 1) throw err;
+        console.warn('Fetch failed, retrying', url, err);
+    }
+    await new Promise(r => { setTimeout(r, delay); });
+    return fetchWithRetry(url, tries - 1, delay * 2);
+}
+
 class AlertPlayer {
     audioContext?: AudioContext;
     mainAudioGain?: GainNode;
@@ -149,7 +163,8 @@ class AlertPlayer {
             voice,
             channel
         });
-        const response = await fetch(`${BASE_URL}/tts/generate?${params}`);
+        const response = await fetchWithRetry(`${BASE_URL}/tts/generate?${params}`);
+        if (!response.ok) throw new Error(`TTS HTTP error! status: ${response.status}`);
         const data = await response.json();
         return data.audioContent;
     }
@@ -162,7 +177,8 @@ class AlertPlayer {
             voice,
             channel
         });
-        const response = await fetch(`${BASE_URL}/tts/ai/generate?${params}`);
+        const response = await fetchWithRetry(`${BASE_URL}/tts/ai/generate?${params}`);
+        if (!response.ok) throw new Error(`AI TTS HTTP error! status: ${response.status}`);
         const data = await response.json();
         return data.audioContent;
     }
@@ -267,7 +283,7 @@ class AlertPlayer {
                 }
             } else if (audioUrl) {
                 // Fetch and decode the audio if we only have a URL
-                fetch(audioUrl)
+                fetchWithRetry(audioUrl)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
