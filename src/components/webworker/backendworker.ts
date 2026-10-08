@@ -13,7 +13,8 @@ const CONFIG = {
     INITIAL_RECONNECT_DELAY: 1000,
     MAX_RECONNECT_DELAY: 30000,
     RECONNECT_BACKOFF_FACTOR: 1.5,
-    HEARTBEAT_TIMEOUT_MS: 25000,
+    // Server sends a heartbeat every 20s; tolerate one missed beat plus latency
+    HEARTBEAT_TIMEOUT_MS: 50000,
     WATCHDOG_INTERVAL_MS: 5000
 };
 
