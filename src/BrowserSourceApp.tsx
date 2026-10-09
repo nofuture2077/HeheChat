@@ -14,9 +14,18 @@ import { version } from '../package.json';
 interface BrowserSourceProps {
   token: string | undefined;
   preview: boolean;
+  embed?: boolean;
 }
 
-export default function BrowserSource({ token, preview }: BrowserSourceProps) {
+const EDITOR_ORIGIN = (() => {
+  try {
+    return new URL(import.meta.env.VITE_EDITOR_URL).origin;
+  } catch {
+    return undefined;
+  }
+})();
+
+export default function BrowserSource({ token, preview, embed = false }: BrowserSourceProps) {
   const backendWorkerRef = useRef<Worker | undefined>(undefined);
   const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE});
   const [chatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
@@ -24,6 +33,9 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
   const networkStatus = useNetwork();
   const initializationAttempted = useRef(false);
   const alertSystemCheckInterval = useRef<number | undefined>(undefined);
+  // Embedded editor preview: channels whose alert config was pushed by the editor (unsaved draft)
+  const previewOverrides = useRef<Set<string>>(new Set());
+  const embedded = preview && embed && window.parent !== window;
 
   // Run storage patches on app initialization
   useEffect(() => {
@@ -135,6 +147,11 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
         }});
       }
       
+      // The embedded editor preview only plays what the editor sends via postMessage
+      if (embedded && (data.type === 'alert' || data.type === 'event' || data.type === 'replayevent')) {
+        return;
+      }
+
       if (data.type === 'alert') {
         // Publish alert data
         setTimeout(() => {
@@ -156,6 +173,9 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
       }
 
       if (data.type === 'alertConfig') {
+        if (previewOverrides.current.has(data.channel)) {
+          return;
+        }
         console.log('Alertconfig was updated for: ', data.channel);
         AlertSystem.loadAlertConfig([data.channel]);
       }
@@ -179,6 +199,86 @@ export default function BrowserSource({ token, preview }: BrowserSourceProps) {
       }
     };
   }, [token]);
+
+  // Editor preview bridge: the alert editor embeds this page in an iframe and drives it via postMessage
+  useEffect(() => {
+    if (!embedded || !EDITOR_ORIGIN) {
+      return undefined;
+    }
+
+    const postToEditor = (message: Record<string, unknown>) => {
+      window.parent.postMessage(message, EDITOR_ORIGIN);
+    };
+
+    const ensureAudio = () => {
+      if (!AlertSystem.status()) {
+        AlertSystem.initialize();
+        initializationAttempted.current = true;
+      }
+      postToEditor({ type: 'hehe-preview:status', audio: AlertSystem.status(), connected: !!AlertSystem.config });
+    };
+
+    // Static alert shown while editing; restored after a played test alert has finished
+    let stickyAlert: Record<string, unknown> | null = null;
+    const showSticky = () => {
+      if (stickyAlert) {
+        PubSub.publish('ALERT_SHOW', { ...stickyAlert, triggerId: undefined, duration: 2_000_000_000 });
+      }
+    };
+    const hiddenToken = PubSub.subscribe('ALERT_HIDDEN', showSticky);
+
+    const handleMessage = (ev: MessageEvent) => {
+      if (ev.origin !== EDITOR_ORIGIN || !ev.data || typeof ev.data.type !== 'string') {
+        return;
+      }
+      const msg = ev.data;
+
+      switch (msg.type) {
+        case 'hehe-preview:config':
+          if (msg.channel && msg.config) {
+            previewOverrides.current.add(msg.channel);
+            AlertSystem.alertConfig[msg.channel] = msg.config;
+          }
+          break;
+        case 'hehe-preview:event':
+          if (msg.event) {
+            ensureAudio();
+            AlertSystem.addEvent({ ...msg.event, force: true });
+          }
+          break;
+        case 'hehe-preview:show':
+          if (msg.alert) {
+            stickyAlert = msg.alert;
+            showSticky();
+          }
+          break;
+        case 'hehe-preview:clear':
+          stickyAlert = null;
+          PubSub.publish('ALERT_HIDE');
+          break;
+      }
+    };
+
+    // A click inside the embedded preview always (re)starts audio, even after a failed autoplay attempt
+    const handleClick = () => {
+      ensureAudio();
+    };
+
+    window.addEventListener('message', handleMessage);
+    window.addEventListener('click', handleClick);
+    postToEditor({ type: 'hehe-preview:ready' });
+
+    const statusInterval = setInterval(() => {
+      postToEditor({ type: 'hehe-preview:status', audio: AlertSystem.status(), connected: !!AlertSystem.config });
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      window.removeEventListener('click', handleClick);
+      PubSub.unsubscribe(hiddenToken);
+      clearInterval(statusInterval);
+    };
+  }, [embedded]);
 
   // Force reconnection if network status changes or document becomes visible
   useEffect(() => {

@@ -15,7 +15,13 @@ function getQueryVariable(query: string, variable: string): string | undefined {
   console.log('Query variable %s not found', variable);
 }
 
-function AlertRoot({ token, preview }: { token: string | undefined; preview: boolean }) {
+interface AlertRootProps {
+  token: string | undefined;
+  preview: boolean;
+  embed: boolean;
+}
+
+function AlertRoot({ token, preview, embed }: AlertRootProps) {
   const pendingReload = useRef(false);
 
   useVersionCheck({
@@ -36,14 +42,15 @@ function AlertRoot({ token, preview }: { token: string | undefined; preview: boo
     return () => clearInterval(id);
   }, []);
 
-  return <BrowserSource token={token} preview={preview} />;
+  return <BrowserSource token={token} preview={preview} embed={embed} />;
 }
 
 // Extract token from hash
 const query = window.location.hash.substring(1);
 const token = getQueryVariable(query, "token");
 const preview = !!getQueryVariable(query, "preview");
+const embed = !!getQueryVariable(query, "embed");
 localStorage.setItem('hehe-sink', token || '');
 localStorage.setItem('hehe-mode', 'browsersource');
 
-ReactDOM.createRoot(document.getElementById('alert')!).render(<AlertRoot token={token} preview={preview}/>);
+ReactDOM.createRoot(document.getElementById('alert')!).render(<AlertRoot token={token} preview={preview} embed={embed}/>);

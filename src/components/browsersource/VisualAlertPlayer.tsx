@@ -152,12 +152,26 @@ export default function VisualAlertPlayer() {
         setMediaData(null);
         AlertSystem.visualPlaying = false;
         alertTimeoutId = undefined;
+        PubSub.publish('ALERT_HIDDEN');
       }, data.duration) as unknown as number;
+    });
+
+    // Hide the current alert immediately (used by the embedded editor preview)
+    const hideToken = PubSub.subscribe('ALERT_HIDE', () => {
+      if (alertTimeoutId) {
+        clearTimeout(alertTimeoutId);
+        alertTimeoutId = undefined;
+      }
+      setIsVisible(false);
+      setCurrentAlert(null);
+      setMediaData(null);
+      AlertSystem.visualPlaying = false;
     });
 
     // Cleanup subscriptions and any pending timeouts
     return () => {
       PubSub.unsubscribe(alertToken);
+      PubSub.unsubscribe(hideToken);
       if (alertTimeoutId) {
         clearTimeout(alertTimeoutId);
       }
