@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Box, Text, Title, Accordion, Anchor } from '@mantine/core';
-import { BG, BORDER, gradientText } from './tokens';
+import { BG, BORDER, gradientText, vars } from './tokens';
 
 export interface FaqItem { question: string; answer: string }
 
@@ -33,13 +33,13 @@ interface Props {
 
 export function PromoFaq({ eyebrow, headline, items }: Props) {
   return (
-    <Box id="faq" component="section" style={{ background: BG, padding: '100px 24px', borderTop: `1px solid ${BORDER}` }}>
+    <Box id="faq" component="section" style={{ background: BG, padding: '120px 24px', borderTop: `1px solid ${BORDER}` }}>
       <Box style={{ maxWidth: 720, margin: '0 auto' }}>
-        <Box style={{ textAlign: 'center', marginBottom: 48 }}>
+        <Box className="p-reveal" style={{ textAlign: 'center', marginBottom: 56 }}>
           <Text size="sm" fw={500} mb={12} style={{ ...gradientText, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             {eyebrow}
           </Text>
-          <Title order={2} style={{ color: '#fff', fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, letterSpacing: '-0.02em' }}>
+          <Title order={2} style={{ color: '#fff', fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 800, letterSpacing: '-0.03em' }}>
             {headline}
           </Title>
         </Box>
@@ -50,8 +50,8 @@ export function PromoFaq({ eyebrow, headline, items }: Props) {
           panel: { color: 'rgba(255,255,255,0.65)' },
           chevron: { color: '#fff' },
         }}>
-          {items.map((item) => (
-            <Accordion.Item key={item.question} value={item.question}>
+          {items.map((item, i) => (
+            <Accordion.Item key={item.question} value={item.question} className="p-faq-item p-reveal" style={vars({ '--i': i })}>
               <Accordion.Control>{item.question}</Accordion.Control>
               <Accordion.Panel style={{ lineHeight: 1.65 }}>{linkify(item.answer)}</Accordion.Panel>
             </Accordion.Item>

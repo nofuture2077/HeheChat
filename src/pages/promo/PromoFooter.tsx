@@ -8,7 +8,7 @@ interface Props {
 
 export function PromoFooter({ copyright }: Props) {
   return (
-    <Box component="footer" style={{ background: BG, borderTop: `1px solid ${BORDER}`, padding: '40px 24px', textAlign: 'center' }}>
+    <Box component="footer" className="p-reveal" style={{ background: BG, borderTop: `1px solid ${BORDER}`, padding: '40px 24px', textAlign: 'center' }}>
       <Box style={{ color: '#fff', opacity: 0.4, display: 'inline-block', marginBottom: 16 }}>
         <HeaderLogo size={20} />
       </Box>

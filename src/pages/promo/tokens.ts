@@ -11,3 +11,13 @@ export const gradientText: React.CSSProperties = {
   WebkitTextFillColor: 'transparent',
   backgroundClip: 'text',
 };
+
+/** Inline style with CSS custom properties (e.g. animation index/delay). */
+export const vars = (v: Record<string, string | number>) => v as React.CSSProperties;
+
+/** Feeds the pointer position into --mx/--my for cursor-following spotlights. */
+export function trackPointer(e: React.PointerEvent<HTMLElement>) {
+  const r = e.currentTarget.getBoundingClientRect();
+  e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+  e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+}

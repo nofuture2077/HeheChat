@@ -1,5 +1,5 @@
 import { Box, Text, Title, Button, SimpleGrid } from '@mantine/core';
-import { PINK_GRADIENT, gradientText } from './tokens';
+import { PINK_GRADIENT, gradientText, trackPointer, vars } from './tokens';
 
 import TwitchLogo from '../../res/twitch_logo.svg?react';
 import BlerpLogo from '../../res/blerp_logo.svg?react';
@@ -33,7 +33,10 @@ function ScatteredLogos() {
       {SCATTERED.map(({ Comp, color, size, top, left, rotate }, i) => (
         <Comp
           key={i}
+          className="p-float"
           style={{
+            ...vars({ '--d': `${i * -1.3}s` }),
+            animationDuration: `${5 + i}s`,
             position: 'absolute',
             top,
             left,
@@ -50,34 +53,36 @@ function ScatteredLogos() {
   );
 }
 
-interface TileProps extends FeatureTileData {}
+interface TileProps extends FeatureTileData {
+  index: number;
+}
 
-function Tile({ title, desc, dark, bg, image, learnMore, scatterLogos }: TileProps) {
+function Tile({ title, desc, dark, bg, image, learnMore, scatterLogos, index }: TileProps) {
   const textColor = dark ? '#fff' : '#1d1d1f';
   const subColor = dark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.5)';
 
   return (
     <Box
-      style={{
+      className="p-tile p-reveal"
+      onPointerMove={trackPointer}
+      style={vars({
+        '--i': index % 2,
         position: 'relative',
         overflow: 'hidden',
         minHeight: 460,
-        backgroundImage: image
-          ? `url(${image})`
-          : (!scatterLogos && dark ? `linear-gradient(135deg, #120820 0%, #2a0a3a 50%, #1a0030 100%)` : undefined),
-        backgroundSize: 'cover',
-        backgroundPosition: 'center top',
+        borderRadius: 24,
         backgroundColor: bg,
-      }}
+      })}
     >
+      <div
+        className="p-tile-bg"
+        style={{
+          backgroundImage: image
+            ? `url(${image})`
+            : (!scatterLogos && dark ? `linear-gradient(135deg, #120820 0%, #2a0a3a 50%, #1a0030 100%)` : undefined),
+        }}
+      />
       {scatterLogos && <ScatteredLogos />}
-
-      {/* gradient keeps text readable over scattered logos or photos */}
-      <Box style={{
-        position: 'absolute',
-        inset: 0,
-        pointerEvents: 'none',
-      }} />
 
       <Box style={{ position: 'relative', zIndex: 2, padding: '44px 40px 0', textAlign: 'center' }}>
         <Title order={2} style={{ color: textColor, fontSize: 28, fontWeight: 700, letterSpacing: '-0.02em', marginBottom: 10 }}>
@@ -90,6 +95,7 @@ function Tile({ title, desc, dark, bg, image, learnMore, scatterLogos }: TilePro
             href={learnMore}
             size="xs"
             mt={20}
+            className="p-btn"
             style={{ background: PINK_GRADIENT, border: 'none', borderRadius: 20, paddingLeft: 18, paddingRight: 18, fontWeight: 500, fontSize: 13 }}
           >
             Learn more
@@ -110,17 +116,17 @@ export function PromoFeatures({ eyebrow, headline, tiles }: Props) {
   return (
     <Box id="features" component="section">
       {headline.length > 0 && (
-        <Box style={{ padding: '80px 24px 40px', textAlign: 'center' }}>
+        <Box className="p-reveal" style={{ padding: '120px 24px 56px', textAlign: 'center' }}>
           <Text size="sm" fw={500} mb={12} style={{ ...gradientText, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             {eyebrow}
           </Text>
-          <Title order={2} style={{ color: '#fff', fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 700, letterSpacing: '-0.02em' }}>
+          <Title order={2} style={{ color: '#fff', fontSize: 'clamp(32px, 5vw, 64px)', fontWeight: 800, lineHeight: 1.08, letterSpacing: '-0.03em' }}>
             {headline.map((line, i) => <span key={i}>{line}{i < headline.length - 1 && <br />}</span>)}
           </Title>
         </Box>
       )}
-      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={6} style={{ padding: '0 6px 6px' }}>
-        {tiles.map((tile) => <Tile key={tile.title} {...tile} />)}
+      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={12} style={{ padding: '0 12px 12px' }}>
+        {tiles.map((tile, i) => <Tile key={tile.title} index={i} {...tile} />)}
       </SimpleGrid>
     </Box>
   );

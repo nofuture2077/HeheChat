@@ -1,0 +1,692 @@
+/* ponytail: all promo motion is pure CSS. Scroll-driven parts sit behind @supports, browsers without them get the static layout */
+
+@property --p-angle {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+
+.promo {
+  overflow-x: clip;
+}
+
+/* ── global overlays ─────────────────────────────────────────── */
+
+.p-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 3px;
+  z-index: 300;
+  background: linear-gradient(90deg, #db32bc, #ff1493, #ff9ee8);
+  box-shadow: 0 0 12px #ff1493;
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  pointer-events: none;
+}
+
+.p-grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 250;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: p-grain 0.8s steps(5) infinite;
+}
+
+@keyframes p-grain {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-3%, 2%); }
+  40% { transform: translate(2%, -3%); }
+  60% { transform: translate(-2%, -1%); }
+  80% { transform: translate(3%, 3%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* ── shared entrances ────────────────────────────────────────── */
+
+.p-in {
+  animation: p-in 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: var(--d, 0s);
+}
+
+@keyframes p-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+    filter: blur(10px);
+  }
+}
+
+@keyframes p-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(64px) scale(0.96);
+    filter: blur(12px);
+  }
+}
+
+.p-shimmer {
+  padding: 0 0.02em 0.08em;
+  background: linear-gradient(90deg, #db32bc, #ff1493, #ff9ee8, #ff1493, #db32bc) 0 0 / 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: p-shimmer 4s linear infinite;
+}
+
+@keyframes p-shimmer {
+  to { background-position: -200% 0; }
+}
+
+/* ── buttons ─────────────────────────────────────────────────── */
+
+.promo .p-btn {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.3s,
+    border-color 0.3s,
+    background-color 0.3s;
+}
+
+.promo .p-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.promo .p-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+.promo .p-btn:hover::after {
+  transform: translateX(120%);
+}
+
+.promo .p-pulse {
+  animation: p-pulse 2.6s ease-out infinite;
+}
+
+@keyframes p-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 20, 147, 0.35), 0 10px 40px rgba(219, 50, 188, 0.2); }
+
+  70%,
+  100% { box-shadow: 0 0 0 12px rgba(255, 20, 147, 0), 0 10px 40px rgba(219, 50, 188, 0.2); }
+}
+
+.promo .p-btn-outline:hover {
+  border-color: #ff1493 !important;
+  background-color: rgba(255, 20, 147, 0.12);
+  box-shadow: 0 0 30px rgba(255, 20, 147, 0.15);
+}
+
+/* ── nav ─────────────────────────────────────────────────────── */
+
+.p-nav {
+  animation: p-nav-in 1s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+}
+
+@keyframes p-nav-in {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+}
+
+.promo .p-nav-link {
+  position: relative;
+  color: rgba(255, 255, 255, 0.75);
+  transition: color 0.2s;
+}
+
+.promo .p-nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #db32bc, #ff1493);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.promo .p-nav-link:hover {
+  color: #fff;
+}
+
+.promo .p-nav-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ── hero ────────────────────────────────────────────────────── */
+
+.p-aurora {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.p-blob {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+}
+
+.p-blob:nth-child(1) {
+  width: 60vmax;
+  height: 60vmax;
+  left: -5%;
+  top: -10%;
+  background: radial-gradient(closest-side, rgba(219, 50, 188, 0.32), transparent);
+  animation: p-drift-a 18s ease-in-out infinite alternate;
+}
+
+.p-blob:nth-child(2) {
+  width: 50vmax;
+  height: 50vmax;
+  right: -5%;
+  top: 5%;
+  background: radial-gradient(closest-side, rgba(120, 40, 255, 0.25), transparent);
+  animation: p-drift-b 23s ease-in-out infinite alternate;
+}
+
+.p-blob:nth-child(3) {
+  width: 45vmax;
+  height: 45vmax;
+  left: 30%;
+  bottom: 0;
+  background: radial-gradient(closest-side, rgba(255, 20, 147, 0.22), transparent);
+  animation: p-drift-c 27s ease-in-out infinite alternate;
+}
+
+@keyframes p-drift-a {
+  to { transform: translate(25%, 20%) scale(1.25); }
+}
+
+@keyframes p-drift-b {
+  to { transform: translate(-30%, 25%) scale(0.8); }
+}
+
+@keyframes p-drift-c {
+  to { transform: translate(-20%, -35%) scale(1.3); }
+}
+
+.p-spot {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 40%), rgba(255, 20, 147, 0.08), transparent 70%);
+}
+
+.p-floor {
+  position: absolute;
+  inset: auto 0 0;
+  height: 48%;
+  z-index: 1;
+  overflow: hidden;
+  perspective: 360px;
+  pointer-events: none;
+  mask-image: linear-gradient(to top, #000 0%, transparent 90%);
+}
+
+.p-floor::before {
+  content: '';
+  position: absolute;
+  left: -60%;
+  right: -60%;
+  bottom: 0;
+  height: 220%;
+  transform-origin: 50% 100%;
+  transform: rotateX(68deg);
+  background-image:
+    linear-gradient(rgba(255, 20, 147, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 20, 147, 0.3) 1px, transparent 1px);
+  background-size: 64px 64px;
+  animation: p-floor 1.4s linear infinite;
+}
+
+@keyframes p-floor {
+  to { transform: rotateX(68deg) translateY(64px); }
+}
+
+.p-stream {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 230px;
+  z-index: 1;
+  overflow: hidden;
+  opacity: 0.5;
+  pointer-events: none;
+  mask-image: linear-gradient(transparent, #000 25%, #000 65%, transparent);
+}
+
+.p-stream-left {
+  left: 4%;
+  transform: rotate(-4deg);
+}
+
+.p-stream-right {
+  right: 4%;
+  transform: rotate(4deg);
+}
+
+.p-stream-track {
+  animation: p-stream 32s linear infinite;
+}
+
+.p-stream-right .p-stream-track {
+  animation-duration: 41s;
+}
+
+@keyframes p-stream {
+  to { transform: translateY(-50%); }
+}
+
+.p-msg {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.p-msg-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.p-msg-lines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.p-msg-line {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.p-msg-alert {
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid rgba(255, 20, 147, 0.35);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(219, 50, 188, 0.25), rgba(255, 20, 147, 0.06));
+  animation: p-alert-glow 2s ease-in-out infinite alternate;
+}
+
+.p-msg-alert .p-msg-line {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+@keyframes p-alert-glow {
+  from { box-shadow: 0 0 12px rgba(255, 20, 147, 0.1); }
+  to { box-shadow: 0 0 28px rgba(255, 20, 147, 0.3); }
+}
+
+@media (max-width: 62em) {
+  .p-stream {
+    display: none;
+  }
+}
+
+.p-headline {
+  perspective: 800px;
+}
+
+.p-word {
+  display: inline-block;
+  transform-origin: 50% 100%;
+  animation: p-word-in 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(0.3s + var(--i, 0) * 90ms);
+}
+
+@keyframes p-word-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5em) rotateX(-75deg);
+    filter: blur(14px);
+  }
+}
+
+.p-track {
+  animation: p-track 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes p-track {
+  from {
+    opacity: 0;
+    letter-spacing: 0.7em;
+    filter: blur(6px);
+  }
+}
+
+.p-cue {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 3;
+  width: 24px;
+  height: 38px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+}
+
+.p-cue::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 4px;
+  height: 8px;
+  margin-left: -2px;
+  border-radius: 2px;
+  background: #ff1493;
+  animation: p-cue 1.8s ease-in-out infinite;
+}
+
+@keyframes p-cue {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  30% { opacity: 1; }
+
+  100% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* ── feature tiles ───────────────────────────────────────────── */
+
+.p-tile {
+  isolation: isolate;
+}
+
+.p-tile-bg {
+  position: absolute;
+  inset: -8% 0;
+  z-index: 0;
+  background-size: cover;
+  background-position: center top;
+  transition: transform 1.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.p-tile:hover .p-tile-bg {
+  transform: scale(1.08);
+}
+
+.p-tile::before,
+.p-tile::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  transition: opacity 0.4s, box-shadow 0.4s;
+}
+
+.p-tile::before {
+  z-index: 1;
+  opacity: 0;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.16), transparent 55%);
+}
+
+.p-tile::after {
+  z-index: 3;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.p-tile:hover::before {
+  opacity: 1;
+}
+
+.p-tile:hover::after {
+  box-shadow: inset 0 0 0 1px rgba(255, 20, 147, 0.35), inset 0 0 80px rgba(255, 20, 147, 0.1);
+}
+
+.p-float {
+  animation: p-float 6s ease-in-out infinite alternate;
+  animation-delay: var(--d, 0s);
+  transition: scale 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.p-tile:hover .p-float {
+  scale: 1.2;
+}
+
+@keyframes p-float {
+  from { translate: 0 -14px; }
+  to { translate: 0 14px; }
+}
+
+/* ── services marquee ────────────────────────────────────────── */
+
+.p-marquee {
+  padding: 28px 0;
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+}
+
+.p-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: p-marquee 45s linear infinite;
+}
+
+.p-marquee-rev .p-marquee-track {
+  animation-direction: reverse;
+  animation-duration: 55s;
+}
+
+.p-marquee:hover .p-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes p-marquee {
+  to { transform: translateX(-50%); }
+}
+
+.p-chip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-right: 20px;
+  padding: 16px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s,
+    transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.p-chip:hover {
+  border-color: var(--c);
+  box-shadow: 0 0 24px color-mix(in srgb, var(--c) 25%, transparent);
+  transform: translateY(-3px);
+}
+
+/* ── carousel ────────────────────────────────────────────────── */
+
+.p-media-in {
+  animation: p-media-in 1.2s cubic-bezier(0.7, 0, 0.2, 1) both;
+}
+
+@keyframes p-media-in {
+  from {
+    clip-path: inset(0 0 0 100%);
+    transform: scale(1.15);
+  }
+}
+
+.p-dot {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: width 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.p-dot-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #db32bc, #ff1493);
+  transform-origin: left;
+  animation: p-dot-fill var(--dur, 5s) linear both;
+}
+
+@keyframes p-dot-fill {
+  from { transform: scaleX(0); }
+}
+
+.p-quote-mark {
+  position: absolute;
+  top: -0.35em;
+  left: 50%;
+  translate: -50% 0;
+  font-size: 220px;
+  font-weight: 800;
+  line-height: 1;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+/* ── pwa card ────────────────────────────────────────────────── */
+
+.p-glow-card {
+  position: relative;
+  isolation: isolate;
+  padding: 1px;
+  border-radius: 24px;
+  background: conic-gradient(from var(--p-angle), transparent 0 55%, #db32bc 72%, #ff1493 82%, #ff9ee8 88%, transparent 100%);
+  animation: p-spin 5s linear infinite;
+}
+
+.p-glow-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: inherit;
+  filter: blur(40px);
+  opacity: 0.25;
+}
+
+@keyframes p-spin {
+  to { --p-angle: 360deg; }
+}
+
+/* ── faq ─────────────────────────────────────────────────────── */
+
+.promo .p-faq-item {
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.promo .p-faq-item:hover,
+.promo .p-faq-item[data-active] {
+  border-color: rgba(255, 20, 147, 0.3) !important;
+  box-shadow: 0 0 30px rgba(255, 20, 147, 0.06);
+}
+
+/* ── scroll-driven (progressive) ─────────────────────────────── */
+
+@supports (animation-timeline: view()) {
+  .p-progress {
+    animation: p-progress linear both;
+    animation-timeline: scroll(root);
+  }
+
+  .p-reveal {
+    animation: p-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry calc(var(--i, 0) * 8%) entry calc(55% + var(--i, 0) * 8%);
+  }
+
+  .p-hero-content {
+    animation: p-hero-out linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 90vh;
+  }
+
+  .p-tile-bg {
+    animation: p-parallax linear both;
+    animation-timeline: view();
+  }
+
+  .p-tilt {
+    animation: p-tilt linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 45%;
+  }
+}
+
+@keyframes p-progress {
+  to { transform: scaleX(1); }
+}
+
+@keyframes p-hero-out {
+  to {
+    opacity: 0;
+    transform: translateY(-100px) scale(0.9);
+    filter: blur(10px);
+  }
+}
+
+@keyframes p-parallax {
+  from { translate: 0 -5%; }
+  to { translate: 0 5%; }
+}
+
+@keyframes p-tilt {
+  from {
+    opacity: 0.3;
+    transform: perspective(1400px) rotateX(28deg) scale(0.86);
+  }
+}
+
+/* ── reduced motion ──────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .promo *,
+  .promo *::before,
+  .promo *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .p-grain,
+  .p-marquee-rev,
+  .p-dup {
+    display: none;
+  }
+
+  .p-marquee-track {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: auto;
+    row-gap: 16px;
+  }
+}

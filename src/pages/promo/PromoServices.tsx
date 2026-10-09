@@ -1,5 +1,5 @@
 import { Box, Text, Title } from '@mantine/core';
-import { BG, BORDER, gradientText } from './tokens';
+import { BG, BORDER, gradientText, vars } from './tokens';
 
 import TwitchLogo from '../../res/twitch_logo.svg?react';
 import YoutubeLogo from '../../res/youtube_logo.svg?react';
@@ -32,28 +32,40 @@ interface Props {
   items: ServiceItem[];
 }
 
+function Marquee({ items, reverse }: { items: ServiceItem[]; reverse?: boolean }) {
+  const shown = items.filter(({ name }) => LOGOS[name]);
+  return (
+    <div className={reverse ? 'p-marquee p-marquee-rev' : 'p-marquee'} aria-hidden={reverse || undefined}>
+      <div className="p-marquee-track">
+        {/* doubled so translateX(-50%) loops seamlessly */}
+        {[...shown, ...shown].map(({ name, color }, i) => {
+          const Logo = LOGOS[name];
+          return (
+            <div key={i} className={i < shown.length ? 'p-chip' : 'p-chip p-dup'} style={vars({ '--c': color })} aria-hidden={i >= shown.length || undefined}>
+              <Logo style={{ width: 32, height: 32, color }} />
+              <Text fw={500} style={{ color: 'rgba(255,255,255,0.85)', whiteSpace: 'nowrap' }}>{name}</Text>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function PromoServices({ eyebrow, headline, items }: Props) {
   return (
-    <Box id="services" component="section" style={{ background: BG, padding: '100px 24px', borderTop: `1px solid ${BORDER}` }}>
-      <Box style={{ textAlign: 'center', marginBottom: 48 }}>
+    <Box id="services" component="section" style={{ background: BG, padding: '120px 0', borderTop: `1px solid ${BORDER}` }}>
+      <Box className="p-reveal" style={{ textAlign: 'center', marginBottom: 24, padding: '0 24px' }}>
         <Text size="sm" fw={500} mb={12} style={{ ...gradientText, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
           {eyebrow}
         </Text>
-        <Title order={2} style={{ color: '#fff', fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, letterSpacing: '-0.02em' }}>
+        <Title order={2} style={{ color: '#fff', fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 800, letterSpacing: '-0.03em' }}>
           {headline}
         </Title>
       </Box>
-      <Box style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 32, maxWidth: 720, margin: '0 auto' }}>
-        {items.map(({ name, color }) => {
-          const Logo = LOGOS[name];
-          if (!Logo) return null;
-          return (
-            <Box key={name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, width: 100 }}>
-              <Logo style={{ width: 40, height: 40, color }} />
-              <Text size="xs" style={{ color: 'rgba(255,255,255,0.65)' }}>{name}</Text>
-            </Box>
-          );
-        })}
+      <Box className="p-reveal" style={vars({ '--i': 1, display: 'flex', flexDirection: 'column', marginTop: -28 })}>
+        <Marquee items={items} />
+        <Box style={{ marginTop: -40 }}><Marquee items={[...items].reverse()} reverse /></Box>
       </Box>
     </Box>
   );

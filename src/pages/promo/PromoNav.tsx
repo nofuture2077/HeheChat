@@ -23,6 +23,7 @@ export function PromoNav({ links, cta }: Props) {
   return (
     <Box
       component="nav"
+      className="p-nav"
       style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
@@ -43,9 +44,8 @@ export function PromoNav({ links, cta }: Props) {
             component="a"
             href={href}
             size="sm"
-            style={{ color: 'rgba(255,255,255,0.75)', textDecoration: 'none', whiteSpace: 'nowrap', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = '#fff')}
-            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = 'rgba(255,255,255,0.75)')}
+            className="p-nav-link"
+            style={{ textDecoration: 'none', whiteSpace: 'nowrap' }}
           >
             {label}
           </Text>
@@ -55,6 +55,7 @@ export function PromoNav({ links, cta }: Props) {
           component="a"
           href={cta.href}
           size="xs"
+          className="p-btn"
           style={{ background: PINK_GRADIENT, border: 'none', borderRadius: 20, paddingLeft: 16, paddingRight: 16, fontWeight: 500, fontSize: 13 }}
         >
           {cta.label}

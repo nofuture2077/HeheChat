@@ -1,6 +1,6 @@
 import { Box, Text, Title, Button, Flex } from '@mantine/core';
 import { IconCheck } from '@tabler/icons-react';
-import { BG, BORDER, PINK_GRADIENT, TEXT_SECONDARY, gradientText } from './tokens';
+import { BG, BORDER, PINK_GRADIENT, TEXT_SECONDARY, gradientText, vars } from './tokens';
 
 export interface PwaCta { label: string; href: string }
 
@@ -14,13 +14,14 @@ interface Props {
 
 export function PromoPwaBanner({ eyebrow, headline, subline, bullets, cta }: Props) {
   return (
-    <Box id="pwa" component="section" style={{ background: BG, padding: '100px 24px', borderTop: `1px solid ${BORDER}` }}>
-      <Box style={{ maxWidth: 800, margin: '0 auto' }}>
-        <Box style={{ background: 'linear-gradient(135deg, #0f0f0f 0%, #1a0a14 100%)', border: '1px solid rgba(219,50,188,0.2)', borderRadius: 24, padding: 'clamp(40px, 6vw, 72px)', textAlign: 'center' }}>
+    <Box id="pwa" component="section" style={{ background: BG, padding: '120px 24px', borderTop: `1px solid ${BORDER}` }}>
+      <Box className="p-reveal" style={{ maxWidth: 800, margin: '0 auto' }}>
+        <Box className="p-glow-card">
+        <Box style={{ background: 'linear-gradient(135deg, #0f0f0f 0%, #1a0a14 100%)', borderRadius: 23, padding: 'clamp(40px, 6vw, 72px)', textAlign: 'center' }}>
           <Text size="sm" fw={500} mb={12} style={{ ...gradientText, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             {eyebrow}
           </Text>
-          <Title order={2} mb={16} style={{ color: '#fff', fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 700, letterSpacing: '-0.02em' }}>
+          <Title order={2} mb={16} style={{ color: '#fff', fontSize: 'clamp(32px, 5vw, 56px)', fontWeight: 800, letterSpacing: '-0.03em' }}>
             {headline}
           </Title>
           <Text style={{ color: TEXT_SECONDARY, maxWidth: 480, margin: '0 auto 36px', lineHeight: 1.65 }}>
@@ -28,8 +29,8 @@ export function PromoPwaBanner({ eyebrow, headline, subline, bullets, cta }: Pro
           </Text>
 
           <Flex direction="column" gap={12} align="center" mb={40}>
-            {bullets.map((text) => (
-              <Flex key={text} align="center" gap={10}>
+            {bullets.map((text, i) => (
+              <Flex key={text} align="center" gap={10} className="p-reveal" style={vars({ '--i': i + 1 })}>
                 <Box style={{ width: 20, height: 20, borderRadius: '50%', background: PINK_GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <IconCheck size={12} stroke={2.5} color="#fff" />
                 </Box>
@@ -38,9 +39,10 @@ export function PromoPwaBanner({ eyebrow, headline, subline, bullets, cta }: Pro
             ))}
           </Flex>
 
-          <Button component="a" href={cta.href} size="md" style={{ background: PINK_GRADIENT, border: 'none', borderRadius: 24, paddingLeft: 32, paddingRight: 32, fontWeight: 600 }}>
+          <Button component="a" href={cta.href} size="lg" className="p-btn p-pulse" style={{ background: PINK_GRADIENT, border: 'none', borderRadius: 24, paddingLeft: 32, paddingRight: 32, fontWeight: 600 }}>
             {cta.label}
           </Button>
+        </Box>
         </Box>
       </Box>
     </Box>
