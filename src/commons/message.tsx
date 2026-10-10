@@ -342,8 +342,8 @@ export function shouldPlayTTSText(
     return true;
 }
 
-const SPAM_WINDOW_MS = 30_000;
-const COPYPASTA_BUFFER_SIZE = 20;
+const SPAM_WINDOW_MS = 300_000;
+const COPYPASTA_BUFFER_SIZE = 200;
 
 class SpamTracker {
     private lastByUser = new Map<string, { text: string; date: number }>();

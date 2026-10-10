@@ -1081,7 +1081,7 @@ class AlertPlayer {
         console.log('Start playing');
         const rawTtsText = (eventData && eventData.text)
             ? this.parsedPartsToTTSText(eventData.text.parts || eventData.text) : undefined;
-        // Preview alerts reuse the same sample user and text, the spam filter would block every repeat within 30s.
+        // Preview alerts reuse the same sample user and text, the spam filter would block every repeat within 5 minutes.
         // Replays must always play in full.
         const isPreviewAlert = !!(event as any).force;
         const smartFilter = this.config?.alertSmartFilter;
