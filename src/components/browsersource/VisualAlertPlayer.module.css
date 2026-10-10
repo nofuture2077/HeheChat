@@ -176,6 +176,162 @@ body, html {
   font-style: normal;
 }
 
+.font-headline-abrilfatface .text p:first-child {
+  font-family: "Abril Fatface", serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-abrilfatface .text p:last-child {
+  font-family: "Abril Fatface", serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-cinzeldecorative .text p:first-child {
+  font-family: "Cinzel Decorative", serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-cinzeldecorative .text p:last-child {
+  font-family: "Cinzel Decorative", serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-unifrakturcook .text p:first-child {
+  font-family: "UnifrakturCook", serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-unifrakturcook .text p:last-child {
+  font-family: "UnifrakturCook", serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-lobster .text p:first-child {
+  font-family: "Lobster", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-lobster .text p:last-child {
+  font-family: "Lobster", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-permanentmarker .text p:first-child {
+  font-family: "Permanent Marker", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-permanentmarker .text p:last-child {
+  font-family: "Permanent Marker", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-creepster .text p:first-child {
+  font-family: "Creepster", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-creepster .text p:last-child {
+  font-family: "Creepster", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-monoton .text p:first-child {
+  font-family: "Monoton", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-monoton .text p:last-child {
+  font-family: "Monoton", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-fasterone .text p:first-child {
+  font-family: "Faster One", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-fasterone .text p:last-child {
+  font-family: "Faster One", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-orbitron .text p:first-child {
+  font-family: "Orbitron", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-orbitron .text p:last-child {
+  font-family: "Orbitron", sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-blackopsone .text p:first-child {
+  font-family: "Black Ops One", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-blackopsone .text p:last-child {
+  font-family: "Black Ops One", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-bungee .text p:first-child {
+  font-family: "Bungee", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-bungee .text p:last-child {
+  font-family: "Bungee", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-rubikglitch .text p:first-child {
+  font-family: "Rubik Glitch", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-rubikglitch .text p:last-child {
+  font-family: "Rubik Glitch", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.font-headline-specialelite .text p:first-child {
+  font-family: "Special Elite", cursive;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.font-text-specialelite .text p:last-child {
+  font-family: "Special Elite", cursive;
+  font-weight: 300;
+  font-style: normal;
+}
+
 .image-xs .image { max-width: 10vw; }
 .image-sm .image { max-width: 20vw; }
 .image-md .image { max-width: 30vw; }
