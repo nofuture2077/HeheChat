@@ -462,9 +462,7 @@ export function Settings(props: SettingsProperties) {
       case 'Chat/Video':
         return <GeneralVideoSettings />;
       case 'General/Account':
-        return (
-          <GeneralAccountSettings />
-        );
+        return <GeneralAccountSettings />;
       case 'General/Profiles':
         return (
           <Stack mt={30} mb={30} gap={30}>
