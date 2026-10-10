@@ -463,7 +463,7 @@ export function Settings(props: SettingsProperties) {
         return <GeneralVideoSettings />;
       case 'General/Account':
         return (
-          <GeneralAccountSettings close={props.close} openUserProfile={props.openUserProfile} />
+          <GeneralAccountSettings />
         );
       case 'General/Profiles':
         return (
