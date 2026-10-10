@@ -85,7 +85,7 @@ export function ConnectionStatusProvider({ forceReconnect, children }: ProviderP
   // While disconnected, tick once a second so consumers re-render
   // and can react to crossing thresholds (e.g. show banner after 5s).
   useEffect(() => {
-    if (raw.state === 'connected') return;
+    if (raw.state === 'connected') return undefined;
     const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, [raw.state]);

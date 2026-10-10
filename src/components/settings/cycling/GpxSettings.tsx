@@ -60,7 +60,6 @@ export function GpxSettings() {
     if (premium.isPremium) {
       loadFiles();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [premium.isPremium]);
 
   if (!premium.isPremium) {

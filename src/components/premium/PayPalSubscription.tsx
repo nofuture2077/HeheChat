@@ -11,57 +11,29 @@ const PayPalButtonPlaceholder: React.FC<{
   amount: string;
   currency: string;
   onSuccess: (details: any, data: any) => void;
-}> = ({ amount, currency, onSuccess }) => {
-  const handleClick = () => {
-    // Simulate a successful PayPal payment
-    const mockDetails = {
-      id: `PAYID-${Math.random().toString(36).substr(2, 9)}`,
-      status: 'COMPLETED',
-      purchase_units: [
-        {
-          amount: {
-            value: amount,
-            currency_code: currency,
-          },
-        },
-      ],
-      payer: {
-        email_address: 'test@example.com',
-      },
-      create_time: new Date().toISOString(),
-    };
-
-    const mockData = {
-      orderID: `ORDER-${Math.random().toString(36).substr(2, 9)}`,
-    };
-
-    onSuccess(mockDetails, mockData);
-  };
-
-  return (
-    <>
-      <div
-        className={classes.paypalButton}
-        style={{
-          backgroundColor: '#8ba3c1',
-          color: 'white',
-          padding: '10px 15px',
-          borderRadius: '4px',
-          cursor: 'not-allowed',
-          textAlign: 'center',
-          fontWeight: 'bold',
-          opacity: 0.7,
-        }}
-      >
-        <IconBrandPaypal style={{ marginRight: '8px' }} />
-        Pay with PayPal
-      </div>
-      <Text size="xs" c="dimmed" mt="xs" ta="center">
-        Pro Version soon
-      </Text>
-    </>
-  );
-};
+}> = () => (
+  <>
+    <div
+      className={classes.paypalButton}
+      style={{
+        backgroundColor: '#8ba3c1',
+        color: 'white',
+        padding: '10px 15px',
+        borderRadius: '4px',
+        cursor: 'not-allowed',
+        textAlign: 'center',
+        fontWeight: 'bold',
+        opacity: 0.7,
+      }}
+    >
+      <IconBrandPaypal style={{ marginRight: '8px' }} />
+      Pay with PayPal
+    </div>
+    <Text size="xs" c="dimmed" mt="xs" ta="center">
+      Pro Version soon
+    </Text>
+  </>
+);
 
 interface PayPalSubscriptionProps {
   onSuccess?: (result: any) => void;
@@ -84,7 +56,7 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
     []
   );
 
-  const handlePayPalSuccess = async (details: any, data: any) => {
+  const handlePayPalSuccess = async (details: any) => {
     setLoading(true);
     setError(null);
 
@@ -110,11 +82,11 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
           setLoading(false);
         }
       }
-    } catch (error) {
+    } catch (err) {
       // Only update state if component is still mounted
       if (isMounted.current) {
         setError('An error occurred while processing the payment');
-        console.error('Error processing payment:', error);
+        console.error('Error processing payment:', err);
         setLoading(false);
       }
     }

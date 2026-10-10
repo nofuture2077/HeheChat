@@ -1,6 +1,6 @@
 import { Button, Fieldset, Group, Stack, Avatar, Text } from '@mantine/core';
 import { IconLogout } from '@tabler/icons-react';
-import { useContext } from 'react';
+import React, { useContext } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 
 export interface GeneralAccountSettingsProps {
@@ -8,7 +8,7 @@ export interface GeneralAccountSettingsProps {
   openUserProfile: () => void;
 }
 
-export function GeneralAccountSettings({}: GeneralAccountSettingsProps) {
+export const GeneralAccountSettings: React.FC<GeneralAccountSettingsProps> = () => {
   const loginContext = useContext(LoginContextContext);
 
   return (
@@ -39,4 +39,4 @@ export function GeneralAccountSettings({}: GeneralAccountSettingsProps) {
       </Fieldset>
     </Stack>
   );
-}
+};

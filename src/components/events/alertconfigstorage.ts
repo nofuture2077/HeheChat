@@ -65,11 +65,15 @@ export class AlertConfigStorage {
   async getCachedConfig(channel: string): Promise<{ config: any; meta: AlertConfigMeta } | null> {
     try {
       const store = await this.getStore();
+      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route IDB rejections into the catch (returning null) and change behavior
       return new Promise((resolve, reject) => {
         const request = store.get(channel);
         request.onsuccess = () => {
           const { result } = request;
-          if (!result) return resolve(null);
+          if (!result) {
+            resolve(null);
+            return;
+          }
           // Return just the config and meta parts
           const { config, meta } = result;
           resolve({ config, meta });
@@ -85,7 +89,7 @@ export class AlertConfigStorage {
   async storeConfig(config: any, meta: AlertConfigMeta): Promise<void> {
     try {
       const store = await this.getStore('readwrite');
-      return new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         const request = store.put({
           meta,
           config,
@@ -103,7 +107,7 @@ export class AlertConfigStorage {
     try {
       // First, get the meta data from the server
       const meta = await this.getConfigMeta(channel);
-      if (!meta) return;
+      if (!meta) return undefined;
 
       // Check if we have a cached version
       meta.channel = channel;

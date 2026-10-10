@@ -167,7 +167,7 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
 
   // Initialize current version and set up periodic checks
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) return undefined;
 
     // Initialize current version and store it in localStorage
     getCurrentVersion().then((version) => {

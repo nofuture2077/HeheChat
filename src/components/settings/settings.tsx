@@ -2,8 +2,6 @@ import { useState, useContext } from 'react';
 import {
   Tooltip,
   UnstyledButton,
-  Title,
-  rem,
   Button,
   ScrollArea,
   Text,
@@ -12,7 +10,6 @@ import {
   Alert,
   Center,
   Switch,
-  Anchor,
 } from '@mantine/core';
 import {
   IconHome2,
@@ -49,7 +46,6 @@ import {
   IconChevronRight,
   IconRobot,
   IconInfoCircle,
-  IconWifi,
   IconBrandSpotify,
   IconShieldOff,
 } from '@tabler/icons-react';
@@ -61,7 +57,7 @@ import {
   NotificationStreamStartSettings,
   NotificationChatMentionSettings,
 } from './NotificationSettings';
-import { OverlayDrawer } from '@/pages/Chat.page';
+import type { OverlayDrawer } from '@/pages/Chat.types';
 import { DiscordInfo } from './DiscordInfo';
 import { ShortcutSettings } from './ShortcutSettings';
 
@@ -377,9 +373,9 @@ export function Settings(props: SettingsProperties) {
       case 'Switcher':
         return (
           <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
-            OBS Remote / Scene Switcher automatically switches OBS scenes based on your stream's
-            health metrics (bitrate, RTT). It connects to your stream ingest provider and OBS
-            WebSocket to react to stream state changes in real time. Requires Premium.
+            OBS Remote / Scene Switcher automatically switches OBS scenes based on your
+            stream&apos;s health metrics (bitrate, RTT). It connects to your stream ingest provider
+            and OBS WebSocket to react to stream state changes in real time. Requires Premium.
           </Alert>
         );
       case 'Connect':
@@ -556,10 +552,10 @@ export function Settings(props: SettingsProperties) {
           <Stack mt={30} mb={30} gap={30}>
             <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
               Rules define which OBS scene to switch to based on stream metrics like bitrate or RTT.
-              For example: switch to a "Low Bitrate" scene when bitrate drops below a threshold, or
-              switch to "Starting Soon" when the stream goes offline. Rules that trigger on stream
-              stop require the HeheChat Browser Source to be added as a source in OBS (see Chat ›
-              Browser Source for the URL).
+              For example: switch to a &quot;Low Bitrate&quot; scene when bitrate drops below a
+              threshold, or switch to &quot;Starting Soon&quot; when the stream goes offline. Rules
+              that trigger on stream stop require the HeheChat Browser Source to be added as a
+              source in OBS (see Chat › Browser Source for the URL).
             </Alert>
             {premium.isPremium ? <RulesTab /> : <PremiumRequired />}
           </Stack>

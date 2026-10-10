@@ -30,9 +30,9 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
         setError(result.message);
         premium.loading = false;
       }
-    } catch (error) {
+    } catch (err) {
       setError('An error occurred while redeeming the code');
-      console.error('Error redeeming code:', error);
+      console.error('Error redeeming code:', err);
       premium.loading = false;
     }
   };

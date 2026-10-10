@@ -243,13 +243,13 @@ class AlertPlayer {
   }
 
   async playAudio(volume: number, audioInfo: AudioInfo | undefined, extra: number): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if (!audioInfo || this.skipCurrent || !this.audioContext) {
         resolve();
         return;
       }
 
-      const { duration, audioBuffer, audioUrl, videoElement, speed } = audioInfo;
+      const { audioBuffer, audioUrl, videoElement, speed } = audioInfo;
       const playbackRate = speed ?? 1.0;
 
       // Clean up any existing audio source
@@ -719,17 +719,18 @@ class AlertPlayer {
         if (!word.trim()) return true;
 
         // Check if word is an emote in any channel
-        for (const channel of channels) {
-          if (!DEFAULT_CHAT_EMOTES.emotes.has(channel)) continue;
+        for (const emoteChannel of channels) {
+          if (!DEFAULT_CHAT_EMOTES.emotes.has(emoteChannel)) continue;
 
-          const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(channel);
+          const channelEmotes = DEFAULT_CHAT_EMOTES.emotes.get(emoteChannel);
 
           // Check channel emotes (if skipEmotesInTTS is enabled)
           if (this.config?.skipEmotesInTTS && channelEmotes?.channelEmotes?.get(word)) return false;
 
           // Check 7TV emotes (if skip7TVEmotesInTTS is enabled)
-          if (this.config?.skip7TVEmotesInTTS && channelEmotes?.sevenTVEmotes?.get(word))
+          if (this.config?.skip7TVEmotesInTTS && channelEmotes?.sevenTVEmotes?.get(word)) {
             return false;
+          }
         }
 
         // Check global emotes (if skipGlobalEmotesInTTS is enabled)
@@ -804,7 +805,7 @@ class AlertPlayer {
     voiceParams?: Record<string, string | number>
   ) {
     // Skip if explicitly disabled
-    if (voiceType === 'none') return;
+    if (voiceType === 'none') return undefined;
 
     // Resolve which voice to use
     let resolvedVoiceType = voiceType;
@@ -815,7 +816,7 @@ class AlertPlayer {
       const defaultVoice = this.alertConfig[channel]?.data?.config?.defaultVoice;
       if (!defaultVoice) {
         console.warn('Default voice type specified but no defaultVoice config found');
-        return;
+        return undefined;
       }
       resolvedVoiceType = defaultVoice.voiceType;
       resolvedVoice = defaultVoice.voiceSpecifier;
@@ -829,7 +830,7 @@ class AlertPlayer {
         ? await this.aiTTS(ttsMessage, channel, resolvedVoice, state, sink)
         : await this.googleTTS(ttsMessage, channel, resolvedVoice, state, sink);
 
-    if (!audioData) return;
+    if (!audioData) return undefined;
     const audioInfo = await this.getAudioInfo(`data:audio/mp3;base64,${audioData}`);
     if (audioInfo) {
       const speed = Number(resolvedVoiceParams?.speed);
@@ -939,6 +940,7 @@ class AlertPlayer {
     if (step || step === 0) {
       return deterministicSample(minAlerts[step], event.triggerId || `${Math.random()}`);
     }
+    return undefined;
   }
 
   getEventData(item?: string): any {
@@ -952,7 +954,7 @@ class AlertPlayer {
 
   parsedPartsToTTSText(parsedParts: ParsedMessagePart[]) {
     return parsedParts
-      .map((part, partIndex) => {
+      .map((part) => {
         if (part.type === 'emote' && this.config?.skipEmotesInTTS) {
           return '';
         }
@@ -964,7 +966,7 @@ class AlertPlayer {
 
   parsedPartsToText(parsedParts: ParsedMessagePart[]) {
     return parsedParts
-      .map((part, partIndex) => {
+      .map((part) => {
         if (part.type === 'emote') {
           return `image${buildEmoteImageUrl(part.emote?.id! || part.id || '', {
             size: '3.0',
@@ -1136,7 +1138,7 @@ class AlertPlayer {
 
       this.startPlaying();
       // Direct access to blerp audio without proxy
-      return new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         this.getAudioInfo(alertInfo.audioUrl!).then(
           (audioInfo) => {
             PubSub.publish('AlertPlayer-update', { duration: audioInfo?.duration || 5 });
@@ -1157,6 +1159,7 @@ class AlertPlayer {
           }
         );
       });
+      return;
     }
 
     // Handle soundalerts (direct audio URL)
@@ -1174,7 +1177,7 @@ class AlertPlayer {
       }
 
       this.startPlaying();
-      return new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         this.getAudioInfo(alertInfo.audioUrl!).then(
           (audioInfo) => {
             PubSub.publish('AlertPlayer-update', { duration: audioInfo?.duration || 5 });
@@ -1195,6 +1198,7 @@ class AlertPlayer {
           }
         );
       });
+      return;
     }
 
     // At this point we have a standard alert
@@ -1459,7 +1463,8 @@ class AlertPlayer {
       }
 
       if (this.interrupted()) {
-        return this.handleAudioInterruption();
+        this.handleAudioInterruption();
+        return;
       }
 
       // Don't process queue if we're already playing or not initialized

@@ -9,6 +9,7 @@ function getQueryVariable(query: string, variable: string): string | undefined {
       return value !== undefined ? decodeURIComponent(value) : '';
     }
   }
+  return undefined;
 }
 
 const query = window.location.hash.substring(1);

@@ -133,6 +133,7 @@ export class EmoteStorage {
     try {
       const prefixedId = `${prefix}${userId}`;
       const store = await this.getStore('readwrite');
+      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route request rejections into catch, changing behavior
       return new Promise((resolve, reject) => {
         const now = Date.now();
         const request = store.put({
@@ -161,6 +162,7 @@ export class EmoteStorage {
     try {
       const prefixedId = `${prefix}${userId}`;
       const store = await this.getStore();
+      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route request rejections into catch, changing behavior
       return new Promise((resolve, reject) => {
         const request = store.get(prefixedId);
         request.onsuccess = () => resolve(request.result);
@@ -185,6 +187,7 @@ export class EmoteStorage {
     try {
       const prefixedId = `${prefix}${userId}`;
       const store = await this.getStore('readwrite');
+      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route request rejections into catch, changing behavior
       return new Promise((resolve, reject) => {
         const request = store.delete(prefixedId);
         request.onsuccess = () => resolve();

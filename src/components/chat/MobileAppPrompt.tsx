@@ -70,7 +70,9 @@ export function MobileAppPrompt() {
           <IconDeviceMobile size={24} />
           <Text fw={500}>Install HeheChat as an App</Text>
         </Group>
-        <Text size="sm">Add HeheChat to your home screen for the best experience! Here's how:</Text>
+        <Text size="sm">
+          Add HeheChat to your home screen for the best experience! Here&apos;s how:
+        </Text>
         <Group align="flex-start" gap="xs">
           {deviceOS === 'iOS' && <IconShare size={20} />}
           {deviceOS === 'Android' && <IconDotsVertical size={20} />}

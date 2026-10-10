@@ -36,7 +36,7 @@ export function ConnectElevenLabsSettings() {
   };
 
   const disconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect your ElevenLabs account?')) return;
+    if (!window.confirm('Are you sure you want to disconnect your ElevenLabs account?')) return;
     setLoading(true);
     try {
       await fetch(`${import.meta.env.VITE_BACKEND_URL}/elevenlabs/set?state=${state}&apikey=`);

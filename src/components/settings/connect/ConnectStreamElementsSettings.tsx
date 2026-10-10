@@ -36,7 +36,7 @@ export function ConnectStreamElementsSettings() {
   };
 
   const disconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect StreamElements?')) return;
+    if (!window.confirm('Are you sure you want to disconnect StreamElements?')) return;
     setLoading(true);
     try {
       await fetch(`${import.meta.env.VITE_BACKEND_URL}/streamelements/set?state=${state}&jwt=`);

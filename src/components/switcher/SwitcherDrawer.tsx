@@ -11,7 +11,7 @@ import {
   postStreamStop,
 } from '@/api/switcher';
 import { ConfigContext, PremiumContext } from '@/ApplicationContext';
-import { OverlayDrawer } from '@/pages/Chat.page';
+import type { OverlayDrawer } from '@/pages/Chat.types';
 import { ProviderConfigTab } from './ProviderConfigTab';
 import { RulesTab } from './RulesTab';
 import { TokenTab } from './TokenTab';
@@ -54,7 +54,7 @@ function StreamTab({ channel }: { channel: string | undefined }) {
   const [isLive, setIsLive] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!channel) return;
+    if (!channel) return undefined;
 
     Promise.all([getSwitcherStatus(channel), getSwitcherScenes(channel), getStreamStatus(channel)])
       .then(([status, sceneData, streamStatus]) => {

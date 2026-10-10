@@ -143,8 +143,8 @@ export function useEventFeed() {
       (key: string) => config.hideEvents[key]
     );
 
-    EventStorage?.load(config.channels, ignored).then((events) => {
-      setEvents(events);
+    EventStorage?.load(config.channels, ignored).then((loadedEvents) => {
+      setEvents(loadedEvents);
       setLoad(false);
     });
 

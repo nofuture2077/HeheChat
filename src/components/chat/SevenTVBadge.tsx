@@ -13,13 +13,13 @@ interface SevenTVBadgeProps {
  */
 export function SevenTVBadgeComponent({ badge, size = 18, className = '' }: SevenTVBadgeProps) {
   // Get the best image file for the requested size
-  const getBadgeImageUrl = (badge: SevenTVBadge, targetSize: number): string | null => {
-    if (!badge.host?.url || !badge.host?.files) {
+  const getBadgeImageUrl = (badgeData: SevenTVBadge, targetSize: number): string | null => {
+    if (!badgeData.host?.url || !badgeData.host?.files) {
       return null;
     }
 
     // Filter supported formats and sort by size
-    const files = badge.host.files
+    const files = badgeData.host.files
       .filter((file) => file.format === 'WEBP' || file.format === 'PNG')
       .sort((a, b) => a.width - b.width);
 
@@ -30,7 +30,7 @@ export function SevenTVBadgeComponent({ badge, size = 18, className = '' }: Seve
     // Find the smallest file that is >= targetSize
     const bestFile =
       files.find((file) => file.width >= targetSize * 1.5) || files[files.length - 1];
-    return `${badge.host.url}/${bestFile.name}`;
+    return `${badgeData.host.url}/${bestFile.name}`;
   };
 
   const imageUrl = getBadgeImageUrl(badge, size);

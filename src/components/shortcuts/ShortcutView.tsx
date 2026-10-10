@@ -14,7 +14,7 @@ import {
 } from '@tabler/icons-react';
 import { Dictionary } from 'underscore';
 import classes from './ShortcutView.module.css';
-import { ConfigContext, ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
+import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
 import { ShortCut, shortcutHandler } from '@/commons/shortcuts';
 
 const getIconForType = (type: string, isToggleOn?: boolean) => {
@@ -44,7 +44,6 @@ const getConfigValue = (config: any, configKey: string): boolean => config[confi
 
 export function ShortcutView() {
   const config = useContext(ConfigContext);
-  const emotes = useContext(ChatEmotesContext);
   const loginContext = useContext(LoginContextContext);
   const [modalOpen, setModalOpen] = useState(false);
   const [activeShortcut, setActiveShortcut] = useState<ShortCut | null>(null);

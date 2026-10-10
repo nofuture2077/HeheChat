@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file -- store, utils and API classes are intentionally co-located in this module */
 import { Database } from '@/commons/database';
 
 // Store name for 7TV cosmetics
@@ -105,6 +106,7 @@ export class SevenTVCosmeticsStorage {
   async storeUserCosmetics(userId: string, cosmetics: SevenTVUserCosmetics): Promise<void> {
     try {
       const store = await this.getStore('readwrite');
+      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route request rejections into catch, changing behavior
       return new Promise((resolve, reject) => {
         const now = Date.now();
         const request = store.put({
@@ -129,6 +131,7 @@ export class SevenTVCosmeticsStorage {
   async getUserCosmetics(userId: string): Promise<UserCosmetics | null> {
     try {
       const store = await this.getStore();
+      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route request rejections into catch, changing behavior
       return new Promise((resolve, reject) => {
         const request = store.get(userId);
         request.onsuccess = () => {
@@ -155,6 +158,7 @@ export class SevenTVCosmeticsStorage {
   async clearUserCosmetics(userId: string): Promise<void> {
     try {
       const store = await this.getStore('readwrite');
+      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route request rejections into catch, changing behavior
       return new Promise((resolve, reject) => {
         const request = store.delete(userId);
         request.onsuccess = () => resolve();
@@ -231,9 +235,8 @@ export class SevenTVCosmeticsUtils {
     // Handle image-based paint
     if (paint.image_url) {
       backgroundImage = `url('${paint.image_url}')`;
-    }
-    // Handle gradient-based paint
-    else if (paint.stops && paint.stops.length > 0) {
+    } else if (paint.stops && paint.stops.length > 0) {
+      // Handle gradient-based paint
       // Sort stops by position to ensure correct gradient order
       const sortedStops = paint.stops
         .map((stop) => ({

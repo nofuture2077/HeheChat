@@ -57,7 +57,7 @@ export function ConnectMoblinSettings() {
   };
 
   const disconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect Moblin?')) return;
+    if (!window.confirm('Are you sure you want to disconnect Moblin?')) return;
     setLoading(true);
     try {
       await fetch(`${import.meta.env.VITE_BACKEND_URL}/moblin/set?state=${state}&password=`);

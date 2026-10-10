@@ -1,9 +1,4 @@
-import {
-  SevenTVCosmeticsStore,
-  SevenTVCosmeticsAPI,
-  SevenTVUserCosmetics,
-  SevenTVCosmeticsUtils,
-} from './7tvcosmetics';
+import { SevenTVCosmeticsStore, SevenTVCosmeticsAPI, SevenTVUserCosmetics } from './7tvcosmetics';
 
 /**
  * Service for managing 7TV user cosmetics with caching
@@ -12,6 +7,7 @@ export class SevenTVCosmeticsService {
   private static instance: SevenTVCosmeticsService;
   private loadingPromises: Map<string, Promise<SevenTVUserCosmetics | null>> = new Map();
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-function -- private constructor enforces singleton
   private constructor() {}
 
   static getInstance(): SevenTVCosmeticsService {

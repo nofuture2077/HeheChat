@@ -53,7 +53,7 @@ export function ConnectBlerpSettings() {
   };
 
   const disconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect your Blerp room?')) return;
+    if (!window.confirm('Are you sure you want to disconnect your Blerp room?')) return;
     setLoading(true);
     try {
       await fetch(`${import.meta.env.VITE_BACKEND_URL}/blerp/set?state=${state}&roomId=`);

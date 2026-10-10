@@ -16,8 +16,9 @@ const CHANNEL_ID_REGEX = /^UC[\w-]{22}$/;
 
 function validateChannelId(id: string): string | null {
   if (!id.trim()) return 'Channel ID is required.';
-  if (!CHANNEL_ID_REGEX.test(id.trim()))
+  if (!CHANNEL_ID_REGEX.test(id.trim())) {
     return 'Channel ID must start with "UC" and be 24 characters long (e.g. UCxxxxxxxxxxxxxxxxxxxxx).';
+  }
   return null;
 }
 
@@ -71,15 +72,15 @@ export function ConnectYouTubeSettings() {
       ).then((r) => r.json());
       if (data.success) setConnected(true);
       else alert(`Error connecting: ${data.error || 'Unknown error'}`);
-    } catch (error) {
-      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } catch (err) {
+      alert(`Error: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
   };
 
   const disconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect your YouTube channel?')) return;
+    if (!window.confirm('Are you sure you want to disconnect your YouTube channel?')) return;
     setLoading(true);
     try {
       const data = await fetch(
@@ -171,8 +172,8 @@ export function ConnectYouTubeSettings() {
                   </li>
                 </ol>
                 <Text size="xs" c="dimmed" mt={6}>
-                  Alternatively, go to your channel page, click "More" → "Share" → "Copy channel
-                  ID".
+                  Alternatively, go to your channel page, click &quot;More&quot; → &quot;Share&quot;
+                  → &quot;Copy channel ID&quot;.
                 </Text>
               </Alert>
               <Button

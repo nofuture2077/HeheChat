@@ -14,7 +14,7 @@ import { useEffect, useState, useContext } from 'react';
 import { ProfileContext, ConfigContext } from '@/ApplicationContext';
 
 function extractBlerpRoom(input: string): string {
-  const regex = /\/([^\/]+)$/;
+  const regex = /\/([^/]+)$/;
   const match = input.match(regex);
   return match ? match[1] : input;
 }
@@ -242,7 +242,7 @@ export function ConnectSettings() {
   };
 
   const disconnectYouTube = async () => {
-    if (!confirm('Are you sure you want to disconnect your YouTube channel?')) {
+    if (!window.confirm('Are you sure you want to disconnect your YouTube channel?')) {
       return;
     }
 
@@ -351,8 +351,8 @@ export function ConnectSettings() {
                     YouTube Studio
                   </a>
                 </li>
-                <li>Click on "Customization" → "Basic info"</li>
-                <li>Your Channel-ID is listed under "Channel URL"</li>
+                <li>Click on &quot;Customization&quot; → &quot;Basic info&quot;</li>
+                <li>Your Channel-ID is listed under &quot;Channel URL&quot;</li>
               </ol>
             </details>
           </Stack>
@@ -503,9 +503,9 @@ export function ConnectSettings() {
                 Ko-fi Webhook Settings
               </a>
             </li>
-            <li>Paste the URL in the "Webhook URL" field on Ko-fi</li>
+            <li>Paste the URL in the &quot;Webhook URL&quot; field on Ko-fi</li>
             <li>Save the settings on Ko-fi</li>
-            <li>Copy the "Verification Token" provided by Ko-fi</li>
+            <li>Copy the &quot;Verification Token&quot; provided by Ko-fi</li>
             <li>Paste it in the field below</li>
           </ol>
         </Text>

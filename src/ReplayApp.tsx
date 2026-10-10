@@ -35,18 +35,18 @@ export default function ReplayApp({ token }: ReplayAppProps) {
       const { data } = event;
 
       if (data.type === 'sharedata') {
-        const { profile } = data;
-        setProfile(profile);
-        AlertSystem.updateProfile(profile);
+        const { profile: newProfile } = data;
+        setProfile(newProfile);
+        AlertSystem.updateProfile(newProfile);
 
-        const channels = profile.config?.channels || [];
+        const channels = newProfile.config?.channels || [];
         backendWorkerRef.current?.postMessage({
           type: 'SEND',
           data: {
             type: 'subscribe',
             source: REPLAY_APP_NAME,
-            profile: profile.guid,
-            profileName: profile.name,
+            profile: newProfile.guid,
+            profileName: newProfile.name,
             version,
             token,
             channels: Object.fromEntries(channels.map((key: string) => [key, true])),
@@ -55,14 +55,14 @@ export default function ReplayApp({ token }: ReplayAppProps) {
       }
 
       if (data.type === 'profile') {
-        const { profile } = data;
-        setProfile(profile);
-        AlertSystem.updateProfile(profile);
+        const { profile: newProfile } = data;
+        setProfile(newProfile);
+        AlertSystem.updateProfile(newProfile);
       }
 
       if (data.type === 'event') {
-        const event = data.data;
-        PubSub.publish('WS-event', event);
+        const evt = data.data;
+        PubSub.publish('WS-event', evt);
       }
     };
 

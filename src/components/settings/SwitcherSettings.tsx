@@ -1,4 +1,4 @@
-import { Tabs, ScrollArea } from '@mantine/core';
+import { Tabs } from '@mantine/core';
 import { IconSettings, IconList, IconKey } from '@tabler/icons-react';
 import { useContext } from 'react';
 import { PremiumContext } from '@/ApplicationContext';

@@ -1,7 +1,7 @@
 import { useViewportSize } from '@mantine/hooks';
 import { useEffect } from 'react';
 
-import humanizeDuration, { HumanizerOptions } from 'humanize-duration';
+import humanizeDuration from 'humanize-duration';
 
 export function param(key: string, value: string) {
   return [key, value].join('=');

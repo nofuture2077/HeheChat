@@ -1,11 +1,10 @@
-import { Avatar, Text, Button, Paper, Space, Group, Stack } from '@mantine/core';
+import { Avatar, Text, Button, Paper, Space, Group } from '@mantine/core';
 
 import { useContext } from 'react';
 import { IconUnlink, IconX } from '@tabler/icons-react';
-import { OverlayDrawer } from '@/pages/Chat.page';
-import { LoginContextContext, ProfileContext } from '@/ApplicationContext';
+import type { OverlayDrawer } from '@/pages/Chat.types';
+import { LoginContextContext } from '@/ApplicationContext';
 import { LoginContext } from '@/commons/login';
-import { CompactAnalyticsChart } from '@/components/analytics/CompactAnalyticsChart';
 
 export const UserCardDrawer: OverlayDrawer = {
   name: 'settings',
@@ -25,7 +24,6 @@ export interface UserCardProps {
 
 export function UserCard(props: UserCardProps) {
   const loginContext = useContext(LoginContextContext);
-  const profile = useContext(ProfileContext);
 
   return (
     <Paper radius="md" withBorder p="lg" bg="var(--mantine-color-body)" ta="center">

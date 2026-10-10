@@ -14,7 +14,7 @@ import {
 import { useContext, useState, useEffect } from 'react';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
+import { LoginContextContext } from '@/ApplicationContext';
 import { getRerollConfig, updateRerollConfig, RerollConfig } from '@/api/sprites';
 
 export function AlertsRerollSettings() {

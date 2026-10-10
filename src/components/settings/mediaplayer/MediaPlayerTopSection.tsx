@@ -45,7 +45,6 @@ export function MediaPlayerTopSection() {
       })
       .catch(() => setDevices([]))
       .finally(() => setLoadingDevices(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activateDevice]);
 
   const changeDevice = (deviceId: string) => {

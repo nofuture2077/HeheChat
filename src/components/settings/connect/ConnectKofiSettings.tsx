@@ -60,7 +60,7 @@ export function ConnectKofiSettings() {
   };
 
   const disconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect Ko-fi?')) return;
+    if (!window.confirm('Are you sure you want to disconnect Ko-fi?')) return;
     setLoading(true);
     try {
       await fetch(
@@ -115,9 +115,9 @@ export function ConnectKofiSettings() {
                       Ko-fi Webhook Settings
                     </a>
                   </li>
-                  <li>Paste the URL in the "Webhook URL" field on Ko-fi</li>
+                  <li>Paste the URL in the &quot;Webhook URL&quot; field on Ko-fi</li>
                   <li>Save the settings on Ko-fi</li>
-                  <li>Copy the "Verification Token" provided by Ko-fi</li>
+                  <li>Copy the &quot;Verification Token&quot; provided by Ko-fi</li>
                   <li>Paste it in the field below</li>
                 </ol>
               </Text>

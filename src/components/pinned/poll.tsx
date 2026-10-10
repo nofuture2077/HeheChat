@@ -1,6 +1,5 @@
 import { Text, Card, Badge, Group, Progress, ActionIcon } from '@mantine/core';
 import { useState, useEffect, useContext, useRef } from 'react';
-import { useDisclosure } from '@mantine/hooks';
 import { IconEyeOff } from '@tabler/icons-react';
 import { formatMinuteSeconds } from '@/commons/helper';
 import { ChatEmotesContext } from '@/ApplicationContext';
@@ -36,8 +35,8 @@ export function Poll(props: PollProps) {
 
     // Set up a new interval
     intervalRef.current = window.setInterval(() => {
-      const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
-      setRemaining(remaining);
+      const nextRemaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
+      setRemaining(nextRemaining);
     }, 1000);
 
     // Clean up the interval when the component unmounts

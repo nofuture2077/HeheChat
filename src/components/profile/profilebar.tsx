@@ -102,7 +102,9 @@ function ProfileListComp(
     <div className={classes.profiles} {...provided.droppableProps} ref={provided.innerRef}>
       {profiles.map((profile, index) => (
         <Draggable key={profile.guid} draggableId={profile.guid} index={index}>
-          {(provided) => ProfileComp(provided, profile, activeProfile, close, emotes)}
+          {(draggableProvided) =>
+            ProfileComp(draggableProvided, profile, activeProfile, close, emotes)
+          }
         </Draggable>
       ))}
       {provided.placeholder}
@@ -153,7 +155,7 @@ function ProfileComp(
             src={emotes.getLogo(channel)?.props.src}
             key={channel + i}
             style={{ zIndex: 10 - i }}
-          ></Avatar>
+          />
         ))}
         {more ? <Avatar key="channelmore">+{more}</Avatar> : null}
       </AvatarGroup>
@@ -184,8 +186,8 @@ export function CreateProfileView(props: { activeProfile: Profile; close: () => 
               try {
                 await props.activeProfile.createProfile(profileName);
                 props.close();
-              } catch (error) {
-                console.error('Error creating profile:', error);
+              } catch (err) {
+                console.error('Error creating profile:', err);
                 // Could add user notification here
               }
             }}

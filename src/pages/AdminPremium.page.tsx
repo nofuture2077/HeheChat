@@ -133,9 +133,9 @@ export function AdminPremiumPage() {
       const data: PremiumUsersResponse = await response.json();
       setPremiumUsers(data.users || []);
       setLastUpdated(new Date());
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch premium users');
-      console.error('Error fetching premium users:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch premium users');
+      console.error('Error fetching premium users:', err);
     } finally {
       setLoading(false);
     }
@@ -166,9 +166,9 @@ export function AdminPremiumPage() {
       }
       const data: RedeemCodesResponse = await response.json();
       setRedeemCodes(data.codes || []);
-    } catch (error) {
-      setCodesError(error instanceof Error ? error.message : 'Failed to fetch redeem codes');
-      console.error('Error fetching redeem codes:', error);
+    } catch (err) {
+      setCodesError(err instanceof Error ? err.message : 'Failed to fetch redeem codes');
+      console.error('Error fetching redeem codes:', err);
     } finally {
       setCodesLoading(false);
     }
@@ -203,9 +203,9 @@ export function AdminPremiumPage() {
       await fetchRedeemCodes();
       closeGenerateModal();
       setGenerateDays(30); // Reset to default
-    } catch (error) {
-      setCodesError(error instanceof Error ? error.message : 'Failed to generate redeem code');
-      console.error('Error generating redeem code:', error);
+    } catch (err) {
+      setCodesError(err instanceof Error ? err.message : 'Failed to generate redeem code');
+      console.error('Error generating redeem code:', err);
     } finally {
       setGenerating(false);
     }
@@ -241,9 +241,9 @@ export function AdminPremiumPage() {
       }
       const data: HistoryResponse = await response.json();
       setHistory(data.history || []);
-    } catch (error) {
-      setHistoryError(error instanceof Error ? error.message : 'Failed to fetch premium history');
-      console.error('Error fetching premium history:', error);
+    } catch (err) {
+      setHistoryError(err instanceof Error ? err.message : 'Failed to fetch premium history');
+      console.error('Error fetching premium history:', err);
     } finally {
       setHistoryLoading(false);
     }

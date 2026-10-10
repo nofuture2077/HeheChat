@@ -15,7 +15,7 @@ import { formatEventText } from '@/components/events/eventlist';
 
 export interface AlertControlProps {}
 
-export function AlertControl(props: AlertControlProps) {
+export function AlertControl() {
   const [runTime, setRuntime] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
   const [paused, setPaused] = useState<boolean>(AlertSystem.paused);

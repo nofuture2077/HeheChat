@@ -48,6 +48,8 @@ function stateName(
       return 'disconnected';
     case ConnectionState.RECONNECTING:
       return 'reconnecting';
+    default:
+      return state satisfies never;
   }
 }
 

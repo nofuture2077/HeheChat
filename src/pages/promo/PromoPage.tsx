@@ -1,10 +1,9 @@
 import { Box } from '@mantine/core';
-import { nav, hero, features, services, pricing, carousel, pwa, faq, footer } from './content';
+import { nav, hero, features, services, carousel, pwa, faq, footer } from './content';
 import { PromoNav } from './PromoNav';
 import { PromoHero } from './PromoHero';
 import { PromoFeatures } from './PromoFeatures';
 import { PromoServices } from './PromoServices';
-import { PromoPricing } from './PromoPricing';
 import { PromoCarousel } from './PromoCarousel';
 import { PromoPwaBanner } from './PromoPwaBanner';
 import { PromoFaq } from './PromoFaq';

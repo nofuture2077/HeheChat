@@ -134,9 +134,9 @@ export const DEFAULT_LOGIN_CONTEXT: LoginContext = {
     return new ApiClient({ authProvider: DEFAULT_LOGIN_CONTEXT.getAuthProvider() });
   },
   setAccessToken: () => {},
-  setUser: (user: HelixUser) => {},
+  setUser: () => {},
   moderatedChannels: [],
-  setModeratedChannels: (channels: HelixModeratedChannel[]) => {},
+  setModeratedChannels: () => {},
 };
 
 // ponytail: backend token expiry only surfaces as a 401 on any authed call, so callers must check for it explicitly

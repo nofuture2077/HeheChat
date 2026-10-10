@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Grid, Paper, Text, ScrollArea, ActionIcon, Flex } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
 import { ConfigContext } from '../../ApplicationContext';
@@ -55,6 +55,7 @@ export function EmoteGrid({
             <Grid gap="sm" className={styles.gridContainer}>
               {emotes.map((emote: any, index: number) => (
                 <Grid.Col span={3} key={`${emote.name}-${index}`}>
+                  {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- adding keyboard/role semantics would change focus and tab behavior */}
                   <div className={styles.emoteContainer} onClick={() => onEmoteSelect(emote.name)}>
                     <EmoteComponent
                       imageUrl={

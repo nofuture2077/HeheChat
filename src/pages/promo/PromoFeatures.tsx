@@ -5,7 +5,6 @@ import TwitchLogo from '../../res/twitch_logo.svg?react';
 import BlerpLogo from '../../res/blerp_logo.svg?react';
 import SoundAlertsLogo from '../../res/soundalerts_logo.svg?react';
 import StreamElementsLogo from '../../res/streamelement_logo.svg?react';
-import HehechatLogo from '../../res/hehechat.svg?react';
 import KofiLogo from '../../res/kofi_logo.svg?react';
 
 // Hardcoded scatter — positions & colors chosen for visual balance

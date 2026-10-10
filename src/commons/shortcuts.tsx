@@ -1,5 +1,5 @@
 import PubSub from 'pubsub-js';
-import { Config } from './config';
+import type { Config } from './config';
 import { postSwitcherScene } from '@/api/switcher';
 
 export type ShortCutType = 'clip' | 'marker' | 'chat' | 'adbreak' | 'toggle' | 'scene';
@@ -135,7 +135,7 @@ class ShortCutHandler {
         break;
       }
 
-      case 'toggle':
+      case 'toggle': {
         // Toggle config value
         if (!this.config) {
           console.error('Config not set for toggle shortcut');
@@ -150,6 +150,7 @@ class ShortCutHandler {
 
         this.toggleConfigValue(configKey);
         break;
+      }
     }
   }
 }

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { Card, Text, Title, Group, Stack, Divider, Loader } from '@mantine/core';
 import { IconCrown, IconCalendar, IconClock } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';

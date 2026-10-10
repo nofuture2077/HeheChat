@@ -21,14 +21,14 @@ import {
 } from '@mantine/core';
 import { useForceUpdate, useDisclosure } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
-import { IconLink, IconRepeat, IconPlus, IconTrash, IconCopy } from '@tabler/icons-react';
+import { IconLink, IconPlus, IconTrash, IconCopy } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
 import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
 import { AlertSystem } from '../alerts/alertplayer';
 import { SystemMessageMainType } from '../../commons/message';
 import { getRerollConfig, updateRerollConfig, RerollConfig } from '@/api/sprites';
-import { EventAlert, EventTypeMapping } from '@/commons/events';
+import { EventAlert } from '@/commons/events';
 
 interface EditorData {
   id: string;
@@ -115,7 +115,7 @@ export function AlertSettings() {
   const [editors, setEditors] = useState<EditorData[]>([]);
   const [editorModalOpened, editorModalHandler] = useDisclosure(false);
   const [rerollConfig, setRerollConfig] = useState<RerollConfig | null>(null);
-  const [isLoadingRerollConfig, setIsLoadingRerollConfig] = useState(false);
+  const [, setIsLoadingRerollConfig] = useState(false);
   const [isSavingRerollConfig, setIsSavingRerollConfig] = useState(false);
 
   useEffect(() => {
@@ -145,11 +145,11 @@ export function AlertSettings() {
 
     setIsLoadingRerollConfig(true);
     try {
-      const config = await getRerollConfig(username);
-      console.log('Received reroll config:', config);
+      const loadedConfig = await getRerollConfig(username);
+      console.log('Received reroll config:', loadedConfig);
 
       // If config is null, create a default config
-      if (!config) {
+      if (!loadedConfig) {
         const defaultConfig = {
           channel: username,
           enabled: true,
@@ -163,7 +163,7 @@ export function AlertSettings() {
         console.log('Creating default config:', defaultConfig);
         setRerollConfig(defaultConfig);
       } else {
-        setRerollConfig(config);
+        setRerollConfig(loadedConfig);
       }
     } catch (error) {
       console.error('Failed to load reroll config:', error);
@@ -243,7 +243,7 @@ export function AlertSettings() {
   };
 
   useEffect(() => {
-    if (shares != config.shares) {
+    if (shares !== config.shares) {
       config.setShares(shares);
     }
   }, [shares]);
@@ -263,8 +263,6 @@ export function AlertSettings() {
     }
     config.setActivatedShares(activatedShares);
   };
-
-  const marks = [-250, -0, 250, 500].map((x) => ({ value: x, label: `${x}ms` }));
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -313,6 +311,7 @@ export function AlertSettings() {
       case 'matches':
         return `${alert.specifier.attribute}: ${alert.specifier.text}`;
     }
+    return undefined;
   };
 
   return (
@@ -488,10 +487,10 @@ export function AlertSettings() {
         <TagsInput
           placeholder=""
           value={config.shares}
-          onChange={(shares) =>
-            setShares(shares.map((c) => c.toLowerCase().substring(0, 25).trim()))
+          onChange={(newShares) =>
+            setShares(newShares.map((c) => c.toLowerCase().substring(0, 25).trim()))
           }
-        ></TagsInput>
+        />
         <Space h="xs" />
         <Text fs="italic" size="14px">
           * Share your alerts with other Streams so they can use your sounds. Be aware: If you use
@@ -1043,7 +1042,7 @@ export function AlertSettings() {
                 />
                 <Text fs="italic" size="14px">
                   Name of the Channel Point Reward for users to pick their sprite (only used if
-                  "Allow users to pick their sprite" is enabled)
+                  &quot;Allow users to pick their sprite&quot; is enabled)
                 </Text>
               </Stack>
             </Fieldset>

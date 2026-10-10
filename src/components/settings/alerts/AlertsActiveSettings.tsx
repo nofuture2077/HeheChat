@@ -50,6 +50,7 @@ function formatDescription(alert: EventAlert) {
     case 'matches':
       return `${alert.specifier.attribute}: ${alert.specifier.text}`;
   }
+  return undefined;
 }
 
 export function AlertsActiveSettings() {

@@ -160,9 +160,9 @@ export function AdminChannelManagementPage() {
       } else {
         setError(data.error || 'Failed to fetch channels');
       }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch authorized channels');
-      console.error('Error fetching authorized channels:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch authorized channels');
+      console.error('Error fetching authorized channels:', err);
     } finally {
       setLoading(false);
     }
@@ -219,12 +219,12 @@ export function AdminChannelManagementPage() {
       } else {
         showNotification('error', data.error || 'Failed to reinitialize channel');
       }
-    } catch (error) {
+    } catch (err) {
       showNotification(
         'error',
-        error instanceof Error ? error.message : 'Failed to reinitialize channel'
+        err instanceof Error ? err.message : 'Failed to reinitialize channel'
       );
-      console.error('Error reinitializing channel:', error);
+      console.error('Error reinitializing channel:', err);
     } finally {
       setReinitializeLoading(null);
     }
@@ -270,12 +270,9 @@ export function AdminChannelManagementPage() {
       } else {
         showNotification('error', data.error || 'Failed to get channel info');
       }
-    } catch (error) {
-      showNotification(
-        'error',
-        error instanceof Error ? error.message : 'Failed to get channel info'
-      );
-      console.error('Error getting channel info:', error);
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to get channel info');
+      console.error('Error getting channel info:', err);
     } finally {
       setInfoLoading(null);
     }
@@ -316,12 +313,12 @@ export function AdminChannelManagementPage() {
       } else {
         setError(data.error || 'Failed to fetch banned channels');
       }
-    } catch (error) {
+    } catch (err) {
       showNotification(
         'error',
-        error instanceof Error ? error.message : 'Failed to fetch banned channels'
+        err instanceof Error ? err.message : 'Failed to fetch banned channels'
       );
-      console.error('Error fetching banned channels:', error);
+      console.error('Error fetching banned channels:', err);
     }
   };
 
@@ -369,12 +366,12 @@ export function AdminChannelManagementPage() {
       } else {
         showNotification('error', data.error || 'Failed to delete channel token');
       }
-    } catch (error) {
+    } catch (err) {
       showNotification(
         'error',
-        error instanceof Error ? error.message : 'Failed to delete channel token'
+        err instanceof Error ? err.message : 'Failed to delete channel token'
       );
-      console.error('Error deleting channel token:', error);
+      console.error('Error deleting channel token:', err);
     } finally {
       setDeleteLoading(null);
     }
@@ -434,9 +431,9 @@ export function AdminChannelManagementPage() {
       } else {
         showNotification('error', data.error || 'Failed to ban channel');
       }
-    } catch (error) {
-      showNotification('error', error instanceof Error ? error.message : 'Failed to ban channel');
-      console.error('Error banning channel:', error);
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to ban channel');
+      console.error('Error banning channel:', err);
     } finally {
       setBanLoading(null);
     }
@@ -492,9 +489,9 @@ export function AdminChannelManagementPage() {
       } else {
         showNotification('error', data.error || 'Failed to unban channel');
       }
-    } catch (error) {
-      showNotification('error', error instanceof Error ? error.message : 'Failed to unban channel');
-      console.error('Error unbanning channel:', error);
+    } catch (err) {
+      showNotification('error', err instanceof Error ? err.message : 'Failed to unban channel');
+      console.error('Error unbanning channel:', err);
     } finally {
       setBanLoading(null);
     }

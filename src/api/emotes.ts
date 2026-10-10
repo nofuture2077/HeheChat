@@ -37,7 +37,7 @@ export class EmoteApiClient {
         }
         throw new Error(`Failed to fetch 7TV emote version: ${response.statusText}`);
       }
-      return response.json();
+      return await response.json();
     } catch (error) {
       console.error('Error fetching 7TV emote version:', error);
       return null;

@@ -1,7 +1,7 @@
 import OBSWebSocket from 'obs-websocket-js';
 import { version } from '../package.json';
 
-const params = new URLSearchParams(location.search);
+const params = new URLSearchParams(window.location.search);
 const heheWsUrl = params.get('heheWsUrl');
 const obsWsUrl = params.get('obsWsUrl') || 'ws://localhost:4455';
 const obsPassword = params.get('obsPassword') || '';
@@ -26,7 +26,10 @@ function calcDelay(attempts: number) {
   return Math.min(INITIAL_DELAY * BACKOFF ** attempts, MAX_DELAY);
 }
 
-const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 const obs = new OBSWebSocket();
 let heheWs: WebSocket | null = null;
@@ -58,22 +61,22 @@ function updateStatus() {
 
 function scheduleObsReconnect() {
   if (obsReconnectTimer !== undefined) return;
-  const delay = calcDelay(obsAttempts);
+  const reconnectDelay = calcDelay(obsAttempts);
   obsAttempts++;
   obsReconnectTimer = setTimeout(() => {
     obsReconnectTimer = undefined;
     connectObs();
-  }, delay);
+  }, reconnectDelay);
 }
 
 function scheduleHeheReconnect() {
   if (heheReconnectTimer !== undefined) return;
-  const delay = calcDelay(heheAttempts);
+  const reconnectDelay = calcDelay(heheAttempts);
   heheAttempts++;
   heheReconnectTimer = setTimeout(() => {
     heheReconnectTimer = undefined;
     connectHehe();
-  }, delay);
+  }, reconnectDelay);
 }
 
 // ── OBS connection ────────────────────────────────────────────────────────────
@@ -355,7 +358,7 @@ setInterval(() => {
 }, VERSION_CHECK_INTERVAL);
 setInterval(() => {
   if (pendingReload && !streamActive) {
-    location.reload();
+    window.location.reload();
   }
 }, IDLE_POLL_INTERVAL);
 

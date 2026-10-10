@@ -214,9 +214,9 @@ export function AdminConnectionsPage() {
         user_count: data.user_count || 0,
       });
       setLastUpdated(new Date());
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch connections');
-      console.error('Error fetching connections:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch connections');
+      console.error('Error fetching connections:', err);
     } finally {
       setLoading(false);
     }

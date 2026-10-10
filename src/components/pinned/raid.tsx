@@ -36,8 +36,8 @@ export function Raid(props: RaidProps) {
 
     // Set up a new interval
     intervalRef.current = window.setInterval(() => {
-      const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
-      setRemaining(remaining);
+      const nextRemaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
+      setRemaining(nextRemaining);
     }, 1000);
 
     // Clean up the interval when the component unmounts

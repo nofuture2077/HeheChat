@@ -195,7 +195,7 @@ export function RulesTab() {
   const [modalOpened, modalHandlers] = useDisclosure(false);
 
   useEffect(() => {
-    if (!channel) return;
+    if (!channel) return undefined;
     getSwitcherRules(channel)
       .then(setRules)
       .catch(() => {});

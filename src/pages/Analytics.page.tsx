@@ -1,4 +1,4 @@
-import { Container, Title, Space } from '@mantine/core';
+import { Container, Title } from '@mantine/core';
 import { StreamAnalyticsChart } from '../components/analytics/StreamAnalyticsChart';
 
 export function AnalyticsPage() {

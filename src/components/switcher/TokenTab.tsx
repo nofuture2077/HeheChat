@@ -8,7 +8,6 @@ export function TokenTab() {
   const config = useContext(ConfigContext);
   const channel = config.getChatChannel();
   const [obsToken, setObsToken] = useState('');
-  const [copied, setCopied] = useState(false);
   const [urlCopied, setUrlCopied] = useState(false);
   const [obsWsUrl, setObsWsUrl] = useState('ws://localhost:4455');
   const [obsWsPassword, setObsWsPassword] = useState('');
@@ -19,12 +18,6 @@ export function TokenTab() {
       .then((data) => setObsToken(data.token))
       .catch(() => {});
   }, [channel]);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(obsToken);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const handleCopyUrl = () => {
     const backendUrl = import.meta.env.VITE_BACKEND_URL as string;

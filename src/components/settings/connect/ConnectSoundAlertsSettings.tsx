@@ -50,7 +50,7 @@ export function ConnectSoundAlertsSettings() {
   };
 
   const disconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect SoundAlerts?')) return;
+    if (!window.confirm('Are you sure you want to disconnect SoundAlerts?')) return;
     setLoading(true);
     try {
       await fetch(`${import.meta.env.VITE_BACKEND_URL}/soundalerts/set?state=${state}&overlayUrl=`);

@@ -131,8 +131,9 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
             const ignoredUsers = (cfg.chatBsIgnoredUsers ?? []).map((u: string) => u.toLowerCase());
             if (
               ignoredUsers.includes((msg as HeheChatMessage).userInfo?.displayName?.toLowerCase())
-            )
+            ) {
               return prev;
+            }
           }
           return [...prev, { msg, addedAt: Date.now(), exiting: false }];
         });

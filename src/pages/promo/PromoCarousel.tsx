@@ -166,7 +166,7 @@ export function PromoCarousel({ eyebrow, headline, slides, interval = 5000 }: Pr
                 fontStyle: 'italic',
               }}
             >
-              "{slide.quote}"
+              &quot;{slide.quote}&quot;
             </Text>
             <Text size="sm" fw={600} style={{ color: TEXT_SECONDARY }}>
               {slide.author}

@@ -90,7 +90,7 @@ export function useWakeLock() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && !wakeLockRef.current) {
-        void requestWakeLock();
+        requestWakeLock();
       }
     };
 

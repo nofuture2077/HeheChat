@@ -31,8 +31,8 @@ export function Hypetrain(props: HypetrainProps) {
 
     // Set up a new interval
     intervalRef.current = window.setInterval(() => {
-      const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
-      setRemaining(remaining);
+      const nextRemaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
+      setRemaining(nextRemaining);
     }, 1000);
 
     // Clean up the interval when the component unmounts
@@ -68,7 +68,7 @@ export function Hypetrain(props: HypetrainProps) {
       <div
         style={{ width: `${100 - progress}%` }}
         className={`${htClasses.progress} ${props.state === 'ended' ? htClasses.completed : ''}`}
-      ></div>
+      />
       <Stack gap={0} className={htClasses.content}>
         <Group justify="space-between">
           <Group gap="xs">

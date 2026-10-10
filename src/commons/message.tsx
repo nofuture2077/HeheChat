@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file -- message model classes are intentionally co-located */
 import { generateGUID } from './helper';
 import { EventType, EventMainType } from './events';
 import { ModActionType } from '../components/chat/mod/modactions';

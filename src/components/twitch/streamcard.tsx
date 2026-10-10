@@ -69,7 +69,7 @@ export function StreamCard(props: StreamCardProps) {
   );
 }
 
-export function StreamCardPlaceholder(props: {}) {
+export function StreamCardPlaceholder() {
   return (
     <Paper shadow="sm" radius="md" withBorder>
       <Stack justify="space-between" flex={1} p="xs" gap="xs" h={180}>

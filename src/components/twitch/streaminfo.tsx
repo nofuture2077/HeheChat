@@ -18,7 +18,7 @@ import { useState, useEffect, useContext } from 'react';
 import { IconX } from '@tabler/icons-react';
 import { LoginContextContext } from '@/ApplicationContext';
 
-import { OverlayDrawer } from '@/pages/Chat.page';
+import type { OverlayDrawer } from '@/pages/Chat.types';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -215,7 +215,7 @@ export function StreamInfo({ close }: StreamInfoProps) {
             onChange={(value: number | string) =>
               setStreamInfo((prev) => ({
                 ...prev,
-                delay: typeof value === 'string' ? parseInt(value) || 0 : value,
+                delay: typeof value === 'string' ? parseInt(value, 10) || 0 : value,
               }))
             }
             mb="md"

@@ -15,7 +15,6 @@ import {
   Textarea,
   NumberInput,
   Table,
-  Tooltip,
   Menu,
 } from '@mantine/core';
 import {
@@ -71,9 +70,9 @@ export function AdminNewsPage() {
     try {
       const data = await NewsApiClient.getAllNews(adminToken);
       setNewsMessages(data.messages);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch news messages');
-      console.error('Error fetching news:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch news messages');
+      console.error('Error fetching news:', err);
     } finally {
       setLoading(false);
     }
@@ -126,10 +125,10 @@ export function AdminNewsPage() {
       closeCreateModal();
       setFormData(DEFAULT_FORM_DATA);
       fetchNews();
-    } catch (error) {
+    } catch (err) {
       notifications.show({
         title: 'Error',
-        message: error instanceof Error ? error.message : 'Failed to create news message',
+        message: err instanceof Error ? err.message : 'Failed to create news message',
         color: 'red',
         icon: <IconAlertCircle size="1rem" />,
       });
@@ -182,10 +181,10 @@ export function AdminNewsPage() {
       setFormData(DEFAULT_FORM_DATA);
       setEditingMessage(null);
       fetchNews();
-    } catch (error) {
+    } catch (err) {
       notifications.show({
         title: 'Error',
-        message: error instanceof Error ? error.message : 'Failed to update news message',
+        message: err instanceof Error ? err.message : 'Failed to update news message',
         color: 'red',
         icon: <IconAlertCircle size="1rem" />,
       });
@@ -206,7 +205,9 @@ export function AdminNewsPage() {
       return;
     }
 
-    if (!confirm(`Are you sure you want to delete the news message "${message.headline}"?`)) {
+    if (
+      !window.confirm(`Are you sure you want to delete the news message "${message.headline}"?`)
+    ) {
       return;
     }
 
@@ -221,10 +222,10 @@ export function AdminNewsPage() {
       });
 
       fetchNews();
-    } catch (error) {
+    } catch (err) {
       notifications.show({
         title: 'Error',
-        message: error instanceof Error ? error.message : 'Failed to delete news message',
+        message: err instanceof Error ? err.message : 'Failed to delete news message',
         color: 'red',
         icon: <IconAlertCircle size="1rem" />,
       });

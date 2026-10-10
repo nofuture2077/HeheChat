@@ -58,7 +58,7 @@ export function UISettings(props: UISettingProperties) {
                 <IconPencil style={{ width: 14, height: 14 }} stroke={1.5} />
               </ActionIcon>
             }
-          ></TextInput>
+          />
           {renameOpen ? <RenameProfileView profile={profile} close={renameHandler.close} /> : null}
           {cloneOpen ? <CloneProfileView profile={profile} close={cloneHandler.close} /> : null}
           {confirmDeleteOpen ? (
@@ -162,8 +162,8 @@ export function RenameProfileView(props: { profile: Profile; close: () => void }
               try {
                 await props.profile.setProfileName(profileName);
                 props.close();
-              } catch (error) {
-                console.error('Error renaming profile:', error);
+              } catch (err) {
+                console.error('Error renaming profile:', err);
                 // Could add user notification here
               }
             }}
@@ -199,8 +199,8 @@ export function CloneProfileView(props: { profile: Profile; close: () => void })
               try {
                 await props.profile.createProfile(profileName, props.profile);
                 props.close();
-              } catch (error) {
-                console.error('Error cloning profile:', error);
+              } catch (err) {
+                console.error('Error cloning profile:', err);
                 // Could add user notification here
               }
             }}

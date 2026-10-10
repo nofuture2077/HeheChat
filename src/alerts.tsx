@@ -13,6 +13,7 @@ function getQueryVariable(query: string, variable: string): string | undefined {
     }
   }
   console.log('Query variable %s not found', variable);
+  return undefined;
 }
 
 interface AlertRootProps {

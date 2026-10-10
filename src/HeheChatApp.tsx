@@ -157,7 +157,7 @@ export default function HeheChat() {
   }, []);
 
   const [loginContext, setLoginContext] = useState<LoginContext>(DEFAULT_LOGIN_CONTEXT);
-  const [chatEmotes, setChatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
+  const [chatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
   const [profile, setProfile] = useState<Profile>({ ...DEFAULT_PROFILE, guid: '' });
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [premium, setPremium] = useState<Premium>({
@@ -190,7 +190,7 @@ export default function HeheChat() {
   ).current;
 
   // Get network status and document visibility at component level
-  const networkStatus = useNetwork();
+  useNetwork();
   const documentVisible = useDocumentVisibility();
 
   // Initialize wake lock to keep display on while using the app
@@ -198,7 +198,6 @@ export default function HeheChat() {
     isSupported: wakeLockSupported,
     isActive: wakeLockActive,
     requestWakeLock,
-    releaseWakeLock,
     error: wakeLockError,
   } = useWakeLock();
 
@@ -512,8 +511,8 @@ export default function HeheChat() {
   }, [wakeLockActive, wakeLockError]);
 
   const updateConfig = (key: ConfigKey, value: any) => {
-    setProfile((profile) => {
-      const newProfile = { ...profile, config: { ...profile.config, [key]: value } };
+    setProfile((prev) => {
+      const newProfile = { ...prev, config: { ...prev.config, [key]: value } };
       return newProfile;
     });
   };
@@ -669,8 +668,8 @@ export default function HeheChat() {
     if (profile.config.channels.includes(profile.config.chatChannel || '')) {
       return profile.config.chatChannel;
     }
-    if (profile.config.channels.length == 0) {
-      return;
+    if (profile.config.channels.length === 0) {
+      return undefined;
     }
     const channel = profile.config.channels[0];
     setChatChannel(channel);
@@ -678,22 +677,22 @@ export default function HeheChat() {
   };
   const setChatChannel = (value: string) => updateConfig('chatChannel', value);
   const setAccessToken = async (accessToken: string | undefined) => {
-    setLoginContext((loginContext) => {
-      const newContext = { ...loginContext, accessToken };
+    setLoginContext((prev) => {
+      const newContext = { ...prev, accessToken };
       return newContext;
     });
   };
 
   const setUser = async (user: HelixUser) => {
-    setLoginContext((loginContext) => {
-      const newContext = { ...loginContext, user };
+    setLoginContext((prev) => {
+      const newContext = { ...prev, user };
       return newContext;
     });
   };
 
   const setModeratedChannels = async (moderatedChannels: HelixModeratedChannel[]) => {
-    setLoginContext((loginContext) => {
-      const newContext = { ...loginContext, moderatedChannels };
+    setLoginContext((prev) => {
+      const newContext = { ...prev, moderatedChannels };
       return newContext;
     });
   };
@@ -756,13 +755,13 @@ export default function HeheChat() {
   };
 
   const switchProfile = async (guid: string) => {
-    const p = profiles.find((p) => p.guid === guid);
+    const p = profiles.find((x) => x.guid === guid);
     if (p) {
       try {
         // First update the active profile on the server
         await saveProfiles(
           guid,
-          profiles.map((p) => p.guid)
+          profiles.map((x) => x.guid)
         );
         // Then update local state
         setProfile(p);
@@ -782,7 +781,7 @@ export default function HeheChat() {
       await storeProfile(newProfile);
       // Then update local state
       setProfile(newProfile);
-      setProfiles((profiles) => profiles.concat(newProfile));
+      setProfiles((prev) => prev.concat(newProfile));
       // Update the profiles list on the server
       await saveProfiles(newProfile.guid, [...profiles.map((p) => p.guid), newProfile.guid]);
     } catch (error) {

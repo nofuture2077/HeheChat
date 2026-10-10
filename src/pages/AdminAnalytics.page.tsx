@@ -26,7 +26,6 @@ import {
 } from '@tabler/icons-react';
 import { useState, useEffect } from 'react';
 import { StreamAnalyticsChart } from '../components/analytics/StreamAnalyticsChart';
-import { useChannels } from '../hooks/useChannels';
 
 // New interfaces for the additional features
 interface StreamEvent {

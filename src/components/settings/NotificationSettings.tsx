@@ -262,7 +262,7 @@ export function NotificationChatMentionSettings() {
             <Stack gap={2}>
               <Text fw={500}>Enable Chat Mention Notifications</Text>
               <Text size="xs" c="dimmed">
-                Receive notifications when you're mentioned in chat
+                Receive notifications when you&apos;re mentioned in chat
               </Text>
             </Stack>
             <Switch

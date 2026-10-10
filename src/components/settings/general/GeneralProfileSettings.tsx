@@ -112,8 +112,8 @@ function RenameProfileView(props: { profile: Profile; close: () => void }) {
               try {
                 await props.profile.setProfileName(profileName);
                 props.close();
-              } catch (error) {
-                console.error('Error renaming profile:', error);
+              } catch (err) {
+                console.error('Error renaming profile:', err);
               }
             }}
           >
@@ -148,8 +148,8 @@ function CloneProfileView(props: { profile: Profile; close: () => void }) {
               try {
                 await props.profile.createProfile(profileName, props.profile);
                 props.close();
-              } catch (error) {
-                console.error('Error cloning profile:', error);
+              } catch (err) {
+                console.error('Error cloning profile:', err);
               }
             }}
           >

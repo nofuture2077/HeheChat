@@ -24,7 +24,7 @@ class RemoteEventStorage implements EventStorage {
     this.baseUrl = baseUrl;
   }
 
-  store(event: EventData): Promise<void> {
+  store(): Promise<void> {
     return Promise.resolve();
   }
 

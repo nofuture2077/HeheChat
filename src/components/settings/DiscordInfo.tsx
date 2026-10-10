@@ -1,4 +1,4 @@
-import { Fieldset, Stack, Text, Button, Group, Anchor, Box } from '@mantine/core';
+import { Fieldset, Stack, Text, Button, Group, Box } from '@mantine/core';
 import { IconBrandDiscord } from '@tabler/icons-react';
 
 export function DiscordInfo() {
@@ -26,7 +26,7 @@ export function DiscordInfo() {
             bg="light-dark(rgb(228, 228, 255),rgb(34, 34, 42))"
           >
             <Text size="sm" fw={500} mb={5}>
-              In our Discord server you'll find:
+              In our Discord server you&apos;ll find:
             </Text>
             <ul style={{ paddingLeft: '20px', margin: '5px 0' }}>
               <li>
@@ -61,7 +61,7 @@ export function DiscordInfo() {
           </Button>
 
           <Text size="xs" c="dimmed" ta="center">
-            By joining our Discord, you'll be the first to know about new features and updates.
+            By joining our Discord, you&apos;ll be the first to know about new features and updates.
           </Text>
         </Stack>
       </Fieldset>

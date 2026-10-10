@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Notification, Stack, Text, Collapse, ActionIcon, Group } from '@mantine/core';
-import { IconNews, IconChevronDown, IconChevronUp, IconX } from '@tabler/icons-react';
+import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { NewsApiClient, NewsMessage } from '../../api/news';
 
 interface NewsDisplayProps {

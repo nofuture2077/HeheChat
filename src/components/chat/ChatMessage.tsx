@@ -16,7 +16,7 @@ import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../App
 import { LoginContext } from '../../commons/login';
 import { use7TVUsernameCosmetics } from './use7TVCosmetics';
 import { SevenTVBadgeComponent } from './SevenTVBadge';
-import { TimeoutView, BanView, DeleteMessageView } from './mod/modview';
+import { TimeoutView, BanView, DeleteMessageView } from './mod/moddialogs';
 import { formatTime, adjustColorForContrast, joinWithSpace } from '../../commons/helper';
 import { ModActions } from './mod/modactions';
 import { Config } from '../../commons/config';
@@ -141,7 +141,7 @@ export function parsedPartsToHtml(
             <span key={partIndex}>
               <img
                 style={{ width: 'auto', height: '1.5em', display: 'inline' }}
-                alt={part.cheermote?.prefix + part.cheermote?.bits}
+                alt={part.cheermote.prefix + part.cheermote.bits}
                 key={partIndex}
                 src={cheerEmote.url}
               />
@@ -173,6 +173,8 @@ export function parsedPartsToHtml(
             style={{ borderRadius: '.4rem', display: 'block', maxHeight: '200px' }}
           />
         );
+      default:
+        return undefined;
     }
   });
 }
@@ -558,11 +560,11 @@ export function canModerate(
   moderatedChannel: { [id: string]: boolean },
   login: LoginContext
 ) {
-  const isModerator = moderatedChannel[channel];
+  const isChannelModerator = moderatedChannel[channel];
   const isBroadcaster = channel === login.user?.name;
   const chatterIsMod = msg.userInfo?.isMod || false;
   const chatterIsBroadcaster = channel === msg.userInfo?.userName;
-  const canMod = (isModerator || isBroadcaster) && !chatterIsMod && !chatterIsBroadcaster;
+  const canMod = (isChannelModerator || isBroadcaster) && !chatterIsMod && !chatterIsBroadcaster;
   return canMod;
 }
 
@@ -572,7 +574,7 @@ export function isModerator(
   moderatedChannel: { [id: string]: boolean },
   login: LoginContext
 ) {
-  const isModerator = moderatedChannel[channel];
+  const isChannelModerator = moderatedChannel[channel];
   const isBroadcaster = channel === login.user?.name;
-  return isModerator || isBroadcaster;
+  return isChannelModerator || isBroadcaster;
 }

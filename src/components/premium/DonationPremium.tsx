@@ -1,4 +1,4 @@
-import { Stack, Title, Text, Button, Group, List, Card, Box } from '@mantine/core';
+import { Stack, Title, Text, Button, Group, List, Card } from '@mantine/core';
 import {
   IconGift,
   IconInfoCircle,
@@ -6,7 +6,7 @@ import {
   IconExternalLink,
   IconX,
 } from '@tabler/icons-react';
-import { OverlayDrawer } from '../../pages/Chat.page';
+import type { OverlayDrawer } from '@/pages/Chat.types';
 
 export const PremiumDrawer: OverlayDrawer = {
   name: 'premium',
@@ -59,7 +59,7 @@ export function DonationPremium() {
           <Text span fw={700} c="violet">
             $1
           </Text>{' '}
-          you donate, you'll receive{' '}
+          you donate, you&apos;ll receive{' '}
           <Text span fw={700} c="grape">
             10 days
           </Text>{' '}
@@ -80,7 +80,7 @@ export function DonationPremium() {
             <List.Item>
               Premium will be automatically added to your account within 24 hours
             </List.Item>
-            <List.Item>Donations are processed through Pally.gg's secure platform</List.Item>
+            <List.Item>Donations are processed through Pally.gg&apos;s secure platform</List.Item>
           </List>
         </Card>
 

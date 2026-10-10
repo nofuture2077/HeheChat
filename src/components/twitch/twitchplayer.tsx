@@ -104,7 +104,7 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
     }
     return getDimension();
   });
-  const [isHovered, setIsHovered] = useState(false);
+  const [, setIsHovered] = useState(false);
   const [touchTimeout, setTouchTimeout] = useState<NodeJS.Timeout | null>(null);
 
   // Use custom dimensions if provided, otherwise use calculated dimensions
@@ -192,7 +192,7 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
       if (containerRef.current) containerRef.current.innerHTML = '';
       playerRef.current = null;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle resize — update iframe dimensions without recreating the player
   const handleResize = useCallback(
@@ -221,7 +221,7 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
     player.setChannel(channel);
     player.setMuted(isMuted);
     player.setQuality(config.videoQuality);
-  }, [channel, props.muted]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [channel, props.muted]);
 
   const handleTouchStart = () => {
     setIsHovered(true);

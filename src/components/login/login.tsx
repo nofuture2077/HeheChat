@@ -11,7 +11,6 @@ import {
   createTrustedAuthProvider,
   handleUnauthorized,
 } from '@/commons/login';
-import { EmoteStore } from '@/components/chat/emotestorage';
 import { DEFAULT_CHAT_EMOTES } from '@/commons/emotes';
 import classes from './login.module.css';
 
@@ -19,11 +18,12 @@ function getQueryVariable(query: String, variable: String): string | undefined {
   const vars = query.split('&');
   for (let i = 0; i < vars.length; i++) {
     const pair = vars[i].split('=');
-    if (decodeURIComponent(pair[0]) == variable) {
+    if (decodeURIComponent(pair[0]) === variable) {
       return decodeURIComponent(pair[1]);
     }
   }
   console.log('Query variable %s not found', variable);
+  return undefined;
 }
 
 interface LoginProps {
@@ -85,8 +85,9 @@ export default function Login(props: LoginProps) {
           loginContext.setUser(user);
         })
         .catch((err) => {
-          if (!handleUnauthorized(err?.statusCode))
+          if (!handleUnauthorized(err?.statusCode)) {
             console.error('[login] failed to load user', err);
+          }
         });
 
       api.moderation
@@ -96,8 +97,9 @@ export default function Login(props: LoginProps) {
           loginContext.setModeratedChannels(moderatedChannels);
         })
         .catch((err) => {
-          if (!handleUnauthorized(err?.statusCode))
+          if (!handleUnauthorized(err?.statusCode)) {
             console.error('[login] failed to load moderated channels', err);
+          }
         });
 
       if (tokenStored) {
@@ -175,13 +177,14 @@ export default function Login(props: LoginProps) {
 
   return (
     <div className={wrapperClassName} style={wrapperStyle}>
-      <button disabled={disabled} style={btnStyle} onClick={onClick}>
+      <button type="button" disabled={disabled} style={btnStyle} onClick={onClick}>
         <IconLink size={20} /> Login with Twitch
       </button>
       <div style={dividerStyle} />
       <Menu position="bottom-end" withinPortal>
         <Menu.Target>
           <button
+            type="button"
             disabled={disabled}
             aria-label="More login options"
             style={{ ...btnStyle, padding: '0 14px' }}

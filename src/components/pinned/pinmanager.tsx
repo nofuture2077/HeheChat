@@ -458,58 +458,58 @@ export function PinManager() {
   }, []);
 
   const selectPin = (id: string) => {
-    setPins((pins) => {
-      const index = pins.findIndex((pin) => pin.id === id);
+    setPins((prevPins) => {
+      const index = prevPins.findIndex((pin) => pin.id === id);
 
       if (index > -1) {
-        const [pin] = pins.splice(index, 1);
-        pins.unshift(pin);
+        const [pin] = prevPins.splice(index, 1);
+        prevPins.unshift(pin);
       }
       expandHandler.close();
-      return [...pins];
+      return [...prevPins];
     });
   };
 
   const hidePin = (id: string) => {
-    setPins((pins) => {
-      const index = pins.findIndex((pin) => pin.id === id);
+    setPins((prevPins) => {
+      const index = prevPins.findIndex((pin) => pin.id === id);
 
       if (index > -1) {
-        const pin = pins[index];
+        const pin = prevPins[index];
         pin.hidden = true;
       }
-      return [...pins];
+      return [...prevPins];
     });
   };
 
   const toggleExpand = (id: string) => {
-    setPins((pins) => {
-      const index = pins.findIndex((pin) => pin.id === id);
+    setPins((prevPins) => {
+      const index = prevPins.findIndex((pin) => pin.id === id);
 
       if (index > -1) {
-        const pin = pins[index];
+        const pin = prevPins[index];
         pin.expanded = !pin.expanded;
       }
-      return [...pins];
+      return [...prevPins];
     });
   };
 
   const removePin = (id: string): void => {
-    setPins((pins) => {
-      const index = pins.findIndex((pin) => pin.id === id);
+    setPins((prevPins) => {
+      const index = prevPins.findIndex((pin) => pin.id === id);
 
       if (index > -1) {
-        const newPins = [...pins];
+        const newPins = [...prevPins];
         newPins.splice(index, 1);
         return newPins;
       }
-      return pins;
+      return prevPins;
     });
   };
 
   const upsertPin = (newPin: Pin): void => {
-    setPins((pins) => {
-      const newPins = [...pins];
+    setPins((prevPins) => {
+      const newPins = [...prevPins];
       const index = newPins.findIndex(
         (pin) => pin.type === newPin.type && pin.channel === newPin.channel
       );

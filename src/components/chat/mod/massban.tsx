@@ -8,7 +8,6 @@ import {
   Stack,
   Text,
   Title,
-  Badge,
   ActionIcon,
   TagsInput,
   Fieldset,
@@ -17,7 +16,7 @@ import { IconSearch, IconX } from '@tabler/icons-react';
 import { ModActions } from './modactions';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../../ApplicationContext';
 import { HeheChatMessage, parseMessage } from '../../../commons/message';
-import { OverlayDrawer } from '../../../pages/Chat.page';
+import type { OverlayDrawer } from '../../../pages/Chat.types';
 import { Storage } from '../chatstorage';
 import { param, query } from '../../../commons/helper';
 
@@ -77,7 +76,7 @@ export function MassBanView(props: MassBanViewProps) {
   const [messages, setMessages] = useState<HeheChatMessage[]>([]);
 
   const config = useContext(ConfigContext);
-  const emotes = useContext(ChatEmotesContext);
+  useContext(ChatEmotesContext);
   const login = useContext(LoginContextContext);
 
   // Get all channels the user moderates
@@ -87,10 +86,10 @@ export function MassBanView(props: MassBanViewProps) {
   useEffect(() => {
     if (props.channelName && !selectedChannels.includes(props.channelName)) {
       const selectedChannelsData = localStorage.getItem('hehechat-massban-channels');
-      const selectedChannels = selectedChannelsData
+      const storedChannels = selectedChannelsData
         ? JSON.parse(selectedChannelsData)
         : [props.channelName];
-      setSelectedChannels(selectedChannels);
+      setSelectedChannels(storedChannels);
     }
   }, [props.channelName]);
 
@@ -149,11 +148,6 @@ export function MassBanView(props: MassBanViewProps) {
 
     setUsersToModerate(Array.from(userMap.values()));
     setIsSearching(false);
-  };
-
-  // Remove a user from the list
-  const removeUser = (userId: string) => {
-    setUsersToModerate((users) => users.filter((user) => user.userId !== userId));
   };
 
   // Get user display names for TagsInput

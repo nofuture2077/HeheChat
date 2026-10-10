@@ -115,10 +115,10 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
       const { data } = event;
 
       if (data.type === 'profile') {
-        const { profile } = data;
-        setProfile(profile);
-        AlertSystem.updateProfile(profile);
-        (profile.config.channels || []).forEach((channel: string) => {
+        const { profile: newProfile } = data;
+        setProfile(newProfile);
+        AlertSystem.updateProfile(newProfile);
+        (newProfile.config.channels || []).forEach((channel: string) => {
           chatEmotes.updateChannel(channel);
         });
       }
@@ -127,13 +127,13 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
         if (!AlertSystem.status()) {
           AlertSystem.initialize();
         }
-        const { profile } = data;
-        setProfile(profile);
-        AlertSystem.updateProfile(profile);
-        (profile.config.channels || []).forEach((channel: string) => {
+        const { profile: newProfile } = data;
+        setProfile(newProfile);
+        AlertSystem.updateProfile(newProfile);
+        (newProfile.config.channels || []).forEach((channel: string) => {
           chatEmotes.updateChannel(channel);
         });
-        const channels = profile.config?.channels || [];
+        const channels = newProfile.config?.channels || [];
         if (!channels) {
           return;
         }
@@ -143,8 +143,8 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
           data: {
             type: 'subscribe',
             source: 'Browsersource',
-            profile: profile.guid,
-            profileName: profile.name,
+            profile: newProfile.guid,
+            profileName: newProfile.name,
             version,
             token,
             channels: Object.fromEntries(channels.map((key: string) => [key, true])),
@@ -168,18 +168,18 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
       }
 
       if (data.type === 'event' || data.type === 'replayevent') {
-        const event = data.type === 'replayevent' ? { ...data.data, replay: true } : data.data;
+        const evt = data.type === 'replayevent' ? { ...data.data, replay: true } : data.data;
 
-        const shouldPlayAudio = AlertSystem.shouldBePlayedInBrowsersourceAudio(event);
-        const shouldShowVisual = AlertSystem.shouldBePlayedInBrowsersourceVisual(event);
+        const shouldPlayAudio = AlertSystem.shouldBePlayedInBrowsersourceAudio(evt);
+        const shouldShowVisual = AlertSystem.shouldBePlayedInBrowsersourceVisual(evt);
 
         // Only process events if browserSourceAudio is true (meaning browsersource handles its own processing)
         // If browserSourceAudio is false, the main app will send pre-processed alerts via 'alert' type
         if (
           profile.config.browserSourceAudio &&
-          (((shouldPlayAudio || shouldShowVisual) && !event.force) || (preview && event.force))
+          (((shouldPlayAudio || shouldShowVisual) && !evt.force) || (preview && evt.force))
         ) {
-          AlertSystem.addEvent(event);
+          AlertSystem.addEvent(evt);
         }
       }
 

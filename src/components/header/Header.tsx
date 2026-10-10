@@ -8,7 +8,6 @@ import {
   UnstyledButton,
   Divider,
 } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
 import {
   IconBrandTwitch,
   IconSettings,
@@ -19,19 +18,13 @@ import {
 } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
 import classes from './Header.module.css';
-import {
-  ConfigContext,
-  ProfileContext,
-  PremiumContext,
-  LoginContextContext,
-} from '@/ApplicationContext';
+import { ConfigContext, PremiumContext, LoginContextContext } from '@/ApplicationContext';
 import { SettingsTab } from '@/components/settings/settings';
 import { HeaderLogo } from './HeaderLogo';
 import { TwitchPlayer } from '@/components/twitch/twitchplayer';
 import { TwitchClipsPlayer } from '@/components/twitch/twitchclipsplayer';
 import { AlertStatusIndicator } from '../alerts/AlertStatusIndicator';
 import { AlertSystem } from '../alerts/alertplayer';
-import { BitrateIndicator } from '../switcher/BitrateIndicator';
 import { useConnectionStatus, type ConnectionStateName } from '@/commons/connectionStatus';
 
 function connectionColor(state: ConnectionStateName): string {
@@ -43,6 +36,8 @@ function connectionColor(state: ConnectionStateName): string {
       return 'yellow';
     case 'disconnected':
       return 'red';
+    default:
+      return state satisfies never;
   }
 }
 
@@ -56,6 +51,8 @@ function connectionLabel(state: ConnectionStateName): string {
       return 'Reconnecting…';
     case 'disconnected':
       return 'Disconnected';
+    default:
+      return state satisfies never;
   }
 }
 
@@ -122,8 +119,6 @@ export function Header(props: {
   setCurrentClipId: (currentClipId: string | null) => void;
 }) {
   const config = useContext(ConfigContext);
-  const [opened] = useDisclosure(false);
-  const profile = useContext(ProfileContext);
   const premium = useContext(PremiumContext);
   const loginContext = useContext(LoginContextContext);
   const connectionStatus = useConnectionStatus();

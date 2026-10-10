@@ -101,9 +101,9 @@ export function AdminAlertsPage() {
       } else {
         setError(data.error || 'Failed to fetch alert tokens');
       }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch alert tokens');
-      console.error('Error fetching alert tokens:', error);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch alert tokens');
+      console.error('Error fetching alert tokens:', err);
     } finally {
       setLoading(false);
     }

@@ -2,7 +2,6 @@ import { useContext, useEffect, useState, useRef, useMemo, type ReactElement } f
 import {
   Avatar,
   Button,
-  TextInput,
   Group,
   Modal,
   Text,
@@ -15,21 +14,20 @@ import {
 import { IconArrowsRight, IconX } from '@tabler/icons-react';
 import { HelixStream } from '@twurple/api';
 import _ from 'underscore';
-import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
-import { OverlayDrawer } from '../../../pages/Chat.page';
+import type { OverlayDrawer } from '../../../pages/Chat.types';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
 import {
   HeheMessage,
   isSystemMessageType,
   isYTChatMessageType,
   parseMessage,
-  YTChatMessage,
 } from '../../../commons/message';
 import { getUserInfo, ModActions } from './modactions';
 import styles from './modview.module.css';
 import { formatDate, formatDuration, formatDateWithTime } from '../../../commons/helper';
 import { ChannelPicker } from '../ChannelPicker';
 import { ChatMessageComp } from '../ChatMessage';
+import { TimeoutView, BanView } from './moddialogs';
 
 export const ModDrawer: OverlayDrawer = {
   name: 'mod',
@@ -291,8 +289,8 @@ export function ModView(props: ModViewProps) {
           userName={username}
           channelId={channelId}
           channelName={channel}
-          timeoutUser={(channelId, userId, duration, reason) => {
-            props.modActions.timeoutUser(channelId, userId, duration, reason);
+          timeoutUser={(targetChannelId, userId, duration, reason) => {
+            props.modActions.timeoutUser(targetChannelId, userId, duration, reason);
             reloadUserInfo();
           }}
           close={() => setShowTimeoutModal(false)}
@@ -305,132 +303,14 @@ export function ModView(props: ModViewProps) {
           userName={username}
           channelId={channelId}
           channelName={channel}
-          banUser={(channelId, userId, reason) => {
-            props.modActions.banUser(channelId, userId, reason);
+          banUser={(targetChannelId, userId, reason) => {
+            props.modActions.banUser(targetChannelId, userId, reason);
             reloadUserInfo();
           }}
           close={() => setShowBanModal(false)}
         />
       )}
     </Stack>
-  );
-}
-
-const durations = [60, 600, 3600, 86400, 604800];
-export function TimeoutView(props: {
-  userId: string;
-  userName: string;
-  channelId: string;
-  channelName: string;
-  timeoutUser: (channelId: string, userId: string, duration: number, reason: string) => void;
-  close: () => void;
-}): ReactElement {
-  const [reason, setReason] = useState('');
-  const [duration, setDuration] = useState<number>(600);
-
-  return (
-    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
-      <Fieldset legend={['Timeout', props.userName, 'in', props.channelName].join(' ')}>
-        <Group justify="center">
-          <GradientSegmentedControl
-            data={durations.map((x) => ({
-              label: formatDuration(x * 1000),
-              value: (x * 1000).toString(),
-            }))}
-            value={(duration * 1000).toString()}
-            setValue={(v: string) => {
-              setDuration(parseInt(v) / 1000);
-            }}
-          ></GradientSegmentedControl>
-        </Group>
-        <TextInput
-          label="Reason"
-          placeholder="Optional: Why?"
-          value={reason}
-          onChange={(ev) => setReason(ev.target.value)}
-        />
-        <Group justify="flex-end" mt="md">
-          <Button onClick={props.close}>Cancel</Button>
-          <Button
-            color="primary"
-            onClick={() => {
-              props.timeoutUser(props.channelId, props.userId, duration, reason);
-              props.close();
-            }}
-          >
-            Timeout
-          </Button>
-        </Group>
-      </Fieldset>
-    </Modal>
-  );
-}
-
-export function BanView(props: {
-  userId: string;
-  userName: string;
-  channelId: string;
-  channelName: string;
-  banUser: (channelId: string, userId: string, reason: string) => void;
-  close: () => void;
-}): ReactElement {
-  const [reason, setReason] = useState('');
-
-  return (
-    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
-      <Fieldset legend={['Ban', props.userName, 'in', props.channelName].join(' ')}>
-        <TextInput
-          label="Reason"
-          placeholder="Optional: Why?"
-          value={reason}
-          onChange={(ev) => setReason(ev.target.value)}
-        />
-        <Group justify="flex-end" mt="md">
-          <Button onClick={props.close}>Cancel</Button>
-          <Button
-            color="primary"
-            onClick={() => {
-              props.banUser(props.channelId, props.userId, reason);
-              props.close();
-            }}
-          >
-            Ban
-          </Button>
-        </Group>
-      </Fieldset>
-    </Modal>
-  );
-}
-
-export function DeleteMessageView(props: {
-  messageId: string;
-  messageText: string;
-  userName: string;
-  channelId: string;
-  channelName: string;
-  deleteMessage: (channelId: string, messageId: string) => void;
-  close: () => void;
-}): ReactElement {
-  return (
-    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
-      <Fieldset legend={['Delete message from', props.userName, 'in', props.channelName].join(' ')}>
-        <Text size="sm" c="dimmed" mb="md">
-          "{props.messageText}"
-        </Text>
-        <Group justify="flex-end" mt="md">
-          <Button onClick={props.close}>Cancel</Button>
-          <Button
-            color="red"
-            onClick={() => {
-              props.deleteMessage(props.channelId, props.messageId);
-              props.close();
-            }}
-          >
-            Delete
-          </Button>
-        </Group>
-      </Fieldset>
-    </Modal>
   );
 }
 
@@ -441,10 +321,10 @@ export function RaidView(props: {
   close: () => void;
 }): ReactElement {
   const [raidFrom, setRaidFrom] = useState(props.initialFrom);
-  const [raidTo, setRaidTo] = useState<HelixStream | undefined>(props.initialTo);
+  const [raidTo] = useState<HelixStream | undefined>(props.initialTo);
   const [profilePicture, setProfilePicture] = useState<string>('');
   const login = useContext(LoginContextContext);
-  const config = useContext(ConfigContext);
+  useContext(ConfigContext);
   const emotes = useContext(ChatEmotesContext);
 
   useEffect(() => {

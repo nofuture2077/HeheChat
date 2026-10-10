@@ -40,7 +40,7 @@ export function ConnectPallySettings() {
   };
 
   const disconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect Pally.gg?')) return;
+    if (!window.confirm('Are you sure you want to disconnect Pally.gg?')) return;
     setLoading(true);
     try {
       await fetch(

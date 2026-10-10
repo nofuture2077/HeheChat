@@ -50,7 +50,6 @@ export const EmoteComponentSimple: React.FC<EmoteComponentProps> = ({
   imageUrl,
   largeImageUrl,
   name,
-  type,
   marginL,
   large,
 }) => (

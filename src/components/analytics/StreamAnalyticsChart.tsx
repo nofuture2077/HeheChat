@@ -12,7 +12,6 @@ import {
   Grid,
   Badge,
   Paper,
-  alpha,
   Pagination,
 } from '@mantine/core';
 import { CompositeChart } from '@mantine/charts';
@@ -62,7 +61,7 @@ export function StreamAnalyticsChart(props: {
   const [selectedChannel, setSelectedChannel] = useState<string>(props.channel || '');
   const [loading, setLoading] = useState(false);
   const [streamsLoading, setStreamsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [data, setData] = useState<ChartDataPoint[]>([]);
   const [summary, setSummary] = useState<StreamAnalyticsSummary | null>(null);
   const [streams, setStreams] = useState<StreamInfo[]>([]);
@@ -134,11 +133,11 @@ export function StreamAnalyticsChart(props: {
       const response = await AnalyticsApiClient.getStreams(channelName, start, end);
 
       if (response.success && response.streams) {
-        const streams = response.streams.reverse();
-        setStreams(streams);
+        const reversedStreams = response.streams.reverse();
+        setStreams(reversedStreams);
         // Auto-select the most recent stream if available
-        if (streams.length > 0) {
-          const mostRecentStream = streams[0];
+        if (reversedStreams.length > 0) {
+          const mostRecentStream = reversedStreams[0];
           // Use ID if available, otherwise use start timestamp as identifier
           const streamId = mostRecentStream.id
             ? mostRecentStream.id.toString()

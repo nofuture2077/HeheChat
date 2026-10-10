@@ -25,7 +25,6 @@ import { ChannelPicker } from './ChannelPicker';
 import { EmoteGrid } from './EmoteGrid';
 import { HeheChatMessage } from '../../commons/message';
 import { ChatMessageComp } from './ChatMessage';
-import classes from './ChatMessage.module.css';
 import inputClasses from './ChatInput.module.css';
 import { ModActions } from './mod/modactions';
 import { getUserId } from '@/components/chat/mod/modactions';
@@ -216,7 +215,7 @@ export function ChatInput(props: ChatInputProps) {
         if (args.length >= 1) {
           const data = await getUserId(args[0]);
           const duration = parseInt(args[1], 10);
-          if (!isNaN(duration)) {
+          if (!Number.isNaN(duration)) {
             props.modActions.timeoutUser(
               channelId,
               data.userId,
@@ -276,11 +275,11 @@ export function ChatInput(props: ChatInputProps) {
 
   const getFilteredItems = (): ComboboxItem[] => {
     const words = inputText.split(' ');
-    const currentWord = words[words.length - 1];
+    const lastWord = words[words.length - 1];
     const bridgeConnected = sceneList.length > 0;
 
     // Handle command autocomplete
-    if (currentWord.startsWith('/')) {
+    if (lastWord.startsWith('/')) {
       const channelId = emotes.getChannelId(config.getChatChannel() || '');
       const isBroadcasterStatus = isBroadcaster(channelId);
       const isModeratorStatus = isModerator(channelId);
@@ -299,7 +298,7 @@ export function ChatInput(props: ChatInputProps) {
       });
 
       return availableCommands
-        .filter((cmd) => cmd.value.toLowerCase().includes(currentWord.toLowerCase()))
+        .filter((cmd) => cmd.value.toLowerCase().includes(lastWord.toLowerCase()))
         .map((cmd) => {
           const disabled = !!cmd.requiresBridge && !bridgeConnected;
           return {
@@ -311,16 +310,16 @@ export function ChatInput(props: ChatInputProps) {
     }
 
     // Handle username autocomplete for @ mentions
-    if (currentWord.includes('@')) {
+    if (lastWord.includes('@')) {
       // If the word is just @ or ends with @, show all usernames
-      if (currentWord === '@' || currentWord.endsWith('@')) {
+      if (lastWord === '@' || lastWord.endsWith('@')) {
         return props.usernames
           .slice(0, 5)
           .map((username) => ({ value: `@${username}`, label: `@${username}` }));
       }
 
       // Otherwise filter based on text after @
-      const filterText = currentWord.split('@')[1] || '';
+      const filterText = lastWord.split('@')[1] || '';
       return props.usernames
         .filter((username) => username.toLowerCase().includes(filterText.toLowerCase()))
         .slice(0, 5)
@@ -333,7 +332,7 @@ export function ChatInput(props: ChatInputProps) {
       const commandDef = commands.find((cmd) => cmd.value === commandMatch);
       if (commandDef?.label.includes('[username]')) {
         // Don't show usernames if we're still typing the command
-        if (words.length === 1 && currentWord === commandMatch) {
+        if (words.length === 1 && lastWord === commandMatch) {
           return [];
         }
 
@@ -346,7 +345,7 @@ export function ChatInput(props: ChatInputProps) {
 
         // Filter usernames based on input after command
         if (words.length > 1) {
-          const filterText = currentWord;
+          const filterText = lastWord;
 
           return props.usernames
             .filter(
@@ -566,6 +565,7 @@ export function ChatInput(props: ChatInputProps) {
                     }
                   }
                 }
+                return undefined;
               }}
               leftSection={
                 props.replyToMsg ? (

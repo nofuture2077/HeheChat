@@ -110,6 +110,7 @@ export function CompactAnalyticsChart({ channels, height = 120 }: CompactAnalyti
       const interval = setInterval(fetchAnalytics, 5 * 60 * 1000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [premium.isPremium, channels]);
 
   if (!premium.isPremium) {

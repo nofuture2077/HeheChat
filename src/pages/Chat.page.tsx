@@ -35,7 +35,6 @@ import {
 import PubSub from 'pubsub-js';
 import { notifications } from '@mantine/notifications';
 import { HelixModeratedChannel } from '@twurple/api';
-import { ReactComponentLike } from 'prop-types';
 import { getRawData } from '@twurple/common';
 import {
   ChatEmotesContext,
@@ -100,16 +99,7 @@ import { EmoteStore } from '../components/chat/emotestorage';
 import { NewsDisplay } from '../components/news/NewsDisplay';
 import classes from './chat.module.css';
 import { version } from '../../package.json';
-
-export type OverlayDrawer = {
-  name: string;
-  component: ReactComponentLike;
-  position: 'bottom' | 'left' | 'right' | 'top';
-  size: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number;
-  props?: any;
-};
-
-interface ChatPageProps {}
+import type { OverlayDrawer } from './Chat.types';
 
 export function ChatPage() {
   const viewport = useRef<HTMLDivElement>(null);
@@ -151,10 +141,9 @@ export function ChatPage() {
     }
   }, [drawerHandler]);
   const [replyMsg, setReplyMsg] = useState<HeheChatMessage>();
-  const [chatInputOpened, chatInputHandler] = useDisclosure(true);
+  const [, chatInputHandler] = useDisclosure(true);
   const loginContext = useContext(LoginContextContext);
   const [deletedMessages, setDeletedMessages] = useState<string[]>([]);
-  const [bannedUser, setBannedUser] = useState<string[]>([]);
   const forceUpdate = useForceUpdate();
   const emotes = useContext(ChatEmotesContext);
   const [online, setOnline] = useState(true);
@@ -191,10 +180,10 @@ export function ChatPage() {
   const onScrollPositionChange = (position: { x: number; y: number }) => {
     const viewportElement = viewport.current;
     if (viewportElement) {
-      const shouldScroll =
+      const nextShouldScroll =
         viewportElement.scrollHeight > viewportElement.clientHeight &&
         viewportElement.scrollHeight - viewportElement.clientHeight - position.y < 60;
-      setShouldScroll(shouldScroll);
+      setShouldScroll(nextShouldScroll);
     }
   };
 
@@ -257,10 +246,10 @@ export function ChatPage() {
     );
   };
 
-  const setMessages = (msgs: HeheMessage[], maxMessages: number) => {
+  const setMessages = (msgs: HeheMessage[]) => {
     messageIndex.clear();
     const newMessages: HeheMessage[] = [];
-    const usernames: string[] = [];
+    const newUsernames: string[] = [];
 
     for (const msg of msgs) {
       if (
@@ -291,13 +280,13 @@ export function ChatPage() {
 
       // Track username from new messages
       if (msg.type === 'chat') {
-        usernames.push(msg.userInfo.userName.toLowerCase());
+        newUsernames.push(msg.userInfo.userName.toLowerCase());
       }
       messageIndex.set(msg.id, msg);
       newMessages.push(msg);
     }
 
-    setUsernames(new Set(usernames));
+    setUsernames(new Set(newUsernames));
 
     setChatMessages(newMessages);
   };
@@ -329,7 +318,7 @@ export function ChatPage() {
   );
 
   useViewportWidthCallback(() => {
-    const [w, h] = getDimension();
+    const [, h] = getDimension();
     setVideoHeight(h);
   });
 
@@ -506,7 +495,7 @@ export function ChatPage() {
 
   useEffect(() => {
     if (!config.channels || !config.channels.length || !loginContext.user) {
-      return;
+      return undefined;
     }
     const chatHandler = config.onMessage({
       handle: async (channel, text, replyTo) => {
@@ -521,7 +510,7 @@ export function ChatPage() {
       drawerHandler.open();
     });
 
-    const premiumSub = PubSub.subscribe('OPEN_PREMIUM', (msg, data) => {
+    PubSub.subscribe('OPEN_PREMIUM', () => {
       setDrawer(PremiumDrawer);
       drawerHandler.open();
     });
@@ -608,7 +597,7 @@ export function ChatPage() {
 
     Storage.load(config.channels, config.ignoredUsers, config.maxMessages).then((rawMessages) => {
       const msgs = rawMessages.map(parseMessage);
-      setMessages(msgs, config.maxMessages);
+      setMessages(msgs);
     });
 
     if (loginContext.user) {
@@ -627,8 +616,9 @@ export function ChatPage() {
           }
         })
         .catch((err: any) => {
-          if (!handleUnauthorized(err?.statusCode))
+          if (!handleUnauthorized(err?.statusCode)) {
             console.error('[chat] failed to load user emotes', err);
+          }
         });
     }
 
@@ -712,7 +702,7 @@ export function ChatPage() {
     if (networkStatus.online && isVisible) {
       Storage.load(config.channels, config.ignoredUsers, config.maxMessages).then((rawMessages) => {
         const msgs = rawMessages.map(parseMessage);
-        setMessages(msgs, config.maxMessages);
+        setMessages(msgs);
       });
     }
     if (!AlertSystem.status()) {
@@ -751,8 +741,9 @@ export function ChatPage() {
       !isVisible ||
       config.channels.length === 0 ||
       config.missedAlertsWindow === 'none'
-    )
+    ) {
       return;
+    }
     const windowMs: Record<string, number> = {
       '15m': 15 * 60 * 1000,
       '1h': 60 * 60 * 1000,
@@ -813,7 +804,7 @@ export function ChatPage() {
   useEffect(() => {
     const viewportEl = viewport.current;
     const contentEl = viewportEl?.firstElementChild as HTMLElement | null;
-    if (!viewportEl || !contentEl) return;
+    if (!viewportEl || !contentEl) return undefined;
     const obs = new ResizeObserver(() => {
       if (shouldScrollRef.current) scrollToBottom();
     });
@@ -823,7 +814,7 @@ export function ChatPage() {
 
   useEffect(() => {
     const wrapper = recentEventsRef.current;
-    if (!wrapper) return;
+    if (!wrapper) return undefined;
     // ponytail: RecentEventsPanel renders position:absolute (mounts/unmounts with its
     // content), so the wrapper's own offsetHeight stays 0 — track the child directly
     // and re-bind whenever it mounts/unmounts.
@@ -942,8 +933,8 @@ export function ChatPage() {
                 setDrawer({ ...SettingsDrawer, props: { tab } });
                 drawerHandler.open();
               }}
-              openDrawer={(drawer: OverlayDrawer) => {
-                setDrawer(drawer);
+              openDrawer={(nextDrawer: OverlayDrawer) => {
+                setDrawer(nextDrawer);
                 drawerHandler.open();
               }}
               {...drawer.props}
@@ -951,7 +942,7 @@ export function ChatPage() {
                 setDrawer({ ...UserCardDrawer });
                 drawerHandler.open();
               }}
-            ></drawer.component>
+            />
           ) : null}
         </Drawer>
 
@@ -977,6 +968,7 @@ export function ChatPage() {
         {/* Chat Section */}
         <div className={classes.chatSection} style={{ width: chatWidth }}>
           {/* Resize Handle */}
+          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions -- mouse-only drag handle for resizing; no keyboard equivalent exists */}
           <div className={classes.resizeHandle} onMouseDown={handleMouseDown} />
           {/* Chat Header */}
           <div className={classes.chatHeader}>
@@ -1274,8 +1266,8 @@ export function ChatPage() {
                 setDrawer({ ...SettingsDrawer, props: { tab } });
                 drawerHandler.open();
               }}
-              openDrawer={(drawer: OverlayDrawer) => {
-                setDrawer(drawer);
+              openDrawer={(nextDrawer: OverlayDrawer) => {
+                setDrawer(nextDrawer);
                 drawerHandler.open();
               }}
               {...drawer.props}
@@ -1283,7 +1275,7 @@ export function ChatPage() {
                 setDrawer({ ...UserCardDrawer });
                 drawerHandler.open();
               }}
-            ></drawer.component>
+            />
           ) : null}
         </Drawer>
         {drawerOpen || shouldScroll || config.rainMode || emoteGridOpen ? null : (

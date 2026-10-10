@@ -1,7 +1,7 @@
 import { Text, Button, Group } from '@mantine/core';
 import { IconX } from '@tabler/icons-react';
 import classes from './eventdrawer.module.css';
-import { OverlayDrawer } from '@/pages/Chat.page';
+import type { OverlayDrawer } from '@/pages/Chat.types';
 import { AlertControl } from './alertcontrol';
 import { EventList } from './eventlist';
 

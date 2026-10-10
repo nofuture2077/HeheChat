@@ -1,6 +1,5 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { ChannelApiClient, type ChannelsResponse } from '@/api/channels';
-import { ConfigContext } from '@/ApplicationContext';
 
 /**
  * Custom hook to fetch and manage channels data
@@ -9,7 +8,6 @@ export function useChannels() {
   const [channels, setChannels] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const config = useContext(ConfigContext);
 
   const fetchChannels = async () => {
     try {

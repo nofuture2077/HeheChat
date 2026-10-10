@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { ExtractedImage, UserSpriteAssignment, Event } from './events';
+import { ExtractedImage, UserSpriteAssignment } from './events';
 import { getUserSpriteAssignment, saveUserSpriteAssignment, completeReroll } from '@/api/sprites';
 // Update ZipCache interface to include sortedPrefixes
 interface ZipCache {
@@ -19,7 +19,9 @@ const MAX_CACHE_SIZE = 10;
 export class SpriteManager {
   private static instance: SpriteManager;
 
-  private constructor() {}
+  private constructor() {
+    // private: use getInstance()
+  }
 
   /**
    * Get the singleton instance of SpriteManager
@@ -431,9 +433,8 @@ export class SpriteManager {
           channel,
           username
         );
-      }
-      // Check if we should explicitly use lastFilename based on event flag
-      else if (useLast && spriteAssignment?.lastFilename) {
+      } else if (useLast && spriteAssignment?.lastFilename) {
+        // Check if we should explicitly use lastFilename based on event flag
         const foundImage = sortedImages.find((img) => img.name === spriteAssignment.lastFilename);
         if (foundImage) {
           selectedImage = foundImage;
@@ -458,7 +459,7 @@ export class SpriteManager {
               console.log(
                 `Selected sprite "${spriteAssignment.selectedFilename}" not found in current sprite pack for ${username} in ${channel}. Using fallback for display only.`
               );
-              selectedImage = sortedImages[0]; // Use first image as fallback for display
+              [selectedImage] = sortedImages; // Use first image as fallback for display
 
               // Important: Override the display image's name with the user's actual selection
               selectedImage = {
@@ -468,12 +469,11 @@ export class SpriteManager {
             }
           } else {
             // No valid selectedFilename either, use first image
-            selectedImage = sortedImages[0];
+            [selectedImage] = sortedImages;
           }
         }
-      }
-      // Use existing assignment if available
-      else if (spriteAssignment?.selectedFilename) {
+      } else if (spriteAssignment?.selectedFilename) {
+        // Use existing assignment if available
         const foundImage = sortedImages.find(
           (img) => img.name === spriteAssignment.selectedFilename
         );
@@ -485,7 +485,7 @@ export class SpriteManager {
           console.log(
             `Selected sprite "${spriteAssignment.selectedFilename}" not found in current sprite pack for ${username} in ${channel}. Using fallback for display only.`
           );
-          selectedImage = sortedImages[0]; // Use first image as fallback for display
+          [selectedImage] = sortedImages; // Use first image as fallback for display
 
           // Important: Override the display image's name with the user's actual selection
           // This ensures we don't lose their selection when the sprite pack changes
@@ -496,15 +496,13 @@ export class SpriteManager {
 
           // Don't set newAssignment = true, as we want to keep their existing selection
         }
-      }
-      // If userSeed is a filename that exists in the zip, use that image directly
-      else if (userSeed && sortedImages.some((img) => img.name === userSeed)) {
+      } else if (userSeed && sortedImages.some((img) => img.name === userSeed)) {
+        // If userSeed is a filename that exists in the zip, use that image directly
         const foundImage = sortedImages.find((img) => img.name === userSeed);
         selectedImage = foundImage || sortedImages[0]; // Fallback to first image if not found
         newAssignment = true;
-      }
-      // Otherwise, select based on hash with filename-based weighting
-      else {
+      } else {
+        // Otherwise, select based on hash with filename-based weighting
         // Generate deterministic hash from username and channel
         const userHash = this.generateSimpleHash(`${username}${channel}`);
 

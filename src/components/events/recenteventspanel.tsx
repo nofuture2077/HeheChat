@@ -1,4 +1,4 @@
-import { ActionIcon, Group, Paper, ScrollArea, Stack, Text } from '@mantine/core';
+import { ActionIcon, Group, Stack, Text } from '@mantine/core';
 import { IconCheck, IconReload } from '@tabler/icons-react';
 import { useContext, useState } from 'react';
 import { Dictionary } from 'underscore';

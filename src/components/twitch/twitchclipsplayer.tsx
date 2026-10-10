@@ -48,6 +48,7 @@ export function TwitchClipsPlayer({ clipId, onClose }: TwitchClipsPlayerProps) {
       }}
     >
       <iframe
+        title="Twitch clip"
         src={`https://clips.twitch.tv/embed?clip=${clipId}&parent=${window.location.hostname}&autoplay=true`}
         width={w}
         height={h}

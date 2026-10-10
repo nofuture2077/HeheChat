@@ -4,8 +4,6 @@ import { HomePage } from './pages/Home.page';
 import { ChatPage } from './pages/Chat.page';
 import { LoginContextContext } from './ApplicationContext';
 
-interface RouterProps {}
-
 export function Router() {
   const loginContext = useContext(LoginContextContext);
 

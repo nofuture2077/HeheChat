@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { Badge, Tooltip } from '@mantine/core';
 import { IconCrown } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';

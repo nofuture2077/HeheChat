@@ -7,13 +7,6 @@ export interface ChatStorage {
   ) => Promise<Array<{ id: string; message: string; username: string; date: number }>>;
 }
 
-interface ChatMessageData {
-  channel: string;
-  date: number;
-  user: string | undefined;
-  msg: string | undefined;
-}
-
 class RemoteChatStorage implements ChatStorage {
   private baseUrl: string;
   constructor(baseUrl: string) {

@@ -1,7 +1,5 @@
 import { Container, Title, Text, Button, Alert, Stack, Center } from '@mantine/core';
 import { IconAlertCircle, IconShieldLock } from '@tabler/icons-react';
-import { useContext } from 'react';
-import { LoginContextContext } from '../ApplicationContext';
 import Login from '../components/login/login';
 import { HeaderLogo } from '../components/header/HeaderLogo';
 
@@ -10,8 +8,6 @@ interface AdminHomePageProps {
 }
 
 export function AdminHomePage({ showAccessDenied = false }: AdminHomePageProps) {
-  const loginContext = useContext(LoginContextContext);
-
   if (showAccessDenied) {
     return (
       <Container size="sm" py="xl">
@@ -29,8 +25,8 @@ export function AdminHomePage({ showAccessDenied = false }: AdminHomePageProps) 
               variant="light"
             >
               <Text>
-                You don't have permission to access the admin panel. Only authorized administrators
-                can view this content.
+                You don&apos;t have permission to access the admin panel. Only authorized
+                administrators can view this content.
               </Text>
             </Alert>
 

@@ -2,16 +2,12 @@ import { useEffect, useState } from 'react';
 import { AlertSystem } from './alertplayer';
 import { useVersionCheck } from '../../hooks/useVersionCheck';
 
-interface BrowserSourceAlertStatusIndicatorProps {
-  // Optional props can be added here if needed
-}
-
-export function BrowserSourceAlertStatusIndicator(_props: BrowserSourceAlertStatusIndicatorProps) {
+export function BrowserSourceAlertStatusIndicator() {
   const [isAlertSystemRunning, setIsAlertSystemRunning] = useState<boolean>(AlertSystem.status());
   const [updateCountdown, setUpdateCountdown] = useState<number>(0);
 
   // Use version check hook with custom remote URL
-  const { newVersionAvailable, currentVersion, latestVersion, isChecking } = useVersionCheck({
+  const { newVersionAvailable, latestVersion } = useVersionCheck({
     checkInterval: 30 * 60 * 1000, // Check every 30 minutes
     remoteManifestUrl: `${window.location.origin}/manifest.json`,
     onNewVersionDetected: (current, latest) => {
@@ -60,6 +56,7 @@ export function BrowserSourceAlertStatusIndicator(_props: BrowserSourceAlertStat
 
       return () => clearInterval(countdownInterval);
     }
+    return undefined;
   }, [updateCountdown, latestVersion]);
 
   // Determine indicator color and message based on state

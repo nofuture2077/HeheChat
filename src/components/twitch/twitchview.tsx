@@ -1,4 +1,4 @@
-import { Title, Button, SimpleGrid, Tabs, Text, Group, ActionIcon } from '@mantine/core';
+import { Button, SimpleGrid, Tabs, Text, Group, ActionIcon } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconX, IconEdit } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
@@ -9,7 +9,7 @@ import { RaidView } from '../chat/mod/modview';
 import { StreamInfoDrawer } from './streaminfo';
 import classes from './twitchview.module.css';
 import { ModActions } from '../chat/mod/modactions';
-import { OverlayDrawer } from '@/pages/Chat.page';
+import type { OverlayDrawer } from '@/pages/Chat.types';
 
 export const TwitchDrawer: OverlayDrawer = {
   name: 'twitch',
@@ -126,8 +126,8 @@ export function TwitchView(props: TwitchViewProps) {
                     config.hideViewers ||
                     (config.hideOwnViewers && stream.userName === login.user?.name)
                   }
-                  onClick={(stream) => {
-                    setInitialRaidTarget(stream);
+                  onClick={(clickedStream) => {
+                    setInitialRaidTarget(clickedStream);
                     raidModalHandler.open();
                   }}
                 />

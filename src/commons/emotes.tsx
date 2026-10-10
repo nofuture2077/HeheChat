@@ -25,17 +25,6 @@ interface sevenTVEmote {
   };
 }
 
-interface sevenTVEmoteSet {
-  emotes: sevenTVEmote[];
-  id: string;
-}
-
-interface sevenTVUser {
-  displayname: string;
-  id: string;
-  emote_set: sevenTVEmoteSet;
-}
-
 const emoteSetUserNameMap: Record<string, string> = {};
 
 type CheermoteImageSet = {
@@ -497,7 +486,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         try {
           const users = await EmoteApiClient.getUsersByNames([channel]);
           if (Array.isArray(users) && users[0]) {
-            user = users[0];
+            [user] = users;
             channelData.user = user;
           }
         } catch (error) {
@@ -696,7 +685,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
       LOADING_PROFILES[channel] = false;
     }
   },
-  getBadge: (channel: string, badgeData: string, key: string) => {
+  getBadge: (channel: string, badgeData: string) => {
     try {
       // Validate input
       if (!badgeData || typeof badgeData !== 'string') {
@@ -922,7 +911,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         return `${name}${bits}`;
       }
 
-      if (typeof bits !== 'number' || isNaN(bits) || bits < 0) {
+      if (typeof bits !== 'number' || Number.isNaN(bits) || bits < 0) {
         console.warn(`Invalid bits value: ${bits}`);
         return `${name}${bits}`;
       }
@@ -1038,7 +1027,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
                 name: entry[0],
                 data: {
                   ...entry[1],
-                  getImageUrl(scale: number) {
+                  getImageUrl() {
                     return `https://static-cdn.jtvnw.net/emoticons/v2/${entry[1].id}/default/dark/2.0`;
                   },
                 },

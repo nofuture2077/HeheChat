@@ -58,8 +58,8 @@ export function ChatEventsSettings() {
       </Fieldset>
       <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
         Control which Twitch and platform events appear as messages directly in your chat feed.
-        Disable event types you don't want cluttering your chat view — they can still trigger alerts
-        independently.
+        Disable event types you don&apos;t want cluttering your chat view — they can still trigger
+        alerts independently.
       </Alert>
       <Fieldset legend="Event Messages" variant="filled">
         <Stack>

@@ -14,7 +14,7 @@ import {
   ProfileContext,
   PremiumContext,
 } from './ApplicationContext';
-import { Premium, DEFAULT_PREMIUM } from './commons/premium';
+import { DEFAULT_PREMIUM } from './commons/premium';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import { DEFAULT_CONFIG } from './commons/config';
 import { DEFAULT_CHAT_EMOTES } from './commons/emotes';
@@ -23,28 +23,26 @@ import { theme } from './theme';
 
 export const ADMIN_APP_NAME = 'HeheChat Admin';
 
-interface AdminAppProps {}
-
-export default function AdminApp(props: AdminAppProps) {
+export default function AdminApp() {
   const [loginContext, setLoginContext] = useState<LoginContext>(DEFAULT_LOGIN_CONTEXT);
 
   const setAccessToken = async (accessToken: string | undefined) => {
-    setLoginContext((loginContext) => {
-      const newContext = { ...loginContext, accessToken };
+    setLoginContext((prev) => {
+      const newContext = { ...prev, accessToken };
       return newContext;
     });
   };
 
   const setUser = async (user: HelixUser) => {
-    setLoginContext((loginContext) => {
-      const newContext = { ...loginContext, user };
+    setLoginContext((prev) => {
+      const newContext = { ...prev, user };
       return newContext;
     });
   };
 
   const setModeratedChannels = async (moderatedChannels: HelixModeratedChannel[]) => {
-    setLoginContext((loginContext) => {
-      const newContext = { ...loginContext, moderatedChannels };
+    setLoginContext((prev) => {
+      const newContext = { ...prev, moderatedChannels };
       return newContext;
     });
   };
