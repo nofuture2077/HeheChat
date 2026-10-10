@@ -5,12 +5,44 @@ import { AdminAnalyticsPage } from './pages/AdminAnalytics.page';
 import { AdminNewsPage } from './pages/AdminNews.page';
 import { AdminPremiumPage } from './pages/AdminPremium.page';
 import { AdminAlertsPage } from './pages/AdminAlerts.page';
+import { AdminDashboardPage } from './pages/AdminDashboard.page';
 import { LoginContextContext } from './ApplicationContext';
 import { useContext, useState } from 'react';
-import { AppShell, Burger, Group, NavLink } from '@mantine/core';
+import { AppShell, Burger, Group, NavLink, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconDashboard, IconUsers, IconChartBar, IconNews, IconCrown, IconSettings, IconBell } from '@tabler/icons-react';
+import {
+  IconDashboard,
+  IconUsers,
+  IconChartBar,
+  IconNews,
+  IconCrown,
+  IconSettings,
+  IconBell,
+} from '@tabler/icons-react';
 import { HeaderLogo } from './components/header/HeaderLogo';
+
+const NAV_GROUPS = [
+  {
+    label: 'Overview',
+    links: [
+      { key: 'dashboard', label: 'Dashboard', icon: IconDashboard },
+      { key: 'analytics', label: 'Stream Analytics', icon: IconChartBar },
+      { key: 'connections', label: 'Active Connections', icon: IconUsers },
+    ],
+  },
+  {
+    label: 'Management',
+    links: [
+      { key: 'channels', label: 'Channel Management', icon: IconSettings },
+      { key: 'alerts', label: 'Alert Tokens', icon: IconBell },
+      { key: 'news', label: 'News Management', icon: IconNews },
+    ],
+  },
+  {
+    label: 'Monetization',
+    links: [{ key: 'premium', label: 'Premium Management', icon: IconCrown }],
+  },
+];
 
 export function AdminRouter() {
   const loginContext = useContext(LoginContextContext);
@@ -42,7 +74,7 @@ export function AdminRouter() {
       case 'alerts':
         return <AdminAlertsPage />;
       default:
-        return <AdminConnectionsPage />; // Default to connections page
+        return <AdminDashboardPage />;
     }
   };
 
@@ -67,46 +99,26 @@ export function AdminRouter() {
       </AppShell.Header>
 
       <AppShell.Navbar p="md">
-        <NavLink
-          href="#"
-          label="Active Connections"
-          leftSection={<IconUsers size="1rem" />}
-          active={activeSection === 'connections'}
-          onClick={() => setActiveSection('connections')}
-        />
-        <NavLink
-          href="#"
-          label="Channel Management"
-          leftSection={<IconSettings size="1rem" />}
-          active={activeSection === 'channels'}
-          onClick={() => setActiveSection('channels')}
-        />
-        <NavLink
-          href="#"
-          label="News Management"
-          leftSection={<IconNews size="1rem" />}
-          active={activeSection === 'news'}
-          onClick={() => setActiveSection('news')}
-        />
-        <NavLink
-          href="#"
-          label="Premium Management"
-          leftSection={<IconCrown size="1rem" />}
-          active={activeSection === 'premium'}
-          onClick={() => setActiveSection('premium')}
-        />
-        <NavLink
-          href="#"
-          label="Alert Tokens"
-          leftSection={<IconBell size="1rem" />}
-          active={activeSection === 'alerts'}
-          onClick={() => setActiveSection('alerts')}
-        />
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label}>
+            <Text size="xs" fw={600} c="dimmed" tt="uppercase" mt="sm" mb={4} px="sm">
+              {group.label}
+            </Text>
+            {group.links.map(({ key, label, icon: Icon }) => (
+              <NavLink
+                key={key}
+                href="#"
+                label={label}
+                leftSection={<Icon size="1rem" />}
+                active={activeSection === key}
+                onClick={() => setActiveSection(key)}
+              />
+            ))}
+          </div>
+        ))}
       </AppShell.Navbar>
 
-      <AppShell.Main>
-        {renderContent()}
-      </AppShell.Main>
+      <AppShell.Main>{renderContent()}</AppShell.Main>
     </AppShell>
   );
 }
