@@ -24,14 +24,14 @@ export function ConnectKofiSettings() {
     const fetchKofi = async () => {
       try {
         const getRes = await fetch(
-          import.meta.env.VITE_BACKEND_URL + '/kofi/get?state=' + state
+          `${import.meta.env.VITE_BACKEND_URL}/kofi/get?state=${state}`
         ).then((res) => res.json());
         if (getRes.verification_token) {
           setVerificationToken(getRes.verification_token);
           setConnected(true);
         }
         const webhookRes = await fetch(
-          import.meta.env.VITE_BACKEND_URL + '/kofi/webhook-url?state=' + state
+          `${import.meta.env.VITE_BACKEND_URL}/kofi/webhook-url?state=${state}`
         ).then((res) => res.json());
         setWebhookUrl(webhookRes.webhook_url || '');
       } catch (error) {
@@ -47,11 +47,9 @@ export function ConnectKofiSettings() {
     setLoading(true);
     try {
       await fetch(
-        import.meta.env.VITE_BACKEND_URL +
-          '/kofi/set?state=' +
-          state +
-          '&verification_token=' +
+        `${import.meta.env.VITE_BACKEND_URL}/kofi/set?state=${state}&verification_token=${
           verificationToken
+        }`
       );
       setConnected(true);
     } catch (error) {
@@ -66,7 +64,7 @@ export function ConnectKofiSettings() {
     setLoading(true);
     try {
       await fetch(
-        import.meta.env.VITE_BACKEND_URL + '/kofi/set?state=' + state + '&verification_token='
+        `${import.meta.env.VITE_BACKEND_URL}/kofi/set?state=${state}&verification_token=`
       );
       setVerificationToken('');
       setConnected(false);

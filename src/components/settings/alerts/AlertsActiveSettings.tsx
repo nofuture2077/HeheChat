@@ -44,11 +44,11 @@ function formatDescription(alert: EventAlert) {
   }
   switch (alert.specifier.type) {
     case 'min':
-      return alert.specifier.amount + '+' + suffix;
+      return `${alert.specifier.amount}+${suffix}`;
     case 'exact':
       return alert.specifier.amount + suffix;
     case 'matches':
-      return alert.specifier.attribute + ': ' + alert.specifier.text;
+      return `${alert.specifier.attribute}: ${alert.specifier.text}`;
   }
 }
 
@@ -57,7 +57,7 @@ export function AlertsActiveSettings() {
   const forceUpdate = useForceUpdate();
 
   const changeActive = (channel: string, active: boolean) => {
-    const activatedShares = config.activatedShares;
+    const { activatedShares } = config;
     if (active) {
       if (!activatedShares.includes(channel)) activatedShares.push(channel);
     } else {
@@ -96,11 +96,11 @@ export function AlertsActiveSettings() {
           if (!AlertSystem.alertConfig[channel] || !config.channels.includes(channel)) return null;
           return (
             <Fieldset
-              key={'Alerts-' + channel}
-              legend={'Active Alert Types ' + channel}
+              key={`Alerts-${channel}`}
+              legend={`Active Alert Types ${channel}`}
               variant="filled"
             >
-              <Stack key={'alert-config-' + channel}>
+              <Stack key={`alert-config-${channel}`}>
                 {Object.entries(AlertSystem.alertConfig[channel].data?.alerts || {}).map(
                   ([eventMainType, alerts]) => {
                     if (!alerts || alerts.length === 0) return null;
@@ -134,7 +134,7 @@ export function AlertsActiveSettings() {
                 <Divider label="Blerps" labelPosition="center" mt={0} mb="xs" />
                 <Switch
                   disabled={!config.activatedShares.includes(channel)}
-                  checked={!config.deactivatedAlerts['blerp']}
+                  checked={!config.deactivatedAlerts.blerp}
                   key="blerp"
                   label="Blerps"
                   size="lg"
@@ -148,7 +148,7 @@ export function AlertsActiveSettings() {
                 <Divider label="SoundAlerts" labelPosition="center" mt="xs" mb="xs" />
                 <Switch
                   disabled={!config.activatedShares.includes(channel)}
-                  checked={!config.deactivatedAlerts['soundalerts']}
+                  checked={!config.deactivatedAlerts.soundalerts}
                   key="soundalerts"
                   label="SoundAlerts"
                   size="lg"

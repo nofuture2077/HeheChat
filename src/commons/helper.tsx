@@ -1,6 +1,8 @@
 import { useViewportSize } from '@mantine/hooks';
 import { useEffect } from 'react';
 
+import humanizeDuration, { HumanizerOptions } from 'humanize-duration';
+
 export function param(key: string, value: string) {
   return [key, value].join('=');
 }
@@ -25,11 +27,11 @@ export function generateGUID(): string {
 // Levenshtein distance function
 export function levenshtein(a: string, b: string) {
   const tmp = [];
-  let i,
-    j,
-    alen = a.length,
-    blen = b.length,
-    cost;
+  let i;
+  let j;
+  const alen = a.length;
+  const blen = b.length;
+  let cost;
 
   if (alen === 0) return blen;
   if (blen === 0) return alen;
@@ -56,8 +58,6 @@ export function levenshtein(a: string, b: string) {
   return tmp[alen][blen];
 }
 
-import humanizeDuration, { HumanizerOptions } from 'humanize-duration';
-
 const shortEnglishHumanizer = humanizeDuration.humanizer({
   language: 'shortEn',
   languages: {
@@ -83,38 +83,38 @@ export function timeSince(date: number): string {
   let interval = seconds / 31536000;
 
   if (interval > 1) {
-    return Math.floor(interval) + ' y ago';
+    return `${Math.floor(interval)} y ago`;
   }
 
   interval = seconds / 2592000;
   if (interval > 1) {
-    return Math.floor(interval) + ' mo ago';
+    return `${Math.floor(interval)} mo ago`;
   }
 
   interval = seconds / 86400;
   if (interval > 1) {
-    return Math.floor(interval) + ' d ago';
+    return `${Math.floor(interval)} d ago`;
   }
 
   interval = seconds / 3600;
   if (interval > 1) {
-    return Math.floor(interval) + ' h ago';
+    return `${Math.floor(interval)} h ago`;
   }
 
   interval = seconds / 60;
   if (interval > 1) {
-    return Math.floor(interval) + ' m ago';
+    return `${Math.floor(interval)} m ago`;
   }
 
-  return Math.floor(seconds) + ' s ago';
+  return `${Math.floor(seconds)} s ago`;
 }
 
 export function formatTime(date: Date): string {
   let hours: number | string = date.getHours();
   let minutes: number | string = date.getMinutes();
 
-  if (hours < 10) hours = '0' + hours;
-  if (minutes < 10) minutes = '0' + minutes;
+  if (hours < 10) hours = `0${hours}`;
+  if (minutes < 10) minutes = `0${minutes}`;
 
   return `${hours}:${minutes}`;
 }
@@ -163,9 +163,7 @@ export function formatHoursMinute(secondsElapsed: number): string {
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 }
 
-export const formatDuration = (duration: number) => {
-  return shortEnglishHumanizer(duration, { largest: 1 });
-};
+export const formatDuration = (duration: number) => shortEnglishHumanizer(duration, { largest: 1 });
 
 export function formatCurrency(value: string): string {
   const currencyMap: Record<string, string> = {
@@ -229,11 +227,10 @@ export function formatString(messageTemplate: string, args: Record<string, any>)
   // Schritt 1: Condition-Blöcke auflösen
   messageTemplate = messageTemplate.replace(
     /\${\s*"([^"]+)"\s*,\s*"([^"]+)"\s*}/g,
-    (_, template, condition) => {
-      return checkCondition(condition, args)
+    (_, template, condition) =>
+      checkCondition(condition, args)
         ? formatString(template, args) // inneres Template erneut verarbeiten
-        : '';
-    }
+        : ''
   );
 
   // Schritt 2: normale Platzhalter ersetzen
@@ -252,9 +249,8 @@ export function replacer(key: string, value: any) {
       dataType: 'Map',
       value: Array.from(value.entries()),
     };
-  } else {
-    return value;
   }
+  return value;
 }
 
 export function reviver(key: string, value: any) {
@@ -284,8 +280,8 @@ export function useViewportWidthCallback(callback: (width: number) => void) {
 
 const getLuminance = (r: number, g: number, b: number) => {
   const [rs, gs, bs] = [r, g, b].map((c) => {
-    c = c / 255;
-    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    c /= 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   });
   return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
 };
@@ -353,14 +349,13 @@ export const adjustColorForContrast = (color: string, backgroundColor: string) =
   return `rgb(${r},${g},${b})`;
 };
 
-export const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] => {
-  return elements.reduce<React.ReactNode[]>((acc, elem, index) => {
+export const joinWithSpace = (elements: React.ReactNode[]): React.ReactNode[] =>
+  elements.reduce<React.ReactNode[]>((acc, elem, index) => {
     if (index === 0) {
       return [elem];
     }
     return [...acc, ' ', elem];
   }, []);
-};
 
 /**
  * Deterministic sample function that selects an item from an array using a seed string
@@ -378,7 +373,7 @@ export function deterministicSample<T>(array: T[], seed: string): T {
   for (let i = 0; i < seed.length; i++) {
     const char = seed.charCodeAt(i);
     hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32bit integer
+    hash &= hash; // Convert to 32bit integer
   }
 
   // Use the absolute value of the hash to ensure positive number

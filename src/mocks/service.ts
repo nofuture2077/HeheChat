@@ -1,8 +1,8 @@
-import { Profile } from '@/commons/profile';
 import { ApiClient } from '@twurple/api';
+import PubSub from 'pubsub-js';
+import { Profile } from '@/commons/profile';
 import { createMockApiClient } from './api';
 import * as storage from './storage';
-import PubSub from 'pubsub-js';
 import { HeheChatMessage } from '@/commons/message';
 import { generateGUID } from '@/commons/helper';
 
@@ -33,7 +33,7 @@ function createMockMessage(channels: string[]): HeheChatMessage | undefined {
     generateGUID(),
     message,
     [{ type: 'text', text: message, name: message }],
-    '#' + channel,
+    `#${channel}`,
     new Date(),
     {
       displayName: username,

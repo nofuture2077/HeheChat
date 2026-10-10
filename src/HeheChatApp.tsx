@@ -4,6 +4,10 @@ import { MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { useDidUpdate, useNetwork, useDocumentVisibility } from '@mantine/hooks';
 import { useCallback, useEffect, useState, useRef } from 'react';
+import { StaticAuthProvider } from '@twurple/auth';
+import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
+import PubSub from 'pubsub-js';
+import _ from 'underscore';
 import { ConnectionStatusProvider } from './commons/connectionStatus';
 import { useWakeLock } from './hooks/useWakeLock';
 import { useVersionCheck } from './hooks/useVersionCheck';
@@ -21,8 +25,6 @@ import { Premium, DEFAULT_PREMIUM } from './commons/premium';
 import { Music, DEFAULT_MUSIC, musicController } from './commons/music';
 import * as premiumApi from './api/premium';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
-import { StaticAuthProvider } from '@twurple/auth';
-import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
 import {
   ConfigKey,
   DEFAULT_CONFIG,
@@ -33,12 +35,10 @@ import {
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { generateGUID } from './commons/helper';
-import PubSub from 'pubsub-js';
 import { SystemMessageMainType, SmartFilterConfig } from './commons/message';
 import { theme } from './theme';
 import { AlertSystem } from './components/alerts/alertplayer';
 import { ShortCut } from './commons/shortcuts';
-import _ from 'underscore';
 import { MockService } from '@/mocks/service';
 
 // Debounce function to prevent excessive API calls
@@ -78,9 +78,9 @@ async function storeProfile(profile: Profile): Promise<any> {
   }
   const token = localStorage.getItem('hehe-token_state') || '';
   return fetch(
-    BASE_URL +
-      '/profile?' +
-      [['token', token].join('='), ['guid', profile.guid].join('=')].join('&'),
+    `${BASE_URL}/profile?${[['token', token].join('='), ['guid', profile.guid].join('=')].join(
+      '&'
+    )}`,
     {
       method: 'PUT',
       body: JSON.stringify(profile),
@@ -95,7 +95,7 @@ async function loadProfileFromServer(guid: String): Promise<Profile> {
   }
   const token = localStorage.getItem('hehe-token_state') || '';
   return fetch(
-    BASE_URL + '/profile?' + [['token', token].join('='), ['guid', guid].join('=')].join('&')
+    `${BASE_URL}/profile?${[['token', token].join('='), ['guid', guid].join('=')].join('&')}`
   ).then((res) => res.json());
 }
 
@@ -105,7 +105,7 @@ async function deleteProfileFromServer(guid: String): Promise<any> {
   }
   const token = localStorage.getItem('hehe-token_state') || '';
   return fetch(
-    BASE_URL + '/profile?' + [['token', token].join('='), ['guid', guid].join('=')].join('&'),
+    `${BASE_URL}/profile?${[['token', token].join('='), ['guid', guid].join('=')].join('&')}`,
     { method: 'DELETE' }
   );
 }
@@ -115,7 +115,7 @@ async function loadProfilesFromServer(): Promise<{ profiles: Profile[] }> {
     return MockService.loadProfilesList();
   }
   const token = localStorage.getItem('hehe-token_state') || '';
-  return fetch(BASE_URL + '/profile/list?' + [['token', token].join('=')].join('&')).then((res) =>
+  return fetch(`${BASE_URL}/profile/list?${[['token', token].join('=')].join('&')}`).then((res) =>
     res.json()
   );
 }
@@ -125,7 +125,7 @@ async function loadProfiles(): Promise<{ active?: string; profiles: string }> {
     return MockService.loadProfiles();
   }
   const token = localStorage.getItem('hehe-token_state') || '';
-  return fetch(BASE_URL + '/profiles/list?' + [['token', token].join('=')].join('&')).then((res) =>
+  return fetch(`${BASE_URL}/profiles/list?${[['token', token].join('=')].join('&')}`).then((res) =>
     res.json()
   );
 }
@@ -136,13 +136,11 @@ async function saveProfiles(active: string, profiles: string[]): Promise<any> {
   }
   const token = localStorage.getItem('hehe-token_state') || '';
   return fetch(
-    BASE_URL +
-      '/profiles/list?' +
-      [
-        ['token', token].join('='),
-        ['active', active].join('='),
-        ['profiles', profiles.join(',')].join('='),
-      ].join('&'),
+    `${BASE_URL}/profiles/list?${[
+      ['token', token].join('='),
+      ['active', active].join('='),
+      ['profiles', profiles.join(',')].join('='),
+    ].join('&')}`,
     {
       method: 'PUT',
     }
@@ -150,7 +148,7 @@ async function saveProfiles(active: string, profiles: string[]): Promise<any> {
 }
 
 const onMessageHandlers: MessageHandler[] = [];
-var onMessageHandlerIndex = 0;
+let onMessageHandlerIndex = 0;
 
 export default function HeheChat() {
   // Run storage patches on app initialization
@@ -208,7 +206,7 @@ export default function HeheChat() {
   // (iPhone home-screen launch) doesn't drift on an old build.
   useVersionCheck({
     checkInterval: 30 * 60 * 1000,
-    remoteManifestUrl: window.location.origin + '/manifest.json',
+    remoteManifestUrl: `${window.location.origin}/manifest.json`,
     onNewVersionDetected: (_current, latest) => {
       if (latest) localStorage.setItem('hehe-current-version', latest);
       window.location.reload();
@@ -379,7 +377,7 @@ export default function HeheChat() {
 
     backendWorkerRef.current.addEventListener('message', (msg: MessageEvent) => {
       // Forward all other messages to PubSub
-      PubSub.publish('WS-' + msg.data.type, msg.data.data ?? msg.data);
+      PubSub.publish(`WS-${msg.data.type}`, msg.data.data ?? msg.data);
     });
 
     loadReceivedShares();
@@ -670,14 +668,13 @@ export default function HeheChat() {
   const getChatChannel = () => {
     if (profile.config.channels.includes(profile.config.chatChannel || '')) {
       return profile.config.chatChannel;
-    } else {
-      if (profile.config.channels.length == 0) {
-        return;
-      }
-      const channel = profile.config.channels[0];
-      setChatChannel(channel);
-      return channel;
     }
+    if (profile.config.channels.length == 0) {
+      return;
+    }
+    const channel = profile.config.channels[0];
+    setChatChannel(channel);
+    return channel;
   };
   const setChatChannel = (value: string) => updateConfig('chatChannel', value);
   const setAccessToken = async (accessToken: string | undefined) => {
@@ -701,13 +698,10 @@ export default function HeheChat() {
     });
   };
 
-  const isLoggedIn = () => {
-    return MockService.isEnabled() || !!loginContext.accessToken;
-  };
+  const isLoggedIn = () => MockService.isEnabled() || !!loginContext.accessToken;
 
-  const getAuthProvider = () => {
-    return new StaticAuthProvider(loginContext.clientId, loginContext.accessToken || '');
-  };
+  const getAuthProvider = () =>
+    new StaticAuthProvider(loginContext.clientId, loginContext.accessToken || '');
 
   const getApiClient = () => {
     const client = new ApiClient({ authProvider: getAuthProvider() });
@@ -731,9 +725,7 @@ export default function HeheChat() {
     });
   };
 
-  const listProfiles = () => {
-    return profiles;
-  };
+  const listProfiles = () => profiles;
 
   const checkProfileName = (name: string) => {
     if (!name) {
@@ -742,7 +734,7 @@ export default function HeheChat() {
     if (name.length > 25) {
       return false;
     }
-    for (var i = 0; i < profiles.length; i++) {
+    for (let i = 0; i < profiles.length; i++) {
       if (name.toLowerCase() === profile.name.toLowerCase()) {
         return false;
       }
@@ -844,7 +836,7 @@ export default function HeheChat() {
       return;
     }
     const share = localStorage.getItem('hehe-token_state') || '';
-    const data: { shares: string[] } = await fetch(BASE_URL + '/shares?state=' + share).then(
+    const data: { shares: string[] } = await fetch(`${BASE_URL}/shares?state=${share}`).then(
       (res) => res.json()
     );
     updateConfig('receivedShares', data.shares);
@@ -857,7 +849,7 @@ export default function HeheChat() {
       return;
     }
     const share = localStorage.getItem('hehe-token_state') || '';
-    const data: { shares: string[] } = await fetch(BASE_URL + '/shares/get?state=' + share).then(
+    const data: { shares: string[] } = await fetch(`${BASE_URL}/shares/get?state=${share}`).then(
       (res) => res.json()
     );
     updateConfig('shares', data.shares);
@@ -871,7 +863,7 @@ export default function HeheChat() {
     }
     const share = localStorage.getItem('hehe-token_state') || '';
     const data: { shares: string[] } = await fetch(
-      BASE_URL + '/shares/set?state=' + share + '&channels=' + value.join(',')
+      `${BASE_URL}/shares/set?state=${share}&channels=${value.join(',')}`
     ).then((res) => res.json());
     updateConfig('shares', data.shares);
   };
@@ -1134,21 +1126,20 @@ export default function HeheChat() {
         }));
 
         return premiumDetails;
-      } else {
-        setPremium((prev) => ({
-          ...prev,
-          isPremium: false,
-          loading: false,
-        }));
-
-        return {
-          isPremium: false,
-          expiresAt: null,
-          subscriptionType: null,
-          daysRemaining: null,
-          status: null,
-        };
       }
+      setPremium((prev) => ({
+        ...prev,
+        isPremium: false,
+        loading: false,
+      }));
+
+      return {
+        isPremium: false,
+        expiresAt: null,
+        subscriptionType: null,
+        daysRemaining: null,
+        status: null,
+      };
     } catch (error) {
       console.error('Error fetching premium details:', error);
 

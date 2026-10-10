@@ -16,7 +16,7 @@ import { ConfigContext } from '@/ApplicationContext';
 
 export function ChatTopSection() {
   const config = useContext(ConfigContext);
-  const fontSizeMarks = [14, 18, 22, 26].map((x) => ({ value: x, label: x + 'px' }));
+  const fontSizeMarks = [14, 18, 22, 26].map((x) => ({ value: x, label: `${x}px` }));
 
   return (
     <>
@@ -25,7 +25,7 @@ export function ChatTopSection() {
           <Select
             label="Max Messages"
             data={['20', '40', '60', '100', '200', '500']}
-            value={config.maxMessages + ''}
+            value={`${config.maxMessages}`}
             onChange={(value) => config.setMaxMessages(Number(value))}
           />
           {config.maxMessages === 20 && (

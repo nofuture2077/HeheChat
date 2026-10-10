@@ -1,5 +1,5 @@
-import Login from '@/components/login/login';
 import { Anchor, Group, Image, Text } from '@mantine/core';
+import Login from '@/components/login/login';
 import classes from './home.module.css';
 import nofuture from './NoFuture.svg';
 // Import version from package.json

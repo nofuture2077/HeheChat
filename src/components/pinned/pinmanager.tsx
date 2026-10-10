@@ -1,15 +1,14 @@
 import { Stack, Badge } from '@mantine/core';
 import { useDisclosure, useForceUpdate } from '@mantine/hooks';
 import { ReactNodeLike } from 'prop-types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
+import PubSub from 'pubsub-js';
 import { Hypetrain } from '@/components/pinned/hypetrain';
 import { Prediction } from '@/components/pinned/prediction';
 import { Poll } from '@/components/pinned/poll';
 import { Raid } from '@/components/pinned/raid';
 import { Shoutout } from '@/components/pinned/shoutout';
 import { AdBreak } from '@/components/pinned/adbreak';
-import PubSub from 'pubsub-js';
-import { useContext } from 'react';
 import { ConfigContext } from '../../ApplicationContext';
 import { generateGUID } from '@/commons/helper';
 
@@ -450,7 +449,6 @@ export function PinManager() {
           data: {},
         };
         upsertPin(pin);
-        return;
       }
     });
 

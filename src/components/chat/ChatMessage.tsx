@@ -1,10 +1,4 @@
-import { buildEmoteImageUrl } from '../../commons/twitch';
-import classes from './ChatMessage.module.css';
-import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
-import { LoginContext } from '../../commons/login';
 import { useContext, useState, useRef } from 'react';
-import { use7TVUsernameCosmetics } from './use7TVCosmetics';
-import { SevenTVBadgeComponent } from './SevenTVBadge';
 import {
   IconArrowBackUp,
   IconTrash,
@@ -16,6 +10,12 @@ import {
 import { Text, Image, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { useLongPress } from '@uidotdev/usehooks';
+import { buildEmoteImageUrl } from '../../commons/twitch';
+import classes from './ChatMessage.module.css';
+import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
+import { LoginContext } from '../../commons/login';
+import { use7TVUsernameCosmetics } from './use7TVCosmetics';
+import { SevenTVBadgeComponent } from './SevenTVBadge';
 import { TimeoutView, BanView, DeleteMessageView } from './mod/modview';
 import { formatTime, adjustColorForContrast, joinWithSpace } from '../../commons/helper';
 import { ModActions } from './mod/modactions';
@@ -24,6 +24,8 @@ import { ChatEmotes } from '../../commons/emotes';
 import { EmoteComponent } from '../emote/emote';
 import { HeheChatMessage, ParsedMessagePart } from '../../commons/message';
 import { RadialDial } from '../radialdial/RadialDial';
+
+import { SevenTVUserCosmetics } from './7tvcosmetics';
 
 interface ChatMessageProps {
   msg: HeheChatMessage;
@@ -67,7 +69,7 @@ const wordMapper = (
       return (
         <a
           href="#"
-          key={partIndex + '_' + index}
+          key={`${partIndex}_${index}`}
           onClick={(e) => {
             e.preventDefault();
             PubSub.publish('CLIP-CLICK', { clipId });
@@ -78,15 +80,16 @@ const wordMapper = (
       );
     }
     return (
-      <a href={word} key={partIndex + '_' + index} target="_blank">
+      <a href={word} key={`${partIndex}_${index}`} target="_blank" rel="noreferrer">
         {word}
       </a>
     );
-  } else if (word.toLocaleLowerCase().indexOf(login.user?.name || ' ') > -1) {
+  }
+  if (word.toLocaleLowerCase().indexOf(login.user?.name || ' ') > -1) {
     return (
       <Text
         fw={700}
-        key={partIndex + '_' + index}
+        key={`${partIndex}_${index}`}
         className={classes.highlight_name}
         inline
         span
@@ -95,10 +98,11 @@ const wordMapper = (
         {word}
       </Text>
     );
-  } else if (word.startsWith('@')) {
-    return <b key={partIndex + '_' + index}>{word}</b>;
   }
-  return emotes.getEmote(channel, word, partIndex + '_' + index);
+  if (word.startsWith('@')) {
+    return <b key={`${partIndex}_${index}`}>{word}</b>;
+  }
+  return emotes.getEmote(channel, word, `${partIndex}_${index}`);
 };
 
 export function parsedPartsToHtml(
@@ -141,14 +145,14 @@ export function parsedPartsToHtml(
                 key={partIndex}
                 src={cheerEmote.url}
               />
-              <span key={partIndex + '_amount'} style={{ color: cheerEmote.color }}>
+              <span key={`${partIndex}_amount`} style={{ color: cheerEmote.color }}>
                 {' '}
                 {part.cheermote?.bits}
               </span>
             </span>
           );
         }
-        return part.cheermote?.prefix + '0';
+        return `${part.cheermote?.prefix}0`;
       }
       case 'text':
         return joinWithSpace(
@@ -196,8 +200,6 @@ const predictionBadgeIndex = ['predictions'].reduce((obj: any, key: string) => {
 }, {});
 
 const badgeIndex = { ...importantBadgeIndex, ...subscriberBadgeIndex, ...predictionBadgeIndex };
-
-import { SevenTVUserCosmetics } from './7tvcosmetics';
 
 function getPrioritizedBadges(
   config: Config,

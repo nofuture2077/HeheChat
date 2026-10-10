@@ -178,10 +178,9 @@ export async function getUserdata(context: LoginContext, usernames: string[]) {
     // Ensure users is an array before using toMap
     if (Array.isArray(users) && users.length > 0) {
       return toMap(users, (u) => u.user.name);
-    } else {
-      console.warn('No users found or empty array returned for usernames:', usernames);
-      return new Map();
     }
+    console.warn('No users found or empty array returned for usernames:', usernames);
+    return new Map();
   } catch (error: any) {
     if (!handleUnauthorized(error?.statusCode)) console.error('Error fetching user data:', error);
     return new Map();

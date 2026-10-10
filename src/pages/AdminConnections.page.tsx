@@ -257,40 +257,38 @@ export function AdminConnectionsPage() {
     connected: boolean,
     channel: string,
     Comp: React.ComponentType<React.ComponentProps<'svg'>>
-  ) => {
-    return (
-      <Tooltip
-        label={connected ? `${name}: Connected (${channel})` : `${name}: Not Connected`}
-        position="top"
-        withArrow
+  ) => (
+    <Tooltip
+      label={connected ? `${name}: Connected (${channel})` : `${name}: Not Connected`}
+      position="top"
+      withArrow
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 36,
+          height: 36,
+          borderRadius: '8px',
+          border: '1px solid',
+          borderColor: connected ? 'var(--mantine-color-default-border)' : 'transparent',
+          backgroundColor: connected ? 'var(--mantine-color-default-hover)' : 'transparent',
+          opacity: connected ? 1 : 0.25,
+          transition: 'all 0.2s ease',
+        }}
       >
-        <div
+        <Comp
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: 36,
-            height: 36,
-            borderRadius: '8px',
-            border: '1px solid',
-            borderColor: connected ? 'var(--mantine-color-default-border)' : 'transparent',
-            backgroundColor: connected ? 'var(--mantine-color-default-hover)' : 'transparent',
-            opacity: connected ? 1 : 0.25,
-            transition: 'all 0.2s ease',
+            width: 20,
+            height: 20,
+            color: 'var(--mantine-color-text)',
+            objectFit: 'contain',
           }}
-        >
-          <Comp
-            style={{
-              width: 20,
-              height: 20,
-              color: 'var(--mantine-color-text)',
-              objectFit: 'contain',
-            }}
-          />
-        </div>
-      </Tooltip>
-    );
-  };
+        />
+      </div>
+    </Tooltip>
+  );
 
   // Group connections by userName
   const groupedUsersMap: Record<string, GroupedUser> = {};

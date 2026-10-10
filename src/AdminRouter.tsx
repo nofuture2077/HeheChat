@@ -1,12 +1,3 @@
-import { AdminHomePage } from './pages/AdminHome.page';
-import { AdminConnectionsPage } from './pages/AdminConnections.page';
-import { AdminChannelManagementPage } from './pages/AdminChannelManagement.page';
-import { AdminAnalyticsPage } from './pages/AdminAnalytics.page';
-import { AdminNewsPage } from './pages/AdminNews.page';
-import { AdminPremiumPage } from './pages/AdminPremium.page';
-import { AdminAlertsPage } from './pages/AdminAlerts.page';
-import { AdminDashboardPage } from './pages/AdminDashboard.page';
-import { LoginContextContext } from './ApplicationContext';
 import { useContext, useState } from 'react';
 import { AppShell, Burger, Group, NavLink, Text } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -19,6 +10,15 @@ import {
   IconSettings,
   IconBell,
 } from '@tabler/icons-react';
+import { AdminHomePage } from './pages/AdminHome.page';
+import { AdminConnectionsPage } from './pages/AdminConnections.page';
+import { AdminChannelManagementPage } from './pages/AdminChannelManagement.page';
+import { AdminAnalyticsPage } from './pages/AdminAnalytics.page';
+import { AdminNewsPage } from './pages/AdminNews.page';
+import { AdminPremiumPage } from './pages/AdminPremium.page';
+import { AdminAlertsPage } from './pages/AdminAlerts.page';
+import { AdminDashboardPage } from './pages/AdminDashboard.page';
+import { LoginContextContext } from './ApplicationContext';
 import { HeaderLogo } from './components/header/HeaderLogo';
 
 const NAV_GROUPS = [
@@ -56,7 +56,7 @@ export function AdminRouter() {
 
   // Check if user is admin
   if (!loginContext.isAdmin || !loginContext.isAdmin()) {
-    return <AdminHomePage showAccessDenied={true} />;
+    return <AdminHomePage showAccessDenied />;
   }
 
   const renderContent = () => {

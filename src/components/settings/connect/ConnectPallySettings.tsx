@@ -11,7 +11,7 @@ export function ConnectPallySettings() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(import.meta.env.VITE_BACKEND_URL + '/pallygg/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/pallygg/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.apikey) {
@@ -27,13 +27,9 @@ export function ConnectPallySettings() {
     setLoading(true);
     try {
       await fetch(
-        import.meta.env.VITE_BACKEND_URL +
-          '/pallygg/set?state=' +
-          state +
-          '&apikey=' +
-          apiKey +
-          '&channel=' +
+        `${import.meta.env.VITE_BACKEND_URL}/pallygg/set?state=${state}&apikey=${apiKey}&channel=${
           channel
+        }`
       );
       setConnected(true);
     } catch (error) {
@@ -48,7 +44,7 @@ export function ConnectPallySettings() {
     setLoading(true);
     try {
       await fetch(
-        import.meta.env.VITE_BACKEND_URL + '/pallygg/set?state=' + state + '&apikey=&channel='
+        `${import.meta.env.VITE_BACKEND_URL}/pallygg/set?state=${state}&apikey=&channel=`
       );
       setApiKey('');
       setChannel('');

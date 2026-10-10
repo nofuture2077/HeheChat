@@ -1,6 +1,5 @@
 import { useContext, useEffect, useRef, useState, useCallback } from 'react';
-import { ConfigContext } from '../../ApplicationContext';
-import { LoginContextContext } from '../../ApplicationContext';
+import { ConfigContext, LoginContextContext } from '../../ApplicationContext';
 import { useViewportWidthCallback } from '../../commons/helper';
 
 // Twitch Player Types
@@ -173,7 +172,7 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
 
         // Hide viewer count bar if needed
         const style = document.createElement('style');
-        style.textContent = `.tw-card-body { display: none !important; }`;
+        style.textContent = '.tw-card-body { display: none !important; }';
         document.head.appendChild(style);
       });
     };
@@ -256,13 +255,14 @@ export function TwitchPlayer(props: TwitchPlayerProps) {
   };
 
   // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (touchTimeout) {
         clearTimeout(touchTimeout);
       }
-    };
-  }, [touchTimeout]);
+    },
+    [touchTimeout]
+  );
 
   if (!channel) return null;
 

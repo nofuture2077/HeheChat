@@ -1,14 +1,6 @@
 import { useContext, useState, useEffect, useMemo } from 'react';
-import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
-import {
-  postSwitcherScene,
-  postStreamStart,
-  postStreamStop,
-  getSwitcherScenes,
-} from '@/api/switcher';
 import { notifications } from '@mantine/notifications';
 import PubSub from 'pubsub-js';
-import { ChannelPicker } from './ChannelPicker';
 import {
   Textarea,
   ActionIcon,
@@ -21,8 +13,16 @@ import {
   Button,
   Group,
 } from '@mantine/core';
-import { EmoteGrid } from './EmoteGrid';
 import { IconSend, IconX, IconSticker } from '@tabler/icons-react';
+import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
+import {
+  postSwitcherScene,
+  postStreamStart,
+  postStreamStop,
+  getSwitcherScenes,
+} from '@/api/switcher';
+import { ChannelPicker } from './ChannelPicker';
+import { EmoteGrid } from './EmoteGrid';
 import { HeheChatMessage } from '../../commons/message';
 import { ChatMessageComp } from './ChatMessage';
 import classes from './ChatMessage.module.css';
@@ -134,13 +134,10 @@ export function ChatInput(props: ChatInputProps) {
 
   const loginContext = useContext(LoginContextContext);
 
-  const isBroadcaster = (channelId: string) => {
-    return loginContext.user?.id === channelId;
-  };
+  const isBroadcaster = (channelId: string) => loginContext.user?.id === channelId;
 
-  const isModerator = (channelname: string) => {
-    return loginContext.moderatedChannels.map((ch) => ch.id).includes(channelname);
-  };
+  const isModerator = (channelname: string) =>
+    loginContext.moderatedChannels.map((ch) => ch.id).includes(channelname);
 
   const executeCommand = async (command: string) => {
     const [cmd, ...args] = command.slice(1).split(' ');
@@ -319,7 +316,7 @@ export function ChatInput(props: ChatInputProps) {
       if (currentWord === '@' || currentWord.endsWith('@')) {
         return props.usernames
           .slice(0, 5)
-          .map((username) => ({ value: '@' + username, label: '@' + username }));
+          .map((username) => ({ value: `@${username}`, label: `@${username}` }));
       }
 
       // Otherwise filter based on text after @
@@ -327,7 +324,7 @@ export function ChatInput(props: ChatInputProps) {
       return props.usernames
         .filter((username) => username.toLowerCase().includes(filterText.toLowerCase()))
         .slice(0, 5)
-        .map((username) => ({ value: '@' + username, label: '@' + username }));
+        .map((username) => ({ value: `@${username}`, label: `@${username}` }));
     }
 
     // Handle username autocomplete for commands that expect usernames
@@ -366,7 +363,7 @@ export function ChatInput(props: ChatInputProps) {
       const filter = inputText.slice('/scene '.length).toLowerCase();
       return sceneList
         .filter((s) => s.toLowerCase().includes(filter))
-        .map((s) => ({ value: '/scene ' + s, label: s }));
+        .map((s) => ({ value: `/scene ${s}`, label: s }));
     }
 
     return [];
@@ -393,17 +390,17 @@ export function ChatInput(props: ChatInputProps) {
       if (currentWord.length > 0) {
         // Replace the current word
         words[words.length - 1] = emoteName;
-        setInputText(words.join(' ') + ' ');
+        setInputText(`${words.join(' ')} `);
       } else {
         // Just append the emote
-        setInputText(inputText + emoteName + ' ');
+        setInputText(`${inputText + emoteName} `);
       }
       setIsEmoteGridOpen(false);
     } else {
       // When typing, replace the current word
       const words = inputText.split(' ');
       words[words.length - 1] = emoteName;
-      setInputText(words.join(' ') + ' ');
+      setInputText(`${words.join(' ')} `);
     }
   };
 
@@ -434,7 +431,7 @@ export function ChatInput(props: ChatInputProps) {
           msg={props.replyToMsg}
           openModView={() => {}}
           moderatedChannel={{}}
-          hideReply={true}
+          hideReply
           deletedMessages={{}}
           setReplyMsg={props.setReplyMsg}
           modActions={props.modActions}
@@ -470,7 +467,7 @@ export function ChatInput(props: ChatInputProps) {
           </Group>
         </Alert>
       )}
-      <Flex justify="space-between" gap={'md'} align="center" m="6px 12px 22px 12px">
+      <Flex justify="space-between" gap="md" align="center" m="6px 12px 22px 12px">
         <Combobox
           store={combobox}
           classNames={{ dropdown: inputClasses.comboboxDropdown }}
@@ -487,9 +484,9 @@ export function ChatInput(props: ChatInputProps) {
             // Replace only the last word with the selected value and add a space
             if (words.length > 1) {
               words[words.length - 1] = value;
-              setInputText(words.join(' ') + ' ');
+              setInputText(`${words.join(' ')} `);
             } else {
-              setInputText(value + ' ');
+              setInputText(`${value} `);
             }
 
             combobox.closeDropdown();
@@ -518,8 +515,8 @@ export function ChatInput(props: ChatInputProps) {
               maxRows={3}
               placeholder={
                 props.replyToMsg
-                  ? 'Reply to ' + props.replyToMsg.userInfo.displayName + ' in ' + chatChannel
-                  : 'Chat in ' + chatChannel
+                  ? `Reply to ${props.replyToMsg.userInfo.displayName} in ${chatChannel}`
+                  : `Chat in ${chatChannel}`
               }
               rightSectionWidth={90}
               leftSectionWidth={44}
@@ -527,13 +524,13 @@ export function ChatInput(props: ChatInputProps) {
                 if (event.key === 'Enter') {
                   // If combobox is open with exactly one option, select it
                   if (combobox.dropdownOpened && filtered.length === 1 && !filtered[0].disabled) {
-                    const value = filtered[0].value;
+                    const { value } = filtered[0];
                     const words = inputText.split(' ');
                     if (words.length > 1) {
                       words[words.length - 1] = value;
-                      setInputText(words.join(' ') + ' ');
+                      setInputText(`${words.join(' ')} `);
                     } else {
-                      setInputText(value + ' ');
+                      setInputText(`${value} `);
                     }
                     combobox.closeDropdown();
                     event.preventDefault();

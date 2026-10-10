@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useState, useRef } from 'react';
-import styles from './RadialDial.module.css';
 import { ActionIcon } from '@mantine/core';
+import styles from './RadialDial.module.css';
 
 export interface RadialAction {
   icon: React.ReactNode;
@@ -49,7 +49,7 @@ export const RadialDial: React.FC<RadialDialProps> = ({
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
 
-      const distance = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
+      const distance = Math.sqrt((clientX - centerX) ** 2 + (clientY - centerY) ** 2);
 
       if (distance < rect.width / 2) {
         setHoveredIndex(i);

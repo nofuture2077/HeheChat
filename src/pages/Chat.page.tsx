@@ -1,13 +1,5 @@
 import { useState, useEffect, useRef, useContext, useCallback, useMemo } from 'react';
 import {
-  ChatEmotesContext,
-  ConfigContext,
-  LoginContextContext,
-  ProfileContext,
-  PremiumContext,
-  MusicContext,
-} from '../ApplicationContext';
-import {
   useViewportSize,
   useDisclosure,
   useForceUpdate,
@@ -26,6 +18,7 @@ import {
   ActionIcon,
   Text,
   useComputedColorScheme,
+  AppShell,
 } from '@mantine/core';
 import {
   IconAlertTriangle,
@@ -41,11 +34,21 @@ import {
 } from '@tabler/icons-react';
 import PubSub from 'pubsub-js';
 import { notifications } from '@mantine/notifications';
+import { HelixModeratedChannel } from '@twurple/api';
+import { ReactComponentLike } from 'prop-types';
+import { getRawData } from '@twurple/common';
+import {
+  ChatEmotesContext,
+  ConfigContext,
+  LoginContextContext,
+  ProfileContext,
+  PremiumContext,
+  MusicContext,
+} from '../ApplicationContext';
 import { Chat } from '../components/chat/Chat';
 import { MobileAppPrompt } from '../components/chat/MobileAppPrompt';
 import { ShortcutView } from '../components/shortcuts/ShortcutView';
 import { MusicPlayerBar } from '../components/music/MusicPlayerBar';
-import { AppShell } from '@mantine/core';
 import { Header } from '../components/header/Header';
 import { ConnectionStatusBanner } from '../components/header/ConnectionStatusBanner';
 import { HeaderLogo } from '../components/header/HeaderLogo';
@@ -53,11 +56,9 @@ import { EventDrawer } from '../components/events/eventdrawer';
 import { RecentEventsPanel } from '../components/events/recenteventspanel';
 import { ChatInput } from '../components/chat/ChatInput';
 import { StreamStatusBar } from '../components/switcher/StreamStatusBar';
-import { HelixModeratedChannel } from '@twurple/api';
 import { SettingsDrawer, SettingsTab } from '../components/settings/settings';
 import { handleUnauthorized } from '../commons/login';
 import { PremiumDrawer } from '../components/premium/DonationPremium';
-import { ReactComponentLike } from 'prop-types';
 import { ModDrawer } from '../components/chat/mod/modview';
 import { MassBanDrawer } from '../components/chat/mod/massban';
 import {
@@ -69,9 +70,9 @@ import {
   shouldReadMessage,
   ttsSpamTracker,
 } from '../commons/message';
-import { EventType, EventTypeMapping } from '../commons/events';
+import { EventType, EventTypeMapping, Event } from '../commons/events';
 import { TwitchDrawer } from '../components/twitch/twitchview';
-import { TwitchPlayer } from '../components/twitch/twitchplayer';
+import { TwitchPlayer, getDimension } from '../components/twitch/twitchplayer';
 import { TwitchClipsPlayer } from '../components/twitch/twitchclipsplayer';
 import {
   ModActions,
@@ -92,14 +93,10 @@ import { EventStorage, EventData } from '../components/events/eventstorage';
 import { AlertSystem } from '../components/alerts/alertplayer';
 import { AlertStatusIndicator } from '../components/alerts/AlertStatusIndicator';
 import { ReloadAlertsButton } from '../components/alerts/ReloadAlertsButton';
-import { toMap } from '../commons/helper';
-import { Event } from '../commons/events';
+import { toMap, useViewportWidthCallback } from '../commons/helper';
 import { UserCardDrawer } from '../components/login/usercard';
 import { PinManager } from '../components/pinned/pinmanager';
-import { useViewportWidthCallback } from '../commons/helper';
-import { getDimension } from '../components/twitch/twitchplayer';
 import { EmoteStore } from '../components/chat/emotestorage';
-import { getRawData } from '@twurple/common';
 import { NewsDisplay } from '../components/news/NewsDisplay';
 import classes from './chat.module.css';
 import { version } from '../../package.json';
@@ -312,7 +309,7 @@ export function ChatPage() {
         setDeletedMessages((dM) => dM.concat(msgId));
       }
       if (data.eventtype === 'timeout' || data.eventtype === 'ban') {
-        const username = data.username;
+        const { username } = data;
         const messagesToDelete = chatMessages
           // @ts-ignore
           .filter((m) => m._prefix?.user === username)
@@ -424,7 +421,7 @@ export function ChatPage() {
         // Check each connection (profile)
         Object.entries(userConnections).forEach(([connectionId, profileConnection]) => {
           // Check if this profile has Browsersource connections
-          if (profileConnection.sources && profileConnection.sources['Browsersource']) {
+          if (profileConnection.sources && profileConnection.sources.Browsersource) {
             if (connectionId === profile.guid) {
               hasBrowserSourceForCurrentProfile = true;
               browserSourceConnectionsCount = 1; // Each connection represents one browsersource
@@ -437,7 +434,7 @@ export function ChatPage() {
           if (
             connectionId === profile.guid &&
             profileConnection.sources &&
-            profileConnection.sources['ReplayApp']
+            profileConnection.sources.ReplayApp
           ) {
             replayAppConnectionsCount = 1; // Each connection represents one replayapp
           }
@@ -554,7 +551,7 @@ export function ChatPage() {
             channel: message.target.slice(1),
             username: data.username,
             eventtype: 'tts',
-            date: date,
+            date,
             text: JSON.stringify({
               text: {
                 parts: message.parts,
@@ -785,11 +782,12 @@ export function ChatPage() {
   ]);
 
   // Cleanup unplayed events banner timer on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (unplayedBannerTimerRef.current) clearTimeout(unplayedBannerTimerRef.current);
-    };
-  }, []);
+    },
+    []
+  );
 
   const handleUnplayedBannerClick = useCallback(() => {
     setShowUnplayedBanner(false);
@@ -963,7 +961,7 @@ export function ChatPage() {
             <TwitchClipsPlayer clipId={currentClipId} onClose={() => setCurrentClipId(null)} />
           ) : config.showVideo ? (
             <TwitchPlayer
-              fullSize={true}
+              fullSize
               customWidth={width - chatWidth}
               customHeight={height}
               muted={false}
@@ -1107,7 +1105,7 @@ export function ChatPage() {
                     onClick={scrollToBottom}
                     leftSection={<IconMessagePause size={14} />}
                     variant="gradient"
-                    radius={'lg'}
+                    radius="lg"
                     className="glass-pink-button"
                   >
                     New Messages
@@ -1297,7 +1295,7 @@ export function ChatPage() {
               onClick={scrollToBottom}
               leftSection={<IconMessagePause />}
               variant="gradient"
-              radius={'lg'}
+              radius="lg"
               className="glass-pink-button"
             >
               New Messages

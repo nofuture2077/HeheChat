@@ -1,5 +1,4 @@
 import { useContext, useState } from 'react';
-import { ChatEmotesContext, ProfileContext } from '@/ApplicationContext';
 import {
   AvatarGroup,
   Avatar,
@@ -14,7 +13,6 @@ import {
   Button,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { Profile } from '@/commons/profile';
 import { IconPlus } from '@tabler/icons-react';
 import {
   DragDropContext,
@@ -24,6 +22,8 @@ import {
   DraggableProvided,
   DropResult,
 } from '@hello-pangea/dnd';
+import { Profile } from '@/commons/profile';
+import { ChatEmotesContext, ProfileContext } from '@/ApplicationContext';
 import classes from './profilebar.module.css';
 import { ChatEmotes } from '@/commons/emotes';
 
@@ -130,7 +130,7 @@ function ProfileComp(
       {...provided.draggableProps}
       {...provided.dragHandleProps}
       className={[classes.profile, isActive ? classes.active : undefined].join(' ')}
-      key={'profile-' + profile.guid}
+      key={`profile-${profile.guid}`}
       shadow="xs"
       pt="xs"
       pb="xs"
@@ -166,8 +166,8 @@ export function CreateProfileView(props: { activeProfile: Profile; close: () => 
   const error = !props.activeProfile.checkProfileName(profileName);
 
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
-      <Fieldset legend={'Create new Profile'}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
+      <Fieldset legend="Create new Profile">
         <TextInput
           label="Profilename"
           placeholder=""

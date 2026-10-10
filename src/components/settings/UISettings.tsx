@@ -10,10 +10,10 @@ import {
   Select,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ColorSchemeToggle } from '../colorscheme/colorscheme';
 import { useContext, useState } from 'react';
-import { ConfigContext, ProfileContext } from '@/ApplicationContext';
 import { IconTrash, IconPencil, IconReload, IconCopy } from '@tabler/icons-react';
+import { ColorSchemeToggle } from '../colorscheme/colorscheme';
+import { ConfigContext, ProfileContext } from '@/ApplicationContext';
 import { Profile } from '@/commons/profile';
 
 export interface UISettingProperties {
@@ -27,7 +27,7 @@ export function UISettings(props: UISettingProperties) {
   const [confirmDeleteOpen, confirmDeleteHandler] = useDisclosure(false);
   const [renameOpen, renameHandler] = useDisclosure(false);
   const [cloneOpen, cloneHandler] = useDisclosure(false);
-  const marks = [14, 18, 22, 26].map((x) => ({ value: x, label: x + 'px' }));
+  const marks = [14, 18, 22, 26].map((x) => ({ value: x, label: `${x}px` }));
   return (
     <Stack mt={30} mb={30} gap={30}>
       <Fieldset legend="Hehechat" variant="filled">
@@ -126,7 +126,7 @@ export function ConfirmProfileDeleteView(props: {
   confirm: () => void;
 }) {
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
       <Fieldset legend={props.title}>
         <Group justify="space-around" mt="md">
           <Button onClick={props.close}>Cancel</Button>
@@ -144,8 +144,8 @@ export function RenameProfileView(props: { profile: Profile; close: () => void }
   const error = !props.profile.checkProfileName(profileName);
 
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
-      <Fieldset legend={'Rename Profile'}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
+      <Fieldset legend="Rename Profile">
         <TextInput
           label="Profilename"
           placeholder=""
@@ -181,8 +181,8 @@ export function CloneProfileView(props: { profile: Profile; close: () => void })
   const error = !props.profile.checkProfileName(profileName);
 
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
-      <Fieldset legend={'Clone Profile'}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
+      <Fieldset legend="Clone Profile">
         <TextInput
           label="Profilename"
           placeholder=""

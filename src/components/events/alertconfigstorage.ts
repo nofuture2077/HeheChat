@@ -27,14 +27,12 @@ export class AlertConfigStorage {
       const state = localStorage.getItem('hehe-token_state') || '';
       const sink = localStorage.getItem('hehe-sink') || '';
       const response = await fetch(
-        this.baseUrl +
-          '/event/config/meta?' +
-          [
-            ['channels', channel].join('='),
-            ['state', state].join('='),
-            ['sink', sink].join('='),
-            ['t', Date.now()].join('='),
-          ].join('&')
+        `${this.baseUrl}/event/config/meta?${[
+          ['channels', channel].join('='),
+          ['state', state].join('='),
+          ['sink', sink].join('='),
+          ['t', Date.now()].join('='),
+        ].join('&')}`
       );
       if (!response.ok) throw new Error('Failed to fetch config meta');
       return await response.json().then((r) => r[channel]);
@@ -49,14 +47,12 @@ export class AlertConfigStorage {
       const state = localStorage.getItem('hehe-token_state') || '';
       const sink = localStorage.getItem('hehe-sink') || '';
       const response = await fetch(
-        this.baseUrl +
-          '/event/config?' +
-          [
-            ['channel', channel].join('='),
-            ['state', state].join('='),
-            ['sink', sink].join('='),
-            ['t', Date.now()].join('='),
-          ].join('&')
+        `${this.baseUrl}/event/config?${[
+          ['channel', channel].join('='),
+          ['state', state].join('='),
+          ['sink', sink].join('='),
+          ['t', Date.now()].join('='),
+        ].join('&')}`
       );
       if (!response.ok) throw new Error('Failed to fetch full config');
       return await response.json();
@@ -72,7 +68,7 @@ export class AlertConfigStorage {
       return new Promise((resolve, reject) => {
         const request = store.get(channel);
         request.onsuccess = () => {
-          const result = request.result;
+          const { result } = request;
           if (!result) return resolve(null);
           // Return just the config and meta parts
           const { config, meta } = result;

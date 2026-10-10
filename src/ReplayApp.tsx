@@ -32,10 +32,10 @@ export default function ReplayApp({ token }: ReplayAppProps) {
     );
 
     backendWorkerRef.current.onmessage = (event) => {
-      const data = event.data;
+      const { data } = event;
 
       if (data.type === 'sharedata') {
-        const profile: Profile = data.profile;
+        const { profile } = data;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
 
@@ -55,7 +55,7 @@ export default function ReplayApp({ token }: ReplayAppProps) {
       }
 
       if (data.type === 'profile') {
-        const profile = data.profile;
+        const { profile } = data;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
       }

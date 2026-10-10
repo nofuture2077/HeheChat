@@ -1,9 +1,9 @@
 import { Stack, Fieldset, TagsInput, Alert, Text } from '@mantine/core';
 import { useContext, useMemo } from 'react';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { ConfigContext } from '@/ApplicationContext';
 import { ColorSchemeToggle } from '../../colorscheme/colorscheme';
 import { useChannels } from '@/hooks/useChannels';
-import { IconInfoCircle } from '@tabler/icons-react';
 
 export function GeneralUISettings() {
   const config = useContext(ConfigContext);

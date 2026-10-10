@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import { AlertSystem } from './alertplayer';
+import { useEffect, useState, useContext } from 'react';
 import { Button } from '@mantine/core';
-import { useContext } from 'react';
-import { ConfigContext } from '@/ApplicationContext';
 import { IconRefresh } from '@tabler/icons-react';
+import { AlertSystem } from './alertplayer';
+import { ConfigContext } from '@/ApplicationContext';
 
 export function ReloadAlertsButton({ onActivate }: { onActivate?: () => void } = {}) {
   const [isAlertSystemRunning, setIsAlertSystemRunning] = useState<boolean>(AlertSystem.status());

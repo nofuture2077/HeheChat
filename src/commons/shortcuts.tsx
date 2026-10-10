@@ -1,5 +1,5 @@
-import { Config } from './config';
 import PubSub from 'pubsub-js';
+import { Config } from './config';
 import { postSwitcherScene } from '@/api/switcher';
 
 export type ShortCutType = 'clip' | 'marker' | 'chat' | 'adbreak' | 'toggle' | 'scene';

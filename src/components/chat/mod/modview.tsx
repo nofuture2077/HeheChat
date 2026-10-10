@@ -1,4 +1,3 @@
-import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
 import { useContext, useEffect, useState, useRef, useMemo, type ReactElement } from 'react';
 import {
   Avatar,
@@ -14,6 +13,9 @@ import {
   Image,
 } from '@mantine/core';
 import { IconArrowsRight, IconX } from '@tabler/icons-react';
+import { HelixStream } from '@twurple/api';
+import _ from 'underscore';
+import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
 import { OverlayDrawer } from '../../../pages/Chat.page';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../../ApplicationContext';
 import {
@@ -28,8 +30,6 @@ import styles from './modview.module.css';
 import { formatDate, formatDuration, formatDateWithTime } from '../../../commons/helper';
 import { ChannelPicker } from '../ChannelPicker';
 import { ChatMessageComp } from '../ChatMessage';
-import { HelixStream } from '@twurple/api';
-import _ from 'underscore';
 
 export const ModDrawer: OverlayDrawer = {
   name: 'mod',
@@ -56,15 +56,14 @@ function formatBanMessage(userInfo: any, username: string): string | null {
   if (endDate) {
     const duration = endDate.getTime() - banDate.getTime();
     return `${username} was timeouted by ${moderator} for ${formatDuration(duration)} (until ${formatDate(endDate)} ${formatDateWithTime(endDate)})`;
-  } else {
-    return `${username} was banned by ${moderator} on ${formatDate(banDate)} ${formatDateWithTime(banDate)}`;
   }
+  return `${username} was banned by ${moderator} on ${formatDate(banDate)} ${formatDateWithTime(banDate)}`;
 }
 
 export function ModView(props: ModViewProps) {
-  const channel = props.channel;
-  const channelId = props.channelId;
-  const username = props.username;
+  const { channel } = props;
+  const { channelId } = props;
+  const { username } = props;
 
   const [userInfo, setUserInfo] = useState<any>(undefined);
   const [showTimeoutModal, setShowTimeoutModal] = useState(false);
@@ -88,13 +87,15 @@ export function ModView(props: ModViewProps) {
   const banMessage = formatBanMessage(userInfo, username);
 
   // Memoize messages to prevent unnecessary re-sorting on every render
-  const messages = useMemo(() => {
-    return (userInfo?.messages || []).slice().reverse();
-  }, [userInfo?.messages]);
+  const messages = useMemo(
+    () => (userInfo?.messages || []).slice().reverse(),
+    [userInfo?.messages]
+  );
 
-  const messageGroups = useMemo(() => {
-    return _.groupBy(messages, (msg) => formatDate(new Date(Number(msg.date))));
-  }, [messages]);
+  const messageGroups = useMemo(
+    () => _.groupBy(messages, (msg) => formatDate(new Date(Number(msg.date)))),
+    [messages]
+  );
 
   const reloadUserInfo = () => {
     // Add a small delay to allow backend to process the moderation action
@@ -142,7 +143,7 @@ export function ModView(props: ModViewProps) {
           deletedMessages={{}}
           moderatedChannel={{}}
           setReplyMsg={() => {}}
-          hideReply={true}
+          hideReply
           openModView={() => {}}
           modActions={modActions}
         />
@@ -176,7 +177,7 @@ export function ModView(props: ModViewProps) {
           {followDate ? <p className={styles.follow}>Followed since {followDate}</p> : <p></p>}
           <p className={styles.createdAt}>
             {userInfo?.user?.created_at
-              ? 'Account created on ' + formatDate(new Date(userInfo.user.created_at))
+              ? `Account created on ${formatDate(new Date(userInfo.user.created_at))}`
               : ''}
           </p>
         </Stack>
@@ -328,7 +329,7 @@ export function TimeoutView(props: {
   const [duration, setDuration] = useState<number>(600);
 
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
       <Fieldset legend={['Timeout', props.userName, 'in', props.channelName].join(' ')}>
         <Group justify="center">
           <GradientSegmentedControl
@@ -376,7 +377,7 @@ export function BanView(props: {
   const [reason, setReason] = useState('');
 
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
       <Fieldset legend={['Ban', props.userName, 'in', props.channelName].join(' ')}>
         <TextInput
           label="Reason"
@@ -411,7 +412,7 @@ export function DeleteMessageView(props: {
   close: () => void;
 }): ReactElement {
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
       <Fieldset legend={['Delete message from', props.userName, 'in', props.channelName].join(' ')}>
         <Text size="sm" c="dimmed" mb="md">
           "{props.messageText}"
@@ -460,8 +461,8 @@ export function RaidView(props: {
   }, [raidTo]);
 
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
-      <Fieldset legend={'Raid channel'}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
+      <Fieldset legend="Raid channel">
         <Group justify="space-between" mt="md">
           <Stack align="center" w="35%">
             <ChannelPicker

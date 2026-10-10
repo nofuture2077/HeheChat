@@ -1,7 +1,7 @@
-import classes from './ChatMessageBrowserSource.module.css';
-import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { memo, useContext } from 'react';
 import { Image } from '@mantine/core';
+import classes from './ChatMessageBrowserSource.module.css';
+import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import { use7TVUsernameCosmetics } from './use7TVCosmetics';
 import { SevenTVBadgeComponent } from './SevenTVBadge';
 import { adjustColorForContrast } from '../../commons/helper';
@@ -126,10 +126,7 @@ interface Props {
   hideHeheBadges?: boolean;
 }
 
-export const ChatMessageBrowserSource = memo(function ChatMessageBrowserSource({
-  msg,
-  hideHeheBadges,
-}: Props) {
+export const ChatMessageBrowserSource = memo(({ msg, hideHeheBadges }: Props) => {
   const config = useContext(ConfigContext);
   const emotes = useContext(ChatEmotesContext);
   const login = useContext(LoginContextContext);

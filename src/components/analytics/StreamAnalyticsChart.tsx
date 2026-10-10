@@ -88,22 +88,21 @@ export function StreamAnalyticsChart(props: {
         minute: '2-digit',
         hour12: false,
       });
-    } else {
-      // For longer streams, show date and hour
-      return date.toLocaleString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        hour12: false,
-      });
     }
+    // For longer streams, show date and hour
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      hour12: false,
+    });
   };
 
   const transformData = (
     rawData: StreamAnalyticsData[],
     streamDuration: number
-  ): ChartDataPoint[] => {
-    return rawData.map((item) => {
+  ): ChartDataPoint[] =>
+    rawData.map((item) => {
       // Convert timestamp to number if it's a string
       const timestamp =
         typeof item.timestamp_minute === 'string'
@@ -123,7 +122,6 @@ export function StreamAnalyticsChart(props: {
         follow_count: item.follow_count,
       };
     });
-  };
 
   const fetchStreams = async (channelName: string) => {
     if (!channelName) return;
@@ -276,7 +274,7 @@ export function StreamAnalyticsChart(props: {
         h={400}
         data={data}
         dataKey="time"
-        withLegend={true}
+        withLegend
         legendProps={{ verticalAlign: 'bottom', height: 50 }}
         withRightYAxis
         yAxisLabel="Viewers / Messages"
@@ -434,15 +432,14 @@ export function StreamAnalyticsChart(props: {
       return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
     };
 
-    const formatDate = (timestamp: number) => {
-      return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+    const formatDate = (timestamp: number) =>
+      new Date(timestamp * 1000).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
       });
-    };
 
     return (
       <Card withBorder mb="md">
@@ -549,14 +546,13 @@ export function StreamAnalyticsChart(props: {
                       ? stream.id.toString()
                       : `active_${stream.start_timestamp}`;
                     const isSelected = selectedStream === streamId;
-                    const formatDate = (timestamp: number) => {
-                      return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+                    const formatDate = (timestamp: number) =>
+                      new Date(timestamp * 1000).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
                       });
-                    };
 
                     return (
                       <Paper

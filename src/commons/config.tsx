@@ -1,4 +1,4 @@
-import { SystemMessageMainType, SmartFilterConfig } from '../commons/message';
+import { SystemMessageMainType, SmartFilterConfig } from './message';
 import { ShortCut } from './shortcuts';
 
 export const DEFAULT_CHAT_SMART_FILTER: SmartFilterConfig = {
@@ -447,9 +447,7 @@ export const DEFAULT_CONFIG: Config = {
   setShowSubBadges: (value: boolean) => {},
   setShowPredictions: (value: boolean) => {},
   setShowOtherBadges: (value: boolean) => {},
-  getChatChannel: () => {
-    return undefined;
-  },
+  getChatChannel: () => undefined,
   setChatChannel: (channel: string) => {},
   setChatEnabled: (val: boolean) => {},
   setShowVideo: (val: boolean) => {},

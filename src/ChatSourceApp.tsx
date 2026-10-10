@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { MantineProvider } from '@mantine/core';
+import { useDocumentVisibility, useNetwork } from '@mantine/hooks';
+import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { ProfileContext, ChatEmotesContext, ConfigContext } from './ApplicationContext';
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { DEFAULT_CONFIG } from './commons/config';
@@ -19,7 +20,6 @@ import { ChatMessageBrowserSource } from './components/chat/ChatMessageBrowserSo
 import { YTChatMessageBrowserSource } from './components/chat/YTChatMessageBrowserSource';
 import { SystemMessageComp } from './components/chat/systemmessage';
 import { ModActions } from './components/chat/mod/modactions';
-import { useDocumentVisibility, useNetwork } from '@mantine/hooks';
 import { initializeStoragePatches } from './commons/patches';
 import { theme } from './theme';
 import { version } from '../package.json';
@@ -85,7 +85,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
     );
 
     backendWorkerRef.current.onmessage = (event) => {
-      const data = event.data;
+      const { data } = event;
 
       if (data.type === 'profile') {
         const p: Profile = data.profile;
@@ -174,7 +174,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
     const cfg = profile.config;
     const maxMsg = cfg.chatBsMaxMessages ?? 5;
     const showSystem = cfg.chatBsShowSystem ?? false;
-    const systemMessageInChat = cfg.systemMessageInChat;
+    const { systemMessageInChat } = cfg;
     const lifetime = cfg.chatBsMessageLifetime ?? 15;
 
     const interval = setInterval(() => {
@@ -213,7 +213,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
   const handleAnimationEnd = useCallback((id: string) => {
     setMessages((prev) =>
       prev.filter((m) => {
-        const msgId = isSystemMessageType(m.msg) ? 'system-' + m.msg.id : m.msg.id;
+        const msgId = isSystemMessageType(m.msg) ? `system-${m.msg.id}` : m.msg.id;
         return !(msgId === id && m.exiting);
       })
     );
@@ -267,7 +267,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
   const outAnimation =
     animateOut === 'fade' ? `chatBsFadeOut ${FADE_OUT_MS}ms ease-in forwards` : undefined;
 
-  const fontSize = bsConfig.fontSize;
+  const { fontSize } = bsConfig;
 
   const containerStyle = useMemo<React.CSSProperties>(
     () => ({
@@ -309,7 +309,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
                   const { msg, exiting } = tracked;
                   const isSystem = isSystemMessageType(msg);
                   const isYT = isYTChatMessageType(msg);
-                  const key = isSystem ? 'system-' + msg.id : msg.id;
+                  const key = isSystem ? `system-${msg.id}` : msg.id;
 
                   const wrapperStyle: React.CSSProperties = {
                     flexShrink: 0,

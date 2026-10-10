@@ -30,7 +30,7 @@ class RemoteChatStorage implements ChatStorage {
       params.push(['max', maxMessages.toString()].join('='));
     }
 
-    return fetch(this.baseUrl + '/chat/history?' + params.join('&'))
+    return fetch(`${this.baseUrl}/chat/history?${params.join('&')}`)
       .then((res) => res.json())
       .then((arr) => arr.map((x: any) => x.message));
   }
@@ -45,7 +45,7 @@ class RemoteChatStorage implements ChatStorage {
       ['ignored', (ignoredUsers || []).join(',')].join('='),
       ['since', since.toString()].join('='),
     ];
-    return fetch(this.baseUrl + '/chat/messages?' + params.join('&')).then((res) => res.json());
+    return fetch(`${this.baseUrl}/chat/messages?${params.join('&')}`).then((res) => res.json());
   }
 }
 

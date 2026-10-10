@@ -10,7 +10,7 @@ export function ConnectStreamElementsSettings() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(import.meta.env.VITE_BACKEND_URL + '/streamelements/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/streamelements/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.jwt) {
@@ -25,7 +25,7 @@ export function ConnectStreamElementsSettings() {
     setLoading(true);
     try {
       await fetch(
-        import.meta.env.VITE_BACKEND_URL + '/streamelements/set?state=' + state + '&jwt=' + jwt
+        `${import.meta.env.VITE_BACKEND_URL}/streamelements/set?state=${state}&jwt=${jwt}`
       );
       setConnected(true);
     } catch (error) {
@@ -39,9 +39,7 @@ export function ConnectStreamElementsSettings() {
     if (!confirm('Are you sure you want to disconnect StreamElements?')) return;
     setLoading(true);
     try {
-      await fetch(
-        import.meta.env.VITE_BACKEND_URL + '/streamelements/set?state=' + state + '&jwt='
-      );
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/streamelements/set?state=${state}&jwt=`);
       setJwt('');
       setConnected(false);
     } catch (error) {

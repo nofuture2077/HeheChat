@@ -21,7 +21,7 @@ const CONFIG = {
 // State variables
 let backendWebsocket: WebSocket | undefined;
 let backEndIsReady: (value?: unknown) => void;
-let backendReady = new Promise((resolve) => {
+const backendReady = new Promise((resolve) => {
   backEndIsReady = resolve;
 });
 let initRequest: any | undefined;
@@ -106,7 +106,7 @@ function resetConnectionState() {
  */
 function getReconnectDelay(): number {
   const delay =
-    CONFIG.INITIAL_RECONNECT_DELAY * Math.pow(CONFIG.RECONNECT_BACKOFF_FACTOR, reconnectAttempts);
+    CONFIG.INITIAL_RECONNECT_DELAY * CONFIG.RECONNECT_BACKOFF_FACTOR ** reconnectAttempts;
   return Math.min(delay, CONFIG.MAX_RECONNECT_DELAY);
 }
 

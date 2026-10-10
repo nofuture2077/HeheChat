@@ -9,7 +9,6 @@ import {
   Divider,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import classes from './Header.module.css';
 import {
   IconBrandTwitch,
   IconSettings,
@@ -19,6 +18,7 @@ import {
   IconMusic,
 } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
+import classes from './Header.module.css';
 import {
   ConfigContext,
   ProfileContext,
@@ -235,9 +235,9 @@ export function Header(props: {
               />
               <StatusRow
                 label="7TV"
-                sublabel={'Force Reload'}
-                color={'green'}
-                ok={true}
+                sublabel="Force Reload"
+                color="green"
+                ok
                 loading={reloadingSevenTV}
                 onAction={handleForceSevenTVReload}
                 actionLabel="Force Reload"

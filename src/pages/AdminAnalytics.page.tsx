@@ -247,16 +247,13 @@ export function AdminAnalyticsPage() {
     }
   }, [chatUsersPage]);
 
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat().format(num);
-  };
+  const formatNumber = (num: number) => new Intl.NumberFormat().format(num);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
     }).format(amount);
-  };
 
   const formatDuration = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
@@ -264,9 +261,7 @@ export function AdminAnalyticsPage() {
     return `${hours}h ${minutes}m`;
   };
 
-  const formatTimestamp = (timestamp: number) => {
-    return new Date(timestamp * 1000).toLocaleString();
-  };
+  const formatTimestamp = (timestamp: number) => new Date(timestamp * 1000).toLocaleString();
 
   const getEventTypeIcon = (eventType: string) => {
     switch (eventType) {
@@ -338,7 +333,7 @@ export function AdminAnalyticsPage() {
         </div>
 
         <StreamAnalyticsChart
-          admin={true}
+          admin
           onChannelChange={(channel) => setSelectedChannel(channel)}
           onStreamChange={(streamId, streamData) => {
             setSelectedStreamData(streamData);
@@ -428,12 +423,11 @@ export function AdminAnalyticsPage() {
                   <Stack gap="xs">
                     {(() => {
                       const streamChatUsers = chatUsers
-                        .filter((user) => {
-                          return (
+                        .filter(
+                          (user) =>
                             user.first_message_time >= selectedStreamData.start_timestamp &&
                             user.first_message_time <= selectedStreamData.end_timestamp
-                          );
-                        })
+                        )
                         .sort((a, b) => b.message_count - a.message_count)
                         .slice(0, 7);
 

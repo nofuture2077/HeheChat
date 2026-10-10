@@ -9,14 +9,13 @@ const generateColorFromUsername = (username: string): string => {
 };
 
 // Function to get initials from display name
-const getInitials = (displayName: string): string => {
-  return displayName
+const getInitials = (displayName: string): string =>
+  displayName
     .split(' ')
     .map((word) => word[0])
     .join('')
     .toUpperCase()
     .slice(0, 2);
-};
 
 // Generate profile picture URL with colored background and initials
 export const generateProfilePictureUrl = (username: string, displayName: string): string => {

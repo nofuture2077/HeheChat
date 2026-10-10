@@ -1,12 +1,12 @@
 import { Text, Card, Badge, Group, Progress, ActionIcon } from '@mantine/core';
 import { useState, useEffect, useContext, useRef } from 'react';
 import { useDisclosure } from '@mantine/hooks';
+import { IconEyeOff } from '@tabler/icons-react';
 import { formatMinuteSeconds } from '@/commons/helper';
 import { ChatEmotesContext } from '@/ApplicationContext';
 import pinClasses from './pinmanager.module.css';
 import predictionClasses from './prediction.module.css';
 import { PinProps } from './pinmanager';
-import { IconEyeOff } from '@tabler/icons-react';
 
 interface Outcome {
   title: string;

@@ -1,7 +1,7 @@
 import { Box, Text, Loader, Alert, Button, Group, Badge } from '@mantine/core';
 import { IconRefresh, IconAlertCircle, IconAlertTriangle } from '@tabler/icons-react';
-import { useChannels } from '@/hooks/useChannels';
 import { useContext, useMemo } from 'react';
+import { useChannels } from '@/hooks/useChannels';
 import { ConfigContext } from '@/ApplicationContext';
 
 /**

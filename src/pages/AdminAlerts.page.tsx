@@ -60,9 +60,7 @@ export function AdminAlertsPage() {
   const [limit] = useState(10);
   const [search, setSearch] = useState('');
 
-  const getAdminToken = () => {
-    return localStorage.getItem('hehe-token_state');
-  };
+  const getAdminToken = () => localStorage.getItem('hehe-token_state');
 
   const fetchAlertTokens = async () => {
     const adminToken = getAdminToken();

@@ -74,7 +74,7 @@ export class HeheChatMessage {
   ) {
     this.id = id;
     this.text = text;
-    this.target = target.startsWith('#') ? target : '#' + target;
+    this.target = target.startsWith('#') ? target : `#${target}`;
     this.date = date;
     this.userInfo = userInfo;
     this.parts = parts;
@@ -124,7 +124,7 @@ export class SystemMessage {
     id?: string
   ) {
     this.type = 'system';
-    this.target = '#' + channel;
+    this.target = `#${channel}`;
     this.channelId = channelId;
     this.userId = userId;
     this.id = id || generateGUID();
@@ -201,7 +201,7 @@ export class YTChatMessage {
     this.text = text;
     this.authorName = authorName;
     this.channelId = channelId;
-    this.target = target.startsWith('#') ? target : '#' + target;
+    this.target = target.startsWith('#') ? target : `#${target}`;
     this.date = date;
     this.authorProfileImageUrl = authorProfileImageUrl;
     this.isMembership = isMembership;

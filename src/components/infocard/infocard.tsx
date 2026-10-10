@@ -1,7 +1,7 @@
 import { Group, Text, Card, Skeleton, Stack } from '@mantine/core';
-import classes from './infocard.module.css';
 import { ReactComponentLike, ReactElementLike } from 'prop-types';
 import { useContext } from 'react';
+import classes from './infocard.module.css';
 import { ChatEmotesContext, PremiumContext } from '@/ApplicationContext';
 import { timeSince } from '@/commons/helper';
 import { PremiumStatus } from '../premium';
@@ -24,7 +24,7 @@ export function InfoCard(props: InfoCardProperties) {
     <Group
       className={[classes.card, props.className].join(' ')}
       onClick={props.onClick}
-      gap={'xs'}
+      gap="xs"
       p={10}
       justify="space-between"
       style={{ flexWrap: 'nowrap' }}

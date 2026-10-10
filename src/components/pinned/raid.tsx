@@ -1,11 +1,11 @@
 import { Text, Card, Group, ActionIcon, Button } from '@mantine/core';
 import { useState, useEffect, useContext, useRef } from 'react';
+import { IconEyeOff, IconX } from '@tabler/icons-react';
 import { formatMinuteSeconds } from '@/commons/helper';
 import { ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
 import pinClasses from './pinmanager.module.css';
 import raidClasses from './raid.module.css';
 import { PinProps } from './pinmanager';
-import { IconEyeOff, IconX } from '@tabler/icons-react';
 import { unraid } from '@/components/chat/mod/modactions';
 
 interface RaidProps extends PinProps {

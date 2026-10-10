@@ -1,9 +1,9 @@
 import { useEffect, useState, useContext } from 'react';
+import PubSub from 'pubsub-js';
 import styles from './VisualAlertPlayer.module.css';
 import { VisualAlert, Event } from '@/commons/events';
 import { AlertSystem } from '../alerts/alertplayer';
 import { ChatEmotesContext } from '@/ApplicationContext';
-import PubSub from 'pubsub-js';
 import { ChatEmotes } from '@/commons/emotes';
 import { joinWithSpace } from '../../commons/helper';
 import { EmoteComponentSimple } from '../emote/emote';
@@ -45,7 +45,7 @@ function formatText(text: string, emotes: ChatEmotes, channel: string) {
         const url = word.substring(5);
         return <EmoteComponentSimple imageUrl={url} largeImageUrl={url} name="emote" type="" />;
       }
-      return emotes.checkEmote(channel, word, '' + index, true);
+      return emotes.checkEmote(channel, word, `${index}`, true);
     })
   );
 }
@@ -116,14 +116,11 @@ export default function VisualAlertPlayer() {
     };
   };
 
-  const isVideoMimeType = (mime: string) => {
-    return (
-      mime.startsWith('video/') ||
-      mime === 'video/webm' ||
-      mime === 'video/mp4' ||
-      mime === 'video/ogg'
-    );
-  };
+  const isVideoMimeType = (mime: string) =>
+    mime.startsWith('video/') ||
+    mime === 'video/webm' ||
+    mime === 'video/mp4' ||
+    mime === 'video/ogg';
 
   useEffect(() => {
     let alertTimeoutId: number | undefined;
@@ -221,23 +218,22 @@ export default function VisualAlertPlayer() {
                   muted
                   loop
                   playsInline
-                  key={'video-' + timestamp}
+                  key={`video-${timestamp}`}
                   style={{ backgroundColor: 'transparent' }}
                 />
               );
-            } else {
-              // Extract prefix class from filename for styling (e.g., "48_whatever.jpg" => "prefix-48")
-              const prefixClass = mediaData.selectedFilename ? mediaData.prefixClass || '' : '';
-
-              return (
-                <img
-                  className={`${styles.image} ${prefixClass ? styles[prefixClass] : ''}`}
-                  src={mediaData.src}
-                  alt="Alert"
-                  key={'image-' + timestamp}
-                />
-              );
             }
+            // Extract prefix class from filename for styling (e.g., "48_whatever.jpg" => "prefix-48")
+            const prefixClass = mediaData.selectedFilename ? mediaData.prefixClass || '' : '';
+
+            return (
+              <img
+                className={`${styles.image} ${prefixClass ? styles[prefixClass] : ''}`}
+                src={mediaData.src}
+                alt="Alert"
+                key={`image-${timestamp}`}
+              />
+            );
           })()}
         <div className={styles.text}>
           <p>

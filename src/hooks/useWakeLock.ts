@@ -101,14 +101,15 @@ export function useWakeLock() {
   }, [requestWakeLock]);
 
   // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (wakeLockRef.current) {
         wakeLockRef.current.release();
         wakeLockRef.current = null;
       }
-    };
-  }, []);
+    },
+    []
+  );
 
   return {
     ...state,

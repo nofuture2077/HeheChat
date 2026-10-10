@@ -48,7 +48,7 @@ export function ChatEventsSettings() {
           <Select
             label="Show latest events above chat"
             data={['Off', '2', '3', '4', '5']}
-            value={config.recentEventsCount === 0 ? 'Off' : config.recentEventsCount + ''}
+            value={config.recentEventsCount === 0 ? 'Off' : `${config.recentEventsCount}`}
             onChange={(value) => {
               config.setRecentEventsCount(value === 'Off' ? 0 : Number(value));
               forceUpdate();

@@ -43,44 +43,44 @@ export function ConnectSettings() {
   const state = localStorage.getItem('hehe-token_state') || '';
 
   useEffect(() => {
-    fetch(import.meta.env.VITE_BACKEND_URL + '/pallygg/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/pallygg/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setPallyggApiKey(data.apikey || '');
         setPallyggChannel(data.channel || '');
       });
 
-    fetch(import.meta.env.VITE_BACKEND_URL + '/blerp/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/blerp/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setBlerpKey(data.roomid || '');
       });
 
-    fetch(import.meta.env.VITE_BACKEND_URL + '/soundalerts/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/soundalerts/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setSoundAlertsConnected(!!data.overlay_id);
       });
 
-    fetch(import.meta.env.VITE_BACKEND_URL + '/elevenlabs/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/elevenlabs/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setElevenLabsApiKey(data.apikey || '');
       });
 
-    fetch(import.meta.env.VITE_BACKEND_URL + '/streamelements/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/streamelements/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setStreamelementsJWT(data.jwt || '');
       });
 
-    fetch(import.meta.env.VITE_BACKEND_URL + '/kofi/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/kofi/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setKofiVerificationToken(data.verification_token || '');
       });
 
-    fetch(import.meta.env.VITE_BACKEND_URL + '/kofi/webhook-url?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/kofi/webhook-url?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setKofiWebhookUrl(data.webhook_url || '');
@@ -136,13 +136,9 @@ export function ConnectSettings() {
 
   const updatePallyGG = (apikey: string, channel: string) => {
     fetch(
-      import.meta.env.VITE_BACKEND_URL +
-        '/pallygg/set?state=' +
-        state +
-        '&apikey=' +
-        apikey +
-        '&channel=' +
+      `${import.meta.env.VITE_BACKEND_URL}/pallygg/set?state=${state}&apikey=${apikey}&channel=${
         channel
+      }`
     );
     setPallyggApiKey(apikey || '');
     setPallyggChannel(channel || '');
@@ -150,11 +146,9 @@ export function ConnectSettings() {
 
   const updateSoundAlerts = (url: string) => {
     fetch(
-      import.meta.env.VITE_BACKEND_URL +
-        '/soundalerts/set?state=' +
-        state +
-        '&overlayUrl=' +
-        encodeURIComponent(url)
+      `${import.meta.env.VITE_BACKEND_URL}/soundalerts/set?state=${
+        state
+      }&overlayUrl=${encodeURIComponent(url)}`
     );
     setSoundAlertsUrl(url);
     setSoundAlertsConnected(false);
@@ -162,29 +156,25 @@ export function ConnectSettings() {
 
   const updateBlerp = (input: string) => {
     const roomId = extractBlerpRoom(input);
-    fetch(import.meta.env.VITE_BACKEND_URL + '/blerp/set?state=' + state + '&roomId=' + roomId);
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/blerp/set?state=${state}&roomId=${roomId}`);
     setBlerpKey(roomId || '');
   };
 
   const updateStreamelements = (jwt: string) => {
-    fetch(import.meta.env.VITE_BACKEND_URL + '/streamelements/set?state=' + state + '&jwt=' + jwt);
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/streamelements/set?state=${state}&jwt=${jwt}`);
     setStreamelementsJWT(jwt || '');
   };
 
   const updateElevenLabs = (apikey: string) => {
-    fetch(
-      import.meta.env.VITE_BACKEND_URL + '/elevenlabs/set?state=' + state + '&apikey=' + apikey
-    );
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/elevenlabs/set?state=${state}&apikey=${apikey}`);
     setElevenLabsApiKey(apikey || '');
   };
 
   const updateKofi = (verificationToken: string) => {
     fetch(
-      import.meta.env.VITE_BACKEND_URL +
-        '/kofi/set?state=' +
-        state +
-        '&verification_token=' +
+      `${import.meta.env.VITE_BACKEND_URL}/kofi/set?state=${state}&verification_token=${
         verificationToken
+      }`
     );
     setKofiVerificationToken(verificationToken || '');
   };
@@ -242,10 +232,10 @@ export function ConnectSettings() {
       if (data.success) {
         setYoutubeConnected(true);
       } else {
-        alert('Error connecting: ' + (data.error || 'Unknown error'));
+        alert(`Error connecting: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
-      alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setYoutubeLoading(false);
     }
@@ -274,10 +264,10 @@ export function ConnectSettings() {
         setYoutubeChannelName('');
         alert('YouTube connection disconnected');
       } else {
-        alert('Error disconnecting: ' + (data.error || 'Unknown error'));
+        alert(`Error disconnecting: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
-      alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setYoutubeLoading(false);
     }

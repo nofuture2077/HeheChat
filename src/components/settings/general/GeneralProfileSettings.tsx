@@ -1,7 +1,6 @@
 import { TextInput, Button, ActionIcon, Modal, Fieldset, Group, Stack, Alert } from '@mantine/core';
-import { IconInfoCircle } from '@tabler/icons-react';
+import { IconInfoCircle, IconTrash, IconPencil, IconCopy } from '@tabler/icons-react';
 import { useDisclosure } from '@mantine/hooks';
-import { IconTrash, IconPencil, IconCopy } from '@tabler/icons-react';
 import { useContext, useState } from 'react';
 import { ProfileContext } from '@/ApplicationContext';
 import { Profile } from '@/commons/profile';
@@ -77,7 +76,7 @@ function ConfirmProfileDeleteView(props: {
   confirm: () => void;
 }) {
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
       <Fieldset legend={props.title}>
         <Group justify="space-around" mt="md">
           <Button onClick={props.close}>Cancel</Button>
@@ -95,7 +94,7 @@ function RenameProfileView(props: { profile: Profile; close: () => void }) {
   const error = !props.profile.checkProfileName(profileName);
 
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
       <Fieldset legend="Rename Profile">
         <TextInput
           label="Profilename"
@@ -131,7 +130,7 @@ function CloneProfileView(props: { profile: Profile; close: () => void }) {
   const error = !props.profile.checkProfileName(profileName);
 
   return (
-    <Modal zIndex={400} opened={true} onClose={props.close} withCloseButton={false}>
+    <Modal zIndex={400} opened onClose={props.close} withCloseButton={false}>
       <Fieldset legend="Clone Profile">
         <TextInput
           label="Profilename"

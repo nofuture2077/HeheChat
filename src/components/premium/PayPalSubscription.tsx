@@ -15,7 +15,7 @@ const PayPalButtonPlaceholder: React.FC<{
   const handleClick = () => {
     // Simulate a successful PayPal payment
     const mockDetails = {
-      id: 'PAYID-' + Math.random().toString(36).substr(2, 9),
+      id: `PAYID-${Math.random().toString(36).substr(2, 9)}`,
       status: 'COMPLETED',
       purchase_units: [
         {
@@ -32,7 +32,7 @@ const PayPalButtonPlaceholder: React.FC<{
     };
 
     const mockData = {
-      orderID: 'ORDER-' + Math.random().toString(36).substr(2, 9),
+      orderID: `ORDER-${Math.random().toString(36).substr(2, 9)}`,
     };
 
     onSuccess(mockDetails, mockData);
@@ -77,11 +77,12 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
   const isMounted = useRef(true);
 
   // Set up the cleanup function when component unmounts
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       isMounted.current = false;
-    };
-  }, []);
+    },
+    []
+  );
 
   const handlePayPalSuccess = async (details: any, data: any) => {
     setLoading(true);
@@ -93,7 +94,7 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
         status: details.status,
         amount: details.purchase_units[0].amount.value,
         currency: details.purchase_units[0].amount.currency_code,
-        details: details,
+        details,
       };
 
       const result = await premium.processPayment(paymentData);

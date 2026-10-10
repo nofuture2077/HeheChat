@@ -6,10 +6,10 @@ import {
   IconPlayerTrackNextFilled,
   IconVolume3,
 } from '@tabler/icons-react';
-import { AlertSystem } from '@/components/alerts/alertplayer';
 import { useEffect, useState, useRef } from 'react';
 import { useForceUpdate } from '@mantine/hooks';
 import PubSub from 'pubsub-js';
+import { AlertSystem } from '@/components/alerts/alertplayer';
 import { formatSeconds } from '@/commons/helper';
 import { formatEventText } from '@/components/events/eventlist';
 
@@ -52,7 +52,7 @@ export function AlertControl(props: AlertControlProps) {
         setSeconds(0);
         setRuntime(data.duration);
         const item = AlertSystem.currentlyPlaying;
-        setText(item ? item.username + ' - ' + formatEventText(item) : playText);
+        setText(item ? `${item.username} - ${formatEventText(item)}` : playText);
       } else {
         stopTimer();
         setRuntime(0);
@@ -74,7 +74,7 @@ export function AlertControl(props: AlertControlProps) {
     setText(playText);
   }, [paused]);
 
-  const muted = AlertSystem.muted;
+  const { muted } = AlertSystem;
 
   return (
     <Stack

@@ -105,9 +105,7 @@ export function AdminPremiumPage() {
   const [historyLimit] = useState(10);
   const [historySearchUser, setHistorySearchUser] = useState('');
 
-  const getAdminToken = () => {
-    return localStorage.getItem('hehe-token_state');
-  };
+  const getAdminToken = () => localStorage.getItem('hehe-token_state');
 
   const fetchPremiumUsers = async () => {
     const adminToken = getAdminToken();
@@ -259,9 +257,7 @@ export function AdminPremiumPage() {
     refreshAll();
   }, []);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleString();
 
   const getStatusBadge = (user: PremiumUser) => {
     if (!user.is_active) {

@@ -70,9 +70,9 @@ export function ConnectYouTubeSettings() {
         }
       ).then((r) => r.json());
       if (data.success) setConnected(true);
-      else alert('Error connecting: ' + (data.error || 'Unknown error'));
+      else alert(`Error connecting: ${data.error || 'Unknown error'}`);
     } catch (error) {
-      alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -90,10 +90,10 @@ export function ConnectYouTubeSettings() {
         setConnected(false);
         setChannelId('');
       } else {
-        alert('Error disconnecting: ' + (data.error || 'Unknown error'));
+        alert(`Error disconnecting: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
-      alert('Error: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      alert(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

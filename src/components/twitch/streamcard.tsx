@@ -27,7 +27,7 @@ export interface StreamCardProps {
 }
 
 export function StreamCard(props: StreamCardProps) {
-  const stream = props.stream;
+  const { stream } = props;
   const content = (
     <Paper shadow="sm" radius="md" withBorder>
       <Box>
@@ -35,12 +35,12 @@ export function StreamCard(props: StreamCardProps) {
           <Stack justify="space-between" flex={1} p="xs" gap="xs" h={180}>
             <Group justify="space-between" align="flex-start">
               <Badge color="green">{stream.gameName}</Badge>
-              <Stack align="flex-end" gap={'xs'}>
+              <Stack align="flex-end" gap="xs">
                 <Badge color="pink">{formatElapsedTimeSinceStartedAt(stream.startDate)}</Badge>
                 {props.hideViewers ? null : <Badge color="pink">{stream.viewers}</Badge>}
               </Stack>
             </Group>
-            <Stack gap={'xs'}>
+            <Stack gap="xs">
               <Badge color="gray">
                 <Text fw={900}>{stream.userName}</Text>
               </Badge>
@@ -63,7 +63,7 @@ export function StreamCard(props: StreamCardProps) {
   }
 
   return (
-    <Anchor href={'https://twitch.tv/' + stream.userName} target="blank" className={classes.link}>
+    <Anchor href={`https://twitch.tv/${stream.userName}`} target="blank" className={classes.link}>
       {content}
     </Anchor>
   );

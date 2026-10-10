@@ -27,7 +27,7 @@ export function ConnectBlerpSettings() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(import.meta.env.VITE_BACKEND_URL + '/blerp/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/blerp/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.roomid) {
@@ -42,7 +42,7 @@ export function ConnectBlerpSettings() {
     const id = extractBlerpRoom(roomId);
     setLoading(true);
     try {
-      await fetch(import.meta.env.VITE_BACKEND_URL + '/blerp/set?state=' + state + '&roomId=' + id);
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/blerp/set?state=${state}&roomId=${id}`);
       setRoomId(id);
       setConnected(true);
     } catch (error) {
@@ -56,7 +56,7 @@ export function ConnectBlerpSettings() {
     if (!confirm('Are you sure you want to disconnect your Blerp room?')) return;
     setLoading(true);
     try {
-      await fetch(import.meta.env.VITE_BACKEND_URL + '/blerp/set?state=' + state + '&roomId=');
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/blerp/set?state=${state}&roomId=`);
       setRoomId('');
       setConnected(false);
     } catch (error) {
@@ -77,7 +77,7 @@ export function ConnectBlerpSettings() {
           <Switch
             label="Enable Blerp alerts"
             description="Receive and display Blerp events in chat"
-            checked={!config.deactivatedAlerts['blerp']}
+            checked={!config.deactivatedAlerts.blerp}
             onChange={(ev) => config.setDeactivatedAlerts('blerp', !ev.currentTarget.checked)}
           />
 

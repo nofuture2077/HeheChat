@@ -1,15 +1,13 @@
-import { SystemMessage } from '../../commons/message';
-import { formatTime, formatString } from '../../commons/helper';
 import { Text, ActionIcon, Tooltip } from '@mantine/core';
-import classes from './systemmessage.module.css';
 import { IconSpeakerphone } from '@tabler/icons-react';
 import { memo, useContext } from 'react';
+import { SystemMessage, ParsedMessagePart } from '../../commons/message';
+import { formatTime, formatString, joinWithSpace } from '../../commons/helper';
+import classes from './systemmessage.module.css';
 import { ChatEmotesContext, ConfigContext, LoginContextContext } from '../../ApplicationContext';
 import { ModActions } from './mod/modactions';
 import { getEventStyle } from '../events/eventhelper';
 import { EventType } from '../../commons/events';
-import { ParsedMessagePart } from '../../commons/message';
-import { joinWithSpace } from '../../commons/helper';
 import { parsedPartsToHtml } from './ChatMessage';
 import BlerpLogo from '@/res/blerp_logo.svg?react';
 import SoundalertsLogo from '@/res/soundalerts_logo.svg?react';
@@ -146,7 +144,7 @@ const messages = {
   streak: '${username} stream streak ${amount:whole}///${text}',
 };
 
-export const SystemMessageComp = memo(function SystemMessageComp(props: SystemMessageProps) {
+export const SystemMessageComp = memo((props: SystemMessageProps) => {
   const login = useContext(LoginContextContext);
   const config = useContext(ConfigContext);
   const emotes = useContext(ChatEmotesContext);
@@ -155,9 +153,9 @@ export const SystemMessageComp = memo(function SystemMessageComp(props: SystemMe
   const isBroadcaster = props.msg.target.substring(1) === login.user?.name;
 
   const canShoutout = isModerator || isBroadcaster;
-  const modToolsEnabled = config.modToolsEnabled;
+  const { modToolsEnabled } = config;
   const eventType = props.msg.data.type as EventType;
-  const platform = props.msg.data.platform;
+  const { platform } = props.msg.data;
 
   const wordMapper = (type: string, word: string, index: number, arr: string[]) => {
     if (type === 'seventv_emote_add' && index === arr.length - 2) {
@@ -173,8 +171,8 @@ export const SystemMessageComp = memo(function SystemMessageComp(props: SystemMe
 
   getEventStyle({ eventtype: eventType, amount: Number(props.msg.data.amount) }, style);
 
-  const channel = props.msg.data.channel;
-  var msgParts: ParsedMessagePart[] = [];
+  const { channel } = props.msg.data;
+  let msgParts: ParsedMessagePart[] = [];
   if (textParts.length > 1) {
     msgParts = props.msg.data.text ? (props.msg.data.text.parts ?? []) : [];
   }

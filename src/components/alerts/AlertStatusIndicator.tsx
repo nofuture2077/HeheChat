@@ -1,7 +1,6 @@
-import { useEffect, useState, ReactNode } from 'react';
-import { AlertSystem } from './alertplayer';
+import { useEffect, useState, ReactNode, useContext } from 'react';
 import { Tooltip, Indicator } from '@mantine/core';
-import { useContext } from 'react';
+import { AlertSystem } from './alertplayer';
 import { ConfigContext } from '@/ApplicationContext';
 
 export interface AlertStatusIndicatorProps {

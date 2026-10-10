@@ -5,7 +5,7 @@ import { IconShare, IconDeviceMobile, IconDotsVertical } from '@tabler/icons-rea
 const PROMPT_SHOWN_KEY = 'mobile-app-prompt-shown';
 
 function getDeviceOS() {
-  const userAgent = navigator.userAgent;
+  const { userAgent } = navigator;
   if (/iPhone|iPad|iPod/i.test(userAgent)) {
     return 'iOS';
   }
@@ -17,7 +17,7 @@ function getDeviceOS() {
 
 function getInstallInstructions() {
   const os = getDeviceOS();
-  const userAgent = navigator.userAgent;
+  const { userAgent } = navigator;
   if (os === 'iOS') {
     if (userAgent.includes('CriOS')) {
       // Chrome on iOS

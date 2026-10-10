@@ -76,15 +76,14 @@ export class SevenTVCosmeticsService {
         // User has 7TV cosmetics (paint and/or badge) - cache them
         await SevenTVCosmeticsStore.storeUserCosmetics(userId, cosmetics);
         return cosmetics;
-      } else {
-        // User either doesn't have 7TV account or has no cosmetics
-        // Cache a "no cosmetics" marker to prevent repeated API calls
-        const noCosmetics = this.createDefaultCosmetics(userId, '');
-        // Mark this as a "no cosmetics" result by setting a special flag
-        (noCosmetics as any).isNoCosmeticsMarker = true;
-        await SevenTVCosmeticsStore.storeUserCosmetics(userId, noCosmetics);
-        return null; // Return null so normal username color is used
       }
+      // User either doesn't have 7TV account or has no cosmetics
+      // Cache a "no cosmetics" marker to prevent repeated API calls
+      const noCosmetics = this.createDefaultCosmetics(userId, '');
+      // Mark this as a "no cosmetics" result by setting a special flag
+      (noCosmetics as any).isNoCosmeticsMarker = true;
+      await SevenTVCosmeticsStore.storeUserCosmetics(userId, noCosmetics);
+      return null; // Return null so normal username color is used
     } catch (error) {
       console.error('Error fetching 7TV cosmetics for user:', userId, error);
       // Cache a "no cosmetics" result even on error to prevent repeated failed requests
@@ -216,10 +215,9 @@ export class SevenTVCosmeticsService {
     if (theme === 'dark') {
       // For dark theme, ensure colors are bright enough
       return baseColor;
-    } else {
-      // For light theme, ensure colors are dark enough
-      return baseColor;
     }
+    // For light theme, ensure colors are dark enough
+    return baseColor;
   }
 }
 

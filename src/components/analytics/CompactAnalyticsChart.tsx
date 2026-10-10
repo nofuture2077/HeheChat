@@ -29,9 +29,7 @@ export function CompactAnalyticsChart({ channels, height = 120 }: CompactAnalyti
   const [data, setData] = useState<CompactChartDataPoint[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const getToken = () => {
-    return localStorage.getItem('hehe-token_state') || '';
-  };
+  const getToken = () => localStorage.getItem('hehe-token_state') || '';
 
   const formatTimestamp = (timestamp: number): string => {
     const date = new Date(timestamp * 1000);
@@ -42,8 +40,8 @@ export function CompactAnalyticsChart({ channels, height = 120 }: CompactAnalyti
     });
   };
 
-  const transformData = (rawData: StreamAnalyticsData[]): CompactChartDataPoint[] => {
-    return rawData.slice(-12).map((item) => {
+  const transformData = (rawData: StreamAnalyticsData[]): CompactChartDataPoint[] =>
+    rawData.slice(-12).map((item) => {
       // Convert timestamp to number if it's a string
       const timestamp =
         typeof item.timestamp_minute === 'string'
@@ -58,7 +56,6 @@ export function CompactAnalyticsChart({ channels, height = 120 }: CompactAnalyti
         cheer_bits_total: item.cheer_bits_total,
       };
     });
-  };
 
   const fetchAnalytics = async () => {
     if (!premium.isPremium || channels.length === 0) {
@@ -148,7 +145,7 @@ export function CompactAnalyticsChart({ channels, height = 120 }: CompactAnalyti
             data={data}
             dataKey="time"
             withLegend={false}
-            withTooltip={true}
+            withTooltip
             series={[
               { name: 'viewer_count', label: 'Viewers', color: 'blue.6', type: 'line' },
               { name: 'message_count', label: 'Messages', color: 'green.6', type: 'bar' },

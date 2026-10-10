@@ -2,6 +2,7 @@ import { Menu } from '@mantine/core';
 import { ApiClient } from '@twurple/api';
 import { IconLink, IconChevronDown } from '@tabler/icons-react';
 import React, { useEffect, useContext, useState } from 'react';
+import PubSub from 'pubsub-js';
 import { LoginContextContext } from '@/ApplicationContext';
 import { generateGUID } from '@/commons/helper';
 import {
@@ -11,14 +12,13 @@ import {
   handleUnauthorized,
 } from '@/commons/login';
 import { EmoteStore } from '@/components/chat/emotestorage';
-import PubSub from 'pubsub-js';
 import { DEFAULT_CHAT_EMOTES } from '@/commons/emotes';
 import classes from './login.module.css';
 
 function getQueryVariable(query: String, variable: String): string | undefined {
-  var vars = query.split('&');
-  for (var i = 0; i < vars.length; i++) {
-    var pair = vars[i].split('=');
+  const vars = query.split('&');
+  for (let i = 0; i < vars.length; i++) {
+    const pair = vars[i].split('=');
     if (decodeURIComponent(pair[0]) == variable) {
       return decodeURIComponent(pair[1]);
     }
@@ -107,7 +107,7 @@ export default function Login(props: LoginProps) {
         loginContext.setAccessToken(token);
         localStorage.setItem('hehe-token', token);
         localStorage.setItem('hehe-userid', userId);
-        localStorage.setItem('hehe-auth-version', AUTH_VERSION + '');
+        localStorage.setItem('hehe-auth-version', `${AUTH_VERSION}`);
         const redirectUrl = encodeURI(
           window.location.origin + window.location.pathname.replace('index.html', '')
         );
@@ -125,7 +125,7 @@ export default function Login(props: LoginProps) {
 
   const authUrl = import.meta.env.VITE_BACKEND_URL + props.target;
 
-  let scope = LOGIN_SCOPES.map(encodeURIComponent).join('+');
+  const scope = LOGIN_SCOPES.map(encodeURIComponent).join('+');
 
   const buildAuthUrl = (forceVerify: boolean) => {
     const state = generateGUID();
@@ -198,6 +198,6 @@ export default function Login(props: LoginProps) {
 }
 
 PubSub.subscribe('WS-auth-update', (msg, data) => {
-  console.log('Got new access token: ' + data.token);
+  console.log(`Got new access token: ${data.token}`);
   localStorage.setItem('hehe-token', data.token);
 });

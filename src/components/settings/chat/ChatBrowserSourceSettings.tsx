@@ -12,9 +12,9 @@ import {
   TagsInput,
 } from '@mantine/core';
 import { useContext, useState, useEffect } from 'react';
-import { ConfigContext } from '@/ApplicationContext';
 import { IconCopy } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { ConfigContext } from '@/ApplicationContext';
 
 export function ChatBrowserSourceSettings() {
   const config = useContext(ConfigContext);
@@ -22,7 +22,7 @@ export function ChatBrowserSourceSettings() {
 
   useEffect(() => {
     const state = localStorage.getItem('hehe-token_state') || '';
-    fetch(import.meta.env.VITE_BACKEND_URL + '/sink/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/sink/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => setSink(data.sink));
   }, []);

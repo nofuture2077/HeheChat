@@ -1,3 +1,4 @@
+import PubSub from 'pubsub-js';
 import {
   Event,
   EventAlertConfig,
@@ -14,7 +15,6 @@ import { Config } from '@/commons/config';
 import { Profile } from '@/commons/profile';
 import { formatString, deterministicSample } from '@/commons/helper';
 import { silence } from './silence';
-import PubSub from 'pubsub-js';
 import { AlertConfig } from '@/components/events/alertconfigstorage';
 import { formatEventText } from '@/components/events/eventlist';
 import { DEFAULT_CHAT_EMOTES } from '@/commons/emotes';
@@ -32,7 +32,7 @@ interface AudioInfo {
   volume?: number;
 }
 
-let cheerPrefixes = [
+const cheerPrefixes = [
   'Cheer',
   'BibleThump',
   'cheerwhal',
@@ -60,7 +60,7 @@ let cheerPrefixes = [
   'RIPCheer',
   'Shamrock',
 ];
-let cheerPrefixesRegExp = cheerPrefixes.map((x) => new RegExp(`\\b${x}\\d+\\b`, 'gi'));
+const cheerPrefixesRegExp = cheerPrefixes.map((x) => new RegExp(`\\b${x}\\d+\\b`, 'gi'));
 
 // ponytail: 3 tries, 500ms/1s backoff; retries network errors, 5xx and 429 only
 async function fetchWithRetry(url: string, tries = 3, delay = 500): Promise<Response> {
@@ -470,7 +470,7 @@ class AlertPlayer {
       // Publish an update to refresh the UI
       PubSub.publish('AlertPlayer-update', {
         text: this.currentlyPlaying
-          ? this.currentlyPlaying.username + ' - ' + formatEventText(this.currentlyPlaying)
+          ? `${this.currentlyPlaying.username} - ${formatEventText(this.currentlyPlaying)}`
           : 'Playing',
       });
     }
@@ -670,7 +670,7 @@ class AlertPlayer {
 
   cleanMessage(message: string, filterTTS: boolean, channel?: string) {
     // First clean cheer prefixes
-    var cleanedMessage = cheerPrefixesRegExp.reduce(
+    let cleanedMessage = cheerPrefixesRegExp.reduce(
       (accumulator, prefix) => accumulator.replaceAll(prefix, ''),
       message
     );
@@ -752,7 +752,7 @@ class AlertPlayer {
   getAudioFileData(reference: Base64FileReference, alertConfig: EventAlertConfig) {
     const file = alertConfig?.data?.files[reference] as unknown as Base64File;
     if (file && file.data) {
-      return 'data:audio/mp3;base64,' + file.data;
+      return `data:audio/mp3;base64,${file.data}`;
     }
     return '';
   }
@@ -785,7 +785,7 @@ class AlertPlayer {
 
   updateProfile(profile: Profile) {
     this.profile = profile;
-    const config = profile.config;
+    const { config } = profile;
     this.config = config;
 
     // Update media session metadata when profile changes
@@ -830,7 +830,7 @@ class AlertPlayer {
         : await this.googleTTS(ttsMessage, channel, resolvedVoice, state, sink);
 
     if (!audioData) return;
-    const audioInfo = await this.getAudioInfo('data:audio/mp3;base64,' + audioData);
+    const audioInfo = await this.getAudioInfo(`data:audio/mp3;base64,${audioData}`);
     if (audioInfo) {
       const speed = Number(resolvedVoiceParams?.speed);
       audioInfo.speed = Number.isFinite(speed) ? Math.min(4.0, Math.max(0.5, speed)) : 1.0;
@@ -919,10 +919,10 @@ class AlertPlayer {
     const eventAmount = Number(event.amount || 0);
     const exactAlertMatches = exactAlerts[eventAmount];
     if (exactAlertMatches && exactAlertMatches.length) {
-      return deterministicSample(exactAlertMatches, event.triggerId || Math.random() + '');
+      return deterministicSample(exactAlertMatches, event.triggerId || `${Math.random()}`);
     }
     if (matchesAlerts.length) {
-      return deterministicSample(matchesAlerts, event.triggerId || Math.random() + '');
+      return deterministicSample(matchesAlerts, event.triggerId || `${Math.random()}`);
     }
     const matchedMult = Object.keys(multAlerts)
       .map((x) => Number(x))
@@ -930,14 +930,14 @@ class AlertPlayer {
       .sort((a, b) => a - b);
     if (matchedMult.length) {
       const highestMult = matchedMult[matchedMult.length - 1];
-      return deterministicSample(multAlerts[highestMult], event.triggerId || Math.random() + '');
+      return deterministicSample(multAlerts[highestMult], event.triggerId || `${Math.random()}`);
     }
     const minKeys = Object.keys(minAlerts)
       .map((x) => Number(x))
       .sort((a, b) => a - b);
     const step = minKeys.findLast((x) => x <= eventAmount);
     if (step || step === 0) {
-      return deterministicSample(minAlerts[step], event.triggerId || Math.random() + '');
+      return deterministicSample(minAlerts[step], event.triggerId || `${Math.random()}`);
     }
   }
 
@@ -966,10 +966,9 @@ class AlertPlayer {
     return parsedParts
       .map((part, partIndex) => {
         if (part.type === 'emote') {
-          return (
-            'image' +
-            buildEmoteImageUrl(part.emote?.id! || part.id || '', { size: '3.0' }).substring(6)
-          );
+          return `image${buildEmoteImageUrl(part.emote?.id! || part.id || '', {
+            size: '3.0',
+          }).substring(6)}`;
         }
         return part.text;
       })
@@ -996,7 +995,7 @@ class AlertPlayer {
       // Check for blerp/soundalerts (direct audio URL)
       if (eventData.audioUrl) {
         if (event.eventtype === 'soundalerts') {
-          if (this.config?.deactivatedAlerts['soundalerts']) {
+          if (this.config?.deactivatedAlerts.soundalerts) {
             return {
               alertType: 'none',
               eventData,
@@ -1011,7 +1010,7 @@ class AlertPlayer {
         }
 
         // blerp
-        if (this.config?.deactivatedAlerts['blerp']) {
+        if (this.config?.deactivatedAlerts.blerp) {
           return {
             alertType: 'none',
             eventData,
@@ -1304,7 +1303,7 @@ class AlertPlayer {
           channel: event.channel,
           position: alert.visual?.position,
           layout: alert.visual?.layout,
-          event: event,
+          event,
         };
         visualAlert.triggerId = event.triggerId;
         event.useLastSpriteFilename = eventData.useLast;

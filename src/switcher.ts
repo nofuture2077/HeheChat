@@ -1,5 +1,5 @@
-import { version } from '../package.json';
 import OBSWebSocket from 'obs-websocket-js';
+import { version } from '../package.json';
 
 const params = new URLSearchParams(location.search);
 const heheWsUrl = params.get('heheWsUrl');
@@ -23,7 +23,7 @@ const MAX_DELAY = 30000;
 const BACKOFF = 1.5;
 
 function calcDelay(attempts: number) {
-  return Math.min(INITIAL_DELAY * Math.pow(BACKOFF, attempts), MAX_DELAY);
+  return Math.min(INITIAL_DELAY * BACKOFF ** attempts, MAX_DELAY);
 }
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -242,7 +242,6 @@ function connectHehe() {
 
     if (msg.type === 'stopStream') {
       await handleStreamCommand(msg.id, 'stopStream');
-      return;
     }
   });
 
@@ -323,7 +322,7 @@ async function checkRemoteVersion() {
   if (!sinkUrl) return;
   try {
     const current = await getCurrentVersion();
-    const resp = await fetch(window.location.origin + `/manifest.json?t=${Date.now()}`, {
+    const resp = await fetch(`${window.location.origin}/manifest.json?t=${Date.now()}`, {
       cache: 'no-cache',
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',

@@ -67,13 +67,9 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
     setCollapsedMessages(newCollapsed);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
 
-  const isExpired = (activeUntil: string) => {
-    return new Date(activeUntil) < new Date();
-  };
+  const isExpired = (activeUntil: string) => new Date(activeUntil) < new Date();
 
   // Filter out dismissed messages and expired/inactive messages
   const visibleMessages = newsMessages.filter((message) => {

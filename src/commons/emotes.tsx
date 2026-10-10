@@ -1,11 +1,11 @@
+import PubSub from 'pubsub-js';
+import { Image } from '@mantine/core';
 import { getUserdata, LoginContext } from '@/commons/login';
 import { toMap } from '@/commons/helper';
 import { EmoteComponentSimple, EmoteComponent } from '@/components/emote/emote';
-import PubSub from 'pubsub-js';
 import { EmoteStore, EmotePrefix } from '@/components/chat/emotestorage';
 import { EmoteApiClient } from '@/api/emotes';
-import { buildEmoteImageUrl } from '../commons/twitch';
-import { Image } from '@mantine/core';
+import { buildEmoteImageUrl } from './twitch';
 
 interface sevenTVEmote {
   name: string;
@@ -145,7 +145,7 @@ function getBadgeImageHtml(badges: Map<string, BadgeSet>, setId: string, version
 export async function get7TVEmotes(userId: string, username: string) {
   // First, check if we need to refresh the cache by checking the version
   let needsRefresh = false;
-  let cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.SEVENTV, userId);
+  const cachedEmotes = await EmoteStore.getEmotes(EmotePrefix.SEVENTV, userId);
 
   try {
     // Try to get version info from server (if the endpoint exists)
@@ -451,7 +451,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
               .map((emote) => {
                 // Validate emote structure
                 if (!emote || !emote.name) {
-                  console.warn(`Invalid emote structure:`, emote);
+                  console.warn('Invalid emote structure:', emote);
                   return null;
                 }
                 return [emote.name, emote];
@@ -491,7 +491,7 @@ export const DEFAULT_CHAT_EMOTES: ChatEmotes = {
         DEFAULT_CHAT_EMOTES.emotes.get(channel) || createEmptyChannelData(channel);
       const previousSevenTVEmotes =
         channelData.sevenTVEmotes instanceof Map ? new Map(channelData.sevenTVEmotes) : new Map();
-      let user = channelData.user;
+      let { user } = channelData;
 
       if (!user?.id || user.id === channel) {
         try {

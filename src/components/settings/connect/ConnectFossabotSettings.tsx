@@ -1,7 +1,6 @@
 import { Textarea, Fieldset, Stack, Text, ActionIcon, Alert } from '@mantine/core';
-import { IconInfoCircle } from '@tabler/icons-react';
+import { IconInfoCircle, IconCopy } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
-import { IconCopy } from '@tabler/icons-react';
 import { ProfileContext, ConfigContext } from '@/ApplicationContext';
 
 export function ConnectFossabotSettings() {

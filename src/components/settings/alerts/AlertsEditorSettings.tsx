@@ -74,7 +74,7 @@ export function AlertsEditorSettings() {
 
   const loadEditors = () => {
     const state = localStorage.getItem('hehe-token_state') || '';
-    fetch(import.meta.env.VITE_BACKEND_URL + '/alert/editor?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/alert/editor?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setEditors(data);
@@ -85,11 +85,9 @@ export function AlertsEditorSettings() {
   const createEditor = (name: string) => {
     const state = localStorage.getItem('hehe-token_state') || '';
     fetch(
-      import.meta.env.VITE_BACKEND_URL +
-        '/alert/editor?state=' +
-        state +
-        '&name=' +
-        encodeURIComponent(name),
+      `${import.meta.env.VITE_BACKEND_URL}/alert/editor?state=${state}&name=${encodeURIComponent(
+        name
+      )}`,
       { method: 'PUT' }
     )
       .then((res) => res.json())
@@ -99,11 +97,9 @@ export function AlertsEditorSettings() {
   const deleteEditor = (token: string) => {
     const state = localStorage.getItem('hehe-token_state') || '';
     fetch(
-      import.meta.env.VITE_BACKEND_URL +
-        '/alert/editor?state=' +
-        state +
-        '&token=' +
-        encodeURIComponent(token),
+      `${import.meta.env.VITE_BACKEND_URL}/alert/editor?state=${state}&token=${encodeURIComponent(
+        token
+      )}`,
       { method: 'DELETE' }
     )
       .then((res) => res.json())
@@ -124,7 +120,7 @@ export function AlertsEditorSettings() {
   };
 
   const firstEditorUrl =
-    editors.length > 0 ? import.meta.env.VITE_EDITOR_URL + '?token=' + editors[0].token : null;
+    editors.length > 0 ? `${import.meta.env.VITE_EDITOR_URL}?token=${editors[0].token}` : null;
 
   return (
     <Stack mt={30} mb={30} gap={30}>
@@ -162,7 +158,7 @@ export function AlertsEditorSettings() {
               <Table.Tr key={element.id}>
                 <Table.Td>
                   <Anchor
-                    href={import.meta.env.VITE_EDITOR_URL + '?token=' + element.token}
+                    href={`${import.meta.env.VITE_EDITOR_URL}?token=${element.token}`}
                     target="_blank"
                   >
                     <IconLink />
@@ -175,7 +171,7 @@ export function AlertsEditorSettings() {
                     color="blue"
                     onClick={() =>
                       copyToClipboard(
-                        import.meta.env.VITE_EDITOR_URL + '?token=' + element.token,
+                        `${import.meta.env.VITE_EDITOR_URL}?token=${element.token}`,
                         'Alert Editor'
                       )
                     }

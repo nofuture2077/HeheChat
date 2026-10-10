@@ -1,8 +1,8 @@
 import { TagsInput, Fieldset, Space, Alert } from '@mantine/core';
 import { useContext, useMemo } from 'react';
+import { IconInfoCircle } from '@tabler/icons-react';
 import { ConfigContext } from '@/ApplicationContext';
 import { useChannels } from '@/hooks/useChannels';
-import { IconInfoCircle } from '@tabler/icons-react';
 
 export function GeneralChannelsSection() {
   const config = useContext(ConfigContext);

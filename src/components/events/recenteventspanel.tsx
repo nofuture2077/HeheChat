@@ -1,13 +1,13 @@
 import { ActionIcon, Group, Paper, ScrollArea, Stack, Text } from '@mantine/core';
 import { IconCheck, IconReload } from '@tabler/icons-react';
 import { useContext, useState } from 'react';
+import { Dictionary } from 'underscore';
+import { useForceUpdate } from '@mantine/hooks';
 import { ConfigContext, ProfileContext } from '@/ApplicationContext';
 import { useEventFeed, formatEventText, getIcon } from './eventlist';
 import { InfoCard } from '../infocard/infocard';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { EventData } from './eventstorage';
-import { Dictionary } from 'underscore';
-import { useForceUpdate } from '@mantine/hooks';
 import classes from './EventList.module.css';
 
 export function RecentEventsPanel() {
@@ -19,7 +19,7 @@ export function RecentEventsPanel() {
 
   const replayEvent = (data: EventData) => {
     if (AlertSystem.shouldBePlayedInBrowsersource(data) && !checkedEvents[data.id]) {
-      PubSub.publish('WSSEND', { type: 'replayevent', data: data, profile: profile.guid });
+      PubSub.publish('WSSEND', { type: 'replayevent', data, profile: profile.guid });
     } else if (AlertSystem.shouldBePlayedInApp(data) && !checkedEvents[data.id]) {
       AlertSystem.addEvent({ ...data, replay: true });
     }
@@ -51,8 +51,8 @@ export function RecentEventsPanel() {
     return (
       <Stack gap={0} mt={38}>
         {recent.map((event, i) => (
-          <Group key={'recent-event-' + i} gap="xs" wrap="nowrap">
-            {getIcon(event, 'recent-event-icon-' + i)}
+          <Group key={`recent-event-${i}`} gap="xs" wrap="nowrap">
+            {getIcon(event, `recent-event-icon-${i}`)}
             <Text size="sm" lineClamp={1}>
               {formatEventText(event)}
             </Text>
@@ -66,13 +66,13 @@ export function RecentEventsPanel() {
     <Stack gap={0}>
       {recent.reverse().map((event, i) => (
         <InfoCard
-          key={'recent-event-' + i}
+          key={`recent-event-${i}`}
           channel={event.channel}
           className={classes.event}
           name={event.username}
           date={event.date}
           text={formatEventText(event)}
-          left={getIcon(event, 'recent-event-icon-' + i)}
+          left={getIcon(event, `recent-event-icon-${i}`)}
           onClick={() => replayEvent(event)}
           right={
             <ActionIcon

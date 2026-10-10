@@ -15,12 +15,12 @@ import {
   useCombobox,
 } from '@mantine/core';
 import { useState, useEffect, useContext } from 'react';
-import { LoginContextContext } from '@/ApplicationContext';
 import { IconX } from '@tabler/icons-react';
-
-const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+import { LoginContextContext } from '@/ApplicationContext';
 
 import { OverlayDrawer } from '@/pages/Chat.page';
+
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const StreamInfoDrawer: OverlayDrawer = {
   name: 'streaminfo',
@@ -160,7 +160,7 @@ export function StreamInfo({ close }: StreamInfoProps) {
                 label="Game"
                 value={gameSearchValue}
                 onChange={async (event) => {
-                  const value = event.currentTarget.value;
+                  const { value } = event.currentTarget;
                   setGameSearchValue(value);
                   combobox.openDropdown();
 
@@ -249,7 +249,7 @@ export function StreamInfo({ close }: StreamInfoProps) {
             mb="xl"
           />
           <Group justify="flex-end">
-            <Button type="submit" variant="gradient" radius={'lg'}>
+            <Button type="submit" variant="gradient" radius="lg">
               Save Changes
             </Button>
           </Group>

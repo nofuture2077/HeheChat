@@ -36,7 +36,7 @@ class RemoteEventStorage implements EventStorage {
     if (since !== undefined) {
       params.push(['since', since.toString()].join('='));
     }
-    return fetch(this.baseUrl + '/event/history?' + params.join('&')).then((res) => res.json());
+    return fetch(`${this.baseUrl}/event/history?${params.join('&')}`).then((res) => res.json());
   }
 }
 

@@ -1,11 +1,11 @@
 import { Text, Card, Badge, Group, Stack, ActionIcon } from '@mantine/core';
 import { useState, useEffect, useContext, useRef } from 'react';
+import { IconEyeOff } from '@tabler/icons-react';
 import { formatMinuteSeconds } from '@/commons/helper';
 import { ChatEmotesContext } from '@/ApplicationContext';
 import pinClasses from './pinmanager.module.css';
 import htClasses from './hypetrain.module.css';
 import { PinProps } from './pinmanager';
-import { IconEyeOff } from '@tabler/icons-react';
 
 interface HypetrainProps extends PinProps {
   level: number;
@@ -74,7 +74,7 @@ export function Hypetrain(props: HypetrainProps) {
           <Group gap="xs">
             <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
             <Text fw={900}>
-              {props.state === 'ended' ? prefix + 'Hype Train Completed!' : prefix + 'Hype Train'}
+              {props.state === 'ended' ? `${prefix}Hype Train Completed!` : `${prefix}Hype Train`}
             </Text>
             <Badge color={props.state === 'ended' ? 'purple' : 'pink'}>LVL {props.level}</Badge>
           </Group>

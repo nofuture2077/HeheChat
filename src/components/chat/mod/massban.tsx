@@ -47,9 +47,10 @@ const findUserByName = async (username: string): Promise<{ userId: string; found
   const state = localStorage.getItem('hehe-token_state') || '';
   try {
     const response = await fetch(
-      import.meta.env.VITE_BACKEND_URL +
-        '/api/user/findByName?' +
-        query([param('username', username), param('token', state)])
+      `${import.meta.env.VITE_BACKEND_URL}/api/user/findByName?${query([
+        param('username', username),
+        param('token', state),
+      ])}`
     );
 
     if (response.status === 404) {
@@ -134,7 +135,7 @@ export function MassBanView(props: MassBanViewProps) {
     const userMap = new Map<string, UserToModerate>();
 
     matchingMessages.forEach((msg) => {
-      const userId = msg.userInfo.userId;
+      const { userId } = msg.userInfo;
 
       if (!userMap.has(userId)) {
         userMap.set(userId, {
@@ -156,9 +157,7 @@ export function MassBanView(props: MassBanViewProps) {
   };
 
   // Get user display names for TagsInput
-  const getUserDisplayNames = () => {
-    return usersToModerate.map((user) => user.displayName);
-  };
+  const getUserDisplayNames = () => usersToModerate.map((user) => user.displayName);
 
   // Handle TagsInput changes
   const handleUserTagsChange = async (usernames: string[]) => {
@@ -245,15 +244,16 @@ export function MassBanView(props: MassBanViewProps) {
   };
 
   // Reset state when component unmounts
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       setSearchPhrase('');
       setBanReason('');
       setBanInAllChannels(false);
       setUsersToModerate([]);
       setShowConfirmation(false);
-    };
-  }, []);
+    },
+    []
+  );
 
   return (
     <Stack justify="space-between" h="100%" gap="xs">

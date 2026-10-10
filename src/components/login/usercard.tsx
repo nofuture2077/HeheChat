@@ -1,9 +1,9 @@
 import { Avatar, Text, Button, Paper, Space, Group, Stack } from '@mantine/core';
 
-import { OverlayDrawer } from '@/pages/Chat.page';
 import { useContext } from 'react';
-import { LoginContextContext, ProfileContext } from '@/ApplicationContext';
 import { IconUnlink, IconX } from '@tabler/icons-react';
+import { OverlayDrawer } from '@/pages/Chat.page';
+import { LoginContextContext, ProfileContext } from '@/ApplicationContext';
 import { LoginContext } from '@/commons/login';
 import { CompactAnalyticsChart } from '@/components/analytics/CompactAnalyticsChart';
 

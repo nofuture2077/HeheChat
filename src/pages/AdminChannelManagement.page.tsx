@@ -114,9 +114,7 @@ export function AdminChannelManagementPage() {
   const [infoModalOpened, { open: openInfoModal, close: closeInfoModal }] = useDisclosure(false);
   const [banModalOpened, { open: openBanModal, close: closeBanModal }] = useDisclosure(false);
 
-  const getAdminToken = () => {
-    return localStorage.getItem('hehe-token_state');
-  };
+  const getAdminToken = () => localStorage.getItem('hehe-token_state');
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
@@ -187,7 +185,7 @@ export function AdminChannelManagementPage() {
         },
         body: JSON.stringify({
           token: adminToken,
-          channelname: channelname,
+          channelname,
         }),
       });
 
@@ -399,9 +397,9 @@ export function AdminChannelManagementPage() {
         },
         body: JSON.stringify({
           token: adminToken,
-          channelname: channelname,
+          channelname,
           action: 'ban',
-          reason: reason,
+          reason,
         }),
       });
 
@@ -461,7 +459,7 @@ export function AdminChannelManagementPage() {
         },
         body: JSON.stringify({
           token: adminToken,
-          channelname: channelname,
+          channelname,
           action: 'unban',
         }),
       });
@@ -542,13 +540,11 @@ export function AdminChannelManagementPage() {
     fetchBannedChannels();
   }, [bannedPage, bannedSearch]);
 
-  const hasAllRequiredScopes = (channelScopes: string[]) => {
-    return LOGIN_SCOPES.every((requiredScope) => channelScopes.includes(requiredScope));
-  };
+  const hasAllRequiredScopes = (channelScopes: string[]) =>
+    LOGIN_SCOPES.every((requiredScope) => channelScopes.includes(requiredScope));
 
-  const getMissingScopes = (channelScopes: string[]) => {
-    return LOGIN_SCOPES.filter((requiredScope) => !channelScopes.includes(requiredScope));
-  };
+  const getMissingScopes = (channelScopes: string[]) =>
+    LOGIN_SCOPES.filter((requiredScope) => !channelScopes.includes(requiredScope));
 
   const toggleScopeExpansion = (channelId: string) => {
     const newExpanded = new Set(expandedScopes);

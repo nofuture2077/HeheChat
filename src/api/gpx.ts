@@ -1,5 +1,5 @@
 // Base URL for the backend API
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL + '/api';
+const API_BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
 /**
  * API client for GPX track related operations

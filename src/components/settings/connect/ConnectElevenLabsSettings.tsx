@@ -10,7 +10,7 @@ export function ConnectElevenLabsSettings() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(import.meta.env.VITE_BACKEND_URL + '/elevenlabs/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/elevenlabs/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.apikey) {
@@ -25,7 +25,7 @@ export function ConnectElevenLabsSettings() {
     setLoading(true);
     try {
       await fetch(
-        import.meta.env.VITE_BACKEND_URL + '/elevenlabs/set?state=' + state + '&apikey=' + apiKey
+        `${import.meta.env.VITE_BACKEND_URL}/elevenlabs/set?state=${state}&apikey=${apiKey}`
       );
       setConnected(true);
     } catch (error) {
@@ -39,7 +39,7 @@ export function ConnectElevenLabsSettings() {
     if (!confirm('Are you sure you want to disconnect your ElevenLabs account?')) return;
     setLoading(true);
     try {
-      await fetch(import.meta.env.VITE_BACKEND_URL + '/elevenlabs/set?state=' + state + '&apikey=');
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/elevenlabs/set?state=${state}&apikey=`);
       setApiKey('');
       setConnected(false);
     } catch (error) {

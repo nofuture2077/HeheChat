@@ -2,8 +2,8 @@ import { Title, Button, SimpleGrid, Tabs, Text, Group, ActionIcon } from '@manti
 import { useDisclosure } from '@mantine/hooks';
 import { IconX, IconEdit } from '@tabler/icons-react';
 import { useContext, useEffect, useState } from 'react';
-import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
 import { HelixStream } from '@twurple/api';
+import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
 import { StreamCardPlaceholder, StreamCard } from './streamcard';
 import { RaidView } from '../chat/mod/modview';
 import { StreamInfoDrawer } from './streaminfo';
@@ -39,7 +39,7 @@ export function TwitchView(props: TwitchViewProps) {
   useEffect(() => {
     setLoadStreams(true);
     if (activeTab === 'live') {
-      fetch(BASE_URL + '/twitch/streams?channels=' + config.channels.join(','))
+      fetch(`${BASE_URL}/twitch/streams?channels=${config.channels.join(',')}`)
         .then((res) => res.json())
         .then((data) => {
           setStreams(data.map((d: any) => new HelixStream(d)));
@@ -47,7 +47,7 @@ export function TwitchView(props: TwitchViewProps) {
         });
     }
     if (activeTab === 'raids') {
-      fetch(BASE_URL + '/twitch/streams?channels=' + (config.raidTargets || []).join(','))
+      fetch(`${BASE_URL}/twitch/streams?channels=${(config.raidTargets || []).join(',')}`)
         .then((res) => res.json())
         .then((data) => {
           setRaidTargetStreams(data.map((d: any) => new HelixStream(d)));

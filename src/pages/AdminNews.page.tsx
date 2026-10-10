@@ -244,13 +244,9 @@ export function AdminNewsPage() {
     openEditModal();
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleString();
 
-  const isExpired = (activeUntil: string) => {
-    return new Date(activeUntil) < new Date();
-  };
+  const isExpired = (activeUntil: string) => new Date(activeUntil) < new Date();
 
   const getStatusBadge = (message: NewsMessage) => {
     if (!message.is_active) {

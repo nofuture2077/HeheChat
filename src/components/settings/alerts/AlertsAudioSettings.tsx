@@ -10,10 +10,10 @@ import {
 } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
-import { ConfigContext } from '@/ApplicationContext';
-import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
 import { IconCopy } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { ConfigContext } from '@/ApplicationContext';
+import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
 
 export function AlertSoundOutputSection() {
   const config = useContext(ConfigContext);
@@ -22,7 +22,7 @@ export function AlertSoundOutputSection() {
 
   useEffect(() => {
     const state = localStorage.getItem('hehe-token_state') || '';
-    fetch(import.meta.env.VITE_BACKEND_URL + '/sink/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/sink/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setSink(data.sink);
@@ -70,7 +70,7 @@ export function AlertSoundOutputSection() {
                 color="blue"
                 onClick={() =>
                   copyToClipboard(
-                    import.meta.env.VITE_SINK_URL + '#token=' + sink,
+                    `${import.meta.env.VITE_SINK_URL}#token=${sink}`,
                     'OBS Browser Source'
                   )
                 }
@@ -85,7 +85,7 @@ export function AlertSoundOutputSection() {
                 color="green"
                 onClick={() =>
                   copyToClipboard(
-                    import.meta.env.VITE_REPLAY_URL + '#token=' + sink,
+                    `${import.meta.env.VITE_REPLAY_URL}#token=${sink}`,
                     'Replay Widget'
                   )
                 }

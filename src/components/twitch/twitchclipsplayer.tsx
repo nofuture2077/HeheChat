@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
-import { useViewportWidthCallback } from '../../commons/helper';
 import { IconX } from '@tabler/icons-react';
 import { ActionIcon } from '@mantine/core';
+import { useViewportWidthCallback } from '../../commons/helper';
 
 interface TwitchClipsPlayerProps {
   clipId: string;
@@ -51,7 +51,7 @@ export function TwitchClipsPlayer({ clipId, onClose }: TwitchClipsPlayerProps) {
         src={`https://clips.twitch.tv/embed?clip=${clipId}&parent=${window.location.hostname}&autoplay=true`}
         width={w}
         height={h}
-        allowFullScreen={true}
+        allowFullScreen
         style={{ border: 'none' }}
       />
       <ActionIcon onClick={onClose} size={32} pos="absolute" top={10} right={10} variant="light">

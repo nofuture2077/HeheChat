@@ -19,14 +19,14 @@ import {
   Select,
   SegmentedControl,
 } from '@mantine/core';
-import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
 import { useForceUpdate, useDisclosure } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
-import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
-import { AlertSystem } from '../../components/alerts/alertplayer';
 import { IconLink, IconRepeat, IconPlus, IconTrash, IconCopy } from '@tabler/icons-react';
-import { SystemMessageMainType } from '../../commons/message';
 import { notifications } from '@mantine/notifications';
+import { GradientSegmentedControl } from '../GradientSegmentedControl/GradientSegmentedControl';
+import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
+import { AlertSystem } from '../alerts/alertplayer';
+import { SystemMessageMainType } from '../../commons/message';
 import { getRerollConfig, updateRerollConfig, RerollConfig } from '@/api/sprites';
 import { EventAlert, EventTypeMapping } from '@/commons/events';
 
@@ -80,7 +80,7 @@ function CreateEditorModal({
 
   return (
     <Modal zIndex={400} opened={opened} onClose={close} withCloseButton={false}>
-      <Fieldset legend={'Create new Editor Token'}>
+      <Fieldset legend="Create new Editor Token">
         <TextInput
           label="Editor Name"
           placeholder="Enter a name for this editor"
@@ -121,7 +121,7 @@ export function AlertSettings() {
   useEffect(() => {
     const state = localStorage.getItem('hehe-token_state') || '';
 
-    fetch(import.meta.env.VITE_BACKEND_URL + '/sink/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/sink/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setSink(data.sink);
@@ -204,7 +204,7 @@ export function AlertSettings() {
 
   const loadEditors = () => {
     const state = localStorage.getItem('hehe-token_state') || '';
-    fetch(import.meta.env.VITE_BACKEND_URL + '/alert/editor?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/alert/editor?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         setEditors(data);
@@ -217,11 +217,9 @@ export function AlertSettings() {
   const createEditor = (name: string) => {
     const state = localStorage.getItem('hehe-token_state') || '';
     fetch(
-      import.meta.env.VITE_BACKEND_URL +
-        '/alert/editor?state=' +
-        state +
-        '&name=' +
-        encodeURIComponent(name),
+      `${import.meta.env.VITE_BACKEND_URL}/alert/editor?state=${state}&name=${encodeURIComponent(
+        name
+      )}`,
       { method: 'PUT' }
     )
       .then((res) => res.json())
@@ -233,11 +231,9 @@ export function AlertSettings() {
   const deleteEditor = (token: string) => {
     const state = localStorage.getItem('hehe-token_state') || '';
     fetch(
-      import.meta.env.VITE_BACKEND_URL +
-        '/alert/editor?state=' +
-        state +
-        '&token=' +
-        encodeURIComponent(token),
+      `${import.meta.env.VITE_BACKEND_URL}/alert/editor?state=${state}&token=${encodeURIComponent(
+        token
+      )}`,
       { method: 'DELETE' }
     )
       .then((res) => res.json())
@@ -253,7 +249,7 @@ export function AlertSettings() {
   }, [shares]);
 
   const changeActive = (channel: string, active: boolean) => {
-    const activatedShares = config.activatedShares;
+    const { activatedShares } = config;
 
     if (active) {
       if (!activatedShares.includes(channel)) {
@@ -268,7 +264,7 @@ export function AlertSettings() {
     config.setActivatedShares(activatedShares);
   };
 
-  const marks = [-250, -0, 250, 500].map((x) => ({ value: x, label: x + 'ms' }));
+  const marks = [-250, -0, 250, 500].map((x) => ({ value: x, label: `${x}ms` }));
 
   const copyToClipboard = async (text: string, label: string) => {
     try {
@@ -311,11 +307,11 @@ export function AlertSettings() {
     }
     switch (alert.specifier.type) {
       case 'min':
-        return alert.specifier.amount + '+' + suffix;
+        return `${alert.specifier.amount}+${suffix}`;
       case 'exact':
         return alert.specifier.amount + suffix;
       case 'matches':
-        return alert.specifier.attribute + ': ' + alert.specifier.text;
+        return `${alert.specifier.attribute}: ${alert.specifier.text}`;
     }
   };
 
@@ -348,7 +344,7 @@ export function AlertSettings() {
                   color="blue"
                   onClick={() =>
                     copyToClipboard(
-                      import.meta.env.VITE_SINK_URL + '#token=' + sink,
+                      `${import.meta.env.VITE_SINK_URL}#token=${sink}`,
                       'OBS Browser Source'
                     )
                   }
@@ -363,7 +359,7 @@ export function AlertSettings() {
                   color="green"
                   onClick={() =>
                     copyToClipboard(
-                      import.meta.env.VITE_REPLAY_URL + '#token=' + sink,
+                      `${import.meta.env.VITE_REPLAY_URL}#token=${sink}`,
                       'Replay Widget'
                     )
                   }
@@ -443,7 +439,7 @@ export function AlertSettings() {
               <Table.Tr key={element.id}>
                 <Table.Td>
                   <Anchor
-                    href={import.meta.env.VITE_EDITOR_URL + '?token=' + element.token}
+                    href={`${import.meta.env.VITE_EDITOR_URL}?token=${element.token}`}
                     target="_blank"
                   >
                     <IconLink />
@@ -456,7 +452,7 @@ export function AlertSettings() {
                     color="blue"
                     onClick={() =>
                       copyToClipboard(
-                        import.meta.env.VITE_EDITOR_URL + '?token=' + element.token,
+                        `${import.meta.env.VITE_EDITOR_URL}?token=${element.token}`,
                         'Alert Editor'
                       )
                     }
@@ -531,8 +527,8 @@ export function AlertSettings() {
             return null;
           }
           return (
-            <Fieldset key={'Alerts-' + channel} legend={'Alerts ' + channel} variant="filled">
-              <Stack key={'alert-config-' + channel}>
+            <Fieldset key={`Alerts-${channel}`} legend={`Alerts ${channel}`} variant="filled">
+              <Stack key={`alert-config-${channel}`}>
                 {/* Add blerp alert option */}
                 {Object.entries(AlertSystem.alertConfig[channel].data?.alerts || {}).map(
                   ([eventMainType, alerts]) => {
@@ -564,25 +560,25 @@ export function AlertSettings() {
                     );
                   }
                 )}
-                <Divider label={'Blerps'} labelPosition="center" mt="xs" />
+                <Divider label="Blerps" labelPosition="center" mt="xs" />
                 <Switch
                   disabled={!config.activatedShares.includes(channel)}
-                  checked={!config.deactivatedAlerts['blerp']}
+                  checked={!config.deactivatedAlerts.blerp}
                   key="blerp"
                   label="Blerps"
                   size="lg"
                   mb="md"
-                  description={'All Blerps'}
+                  description="All Blerps"
                 />
-                <Divider label={'SoundAlerts'} labelPosition="center" mt="xs" />
+                <Divider label="SoundAlerts" labelPosition="center" mt="xs" />
                 <Switch
                   disabled={!config.activatedShares.includes(channel)}
-                  checked={!config.deactivatedAlerts['soundalerts']}
+                  checked={!config.deactivatedAlerts.soundalerts}
                   key="soundalerts"
                   label="SoundAlerts"
                   size="lg"
                   mb="md"
-                  description={'All SoundAlerts'}
+                  description="All SoundAlerts"
                 />
               </Stack>
             </Fieldset>
@@ -1013,7 +1009,7 @@ export function AlertSettings() {
                   placeholder="Enter Channel Points Reward name for user pick"
                   value={rerollConfig.config.userPickChannelPointReward || ''}
                   onChange={(ev) => {
-                    const value = ev.target.value;
+                    const { value } = ev.target;
                     const newConfig = {
                       ...rerollConfig,
                       config: {

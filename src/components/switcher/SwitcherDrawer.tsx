@@ -147,10 +147,11 @@ function StreamTab({ channel }: { channel: string | undefined }) {
               size="xs"
               variant="subtle"
               onClick={() => {
-                if (channel)
+                if (channel) {
                   getSwitcherScenes(channel)
                     .then((d) => setScenes(d.scenes ?? []))
                     .catch(() => {});
+                }
               }}
             >
               Retry

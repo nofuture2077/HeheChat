@@ -1,7 +1,7 @@
-import { useChannels } from '@/hooks/useChannels';
-import { ChannelPicker, type ChannelPickerProps } from '@/components/chat/ChannelPicker';
 import { Loader, Alert, Box } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
+import { useChannels } from '@/hooks/useChannels';
+import { ChannelPicker, type ChannelPickerProps } from '@/components/chat/ChannelPicker';
 
 /**
  * Props for ConnectedChannelPicker, excluding channels since they're fetched automatically

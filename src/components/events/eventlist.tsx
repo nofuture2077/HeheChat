@@ -5,8 +5,16 @@ import {
   IconReload,
   IconTrain,
   IconUsersGroup,
+  IconGiftFilled,
+  IconCoinBitcoinFilled,
+  IconUserHeart,
+  IconMoneybag,
+  IconSpeakerphone,
 } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
+import { Dictionary } from 'underscore';
+import { useForceUpdate } from '@mantine/hooks';
+import { ReactElementLike } from 'prop-types';
 import { EventStorage, EventData } from './eventstorage';
 import { ConfigContext, ProfileContext, LoginContextContext } from '@/ApplicationContext';
 import { getUserId, shoutoutUser } from '@/components/chat/mod/modactions';
@@ -20,17 +28,7 @@ import { InfoCard, InfoCardSkeleton } from '../infocard/infocard';
 import { getEventStyle } from '@/components/events/eventhelper';
 import { EventType } from '@/commons/events';
 import { AlertSystem } from '@/components/alerts/alertplayer';
-import { Dictionary } from 'underscore';
-import { useForceUpdate } from '@mantine/hooks';
-import {
-  IconGiftFilled,
-  IconCoinBitcoinFilled,
-  IconUserHeart,
-  IconMoneybag,
-  IconSpeakerphone,
-} from '@tabler/icons-react';
 import { formatString } from '@/commons/helper';
-import { ReactElementLike } from 'prop-types';
 import classes from './EventList.module.css';
 
 const LOGOS: Record<string, any> = {
@@ -94,12 +92,12 @@ export const icons: Record<EventType, ReactElementLike> = {
   follow: <IconUserHeart />,
   cheer: <IconCoinBitcoinFilled />,
   donation: <IconMoneybag />,
-  blerp: LOGOS['blerp'],
-  soundalerts: LOGOS['soundalerts'],
-  channelPointRedemption: LOGOS['twitch'],
-  kofishop: LOGOS['kofi'],
-  kofidono: LOGOS['kofi'],
-  kofisub: LOGOS['kofi'],
+  blerp: LOGOS.blerp,
+  soundalerts: LOGOS.soundalerts,
+  channelPointRedemption: LOGOS.twitch,
+  kofishop: LOGOS.kofi,
+  kofidono: LOGOS.kofi,
+  kofisub: LOGOS.kofi,
   tts: <IconSpeakerphone />,
   hypetrain: <IconTrain />,
   streak: <IconBoltFilled />,
@@ -157,9 +155,7 @@ export function useEventFeed() {
           config.hideEvents[event.eventtype as keyof typeof config.hideEvents]
         )
       ) {
-        setEvents((prevState) => {
-          return prevState.concat(event);
-        });
+        setEvents((prevState) => prevState.concat(event));
       }
     });
 
@@ -195,7 +191,7 @@ export function EventList() {
 
   const replayEvent = (data: EventData) => {
     if (AlertSystem.shouldBePlayedInBrowsersource(data) && !checkedEvents[data.id]) {
-      PubSub.publish('WSSEND', { type: 'replayevent', data: data, profile: profile.guid });
+      PubSub.publish('WSSEND', { type: 'replayevent', data, profile: profile.guid });
     } else if (AlertSystem.shouldBePlayedInApp(data) && !checkedEvents[data.id]) {
       AlertSystem.addEvent({ ...data, replay: true });
     }
@@ -215,7 +211,8 @@ export function EventList() {
 
   return (
     <ScrollArea className={classes.main}>
-      <style>{`
+      <style>
+        {`
                 .monochrome-logo {
                     filter: brightness(0) opacity(0.65);
                     transition: all 0.2s ease;
@@ -224,12 +221,13 @@ export function EventList() {
                 [data-mantine-color-scheme="dark"] .monochrome-logo {
                     filter: brightness(0) invert(1) opacity(0.85);
                 }
-            `}</style>
+            `}
+      </style>
       <div className={classes.reverse}>
         {load ? (
           <>
             {[1, 2, 3].map((x) => (
-              <InfoCardSkeleton key={'event' + x} />
+              <InfoCardSkeleton key={`event${x}`} />
             ))}
           </>
         ) : null}
@@ -240,7 +238,7 @@ export function EventList() {
         ) : null}
         {events.map((event, i) => (
           <InfoCard
-            key={'event' + i}
+            key={`event${i}`}
             channel={event.channel}
             className={classes.event}
             name={event.username}
@@ -255,7 +253,7 @@ export function EventList() {
                     <ActionIcon
                       variant="filled"
                       color="primary"
-                      key={'infocard-shoutout'}
+                      key="infocard-shoutout"
                       onClick={(e) => {
                         e.stopPropagation();
                         shoutout(event);
@@ -271,7 +269,7 @@ export function EventList() {
                     !AlertSystem.shouldBePlayedInBrowsersource(event)
                   }
                   variant="transparent"
-                  key={'infocard-right'}
+                  key="infocard-right"
                 >
                   {checkedEvents[event.id] ? <IconCheck /> : <IconReload />}
                 </ActionIcon>

@@ -13,7 +13,7 @@ export function BrowserSourceAlertStatusIndicator(_props: BrowserSourceAlertStat
   // Use version check hook with custom remote URL
   const { newVersionAvailable, currentVersion, latestVersion, isChecking } = useVersionCheck({
     checkInterval: 30 * 60 * 1000, // Check every 30 minutes
-    remoteManifestUrl: window.location.origin + '/manifest.json',
+    remoteManifestUrl: `${window.location.origin}/manifest.json`,
     onNewVersionDetected: (current, latest) => {
       console.log(`New version detected: ${current} -> ${latest}`);
       // Start countdown for update

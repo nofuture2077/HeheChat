@@ -25,7 +25,7 @@ export function Chat(props: ChatProps) {
     if (isSystemMessageType(msg)) {
       return (
         <SystemMessageComp
-          key={'system-' + msg.id}
+          key={`system-${msg.id}`}
           msg={msg as SystemMessage}
           modActions={props.modActions}
           moderatedChannel={props.moderatedChannel}
@@ -33,7 +33,7 @@ export function Chat(props: ChatProps) {
       );
     }
     if (isYTChatMessageType(msg)) {
-      return <YTChatMessageComp key={'ytchat-' + msg.id} msg={msg as YTChatMessage} />;
+      return <YTChatMessageComp key={`ytchat-${msg.id}`} msg={msg as YTChatMessage} />;
     }
     const chatMsg = msg as HeheChatMessage;
     return (

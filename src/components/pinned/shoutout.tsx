@@ -1,11 +1,11 @@
 import { Text, Card, Group, ActionIcon } from '@mantine/core';
 import { useState, useEffect, useContext, useRef } from 'react';
+import { IconEyeOff } from '@tabler/icons-react';
 import { formatMinuteSeconds } from '@/commons/helper';
 import { ChatEmotesContext } from '@/ApplicationContext';
 import pinClasses from './pinmanager.module.css';
 import soClasses from './shoutout.module.css';
 import { PinProps } from './pinmanager';
-import { IconEyeOff } from '@tabler/icons-react';
 
 interface ShoutoutProps extends PinProps {
   broadcasterName: string;

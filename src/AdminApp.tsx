@@ -4,6 +4,8 @@ import '@mantine/charts/styles.css';
 import { Center, Loader, MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { useState, useEffect } from 'react';
+import { StaticAuthProvider } from '@twurple/auth';
+import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
 import { AdminRouter } from './AdminRouter';
 import {
   ConfigContext,
@@ -14,8 +16,6 @@ import {
 } from './ApplicationContext';
 import { Premium, DEFAULT_PREMIUM } from './commons/premium';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
-import { StaticAuthProvider } from '@twurple/auth';
-import { ApiClient, HelixModeratedChannel, HelixUser } from '@twurple/api';
 import { DEFAULT_CONFIG } from './commons/config';
 import { DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { DEFAULT_PROFILE } from './commons/profile';

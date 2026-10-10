@@ -12,9 +12,9 @@ import {
   ActionIcon,
 } from '@mantine/core';
 import { useContext, useState, useEffect } from 'react';
-import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
+import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
 import { getRerollConfig, updateRerollConfig, RerollConfig } from '@/api/sprites';
 
 export function AlertsRerollSettings() {
@@ -324,7 +324,7 @@ export function AlertsRerollSettings() {
               placeholder="e.g. ${username} rerolled and got ${sprite}!"
               value={rerollConfig.config.chatMessage || ''}
               onChange={(ev) => {
-                const value = ev.target.value;
+                const { value } = ev.target;
                 setRerollConfig({
                   ...rerollConfig,
                   config: { ...rerollConfig.config, chatMessage: value === '' ? null : value },
@@ -399,7 +399,7 @@ export function AlertsRerollSettings() {
                 placeholder="Enter Channel Points Reward name for user pick"
                 value={rerollConfig.config.userPickChannelPointReward || ''}
                 onChange={(ev) => {
-                  const value = ev.target.value;
+                  const { value } = ev.target;
                   setRerollConfig({
                     ...rerollConfig,
                     config: {

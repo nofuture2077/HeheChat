@@ -14,7 +14,11 @@ import './promo.css';
 export default function PromoPage() {
   return (
     <Box className="promo" style={{ background: '#000', minHeight: '100vh', color: '#fff' }}>
-      <style>{`* { box-sizing: border-box; } body { margin: 0; background: #000; } html { scroll-behavior: smooth; } a { color: inherit; }`}</style>
+      <style>
+        {
+          '* { box-sizing: border-box; } body { margin: 0; background: #000; } html { scroll-behavior: smooth; } a { color: inherit; }'
+        }
+      </style>
       <div className="p-progress" aria-hidden />
       <div className="p-grain" aria-hidden />
       <PromoNav {...nav} />

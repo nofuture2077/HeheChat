@@ -22,7 +22,7 @@ export function ConnectSoundAlertsSettings() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(import.meta.env.VITE_BACKEND_URL + '/soundalerts/get?state=' + state)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/soundalerts/get?state=${state}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.overlay_id) {
@@ -37,11 +37,9 @@ export function ConnectSoundAlertsSettings() {
     setLoading(true);
     try {
       await fetch(
-        import.meta.env.VITE_BACKEND_URL +
-          '/soundalerts/set?state=' +
-          state +
-          '&overlayUrl=' +
-          encodeURIComponent(overlayUrl)
+        `${import.meta.env.VITE_BACKEND_URL}/soundalerts/set?state=${
+          state
+        }&overlayUrl=${encodeURIComponent(overlayUrl)}`
       );
       setConnected(true);
     } catch (error) {
@@ -55,9 +53,7 @@ export function ConnectSoundAlertsSettings() {
     if (!confirm('Are you sure you want to disconnect SoundAlerts?')) return;
     setLoading(true);
     try {
-      await fetch(
-        import.meta.env.VITE_BACKEND_URL + '/soundalerts/set?state=' + state + '&overlayUrl='
-      );
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/soundalerts/set?state=${state}&overlayUrl=`);
       setOverlayUrl('');
       setConnected(false);
     } catch (error) {
@@ -79,7 +75,7 @@ export function ConnectSoundAlertsSettings() {
           <Switch
             label="Enable SoundAlerts alerts"
             description="Receive and display SoundAlerts events in chat"
-            checked={!config.deactivatedAlerts['soundalerts']}
+            checked={!config.deactivatedAlerts.soundalerts}
             onChange={(ev) => config.setDeactivatedAlerts('soundalerts', !ev.currentTarget.checked)}
           />
 

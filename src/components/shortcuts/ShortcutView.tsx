@@ -1,8 +1,5 @@
 import { Group, ActionIcon, Text, Modal, TextInput, Button, Stack, Badge } from '@mantine/core';
-import classes from './ShortcutView.module.css';
 import { useContext, useState, useEffect } from 'react';
-import { ConfigContext, ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
-import { ShortCut, shortcutHandler } from '@/commons/shortcuts';
 import {
   IconClipboard,
   IconBookmark,
@@ -16,6 +13,9 @@ import {
   IconCamera,
 } from '@tabler/icons-react';
 import { Dictionary } from 'underscore';
+import classes from './ShortcutView.module.css';
+import { ConfigContext, ChatEmotesContext, LoginContextContext } from '@/ApplicationContext';
+import { ShortCut, shortcutHandler } from '@/commons/shortcuts';
 
 const getIconForType = (type: string, isToggleOn?: boolean) => {
   switch (type) {
@@ -40,9 +40,7 @@ const getIconForType = (type: string, isToggleOn?: boolean) => {
   }
 };
 
-const getConfigValue = (config: any, configKey: string): boolean => {
-  return config[configKey] || false;
-};
+const getConfigValue = (config: any, configKey: string): boolean => config[configKey] || false;
 
 export function ShortcutView() {
   const config = useContext(ConfigContext);
@@ -91,7 +89,7 @@ export function ShortcutView() {
       shortcutHandler.handle(
         shortcutWithParams,
         loginContext.user?.id || '',
-        activeShortcut.params[0] ? activeShortcut.params[0] + ' ' + inputValue : inputValue
+        activeShortcut.params[0] ? `${activeShortcut.params[0]} ${inputValue}` : inputValue
       );
 
       setCheckedShortcuts((prev) => ({

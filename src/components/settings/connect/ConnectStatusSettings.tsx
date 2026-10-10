@@ -13,9 +13,9 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconRefresh, IconAlertCircle } from '@tabler/icons-react';
-import MoblinLogo from '@/res/moblin_logo.svg?react';
 import { useState, useEffect } from 'react';
 import { notifications } from '@mantine/notifications';
+import MoblinLogo from '@/res/moblin_logo.svg?react';
 
 // Import SVG logo assets directly
 import SeventvLogo from '@/res/7tv_logo.svg?react';

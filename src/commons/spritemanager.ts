@@ -1,4 +1,6 @@
+import JSZip from 'jszip';
 import { ExtractedImage, UserSpriteAssignment, Event } from './events';
+import { getUserSpriteAssignment, saveUserSpriteAssignment, completeReroll } from '@/api/sprites';
 // Update ZipCache interface to include sortedPrefixes
 interface ZipCache {
   zipHash: string;
@@ -6,8 +8,6 @@ interface ZipCache {
   sortedPrefixes: number[];
   timestamp: number;
 }
-import { getUserSpriteAssignment, saveUserSpriteAssignment, completeReroll } from '@/api/sprites';
-import JSZip from 'jszip';
 
 // Cache for extracted zip files (LRU cache with max 10 entries)
 const zipCache: ZipCache[] = [];
@@ -56,7 +56,7 @@ export class SpriteManager {
     for (let i = 0; i < input.length; i++) {
       const char = input.charCodeAt(i);
       hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32bit integer
+      hash &= hash; // Convert to 32bit integer
     }
 
     return Math.abs(hash);
@@ -247,7 +247,7 @@ export class SpriteManager {
     const totalWeight = shuffledPool.reduce((sum, item) => sum + item.weight, 0);
 
     // Use the hash to select an image based on weighted probability
-    let targetValue = ((userHash % 1000) / 1000) * totalWeight;
+    const targetValue = ((userHash % 1000) / 1000) * totalWeight;
     let cumulativeWeight = 0;
 
     for (const item of shuffledPool) {

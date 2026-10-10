@@ -80,7 +80,7 @@ function Tile({ title, desc, dark, bg, image, learnMore, scatterLogos, index }: 
           backgroundImage: image
             ? `url(${image})`
             : !scatterLogos && dark
-              ? `linear-gradient(135deg, #120820 0%, #2a0a3a 50%, #1a0030 100%)`
+              ? 'linear-gradient(135deg, #120820 0%, #2a0a3a 50%, #1a0030 100%)'
               : undefined,
         }}
       />

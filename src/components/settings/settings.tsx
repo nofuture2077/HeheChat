@@ -629,7 +629,7 @@ export function Settings(props: SettingsProperties) {
         <div className={classes.aside}>
           {NAV_GROUPS.map((group) => {
             const Icon = group.icon;
-            const isGroupActive = active === group.id || active.startsWith(group.id + '/');
+            const isGroupActive = active === group.id || active.startsWith(`${group.id}/`);
             return (
               <Tooltip key={group.id} label={group.label} position="right" withArrow>
                 <UnstyledButton

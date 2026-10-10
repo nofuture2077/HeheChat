@@ -38,7 +38,7 @@ function bitrateColor(bitrate: number | null, yellow = 1000, red = 400): string 
 
 function formatMbit(bitrate: number | null): string {
   if (bitrate === null) return '? Mbit';
-  return (bitrate / 1000).toFixed(1) + ' Mbit';
+  return `${(bitrate / 1000).toFixed(1)} Mbit`;
 }
 
 interface MoblinScene {
@@ -173,7 +173,7 @@ export function StreamStatusBar() {
   const moblinState = localStorage.getItem('hehe-token_state') || '';
 
   const refreshMoblinStatus = useCallback(() => {
-    fetch(import.meta.env.VITE_BACKEND_URL + '/moblin/get?state=' + moblinState)
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/moblin/get?state=${moblinState}`)
       .then((res) => res.json())
       .then((data) => {
         setMoblinConnected(!!data.connected);
@@ -261,11 +261,9 @@ export function StreamStatusBar() {
   const handleMoblinSceneSwitch = (sceneId: string) => {
     setMoblinActiveSceneId(sceneId);
     fetch(
-      import.meta.env.VITE_BACKEND_URL +
-        '/moblin/setscene?state=' +
-        moblinState +
-        '&id=' +
-        encodeURIComponent(sceneId)
+      `${import.meta.env.VITE_BACKEND_URL}/moblin/setscene?state=${
+        moblinState
+      }&id=${encodeURIComponent(sceneId)}`
     ).catch(() => {});
   };
 
@@ -276,25 +274,23 @@ export function StreamStatusBar() {
   const handleMoblinZoom = (x: number) => {
     setMoblinZoom(x);
     setMoblinActivePreset(null);
-    fetch(
-      import.meta.env.VITE_BACKEND_URL + '/moblin/setzoom?state=' + moblinState + '&x=' + x
-    ).catch(() => {});
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/moblin/setzoom?state=${moblinState}&x=${x}`).catch(
+      () => {}
+    );
   };
 
   const handleMoblinZoomLevel = (id: string, x: number | null) => {
     setMoblinActivePreset(id);
     if (x !== null) {
       setMoblinZoom(x);
-      fetch(
-        import.meta.env.VITE_BACKEND_URL + '/moblin/setzoom?state=' + moblinState + '&x=' + x
-      ).catch(() => {});
+      fetch(`${import.meta.env.VITE_BACKEND_URL}/moblin/setzoom?state=${moblinState}&x=${x}`).catch(
+        () => {}
+      );
     } else {
       fetch(
-        import.meta.env.VITE_BACKEND_URL +
-          '/moblin/setzoompreset?state=' +
-          moblinState +
-          '&id=' +
-          encodeURIComponent(id)
+        `${import.meta.env.VITE_BACKEND_URL}/moblin/setzoompreset?state=${
+          moblinState
+        }&id=${encodeURIComponent(id)}`
       ).catch(() => {});
     }
   };

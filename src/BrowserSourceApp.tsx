@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import PubSub from 'pubsub-js';
+import { useDocumentVisibility, useNetwork } from '@mantine/hooks';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
 import { ProfileContext, ChatEmotesContext } from './ApplicationContext';
 import VisualAlertPlayer from './components/browsersource/VisualAlertPlayer';
@@ -7,7 +8,6 @@ import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { AlertSystem } from './components/alerts/alertplayer';
 import { BrowserSourceAlertStatusIndicator } from './components/alerts/BrowserSourceAlertStatusIndicator';
 import { initializeStoragePatches } from './commons/patches';
-import { useDocumentVisibility, useNetwork } from '@mantine/hooks';
 import { version } from '../package.json';
 
 interface BrowserSourceProps {
@@ -112,10 +112,10 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
 
     // Set up message handler
     backendWorkerRef.current.onmessage = (event) => {
-      const data = event.data;
+      const { data } = event;
 
       if (data.type === 'profile') {
-        const profile: Profile = data.profile;
+        const { profile } = data;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
         (profile.config.channels || []).forEach((channel: string) => {
@@ -127,7 +127,7 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
         if (!AlertSystem.status()) {
           AlertSystem.initialize();
         }
-        const profile = data.profile;
+        const { profile } = data;
         setProfile(profile);
         AlertSystem.updateProfile(profile);
         (profile.config.channels || []).forEach((channel: string) => {

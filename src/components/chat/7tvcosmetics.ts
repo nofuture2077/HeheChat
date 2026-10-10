@@ -132,7 +132,7 @@ export class SevenTVCosmeticsStorage {
       return new Promise((resolve, reject) => {
         const request = store.get(userId);
         request.onsuccess = () => {
-          const result = request.result;
+          const { result } = request;
           // Check if cache is still valid
           if (result && result.expiresAt > Date.now()) {
             resolve(result);
@@ -256,7 +256,7 @@ export class SevenTVCosmeticsUtils {
           let rgbaColor = this.argbToRgba(shadowData.color);
           rgbaColor = rgbaColor.replace(
             /rgba\((\d+), (\d+), (\d+), (\d+(\.\d+)?)\)/,
-            `rgba($1, $2, $3)`
+            'rgba($1, $2, $3)'
           );
           return `drop-shadow(${rgbaColor} ${shadowData.x_offset}px ${shadowData.y_offset}px ${shadowData.radius}px)`;
         })

@@ -1,8 +1,8 @@
+import { useContext, useEffect } from 'react';
+import PubSub from 'pubsub-js';
 import { HomePage } from './pages/Home.page';
 import { ChatPage } from './pages/Chat.page';
 import { LoginContextContext } from './ApplicationContext';
-import { useContext, useEffect } from 'react';
-import PubSub from 'pubsub-js';
 
 interface RouterProps {}
 

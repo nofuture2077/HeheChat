@@ -1,14 +1,14 @@
-import classes from './ChatMessage.module.css';
-import { ConfigContext, ChatEmotesContext } from '../../ApplicationContext';
 import { useContext } from 'react';
-import { formatTime } from '../../commons/helper';
-import { YTChatMessage, YTMessagePart } from '../../commons/message';
 import {
   IconBrandYoutube,
   IconShieldCheckFilled,
   IconCrown,
   IconShieldFilled,
 } from '@tabler/icons-react';
+import classes from './ChatMessage.module.css';
+import { ConfigContext, ChatEmotesContext } from '../../ApplicationContext';
+import { formatTime } from '../../commons/helper';
+import { YTChatMessage, YTMessagePart } from '../../commons/message';
 
 interface YTChatMessageProps {
   msg: YTChatMessage;
