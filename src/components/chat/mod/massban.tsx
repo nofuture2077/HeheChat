@@ -117,7 +117,7 @@ export function MassBanView(props: MassBanViewProps) {
     };
 
     loadMessages();
-  }, [config.channels, config.ignoredUsers, 200]);
+  }, [config.channels, config.ignoredUsers, config.maxMessages]);
 
   // Search for messages matching the phrase
   const searchMessages = () => {
