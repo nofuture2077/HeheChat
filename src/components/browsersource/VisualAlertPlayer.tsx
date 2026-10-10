@@ -70,19 +70,21 @@ export default function VisualAlertPlayer() {
     
     const file = AlertSystem.alertConfig[channel].data.files[ref];
     
-    // Check if file is a zip file and we have a pre-selected sprite filename
-    if (file.mime === 'application/zip' && event?.selectedSpriteFilename) {
+    // Zip files show a sprite: the pre-selected one, otherwise (e.g. editor preview) the first one
+    if (file.mime === 'application/zip') {
       try {
-        // Use the SpriteManager's getSpriteData method which already handles caching
+        // Use the SpriteManager's methods which already handle caching
         // This avoids unzipping the same data repeatedly
-        const spriteData = await spriteManager.getSpriteData(
-          file.data,
-          channel,
-          event.username,
-          event.useLastSpriteFilename || false,
-          event.userSeed,
-          event.selectedSpriteFilename,
-        );
+        const spriteData = event?.selectedSpriteFilename
+          ? await spriteManager.getSpriteData(
+            file.data,
+            channel,
+            event.username,
+            event.useLastSpriteFilename || false,
+            event.userSeed,
+            event.selectedSpriteFilename,
+          )
+          : await spriteManager.getPreviewSprite(file.data);
         
         if (!spriteData) {
           console.error('Failed to get sprite data');

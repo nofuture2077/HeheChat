@@ -303,6 +303,69 @@ export class SpriteManager {
   }
 
   /**
+   * Extract the images of a zip file, cached by zip hash
+   */
+  private async getCachedZip(zipData: string): Promise<ZipCache | null> {
+    // Generate a hash for the zip file to use as cache key
+    const zipHash = this.generateSimpleHash(zipData.substring(0, 1000)).toString();
+
+    // Check if we have this zip in cache
+    let cacheEntry = zipCache.find(entry => entry.zipHash === zipHash);
+
+    // If not in cache or cache is empty, extract images and cache them
+    if (!cacheEntry || cacheEntry.images.length === 0) {
+      const extractedImages = await this.extractImagesFromZip(zipData);
+
+      if (extractedImages.length === 0) {
+        console.warn('No valid images found in zip file');
+        return null;
+      }
+
+      // Create new cache entry with sorted prefixes
+      cacheEntry = {
+        zipHash,
+        images: extractedImages,
+        sortedPrefixes: this.extractAllPrefixesFromImages(extractedImages),
+        timestamp: Date.now()
+      };
+
+      // Add to cache (remove oldest entry if cache is full)
+      if (zipCache.length >= MAX_CACHE_SIZE) {
+        zipCache.sort((a, b) => a.timestamp - b.timestamp);
+        zipCache.shift(); // Remove oldest entry
+      }
+
+      zipCache.push(cacheEntry);
+    } else {
+      // Update timestamp for LRU cache
+      cacheEntry.timestamp = Date.now();
+    }
+    return cacheEntry;
+  }
+
+  /**
+   * First sprite of a zip without any user assignment (used for previews, no backend calls)
+   */
+  public async getPreviewSprite(zipData: string): Promise<{
+    selectedImage: ExtractedImage;
+    prefixClass: string;
+    selectedFilename: string;
+  } | null> {
+    try {
+      const cacheEntry = await this.getCachedZip(zipData);
+      if (!cacheEntry) {
+        return null;
+      }
+      const selectedImage = [...cacheEntry.images].sort((a, b) => a.name.localeCompare(b.name))[0];
+      const prefixRank = this.getPrefixRank(selectedImage.name, cacheEntry.sortedPrefixes);
+      return { selectedImage, prefixClass: `prefix-${prefixRank}`, selectedFilename: selectedImage.name };
+    } catch (err) {
+      console.error('Error getting preview sprite:', err);
+      return null;
+    }
+  }
+
+  /**
    * Get sprite data for a user
    * Returns the selected image and additional metadata
    */
@@ -319,39 +382,9 @@ export class SpriteManager {
     selectedFilename: string;
   } | null> {
     try {
-      // Generate a hash for the zip file to use as cache key
-      const zipHash = this.generateSimpleHash(zipData.substring(0, 1000)).toString();
-      
-      // Check if we have this zip in cache
-      let cacheEntry = zipCache.find(entry => entry.zipHash === zipHash);
-      
-      // If not in cache or cache is empty, extract images and cache them
-      if (!cacheEntry || cacheEntry.images.length === 0) {
-        const extractedImages = await this.extractImagesFromZip(zipData);
-        
-        if (extractedImages.length === 0) {
-          console.warn('No valid images found in zip file');
-          return null;
-        }
-        
-        // Create new cache entry with sorted prefixes
-        cacheEntry = {
-          zipHash,
-          images: extractedImages,
-          sortedPrefixes: this.extractAllPrefixesFromImages(extractedImages),
-          timestamp: Date.now()
-        };
-        
-        // Add to cache (remove oldest entry if cache is full)
-        if (zipCache.length >= MAX_CACHE_SIZE) {
-          zipCache.sort((a, b) => a.timestamp - b.timestamp);
-          zipCache.shift(); // Remove oldest entry
-        }
-        
-        zipCache.push(cacheEntry);
-      } else {
-        // Update timestamp for LRU cache
-        cacheEntry.timestamp = Date.now();
+      const cacheEntry = await this.getCachedZip(zipData);
+      if (!cacheEntry) {
+        return null;
       }
       
       // Sort images by filename for consistent ordering
