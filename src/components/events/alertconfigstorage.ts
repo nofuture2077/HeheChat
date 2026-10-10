@@ -65,8 +65,7 @@ export class AlertConfigStorage {
   async getCachedConfig(channel: string): Promise<{ config: any; meta: AlertConfigMeta } | null> {
     try {
       const store = await this.getStore();
-      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route IDB rejections into the catch (returning null) and change behavior
-      return new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         const request = store.get(channel);
         request.onsuccess = () => {
           const { result } = request;

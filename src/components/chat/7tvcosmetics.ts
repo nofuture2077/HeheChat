@@ -106,8 +106,7 @@ export class SevenTVCosmeticsStorage {
   async storeUserCosmetics(userId: string, cosmetics: SevenTVUserCosmetics): Promise<void> {
     try {
       const store = await this.getStore('readwrite');
-      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route request rejections into catch, changing behavior
-      return new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         const now = Date.now();
         const request = store.put({
           userId,
@@ -131,8 +130,7 @@ export class SevenTVCosmeticsStorage {
   async getUserCosmetics(userId: string): Promise<UserCosmetics | null> {
     try {
       const store = await this.getStore();
-      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route request rejections into catch, changing behavior
-      return new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         const request = store.get(userId);
         request.onsuccess = () => {
           const { result } = request;
@@ -158,8 +156,7 @@ export class SevenTVCosmeticsStorage {
   async clearUserCosmetics(userId: string): Promise<void> {
     try {
       const store = await this.getStore('readwrite');
-      // eslint-disable-next-line @typescript-eslint/return-await -- awaiting would route request rejections into catch, changing behavior
-      return new Promise((resolve, reject) => {
+      return await new Promise((resolve, reject) => {
         const request = store.delete(userId);
         request.onsuccess = () => resolve();
         request.onerror = () => reject(request.error);
