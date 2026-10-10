@@ -18,6 +18,8 @@
     "scss/at-rule-no-unknown": null,
     "value-keyword-case": null,
     "media-feature-range-notation": null,
+    "keyframes-name-pattern": null,
+    "number-max-precision": null,
     "selector-pseudo-class-no-unknown": [
       true,
       {

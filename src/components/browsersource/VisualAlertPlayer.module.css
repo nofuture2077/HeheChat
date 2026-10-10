@@ -48,6 +48,7 @@ body, html {
 
 .left {
   align-items: flex-start;
+
   .contentWrapper {
     padding-left: 2rem;
   }
@@ -93,25 +94,25 @@ body, html {
 .text p:first-child { margin: 0; }
 
 .font-headline-bangers .text p:first-child {
-  font-family: "Bangers", serif;
+  font-family: Bangers, serif;
   font-weight: 600;
   font-style: normal;
 }
 
 .font-text-bangers .text p:last-child {
-  font-family: "Bangers", serif;
+  font-family: Bangers, serif;
   font-weight: 300;
   font-style: normal;
 }
 
 .font-headline-molle .text p:first-child {
-  font-family: "Molle", cursive;
+  font-family: Molle, cursive;
   font-weight: 600;
   font-style: normal;
 }
 
 .font-text-molle .text p:last-child {
-  font-family: "Molle", cursive;
+  font-family: Molle, cursive;
   font-weight: 300;
   font-style: normal;
 }
@@ -153,13 +154,13 @@ body, html {
 }
 
 .font-headline-ultra .text p:first-child {
-  font-family: "Ultra", serif;
+  font-family: Ultra, serif;
   font-weight: 600;
   font-style: normal;
 }
 
 .font-text-ultra .text p:last-child {
-  font-family: "Ultra", serif;
+  font-family: Ultra, serif;
   font-weight: 300;
   font-style: normal;
 }
@@ -201,25 +202,25 @@ body, html {
 }
 
 .font-headline-unifrakturcook .text p:first-child {
-  font-family: "UnifrakturCook", serif;
+  font-family: UnifrakturCook, serif;
   font-weight: 600;
   font-style: normal;
 }
 
 .font-text-unifrakturcook .text p:last-child {
-  font-family: "UnifrakturCook", serif;
+  font-family: UnifrakturCook, serif;
   font-weight: 300;
   font-style: normal;
 }
 
 .font-headline-lobster .text p:first-child {
-  font-family: "Lobster", cursive;
+  font-family: Lobster, cursive;
   font-weight: 600;
   font-style: normal;
 }
 
 .font-text-lobster .text p:last-child {
-  font-family: "Lobster", cursive;
+  font-family: Lobster, cursive;
   font-weight: 300;
   font-style: normal;
 }
@@ -237,25 +238,25 @@ body, html {
 }
 
 .font-headline-creepster .text p:first-child {
-  font-family: "Creepster", cursive;
+  font-family: Creepster, cursive;
   font-weight: 600;
   font-style: normal;
 }
 
 .font-text-creepster .text p:last-child {
-  font-family: "Creepster", cursive;
+  font-family: Creepster, cursive;
   font-weight: 300;
   font-style: normal;
 }
 
 .font-headline-monoton .text p:first-child {
-  font-family: "Monoton", cursive;
+  font-family: Monoton, cursive;
   font-weight: 600;
   font-style: normal;
 }
 
 .font-text-monoton .text p:last-child {
-  font-family: "Monoton", cursive;
+  font-family: Monoton, cursive;
   font-weight: 300;
   font-style: normal;
 }
@@ -273,13 +274,13 @@ body, html {
 }
 
 .font-headline-orbitron .text p:first-child {
-  font-family: "Orbitron", sans-serif;
+  font-family: Orbitron, sans-serif;
   font-weight: 600;
   font-style: normal;
 }
 
 .font-text-orbitron .text p:last-child {
-  font-family: "Orbitron", sans-serif;
+  font-family: Orbitron, sans-serif;
   font-weight: 300;
   font-style: normal;
 }
@@ -297,13 +298,13 @@ body, html {
 }
 
 .font-headline-bungee .text p:first-child {
-  font-family: "Bungee", cursive;
+  font-family: Bungee, cursive;
   font-weight: 600;
   font-style: normal;
 }
 
 .font-text-bungee .text p:last-child {
-  font-family: "Bungee", cursive;
+  font-family: Bungee, cursive;
   font-weight: 300;
   font-style: normal;
 }
@@ -433,7 +434,7 @@ body, html {
 }
 
 .effect-psychedelic .text {
-  background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff0080, #8000ff);
+  background: linear-gradient(45deg, #f0f, #0ff, #ff0, #ff0080, #8000ff);
   background-size: 400% 400%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -443,9 +444,9 @@ body, html {
 
 .effect-rainbow .text {
   background: linear-gradient(90deg, 
-    #ff0000, #ff8000, #ffff00, #80ff00, 
-    #00ff00, #00ff80, #00ffff, #0080ff, 
-    #0000ff, #8000ff, #ff00ff, #ff0080);
+    #f00, #ff8000, #ff0, #80ff00, 
+    #0f0, #00ff80, #0ff, #0080ff, 
+    #00f, #8000ff, #f0f, #ff0080);
   background-size: 1200% 100%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -454,14 +455,14 @@ body, html {
 }
 
 .effect-neon .text {
-  color: #00ffff;
+  color: #0ff;
   text-shadow: 
-    0 0 5px #00ffff,
-    0 0 10px #00ffff,
-    0 0 15px #00ffff,
-    0 0 20px #ff00ff,
-    0 0 35px #ff00ff,
-    0 0 40px #ff00ff;
+    0 0 5px #0ff,
+    0 0 10px #0ff,
+    0 0 15px #0ff,
+    0 0 20px #f0f,
+    0 0 35px #f0f,
+    0 0 40px #f0f;
   animation: textNeon 2s ease-in-out infinite alternate;
 }
 
@@ -474,7 +475,7 @@ body, html {
 }
 
 .effect-trippy .text {
-  background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff0080);
+  background: linear-gradient(45deg, #f0f, #0ff, #ff0, #ff0080);
   background-size: 400% 400%;
   -webkit-background-clip: text;
   background-clip: text;
@@ -636,7 +637,7 @@ body, html {
 }
 
 .image-effect-neon .image {
-  filter: hue-rotate(0deg) saturate(3) contrast(2) brightness(1.6) drop-shadow(0 0 20px #ff00ff);
+  filter: hue-rotate(0deg) saturate(3) contrast(2) brightness(1.6) drop-shadow(0 0 20px #f0f);
   animation: imageNeon 2s ease-in-out infinite alternate;
 }
 
@@ -740,18 +741,22 @@ body, html {
     filter: hue-rotate(0deg) saturate(3) contrast(2) brightness(1.6);
     transform: scale(1) rotate(0deg);
   }
+
   25% { 
     filter: hue-rotate(120deg) saturate(4) contrast(2.5) brightness(1.8);
     transform: scale(1.1) rotate(2deg);
   }
+
   50% { 
     filter: hue-rotate(240deg) saturate(3.5) contrast(2.2) brightness(1.7);
     transform: scale(0.95) rotate(-1deg);
   }
+
   75% { 
     filter: hue-rotate(300deg) saturate(4.2) contrast(2.8) brightness(1.9);
     transform: scale(1.05) rotate(1deg);
   }
+
   100% { 
     filter: hue-rotate(360deg) saturate(3) contrast(2) brightness(1.6);
     transform: scale(1) rotate(0deg);
@@ -763,18 +768,22 @@ body, html {
     filter: hue-rotate(0deg) saturate(4) contrast(2.5) brightness(1.8);
     transform: rotate(0deg) scale(1);
   }
+
   25% { 
     filter: hue-rotate(90deg) saturate(5) contrast(3) brightness(2);
     transform: rotate(90deg) scale(1.1);
   }
+
   50% { 
     filter: hue-rotate(180deg) saturate(4.5) contrast(2.8) brightness(1.9);
     transform: rotate(180deg) scale(0.9);
   }
+
   75% { 
     filter: hue-rotate(270deg) saturate(5.2) contrast(3.2) brightness(2.1);
     transform: rotate(270deg) scale(1.05);
   }
+
   100% { 
     filter: hue-rotate(360deg) saturate(4) contrast(2.5) brightness(1.8);
     transform: rotate(360deg) scale(1);
@@ -793,15 +802,17 @@ body, html {
 
 @keyframes imageNeon {
   0% { 
-    filter: hue-rotate(0deg) saturate(3) contrast(2) brightness(1.6) drop-shadow(0 0 20px #ff00ff);
+    filter: hue-rotate(0deg) saturate(3) contrast(2) brightness(1.6) drop-shadow(0 0 20px #f0f);
     transform: scale(1);
   }
+
   50% { 
-    filter: hue-rotate(180deg) saturate(3.5) contrast(2.3) brightness(1.8) drop-shadow(0 0 30px #00ffff);
+    filter: hue-rotate(180deg) saturate(3.5) contrast(2.3) brightness(1.8) drop-shadow(0 0 30px #0ff);
     transform: scale(1.05);
   }
+
   100% { 
-    filter: hue-rotate(360deg) saturate(3) contrast(2) brightness(1.6) drop-shadow(0 0 20px #ff00ff);
+    filter: hue-rotate(360deg) saturate(3) contrast(2) brightness(1.6) drop-shadow(0 0 20px #f0f);
     transform: scale(1);
   }
 }
@@ -811,42 +822,52 @@ body, html {
     filter: saturate(2) contrast(1.5) brightness(1.2);
     transform: translate(0);
   }
+
   10% { 
     filter: saturate(4) contrast(2.5) brightness(1.8) hue-rotate(90deg);
     transform: translate(-3px, 2px);
   }
+
   20% { 
     filter: saturate(3) contrast(2) brightness(1.5) hue-rotate(180deg);
     transform: translate(2px, -2px);
   }
+
   30% { 
     filter: saturate(5) contrast(3) brightness(2) hue-rotate(270deg);
     transform: translate(-2px, -3px);
   }
+
   40% { 
     filter: saturate(2.5) contrast(1.8) brightness(1.3) hue-rotate(45deg);
     transform: translate(3px, 1px);
   }
+
   50% { 
     filter: saturate(4.5) contrast(2.8) brightness(1.9) hue-rotate(135deg);
     transform: translate(-1px, 3px);
   }
+
   60% { 
     filter: saturate(3.5) contrast(2.2) brightness(1.6) hue-rotate(225deg);
     transform: translate(2px, -1px);
   }
+
   70% { 
     filter: saturate(5.5) contrast(3.5) brightness(2.2) hue-rotate(315deg);
     transform: translate(-3px, -2px);
   }
+
   80% { 
     filter: saturate(2.8) contrast(1.9) brightness(1.4) hue-rotate(60deg);
     transform: translate(1px, 2px);
   }
+
   90% { 
     filter: saturate(4.2) contrast(2.6) brightness(1.7) hue-rotate(300deg);
     transform: translate(-2px, 1px);
   }
+
   100% { 
     filter: saturate(2) contrast(1.5) brightness(1.2);
     transform: translate(0);
@@ -858,18 +879,22 @@ body, html {
     filter: saturate(3) contrast(2) brightness(1.5) hue-rotate(0deg);
     transform: scale(1);
   }
+
   25% { 
     filter: saturate(4) contrast(2.5) brightness(1.8) hue-rotate(90deg);
     transform: scale(1.1);
   }
+
   50% { 
     filter: saturate(3.5) contrast(2.2) brightness(1.6) hue-rotate(180deg);
     transform: scale(0.95);
   }
+
   75% { 
     filter: saturate(4.5) contrast(2.8) brightness(1.9) hue-rotate(270deg);
     transform: scale(1.05);
   }
+
   100% { 
     filter: saturate(3) contrast(2) brightness(1.5) hue-rotate(360deg);
     transform: scale(1);
@@ -881,22 +906,27 @@ body, html {
     filter: hue-rotate(0deg) saturate(3.5) contrast(2.2) brightness(1.7);
     transform: rotate(0deg) skew(0deg, 0deg);
   }
+
   20% { 
     filter: hue-rotate(72deg) saturate(4) contrast(2.5) brightness(1.9);
     transform: rotate(5deg) skew(2deg, 1deg);
   }
+
   40% { 
     filter: hue-rotate(144deg) saturate(4.5) contrast(2.8) brightness(2.1);
     transform: rotate(-3deg) skew(-1deg, 3deg);
   }
+
   60% { 
     filter: hue-rotate(216deg) saturate(4.2) contrast(2.6) brightness(1.8);
     transform: rotate(7deg) skew(3deg, -2deg);
   }
+
   80% { 
     filter: hue-rotate(288deg) saturate(3.8) contrast(2.4) brightness(2);
     transform: rotate(-2deg) skew(-2deg, 2deg);
   }
+
   100% { 
     filter: hue-rotate(360deg) saturate(3.5) contrast(2.2) brightness(1.7);
     transform: rotate(0deg) skew(0deg, 0deg);
@@ -906,66 +936,93 @@ body, html {
 /* Text effect keyframes */
 @keyframes textParty {
   0% { 
-    color: #ff00ff;
-    text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+    color: #f0f;
+    text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
     transform: scale(1);
   }
+
   25% { 
-    color: #00ffff;
-    text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+    color: #0ff;
+    text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
     transform: scale(1.05);
   }
+
   50% { 
-    color: #ffff00;
-    text-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00;
+    color: #ff0;
+    text-shadow: 0 0 10px #ff0, 0 0 20px #ff0;
     transform: scale(0.95);
   }
+
   75% { 
     color: #ff0080;
     text-shadow: 0 0 10px #ff0080, 0 0 20px #ff0080;
     transform: scale(1.02);
   }
+
   100% { 
-    color: #ff00ff;
-    text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+    color: #f0f;
+    text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
     transform: scale(1);
   }
 }
 
 @keyframes textHallucination {
   0% { 
-    color: #ff00ff;
-    text-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff;
+    color: #f0f;
+    text-shadow: 0 0 15px #f0f, 0 0 30px #f0f;
     transform: rotate(0deg) scale(1);
   }
+
   25% { 
     color: #00ff80;
     text-shadow: 0 0 15px #00ff80, 0 0 30px #00ff80;
     transform: rotate(1deg) scale(1.1);
   }
+
   50% { 
     color: #8000ff;
     text-shadow: 0 0 15px #8000ff, 0 0 30px #8000ff;
     transform: rotate(-0.5deg) scale(0.95);
   }
+
   75% { 
     color: #ff8000;
     text-shadow: 0 0 15px #ff8000, 0 0 30px #ff8000;
     transform: rotate(0.8deg) scale(1.05);
   }
+
   100% { 
-    color: #ff00ff;
-    text-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff;
+    color: #f0f;
+    text-shadow: 0 0 15px #f0f, 0 0 30px #f0f;
     transform: rotate(0deg) scale(1);
   }
 }
 
 @keyframes textPsychedelic {
-  0% { background-position: 0% 50%; transform: rotate(0deg); }
-  25% { background-position: 100% 50%; transform: rotate(1deg); }
-  50% { background-position: 200% 50%; transform: rotate(-0.5deg); }
-  75% { background-position: 300% 50%; transform: rotate(0.8deg); }
-  100% { background-position: 400% 50%; transform: rotate(0deg); }
+  0% {
+    background-position: 0% 50%;
+    transform: rotate(0deg);
+  }
+
+  25% {
+    background-position: 100% 50%;
+    transform: rotate(1deg);
+  }
+
+  50% {
+    background-position: 200% 50%;
+    transform: rotate(-0.5deg);
+  }
+
+  75% {
+    background-position: 300% 50%;
+    transform: rotate(0.8deg);
+  }
+
+  100% {
+    background-position: 400% 50%;
+    transform: rotate(0deg);
+  }
 }
 
 @keyframes textRainbow {
@@ -977,32 +1034,34 @@ body, html {
 @keyframes textNeon {
   0% { 
     text-shadow: 
-      0 0 5px #00ffff,
-      0 0 10px #00ffff,
-      0 0 15px #00ffff,
-      0 0 20px #ff00ff,
-      0 0 35px #ff00ff,
-      0 0 40px #ff00ff;
+      0 0 5px #0ff,
+      0 0 10px #0ff,
+      0 0 15px #0ff,
+      0 0 20px #f0f,
+      0 0 35px #f0f,
+      0 0 40px #f0f;
     transform: scale(1);
   }
+
   50% { 
     text-shadow: 
-      0 0 8px #ff00ff,
-      0 0 15px #ff00ff,
-      0 0 25px #ff00ff,
-      0 0 30px #00ffff,
-      0 0 45px #00ffff,
-      0 0 50px #00ffff;
+      0 0 8px #f0f,
+      0 0 15px #f0f,
+      0 0 25px #f0f,
+      0 0 30px #0ff,
+      0 0 45px #0ff,
+      0 0 50px #0ff;
     transform: scale(1.02);
   }
+
   100% { 
     text-shadow: 
-      0 0 5px #00ffff,
-      0 0 10px #00ffff,
-      0 0 15px #00ffff,
-      0 0 20px #ff00ff,
-      0 0 35px #ff00ff,
-      0 0 40px #ff00ff;
+      0 0 5px #0ff,
+      0 0 10px #0ff,
+      0 0 15px #0ff,
+      0 0 20px #f0f,
+      0 0 35px #f0f,
+      0 0 40px #f0f;
     transform: scale(1);
   }
 }
@@ -1013,51 +1072,61 @@ body, html {
     text-shadow: 2px 2px 2px #333;
     transform: translate(0);
   }
+
   10% { 
-    color: #ff00ff;
-    text-shadow: -2px 2px 2px #ff00ff;
+    color: #f0f;
+    text-shadow: -2px 2px 2px #f0f;
     transform: translate(-2px, 1px);
   }
+
   20% { 
-    color: #00ffff;
-    text-shadow: 2px -2px 2px #00ffff;
+    color: #0ff;
+    text-shadow: 2px -2px 2px #0ff;
     transform: translate(1px, -2px);
   }
+
   30% { 
-    color: #ffff00;
-    text-shadow: -2px -2px 2px #ffff00;
+    color: #ff0;
+    text-shadow: -2px -2px 2px #ff0;
     transform: translate(-1px, -1px);
   }
+
   40% { 
     color: #ff0080;
     text-shadow: 3px 1px 2px #ff0080;
     transform: translate(2px, 0px);
   }
+
   50% { 
     color: #8000ff;
     text-shadow: -1px 3px 2px #8000ff;
     transform: translate(0px, 2px);
   }
+
   60% { 
     color: #00ff80;
     text-shadow: 2px -1px 2px #00ff80;
     transform: translate(1px, -1px);
   }
+
   70% { 
     color: #ff8000;
     text-shadow: -3px -1px 2px #ff8000;
     transform: translate(-2px, 0px);
   }
+
   80% { 
     color: #0080ff;
     text-shadow: 1px 2px 2px #0080ff;
     transform: translate(0px, 1px);
   }
+
   90% { 
     color: #ff4080;
     text-shadow: -1px -2px 2px #ff4080;
     transform: translate(-1px, -1px);
   }
+
   100% { 
     color: white;
     text-shadow: 2px 2px 2px #333;
@@ -1067,28 +1136,32 @@ body, html {
 
 @keyframes textDisco {
   0% { 
-    color: #ff00ff;
-    text-shadow: 0 0 20px #ff00ff;
+    color: #f0f;
+    text-shadow: 0 0 20px #f0f;
     transform: scale(1);
   }
+
   25% { 
-    color: #00ffff;
-    text-shadow: 0 0 20px #00ffff;
+    color: #0ff;
+    text-shadow: 0 0 20px #0ff;
     transform: scale(1.1);
   }
+
   50% { 
-    color: #ffff00;
-    text-shadow: 0 0 20px #ffff00;
+    color: #ff0;
+    text-shadow: 0 0 20px #ff0;
     transform: scale(0.95);
   }
+
   75% { 
     color: #ff0080;
     text-shadow: 0 0 20px #ff0080;
     transform: scale(1.05);
   }
+
   100% { 
-    color: #ff00ff;
-    text-shadow: 0 0 20px #ff00ff;
+    color: #f0f;
+    text-shadow: 0 0 20px #f0f;
     transform: scale(1);
   }
 }
@@ -1098,22 +1171,27 @@ body, html {
     background-position: 0% 50%; 
     transform: rotate(0deg) skew(0deg);
   }
+
   20% { 
     background-position: 80% 30%; 
     transform: rotate(1deg) skew(1deg);
   }
+
   40% { 
     background-position: 160% 70%; 
     transform: rotate(-0.5deg) skew(-0.5deg);
   }
+
   60% { 
     background-position: 240% 20%; 
     transform: rotate(0.8deg) skew(0.8deg);
   }
+
   80% { 
     background-position: 320% 80%; 
     transform: rotate(-0.3deg) skew(-0.3deg);
   }
+
   100% { 
     background-position: 400% 50%; 
     transform: rotate(0deg) skew(0deg);
@@ -1164,6 +1242,7 @@ body, html {
     opacity: 0;
     transform: translateY(30px);
   }
+
   100% { 
     opacity: 1;
     transform: translateY(0);
@@ -1175,6 +1254,7 @@ body, html {
     opacity: 0;
     transform: translateY(-30px);
   }
+
   100% { 
     opacity: 1;
     transform: translateY(0);
@@ -1186,6 +1266,7 @@ body, html {
     opacity: 0;
     transform: translateX(-30px);
   }
+
   100% { 
     opacity: 1;
     transform: translateX(0);
@@ -1197,6 +1278,7 @@ body, html {
     opacity: 0;
     transform: translateX(30px);
   }
+
   100% { 
     opacity: 1;
     transform: translateX(0);
@@ -1208,6 +1290,7 @@ body, html {
     opacity: 0;
     transform: scale(0.8);
   }
+
   100% { 
     opacity: 1;
     transform: scale(1);
@@ -1219,6 +1302,7 @@ body, html {
     opacity: 0;
     transform: rotate(-10deg) scale(0.8);
   }
+
   100% { 
     opacity: 1;
     transform: rotate(0) scale(1);
@@ -1413,6 +1497,7 @@ body, html {
     opacity: 0;
     transform: translateY(10px);
   }
+
   100% { 
     opacity: 1;
     transform: translateY(0);
@@ -1657,7 +1742,7 @@ body, html {
 }
 
 .image-effect-neon video {
-  filter: hue-rotate(0deg) saturate(3) contrast(2) brightness(1.6) drop-shadow(0 0 20px #ff00ff);
+  filter: hue-rotate(0deg) saturate(3) contrast(2) brightness(1.6) drop-shadow(0 0 20px #f0f);
   animation: imageNeon 2s ease-in-out infinite alternate;
 }
 

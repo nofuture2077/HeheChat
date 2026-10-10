@@ -51,6 +51,7 @@
 
 .msg.highlight {
     background-color: light-dark(#9d9cbc, #383754);
+
     .highlightBadge {
         font-size: 10px;
         position: absolute;

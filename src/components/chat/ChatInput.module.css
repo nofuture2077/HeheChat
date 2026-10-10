@@ -20,7 +20,7 @@
 }
 
 /* Firefox-specific styles */
-@-moz-document url-prefix() {
+@document url-prefix() {
     .channelPickerWrapper {
         display: block;
         width: 44px;

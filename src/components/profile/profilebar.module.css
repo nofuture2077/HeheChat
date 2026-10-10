@@ -1,9 +1,11 @@
 .profile {
     margin: 8px;
+
     &:hover {
         background-color: #DB32BC;
         cursor: pointer;
     }
+
     &.active {
         background-color: #ff1493;
     }

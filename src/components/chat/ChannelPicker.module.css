@@ -16,6 +16,7 @@
   padding: 4px 8px;
   margin: 0;
   border-radius: 10px !important;
+
   >.mantine-Menu-itemSection:where([data-position='left']) {
       margin-inline-end: 0 !important;
   }
@@ -38,7 +39,7 @@
 }
 
 /* Firefox-specific styles */
-@-moz-document url-prefix() {
+@document url-prefix() {
   .menuItem {
     display: flex;
     align-items: center;
