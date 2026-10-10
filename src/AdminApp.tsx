@@ -1,7 +1,7 @@
 import '@mantine/core/styles.css';
 import '@mantine/notifications/styles.css';
 import '@mantine/charts/styles.css';
-import { MantineProvider } from '@mantine/core';
+import { Center, Loader, MantineProvider } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
 import { useState, useEffect } from 'react';
 import { AdminRouter } from './AdminRouter';
@@ -77,27 +77,33 @@ export default function AdminApp(props: AdminAppProps) {
         return new ApiClient({ authProvider: getAuthProvider()});
     };
 
-    // Check if user is admin (implement your own admin check logic here)
+    // undefined = not checked yet
+    const [adminStatus, setAdminStatus] = useState<boolean | undefined>(undefined);
+
+    useEffect(() => {
+        if (!loginContext.accessToken) {
+            setAdminStatus(undefined);
+            return;
+        }
+        const token = localStorage.getItem('hehe-token_state') || '';
+        fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/status?token=${encodeURIComponent(token)}`)
+            .then((res) => (res.ok ? res.json() : undefined))
+            .then((data) => setAdminStatus(!!data?.data?.isAdmin))
+            .catch(() => setAdminStatus(false));
+    }, [loginContext.accessToken]);
+
+    // Server-side check via /api/admin/status; the backend enforces admin on every admin endpoint anyway
     const isAdmin = () => {
-        // For development, allow bypass
         if (import.meta.env.DEV && import.meta.env.VITE_BYPASS_LOGIN === 'true') {
             return true;
         }
-        
-        // In production, check if user is logged in and has admin privileges
-        // You can modify this to check against a list of admin user IDs or roles
-        if (!isLoggedIn() || !loginContext.user) {
-            return false;
-        }
-        
-        // Add your admin user check logic here
-        // For example, check against a list of admin user IDs:
-        // const adminUserIds = ['123456789', '987654321']; // Replace with actual admin user IDs
-        // return adminUserIds.includes(loginContext.user.id);
-        
-        // For now, we'll allow any logged-in user to access admin (change this in production)
-        return true;
+        return isLoggedIn() && adminStatus === true;
     };
+
+    const isCheckingAdmin =
+        !(import.meta.env.DEV && import.meta.env.VITE_BYPASS_LOGIN === 'true') &&
+        isLoggedIn() &&
+        adminStatus === undefined;
 
     const appLogin = {
         ...loginContext,
@@ -118,7 +124,13 @@ export default function AdminApp(props: AdminAppProps) {
                     <LoginContextContext.Provider value={appLogin}>
                         <ChatEmotesContext.Provider value={DEFAULT_CHAT_EMOTES}>
                             <PremiumContext.Provider value={DEFAULT_PREMIUM}>
-                                <AdminRouter />
+                                {isCheckingAdmin ? (
+                                    <Center h="100vh">
+                                        <Loader />
+                                    </Center>
+                                ) : (
+                                    <AdminRouter />
+                                )}
                             </PremiumContext.Provider>
                         </ChatEmotesContext.Provider>
                     </LoginContextContext.Provider>
