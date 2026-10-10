@@ -20,6 +20,7 @@ interface AudioInfo {
     audioUrl?: string;
     videoElement?: HTMLVideoElement;
     speed?: number;
+    volume?: number;
 }
 
 let cheerPrefixes = ['Cheer', 'BibleThump', 'cheerwhal', 'Corgo', 'uni', 'ShowLove', 'Party', 'SeemsGood', 'Pride', 'Kappa', 'FrankerZ', 'HeyGuys', 'DansGame', 'EleGiggle', 'TriHard', 'Kreygasm', '4Head', 'SwiftRage', 'NotLikeThis', 'FailFish', 'VoHiYo', 'PJSalt', 'MrDestructoid', 'bday', 'RIPCheer', 'Shamrock'];
@@ -757,6 +758,8 @@ class AlertPlayer {
         if (audioInfo) {
             const speed = Number(resolvedVoiceParams?.speed);
             audioInfo.speed = Number.isFinite(speed) ? Math.min(4.0, Math.max(0.5, speed)) : 1.0;
+            const volume = Number(resolvedVoiceParams?.volume);
+            audioInfo.volume = resolvedVoiceParams?.volume !== undefined && Number.isFinite(volume) ? Math.min(3.0, Math.max(0, volume)) : 1.0;
         }
         return audioInfo;
     }
@@ -1078,8 +1081,10 @@ class AlertPlayer {
         console.log('Start playing');
         const rawTtsText = (eventData && eventData.text)
             ? this.parsedPartsToTTSText(eventData.text.parts || eventData.text) : undefined;
+        // Preview alerts reuse the same sample user and text, the spam filter would block every repeat within 30s
+        const isPreviewAlert = !!(event as any).force;
         const smartFilter = this.config?.alertSmartFilter;
-        const blockedBySmartFilter = !!(smartFilter?.enabled &&
+        const blockedBySmartFilter = !isPreviewAlert && !!(smartFilter?.enabled &&
             rawTtsText && !shouldPlayTTSText(rawTtsText, event.username, smartFilter, Date.now()));
         const ttsMessage = blockedBySmartFilter ? undefined : this.cleanMessage(formatString(alert.audio?.tts?.text || "", {
             ...vars,
@@ -1088,7 +1093,6 @@ class AlertPlayer {
 
         // Chain audio playback with proper error handling - use mode to determine which setting to check
         // For preview alerts (event.force), always play audio in browsersource regardless of settings
-        const isPreviewAlert = !!(event as any).force;
         const shouldPlayAudio = this.mode === 'browsersource' 
             ? (isPreviewAlert || (this.config?.browserSourceAudio ?? false))
             : (this.config?.playAlerts ?? false);
@@ -1139,7 +1143,7 @@ class AlertPlayer {
                             console.log("No TTS audio available, skipping TTS part but continuing alert");
                             return Promise.resolve(); // Skip TTS part but continue chain
                         }
-                        return this.playAudio(1.0, ttsAudio, 0);
+                        return this.playAudio(ttsAudio.volume ?? 1.0, ttsAudio, 0);
                     })
                     .then(() => {
                         console.log("TTS playback completed");
