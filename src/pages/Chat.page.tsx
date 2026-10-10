@@ -510,7 +510,7 @@ export function ChatPage() {
       drawerHandler.open();
     });
 
-    PubSub.subscribe('OPEN_PREMIUM', () => {
+    const premiumSub = PubSub.subscribe('OPEN_PREMIUM', () => {
       setDrawer(PremiumDrawer);
       drawerHandler.open();
     });
@@ -659,6 +659,7 @@ export function ChatPage() {
       PubSub.unsubscribe(eventSub);
       PubSub.unsubscribe(modEventSub);
       PubSub.unsubscribe(massBanSub);
+      PubSub.unsubscribe(premiumSub);
       PubSub.unsubscribe(gapSub);
       config.off(chatHandler);
     };
