@@ -180,7 +180,7 @@ export function Header(props: {
           <Popover.Target>
             <UnstyledButton onClick={() => setPopoverOpened((o) => !o)}>
               <Group gap={8} align="center" style={{ overflow: 'visible', position: 'relative' }}>
-                <HeaderLogo height={28} />
+                <HeaderLogo />
                 <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
                   <Text fw={700} c="primary">
                     HEHE

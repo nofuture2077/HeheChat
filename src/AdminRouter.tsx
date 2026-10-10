@@ -92,7 +92,7 @@ export function AdminRouter() {
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
           <Group>
-            <HeaderLogo size={32} />
+            <HeaderLogo />
             <span style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>HeheChat Admin</span>
           </Group>
         </Group>
