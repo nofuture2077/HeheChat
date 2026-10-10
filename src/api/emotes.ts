@@ -1,5 +1,5 @@
 // Base URL for the backend API
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL + "/api";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL + '/api';
 
 /**
  * API client for emote-related operations
@@ -12,7 +12,9 @@ export class EmoteApiClient {
    * @returns The 7TV emotes for the user, including emoteSetId and lastModified if available
    */
   static async get7TVEmotes(userId: string, username: string) {
-    const response = await fetch(`${API_BASE_URL}/emotes/7tv/${userId}?username=${encodeURIComponent(username)}`);
+    const response = await fetch(
+      `${API_BASE_URL}/emotes/7tv/${userId}?username=${encodeURIComponent(username)}`
+    );
     if (!response.ok) {
       throw new Error(`Failed to fetch 7TV emotes: ${response.statusText}`);
     }
@@ -114,9 +116,9 @@ export class EmoteApiClient {
     const response = await fetch(`${API_BASE_URL}/users/bynames`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ usernames })
+      body: JSON.stringify({ usernames }),
     });
     if (!response.ok) {
       throw new Error(`Failed to fetch users by names: ${response.statusText}`);

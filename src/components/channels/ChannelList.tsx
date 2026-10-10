@@ -10,19 +10,20 @@ import { ConfigContext } from '@/ApplicationContext';
 export function ChannelList() {
   const { channels, loading, error, refetch, total } = useChannels();
   const config = useContext(ConfigContext);
-  
+
   // Compare fetched channels with channels in config to find unauthorized channels
   const unauthorizedChannels = useMemo(() => {
     if (!channels || !config.channels || config.channels.length === 0) {
       return [];
     }
-    
+
     // Find channels in config that are not in the fetched channels list
-    return config.channels.filter(configChannel => 
-      !channels.some(channel => channel.toLowerCase() === configChannel.toLowerCase())
+    return config.channels.filter(
+      (configChannel) =>
+        !channels.some((channel) => channel.toLowerCase() === configChannel.toLowerCase())
     );
   }, [channels, config.channels]);
-  
+
   const hasUnauthorizedChannels = unauthorizedChannels.length > 0;
 
   if (loading) {
@@ -39,19 +40,15 @@ export function ChannelList() {
   if (error) {
     return (
       <Box p="md">
-        <Alert 
-          icon={<IconAlertCircle size="1rem" />} 
-          title="Error loading channels" 
+        <Alert
+          icon={<IconAlertCircle size="1rem" />}
+          title="Error loading channels"
           color="red"
           mb="md"
         >
           {error}
         </Alert>
-        <Button 
-          leftSection={<IconRefresh size="1rem" />}
-          onClick={refetch}
-          variant="light"
-        >
+        <Button leftSection={<IconRefresh size="1rem" />} onClick={refetch} variant="light">
           Retry
         </Button>
       </Box>
@@ -64,7 +61,7 @@ export function ChannelList() {
         <Text size="lg" fw={500}>
           Channels ({total})
         </Text>
-        <Button 
+        <Button
           leftSection={<IconRefresh size="1rem" />}
           onClick={refetch}
           variant="light"
@@ -73,39 +70,45 @@ export function ChannelList() {
           Refresh
         </Button>
       </Group>
-      
+
       {hasUnauthorizedChannels && (
-        <Alert 
-          icon={<IconAlertTriangle size="1rem" />} 
-          title="Unauthorized Channels" 
+        <Alert
+          icon={<IconAlertTriangle size="1rem" />}
+          title="Unauthorized Channels"
           color="yellow"
           mb="md"
         >
-          Some channels have not authorized hehechat yet. Please ask them to join or going into a shared chat to see their messages.
+          Some channels have not authorized hehechat yet. Please ask them to join or going into a
+          shared chat to see their messages.
         </Alert>
       )}
-      
+
       {channels.length === 0 ? (
         <Text c="dimmed">No channels found</Text>
       ) : (
         <Box>
           {/* Display authorized channels from the API */}
           {channels.map((channel, index) => (
-            <Box key={index} p="sm" mb="xs" style={{ border: '1px solid #e0e0e0', borderRadius: '4px' }}>
+            <Box
+              key={index}
+              p="sm"
+              mb="xs"
+              style={{ border: '1px solid #e0e0e0', borderRadius: '4px' }}
+            >
               <Text fw={500}>{channel}</Text>
             </Box>
           ))}
-          
+
           {/* Display unauthorized channels from config with yellow background */}
           {unauthorizedChannels.map((channel, index) => (
-            <Box 
-              key={`unauthorized-${index}`} 
-              p="sm" 
-              mb="xs" 
-              style={{ 
-                border: '1px solid #e0e0e0', 
+            <Box
+              key={`unauthorized-${index}`}
+              p="sm"
+              mb="xs"
+              style={{
+                border: '1px solid #e0e0e0',
                 borderRadius: '4px',
-                backgroundColor: '#fffbe6' // Light yellow background
+                backgroundColor: '#fffbe6', // Light yellow background
               }}
             >
               <Group justify="space-between">

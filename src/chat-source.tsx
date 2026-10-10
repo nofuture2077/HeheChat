@@ -17,6 +17,4 @@ const token = getQueryVariable(query, 'token');
 localStorage.setItem('hehe-sink', token || '');
 localStorage.setItem('hehe-mode', 'browsersource');
 
-ReactDOM.createRoot(document.getElementById('chat')!).render(
-  <ChatSourceApp token={token} />
-);
+ReactDOM.createRoot(document.getElementById('chat')!).render(<ChatSourceApp token={token} />);

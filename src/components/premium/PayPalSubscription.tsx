@@ -21,36 +21,36 @@ const PayPalButtonPlaceholder: React.FC<{
         {
           amount: {
             value: amount,
-            currency_code: currency
-          }
-        }
+            currency_code: currency,
+          },
+        },
       ],
       payer: {
-        email_address: 'test@example.com'
+        email_address: 'test@example.com',
       },
-      create_time: new Date().toISOString()
+      create_time: new Date().toISOString(),
     };
-    
+
     const mockData = {
-      orderID: 'ORDER-' + Math.random().toString(36).substr(2, 9)
+      orderID: 'ORDER-' + Math.random().toString(36).substr(2, 9),
     };
-    
+
     onSuccess(mockDetails, mockData);
   };
-  
+
   return (
     <>
-      <div 
+      <div
         className={classes.paypalButton}
-        style={{ 
-          backgroundColor: '#8ba3c1', 
-          color: 'white', 
-          padding: '10px 15px', 
+        style={{
+          backgroundColor: '#8ba3c1',
+          color: 'white',
+          padding: '10px 15px',
           borderRadius: '4px',
           cursor: 'not-allowed',
           textAlign: 'center',
           fontWeight: 'bold',
-          opacity: 0.7
+          opacity: 0.7,
         }}
       >
         <IconBrandPaypal style={{ marginRight: '8px' }} />
@@ -72,7 +72,7 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
+
   // Use a ref to track if the component is mounted
   const isMounted = useRef(true);
 
@@ -86,18 +86,18 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
   const handlePayPalSuccess = async (details: any, data: any) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const paymentData = {
         id: details.id,
         status: details.status,
         amount: details.purchase_units[0].amount.value,
         currency: details.purchase_units[0].amount.currency_code,
-        details: details
+        details: details,
       };
-      
+
       const result = await premium.processPayment(paymentData);
-      
+
       // Only update state if component is still mounted
       if (isMounted.current) {
         if (result.success) {
@@ -127,9 +127,9 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
           <span>Subscribe with PayPal</span>
         </Group>
       </Title>
-      
+
       <Text mb="md">Get HeheChat Pro for just $X.XX per month</Text>
-      
+
       <div className={classes.paypalContainer}>
         {loading ? (
           <Group justify="center" p="md">
@@ -137,30 +137,26 @@ export const PayPalSubscription: React.FC<PayPalSubscriptionProps> = ({ onSucces
             <Text size="sm">Processing payment...</Text>
           </Group>
         ) : (
-          <PayPalButtonPlaceholder
-            amount="4.99"
-            currency="USD"
-            onSuccess={handlePayPalSuccess}
-          />
+          <PayPalButtonPlaceholder amount="4.99" currency="USD" onSuccess={handlePayPalSuccess} />
         )}
       </div>
-      
+
       {error && (
         <Group className={classes.errorMessage} gap="xs">
           <IconX size={16} />
           <Text size="sm">{error}</Text>
         </Group>
       )}
-      
+
       {success && (
         <Group className={classes.successMessage} gap="xs">
           <IconCheck size={16} />
           <Text size="sm">{success}</Text>
         </Group>
       )}
-      
+
       <Text size="xs" c="dimmed" mt="md">
-        Note: This is a placeholder for the actual PayPal integration. In a production environment, 
+        Note: This is a placeholder for the actual PayPal integration. In a production environment,
         you would use the official PayPal button component with your PayPal client ID.
       </Text>
     </Card>

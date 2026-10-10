@@ -1,5 +1,28 @@
-import { Container, Title, Text, Button, Alert, Stack, Badge, LoadingOverlay, Card, Group, Anchor, Tooltip, Grid } from '@mantine/core';
-import { IconRefresh, IconAlertCircle, IconUsers, IconClock, IconWifi, IconDevices, IconExternalLink, IconBrandTwitch } from '@tabler/icons-react';
+import {
+  Container,
+  Title,
+  Text,
+  Button,
+  Alert,
+  Stack,
+  Badge,
+  LoadingOverlay,
+  Card,
+  Group,
+  Anchor,
+  Tooltip,
+  Grid,
+} from '@mantine/core';
+import {
+  IconRefresh,
+  IconAlertCircle,
+  IconUsers,
+  IconClock,
+  IconWifi,
+  IconDevices,
+  IconExternalLink,
+  IconBrandTwitch,
+} from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
 
@@ -34,10 +57,10 @@ const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Map connection source names to distinct Mantine colors
 const SOURCE_COLORS: Record<string, string> = {
-  "replay app": 'blue',
-  "browsersource": 'grape',
-  "hehechat app": 'teal',
-  "scene switcher": 'orange',
+  'replay app': 'blue',
+  browsersource: 'grape',
+  'hehechat app': 'teal',
+  'scene switcher': 'orange',
 };
 
 const getSourceColor = (source: string): string => {
@@ -156,9 +179,9 @@ export function AdminConnectionsPage() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data: ConnectionsResponse = await response.json();
-      
+
       // Map the flat structure to our display format
-      const flatConnections: FlatConnection[] = data.connections.map(conn => ({
+      const flatConnections: FlatConnection[] = data.connections.map((conn) => ({
         guid: conn.guid,
         userId: conn.userId,
         userName: conn.userName,
@@ -182,13 +205,13 @@ export function AdminConnectionsPage() {
         twitchConnected: conn.connectionStatus?.twitch?.connected || false,
         twitchChannel: conn.connectionStatus?.twitch?.channelname || 'N/A',
         connectedAt: conn.connectedAt,
-        streamInfo: conn.streamInfo
+        streamInfo: conn.streamInfo,
       }));
-      
+
       setConnections(flatConnections);
       setConnectionStats({
         connection_count: data.connection_count || 0,
-        user_count: data.user_count || 0
+        user_count: data.user_count || 0,
       });
       setLastUpdated(new Date());
     } catch (error) {
@@ -212,7 +235,10 @@ export function AdminConnectionsPage() {
     if (!guid) return;
     setReinitializingTwitch((prev) => ({ ...prev, [user.userName]: true }));
     try {
-      await fetch(`${BASE_URL}/api/admin/reconnect?token=${adminToken}&guid=${guid}&service=twitch`, { method: 'POST' });
+      await fetch(
+        `${BASE_URL}/api/admin/reconnect?token=${adminToken}&guid=${guid}&service=twitch`,
+        { method: 'POST' }
+      );
       await fetchConnections();
     } finally {
       setReinitializingTwitch((prev) => ({ ...prev, [user.userName]: false }));
@@ -230,10 +256,10 @@ export function AdminConnectionsPage() {
     name: string,
     connected: boolean,
     channel: string,
-    Comp: React.ComponentType<React.ComponentProps<"svg">>
+    Comp: React.ComponentType<React.ComponentProps<'svg'>>
   ) => {
     return (
-      <Tooltip 
+      <Tooltip
         label={connected ? `${name}: Connected (${channel})` : `${name}: Not Connected`}
         position="top"
         withArrow
@@ -254,12 +280,12 @@ export function AdminConnectionsPage() {
           }}
         >
           <Comp
-            style={{ 
-              width: 20, 
+            style={{
+              width: 20,
               height: 20,
               color: 'var(--mantine-color-text)',
-              objectFit: 'contain'
-            }} 
+              objectFit: 'contain',
+            }}
           />
         </div>
       </Tooltip>
@@ -269,7 +295,7 @@ export function AdminConnectionsPage() {
   // Group connections by userName
   const groupedUsersMap: Record<string, GroupedUser> = {};
 
-  connections.forEach(conn => {
+  connections.forEach((conn) => {
     const name = conn.userName;
     if (!groupedUsersMap[name]) {
       groupedUsersMap[name] = {
@@ -293,7 +319,7 @@ export function AdminConnectionsPage() {
     const user = groupedUsersMap[name];
 
     // Add unique channels
-    conn.channels.forEach(ch => {
+    conn.channels.forEach((ch) => {
       if (!user.channels.includes(ch)) {
         user.channels.push(ch);
       }
@@ -369,15 +395,32 @@ export function AdminConnectionsPage() {
         )}
 
         <Group justify="space-between">
-          <Text fw={700} size="lg">Connection Statistics</Text>
+          <Text fw={700} size="lg">
+            Connection Statistics
+          </Text>
           <Group gap="md">
-            <Badge size="lg" variant="filled" color="blue" leftSection={<IconUsers size="0.9rem" />}>
+            <Badge
+              size="lg"
+              variant="filled"
+              color="blue"
+              leftSection={<IconUsers size="0.9rem" />}
+            >
               {connectionStats.user_count} Users
             </Badge>
-            <Badge size="lg" variant="filled" color="green" leftSection={<IconWifi size="0.9rem" />}>
+            <Badge
+              size="lg"
+              variant="filled"
+              color="green"
+              leftSection={<IconWifi size="0.9rem" />}
+            >
               {connectionStats.connection_count} Total Connections
             </Badge>
-            <Badge size="lg" variant="filled" color="orange" leftSection={<IconDevices size="0.9rem" />}>
+            <Badge
+              size="lg"
+              variant="filled"
+              color="orange"
+              leftSection={<IconDevices size="0.9rem" />}
+            >
               {connections.length} Active Sources
             </Badge>
           </Group>
@@ -385,31 +428,26 @@ export function AdminConnectionsPage() {
 
         <div style={{ position: 'relative' }}>
           <LoadingOverlay visible={loading} />
-          
+
           {error && (
-            <Alert 
-              icon={<IconAlertCircle size="1rem" />} 
-              title="Error Loading Connections" 
+            <Alert
+              icon={<IconAlertCircle size="1rem" />}
+              title="Error Loading Connections"
               color="pink"
               variant="light"
               m="md"
             >
               <Text>{error}</Text>
-              <Button 
-                size="xs" 
-                variant="light" 
-                mt="xs"
-                onClick={fetchConnections}
-              >
+              <Button size="xs" variant="light" mt="xs" onClick={fetchConnections}>
                 Try Again
               </Button>
             </Alert>
           )}
 
           {!error && connections.length === 0 && !loading && (
-            <Alert 
-              icon={<IconWifi size="1rem" />} 
-              title="No Active Connections" 
+            <Alert
+              icon={<IconWifi size="1rem" />}
+              title="No Active Connections"
               color="blue"
               variant="light"
               m="md"
@@ -421,14 +459,7 @@ export function AdminConnectionsPage() {
           {!error && groupedUsers.length > 0 && (
             <Stack gap="md" w="100%">
               {groupedUsers.map((user) => (
-                <Card
-                  key={user.userName}
-                  withBorder
-                  shadow="sm"
-                  radius="md"
-                  p="md"
-                  w="100%"
-                >
+                <Card key={user.userName} withBorder shadow="sm" radius="md" p="md" w="100%">
                   <Stack gap="sm">
                     <Grid align="center" gap="md">
                       {/* Left Column: Username, UserID, linked Channels, and source tags */}
@@ -445,15 +476,21 @@ export function AdminConnectionsPage() {
                                 }}
                               />
                             )}
-                            <Text fw={700} size="lg" c="blue">{user.userName}</Text>
-                            <Text size="xs" c="dimmed">({user.userId})</Text>
+                            <Text fw={700} size="lg" c="blue">
+                              {user.userName}
+                            </Text>
+                            <Text size="xs" c="dimmed">
+                              ({user.userId})
+                            </Text>
                           </Group>
 
                           {user.channels.length > 0 && (
                             <Group gap="xs" wrap="wrap">
-                              <Text size="xs" fw={600} c="dimmed">Channels:</Text>
+                              <Text size="xs" fw={600} c="dimmed">
+                                Channels:
+                              </Text>
                               {user.channels.map((channel) => (
-                                <Badge 
+                                <Badge
                                   key={channel}
                                   variant="light"
                                   color="blue"
@@ -463,7 +500,11 @@ export function AdminConnectionsPage() {
                                       href={`https://twitch.tv/${channel}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      style={{ color: 'inherit', display: 'flex', alignItems: 'center' }}
+                                      style={{
+                                        color: 'inherit',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                      }}
                                     >
                                       <IconExternalLink size="0.75rem" />
                                     </Anchor>
@@ -476,9 +517,11 @@ export function AdminConnectionsPage() {
                           )}
 
                           <Group gap="xs" wrap="wrap">
-                            <Text size="xs" fw={600} c="dimmed">Sources:</Text>
+                            <Text size="xs" fw={600} c="dimmed">
+                              Sources:
+                            </Text>
                             {user.connections.map((conn, idx) => (
-                              <Badge 
+                              <Badge
                                 key={`${conn.guid}-${idx}`}
                                 variant="outline"
                                 color={getSourceColor(conn.source)}
@@ -489,7 +532,9 @@ export function AdminConnectionsPage() {
                                     v{conn.version}
                                   </Text>
                                 }
-                              >{conn.source}</Badge>
+                              >
+                                {conn.source}
+                              </Badge>
                             ))}
                           </Group>
                         </Stack>
@@ -498,15 +543,52 @@ export function AdminConnectionsPage() {
                       {/* Right Column: Services (monochrome logos) only */}
                       <Grid.Col span={{ base: 12, md: 4 }}>
                         <Stack align="flex-start" gap={4}>
-                          <Text size="xs" fw={700} c="dimmed">SERVICES</Text>
+                          <Text size="xs" fw={700} c="dimmed">
+                            SERVICES
+                          </Text>
                           <Group gap="xs">
-                            {renderServiceLogo('7TV', user.services.sevenTV.connected, user.services.sevenTV.channel, SeventvLogo)}
-                            {renderServiceLogo('StreamElements', user.services.streamelements.connected, user.services.streamelements.channel, StreamelementLogo)}
-                            {renderServiceLogo('Blerp', user.services.blerp.connected, user.services.blerp.channel, BlerpLogo)}
-                            {renderServiceLogo('SoundAlerts', user.services.soundalerts.connected, user.services.soundalerts.channel, SoundalertsLogo)}
-                            {renderServiceLogo('Pally.gg', user.services.pallygg.connected, user.services.pallygg.channel, PallyLogo)}
-                            {renderServiceLogo('YouTube', user.services.youtube.connected, user.services.youtube.channel, YoutubeLogo)}
-                            {renderServiceLogo('Twitch', user.services.twitch.connected, user.services.twitch.channel, TwitchLogo)}
+                            {renderServiceLogo(
+                              '7TV',
+                              user.services.sevenTV.connected,
+                              user.services.sevenTV.channel,
+                              SeventvLogo
+                            )}
+                            {renderServiceLogo(
+                              'StreamElements',
+                              user.services.streamelements.connected,
+                              user.services.streamelements.channel,
+                              StreamelementLogo
+                            )}
+                            {renderServiceLogo(
+                              'Blerp',
+                              user.services.blerp.connected,
+                              user.services.blerp.channel,
+                              BlerpLogo
+                            )}
+                            {renderServiceLogo(
+                              'SoundAlerts',
+                              user.services.soundalerts.connected,
+                              user.services.soundalerts.channel,
+                              SoundalertsLogo
+                            )}
+                            {renderServiceLogo(
+                              'Pally.gg',
+                              user.services.pallygg.connected,
+                              user.services.pallygg.channel,
+                              PallyLogo
+                            )}
+                            {renderServiceLogo(
+                              'YouTube',
+                              user.services.youtube.connected,
+                              user.services.youtube.channel,
+                              YoutubeLogo
+                            )}
+                            {renderServiceLogo(
+                              'Twitch',
+                              user.services.twitch.connected,
+                              user.services.twitch.channel,
+                              TwitchLogo
+                            )}
                           </Group>
                           <Tooltip label="Reinitialize Twitch EventSub">
                             <Button
@@ -537,16 +619,30 @@ export function AdminConnectionsPage() {
                       >
                         <Stack gap={6}>
                           <Group justify="space-between" wrap="wrap" gap="sm">
-                            <Badge color="pink" variant="filled" size="xs">LIVE</Badge>
+                            <Badge color="pink" variant="filled" size="xs">
+                              LIVE
+                            </Badge>
                             <Group gap="md" wrap="nowrap">
-                              <Text size="xs" c="dimmed">{user.streamInfo.category}</Text>
+                              <Text size="xs" c="dimmed">
+                                {user.streamInfo.category}
+                              </Text>
                               <Group gap={4} wrap="nowrap">
-                                <IconUsers size="0.75rem" style={{ color: 'var(--mantine-color-violet-5)' }} />
-                                <Text size="xs" fw={600}>{user.streamInfo.viewerCount?.toLocaleString()}</Text>
+                                <IconUsers
+                                  size="0.75rem"
+                                  style={{ color: 'var(--mantine-color-violet-5)' }}
+                                />
+                                <Text size="xs" fw={600}>
+                                  {user.streamInfo.viewerCount?.toLocaleString()}
+                                </Text>
                               </Group>
                               <Group gap={4} wrap="nowrap">
-                                <IconClock size="0.75rem" style={{ color: 'var(--mantine-color-gray-5)' }} />
-                                <Text size="xs">{formatStreamDuration(user.streamInfo.startTime)}</Text>
+                                <IconClock
+                                  size="0.75rem"
+                                  style={{ color: 'var(--mantine-color-gray-5)' }}
+                                />
+                                <Text size="xs">
+                                  {formatStreamDuration(user.streamInfo.startTime)}
+                                </Text>
                               </Group>
                             </Group>
                           </Group>

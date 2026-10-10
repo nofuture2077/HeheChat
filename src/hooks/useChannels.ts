@@ -34,6 +34,6 @@ export function useChannels() {
     loading,
     error,
     refetch: fetchChannels,
-    total: channels.length
+    total: channels.length,
   };
 }

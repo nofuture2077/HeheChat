@@ -134,8 +134,12 @@ export function ConnectStatusSettings() {
     fetchConnections();
     // ponytail: moblin connection state isn't part of /api/connection, fetched separately
     fetch(`${BASE_URL}/moblin/get?state=${token}`)
-      .then(res => res.json())
-      .then(data => setMoblinStatus(data.configured ? { connected: !!data.connected, channelname: '' } : undefined))
+      .then((res) => res.json())
+      .then((data) =>
+        setMoblinStatus(
+          data.configured ? { connected: !!data.connected, channelname: '' } : undefined
+        )
+      )
       .catch(() => {});
   }, []);
 

@@ -10,9 +10,14 @@ export const PremiumSettings: React.FC<{ refreshKey?: number }> = ({ refreshKey 
     <Stack key={refreshKey} gap="md">
       {!premium.isPremium && (
         <>
-          <Text>Upgrade to HeheChat Pro to unlock premium features and support the development of HeheChat.</Text>
+          <Text>
+            Upgrade to HeheChat Pro to unlock premium features and support the development of
+            HeheChat.
+          </Text>
           <div>
-            <Text fw={600} mb="xs">Premium Features:</Text>
+            <Text fw={600} mb="xs">
+              Premium Features:
+            </Text>
             <ul style={{ paddingLeft: '20px', margin: 0 }}>
               <li>Deluxe TTS Voices (ElevenLabs AI)</li>
               <li>Push Notifications for stream events</li>

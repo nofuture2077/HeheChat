@@ -1,42 +1,43 @@
-import { EventType } from "@/commons/events"
-
+import { EventType } from '@/commons/events';
 
 export interface EventData {
-    id: number;
-    date: number;
-    eventtype: EventType;
-    channel: string;
-    username: string;
-    usernameTo?: string;
-    text?: string;
-    amount?: number;
-    amount2?: number;
-    played?: boolean;
+  id: number;
+  date: number;
+  eventtype: EventType;
+  channel: string;
+  username: string;
+  usernameTo?: string;
+  text?: string;
+  amount?: number;
+  amount2?: number;
+  played?: boolean;
 }
 
 export interface EventStorage {
-    store: (event: EventData) => Promise<void>;
-    load: (channels: string[], ignored: string[], since?: number) => Promise<EventData[]>;
+  store: (event: EventData) => Promise<void>;
+  load: (channels: string[], ignored: string[], since?: number) => Promise<EventData[]>;
 }
 
 class RemoteEventStorage implements EventStorage {
-    private baseUrl: string;
-    constructor(baseUrl: string) {
-        this.baseUrl = baseUrl;
-    }
+  private baseUrl: string;
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+  }
 
-    store(event: EventData): Promise<void> {
-        return Promise.resolve();
-    }
+  store(event: EventData): Promise<void> {
+    return Promise.resolve();
+  }
 
-    async load(channels: string[], ignored: string[], since?: number): Promise<EventData[]> {
-        const params = [['channels', channels.join(',')].join('='), ['ignored', ignored.join(',')].join('=')];
-        if (since !== undefined) {
-            params.push(['since', since.toString()].join('='));
-        }
-        return fetch(this.baseUrl + '/event/history?' + params.join('&')).then(res => res.json());
+  async load(channels: string[], ignored: string[], since?: number): Promise<EventData[]> {
+    const params = [
+      ['channels', channels.join(',')].join('='),
+      ['ignored', ignored.join(',')].join('='),
+    ];
+    if (since !== undefined) {
+      params.push(['since', since.toString()].join('='));
     }
+    return fetch(this.baseUrl + '/event/history?' + params.join('&')).then((res) => res.json());
+  }
 }
 
 export const EventStorage = new RemoteEventStorage(import.meta.env.VITE_BACKEND_URL);
-

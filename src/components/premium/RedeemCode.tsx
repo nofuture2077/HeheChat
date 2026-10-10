@@ -21,19 +21,19 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
 
     try {
       const result = await premium.redeemCode(code);
-        if (result.success) {
-          setSuccess(result.message);
-          setCode('');
-          premium.loading = false;
-          if (onSuccess) onSuccess(result);
-        } else {
-          setError(result.message);
-          premium.loading = false;
-        }
-    } catch (error) {
-        setError('An error occurred while redeeming the code');
-        console.error('Error redeeming code:', error);
+      if (result.success) {
+        setSuccess(result.message);
+        setCode('');
         premium.loading = false;
+        if (onSuccess) onSuccess(result);
+      } else {
+        setError(result.message);
+        premium.loading = false;
+      }
+    } catch (error) {
+      setError('An error occurred while redeeming the code');
+      console.error('Error redeeming code:', error);
+      premium.loading = false;
     }
   };
 
@@ -45,7 +45,7 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
           <span>Redeem Code</span>
         </Group>
       </Title>
-      
+
       <form onSubmit={handleSubmit} className={classes.redeemCodeForm}>
         <TextInput
           label="Enter your code"
@@ -56,25 +56,19 @@ export const RedeemCode: React.FC<RedeemCodeProps> = ({ onSuccess }) => {
           disabled={premium.loading}
           required
         />
-        
-        <Button 
-          type="submit" 
-          fullWidth 
-          mt="md" 
-          loading={premium.loading}
-          disabled={!code.trim()}
-        >
+
+        <Button type="submit" fullWidth mt="md" loading={premium.loading} disabled={!code.trim()}>
           Redeem
         </Button>
       </form>
-      
+
       {error && (
         <Group className={classes.errorMessage} gap="xs">
           <IconX size={16} />
           <Text size="sm">{error}</Text>
         </Group>
       )}
-      
+
       {success && (
         <Group className={classes.successMessage} gap="xs">
           <IconCheck size={16} />

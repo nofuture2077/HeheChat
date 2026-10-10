@@ -47,10 +47,12 @@ function AlertRoot({ token, preview, embed }: AlertRootProps) {
 
 // Extract token from hash
 const query = window.location.hash.substring(1);
-const token = getQueryVariable(query, "token");
-const preview = !!getQueryVariable(query, "preview");
-const embed = !!getQueryVariable(query, "embed");
+const token = getQueryVariable(query, 'token');
+const preview = !!getQueryVariable(query, 'preview');
+const embed = !!getQueryVariable(query, 'embed');
 localStorage.setItem('hehe-sink', token || '');
 localStorage.setItem('hehe-mode', 'browsersource');
 
-ReactDOM.createRoot(document.getElementById('alert')!).render(<AlertRoot token={token} preview={preview} embed={embed}/>);
+ReactDOM.createRoot(document.getElementById('alert')!).render(
+  <AlertRoot token={token} preview={preview} embed={embed} />
+);

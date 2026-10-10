@@ -4,27 +4,26 @@ import { LoginContextContext } from './ApplicationContext';
 import { useContext, useEffect } from 'react';
 import PubSub from 'pubsub-js';
 
-interface RouterProps {
-}
+interface RouterProps {}
 
 export function Router() {
   const loginContext = useContext(LoginContextContext);
-  
+
   useEffect(() => {
     if (window.location.pathname === '/massban' && loginContext.isLoggedIn()) {
       const channelId = loginContext.user?.id || '';
       const channelName = loginContext.user?.name || '';
-      
-      PubSub.publish("OPEN_MASSBAN", { channelId, channelName });
+
+      PubSub.publish('OPEN_MASSBAN', { channelId, channelName });
     }
 
     if (window.location.pathname === '/premium' && loginContext.isLoggedIn()) {
-      PubSub.publish("OPEN_PREMIUM");
+      PubSub.publish('OPEN_PREMIUM');
     }
   }, [loginContext]);
-  
+
   if (!loginContext.isLoggedIn()) {
-    return <HomePage/>
+    return <HomePage />;
   }
-  return <ChatPage/>;
+  return <ChatPage />;
 }

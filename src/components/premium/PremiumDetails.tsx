@@ -57,20 +57,20 @@ export const PremiumDetails: React.FC<PremiumDetailsProps> = ({ compact = false 
           <IconCrown className={classes.premiumIcon} size={24} />
           <Title order={4}>HeheChat Pro Subscription</Title>
         </div>
-        
+
         <Divider my="sm" />
-        
+
         <Stack gap="xs">
           <Group>
             <Text fw={500}>Status:</Text>
             <Text>{premium.status || 'Active'}</Text>
           </Group>
-          
+
           <Group>
             <Text fw={500}>Type:</Text>
             <Text>{premium.subscriptionType || 'Standard'}</Text>
           </Group>
-          
+
           {premium.expiresAt && (
             <>
               <Group>
@@ -80,7 +80,7 @@ export const PremiumDetails: React.FC<PremiumDetailsProps> = ({ compact = false 
                   <Text>{new Date(premium.expiresAt).toLocaleDateString()}</Text>
                 </Group>
               </Group>
-              
+
               {premium.daysRemaining !== null && (
                 <Group>
                   <Text fw={500}>Days remaining:</Text>

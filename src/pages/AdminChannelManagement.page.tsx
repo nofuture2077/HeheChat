@@ -1,15 +1,15 @@
-import { 
-  Container, 
-  Title, 
-  Text, 
-  Button, 
-  Alert, 
-  Stack, 
-  Table, 
-  Badge, 
-  LoadingOverlay, 
-  Card, 
-  Group, 
+import {
+  Container,
+  Title,
+  Text,
+  Button,
+  Alert,
+  Stack,
+  Table,
+  Badge,
+  LoadingOverlay,
+  Card,
+  Group,
   ActionIcon,
   Modal,
   TextInput,
@@ -18,13 +18,13 @@ import {
   Tooltip,
   Textarea,
   Tabs,
-  Pagination
+  Pagination,
 } from '@mantine/core';
-import { 
-  IconRefresh, 
-  IconAlertCircle, 
-  IconSettings, 
-  IconClock, 
+import {
+  IconRefresh,
+  IconAlertCircle,
+  IconSettings,
+  IconClock,
   IconReload,
   IconInfoCircle,
   IconCheck,
@@ -35,7 +35,7 @@ import {
   IconTrash,
   IconBan,
   IconShield,
-  IconSearch
+  IconSearch,
 } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { useDisclosure } from '@mantine/hooks';
@@ -89,7 +89,10 @@ export function AdminChannelManagementPage() {
   const [reinitializeLoading, setReinitializeLoading] = useState<string | null>(null);
   const [infoLoading, setInfoLoading] = useState<string | null>(null);
   const [channelInfo, setChannelInfo] = useState<ChannelInfo | null>(null);
-  const [notification, setNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [notification, setNotification] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
   const [expandedScopes, setExpandedScopes] = useState<Set<string>>(new Set());
   const [bannedChannels, setBannedChannels] = useState<ApiResponse<BannedChannel> | null>();
   const [activeTab, setActiveTab] = useState<string | null>('authorized');
@@ -97,17 +100,17 @@ export function AdminChannelManagementPage() {
   const [banLoading, setBanLoading] = useState<string | null>(null);
   const [banReason, setBanReason] = useState('');
   const [selectedChannelForBan, setSelectedChannelForBan] = useState<string | null>(null);
-  
+
   // Pagination state for authorized channels
   const [channelsPage, setChannelsPage] = useState(1);
   const [channelsLimit] = useState(10);
   const [channelsSearch, setChannelsSearch] = useState('');
-  
+
   // Pagination state for banned channels
   const [bannedPage, setBannedPage] = useState(1);
   const [bannedLimit] = useState(10);
   const [bannedSearch, setBannedSearch] = useState('');
-  
+
   const [infoModalOpened, { open: openInfoModal, close: closeInfoModal }] = useDisclosure(false);
   const [banModalOpened, { open: openBanModal, close: closeBanModal }] = useDisclosure(false);
 
@@ -129,12 +132,14 @@ export function AdminChannelManagementPage() {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       const offset = (channelsPage - 1) * channelsLimit;
       const searchParam = channelsSearch ? `&query=${encodeURIComponent(channelsSearch)}` : '';
-      const response = await fetch(`${BASE_URL}/api/channels/authorized?token=${adminToken}&limit=${channelsLimit}&offset=${offset}${searchParam}`);
-      
+      const response = await fetch(
+        `${BASE_URL}/api/channels/authorized?token=${adminToken}&limit=${channelsLimit}&offset=${offset}${searchParam}`
+      );
+
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('hehe-token_state');
@@ -150,7 +155,7 @@ export function AdminChannelManagementPage() {
       }
 
       const data: ApiResponse<AuthorizedChannel> = await response.json();
-      
+
       if (data.success && data.channels) {
         setChannels(data);
         setLastUpdated(new Date());
@@ -173,7 +178,7 @@ export function AdminChannelManagementPage() {
     }
 
     setReinitializeLoading(channelname);
-    
+
     try {
       const response = await fetch(`${BASE_URL}/api/channels/reinitialize`, {
         method: 'POST',
@@ -182,8 +187,8 @@ export function AdminChannelManagementPage() {
         },
         body: JSON.stringify({
           token: adminToken,
-          channelname: channelname
-        })
+          channelname: channelname,
+        }),
       });
 
       if (!response.ok) {
@@ -205,16 +210,22 @@ export function AdminChannelManagementPage() {
       }
 
       const data: ApiResponse<AuthorizedChannel> = await response.json();
-      
+
       if (data.success) {
-        showNotification('success', data.message || `Channel '${channelname}' has been reinitialized`);
+        showNotification(
+          'success',
+          data.message || `Channel '${channelname}' has been reinitialized`
+        );
         // Refresh the channels list
         fetchAuthorizedChannels();
       } else {
         showNotification('error', data.error || 'Failed to reinitialize channel');
       }
     } catch (error) {
-      showNotification('error', error instanceof Error ? error.message : 'Failed to reinitialize channel');
+      showNotification(
+        'error',
+        error instanceof Error ? error.message : 'Failed to reinitialize channel'
+      );
       console.error('Error reinitializing channel:', error);
     } finally {
       setReinitializeLoading(null);
@@ -229,9 +240,11 @@ export function AdminChannelManagementPage() {
     }
 
     setInfoLoading(channelname);
-    
+
     try {
-      const response = await fetch(`${BASE_URL}/api/channels/info?token=${adminToken}&channelname=${channelname}`);
+      const response = await fetch(
+        `${BASE_URL}/api/channels/info?token=${adminToken}&channelname=${channelname}`
+      );
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -252,7 +265,7 @@ export function AdminChannelManagementPage() {
       }
 
       const data: ApiResponse<ChannelInfo> = await response.json();
-      
+
       if (data.success && data.channel) {
         setChannelInfo(data.channel);
         openInfoModal();
@@ -260,7 +273,10 @@ export function AdminChannelManagementPage() {
         showNotification('error', data.error || 'Failed to get channel info');
       }
     } catch (error) {
-      showNotification('error', error instanceof Error ? error.message : 'Failed to get channel info');
+      showNotification(
+        'error',
+        error instanceof Error ? error.message : 'Failed to get channel info'
+      );
       console.error('Error getting channel info:', error);
     } finally {
       setInfoLoading(null);
@@ -277,8 +293,10 @@ export function AdminChannelManagementPage() {
     try {
       const offset = (bannedPage - 1) * bannedLimit;
       const searchParam = bannedSearch ? `&query=${encodeURIComponent(bannedSearch)}` : '';
-      const response = await fetch(`${BASE_URL}/api/channels/banned?token=${adminToken}&limit=${bannedLimit}&offset=${offset}${searchParam}`);
-      
+      const response = await fetch(
+        `${BASE_URL}/api/channels/banned?token=${adminToken}&limit=${bannedLimit}&offset=${offset}${searchParam}`
+      );
+
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('hehe-token_state');
@@ -301,7 +319,10 @@ export function AdminChannelManagementPage() {
         setError(data.error || 'Failed to fetch banned channels');
       }
     } catch (error) {
-      showNotification('error', error instanceof Error ? error.message : 'Failed to fetch banned channels');
+      showNotification(
+        'error',
+        error instanceof Error ? error.message : 'Failed to fetch banned channels'
+      );
       console.error('Error fetching banned channels:', error);
     }
   };
@@ -314,11 +335,14 @@ export function AdminChannelManagementPage() {
     }
 
     setDeleteLoading(channelname);
-    
+
     try {
-      const response = await fetch(`${BASE_URL}/api/channels/token?token=${adminToken}&channelname=${channelname}`, {
-        method: 'DELETE'
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/channels/token?token=${adminToken}&channelname=${channelname}`,
+        {
+          method: 'DELETE',
+        }
+      );
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -339,7 +363,7 @@ export function AdminChannelManagementPage() {
       }
 
       const data: ApiResponse<AuthorizedChannel> = await response.json();
-      
+
       if (data.success) {
         showNotification('success', data.message || `Token deleted for channel '${channelname}'`);
         // Refresh the channels list
@@ -348,7 +372,10 @@ export function AdminChannelManagementPage() {
         showNotification('error', data.error || 'Failed to delete channel token');
       }
     } catch (error) {
-      showNotification('error', error instanceof Error ? error.message : 'Failed to delete channel token');
+      showNotification(
+        'error',
+        error instanceof Error ? error.message : 'Failed to delete channel token'
+      );
       console.error('Error deleting channel token:', error);
     } finally {
       setDeleteLoading(null);
@@ -363,7 +390,7 @@ export function AdminChannelManagementPage() {
     }
 
     setBanLoading(channelname);
-    
+
     try {
       const response = await fetch(`${BASE_URL}/api/channels/ban`, {
         method: 'POST',
@@ -374,8 +401,8 @@ export function AdminChannelManagementPage() {
           token: adminToken,
           channelname: channelname,
           action: 'ban',
-          reason: reason
-        })
+          reason: reason,
+        }),
       });
 
       if (!response.ok) {
@@ -397,7 +424,7 @@ export function AdminChannelManagementPage() {
       }
 
       const data: ApiResponse<BannedChannel> = await response.json();
-      
+
       if (data.success) {
         showNotification('success', data.message || `Channel '${channelname}' has been banned`);
         // Refresh both lists
@@ -425,7 +452,7 @@ export function AdminChannelManagementPage() {
     }
 
     setBanLoading(channelname);
-    
+
     try {
       const response = await fetch(`${BASE_URL}/api/channels/ban`, {
         method: 'POST',
@@ -435,8 +462,8 @@ export function AdminChannelManagementPage() {
         body: JSON.stringify({
           token: adminToken,
           channelname: channelname,
-          action: 'unban'
-        })
+          action: 'unban',
+        }),
       });
 
       if (!response.ok) {
@@ -458,7 +485,7 @@ export function AdminChannelManagementPage() {
       }
 
       const data: ApiResponse<BannedChannel> = await response.json();
-      
+
       if (data.success) {
         showNotification('success', data.message || `Channel '${channelname}' has been unbanned`);
         // Refresh both lists
@@ -482,12 +509,12 @@ export function AdminChannelManagementPage() {
   const handleBannedPageChange = (page: number) => {
     setBannedPage(page);
   };
-  
+
   const handleChannelsSearch = (query: string) => {
     setChannelsSearch(query);
     setChannelsPage(1); // Reset to first page when searching
   };
-  
+
   const handleBannedSearch = (query: string) => {
     setBannedSearch(query);
     setBannedPage(1); // Reset to first page when searching
@@ -516,11 +543,11 @@ export function AdminChannelManagementPage() {
   }, [bannedPage, bannedSearch]);
 
   const hasAllRequiredScopes = (channelScopes: string[]) => {
-    return LOGIN_SCOPES.every(requiredScope => channelScopes.includes(requiredScope));
+    return LOGIN_SCOPES.every((requiredScope) => channelScopes.includes(requiredScope));
   };
 
   const getMissingScopes = (channelScopes: string[]) => {
-    return LOGIN_SCOPES.filter(requiredScope => !channelScopes.includes(requiredScope));
+    return LOGIN_SCOPES.filter((requiredScope) => !channelScopes.includes(requiredScope));
   };
 
   const toggleScopeExpansion = (channelId: string) => {
@@ -539,16 +566,11 @@ export function AdminChannelManagementPage() {
       'chat:edit': 'green',
       'channel:moderate': 'orange',
       'channel:manage:broadcast': 'red',
-      'user:read:email': 'purple'
+      'user:read:email': 'purple',
     };
 
     return scope.map((s, index) => (
-      <Badge 
-        key={index} 
-        size="xs" 
-        variant="light" 
-        color={scopeColors[s] || 'gray'}
-      >
+      <Badge key={index} size="xs" variant="light" color={scopeColors[s] || 'gray'}>
         {s}
       </Badge>
     ));
@@ -569,7 +591,9 @@ export function AdminChannelManagementPage() {
           <Group gap="xs">
             <Text fw={500}>{(channel.is_valid ? '' : '⚠️ ') + channel.channelname}</Text>
             {!hasAllScopes && (
-              <Tooltip label={`Missing ${missingScopes.length} required scope${missingScopes.length > 1 ? 's' : ''}`}>
+              <Tooltip
+                label={`Missing ${missingScopes.length} required scope${missingScopes.length > 1 ? 's' : ''}`}
+              >
                 <IconExclamationCircle size="1rem" color="orange" />
               </Tooltip>
             )}
@@ -593,7 +617,11 @@ export function AdminChannelManagementPage() {
                 onClick={() => toggleScopeExpansion(channel.channelid)}
                 title={isExpanded ? 'Hide scopes' : 'Show scopes'}
               >
-                {isExpanded ? <IconChevronDown size="0.8rem" /> : <IconChevronRight size="0.8rem" />}
+                {isExpanded ? (
+                  <IconChevronDown size="0.8rem" />
+                ) : (
+                  <IconChevronRight size="0.8rem" />
+                )}
               </ActionIcon>
             </Group>
             <Collapse expanded={isExpanded}>
@@ -603,7 +631,9 @@ export function AdminChannelManagementPage() {
                 </Group>
                 {!hasAllScopes && (
                   <div>
-                    <Text size="xs" fw={500} c="orange" mb="xs">Missing required scopes:</Text>
+                    <Text size="xs" fw={500} c="orange" mb="xs">
+                      Missing required scopes:
+                    </Text>
                     <Group gap="xs" wrap="wrap">
                       {missingScopes.map((scope, index) => (
                         <Badge key={index} size="xs" variant="light" color="red">
@@ -683,7 +713,13 @@ export function AdminChannelManagementPage() {
       <Stack gap="md">
         {notification && (
           <Notification
-            icon={notification.type === 'success' ? <IconCheck size="1.1rem" /> : <IconX size="1.1rem" />}
+            icon={
+              notification.type === 'success' ? (
+                <IconCheck size="1.1rem" />
+              ) : (
+                <IconX size="1.1rem" />
+              )
+            }
             color={notification.type === 'success' ? 'teal' : 'red'}
             title={notification.type === 'success' ? 'Success' : 'Error'}
             onClose={() => setNotification(null)}
@@ -741,7 +777,7 @@ export function AdminChannelManagementPage() {
                   </Badge>
                 </Group>
               </Card.Section>
-              
+
               <Card.Section p="md" withBorder>
                 <TextInput
                   placeholder="Search channels..."
@@ -749,7 +785,11 @@ export function AdminChannelManagementPage() {
                   onChange={(event) => handleChannelsSearch(event.currentTarget.value)}
                   rightSection={
                     channelsSearch ? (
-                      <ActionIcon onClick={() => handleChannelsSearch('')} variant="subtle" size="sm">
+                      <ActionIcon
+                        onClick={() => handleChannelsSearch('')}
+                        variant="subtle"
+                        size="sm"
+                      >
                         <IconX size="1rem" />
                       </ActionIcon>
                     ) : (
@@ -762,31 +802,26 @@ export function AdminChannelManagementPage() {
               <Card.Section>
                 <div style={{ position: 'relative' }}>
                   <LoadingOverlay visible={loading} />
-                  
+
                   {error && (
-                    <Alert 
-                      icon={<IconAlertCircle size="1rem" />} 
-                      title="Error Loading Channels" 
+                    <Alert
+                      icon={<IconAlertCircle size="1rem" />}
+                      title="Error Loading Channels"
                       color="red"
                       variant="light"
                       m="md"
                     >
                       <Text>{error}</Text>
-                      <Button 
-                        size="xs" 
-                        variant="light" 
-                        mt="xs"
-                        onClick={fetchAuthorizedChannels}
-                      >
+                      <Button size="xs" variant="light" mt="xs" onClick={fetchAuthorizedChannels}>
                         Try Again
                       </Button>
                     </Alert>
                   )}
 
                   {!error && channels?.total === 0 && !loading && (
-                    <Alert 
-                      icon={<IconSettings size="1rem" />} 
-                      title="No Authorized Channels" 
+                    <Alert
+                      icon={<IconSettings size="1rem" />}
+                      title="No Authorized Channels"
                       color="blue"
                       variant="light"
                       m="md"
@@ -810,7 +845,7 @@ export function AdminChannelManagementPage() {
                         </Table.Thead>
                         <Table.Tbody>{rows}</Table.Tbody>
                       </Table>
-                      
+
                       <Group justify="center" p="md">
                         <Pagination
                           value={channelsPage}
@@ -836,7 +871,7 @@ export function AdminChannelManagementPage() {
                   </Badge>
                 </Group>
               </Card.Section>
-              
+
               <Card.Section p="md" withBorder>
                 <TextInput
                   placeholder="Search banned channels..."
@@ -857,9 +892,9 @@ export function AdminChannelManagementPage() {
               <Card.Section>
                 <div style={{ position: 'relative' }}>
                   {bannedChannels?.total === 0 ? (
-                    <Alert 
-                      icon={<IconShield size="1rem" />} 
-                      title="No Banned Channels" 
+                    <Alert
+                      icon={<IconShield size="1rem" />}
+                      title="No Banned Channels"
                       color="green"
                       variant="light"
                       m="md"
@@ -917,7 +952,7 @@ export function AdminChannelManagementPage() {
                           ))}
                         </Table.Tbody>
                       </Table>
-                      
+
                       <Group justify="center" p="md">
                         <Pagination
                           value={bannedPage}
@@ -934,9 +969,9 @@ export function AdminChannelManagementPage() {
           </Tabs.Panel>
         </Tabs>
 
-        <Modal 
-          opened={infoModalOpened} 
-          onClose={closeInfoModal} 
+        <Modal
+          opened={infoModalOpened}
+          onClose={closeInfoModal}
           title="Channel Information"
           size="md"
         >
@@ -946,18 +981,15 @@ export function AdminChannelManagementPage() {
                 <Text fw={500}>Channel Name:</Text>
                 <Text>{channelInfo.channelname}</Text>
               </Group>
-              
+
               <Group justify="space-between">
                 <Text fw={500}>Channel ID:</Text>
                 <Text style={{ fontFamily: 'monospace' }}>{channelInfo.channelid}</Text>
               </Group>
-              
+
               <Group justify="space-between">
                 <Text fw={500}>Status:</Text>
-                <Badge 
-                  color={channelInfo.is_loaded ? 'green' : 'red'}
-                  variant="light"
-                >
+                <Badge color={channelInfo.is_loaded ? 'green' : 'red'} variant="light">
                   {channelInfo.is_loaded ? 'Loaded' : 'Not Loaded'}
                 </Badge>
               </Group>
@@ -965,7 +997,7 @@ export function AdminChannelManagementPage() {
               {channelInfo.is_pubsub_initialized !== undefined && (
                 <Group justify="space-between">
                   <Text fw={500}>PubSub Status:</Text>
-                  <Badge 
+                  <Badge
                     color={channelInfo.is_pubsub_initialized ? 'green' : 'red'}
                     variant="light"
                   >
@@ -973,10 +1005,10 @@ export function AdminChannelManagementPage() {
                   </Badge>
                 </Group>
               )}
-              
+
               <Group justify="space-between">
                 <Text fw={500}>Scope Status:</Text>
-                <Badge 
+                <Badge
                   color={hasAllRequiredScopes(channelInfo.scope) ? 'green' : 'orange'}
                   variant="light"
                 >
@@ -997,9 +1029,11 @@ export function AdminChannelManagementPage() {
                   <Text size="sm">{new Date(channelInfo.last_login).toLocaleString()}</Text>
                 </Group>
               )}
-              
+
               <div>
-                <Text fw={500} mb="xs">Current Permissions ({channelInfo.scope.length}):</Text>
+                <Text fw={500} mb="xs">
+                  Current Permissions ({channelInfo.scope.length}):
+                </Text>
                 <Group gap="xs" wrap="wrap">
                   {getScopeBadges(channelInfo.scope)}
                 </Group>
@@ -1007,7 +1041,9 @@ export function AdminChannelManagementPage() {
 
               {!hasAllRequiredScopes(channelInfo.scope) && (
                 <div>
-                  <Text fw={500} mb="xs" c="orange">Missing Required Scopes ({getMissingScopes(channelInfo.scope).length}):</Text>
+                  <Text fw={500} mb="xs" c="orange">
+                    Missing Required Scopes ({getMissingScopes(channelInfo.scope).length}):
+                  </Text>
                   <Group gap="xs" wrap="wrap">
                     {getMissingScopes(channelInfo.scope).map((scope, index) => (
                       <Badge key={index} size="xs" variant="light" color="red">
@@ -1021,22 +1057,10 @@ export function AdminChannelManagementPage() {
           )}
         </Modal>
 
-        <Modal 
-          opened={banModalOpened} 
-          onClose={closeBanModal} 
-          title="Ban Channel"
-          size="md"
-        >
+        <Modal opened={banModalOpened} onClose={closeBanModal} title="Ban Channel" size="md">
           <Stack gap="md">
-            <Alert 
-              icon={<IconBan size="1rem" />} 
-              title="Warning" 
-              color="orange"
-              variant="light"
-            >
-              <Text>
-                Banning a channel will:
-              </Text>
+            <Alert icon={<IconBan size="1rem" />} title="Warning" color="orange" variant="light">
+              <Text>Banning a channel will:</Text>
               <ul style={{ marginTop: '8px', marginBottom: '0' }}>
                 <li>Delete its authentication token (revoking current access)</li>
                 <li>Reset its PubSub initialization (stopping event processing)</li>
@@ -1062,16 +1086,18 @@ export function AdminChannelManagementPage() {
             />
 
             <Group justify="flex-end" gap="sm">
-              <Button 
-                variant="light" 
+              <Button
+                variant="light"
                 onClick={closeBanModal}
                 disabled={banLoading === selectedChannelForBan}
               >
                 Cancel
               </Button>
-              <Button 
-                color="red" 
-                onClick={() => selectedChannelForBan && banChannel(selectedChannelForBan, banReason)}
+              <Button
+                color="red"
+                onClick={() =>
+                  selectedChannelForBan && banChannel(selectedChannelForBan, banReason)
+                }
                 loading={banLoading === selectedChannelForBan}
                 disabled={!banReason.trim()}
               >

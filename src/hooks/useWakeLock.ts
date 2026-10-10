@@ -18,7 +18,7 @@ export function useWakeLock() {
 
   const requestWakeLock = useCallback(async () => {
     if (!state.isSupported) {
-      setState(prev => ({ ...prev, error: 'Wake Lock API is not supported in this browser' }));
+      setState((prev) => ({ ...prev, error: 'Wake Lock API is not supported in this browser' }));
       return;
     }
 
@@ -33,10 +33,10 @@ export function useWakeLock() {
       const sentinel = await navigator.wakeLock.request('screen');
       wakeLockRef.current = sentinel;
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         isActive: true,
-        error: null
+        error: null,
       }));
 
       // Listen for wake lock release (e.g. iOS releasing it on visibility loss)
@@ -44,19 +44,19 @@ export function useWakeLock() {
         if (wakeLockRef.current === sentinel) {
           wakeLockRef.current = null;
         }
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
-          isActive: false
+          isActive: false,
         }));
       });
 
       console.log('Screen wake lock activated');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to request wake lock';
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         error: errorMessage,
-        isActive: false
+        isActive: false,
       }));
       console.error('Failed to request wake lock:', error);
     } finally {
@@ -69,17 +69,17 @@ export function useWakeLock() {
       try {
         await wakeLockRef.current.release();
         wakeLockRef.current = null;
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           isActive: false,
-          error: null
+          error: null,
         }));
         console.log('Screen wake lock released');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to release wake lock';
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
-          error: errorMessage
+          error: errorMessage,
         }));
         console.error('Failed to release wake lock:', error);
       }

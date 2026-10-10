@@ -1,5 +1,19 @@
 import { useState, useContext } from 'react';
-import { Tooltip, UnstyledButton, Title, rem, Button, ScrollArea, Text, Stack, Group, Alert, Center, Switch, Anchor } from '@mantine/core';
+import {
+  Tooltip,
+  UnstyledButton,
+  Title,
+  rem,
+  Button,
+  ScrollArea,
+  Text,
+  Stack,
+  Group,
+  Alert,
+  Center,
+  Switch,
+  Anchor,
+} from '@mantine/core';
 import {
   IconHome2,
   IconX,
@@ -42,7 +56,11 @@ import {
 import classes from './settings.module.css';
 import { ModSettings } from './ModSettings';
 import { PremiumContext, ConfigContext } from '@/ApplicationContext';
-import { NotificationEnableSection, NotificationStreamStartSettings, NotificationChatMentionSettings } from './NotificationSettings';
+import {
+  NotificationEnableSection,
+  NotificationStreamStartSettings,
+  NotificationChatMentionSettings,
+} from './NotificationSettings';
 import { OverlayDrawer } from '@/pages/Chat.page';
 import { DiscordInfo } from './DiscordInfo';
 import { ShortcutSettings } from './ShortcutSettings';
@@ -106,20 +124,56 @@ export const SettingsDrawer: OverlayDrawer = {
   component: Settings,
   size: 700,
   position: 'right',
-}
+};
 
 export type SettingsTab =
-  | 'General' | 'General/UI' | 'General/Account' | 'General/Profiles'
-  | 'Chat' | 'Chat/Channels' | 'Chat/Appearance' | 'Chat/Events' | 'Chat/Bot' | 'Chat/BrowserSource' | 'Chat/SevenTV' | 'Chat/Video'
+  | 'General'
+  | 'General/UI'
+  | 'General/Account'
+  | 'General/Profiles'
+  | 'Chat'
+  | 'Chat/Channels'
+  | 'Chat/Appearance'
+  | 'Chat/Events'
+  | 'Chat/Bot'
+  | 'Chat/BrowserSource'
+  | 'Chat/SevenTV'
+  | 'Chat/Video'
   | 'Mod'
-  | 'Alerts' | 'Alerts/Audio' | 'Alerts/Sharing' | 'Alerts/ActiveAlerts' | 'Alerts/Editor' | 'Alerts/Filters' | 'Alerts/SpamFiltering' | 'Alerts/Reroll'
-  | 'Notifications' | 'Notifications/StreamStart' | 'Notifications/ChatMention'
-  | 'Connect' | 'Connect/ElevenLabs' | 'Connect/SoundAlerts' | 'Connect/Blerp'
-  | 'Connect/StreamElements' | 'Connect/Pally' | 'Connect/Kofi' | 'Connect/Fossabot' | 'Connect/YouTube' | 'Connect/Moblin' | 'Connect/Spotify'
-  | 'MediaPlayer' | 'MediaPlayer/Controls' | 'MediaPlayer/SongRequests'
+  | 'Alerts'
+  | 'Alerts/Audio'
+  | 'Alerts/Sharing'
+  | 'Alerts/ActiveAlerts'
+  | 'Alerts/Editor'
+  | 'Alerts/Filters'
+  | 'Alerts/SpamFiltering'
+  | 'Alerts/Reroll'
+  | 'Notifications'
+  | 'Notifications/StreamStart'
+  | 'Notifications/ChatMention'
+  | 'Connect'
+  | 'Connect/ElevenLabs'
+  | 'Connect/SoundAlerts'
+  | 'Connect/Blerp'
+  | 'Connect/StreamElements'
+  | 'Connect/Pally'
+  | 'Connect/Kofi'
+  | 'Connect/Fossabot'
+  | 'Connect/YouTube'
+  | 'Connect/Moblin'
+  | 'Connect/Spotify'
+  | 'MediaPlayer'
+  | 'MediaPlayer/Controls'
+  | 'MediaPlayer/SongRequests'
   | 'Shortcuts'
-  | 'Switcher' | 'Switcher/Provider' | 'Switcher/Rules' | 'Switcher/Tokens' | 'Switcher/MoblinHud'
-  | 'Premium' | 'Premium/Donate' | 'Premium/Redeem'
+  | 'Switcher'
+  | 'Switcher/Provider'
+  | 'Switcher/Rules'
+  | 'Switcher/Tokens'
+  | 'Switcher/MoblinHud'
+  | 'Premium'
+  | 'Premium/Donate'
+  | 'Premium/Redeem'
   | 'Discord';
 
 export interface SettingsProperties {
@@ -143,14 +197,18 @@ type NavGroup = {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    id: 'General', label: 'General', icon: IconHome2,
+    id: 'General',
+    label: 'General',
+    icon: IconHome2,
     children: [
       { id: 'General/Account', label: 'Account', icon: IconUser },
       { id: 'General/Profiles', label: 'Profiles', icon: IconUsers },
     ],
   },
   {
-    id: 'Chat', label: 'Chat', icon: IconMessageChatbot,
+    id: 'Chat',
+    label: 'Chat',
+    icon: IconMessageChatbot,
     children: [
       { id: 'Chat/Appearance', label: 'Appearance', icon: IconPalette },
       { id: 'Chat/Events', label: 'Chat Events', icon: IconCalendarEvent },
@@ -162,7 +220,9 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    id: 'Alerts', label: 'Alerts', icon: IconBell,
+    id: 'Alerts',
+    label: 'Alerts',
+    icon: IconBell,
     children: [
       { id: 'Alerts/Editor', label: 'Editor', icon: IconPencil },
       { id: 'Alerts/ActiveAlerts', label: 'Active Alerts', icon: IconBell },
@@ -174,7 +234,9 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    id: 'Connect', label: 'Connect', icon: IconLink,
+    id: 'Connect',
+    label: 'Connect',
+    icon: IconLink,
     children: [
       { id: 'Connect/YouTube', label: 'YouTube', icon: IconBrandYoutube },
       { id: 'Connect/ElevenLabs', label: 'ElevenLabs', icon: IconHeadphones },
@@ -189,7 +251,9 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    id: 'MediaPlayer', label: 'Media Player', icon: IconMusic,
+    id: 'MediaPlayer',
+    label: 'Media Player',
+    icon: IconMusic,
     children: [
       { id: 'MediaPlayer/Controls', label: 'Now Playing', icon: IconMusic },
       { id: 'MediaPlayer/SongRequests', label: 'Requests', icon: IconHeadphones },
@@ -197,7 +261,9 @@ const NAV_GROUPS: NavGroup[] = [
   },
   { id: 'Shortcuts', label: 'Shortcuts', icon: IconKeyboard },
   {
-    id: 'Switcher', label: 'OBS Remote', icon: IconSwitchHorizontal,
+    id: 'Switcher',
+    label: 'OBS Remote',
+    icon: IconSwitchHorizontal,
     children: [
       { id: 'Switcher/Provider', label: 'Provider', icon: IconSettings },
       { id: 'Switcher/Rules', label: 'Rules', icon: IconList },
@@ -207,14 +273,18 @@ const NAV_GROUPS: NavGroup[] = [
   },
   { id: 'Mod', label: 'Mod', icon: IconSword },
   {
-    id: 'Notifications', label: 'Notifications', icon: IconUserUp,
+    id: 'Notifications',
+    label: 'Notifications',
+    icon: IconUserUp,
     children: [
       { id: 'Notifications/StreamStart', label: 'Stream Start', icon: IconBell },
       { id: 'Notifications/ChatMention', label: 'Chat Mention', icon: IconMessageChatbot },
     ],
   },
   {
-    id: 'Premium', label: 'Premium', icon: IconCrown,
+    id: 'Premium',
+    label: 'Premium',
+    icon: IconCrown,
     children: [
       { id: 'Premium/Donate', label: 'Donate', icon: IconGift },
       { id: 'Premium/Redeem', label: 'Redeem', icon: IconTicket },
@@ -224,7 +294,7 @@ const NAV_GROUPS: NavGroup[] = [
 ];
 
 function getParentGroup(tab: SettingsTab): NavGroup | undefined {
-  return NAV_GROUPS.find(g => g.id === tab || g.children?.some(c => c.id === tab));
+  return NAV_GROUPS.find((g) => g.id === tab || g.children?.some((c) => c.id === tab));
 }
 
 function resolveInitialTab(tab?: SettingsTab): SettingsTab {
@@ -233,20 +303,20 @@ function resolveInitialTab(tab?: SettingsTab): SettingsTab {
 }
 
 const tabLabels: Partial<Record<SettingsTab, string>> = {
-  'General': 'General',
+  General: 'General',
   'General/UI': 'General › UI',
   'Chat/Video': 'Chat › Video Player',
   'General/Account': 'General › Account',
   'General/Profiles': 'General › Profiles',
-  'Chat': 'Chat',
+  Chat: 'Chat',
   'Chat/Channels': 'Chat › TTS',
   'Chat/Appearance': 'Chat › Appearance',
   'Chat/Events': 'Chat › Chat Events',
   'Chat/Bot': 'Chat › Bot',
   'Chat/BrowserSource': 'Chat › Browser Source',
   'Chat/SevenTV': 'Chat › 7TV',
-  'Mod': 'Mod',
-  'Alerts': 'Alerts',
+  Mod: 'Mod',
+  Alerts: 'Alerts',
   'Alerts/Audio': 'Alerts › Audio',
   'Alerts/Sharing': 'Alerts › Sharing',
   'Alerts/ActiveAlerts': 'Alerts › Active Alerts',
@@ -254,10 +324,10 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Alerts/Filters': 'Alerts › Filters',
   'Alerts/SpamFiltering': 'Alerts › Spam Filtering',
   'Alerts/Reroll': 'Alerts › Reroll',
-  'Notifications': 'Notifications',
+  Notifications: 'Notifications',
   'Notifications/StreamStart': 'Notifications › Stream Start',
   'Notifications/ChatMention': 'Notifications › Chat Mention',
-  'Connect': 'Connect',
+  Connect: 'Connect',
   'Connect/ElevenLabs': 'Connect › ElevenLabs',
   'Connect/SoundAlerts': 'Connect › SoundAlerts',
   'Connect/Blerp': 'Connect › Blerp',
@@ -268,19 +338,19 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Connect/YouTube': 'Connect › YouTube',
   'Connect/Moblin': 'Connect › Moblin',
   'Connect/Spotify': 'Connect › Spotify',
-  'MediaPlayer': 'Media Player',
+  MediaPlayer: 'Media Player',
   'MediaPlayer/Controls': 'Media Player › Now Playing',
   'MediaPlayer/SongRequests': 'Media Player › Requests',
-  'Shortcuts': 'Shortcuts',
-  'Switcher': 'OBS Remote',
+  Shortcuts: 'Shortcuts',
+  Switcher: 'OBS Remote',
   'Switcher/Provider': 'OBS Remote › Provider',
   'Switcher/Rules': 'OBS Remote › Rules',
   'Switcher/Tokens': 'OBS Remote › Browsersource',
   'Switcher/MoblinHud': 'OBS Remote › Moblin HUD',
-  'Premium': 'Premium',
+  Premium: 'Premium',
   'Premium/Donate': 'Premium › Donate',
   'Premium/Redeem': 'Premium › Redeem',
-  'Discord': 'Discord',
+  Discord: 'Discord',
 };
 
 export function Settings(props: SettingsProperties) {
@@ -297,9 +367,7 @@ export function Settings(props: SettingsProperties) {
   const renderPinnedContent = (groupId: SettingsTab) => {
     switch (groupId) {
       case 'General':
-        return (
-          <GeneralUISettings />
-        );
+        return <GeneralUISettings />;
       case 'Chat':
         return <ChatTopSection />;
       case 'Notifications':
@@ -309,7 +377,9 @@ export function Settings(props: SettingsProperties) {
       case 'Switcher':
         return (
           <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
-            OBS Remote / Scene Switcher automatically switches OBS scenes based on your stream's health metrics (bitrate, RTT). It connects to your stream ingest provider and OBS WebSocket to react to stream state changes in real time. Requires Premium.
+            OBS Remote / Scene Switcher automatically switches OBS scenes based on your stream's
+            health metrics (bitrate, RTT). It connects to your stream ingest provider and OBS
+            WebSocket to react to stream state changes in real time. Requires Premium.
           </Alert>
         );
       case 'Connect':
@@ -329,7 +399,12 @@ export function Settings(props: SettingsProperties) {
         return (
           <Stack gap="md">
             <Center>
-              <Switch checked={config.rainMode} onChange={(event) => config.setRainMode(event.currentTarget.checked)} label="Rain Mode" size="lg" />
+              <Switch
+                checked={config.rainMode}
+                onChange={(event) => config.setRainMode(event.currentTarget.checked)}
+                label="Rain Mode"
+                size="lg"
+              />
             </Center>
           </Stack>
         );
@@ -344,7 +419,7 @@ export function Settings(props: SettingsProperties) {
       <Stack gap="xl" p="lg">
         {pinned}
         <Stack gap="xs">
-          {group.children!.map(child => {
+          {group.children!.map((child) => {
             const ChildIcon = child.icon;
             return (
               <UnstyledButton
@@ -355,7 +430,9 @@ export function Settings(props: SettingsProperties) {
                 <Group gap="sm" justify="space-between">
                   <Group gap="sm">
                     <ChildIcon size={18} />
-                    <Text size="sm" fw={500}>{child.label}</Text>
+                    <Text size="sm" fw={500}>
+                      {child.label}
+                    </Text>
                   </Group>
                   <IconChevronRight size={16} />
                 </Group>
@@ -386,79 +463,143 @@ export function Settings(props: SettingsProperties) {
 
   const renderContentBody = () => {
     switch (active) {
-      case 'Chat/Video': return <GeneralVideoSettings />;
-      case 'General/Account': return <GeneralAccountSettings close={props.close} openUserProfile={props.openUserProfile} />;
-      case 'General/Profiles': return (
-        <Stack mt={30} mb={30} gap={30}>
-          <GeneralProfileSettings />
-          <ProfileSelector onCreateProfileRequested={() => nav('Chat')} />
-        </Stack>
-      );
-      case 'Chat/Channels': return <ChatChannelsSettings />;
-      case 'Chat/Appearance': return <ChatAppearanceSettings />;
-      case 'Chat/Events': return <ChatEventsSettings />;
-      case 'Chat/Bot': return <Stack mt={30} mb={30} gap={30}><GeneralBotSettings /></Stack>;
-      case 'Chat/BrowserSource': return <ChatBrowserSourceSettings />;
-      case 'Chat/SevenTV': return <Chat7TVSettings />;
-      case 'Mod': return <ModSettings />;
-      case 'Alerts/Audio': return <AlertsAudioSettings />;
-      case 'Alerts/Sharing': return <AlertsSharingSettings />;
-      case 'Alerts/ActiveAlerts': return <AlertsActiveSettings />;
-      case 'Alerts/Editor': return <AlertsEditorSettings />;
-      case 'Alerts/Filters': return <AlertsFiltersSettings />;
-      case 'Alerts/SpamFiltering': return <AlertsSpamFilterSettings />;
-      case 'Alerts/Reroll': return <AlertsRerollSettings />;
-      case 'Notifications/StreamStart': return <NotificationStreamStartSettings />;
-      case 'Notifications/ChatMention': return <NotificationChatMentionSettings />;
-      case 'Connect/ElevenLabs': return <ConnectElevenLabsSettings />;
-      case 'Connect/SoundAlerts': return <ConnectSoundAlertsSettings />;
-      case 'Connect/Blerp': return <ConnectBlerpSettings />;
-      case 'Connect/StreamElements': return <ConnectStreamElementsSettings />;
-      case 'Connect/Pally': return <ConnectPallySettings />;
-      case 'Connect/Kofi': return <ConnectKofiSettings />;
-      case 'Connect/Fossabot': return <ConnectFossabotSettings />;
-      case 'Connect/YouTube': return <ConnectYouTubeSettings />;
-      case 'Connect/Moblin': return premium.isPremium ? <ConnectMoblinSettings /> : <PremiumRequired />;
-      case 'Connect/Spotify': return <ConnectSpotifySettings />;
-      case 'MediaPlayer/Controls': return <MediaPlayerSettings />;
-      case 'MediaPlayer/SongRequests': return <SongRequestSettings />;
-      case 'Shortcuts': return <ShortcutSettings />;
-      case 'Switcher/Provider': return (
-        <Stack mt={30} mb={30} gap={30}>
-          <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
-            Configure your stream ingest provider (e.g. nginx-rtmp, SRT server). HeheChat monitors the incoming stream signal from this provider to detect when your stream goes online or offline and trigger scene switches automatically. Scene switching on stream stop requires the HeheChat Browser Source to be added as a source in OBS (see Chat › Browser Source for the URL).
-          </Alert>
-          {premium.isPremium ? <ProviderConfigTab /> : <PremiumRequired />}
-        </Stack>
-      );
-      case 'Switcher/Rules': return (
-        <Stack mt={30} mb={30} gap={30}>
-          <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
-            Rules define which OBS scene to switch to based on stream metrics like bitrate or RTT. For example: switch to a "Low Bitrate" scene when bitrate drops below a threshold, or switch to "Starting Soon" when the stream goes offline. Rules that trigger on stream stop require the HeheChat Browser Source to be added as a source in OBS (see Chat › Browser Source for the URL).
-          </Alert>
-          {premium.isPremium ? <RulesTab /> : <PremiumRequired />}
-        </Stack>
-      );
-      case 'Switcher/Tokens': return (
-        <Stack mt={30} mb={30} gap={30}>
-          <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
-            Add this page as a Browser Source in OBS to enable automatic scene switching. Enter your OBS WebSocket URL and password, then copy the generated URL and paste it into an OBS Browser Source.
-          </Alert>
-          {premium.isPremium ? <TokenTab /> : <PremiumRequired />}
-        </Stack>
-      );
-      case 'Switcher/MoblinHud': return (
-        <Stack mt={30} mb={30} gap={30}>
-          <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
-            Configure the cycling telemetry HUD shown as an OBS browser source for Moblin streams, including theme, logo, sections and GPX track.
-          </Alert>
-          {premium.isPremium ? <MoblinHudSettings /> : <PremiumRequired />}
-        </Stack>
-      );
-      case 'Premium/Donate': return <DonationPremium />;
-      case 'Premium/Redeem': return <RedeemCode onSuccess={() => { setPremiumRefreshKey(k => k + 1); setActive('Premium'); }} />;
-      case 'Discord': return <DiscordInfo />;
-      default: return null;
+      case 'Chat/Video':
+        return <GeneralVideoSettings />;
+      case 'General/Account':
+        return (
+          <GeneralAccountSettings close={props.close} openUserProfile={props.openUserProfile} />
+        );
+      case 'General/Profiles':
+        return (
+          <Stack mt={30} mb={30} gap={30}>
+            <GeneralProfileSettings />
+            <ProfileSelector onCreateProfileRequested={() => nav('Chat')} />
+          </Stack>
+        );
+      case 'Chat/Channels':
+        return <ChatChannelsSettings />;
+      case 'Chat/Appearance':
+        return <ChatAppearanceSettings />;
+      case 'Chat/Events':
+        return <ChatEventsSettings />;
+      case 'Chat/Bot':
+        return (
+          <Stack mt={30} mb={30} gap={30}>
+            <GeneralBotSettings />
+          </Stack>
+        );
+      case 'Chat/BrowserSource':
+        return <ChatBrowserSourceSettings />;
+      case 'Chat/SevenTV':
+        return <Chat7TVSettings />;
+      case 'Mod':
+        return <ModSettings />;
+      case 'Alerts/Audio':
+        return <AlertsAudioSettings />;
+      case 'Alerts/Sharing':
+        return <AlertsSharingSettings />;
+      case 'Alerts/ActiveAlerts':
+        return <AlertsActiveSettings />;
+      case 'Alerts/Editor':
+        return <AlertsEditorSettings />;
+      case 'Alerts/Filters':
+        return <AlertsFiltersSettings />;
+      case 'Alerts/SpamFiltering':
+        return <AlertsSpamFilterSettings />;
+      case 'Alerts/Reroll':
+        return <AlertsRerollSettings />;
+      case 'Notifications/StreamStart':
+        return <NotificationStreamStartSettings />;
+      case 'Notifications/ChatMention':
+        return <NotificationChatMentionSettings />;
+      case 'Connect/ElevenLabs':
+        return <ConnectElevenLabsSettings />;
+      case 'Connect/SoundAlerts':
+        return <ConnectSoundAlertsSettings />;
+      case 'Connect/Blerp':
+        return <ConnectBlerpSettings />;
+      case 'Connect/StreamElements':
+        return <ConnectStreamElementsSettings />;
+      case 'Connect/Pally':
+        return <ConnectPallySettings />;
+      case 'Connect/Kofi':
+        return <ConnectKofiSettings />;
+      case 'Connect/Fossabot':
+        return <ConnectFossabotSettings />;
+      case 'Connect/YouTube':
+        return <ConnectYouTubeSettings />;
+      case 'Connect/Moblin':
+        return premium.isPremium ? <ConnectMoblinSettings /> : <PremiumRequired />;
+      case 'Connect/Spotify':
+        return <ConnectSpotifySettings />;
+      case 'MediaPlayer/Controls':
+        return <MediaPlayerSettings />;
+      case 'MediaPlayer/SongRequests':
+        return <SongRequestSettings />;
+      case 'Shortcuts':
+        return <ShortcutSettings />;
+      case 'Switcher/Provider':
+        return (
+          <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+              Configure your stream ingest provider (e.g. nginx-rtmp, SRT server). HeheChat monitors
+              the incoming stream signal from this provider to detect when your stream goes online
+              or offline and trigger scene switches automatically. Scene switching on stream stop
+              requires the HeheChat Browser Source to be added as a source in OBS (see Chat ›
+              Browser Source for the URL).
+            </Alert>
+            {premium.isPremium ? <ProviderConfigTab /> : <PremiumRequired />}
+          </Stack>
+        );
+      case 'Switcher/Rules':
+        return (
+          <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+              Rules define which OBS scene to switch to based on stream metrics like bitrate or RTT.
+              For example: switch to a "Low Bitrate" scene when bitrate drops below a threshold, or
+              switch to "Starting Soon" when the stream goes offline. Rules that trigger on stream
+              stop require the HeheChat Browser Source to be added as a source in OBS (see Chat ›
+              Browser Source for the URL).
+            </Alert>
+            {premium.isPremium ? <RulesTab /> : <PremiumRequired />}
+          </Stack>
+        );
+      case 'Switcher/Tokens':
+        return (
+          <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+              Add this page as a Browser Source in OBS to enable automatic scene switching. Enter
+              your OBS WebSocket URL and password, then copy the generated URL and paste it into an
+              OBS Browser Source.
+            </Alert>
+            {premium.isPremium ? <TokenTab /> : <PremiumRequired />}
+          </Stack>
+        );
+      case 'Switcher/MoblinHud':
+        return (
+          <Stack mt={30} mb={30} gap={30}>
+            <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
+              Configure the cycling telemetry HUD shown as an OBS browser source for Moblin streams,
+              including theme, logo, sections and GPX track.
+            </Alert>
+            {premium.isPremium ? <MoblinHudSettings /> : <PremiumRequired />}
+          </Stack>
+        );
+      case 'Premium/Donate':
+        return <DonationPremium />;
+      case 'Premium/Redeem':
+        return (
+          <RedeemCode
+            onSuccess={() => {
+              setPremiumRefreshKey((k) => k + 1);
+              setActive('Premium');
+            }}
+          />
+        );
+      case 'Discord':
+        return <DiscordInfo />;
+      default:
+        return null;
     }
   };
 
@@ -477,12 +618,16 @@ export function Settings(props: SettingsProperties) {
   return (
     <nav className={classes.navbar} style={{ overflow: 'hidden' }}>
       <div className={classes.header}>
-        <Text fw={700} c='primary'>Settings › {tabLabels[active] ?? active}</Text>
-        <Button onClick={props.close} variant='subtle' color='primary'><IconX /></Button>
+        <Text fw={700} c="primary">
+          Settings › {tabLabels[active] ?? active}
+        </Text>
+        <Button onClick={props.close} variant="subtle" color="primary">
+          <IconX />
+        </Button>
       </div>
       <div className={classes.wrapper}>
         <div className={classes.aside}>
-          {NAV_GROUPS.map(group => {
+          {NAV_GROUPS.map((group) => {
             const Icon = group.icon;
             const isGroupActive = active === group.id || active.startsWith(group.id + '/');
             return (

@@ -30,10 +30,10 @@ export const DEFAULT_PREMIUM: Premium = {
     subscriptionType: null,
     daysRemaining: null,
     status: null,
-    loading: false
+    loading: false,
   }),
   redeemCode: async () => ({ success: false, message: 'Not implemented' }),
-  processPayment: async () => ({ success: false, message: 'Not implemented' })
+  processPayment: async () => ({ success: false, message: 'Not implemented' }),
 };
 
 export const PremiumContext = createContext<Premium>(DEFAULT_PREMIUM);

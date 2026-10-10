@@ -50,7 +50,7 @@ export const features = {
       // ponytail: CSS gradient stands in until a real screenshot is available
       image: '/img/tile_replay.png',
     },
-        {
+    {
       title: 'Shared Chat',
       desc: 'Multiple streamers, one shared view. Built for co-streams.',
       dark: false,
@@ -75,13 +75,15 @@ export const carousel = {
   slides: [
     {
       video: '/img/slide_moritz.mp4',
-      quote: 'Ich nutze HeheChat seit über einem Jahr als IRL Chat App und um meine IRL Alerts abzuspielen. Die Kombination aus Alerts und Chat App habe ich in diesem Umfang noch nirgends gesehen. Gerade die Möglichkeit Alerts ein zweites mal abzuspielen macht es für mich noch angenehmer in IRL Streams mit meiner Community zu interagieren.',
+      quote:
+        'Ich nutze HeheChat seit über einem Jahr als IRL Chat App und um meine IRL Alerts abzuspielen. Die Kombination aus Alerts und Chat App habe ich in diesem Umfang noch nirgends gesehen. Gerade die Möglichkeit Alerts ein zweites mal abzuspielen macht es für mich noch angenehmer in IRL Streams mit meiner Community zu interagieren.',
       author: 'Moritz - Youtube & Snowboard Legend',
       channel: 'twitch.tv/moritzschmid1',
     },
     {
       video: '/img/slide_knirpz.mp4',
-      quote: 'Für mich ist HeheChat sehr übersichtlich und intuitiv. Ich kann das Design schnell und einfach an meine Umgebung anpassen. Dank der vielen Anpassungsmöglichkeiten kann ich meine Zuschauer noch mehr Teil des Geschehens werden lassen, was mich manchmal meinen Lebenssinn hinterfragen lässt.',
+      quote:
+        'Für mich ist HeheChat sehr übersichtlich und intuitiv. Ich kann das Design schnell und einfach an meine Umgebung anpassen. Dank der vielen Anpassungsmöglichkeiten kann ich meine Zuschauer noch mehr Teil des Geschehens werden lassen, was mich manchmal meinen Lebenssinn hinterfragen lässt.',
       author: 'Knirpz - Twitch Ambassador',
       channel: 'twitch.tv/knirpz',
     },
@@ -94,7 +96,8 @@ export const carousel = {
     },*/
     {
       video: '/img/slide_simon.mp4',
-      quote: 'Meine ersten IRL-Streams habe ich noch mit einem ziemlich gurkigen Handy gemacht. HeheChat lief darauf super, weil die App auch für einfache Smartphones gut optimiert ist. Gerade als Hobby-Streamer behält man alle Alerts im Blick und kann während des Streams ganz entspannt moderieren – inklusive Timeouts und Bans.',
+      quote:
+        'Meine ersten IRL-Streams habe ich noch mit einem ziemlich gurkigen Handy gemacht. HeheChat lief darauf super, weil die App auch für einfache Smartphones gut optimiert ist. Gerade als Hobby-Streamer behält man alle Alerts im Blick und kann während des Streams ganz entspannt moderieren – inklusive Timeouts und Bans.',
       author: 'Simon - Technik Nerd, Moderator & Streamer',
       channel: 'twitch.tv/simon_offiziell',
     },

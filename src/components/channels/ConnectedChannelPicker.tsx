@@ -18,7 +18,11 @@ export function ConnectedChannelPicker(props: ConnectedChannelPickerProps) {
 
   if (loading) {
     return (
-      <Box w={32} h={32} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Box
+        w={32}
+        h={32}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
         <Loader size="sm" />
       </Box>
     );
@@ -26,9 +30,13 @@ export function ConnectedChannelPicker(props: ConnectedChannelPickerProps) {
 
   if (error) {
     return (
-      <Box w={32} h={32} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <Alert 
-          icon={<IconAlertCircle size="1rem" />} 
+      <Box
+        w={32}
+        h={32}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
+        <Alert
+          icon={<IconAlertCircle size="1rem" />}
           color="red"
           p="xs"
           title="Error loading channels"
@@ -42,10 +50,5 @@ export function ConnectedChannelPicker(props: ConnectedChannelPickerProps) {
   // Channels are already strings from the API
   const channelNames = channels;
 
-  return (
-    <ChannelPicker
-      {...props}
-      channels={channelNames}
-    />
-  );
+  return <ChannelPicker {...props} channels={channelNames} />;
 }

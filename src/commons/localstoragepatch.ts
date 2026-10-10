@@ -37,9 +37,7 @@ export class LocalStoragePatch {
    * Execute all pending patches that haven't been run yet
    */
   applyPatches() {
-    const pendingPatches = this.patches.filter(
-      (patch) => patch.version > this.currentVersion
-    );
+    const pendingPatches = this.patches.filter((patch) => patch.version > this.currentVersion);
 
     if (pendingPatches.length === 0) {
       return;
@@ -49,10 +47,7 @@ export class LocalStoragePatch {
       try {
         patch.execute(localStorage);
         this.currentVersion = patch.version;
-        localStorage.setItem(
-          LocalStoragePatch.VERSION_KEY,
-          this.currentVersion.toString()
-        );
+        localStorage.setItem(LocalStoragePatch.VERSION_KEY, this.currentVersion.toString());
       } catch (error) {
         console.error(`Error applying patch version ${patch.version}:`, error);
         // Stop applying patches if one fails to prevent potential data corruption

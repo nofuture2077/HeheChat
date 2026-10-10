@@ -22,14 +22,14 @@ export const PremiumStatus: React.FC<PremiumStatusProps> = ({ showText = true, o
     return null;
   }
 
-  const tooltipContent = premium.expiresAt 
+  const tooltipContent = premium.expiresAt
     ? `HeheChat Pro active until ${new Date(premium.expiresAt).toLocaleDateString()}`
     : 'HeheChat Pro active';
 
   return (
     <Tooltip label={tooltipContent} position="bottom" withArrow>
-      <Badge 
-        className={classes.premiumBadge} 
+      <Badge
+        className={classes.premiumBadge}
         leftSection={<IconCrown size={14} />}
         onClick={onClick}
         style={{ cursor: onClick ? 'pointer' : 'default' }}

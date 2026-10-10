@@ -21,7 +21,7 @@ export interface RerollConfig {
     userPickChannelPointReward: string | null;
     rerollTriggers: RerollTrigger[];
     chatMessage: string | null;
-  },
+  };
   enabled: boolean;
 }
 
@@ -37,7 +37,7 @@ export const getUserSpriteAssignment = async (
 ): Promise<UserSpriteAssignment | null> => {
   try {
     const response = await fetch(`${BASE_URL}/api/user-sprite/${channel}/${username}`);
-    
+
     if (!response.ok) {
       if (response.status === 404) {
         // No assignment found, which is a valid state
@@ -45,7 +45,7 @@ export const getUserSpriteAssignment = async (
       }
       throw new Error(`Failed to fetch sprite assignment: ${response.statusText}`);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error('Error fetching user sprite assignment:', error);
@@ -73,11 +73,11 @@ export const saveUserSpriteAssignment = async (
       },
       body: JSON.stringify({ selectedFilename: filename }),
     });
-    
+
     if (!response.ok) {
       throw new Error(`Failed to save sprite assignment: ${response.statusText}`);
     }
-    
+
     return true;
   } catch (error) {
     console.error('Error saving user sprite assignment:', error);
@@ -100,13 +100,16 @@ export const completeReroll = async (
   try {
     const token = localStorage.getItem('hehe-token_state') || '';
     const sink = localStorage.getItem('hehe-sink') || '';
-    const response = await fetch(`${BASE_URL}/api/user-sprite/${channel}/${username}/complete-reroll?token=${token}&sink=${sink}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ newFilename }),
-    });
+    const response = await fetch(
+      `${BASE_URL}/api/user-sprite/${channel}/${username}/complete-reroll?token=${token}&sink=${sink}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ newFilename }),
+      }
+    );
 
     if (response.ok) {
       return newFilename;
@@ -132,21 +135,24 @@ export const completeReroll = async (
  */
 export const triggerReroll = async (
   channel: string,
-  username: string,
+  username: string
 ): Promise<{ success: boolean; rerollPending: boolean }> => {
   try {
-    const response = await fetch(`${BASE_URL}/api/user-sprite/${channel}/${username}/trigger-reroll`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ trigger: 'manual' }),
-    });
-    
+    const response = await fetch(
+      `${BASE_URL}/api/user-sprite/${channel}/${username}/trigger-reroll`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ trigger: 'manual' }),
+      }
+    );
+
     if (!response.ok) {
       throw new Error(`Failed to trigger reroll: ${response.statusText}`);
     }
-    
+
     const result = await response.json();
     return {
       success: true,
@@ -169,12 +175,14 @@ export const triggerReroll = async (
 export const getRerollConfig = async (channel: string): Promise<RerollConfig | null> => {
   try {
     const state = localStorage.getItem('hehe-token_state') || '';
-    const response = await fetch(`${BASE_URL}/api/user-sprite/reroll-config/${channel}?token=${state}`);
-    
+    const response = await fetch(
+      `${BASE_URL}/api/user-sprite/reroll-config/${channel}?token=${state}`
+    );
+
     if (!response.ok) {
       throw new Error(`Failed to fetch reroll config: ${response.statusText}`);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error('Error fetching reroll config:', error);
@@ -196,33 +204,36 @@ export const updateRerollConfig = async (
       userPickChannelPointReward: string | null;
       rerollTriggers: RerollTrigger[];
       chatMessage: string | null;
-    },
+    };
     enabled: boolean;
   }
 ): Promise<{ success: boolean; config?: RerollConfig }> => {
   try {
     const state = localStorage.getItem('hehe-token_state') || '';
-    const response = await fetch(`${BASE_URL}/api/user-sprite/reroll-config/${channel}?token=${state}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(config),
-    });
-    
+    const response = await fetch(
+      `${BASE_URL}/api/user-sprite/reroll-config/${channel}?token=${state}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config),
+      }
+    );
+
     if (!response.ok) {
       throw new Error(`Failed to update reroll config: ${response.statusText}`);
     }
-    
+
     const result = await response.json();
     return {
       success: true,
-      config: result
+      config: result,
     };
   } catch (error) {
     console.error('Error updating reroll config:', error);
     return {
-      success: false
+      success: false,
     };
   }
 };

@@ -3,12 +3,12 @@ import classes from './infocard.module.css';
 import { ReactComponentLike, ReactElementLike } from 'prop-types';
 import { useContext } from 'react';
 import { ChatEmotesContext, PremiumContext } from '@/ApplicationContext';
-import { timeSince } from '@/commons/helper'
+import { timeSince } from '@/commons/helper';
 import { PremiumStatus } from '../premium';
 
 export interface InfoCardProperties {
   channel?: string;
-  name: string; 
+  name: string;
   text: string;
   date: number;
   left?: ReactElementLike;
@@ -21,30 +21,38 @@ export interface InfoCardProperties {
 export function InfoCard(props: InfoCardProperties) {
   const emotes = useContext(ChatEmotesContext);
   return (
-     <Group className={[classes.card, props.className].join(' ')} onClick={props.onClick} gap={'xs'} p={10} justify='space-between' style={{flexWrap: 'nowrap'}}>
-      {props.channel ? <span key='infocard-channel' className={classes.channel}>{emotes.getLogo(props.channel)}</span> : null}
+    <Group
+      className={[classes.card, props.className].join(' ')}
+      onClick={props.onClick}
+      gap={'xs'}
+      p={10}
+      justify="space-between"
+      style={{ flexWrap: 'nowrap' }}
+    >
+      {props.channel ? (
+        <span key="infocard-channel" className={classes.channel}>
+          {emotes.getLogo(props.channel)}
+        </span>
+      ) : null}
       {props.left || null}
-        <Stack gap={0} style={{flexGrow: 5}}>
-          <Group justify='space-between'>
-            <Group gap="xs">
-              <Text size="sm" fw={700} className={classes.username}>
-                {props.name}
-              </Text>
-              {props.showPremium && <PremiumStatus showText={false} />}
-            </Group>
-            <Text fw={500} c="dimmed" size="sm">
-              {timeSince(props.date)}
+      <Stack gap={0} style={{ flexGrow: 5 }}>
+        <Group justify="space-between">
+          <Group gap="xs">
+            <Text size="sm" fw={700} className={classes.username}>
+              {props.name}
             </Text>
+            {props.showPremium && <PremiumStatus showText={false} />}
           </Group>
+          <Text fw={500} c="dimmed" size="sm">
+            {timeSince(props.date)}
+          </Text>
+        </Group>
 
+        <Text lineClamp={1}>{props.text}</Text>
+      </Stack>
 
-          <Text lineClamp={1}>{props.text}</Text>
-        </Stack>
-
-        <div>
-          {props.right || null}
-        </div>
-      </Group>
+      <div>{props.right || null}</div>
+    </Group>
   );
 }
 
@@ -52,11 +60,11 @@ export function InfoCardSkeleton() {
   return (
     <Card className={classes.card}>
       <Group flex={1}>
-        <Skeleton h={32} w={32} radius='xl'/>
+        <Skeleton h={32} w={32} radius="xl" />
         <div style={{ flex: 1 }}>
-          <Skeleton h='1rem' />
+          <Skeleton h="1rem" />
 
-          <Skeleton h='1rem' />
+          <Skeleton h="1rem" />
         </div>
       </Group>
     </Card>

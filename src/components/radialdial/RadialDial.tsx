@@ -49,9 +49,7 @@ export const RadialDial: React.FC<RadialDialProps> = ({
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
 
-      const distance = Math.sqrt(
-        Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2)
-      );
+      const distance = Math.sqrt(Math.pow(clientX - centerX, 2) + Math.pow(clientY - centerY, 2));
 
       if (distance < rect.width / 2) {
         setHoveredIndex(i);
@@ -110,9 +108,8 @@ export const RadialDial: React.FC<RadialDialProps> = ({
     }
   }, [messageRef]);
 
-  const currentTooltip = hoveredIndex !== null && !actions[hoveredIndex].disabled 
-    ? actions[hoveredIndex].tooltip 
-    : null;
+  const currentTooltip =
+    hoveredIndex !== null && !actions[hoveredIndex].disabled ? actions[hoveredIndex].tooltip : null;
 
   // Calculate position offset towards screen center
   const screenCenterX = window.innerWidth / 2;
@@ -122,7 +119,7 @@ export const RadialDial: React.FC<RadialDialProps> = ({
   // Calculate direction vector towards screen center
   const dirX = screenCenterX - position.x;
   const dirY = screenCenterY - position.y;
-  
+
   // Normalize and scale the offset
   const length = Math.sqrt(dirX * dirX + dirY * dirY);
   const normalizedX = (dirX / length) * Math.min(maxOffset, length);
@@ -133,8 +130,8 @@ export const RadialDial: React.FC<RadialDialProps> = ({
   const adjustedY = position.y + normalizedY;
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className={styles.container}
       style={{
         position: 'fixed',
@@ -142,15 +139,13 @@ export const RadialDial: React.FC<RadialDialProps> = ({
         top: adjustedY,
       }}
     >
-      {currentTooltip && (
-        <div className={styles.tooltip}>{currentTooltip}</div>
-      )}
+      {currentTooltip && <div className={styles.tooltip}>{currentTooltip}</div>}
       <div className={styles.actions}>
         {actions.map((action, index) => {
           const angle = (2 * Math.PI * index) / actions.length - Math.PI / 2;
           const x = Math.cos(angle) * radius - 36;
           const y = Math.sin(angle) * radius - 36;
-          
+
           return (
             <ActionIcon
               key={index}

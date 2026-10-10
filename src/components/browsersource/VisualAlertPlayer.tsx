@@ -20,7 +20,7 @@ function HighlightedText({ text }: HighlightedTextProps) {
       {parts.map((part, index) => {
         // Replace spaces with non-breaking spaces
         const processedPart = part.replace(/ /g, '\u00A0');
-        
+
         // Every odd index is highlighted text (inside ##)
         if (index % 2 === 1) {
           return (
@@ -39,13 +39,15 @@ function HighlightedText({ text }: HighlightedTextProps) {
 }
 
 function formatText(text: string, emotes: ChatEmotes, channel: string) {
-  return joinWithSpace(text.split(' ').map((word, index) => {
+  return joinWithSpace(
+    text.split(' ').map((word, index) => {
       if (word.startsWith('image//')) {
         const url = word.substring(5);
-        return <EmoteComponentSimple imageUrl={url} largeImageUrl={url} name='emote' type=''/>
+        return <EmoteComponentSimple imageUrl={url} largeImageUrl={url} name="emote" type="" />;
       }
-      return emotes.checkEmote(channel, word, "" + index, true);
-  }));
+      return emotes.checkEmote(channel, word, '' + index, true);
+    })
+  );
 }
 
 const shownAlerts: Record<string, boolean> = {};
@@ -55,10 +57,10 @@ export default function VisualAlertPlayer() {
   const chatEmotes = useContext(ChatEmotesContext);
   const [isVisible, setIsVisible] = useState(false);
   const [timestamp, setTimestamp] = useState(0);
-  const [mediaData, setMediaData] = useState<{ 
-    src: string; 
-    type: string; 
-    mime: string; 
+  const [mediaData, setMediaData] = useState<{
+    src: string;
+    type: string;
+    mime: string;
     prefixClass?: string;
     selectedFilename?: string;
   } | null>(null);
@@ -67,9 +69,9 @@ export default function VisualAlertPlayer() {
     if (!AlertSystem.alertConfig?.[channel]?.data?.files?.[ref]) {
       return null;
     }
-    
+
     const file = AlertSystem.alertConfig[channel].data.files[ref];
-    
+
     // Zip files show a sprite: the pre-selected one, otherwise (e.g. editor preview) the first one
     if (file.mime === 'application/zip') {
       try {
@@ -77,45 +79,50 @@ export default function VisualAlertPlayer() {
         // This avoids unzipping the same data repeatedly
         const spriteData = event?.selectedSpriteFilename
           ? await spriteManager.getSpriteData(
-            file.data,
-            channel,
-            event.username,
-            event.useLastSpriteFilename || false,
-            event.userSeed,
-            event.selectedSpriteFilename,
-          )
+              file.data,
+              channel,
+              event.username,
+              event.useLastSpriteFilename || false,
+              event.userSeed,
+              event.selectedSpriteFilename
+            )
           : await spriteManager.getPreviewSprite(file.data);
-        
+
         if (!spriteData) {
           console.error('Failed to get sprite data');
           return null;
         }
-        
+
         // Return the image data
         return {
           src: `data:${spriteData.selectedImage.mime};base64,${spriteData.selectedImage.data}`,
           type: 'image',
           mime: spriteData.selectedImage.mime,
           prefixClass: spriteData.prefixClass,
-          selectedFilename: spriteData.selectedFilename
+          selectedFilename: spriteData.selectedFilename,
         };
       } catch (err) {
         console.error('Error processing sprite data:', err);
         return null;
       }
     }
-    
+
     // Not a zip file, return as before
     return {
       src: `data:${file.mime};base64,${file.data}`,
       type: file.type,
       mime: file.mime,
-      prefixClass: '' // No prefix class for non-zip files
+      prefixClass: '', // No prefix class for non-zip files
     };
   };
 
   const isVideoMimeType = (mime: string) => {
-    return mime.startsWith('video/') || mime === 'video/webm' || mime === 'video/mp4' || mime === 'video/ogg';
+    return (
+      mime.startsWith('video/') ||
+      mime === 'video/webm' ||
+      mime === 'video/mp4' ||
+      mime === 'video/ogg'
+    );
   };
 
   useEffect(() => {
@@ -189,45 +196,53 @@ export default function VisualAlertPlayer() {
   const containerClasses = [
     styles.alertContainer,
     isVisible && styles.visible,
-    ...(currentAlert.position?.split(' ') || []).map(p => styles[p]),
-    ...(currentAlert.layout?.split(' ') || []).map(l => styles[l]),
+    ...(currentAlert.position?.split(' ') || []).map((p) => styles[p]),
+    ...(currentAlert.layout?.split(' ') || []).map((l) => styles[l]),
     // Support for font classes like 'font-headline-bangers font-text-molle'
-    ...(currentAlert.layout?.split(' ').filter(l => l.startsWith('font-')) || []).map(f => styles[f])
-  ].filter(Boolean).join(' ');
+    ...(currentAlert.layout?.split(' ').filter((l) => l.startsWith('font-')) || []).map(
+      (f) => styles[f]
+    ),
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className={containerClasses}>
       <div className={styles.contentWrapper}>
-        {currentAlert.image && mediaData && (() => {
-          if (mediaData.type === 'video' || isVideoMimeType(mediaData.mime)) {
-            return (
-              <video 
-                className={styles.image}
-                src={mediaData.src}
-                autoPlay
-                muted
-                loop
-                playsInline
-                key={"video-" + timestamp}
-                style={{ backgroundColor: 'transparent' }}
-              />
-            );
-          } else {
-            // Extract prefix class from filename for styling (e.g., "48_whatever.jpg" => "prefix-48")
-            const prefixClass = mediaData.selectedFilename ? mediaData.prefixClass || '' : '';
-            
-            return (
-              <img 
-                className={`${styles.image} ${prefixClass ? styles[prefixClass] : ''}`}
-                src={mediaData.src} 
-                alt="Alert" 
-                key={"image-" + timestamp}
-              />
-            );
-          }
-        })()}
+        {currentAlert.image &&
+          mediaData &&
+          (() => {
+            if (mediaData.type === 'video' || isVideoMimeType(mediaData.mime)) {
+              return (
+                <video
+                  className={styles.image}
+                  src={mediaData.src}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  key={'video-' + timestamp}
+                  style={{ backgroundColor: 'transparent' }}
+                />
+              );
+            } else {
+              // Extract prefix class from filename for styling (e.g., "48_whatever.jpg" => "prefix-48")
+              const prefixClass = mediaData.selectedFilename ? mediaData.prefixClass || '' : '';
+
+              return (
+                <img
+                  className={`${styles.image} ${prefixClass ? styles[prefixClass] : ''}`}
+                  src={mediaData.src}
+                  alt="Alert"
+                  key={'image-' + timestamp}
+                />
+              );
+            }
+          })()}
         <div className={styles.text}>
-          <p><HighlightedText text={currentAlert.headline} /></p>
+          <p>
+            <HighlightedText text={currentAlert.headline} />
+          </p>
           <p>{formatText(currentAlert.text, chatEmotes, currentAlert.channel)}</p>
         </div>
       </div>

@@ -13,12 +13,28 @@ import {
   Badge,
   Paper,
   alpha,
-  Pagination
+  Pagination,
 } from '@mantine/core';
 import { CompositeChart } from '@mantine/charts';
-import { IconInfoCircle, IconTrendingUp, IconUsers, IconMessage, IconGift, IconBolt, IconClock, IconCalendar } from '@tabler/icons-react';
+import {
+  IconInfoCircle,
+  IconTrendingUp,
+  IconUsers,
+  IconMessage,
+  IconGift,
+  IconBolt,
+  IconClock,
+  IconCalendar,
+} from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
-import { AnalyticsApiClient, StreamAnalyticsData, StreamAnalyticsSummary, StreamInfo, fillMissingTimestamps, normalizeAnalyticsData } from '@/api/analytics';
+import {
+  AnalyticsApiClient,
+  StreamAnalyticsData,
+  StreamAnalyticsSummary,
+  StreamInfo,
+  fillMissingTimestamps,
+  normalizeAnalyticsData,
+} from '@/api/analytics';
 import { useChannels } from '@/hooks/useChannels';
 
 interface ChartDataPoint {
@@ -34,11 +50,15 @@ interface ChartDataPoint {
   follow_count: number;
 }
 
-
-export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, onChannelChange?: (channel: string) => void, onStreamChange?: (streamId: string, streamData: any) => void}) {
+export function StreamAnalyticsChart(props: {
+  channel?: string;
+  admin: boolean;
+  onChannelChange?: (channel: string) => void;
+  onStreamChange?: (streamId: string, streamData: any) => void;
+}) {
   const premium = useContext(PremiumContext);
   const { channels, loading: channelsLoading } = useChannels();
-  
+
   const [selectedChannel, setSelectedChannel] = useState<string>(props.channel || '');
   const [loading, setLoading] = useState(false);
   const [streamsLoading, setStreamsLoading] = useState(false);
@@ -47,45 +67,49 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
   const [summary, setSummary] = useState<StreamAnalyticsSummary | null>(null);
   const [streams, setStreams] = useState<StreamInfo[]>([]);
   const [selectedStream, setSelectedStream] = useState<string>('');
-  
+
   // Pagination state for Recent Streams
   const [streamsPage, setStreamsPage] = useState(1);
   const [streamsLimit] = useState(5);
 
   const getLast30DaysRange = () => {
     const now = Math.floor(Date.now() / 1000);
-    const thirtyDaysAgo = now - (30 * 24 * 60 * 60);
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60;
     return { start: thirtyDaysAgo, end: now };
   };
 
   const formatTimestamp = (timestamp: number, streamDuration: number): string => {
     const date = new Date(timestamp * 1000);
-    
+
     // For streams shorter than 6 hours, show time with minutes
     if (streamDuration < 6 * 60) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
         minute: '2-digit',
-        hour12: false 
+        hour12: false,
       });
     } else {
       // For longer streams, show date and hour
-      return date.toLocaleString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
+      return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
         hour: '2-digit',
-        hour12: false 
+        hour12: false,
       });
     }
   };
 
-  const transformData = (rawData: StreamAnalyticsData[], streamDuration: number): ChartDataPoint[] => {
-    return rawData.map(item => {
+  const transformData = (
+    rawData: StreamAnalyticsData[],
+    streamDuration: number
+  ): ChartDataPoint[] => {
+    return rawData.map((item) => {
       // Convert timestamp to number if it's a string
-      const timestamp = typeof item.timestamp_minute === 'string' 
-        ? parseInt(item.timestamp_minute, 10) 
-        : item.timestamp_minute;
-      
+      const timestamp =
+        typeof item.timestamp_minute === 'string'
+          ? parseInt(item.timestamp_minute, 10)
+          : item.timestamp_minute;
+
       return {
         timestamp: timestamp.toString(),
         time: formatTimestamp(timestamp, streamDuration),
@@ -96,7 +120,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
         cheer_bits_total: item.cheer_bits_total,
         raid_count: item.raid_count,
         raid_viewers_total: item.raid_viewers_total,
-        follow_count: item.follow_count
+        follow_count: item.follow_count,
       };
     });
   };
@@ -119,7 +143,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
           const mostRecentStream = streams[0];
           // Use ID if available, otherwise use start timestamp as identifier
           const streamId = mostRecentStream.id
-            ? mostRecentStream.id.toString() 
+            ? mostRecentStream.id.toString()
             : `active_${mostRecentStream.start_timestamp}`;
           setSelectedStream(streamId);
         }
@@ -149,10 +173,8 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
 
     try {
       // Find stream by matching the identifier format
-      const selectedStreamData = streams.find(s => {
-        const currentStreamId = s.id
-          ? s.id.toString() 
-          : `active_${s.start_timestamp}`;
+      const selectedStreamData = streams.find((s) => {
+        const currentStreamId = s.id ? s.id.toString() : `active_${s.start_timestamp}`;
         return currentStreamId === streamId;
       });
 
@@ -164,7 +186,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
       // Determine appropriate interval based on stream duration
       let interval: '1m' | '5m' | '15m' | '30m' | '1h' | '6h' | '12h' | '1d' = '1h';
       const durationMinutes = selectedStreamData.duration_seconds / 60;
-      
+
       if (durationMinutes <= 60) {
         interval = '1m';
       } else if (durationMinutes <= 180) {
@@ -187,10 +209,10 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
         false
       );
 
-      if (response.success) {        
+      if (response.success) {
         // Normalize the data to ensure consistent types
         const normalizedData = normalizeAnalyticsData(response.data);
-        
+
         // Fill missing timestamps with zero values for better chart visualization
         const filledData = fillMissingTimestamps(
           normalizedData,
@@ -198,9 +220,9 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
           selectedStreamData.end_timestamp,
           interval
         );
-        
+
         const transformedData = transformData(filledData, durationMinutes);
-        
+
         setData(transformedData);
         setSummary(response.summary || null);
       } else {
@@ -264,7 +286,13 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
           { name: 'message_count', label: 'Messages', color: 'green.6', type: 'area' },
           { name: 'sub_count', label: 'Subs', color: 'violet.6', type: 'bar', yAxisId: 'right' },
           { name: 'cheer_count', label: 'Bits', color: 'orange.6', type: 'bar', yAxisId: 'right' },
-          { name: 'follow_count', label: 'Follows', color: 'pink.6', type: 'bar', yAxisId: 'right' }
+          {
+            name: 'follow_count',
+            label: 'Follows',
+            color: 'pink.6',
+            type: 'bar',
+            yAxisId: 'right',
+          },
         ]}
       />
     );
@@ -274,9 +302,10 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
     if (!summary) return null;
 
     // Calculate messages per minute
-    const messagesPerMinute = summary.total_minutes > 0 
-      ? (summary.total_messages / summary.total_minutes).toFixed(1)
-      : '0.0';
+    const messagesPerMinute =
+      summary.total_minutes > 0
+        ? (summary.total_messages / summary.total_minutes).toFixed(1)
+        : '0.0';
 
     return (
       <Grid>
@@ -285,8 +314,12 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
             <Group>
               <IconUsers size={24} color="var(--mantine-color-blue-6)" />
               <div>
-                <Text size="xs" c="dimmed">Average Viewers</Text>
-                <Text size="lg" fw={700}>{summary.avg_viewers.toLocaleString()}</Text>
+                <Text size="xs" c="dimmed">
+                  Average Viewers
+                </Text>
+                <Text size="lg" fw={700}>
+                  {summary.avg_viewers.toLocaleString()}
+                </Text>
               </div>
             </Group>
           </Card>
@@ -296,8 +329,12 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
             <Group>
               <IconTrendingUp size={24} color="var(--mantine-color-blue-6)" />
               <div>
-                <Text size="xs" c="dimmed">Peak Viewers</Text>
-                <Text size="lg" fw={700}>{summary.peak_viewers.toLocaleString()}</Text>
+                <Text size="xs" c="dimmed">
+                  Peak Viewers
+                </Text>
+                <Text size="lg" fw={700}>
+                  {summary.peak_viewers.toLocaleString()}
+                </Text>
               </div>
             </Group>
           </Card>
@@ -307,8 +344,12 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
             <Group>
               <IconMessage size={24} color="var(--mantine-color-green-6)" />
               <div>
-                <Text size="xs" c="dimmed">Total Messages</Text>
-                <Text size="lg" fw={700}>{summary.total_messages.toLocaleString()}</Text>
+                <Text size="xs" c="dimmed">
+                  Total Messages
+                </Text>
+                <Text size="lg" fw={700}>
+                  {summary.total_messages.toLocaleString()}
+                </Text>
               </div>
             </Group>
           </Card>
@@ -318,8 +359,12 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
             <Group>
               <IconMessage size={24} color="var(--mantine-color-green-6)" />
               <div>
-                <Text size="xs" c="dimmed">Messages/Min</Text>
-                <Text size="lg" fw={700}>{messagesPerMinute}</Text>
+                <Text size="xs" c="dimmed">
+                  Messages/Min
+                </Text>
+                <Text size="lg" fw={700}>
+                  {messagesPerMinute}
+                </Text>
               </div>
             </Group>
           </Card>
@@ -329,8 +374,12 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
             <Group>
               <IconBolt size={24} color="var(--mantine-color-orange-6)" />
               <div>
-                <Text size="xs" c="dimmed">Total Bits</Text>
-                <Text size="lg" fw={700}>{summary.total_bits.toLocaleString()}</Text>
+                <Text size="xs" c="dimmed">
+                  Total Bits
+                </Text>
+                <Text size="lg" fw={700}>
+                  {summary.total_bits.toLocaleString()}
+                </Text>
               </div>
             </Group>
           </Card>
@@ -340,8 +389,12 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
             <Group>
               <IconGift size={24} color="var(--mantine-color-violet-6)" />
               <div>
-                <Text size="xs" c="dimmed">Total Subs</Text>
-                <Text size="lg" fw={700}>{summary.total_subs.toLocaleString()}</Text>
+                <Text size="xs" c="dimmed">
+                  Total Subs
+                </Text>
+                <Text size="lg" fw={700}>
+                  {summary.total_subs.toLocaleString()}
+                </Text>
               </div>
             </Group>
           </Card>
@@ -351,8 +404,12 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
             <Group>
               <IconUsers size={24} color="var(--mantine-color-pink-6)" />
               <div>
-                <Text size="xs" c="dimmed">Total Follows</Text>
-                <Text size="lg" fw={700}>{summary.total_follows?.toLocaleString() || '0'}</Text>
+                <Text size="xs" c="dimmed">
+                  Total Follows
+                </Text>
+                <Text size="lg" fw={700}>
+                  {summary.total_follows?.toLocaleString() || '0'}
+                </Text>
               </div>
             </Group>
           </Card>
@@ -363,10 +420,8 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
 
   const renderStreamInfo = () => {
     // Find stream by matching the identifier format
-    const selectedStreamData = streams.find(s => {
-      const currentStreamId = s.id
-        ? s.id.toString() 
-        : `active_${s.start_timestamp}`;
+    const selectedStreamData = streams.find((s) => {
+      const currentStreamId = s.id ? s.id.toString() : `active_${s.start_timestamp}`;
       return currentStreamId === selectedStream;
     });
 
@@ -385,7 +440,7 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       });
     };
 
@@ -394,9 +449,13 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
         <Group justify="space-between">
           <div>
             <Group gap="xs" mb="xs">
-              <Text fw={600} size="lg">{selectedStreamData.title}</Text>
+              <Text fw={600} size="lg">
+                {selectedStreamData.title}
+              </Text>
               {selectedStreamData.id === null && (
-                <Badge color="red" variant="filled" size="sm">LIVE</Badge>
+                <Badge color="red" variant="filled" size="sm">
+                  LIVE
+                </Badge>
               )}
             </Group>
             <Group gap="xs" mt="xs">
@@ -449,14 +508,18 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
                   props.onChannelChange(newChannel);
                 }
               }}
-              data={channels.length > 0 ? channels.map(channel => ({ value: channel, label: channel })) : []}
+              data={
+                channels.length > 0
+                  ? channels.map((channel) => ({ value: channel, label: channel }))
+                  : []
+              }
               searchable
               w={200}
               disabled={channelsLoading}
             />
-            
-            <Button 
-              onClick={() => selectedChannel && fetchStreams(selectedChannel)} 
+
+            <Button
+              onClick={() => selectedChannel && fetchStreams(selectedChannel)}
               loading={streamsLoading}
               disabled={!selectedChannel}
               mt="auto"
@@ -475,57 +538,72 @@ export function StreamAnalyticsChart(props: {channel?: string, admin: boolean, o
           {/* Stream Selection */}
           {streams.length > 0 && (
             <Card withBorder p="md">
-              <Text fw={600} mb="md">Recent Streams (Last 30 Days)</Text>
+              <Text fw={600} mb="md">
+                Recent Streams (Last 30 Days)
+              </Text>
               <Stack gap="xs">
-                {streams.slice((streamsPage - 1) * streamsLimit, streamsPage * streamsLimit).map((stream) => {
-                  const streamId = stream.id ? stream.id.toString() : `active_${stream.start_timestamp}`;
-                  const isSelected = selectedStream === streamId;
-                  const formatDate = (timestamp: number) => {
-                    return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    });
-                  };
-                  
-                  return (
-                    <Paper
-                      key={streamId}
-                      p="sm"
-                      withBorder
-                      style={{
-                        cursor: 'pointer',
-                        backgroundColor: isSelected ? 'var(--mantine-color-blue-light)' : undefined,
-                        borderColor: isSelected ? 'var(--mantine-color-blue-6)' : undefined
-                      }}
-                      onClick={() => {
-                        setSelectedStream(streamId);
-                        // Notify parent component of stream change
-                        if (props.onStreamChange) {
-                          props.onStreamChange(streamId, stream);
-                        }
-                      }}
-                    >
-                      <Group justify="space-between">
-                        <div>
-                          <Group gap="xs">
-                            <Text fw={500} truncate maw={300}>{stream.title}</Text>
-                            {stream.id === null && (
-                              <Badge color="red" size="sm" variant="filled">🔴 LIVE</Badge>
-                            )}
-                          </Group>
-                          <Text size="sm" c="dimmed">
-                            {formatDate(stream.start_timestamp)} • {stream.peak_viewers} peak viewers
-                          </Text>
-                        </div>
-                        {isSelected && (
-                          <Badge color="blue" variant="filled">Selected</Badge>
-                        )}
-                      </Group>
-                    </Paper>
-                  );
-                })}
+                {streams
+                  .slice((streamsPage - 1) * streamsLimit, streamsPage * streamsLimit)
+                  .map((stream) => {
+                    const streamId = stream.id
+                      ? stream.id.toString()
+                      : `active_${stream.start_timestamp}`;
+                    const isSelected = selectedStream === streamId;
+                    const formatDate = (timestamp: number) => {
+                      return new Date(timestamp * 1000).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      });
+                    };
+
+                    return (
+                      <Paper
+                        key={streamId}
+                        p="sm"
+                        withBorder
+                        style={{
+                          cursor: 'pointer',
+                          backgroundColor: isSelected
+                            ? 'var(--mantine-color-blue-light)'
+                            : undefined,
+                          borderColor: isSelected ? 'var(--mantine-color-blue-6)' : undefined,
+                        }}
+                        onClick={() => {
+                          setSelectedStream(streamId);
+                          // Notify parent component of stream change
+                          if (props.onStreamChange) {
+                            props.onStreamChange(streamId, stream);
+                          }
+                        }}
+                      >
+                        <Group justify="space-between">
+                          <div>
+                            <Group gap="xs">
+                              <Text fw={500} truncate maw={300}>
+                                {stream.title}
+                              </Text>
+                              {stream.id === null && (
+                                <Badge color="red" size="sm" variant="filled">
+                                  🔴 LIVE
+                                </Badge>
+                              )}
+                            </Group>
+                            <Text size="sm" c="dimmed">
+                              {formatDate(stream.start_timestamp)} • {stream.peak_viewers} peak
+                              viewers
+                            </Text>
+                          </div>
+                          {isSelected && (
+                            <Badge color="blue" variant="filled">
+                              Selected
+                            </Badge>
+                          )}
+                        </Group>
+                      </Paper>
+                    );
+                  })}
                 {streams.length > 5 && (
                   <Group justify="center" mt="md">
                     <Pagination

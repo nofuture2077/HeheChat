@@ -8,16 +8,12 @@ export { SevenTVCosmeticsServiceInstance as SevenTVService } from '../7tvcosmeti
 
 // Convenience re-exports
 export {
-    SevenTVCosmeticsStore,
-    SevenTVCosmeticsAPI,
-    SevenTVCosmeticsUtils,
-    type SevenTVUserCosmetics,
-    type SevenTVPaint,
-    type SevenTVBadge
+  SevenTVCosmeticsStore,
+  SevenTVCosmeticsAPI,
+  SevenTVCosmeticsUtils,
+  type SevenTVUserCosmetics,
+  type SevenTVPaint,
+  type SevenTVBadge,
 } from '../7tvcosmetics';
 
-export {
-    use7TVCosmetics,
-    use7TVCosmeticsBatch,
-    use7TVUsernameCosmetics
-} from '../use7TVCosmetics';
+export { use7TVCosmetics, use7TVCosmeticsBatch, use7TVUsernameCosmetics } from '../use7TVCosmetics';

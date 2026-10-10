@@ -4,7 +4,9 @@ import { StreamAnalyticsChart } from '../components/analytics/StreamAnalyticsCha
 export function AnalyticsPage() {
   return (
     <Container size="xl" py="md">
-      <Title order={1} mb="lg">Stream Analytics</Title>
+      <Title order={1} mb="lg">
+        Stream Analytics
+      </Title>
       <StreamAnalyticsChart admin={false} />
     </Container>
   );

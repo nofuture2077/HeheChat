@@ -100,25 +100,26 @@ export function fillMissingTimestamps(
     '1h': 60 * 60,
     '6h': 6 * 60 * 60,
     '12h': 12 * 60 * 60,
-    '1d': 24 * 60 * 60
+    '1d': 24 * 60 * 60,
   }[interval];
 
   // Create a map of existing data points for quick lookup
   const dataMap = new Map<number, StreamAnalyticsData>();
-  data.forEach(item => {
+  data.forEach((item) => {
     // Convert timestamp to number if it's a string
-    const timestamp = typeof item.timestamp_minute === 'string' 
-      ? parseInt(item.timestamp_minute, 10) 
-      : item.timestamp_minute;
+    const timestamp =
+      typeof item.timestamp_minute === 'string'
+        ? parseInt(item.timestamp_minute, 10)
+        : item.timestamp_minute;
     dataMap.set(timestamp, item);
   });
 
   // Generate all expected timestamps
   const filledData: StreamAnalyticsData[] = [];
-  
+
   // Align start time to interval boundary
   const alignedStartTime = Math.floor(startTime / intervalSeconds) * intervalSeconds;
-  
+
   for (let timestamp = alignedStartTime; timestamp <= endTime; timestamp += intervalSeconds) {
     if (dataMap.has(timestamp)) {
       // Use existing data point
@@ -134,7 +135,7 @@ export function fillMissingTimestamps(
         cheer_bits_total: 0,
         raid_count: 0,
         raid_viewers_total: 0,
-        follow_count: 0
+        follow_count: 0,
       });
     }
   }
@@ -148,10 +149,11 @@ export function fillMissingTimestamps(
  * @returns Normalized analytics data
  */
 export function normalizeAnalyticsData(data: any[]): StreamAnalyticsData[] {
-  return data.map(item => ({
-    timestamp_minute: typeof item.timestamp_minute === 'string' 
-      ? parseInt(item.timestamp_minute, 10) 
-      : item.timestamp_minute,
+  return data.map((item) => ({
+    timestamp_minute:
+      typeof item.timestamp_minute === 'string'
+        ? parseInt(item.timestamp_minute, 10)
+        : item.timestamp_minute,
     viewer_count: item.viewer_count,
     message_count: item.message_count || 0,
     sub_count: item.sub_count || 0,
@@ -159,7 +161,7 @@ export function normalizeAnalyticsData(data: any[]): StreamAnalyticsData[] {
     cheer_bits_total: item.cheer_bits_total || 0,
     raid_count: item.raid_count || 0,
     raid_viewers_total: item.raid_viewers_total || 0,
-    follow_count: item.follow_count || 0
+    follow_count: item.follow_count || 0,
   }));
 }
 
@@ -193,15 +195,15 @@ export class AnalyticsApiClient {
       end: end.toString(),
       interval,
       summary: summary.toString(),
-      metadata: metadata.toString()
+      metadata: metadata.toString(),
     });
 
     const response = await fetch(`${API_BASE_URL}/api/analytics/stream?${params}`, {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     });
 
     if (!response.ok) {
@@ -217,13 +219,16 @@ export class AnalyticsApiClient {
    * @returns Active stream session data
    */
   static async getActiveStreamSession(token: string): Promise<ActiveStreamSession | null> {
-    const response = await fetch(`${API_BASE_URL}/analytics/active-streams?token=${encodeURIComponent(token)}`, {
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
+    const response = await fetch(
+      `${API_BASE_URL}/analytics/active-streams?token=${encodeURIComponent(token)}`,
+      {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch active stream session: ${response.statusText}`);
@@ -239,13 +244,16 @@ export class AnalyticsApiClient {
    * @returns Date range information
    */
   static async getDateRange(token: string): Promise<DateRangeResponse> {
-    const response = await fetch(`${API_BASE_URL}/analytics/date-range?token=${encodeURIComponent(token)}`, {
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
+    const response = await fetch(
+      `${API_BASE_URL}/analytics/date-range?token=${encodeURIComponent(token)}`,
+      {
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
       }
-    });
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to fetch date range: ${response.statusText}`);
@@ -272,15 +280,15 @@ export class AnalyticsApiClient {
       token: encodeURIComponent(token),
       channelname,
       start: start.toString(),
-      end: end.toString()
+      end: end.toString(),
     });
 
     const response = await fetch(`${API_BASE_URL}/api/streams?${params}`, {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
+        Pragma: 'no-cache',
+        Expires: '0',
+      },
     });
 
     if (!response.ok) {

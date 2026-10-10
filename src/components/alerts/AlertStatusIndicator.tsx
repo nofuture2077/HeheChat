@@ -26,11 +26,11 @@ export function AlertStatusIndicator(props: AlertStatusIndicatorProps) {
   // If children are provided, wrap them with an Indicator
   if (props.children) {
     return (
-      <Indicator 
-        size={8} 
-        offset={2} 
-        color={isAlertSystemRunning ? 'green' : 'red'} 
-        processing={!isAlertSystemRunning} 
+      <Indicator
+        size={8}
+        offset={2}
+        color={isAlertSystemRunning ? 'green' : 'red'}
+        processing={!isAlertSystemRunning}
         disabled={!config?.playAlerts}
       >
         {props.children}
@@ -57,7 +57,7 @@ export function AlertStatusIndicator(props: AlertStatusIndicatorProps) {
       </div>
     );
   }
-  
+
   // Otherwise render as fixed position indicator
   return (
     <>

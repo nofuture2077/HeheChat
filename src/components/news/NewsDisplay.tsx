@@ -15,7 +15,7 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
 
   const fetchActiveNews = async () => {
     setLoading(true);
-    
+
     try {
       const data = await NewsApiClient.getActiveNews();
       setNewsMessages(data.messages || []);
@@ -28,10 +28,10 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
 
   useEffect(() => {
     fetchActiveNews();
-    
+
     // Refresh news every 5 minutes
     const interval = setInterval(fetchActiveNews, 5 * 60 * 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -52,7 +52,7 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
     const newDismissed = new Set(dismissedMessages);
     newDismissed.add(messageId);
     setDismissedMessages(newDismissed);
-    
+
     // Save to localStorage
     localStorage.setItem('hehe-dismissed-news', JSON.stringify(Array.from(newDismissed)));
   };
@@ -76,12 +76,12 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
   };
 
   // Filter out dismissed messages and expired/inactive messages
-  const visibleMessages = newsMessages.filter(message => {
+  const visibleMessages = newsMessages.filter((message) => {
     const isDismissed = dismissedMessages.has(message.id);
     // If is_active is undefined, assume it's active (public endpoint only returns active messages)
     const isActive = message.is_active !== false;
     const isNotExpired = !isExpired(message.active_until);
-    
+
     return !isDismissed && isActive && isNotExpired;
   });
 
@@ -90,11 +90,15 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
   }
 
   return (
-    <Stack gap="xs" className={className} style={{ maxWidth: '400px', width: '100%', margin: '0 auto' }}>
+    <Stack
+      gap="xs"
+      className={className}
+      style={{ maxWidth: '400px', width: '100%', margin: '0 auto' }}
+    >
       {visibleMessages.map((message) => {
         const isCollapsed = collapsedMessages.has(message.id);
         const isLongText = message.text.length > 200;
-        
+
         return (
           <Notification
             key={message.id}
@@ -107,12 +111,12 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
                   {message.headline}
                 </Text>
                 {isLongText && (
-                  <ActionIcon
-                    variant="subtle"
-                    size="sm"
-                    onClick={() => toggleCollapse(message.id)}
-                  >
-                    {isCollapsed ? <IconChevronDown size="0.8rem" /> : <IconChevronUp size="0.8rem" />}
+                  <ActionIcon variant="subtle" size="sm" onClick={() => toggleCollapse(message.id)}>
+                    {isCollapsed ? (
+                      <IconChevronDown size="0.8rem" />
+                    ) : (
+                      <IconChevronUp size="0.8rem" />
+                    )}
                   </ActionIcon>
                 )}
               </Group>
@@ -127,7 +131,7 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
                 Posted {formatDate(message.created_at)}
               </Text>
             </Collapse>
-            
+
             {isCollapsed && isLongText && (
               <Text size="sm" c="dimmed" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
                 {message.text.substring(0, 200)}...

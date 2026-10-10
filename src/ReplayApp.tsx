@@ -9,16 +9,15 @@ import { EventList } from './components/events/eventlist';
 import { AlertSystem } from '@/components/alerts/alertplayer';
 import { version } from '../package.json';
 
-export const REPLAY_APP_NAME = "Replay App";
+export const REPLAY_APP_NAME = 'Replay App';
 
 interface ReplayAppProps {
   token: string | undefined;
 }
 
-
 export default function ReplayApp({ token }: ReplayAppProps) {
   const backendWorkerRef = useRef<Worker | undefined>(undefined);
-  const [profile, setProfile] = useState<Profile>({...DEFAULT_PROFILE});
+  const [profile, setProfile] = useState<Profile>({ ...DEFAULT_PROFILE });
 
   // Run storage patches on app initialization
   useEffect(() => {
@@ -27,26 +26,32 @@ export default function ReplayApp({ token }: ReplayAppProps) {
 
   useEffect(() => {
     // Initialize the worker
-    backendWorkerRef.current = new Worker(new URL('./components/webworker/backendworker.ts', import.meta.url), { type: 'module' });
+    backendWorkerRef.current = new Worker(
+      new URL('./components/webworker/backendworker.ts', import.meta.url),
+      { type: 'module' }
+    );
 
     backendWorkerRef.current.onmessage = (event) => {
       const data = event.data;
 
       if (data.type === 'sharedata') {
-          const profile: Profile = data.profile;
-          setProfile(profile);
-          AlertSystem.updateProfile(profile);
+        const profile: Profile = data.profile;
+        setProfile(profile);
+        AlertSystem.updateProfile(profile);
 
-          const channels = profile.config?.channels || [];
-          backendWorkerRef.current?.postMessage({ type: "SEND", data: { 
-            type: "subscribe", 
-            source: REPLAY_APP_NAME, 
+        const channels = profile.config?.channels || [];
+        backendWorkerRef.current?.postMessage({
+          type: 'SEND',
+          data: {
+            type: 'subscribe',
+            source: REPLAY_APP_NAME,
             profile: profile.guid,
             profileName: profile.name,
             version,
-            token, 
-            channels: Object.fromEntries(channels.map((key: string) => [key, true])) 
-          }});
+            token,
+            channels: Object.fromEntries(channels.map((key: string) => [key, true])),
+          },
+        });
       }
 
       if (data.type === 'profile') {
@@ -56,14 +61,14 @@ export default function ReplayApp({ token }: ReplayAppProps) {
       }
 
       if (data.type === 'event') {
-          const event = data.data;
-          PubSub.publish("WS-event", event);
+        const event = data.data;
+        PubSub.publish('WS-event', event);
       }
     };
 
-    const wssendSub = PubSub.subscribe("WSSEND", (msg, data) => {
-        data.sink = token;
-        backendWorkerRef.current?.postMessage({type: "SEND", data });
+    const wssendSub = PubSub.subscribe('WSSEND', (msg, data) => {
+      data.sink = token;
+      backendWorkerRef.current?.postMessage({ type: 'SEND', data });
     });
 
     // Send initial subscription message
@@ -72,10 +77,9 @@ export default function ReplayApp({ token }: ReplayAppProps) {
       data: {
         type: 'sink',
         source: REPLAY_APP_NAME,
-        token
-      }
+        token,
+      },
     });
-
 
     return () => {
       if (backendWorkerRef.current) {
@@ -90,12 +94,13 @@ export default function ReplayApp({ token }: ReplayAppProps) {
     return null;
   }
 
-  return (<MantineProvider defaultColorScheme="auto" theme={theme}>
-  <ProfileContext.Provider value={profile}>
-    <ConfigContext.Provider value={profile.config}>
-      <EventList></EventList>
-    </ConfigContext.Provider>
-  </ProfileContext.Provider>
-  </MantineProvider>);
-   
+  return (
+    <MantineProvider defaultColorScheme="auto" theme={theme}>
+      <ProfileContext.Provider value={profile}>
+        <ConfigContext.Provider value={profile.config}>
+          <EventList></EventList>
+        </ConfigContext.Provider>
+      </ProfileContext.Provider>
+    </MantineProvider>
+  );
 }

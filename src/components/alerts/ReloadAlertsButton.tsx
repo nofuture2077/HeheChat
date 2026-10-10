@@ -15,12 +15,12 @@ export function ReloadAlertsButton({ onActivate }: { onActivate?: () => void } =
     const intervalId = setInterval(() => {
       const currentStatus = AlertSystem.status();
       setIsAlertSystemRunning(currentStatus);
-      
+
       // If status changes to red (not running), make the button visible
       if (!currentStatus && !isVisible) {
         setIsVisible(true);
       }
-      
+
       // If status changes to green (running), hide the button
       if (currentStatus && isVisible) {
         setIsVisible(false);
@@ -35,9 +35,9 @@ export function ReloadAlertsButton({ onActivate }: { onActivate?: () => void } =
   const handleClick = () => {
     // Initialize the alert system
     if (!AlertSystem.status()) {
-        AlertSystem.initialize();
-    } 
-    
+      AlertSystem.initialize();
+    }
+
     // Hide the button
     setIsVisible(false);
     onActivate?.();
@@ -64,7 +64,7 @@ export function ReloadAlertsButton({ onActivate }: { onActivate?: () => void } =
         maxWidth: '400px',
         margin: '0 auto',
         display: 'flex',
-        justifyContent: 'center'
+        justifyContent: 'center',
       }}
     >
       Activate Alerts

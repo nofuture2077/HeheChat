@@ -1,5 +1,31 @@
-import { Container, Title, Text, Button, Alert, Stack, Table, Badge, LoadingOverlay, Card, Group, TextInput, Modal, NumberInput, Pagination } from '@mantine/core';
-import { IconRefresh, IconAlertCircle, IconCrown, IconClock, IconPlus, IconCode, IconUsers, IconHistory, IconSearch } from '@tabler/icons-react';
+import {
+  Container,
+  Title,
+  Text,
+  Button,
+  Alert,
+  Stack,
+  Table,
+  Badge,
+  LoadingOverlay,
+  Card,
+  Group,
+  TextInput,
+  Modal,
+  NumberInput,
+  Pagination,
+} from '@mantine/core';
+import {
+  IconRefresh,
+  IconAlertCircle,
+  IconCrown,
+  IconClock,
+  IconPlus,
+  IconCode,
+  IconUsers,
+  IconHistory,
+  IconSearch,
+} from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import { LoginContextContext } from '@/ApplicationContext';
@@ -59,17 +85,18 @@ export function AdminPremiumPage() {
   const [error, setError] = useState<string | null>(null);
   const [codesError, setCodesError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [generateModalOpened, { open: openGenerateModal, close: closeGenerateModal }] = useDisclosure(false);
+  const [generateModalOpened, { open: openGenerateModal, close: closeGenerateModal }] =
+    useDisclosure(false);
   const [generateDays, setGenerateDays] = useState<number>(30);
-  
+
   // Pagination state for premium users
   const [usersPage, setUsersPage] = useState(1);
   const [usersLimit] = useState(10);
-  
+
   // Pagination state for redeem codes
   const [codesPage, setCodesPage] = useState(1);
   const [codesLimit] = useState(10);
-  
+
   // History state
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -93,7 +120,9 @@ export function AdminPremiumPage() {
     setError(null);
     try {
       const offset = (usersPage - 1) * usersLimit;
-      const response = await fetch(`${BASE_URL}/admin/premium/users?active=true&token=${adminToken}&limit=${usersLimit}&offset=${offset}`);
+      const response = await fetch(
+        `${BASE_URL}/admin/premium/users?active=true&token=${adminToken}&limit=${usersLimit}&offset=${offset}`
+      );
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('hehe-token_state');
@@ -125,7 +154,9 @@ export function AdminPremiumPage() {
     setCodesError(null);
     try {
       const offset = (codesPage - 1) * codesLimit;
-      const response = await fetch(`${BASE_URL}/admin/premium/codes?token=${adminToken}&unused=true&limit=${codesLimit}&offset=${offset}`);
+      const response = await fetch(
+        `${BASE_URL}/admin/premium/codes?token=${adminToken}&unused=true&limit=${codesLimit}&offset=${offset}`
+      );
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('hehe-token_state');
@@ -154,9 +185,12 @@ export function AdminPremiumPage() {
 
     setGenerating(true);
     try {
-      const response = await fetch(`${BASE_URL}/admin/premium/generate-code?token=${adminToken}&days=${generateDays}`, {
-        method: 'POST'
-      });
+      const response = await fetch(
+        `${BASE_URL}/admin/premium/generate-code?token=${adminToken}&days=${generateDays}`,
+        {
+          method: 'POST',
+        }
+      );
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('hehe-token_state');
@@ -166,7 +200,7 @@ export function AdminPremiumPage() {
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       // Refresh the codes list after generating
       await fetchRedeemCodes();
       closeGenerateModal();
@@ -191,7 +225,7 @@ export function AdminPremiumPage() {
     try {
       const offset = (historyPage - 1) * historyLimit;
       let url = `${BASE_URL}/admin/premium/history?token=${adminToken}&limit=${historyLimit}&offset=${offset}`;
-      
+
       if (historySearchUser.trim()) {
         // Search for specific user
         url += `&username=${encodeURIComponent(historySearchUser.trim())}`;
@@ -231,31 +265,63 @@ export function AdminPremiumPage() {
 
   const getStatusBadge = (user: PremiumUser) => {
     if (!user.is_active) {
-      return <Badge color="red" variant="light">Inactive</Badge>;
+      return (
+        <Badge color="red" variant="light">
+          Inactive
+        </Badge>
+      );
     }
-    
+
     if (user.days_remaining <= 7) {
-      return <Badge color="orange" variant="light">Expires Soon</Badge>;
+      return (
+        <Badge color="orange" variant="light">
+          Expires Soon
+        </Badge>
+      );
     }
-    
-    return <Badge color="green" variant="light">Active</Badge>;
+
+    return (
+      <Badge color="green" variant="light">
+        Active
+      </Badge>
+    );
   };
 
   const getSubscriptionTypeBadge = (type: string) => {
     const color = type === 'donation' ? 'blue' : 'purple';
-    return <Badge color={color} variant="light">{type}</Badge>;
+    return (
+      <Badge color={color} variant="light">
+        {type}
+      </Badge>
+    );
   };
 
   const getActionTypeBadge = (actionType: string) => {
     switch (actionType) {
       case 'paypal_payment':
-        return <Badge color="purple" variant="light">PayPal</Badge>;
+        return (
+          <Badge color="purple" variant="light">
+            PayPal
+          </Badge>
+        );
       case 'redeem_code':
-        return <Badge color="green" variant="light">Code</Badge>;
+        return (
+          <Badge color="green" variant="light">
+            Code
+          </Badge>
+        );
       case 'donation':
-        return <Badge color="blue" variant="light">Donation</Badge>;
+        return (
+          <Badge color="blue" variant="light">
+            Donation
+          </Badge>
+        );
       default:
-        return <Badge color="gray" variant="light">{actionType}</Badge>;
+        return (
+          <Badge color="gray" variant="light">
+            {actionType}
+          </Badge>
+        );
     }
   };
 
@@ -309,9 +375,7 @@ export function AdminPremiumPage() {
   const redeemCodeRows = redeemCodes.map((code) => (
     <Table.Tr key={code.code}>
       <Table.Td>
-        <Text style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>
-          {code.code}
-        </Text>
+        <Text style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>{code.code}</Text>
       </Table.Td>
       <Table.Td>
         <Badge variant="outline" color="blue">
@@ -396,31 +460,26 @@ export function AdminPremiumPage() {
           <Card.Section>
             <div style={{ position: 'relative' }}>
               <LoadingOverlay visible={loading} />
-              
+
               {error && (
-                <Alert 
-                  icon={<IconAlertCircle size="1rem" />} 
-                  title="Error Loading Premium Users" 
+                <Alert
+                  icon={<IconAlertCircle size="1rem" />}
+                  title="Error Loading Premium Users"
                   color="red"
                   variant="light"
                   m="md"
                 >
                   <Text>{error}</Text>
-                  <Button 
-                    size="xs" 
-                    variant="light" 
-                    mt="xs"
-                    onClick={fetchPremiumUsers}
-                  >
+                  <Button size="xs" variant="light" mt="xs" onClick={fetchPremiumUsers}>
                     Try Again
                   </Button>
                 </Alert>
               )}
 
               {!error && premiumUsers.length === 0 && !loading && (
-                <Alert 
-                  icon={<IconCrown size="1rem" />} 
-                  title="No Premium Users" 
+                <Alert
+                  icon={<IconCrown size="1rem" />}
+                  title="No Premium Users"
                   color="blue"
                   variant="light"
                   m="md"
@@ -444,7 +503,7 @@ export function AdminPremiumPage() {
                     </Table.Thead>
                     <Table.Tbody>{premiumUserRows}</Table.Tbody>
                   </Table>
-                  
+
                   <Group justify="center" p="md">
                     <Pagination
                       value={usersPage}
@@ -515,40 +574,34 @@ export function AdminPremiumPage() {
           <Card.Section>
             <div style={{ position: 'relative' }}>
               <LoadingOverlay visible={historyLoading} />
-              
+
               {historyError && (
-                <Alert 
-                  icon={<IconAlertCircle size="1rem" />} 
-                  title="Error Loading Premium History" 
+                <Alert
+                  icon={<IconAlertCircle size="1rem" />}
+                  title="Error Loading Premium History"
                   color="red"
                   variant="light"
                   m="md"
                 >
                   <Text>{historyError}</Text>
-                  <Button 
-                    size="xs" 
-                    variant="light" 
-                    mt="xs"
-                    onClick={fetchHistory}
-                  >
+                  <Button size="xs" variant="light" mt="xs" onClick={fetchHistory}>
                     Try Again
                   </Button>
                 </Alert>
               )}
 
               {!historyError && history.length === 0 && !historyLoading && (
-                <Alert 
-                  icon={<IconHistory size="1rem" />} 
-                  title="No History Records" 
+                <Alert
+                  icon={<IconHistory size="1rem" />}
+                  title="No History Records"
                   color="blue"
                   variant="light"
                   m="md"
                 >
                   <Text>
-                    {historySearchUser 
+                    {historySearchUser
                       ? `No history found for "${historySearchUser}".`
-                      : 'There are currently no premium history records.'
-                    }
+                      : 'There are currently no premium history records.'}
                   </Text>
                 </Alert>
               )}
@@ -567,7 +620,7 @@ export function AdminPremiumPage() {
                     </Table.Thead>
                     <Table.Tbody>{historyRows}</Table.Tbody>
                   </Table>
-                  
+
                   <Group justify="center" p="md">
                     <Pagination
                       value={historyPage}
@@ -594,7 +647,7 @@ export function AdminPremiumPage() {
               </Text>
               <Group gap="md">
                 <Badge size="lg" variant="light" color="green">
-                  {redeemCodes.filter(code => !code.used).length} Available
+                  {redeemCodes.filter((code) => !code.used).length} Available
                 </Badge>
                 <Button
                   leftSection={<IconPlus size="1rem" />}
@@ -611,31 +664,26 @@ export function AdminPremiumPage() {
           <Card.Section>
             <div style={{ position: 'relative' }}>
               <LoadingOverlay visible={codesLoading} />
-              
+
               {codesError && (
-                <Alert 
-                  icon={<IconAlertCircle size="1rem" />} 
-                  title="Error Loading Redeem Codes" 
+                <Alert
+                  icon={<IconAlertCircle size="1rem" />}
+                  title="Error Loading Redeem Codes"
                   color="red"
                   variant="light"
                   m="md"
                 >
                   <Text>{codesError}</Text>
-                  <Button 
-                    size="xs" 
-                    variant="light" 
-                    mt="xs"
-                    onClick={fetchRedeemCodes}
-                  >
+                  <Button size="xs" variant="light" mt="xs" onClick={fetchRedeemCodes}>
                     Try Again
                   </Button>
                 </Alert>
               )}
 
               {!codesError && redeemCodes.length === 0 && !codesLoading && (
-                <Alert 
-                  icon={<IconCode size="1rem" />} 
-                  title="No Redeem Codes" 
+                <Alert
+                  icon={<IconCode size="1rem" />}
+                  title="No Redeem Codes"
                   color="blue"
                   variant="light"
                   m="md"
@@ -657,7 +705,7 @@ export function AdminPremiumPage() {
                     </Table.Thead>
                     <Table.Tbody>{redeemCodeRows}</Table.Tbody>
                   </Table>
-                  
+
                   <Group justify="center" p="md">
                     <Pagination
                       value={codesPage}
@@ -684,7 +732,7 @@ export function AdminPremiumPage() {
           <Text size="sm" c="dimmed">
             Generate a new redeem code for premium access.
           </Text>
-          
+
           <NumberInput
             label="Days"
             description="Number of days the code will grant premium access"

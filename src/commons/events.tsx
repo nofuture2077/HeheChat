@@ -1,169 +1,203 @@
-export type EventType = 'raid' | 'follow' | 'cheer'| 'donation' | 'blerp' | 'soundalerts' |
-'sub_1000' | 'sub_2000' | 'sub_3000' | 'sub_Prime' |
-'subgift_1000' | 'subgift_2000' | 'subgift_3000' |
-'subgiftb_1000' | 'subgiftb_2000' | 'subgiftb_3000' | 'channelPointRedemption' | 'kofisub' | 'kofidono' | 'kofishop' | 'tts' | 'hypetrain' | 'streak';
+export type EventType =
+  | 'raid'
+  | 'follow'
+  | 'cheer'
+  | 'donation'
+  | 'blerp'
+  | 'soundalerts'
+  | 'sub_1000'
+  | 'sub_2000'
+  | 'sub_3000'
+  | 'sub_Prime'
+  | 'subgift_1000'
+  | 'subgift_2000'
+  | 'subgift_3000'
+  | 'subgiftb_1000'
+  | 'subgiftb_2000'
+  | 'subgiftb_3000'
+  | 'channelPointRedemption'
+  | 'kofisub'
+  | 'kofidono'
+  | 'kofishop'
+  | 'tts'
+  | 'hypetrain'
+  | 'streak';
 
-export type EventMainType = 'sub' | 'subgift' | 'subgiftb' | 'raid' | 'follow' | 'donation' | 'cheer' | 'channelPointRedemption' | 'blerp' | 'soundalerts' | 'kofi' | 'tts' | 'hypetrain' | 'streak';
+export type EventMainType =
+  | 'sub'
+  | 'subgift'
+  | 'subgiftb'
+  | 'raid'
+  | 'follow'
+  | 'donation'
+  | 'cheer'
+  | 'channelPointRedemption'
+  | 'blerp'
+  | 'soundalerts'
+  | 'kofi'
+  | 'tts'
+  | 'hypetrain'
+  | 'streak';
 
 export type EventAlertRestriction = 'none' | 'mod' | 'system';
 
 export type EventAlertSpecifier = {
-    type: 'min' | 'exact' | 'mult' | 'matches';
-    amount?: number;
-    attribute?: string;
-    text?: string;
-}
+  type: 'min' | 'exact' | 'mult' | 'matches';
+  amount?: number;
+  attribute?: string;
+  text?: string;
+};
 
 export const EventTypeMapping: Record<string, string> = {
-    'raid': 'raid',
-    'follow': 'follow',
-    'cheer': 'cheer',
-    'donation': 'donation',
-    'sub_1000': 'sub',
-    'sub_2000': 'sub',
-    'sub_3000': 'sub',
-    'sub_Prime': 'sub',
-    'subgift_1000': 'subgift',
-    'subgift_2000': 'subgift',
-    'subgift_3000': 'subgift',
-    'subgiftb_1000': 'subgiftb',
-    'subgiftb_2000': 'subgiftb',
-    'subgiftb_3000': 'subgiftb',
-    'timeout': 'timeout',
-    'ban': 'ban',
-    'delete': 'delete',
-    'streamOnline': 'streamOnline',
-    'streamOffline': 'streamOffline',
-    'channelPointRedemption': 'channelPointRedemption',
-    'blerp': 'blerp',
-    'soundalerts': 'soundalerts',
-    'seventv_emote_add': 'sevenTVAdded',
-    'seventv_emote_remove': 'sevenTVRemoved',
-    'kofishop': 'kofi',
-    'kofisub': 'kofi',
-    'kofidono': 'kofi',
-    'hypetrain': 'hypetrain',
-    'tts': 'tts',
-    'streak': 'streak'
+  raid: 'raid',
+  follow: 'follow',
+  cheer: 'cheer',
+  donation: 'donation',
+  sub_1000: 'sub',
+  sub_2000: 'sub',
+  sub_3000: 'sub',
+  sub_Prime: 'sub',
+  subgift_1000: 'subgift',
+  subgift_2000: 'subgift',
+  subgift_3000: 'subgift',
+  subgiftb_1000: 'subgiftb',
+  subgiftb_2000: 'subgiftb',
+  subgiftb_3000: 'subgiftb',
+  timeout: 'timeout',
+  ban: 'ban',
+  delete: 'delete',
+  streamOnline: 'streamOnline',
+  streamOffline: 'streamOffline',
+  channelPointRedemption: 'channelPointRedemption',
+  blerp: 'blerp',
+  soundalerts: 'soundalerts',
+  seventv_emote_add: 'sevenTVAdded',
+  seventv_emote_remove: 'sevenTVRemoved',
+  kofishop: 'kofi',
+  kofisub: 'kofi',
+  kofidono: 'kofi',
+  hypetrain: 'hypetrain',
+  tts: 'tts',
+  streak: 'streak',
 };
 
 export type EventAlertMeta = {
-    channel: string;
-    name: string;
-    guid: string;
-    hash: string;
-    lastUpdate: string;
-}
+  channel: string;
+  name: string;
+  guid: string;
+  hash: string;
+  lastUpdate: string;
+};
 
 export type EventAlertData = {
-    alerts: Record<EventMainType, EventAlert[]>;
-    files: Record<Base64FileReference, Base64File>;
-    config?: {
-        ttsReplacements?: Record<string, string>;
-        defaultVoice?: {
-            voiceType: 'ai' | 'google';
-            voiceSpecifier: string;
-            voiceParams: Record<string, string | number>;
-        };
-    }
-}
+  alerts: Record<EventMainType, EventAlert[]>;
+  files: Record<Base64FileReference, Base64File>;
+  config?: {
+    ttsReplacements?: Record<string, string>;
+    defaultVoice?: {
+      voiceType: 'ai' | 'google';
+      voiceSpecifier: string;
+      voiceParams: Record<string, string | number>;
+    };
+  };
+};
 
 export type EventAlert = {
-    name: string;
-    id: string;
-    type: EventType;
-    specifier: EventAlertSpecifier;
-    restriction: EventAlertRestriction;
-    audio?: EventAlertAudioData;
-    visual?: EventAlertVisualData;
-    minDuration?: number;
-}
+  name: string;
+  id: string;
+  type: EventType;
+  specifier: EventAlertSpecifier;
+  restriction: EventAlertRestriction;
+  audio?: EventAlertAudioData;
+  visual?: EventAlertVisualData;
+  minDuration?: number;
+};
 
 export type EventAlertAudioData = {
-    jingle?: Base64FileReference;
-    tts?: EventAlertTTS;
-}
+  jingle?: Base64FileReference;
+  tts?: EventAlertTTS;
+};
 
 export type EventAlertTTS = {
-    text?: string;
-    voiceType: 'ai' | 'google' | 'none' | 'default';
-    voiceSpecifier: string;
-    voiceParams: Record<string, string | number>;
-}
+  text?: string;
+  voiceType: 'ai' | 'google' | 'none' | 'default';
+  voiceSpecifier: string;
+  voiceParams: Record<string, string | number>;
+};
 
 export type EventAlertVisualData = {
-    element?: Base64FileReference;
-    headline: string;
-    text?: string;
-    position?: string;
-    layout?: string;
-}
+  element?: Base64FileReference;
+  headline: string;
+  text?: string;
+  position?: string;
+  layout?: string;
+};
 
 export type Base64FileReference = string;
 
 export type Base64File = {
-    id: string;
-    type: 'audio' | 'image' | 'video' | 'application/zip';
-    name: string;
-    mime: string;
-    data: string;
-}
+  id: string;
+  type: 'audio' | 'image' | 'video' | 'application/zip';
+  name: string;
+  mime: string;
+  data: string;
+};
 
 export type EventAlertConfig = {
-    meta: EventAlertMeta;
-    data?: EventAlertData;
-}
+  meta: EventAlertMeta;
+  data?: EventAlertData;
+};
 
 export type Event = {
-    id: number;
-    channel: string; 
-    username: string; 
-    eventtype: EventType;
-    date: number;
-    usernameTo?: string;
-    text?: string;
-    amount?: number;
-    amount2?: number;
-    eventAlert?: EventAlert;
-    triggerId?: string;
-    userSeed?: string; // Added for deterministic sprite selection
-    rerollPending?: boolean; // Flag indicating a reroll is pending for this user
-    selectedSpriteFilename?: string; // Selected sprite filename for TTS and visual display
-    useLastSpriteFilename?: boolean; // Flag to control whether to use lastFilename or selectedFilename
-    replay?: boolean; // Replayed events always play in full, bypassing the TTS smart filter
-}
+  id: number;
+  channel: string;
+  username: string;
+  eventtype: EventType;
+  date: number;
+  usernameTo?: string;
+  text?: string;
+  amount?: number;
+  amount2?: number;
+  eventAlert?: EventAlert;
+  triggerId?: string;
+  userSeed?: string; // Added for deterministic sprite selection
+  rerollPending?: boolean; // Flag indicating a reroll is pending for this user
+  selectedSpriteFilename?: string; // Selected sprite filename for TTS and visual display
+  useLastSpriteFilename?: boolean; // Flag to control whether to use lastFilename or selectedFilename
+  replay?: boolean; // Replayed events always play in full, bypassing the TTS smart filter
+};
 
 // User sprite assignment interface
 export interface UserSpriteAssignment {
-    username: string;
-    channel: string;
-    selectedFilename: string;
-    lastFilename?: string; // Added for tracking the most recently rolled sprite
-    rerollPending: boolean;
-    mod?: number;
-    filenames?: string[]; // Array of all previously assigned filenames
+  username: string;
+  channel: string;
+  selectedFilename: string;
+  lastFilename?: string; // Added for tracking the most recently rolled sprite
+  rerollPending: boolean;
+  mod?: number;
+  filenames?: string[]; // Array of all previously assigned filenames
 }
 
 export interface VisualAlert {
-    text: string;
-    headline: string;
-    image?: string;
-    duration: number;
-    channel: string;
-    position?: string;
-    layout?: string;
-    triggerId?: string;
-    event: Event;
+  text: string;
+  headline: string;
+  image?: string;
+  duration: number;
+  channel: string;
+  position?: string;
+  layout?: string;
+  triggerId?: string;
+  event: Event;
 }
 
 export interface ExtractedImage {
-    name: string;
-    data: string; // base64 data URL
-    mime: string;
+  name: string;
+  data: string; // base64 data URL
+  mime: string;
 }
 
 export interface ZipCache {
-    zipHash: string;
-    images: ExtractedImage[];
-    timestamp: number;
+  zipHash: string;
+  images: ExtractedImage[];
+  timestamp: number;
 }

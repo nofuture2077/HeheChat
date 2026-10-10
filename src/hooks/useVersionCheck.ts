@@ -25,7 +25,7 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
     checkInterval = DEFAULT_CHECK_INTERVAL,
     remoteManifestUrl,
     enabled = true,
-    onNewVersionDetected
+    onNewVersionDetected,
   } = options;
 
   const [state, setState] = useState<VersionCheckResult>({
@@ -34,7 +34,7 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
     latestVersion: null,
     isChecking: false,
     lastChecked: null,
-    error: null
+    error: null,
   });
 
   // Get current version from local manifest or fallback to package version
@@ -57,7 +57,7 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
     } catch (error) {
       console.warn('Failed to get current version from manifest:', error);
     }
-    
+
     // Fallback to hardcoded version
     return '0.0.1';
   }, []);
@@ -89,7 +89,7 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
   const checkForUpdates = useCallback(async (): Promise<void> => {
     if (!enabled || state.isChecking) return;
 
-    setState(prev => ({ ...prev, isChecking: true, error: null }));
+    setState((prev) => ({ ...prev, isChecking: true, error: null }));
 
     try {
       // Get current version
@@ -101,8 +101,8 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
         cache: 'no-cache',
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache'
-        }
+          Pragma: 'no-cache',
+        },
       });
 
       if (!response.ok) {
@@ -123,14 +123,14 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
       // Check if versions differ
       const newVersionAvailable = compareVersions(currentVersion, latestVersion);
 
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         newVersionAvailable,
         currentVersion,
         latestVersion,
         isChecking: false,
         lastChecked: now,
-        error: null
+        error: null,
       }));
 
       // Notify if new version is available
@@ -138,19 +138,27 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
         onNewVersionDetected(currentVersion, latestVersion);
       }
 
-      console.log(`Version check completed: current=${currentVersion}, latest=${latestVersion}, updateAvailable=${newVersionAvailable}`);
-
+      console.log(
+        `Version check completed: current=${currentVersion}, latest=${latestVersion}, updateAvailable=${newVersionAvailable}`
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Version check failed:', errorMessage);
-      
-      setState(prev => ({
+
+      setState((prev) => ({
         ...prev,
         isChecking: false,
-        error: errorMessage
+        error: errorMessage,
       }));
     }
-  }, [enabled, state.isChecking, getCurrentVersion, remoteManifestUrl, compareVersions, onNewVersionDetected]);
+  }, [
+    enabled,
+    state.isChecking,
+    getCurrentVersion,
+    remoteManifestUrl,
+    compareVersions,
+    onNewVersionDetected,
+  ]);
 
   // Manual check function
   const checkNow = useCallback((): void => {
@@ -162,8 +170,8 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
     if (!enabled) return;
 
     // Initialize current version and store it in localStorage
-    getCurrentVersion().then(version => {
-      setState(prev => ({ ...prev, currentVersion: version }));
+    getCurrentVersion().then((version) => {
+      setState((prev) => ({ ...prev, currentVersion: version }));
       // Always store the current version in localStorage when the app loads
       localStorage.setItem(STORAGE_KEY_CURRENT_VERSION, version);
     });
@@ -185,6 +193,6 @@ export function useVersionCheck(options: UseVersionCheckOptions = {}): VersionCh
 
   return {
     ...state,
-    checkNow
+    checkNow,
   } as VersionCheckResult & { checkNow: () => void };
 }

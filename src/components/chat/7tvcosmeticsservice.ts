@@ -1,211 +1,226 @@
-import { SevenTVCosmeticsStore, SevenTVCosmeticsAPI, SevenTVUserCosmetics, SevenTVCosmeticsUtils } from './7tvcosmetics';
+import {
+  SevenTVCosmeticsStore,
+  SevenTVCosmeticsAPI,
+  SevenTVUserCosmetics,
+  SevenTVCosmeticsUtils,
+} from './7tvcosmetics';
 
 /**
  * Service for managing 7TV user cosmetics with caching
  */
 export class SevenTVCosmeticsService {
-    private static instance: SevenTVCosmeticsService;
-    private loadingPromises: Map<string, Promise<SevenTVUserCosmetics | null>> = new Map();
+  private static instance: SevenTVCosmeticsService;
+  private loadingPromises: Map<string, Promise<SevenTVUserCosmetics | null>> = new Map();
 
-    private constructor() {}
+  private constructor() {}
 
-    static getInstance(): SevenTVCosmeticsService {
-        if (!SevenTVCosmeticsService.instance) {
-            SevenTVCosmeticsService.instance = new SevenTVCosmeticsService();
-        }
-        return SevenTVCosmeticsService.instance;
+  static getInstance(): SevenTVCosmeticsService {
+    if (!SevenTVCosmeticsService.instance) {
+      SevenTVCosmeticsService.instance = new SevenTVCosmeticsService();
+    }
+    return SevenTVCosmeticsService.instance;
+  }
+
+  /**
+   * Get user cosmetics with caching
+   * @param userId The 7TV user ID
+   * @param forceRefresh Force refresh from API
+   */
+  async getUserCosmetics(
+    userId: string,
+    forceRefresh: boolean = false
+  ): Promise<SevenTVUserCosmetics | null> {
+    if (!userId) {
+      return null;
     }
 
-    /**
-     * Get user cosmetics with caching
-     * @param userId The 7TV user ID
-     * @param forceRefresh Force refresh from API
-     */
-    async getUserCosmetics(userId: string, forceRefresh: boolean = false): Promise<SevenTVUserCosmetics | null> {
-        if (!userId) {
-            return null;
-        }
-
-        // Check if we're already loading this user's cosmetics
-        if (this.loadingPromises.has(userId)) {
-            return this.loadingPromises.get(userId)!;
-        }
-
-        // Check cache first if not forcing refresh
-        if (!forceRefresh) {
-            const cached = await SevenTVCosmeticsStore.getUserCosmetics(userId);
-            if (cached) {
-                // Check if this is a "no cosmetics" marker
-                if ((cached.cosmetics as any).isNoCosmeticsMarker) {
-                    return null; // Return null so normal username color is used
-                }
-                return cached.cosmetics;
-            }
-        }
-
-        // Create loading promise
-        const loadingPromise = this.fetchAndCacheCosmetics(userId);
-        this.loadingPromises.set(userId, loadingPromise);
-
-        try {
-            const result = await loadingPromise;
-            return result;
-        } finally {
-            // Clean up loading promise
-            this.loadingPromises.delete(userId);
-        }
+    // Check if we're already loading this user's cosmetics
+    if (this.loadingPromises.has(userId)) {
+      return this.loadingPromises.get(userId)!;
     }
 
-    /**
-     * Fetch cosmetics from API and cache them
-     * @param userId The 7TV user ID
-     */
-    private async fetchAndCacheCosmetics(userId: string): Promise<SevenTVUserCosmetics | null> {
-        try {
-            const cosmetics = await SevenTVCosmeticsAPI.fetchUserCosmetics(userId);
-            
-            if (cosmetics) {
-                // User has 7TV cosmetics (paint and/or badge) - cache them
-                await SevenTVCosmeticsStore.storeUserCosmetics(userId, cosmetics);
-                return cosmetics;
-            } else {
-                // User either doesn't have 7TV account or has no cosmetics
-                // Cache a "no cosmetics" marker to prevent repeated API calls
-                const noCosmetics = this.createDefaultCosmetics(userId, '');
-                // Mark this as a "no cosmetics" result by setting a special flag
-                (noCosmetics as any).isNoCosmeticsMarker = true;
-                await SevenTVCosmeticsStore.storeUserCosmetics(userId, noCosmetics);
-                return null; // Return null so normal username color is used
-            }
-        } catch (error) {
-            console.error('Error fetching 7TV cosmetics for user:', userId, error);
-            // Cache a "no cosmetics" result even on error to prevent repeated failed requests
-            const noCosmetics = this.createDefaultCosmetics(userId, '');
-            (noCosmetics as any).isNoCosmeticsMarker = true;
-            try {
-                await SevenTVCosmeticsStore.storeUserCosmetics(userId, noCosmetics);
-            } catch (cacheError) {
-                console.error('Error caching no cosmetics marker:', cacheError);
-            }
-            return null; // Return null so normal username color is used
+    // Check cache first if not forcing refresh
+    if (!forceRefresh) {
+      const cached = await SevenTVCosmeticsStore.getUserCosmetics(userId);
+      if (cached) {
+        // Check if this is a "no cosmetics" marker
+        if ((cached.cosmetics as any).isNoCosmeticsMarker) {
+          return null; // Return null so normal username color is used
         }
+        return cached.cosmetics;
+      }
     }
 
-    /**
-     * Apply cosmetics to a DOM element
-     * @param element The DOM element to apply cosmetics to
-     * @param cosmetics The cosmetics data
-     * @param theme The current theme ('light' or 'dark')
-     */
-    applyCosmetics(element: HTMLElement, cosmetics: SevenTVUserCosmetics, theme: 'light' | 'dark' = 'light'): void {
-        if (!cosmetics || !cosmetics.paint) {
-            // Reset to default if no paint
-            element.style.backgroundImage = '';
-            element.style.backgroundClip = '';
-            element.style.webkitBackgroundClip = '';
-            element.style.filter = '';
-            element.style.color = theme === 'dark' ? '#ffffff' : '#000000';
-            return;
-        }
+    // Create loading promise
+    const loadingPromise = this.fetchAndCacheCosmetics(userId);
+    this.loadingPromises.set(userId, loadingPromise);
 
-        const { paintInfo, adjustedColors } = cosmetics;
+    try {
+      const result = await loadingPromise;
+      return result;
+    } finally {
+      // Clean up loading promise
+      this.loadingPromises.delete(userId);
+    }
+  }
 
-        // Apply background image (gradient or image)
-        if (paintInfo.backgroundImage) {
-            element.style.backgroundImage = paintInfo.backgroundImage;
-            element.style.backgroundClip = 'text';
-            element.style.webkitBackgroundClip = 'text';
-            element.style.color = 'transparent';
-            
-            // For text gradients, we need to ensure proper sizing
-            // Use 100% 100% to cover the entire text area
-            element.style.backgroundSize = '100% 100%';
-            element.style.backgroundPosition = '0 0';
-            element.style.backgroundRepeat = 'no-repeat';
-        } else if (adjustedColors && adjustedColors[theme]) {
-            // Use adjusted color for the theme
-            element.style.backgroundImage = '';
-            element.style.backgroundClip = '';
-            element.style.webkitBackgroundClip = '';
-            element.style.color = adjustedColors[theme];
-        }
+  /**
+   * Fetch cosmetics from API and cache them
+   * @param userId The 7TV user ID
+   */
+  private async fetchAndCacheCosmetics(userId: string): Promise<SevenTVUserCosmetics | null> {
+    try {
+      const cosmetics = await SevenTVCosmeticsAPI.fetchUserCosmetics(userId);
 
-        // Apply shadows
-        if (paintInfo.shadow) {
-            element.style.filter = paintInfo.shadow;
-        }
+      if (cosmetics) {
+        // User has 7TV cosmetics (paint and/or badge) - cache them
+        await SevenTVCosmeticsStore.storeUserCosmetics(userId, cosmetics);
+        return cosmetics;
+      } else {
+        // User either doesn't have 7TV account or has no cosmetics
+        // Cache a "no cosmetics" marker to prevent repeated API calls
+        const noCosmetics = this.createDefaultCosmetics(userId, '');
+        // Mark this as a "no cosmetics" result by setting a special flag
+        (noCosmetics as any).isNoCosmeticsMarker = true;
+        await SevenTVCosmeticsStore.storeUserCosmetics(userId, noCosmetics);
+        return null; // Return null so normal username color is used
+      }
+    } catch (error) {
+      console.error('Error fetching 7TV cosmetics for user:', userId, error);
+      // Cache a "no cosmetics" result even on error to prevent repeated failed requests
+      const noCosmetics = this.createDefaultCosmetics(userId, '');
+      (noCosmetics as any).isNoCosmeticsMarker = true;
+      try {
+        await SevenTVCosmeticsStore.storeUserCosmetics(userId, noCosmetics);
+      } catch (cacheError) {
+        console.error('Error caching no cosmetics marker:', cacheError);
+      }
+      return null; // Return null so normal username color is used
+    }
+  }
+
+  /**
+   * Apply cosmetics to a DOM element
+   * @param element The DOM element to apply cosmetics to
+   * @param cosmetics The cosmetics data
+   * @param theme The current theme ('light' or 'dark')
+   */
+  applyCosmetics(
+    element: HTMLElement,
+    cosmetics: SevenTVUserCosmetics,
+    theme: 'light' | 'dark' = 'light'
+  ): void {
+    if (!cosmetics || !cosmetics.paint) {
+      // Reset to default if no paint
+      element.style.backgroundImage = '';
+      element.style.backgroundClip = '';
+      element.style.webkitBackgroundClip = '';
+      element.style.filter = '';
+      element.style.color = theme === 'dark' ? '#ffffff' : '#000000';
+      return;
     }
 
-    /**
-     * Get cosmetics for multiple users in batch
-     * @param userIds Array of user IDs
-     * @param forceRefresh Force refresh from API
-     */
-    async getBatchUserCosmetics(userIds: string[], forceRefresh: boolean = false): Promise<Map<string, SevenTVUserCosmetics | null>> {
-        const results = new Map<string, SevenTVUserCosmetics | null>();
-        
-        // Process all users concurrently
-        const promises = userIds.map(async (userId) => {
-            const cosmetics = await this.getUserCosmetics(userId, forceRefresh);
-            results.set(userId, cosmetics);
-        });
+    const { paintInfo, adjustedColors } = cosmetics;
 
-        await Promise.all(promises);
-        return results;
+    // Apply background image (gradient or image)
+    if (paintInfo.backgroundImage) {
+      element.style.backgroundImage = paintInfo.backgroundImage;
+      element.style.backgroundClip = 'text';
+      element.style.webkitBackgroundClip = 'text';
+      element.style.color = 'transparent';
+
+      // For text gradients, we need to ensure proper sizing
+      // Use 100% 100% to cover the entire text area
+      element.style.backgroundSize = '100% 100%';
+      element.style.backgroundPosition = '0 0';
+      element.style.backgroundRepeat = 'no-repeat';
+    } else if (adjustedColors && adjustedColors[theme]) {
+      // Use adjusted color for the theme
+      element.style.backgroundImage = '';
+      element.style.backgroundClip = '';
+      element.style.webkitBackgroundClip = '';
+      element.style.color = adjustedColors[theme];
     }
 
-    /**
-     * Clear cached cosmetics for a user
-     * @param userId The user ID
-     */
-    async clearUserCosmetics(userId: string): Promise<void> {
-        await SevenTVCosmeticsStore.clearUserCosmetics(userId);
+    // Apply shadows
+    if (paintInfo.shadow) {
+      element.style.filter = paintInfo.shadow;
     }
+  }
 
-    /**
-     * Check if user has cached cosmetics
-     * @param userId The user ID
-     */
-    async hasValidCosmetics(userId: string): Promise<boolean> {
-        return SevenTVCosmeticsStore.hasValidCosmetics(userId);
-    }
+  /**
+   * Get cosmetics for multiple users in batch
+   * @param userIds Array of user IDs
+   * @param forceRefresh Force refresh from API
+   */
+  async getBatchUserCosmetics(
+    userIds: string[],
+    forceRefresh: boolean = false
+  ): Promise<Map<string, SevenTVUserCosmetics | null>> {
+    const results = new Map<string, SevenTVUserCosmetics | null>();
 
-    /**
-     * Create a default cosmetics object for users without 7TV cosmetics
-     * @param userId The user ID
-     * @param username The username
-     */
-    createDefaultCosmetics(userId: string, username: string): SevenTVUserCosmetics {
-        return {
-            userId,
-            username,
-            adjustedColors: {
-                light: '#000000',
-                dark: '#ffffff'
-            },
-            paintInfo: {
-                backgroundImage: null,
-                shadow: null
-            }
-        };
-    }
+    // Process all users concurrently
+    const promises = userIds.map(async (userId) => {
+      const cosmetics = await this.getUserCosmetics(userId, forceRefresh);
+      results.set(userId, cosmetics);
+    });
 
-    /**
-     * Enhanced color adjustment for better theme compatibility
-     * @param baseColor The base color
-     * @param theme The target theme
-     */
-    static adjustColorForTheme(baseColor: string, theme: 'light' | 'dark'): string {
-        // This is a placeholder for more sophisticated color adjustment
-        // You can implement actual color manipulation logic here
-        if (theme === 'dark') {
-            // For dark theme, ensure colors are bright enough
-            return baseColor;
-        } else {
-            // For light theme, ensure colors are dark enough
-            return baseColor;
-        }
+    await Promise.all(promises);
+    return results;
+  }
+
+  /**
+   * Clear cached cosmetics for a user
+   * @param userId The user ID
+   */
+  async clearUserCosmetics(userId: string): Promise<void> {
+    await SevenTVCosmeticsStore.clearUserCosmetics(userId);
+  }
+
+  /**
+   * Check if user has cached cosmetics
+   * @param userId The user ID
+   */
+  async hasValidCosmetics(userId: string): Promise<boolean> {
+    return SevenTVCosmeticsStore.hasValidCosmetics(userId);
+  }
+
+  /**
+   * Create a default cosmetics object for users without 7TV cosmetics
+   * @param userId The user ID
+   * @param username The username
+   */
+  createDefaultCosmetics(userId: string, username: string): SevenTVUserCosmetics {
+    return {
+      userId,
+      username,
+      adjustedColors: {
+        light: '#000000',
+        dark: '#ffffff',
+      },
+      paintInfo: {
+        backgroundImage: null,
+        shadow: null,
+      },
+    };
+  }
+
+  /**
+   * Enhanced color adjustment for better theme compatibility
+   * @param baseColor The base color
+   * @param theme The target theme
+   */
+  static adjustColorForTheme(baseColor: string, theme: 'light' | 'dark'): string {
+    // This is a placeholder for more sophisticated color adjustment
+    // You can implement actual color manipulation logic here
+    if (theme === 'dark') {
+      // For dark theme, ensure colors are bright enough
+      return baseColor;
+    } else {
+      // For light theme, ensure colors are dark enough
+      return baseColor;
     }
+  }
 }
 
 // Export singleton instance
@@ -215,20 +230,21 @@ export const SevenTVCosmeticsServiceInstance = SevenTVCosmeticsService.getInstan
  * Hook for React components to use 7TV cosmetics
  */
 export function useSevenTVCosmetics() {
-    const service = SevenTVCosmeticsServiceInstance;
+  const service = SevenTVCosmeticsServiceInstance;
 
-    return {
-        getUserCosmetics: (userId: string, forceRefresh?: boolean) => 
-            service.getUserCosmetics(userId, forceRefresh),
-        getBatchUserCosmetics: (userIds: string[], forceRefresh?: boolean) => 
-            service.getBatchUserCosmetics(userIds, forceRefresh),
-        applyCosmetics: (element: HTMLElement, cosmetics: SevenTVUserCosmetics, theme?: 'light' | 'dark') => 
-            service.applyCosmetics(element, cosmetics, theme),
-        clearUserCosmetics: (userId: string) => 
-            service.clearUserCosmetics(userId),
-        hasValidCosmetics: (userId: string) => 
-            service.hasValidCosmetics(userId),
-        createDefaultCosmetics: (userId: string, username: string) => 
-            service.createDefaultCosmetics(userId, username)
-    };
+  return {
+    getUserCosmetics: (userId: string, forceRefresh?: boolean) =>
+      service.getUserCosmetics(userId, forceRefresh),
+    getBatchUserCosmetics: (userIds: string[], forceRefresh?: boolean) =>
+      service.getBatchUserCosmetics(userIds, forceRefresh),
+    applyCosmetics: (
+      element: HTMLElement,
+      cosmetics: SevenTVUserCosmetics,
+      theme?: 'light' | 'dark'
+    ) => service.applyCosmetics(element, cosmetics, theme),
+    clearUserCosmetics: (userId: string) => service.clearUserCosmetics(userId),
+    hasValidCosmetics: (userId: string) => service.hasValidCosmetics(userId),
+    createDefaultCosmetics: (userId: string, username: string) =>
+      service.createDefaultCosmetics(userId, username),
+  };
 }

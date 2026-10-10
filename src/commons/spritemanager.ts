@@ -36,12 +36,14 @@ export class SpriteManager {
    */
   private isImageFile(filename: string): boolean {
     const lowerName = filename.toLowerCase();
-    return lowerName.endsWith('.png') || 
-           lowerName.endsWith('.jpg') || 
-           lowerName.endsWith('.jpeg') || 
-           lowerName.endsWith('.gif') || 
-           lowerName.endsWith('.webp') || 
-           lowerName.endsWith('.apng');
+    return (
+      lowerName.endsWith('.png') ||
+      lowerName.endsWith('.jpg') ||
+      lowerName.endsWith('.jpeg') ||
+      lowerName.endsWith('.gif') ||
+      lowerName.endsWith('.webp') ||
+      lowerName.endsWith('.apng')
+    );
   }
 
   /**
@@ -50,13 +52,13 @@ export class SpriteManager {
   private generateSimpleHash(input: string): number {
     let hash = 0;
     if (input.length === 0) return hash;
-    
+
     for (let i = 0; i < input.length; i++) {
       const char = input.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
-    
+
     return Math.abs(hash);
   }
 
@@ -77,14 +79,14 @@ export class SpriteManager {
    */
   private extractAllPrefixesFromImages(images: ExtractedImage[]): number[] {
     const prefixes = new Set<number>();
-    
-    images.forEach(image => {
+
+    images.forEach((image) => {
       const prefix = this.extractWeightFromFilename(image.name);
       if (prefix !== null) {
         prefixes.add(prefix);
       }
     });
-    
+
     return Array.from(prefixes).sort((a, b) => a - b);
   }
 
@@ -94,11 +96,11 @@ export class SpriteManager {
    */
   private getPrefixRank(filename: string, sortedPrefixes: number[]): number {
     const prefix = this.extractWeightFromFilename(filename);
-    
+
     if (prefix === null) {
       return 0; // Files without prefix get rank 0
     }
-    
+
     const index = sortedPrefixes.indexOf(prefix);
     return index + 1; // Convert to 1-based indexing
   }
@@ -114,24 +116,24 @@ export class SpriteManager {
       for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
       }
-      
+
       // Load zip file
       const zip = await JSZip.loadAsync(bytes.buffer);
       const images: ExtractedImage[] = [];
-      
+
       // Process each file in the zip
       const promises = Object.keys(zip.files).map(async (filename) => {
         const file = zip.files[filename];
-        
+
         // Skip directories and non-image files
         if (file.dir || !this.isImageFile(filename)) return;
 
-        if (filename.includes("__MACOSX/")) return;
-        
+        if (filename.includes('__MACOSX/')) return;
+
         try {
           // Get file as array buffer
           const content = await file.async('arraybuffer');
-          
+
           // Determine mime type based on extension
           let mime = 'image/png'; // Default
           const lowerName = filename.toLowerCase();
@@ -144,23 +146,22 @@ export class SpriteManager {
           } else if (lowerName.endsWith('.apng')) {
             mime = 'image/apng';
           }
-          
+
           // Convert to base64 data URL
           const base64 = btoa(
-            new Uint8Array(content)
-              .reduce((data, byte) => data + String.fromCharCode(byte), '')
+            new Uint8Array(content).reduce((data, byte) => data + String.fromCharCode(byte), '')
           );
-          
+
           images.push({
             name: filename.split('/').pop() as string,
             data: base64,
-            mime
+            mime,
           });
         } catch (err) {
           console.error(`Error processing file ${filename} in zip:`, err);
         }
       });
-      
+
       await Promise.all(promises);
       return images;
     } catch (err) {
@@ -175,20 +176,20 @@ export class SpriteManager {
   private deterministicShuffle<T>(array: T[], seed: number): T[] {
     // Clone the array to avoid modifying the original
     const result = [...array];
-    
+
     // Fisher-Yates shuffle algorithm with seeded random
     for (let i = result.length - 1; i > 0; i--) {
       // Simple LCG (Linear Congruential Generator) using the seed
       seed = (seed * 9301 + 49297) % 233280;
       const randomValue = seed / 233280;
-      
+
       // Get random index based on seeded random value
       const j = Math.floor(randomValue * (i + 1));
-      
+
       // Swap elements
       [result[i], result[j]] = [result[j], result[i]];
     }
-    
+
     return result;
   }
 
@@ -212,21 +213,20 @@ export class SpriteManager {
       const mm = (now.getMonth() + 1).toString().padStart(2, '0'); // Month is 0-indexed
       const dd = now.getDate().toString().padStart(2, '0');
       const datePrefix = `${dd}${mm}${yy}_`; // Format: YYMMDD_
-      
+
       // Look for images with today's date prefix that aren't in collectedSprites
-      const todayImages = images.filter(img => 
-        img.name.startsWith(datePrefix) && 
-        !collectedSprites.includes(img.name)
+      const todayImages = images.filter(
+        (img) => img.name.startsWith(datePrefix) && !collectedSprites.includes(img.name)
       );
-      
+
       // If we found any matching images, return the first one
       if (todayImages.length > 0) {
         return todayImages[0];
       }
     }
-    
+
     // Process each image and determine its weight
-    images.forEach(image => {
+    images.forEach((image) => {
       const weight = this.extractWeightFromFilename(image.name);
       if (mod && (weight || 0) < mod) return;
       if (weight !== null) {
@@ -238,25 +238,25 @@ export class SpriteManager {
         weightedPool.push({ image, weight: 1.0 });
       }
     });
-    
+
     // Shuffle the weightedPool using a deterministic shuffle based on userHash
     // This ensures images with equal weights have equal chances regardless of order
     const shuffledPool = this.deterministicShuffle(weightedPool, userHash);
-    
+
     // Calculate total weight
     const totalWeight = shuffledPool.reduce((sum, item) => sum + item.weight, 0);
-    
+
     // Use the hash to select an image based on weighted probability
-    let targetValue = (userHash % 1000) / 1000 * totalWeight;
+    let targetValue = ((userHash % 1000) / 1000) * totalWeight;
     let cumulativeWeight = 0;
-    
+
     for (const item of shuffledPool) {
       cumulativeWeight += item.weight;
       if (targetValue <= cumulativeWeight) {
         return item.image;
       }
     }
-    
+
     // Fallback to the first image if something goes wrong
     return images[0];
   }
@@ -265,29 +265,34 @@ export class SpriteManager {
    * Handle reroll if pending
    */
   public async handleRerollIfPending(
-    sortedImages: ExtractedImage[], 
+    sortedImages: ExtractedImage[],
     spriteAssignment: UserSpriteAssignment,
     channel: string,
     username: string
   ): Promise<ExtractedImage> {
     console.log(`Reroll pending for ${username} in ${channel}`);
-    
+
     // Select a new image (different from current) using weighted selection
     const currentFilename = spriteAssignment.selectedFilename;
-    const availableImages = sortedImages.filter(img => img.name !== currentFilename);
-    
+    const availableImages = sortedImages.filter((img) => img.name !== currentFilename);
+
     let selectedImage: ExtractedImage;
-    
+
     if (availableImages.length > 0) {
       // Use weighted selection for reroll too
       const userHash = this.generateSimpleHash(`${username}${channel}${Date.now()}`); // Add timestamp for different result
-      selectedImage = this.selectImageWithWeighting(availableImages, userHash, spriteAssignment.mod, spriteAssignment.filenames);
+      selectedImage = this.selectImageWithWeighting(
+        availableImages,
+        userHash,
+        spriteAssignment.mod,
+        spriteAssignment.filenames
+      );
 
       // Report back to server and use the canonical filename it returns.
       // If another client won the race, the server returns 409 with lastFilename so both clients converge.
       const canonicalFilename = await completeReroll(channel, username, selectedImage.name);
       if (canonicalFilename && canonicalFilename !== selectedImage.name) {
-        const canonicalImage = sortedImages.find(img => img.name === canonicalFilename);
+        const canonicalImage = sortedImages.find((img) => img.name === canonicalFilename);
         if (canonicalImage) {
           selectedImage = canonicalImage;
         }
@@ -295,10 +300,10 @@ export class SpriteManager {
       console.log(`Reroll completed for ${username} in ${channel}: ${selectedImage.name}`);
     } else {
       // If no other images available, keep current
-      const foundImage = sortedImages.find(img => img.name === currentFilename);
+      const foundImage = sortedImages.find((img) => img.name === currentFilename);
       selectedImage = foundImage || sortedImages[0];
     }
-    
+
     return selectedImage;
   }
 
@@ -310,7 +315,7 @@ export class SpriteManager {
     const zipHash = this.generateSimpleHash(zipData.substring(0, 1000)).toString();
 
     // Check if we have this zip in cache
-    let cacheEntry = zipCache.find(entry => entry.zipHash === zipHash);
+    let cacheEntry = zipCache.find((entry) => entry.zipHash === zipHash);
 
     // If not in cache or cache is empty, extract images and cache them
     if (!cacheEntry || cacheEntry.images.length === 0) {
@@ -326,7 +331,7 @@ export class SpriteManager {
         zipHash,
         images: extractedImages,
         sortedPrefixes: this.extractAllPrefixesFromImages(extractedImages),
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
 
       // Add to cache (remove oldest entry if cache is full)
@@ -358,7 +363,11 @@ export class SpriteManager {
       }
       const selectedImage = [...cacheEntry.images].sort((a, b) => a.name.localeCompare(b.name))[0];
       const prefixRank = this.getPrefixRank(selectedImage.name, cacheEntry.sortedPrefixes);
-      return { selectedImage, prefixClass: `prefix-${prefixRank}`, selectedFilename: selectedImage.name };
+      return {
+        selectedImage,
+        prefixClass: `prefix-${prefixRank}`,
+        selectedFilename: selectedImage.name,
+      };
     } catch (err) {
       console.error('Error getting preview sprite:', err);
       return null;
@@ -375,7 +384,7 @@ export class SpriteManager {
     username: string,
     useLast: boolean,
     userSeed?: string,
-    overrideFilename?: string,
+    overrideFilename?: string
   ): Promise<{
     selectedImage: ExtractedImage;
     prefixClass: string;
@@ -386,10 +395,10 @@ export class SpriteManager {
       if (!cacheEntry) {
         return null;
       }
-      
+
       // Sort images by filename for consistent ordering
       const sortedImages = [...cacheEntry.images].sort((a, b) => a.name.localeCompare(b.name));
-      
+
       // Check if user has a sprite assignment or reroll pending
       let spriteAssignment: UserSpriteAssignment | null = null;
       try {
@@ -397,47 +406,64 @@ export class SpriteManager {
       } catch (error) {
         console.error('Error fetching sprite assignment:', error);
       }
-      
+
       let selectedImage: ExtractedImage;
       let newAssignment = false;
-      
+
       // If a specific filename was pre-selected (e.g. forwarded from the app), use it directly
       if (overrideFilename) {
-        const overrideImage = sortedImages.find(img => img.name === overrideFilename);
+        const overrideImage = sortedImages.find((img) => img.name === overrideFilename);
         if (overrideImage) {
           const prefixRank = this.getPrefixRank(overrideImage.name, cacheEntry.sortedPrefixes);
-          return { selectedImage: overrideImage, prefixClass: `prefix-${prefixRank}`, selectedFilename: overrideImage.name };
+          return {
+            selectedImage: overrideImage,
+            prefixClass: `prefix-${prefixRank}`,
+            selectedFilename: overrideImage.name,
+          };
         }
       }
 
       // Handle reroll if pending
       if (spriteAssignment?.rerollPending) {
-        selectedImage = await this.handleRerollIfPending(sortedImages, spriteAssignment, channel, username);
+        selectedImage = await this.handleRerollIfPending(
+          sortedImages,
+          spriteAssignment,
+          channel,
+          username
+        );
       }
       // Check if we should explicitly use lastFilename based on event flag
       else if (useLast && spriteAssignment?.lastFilename) {
-        const foundImage = sortedImages.find(img => img.name === spriteAssignment.lastFilename);
+        const foundImage = sortedImages.find((img) => img.name === spriteAssignment.lastFilename);
         if (foundImage) {
           selectedImage = foundImage;
-          console.log(`Using lastFilename "${spriteAssignment.lastFilename}" for ${username} in ${channel} (explicit flag)`);
+          console.log(
+            `Using lastFilename "${spriteAssignment.lastFilename}" for ${username} in ${channel} (explicit flag)`
+          );
         } else {
           // Fall back to selectedFilename if lastFilename not found
-          console.log(`Last sprite "${spriteAssignment.lastFilename}" not found, falling back to selectedFilename`);
-          
+          console.log(
+            `Last sprite "${spriteAssignment.lastFilename}" not found, falling back to selectedFilename`
+          );
+
           // Use existing assignment if available
           if (spriteAssignment.selectedFilename) {
-            const selectedFoundImage = sortedImages.find(img => img.name === spriteAssignment.selectedFilename);
+            const selectedFoundImage = sortedImages.find(
+              (img) => img.name === spriteAssignment.selectedFilename
+            );
             if (selectedFoundImage) {
               selectedImage = selectedFoundImage;
             } else {
               // If assigned image no longer exists, use the first image for display
-              console.log(`Selected sprite "${spriteAssignment.selectedFilename}" not found in current sprite pack for ${username} in ${channel}. Using fallback for display only.`);
+              console.log(
+                `Selected sprite "${spriteAssignment.selectedFilename}" not found in current sprite pack for ${username} in ${channel}. Using fallback for display only.`
+              );
               selectedImage = sortedImages[0]; // Use first image as fallback for display
-              
+
               // Important: Override the display image's name with the user's actual selection
               selectedImage = {
                 ...selectedImage,
-                name: spriteAssignment.selectedFilename // Preserve the original filename
+                name: spriteAssignment.selectedFilename, // Preserve the original filename
               };
             }
           } else {
@@ -448,28 +474,32 @@ export class SpriteManager {
       }
       // Use existing assignment if available
       else if (spriteAssignment?.selectedFilename) {
-        const foundImage = sortedImages.find(img => img.name === spriteAssignment.selectedFilename);
+        const foundImage = sortedImages.find(
+          (img) => img.name === spriteAssignment.selectedFilename
+        );
         if (foundImage) {
           selectedImage = foundImage;
         } else {
           // If assigned image no longer exists, use the first image for display
           // but keep the user's selected filename in the database
-          console.log(`Selected sprite "${spriteAssignment.selectedFilename}" not found in current sprite pack for ${username} in ${channel}. Using fallback for display only.`);
+          console.log(
+            `Selected sprite "${spriteAssignment.selectedFilename}" not found in current sprite pack for ${username} in ${channel}. Using fallback for display only.`
+          );
           selectedImage = sortedImages[0]; // Use first image as fallback for display
-          
+
           // Important: Override the display image's name with the user's actual selection
           // This ensures we don't lose their selection when the sprite pack changes
           selectedImage = {
             ...selectedImage,
-            name: spriteAssignment.selectedFilename // Preserve the original filename
+            name: spriteAssignment.selectedFilename, // Preserve the original filename
           };
-          
+
           // Don't set newAssignment = true, as we want to keep their existing selection
         }
       }
       // If userSeed is a filename that exists in the zip, use that image directly
-      else if (userSeed && sortedImages.some(img => img.name === userSeed)) {
-        const foundImage = sortedImages.find(img => img.name === userSeed);
+      else if (userSeed && sortedImages.some((img) => img.name === userSeed)) {
+        const foundImage = sortedImages.find((img) => img.name === userSeed);
         selectedImage = foundImage || sortedImages[0]; // Fallback to first image if not found
         newAssignment = true;
       }
@@ -477,35 +507,37 @@ export class SpriteManager {
       else {
         // Generate deterministic hash from username and channel
         const userHash = this.generateSimpleHash(`${username}${channel}`);
-        
+
         // Apply weighted selection based on filename prefixes
         selectedImage = this.selectImageWithWeighting(sortedImages, userHash);
         newAssignment = true;
       }
-      
+
       // Save new assignment if needed
       if (newAssignment) {
         await saveUserSpriteAssignment(channel, username, selectedImage.name)
-          .then(success => {
+          .then((success) => {
             if (success) {
-              console.log(`Saved sprite assignment for ${username} in ${channel}: ${selectedImage.name}`);
+              console.log(
+                `Saved sprite assignment for ${username} in ${channel}: ${selectedImage.name}`
+              );
             } else {
               console.error(`Failed to save sprite assignment for ${username} in ${channel}`);
             }
           })
-          .catch(error => {
+          .catch((error) => {
             console.error('Error saving sprite assignment:', error);
           });
       }
-      
+
       // Get the rank of the prefix for the selected image
       const prefixRank = this.getPrefixRank(selectedImage.name, cacheEntry.sortedPrefixes);
       const prefixClass = `prefix-${prefixRank}`;
-      
+
       return {
         selectedImage,
         prefixClass,
-        selectedFilename: selectedImage.name
+        selectedFilename: selectedImage.name,
       };
     } catch (err) {
       console.error('Error processing sprites:', err);

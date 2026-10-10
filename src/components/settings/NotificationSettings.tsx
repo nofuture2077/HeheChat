@@ -1,5 +1,15 @@
 import { useState, useEffect, useContext } from 'react';
-import { Button, Text, Stack, Group, Alert, Fieldset, TagsInput, Switch, Space } from '@mantine/core';
+import {
+  Button,
+  Text,
+  Stack,
+  Group,
+  Alert,
+  Fieldset,
+  TagsInput,
+  Switch,
+  Space,
+} from '@mantine/core';
 import { IconBellRinging, IconBellOff, IconAlertCircle } from '@tabler/icons-react';
 import { PremiumContext } from '@/ApplicationContext';
 import { NotificationSettings as NotificationSettingsType } from '@/commons/config';
@@ -68,18 +78,21 @@ export function NotificationEnableSection() {
     if (!supported) return;
 
     setPermissionStatus(Notification.permission);
-    navigator.serviceWorker.ready.then(reg => {
-      setRegistration(reg);
-      return reg.pushManager.getSubscription();
-    }).then(sub => {
-      setIsSubscribed(!!sub);
-      setSubscription(sub);
-    }).catch(() => setError('Failed to get subscription information.'));
+    navigator.serviceWorker.ready
+      .then((reg) => {
+        setRegistration(reg);
+        return reg.pushManager.getSubscription();
+      })
+      .then((sub) => {
+        setIsSubscribed(!!sub);
+        setSubscription(sub);
+      })
+      .catch(() => setError('Failed to get subscription information.'));
 
     const token = localStorage.getItem('hehe-token_state') || '';
     fetch(`${BASE_URL}/push/vapidPublicKey?token=${token}`)
-      .then(r => r.json())
-      .then(d => setVapidPublicKey(d.vapidPublicKey))
+      .then((r) => r.json())
+      .then((d) => setVapidPublicKey(d.vapidPublicKey))
       .catch(() => setError('Failed to fetch server configuration for push notifications.'));
   }, []);
 
@@ -143,7 +156,13 @@ export function NotificationEnableSection() {
     <Fieldset legend="Push Notifications" variant="filled">
       <Stack gap="sm">
         {error && (
-          <Alert icon={<IconAlertCircle size={16} />} title="Error" color="red" withCloseButton onClose={() => setError(null)}>
+          <Alert
+            icon={<IconAlertCircle size={16} />}
+            title="Error"
+            color="red"
+            withCloseButton
+            onClose={() => setError(null)}
+          >
             {error}
           </Alert>
         )}
@@ -156,7 +175,9 @@ export function NotificationEnableSection() {
           <Stack gap={2}>
             <Text fw={500}>Enable Push Notifications</Text>
             <Text size="xs" c="dimmed">
-              {isSubscribed ? 'You are currently receiving push notifications' : 'Subscribe to receive notifications when the app is closed'}
+              {isSubscribed
+                ? 'You are currently receiving push notifications'
+                : 'Subscribe to receive notifications when the app is closed'}
             </Text>
           </Stack>
           <Button
@@ -184,12 +205,15 @@ export function NotificationStreamStartSettings() {
   const [settings, setSettings] = useState<NotificationSettingsType>(emptySettings());
 
   useEffect(() => {
-    getSubscriptionStatus().then(sub => setIsSubscribed(!!sub));
+    getSubscriptionStatus().then((sub) => setIsSubscribed(!!sub));
     fetchNotificationSettings().then(setSettings);
   }, []);
 
   const handleChange = (channels: string[]) => {
-    const updated = { ...settings, streamStartChannels: channels.map(c => c.toLowerCase().substring(0, 25).trim()) };
+    const updated = {
+      ...settings,
+      streamStartChannels: channels.map((c) => c.toLowerCase().substring(0, 25).trim()),
+    };
     setSettings(updated);
     sendNotificationSettingsToBackend(updated);
   };
@@ -205,7 +229,9 @@ export function NotificationStreamStartSettings() {
           clearable
         />
         <Space h="xs" />
-        <Text size="xs" c="dimmed">Add channels to receive notifications when they go live.</Text>
+        <Text size="xs" c="dimmed">
+          Add channels to receive notifications when they go live.
+        </Text>
       </Fieldset>
     </Stack>
   );
@@ -217,7 +243,7 @@ export function NotificationChatMentionSettings() {
   const premium = useContext(PremiumContext);
 
   useEffect(() => {
-    getSubscriptionStatus().then(sub => setIsSubscribed(!!sub));
+    getSubscriptionStatus().then((sub) => setIsSubscribed(!!sub));
     fetchNotificationSettings().then(setSettings);
   }, []);
 
@@ -235,7 +261,9 @@ export function NotificationChatMentionSettings() {
           <Group justify="space-between">
             <Stack gap={2}>
               <Text fw={500}>Enable Chat Mention Notifications</Text>
-              <Text size="xs" c="dimmed">Receive notifications when you're mentioned in chat</Text>
+              <Text size="xs" c="dimmed">
+                Receive notifications when you're mentioned in chat
+              </Text>
             </Stack>
             <Switch
               checked={settings.chatMention || false}
@@ -250,24 +278,38 @@ export function NotificationChatMentionSettings() {
         <TagsInput
           placeholder="Type a channel name and press Enter"
           value={settings.chatMentionChannels}
-          onChange={(v) => handleChange({ ...settings, chatMentionChannels: v.map(c => c.toLowerCase().substring(0, 25).trim()) })}
+          onChange={(v) =>
+            handleChange({
+              ...settings,
+              chatMentionChannels: v.map((c) => c.toLowerCase().substring(0, 25).trim()),
+            })
+          }
           disabled={disabled || !settings.chatMention}
           clearable
         />
         <Space h="xs" />
-        <Text size="xs" c="dimmed">Channels to watch for mentions. Leave empty to watch all channels.</Text>
+        <Text size="xs" c="dimmed">
+          Channels to watch for mentions. Leave empty to watch all channels.
+        </Text>
       </Fieldset>
 
       <Fieldset legend="Only from Specific Users" variant="filled">
         <TagsInput
           placeholder="Type a username and press Enter"
           value={settings.chatMentionUsers}
-          onChange={(v) => handleChange({ ...settings, chatMentionUsers: v.map(c => c.toLowerCase().substring(0, 25).trim()) })}
+          onChange={(v) =>
+            handleChange({
+              ...settings,
+              chatMentionUsers: v.map((c) => c.toLowerCase().substring(0, 25).trim()),
+            })
+          }
           disabled={disabled || !settings.chatMention}
           clearable
         />
         <Space h="xs" />
-        <Text size="xs" c="dimmed">Only notify for mentions from these users. Leave empty to receive from everyone.</Text>
+        <Text size="xs" c="dimmed">
+          Only notify for mentions from these users. Leave empty to receive from everyone.
+        </Text>
       </Fieldset>
     </Stack>
   );

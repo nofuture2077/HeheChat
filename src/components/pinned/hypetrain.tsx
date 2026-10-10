@@ -1,91 +1,111 @@
 import { Text, Card, Badge, Group, Stack, ActionIcon } from '@mantine/core';
 import { useState, useEffect, useContext, useRef } from 'react';
-import { formatMinuteSeconds } from '@/commons/helper'
-import { ChatEmotesContext } from '@/ApplicationContext'
+import { formatMinuteSeconds } from '@/commons/helper';
+import { ChatEmotesContext } from '@/ApplicationContext';
 import pinClasses from './pinmanager.module.css';
 import htClasses from './hypetrain.module.css';
 import { PinProps } from './pinmanager';
 import { IconEyeOff } from '@tabler/icons-react';
 
 interface HypetrainProps extends PinProps {
-    level: number;
-    progress: number;
-    goal: number;
-    state?: 'active' | 'ended';
-    isGoldenKappaTrain: boolean;
+  level: number;
+  progress: number;
+  goal: number;
+  state?: 'active' | 'ended';
+  isGoldenKappaTrain: boolean;
 }
 
 export function Hypetrain(props: HypetrainProps) {
-    const emotes = useContext(ChatEmotesContext);
-    const [remaining, setRemaining] = useState<number>(Math.round((props.endTime.getTime() - new Date().getTime()) / 1000));
-    const intervalRef = useRef<number | null>(null);
-    const progress = Math.ceil(100 * props.progress / props.goal);
+  const emotes = useContext(ChatEmotesContext);
+  const [remaining, setRemaining] = useState<number>(
+    Math.round((props.endTime.getTime() - new Date().getTime()) / 1000)
+  );
+  const intervalRef = useRef<number | null>(null);
+  const progress = Math.ceil((100 * props.progress) / props.goal);
 
-    useEffect(() => {
-      // Clear any existing interval
-      if (intervalRef.current !== null) {
-        clearInterval(intervalRef.current);
-      }
-      
-      // Set up a new interval
-      intervalRef.current = window.setInterval(() => {
-        const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
-        setRemaining(remaining);
-      }, 1000);
-      
-      // Clean up the interval when the component unmounts
-      return () => {
-        if (intervalRef.current !== null) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-      };
-    }, [props.endTime]);
-
-    if (remaining < 0 && props.state !== 'ended') {
-      props.remove();
-      return null;
+  useEffect(() => {
+    // Clear any existing interval
+    if (intervalRef.current !== null) {
+      clearInterval(intervalRef.current);
     }
 
-    const prefix = props.isGoldenKappaTrain ? 'Golden Kappa ' : '';
+    // Set up a new interval
+    intervalRef.current = window.setInterval(() => {
+      const remaining = Math.round((props.endTime.getTime() - new Date().getTime()) / 1000);
+      setRemaining(remaining);
+    }, 1000);
 
-    return <Card withBorder radius="md" p="md" ml="sm" mr="sm" mt={0} mb={0} onClick={props.onClick} className={[htClasses.hypetrain, props.isGoldenKappaTrain ? htClasses.goldenkappa : ''].join(' ')}>
-      <div 
-        style={{ width: `${100 - progress}%` }} 
+    // Clean up the interval when the component unmounts
+    return () => {
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [props.endTime]);
+
+  if (remaining < 0 && props.state !== 'ended') {
+    props.remove();
+    return null;
+  }
+
+  const prefix = props.isGoldenKappaTrain ? 'Golden Kappa ' : '';
+
+  return (
+    <Card
+      withBorder
+      radius="md"
+      p="md"
+      ml="sm"
+      mr="sm"
+      mt={0}
+      mb={0}
+      onClick={props.onClick}
+      className={[htClasses.hypetrain, props.isGoldenKappaTrain ? htClasses.goldenkappa : ''].join(
+        ' '
+      )}
+    >
+      <div
+        style={{ width: `${100 - progress}%` }}
         className={`${htClasses.progress} ${props.state === 'ended' ? htClasses.completed : ''}`}
       ></div>
       <Stack gap={0} className={htClasses.content}>
-        <Group justify='space-between'>
-          <Group gap='xs'>
+        <Group justify="space-between">
+          <Group gap="xs">
             <span className={pinClasses.logo}>{emotes.getLogo(props.channel)}</span>
             <Text fw={900}>
-              {props.state === 'ended' ? prefix + "Hype Train Completed!" : prefix + "Hype Train"}
+              {props.state === 'ended' ? prefix + 'Hype Train Completed!' : prefix + 'Hype Train'}
             </Text>
-            <Badge color={props.state === 'ended' ? "purple" : "pink"}>LVL {props.level}</Badge>
+            <Badge color={props.state === 'ended' ? 'purple' : 'pink'}>LVL {props.level}</Badge>
           </Group>
           <Group>
-                {props.state === 'ended' ? (
-                  <Badge color="purple" size="lg">FINAL</Badge>
-                ) : (
-                  <Text fw={700}>{formatMinuteSeconds(remaining)}</Text>
-                )}
-                <ActionIcon variant="subtle" onClick={props.hide} color='primary'>
-                    <IconEyeOff/>
-                </ActionIcon>
-            </Group>
-          
+            {props.state === 'ended' ? (
+              <Badge color="purple" size="lg">
+                FINAL
+              </Badge>
+            ) : (
+              <Text fw={700}>{formatMinuteSeconds(remaining)}</Text>
+            )}
+            <ActionIcon variant="subtle" onClick={props.hide} color="primary">
+              <IconEyeOff />
+            </ActionIcon>
+          </Group>
         </Group>
-        <Group justify='space-between' align='flex-end'>
+        <Group justify="space-between" align="flex-end">
           <Text fw={600}>
-            {props.state === 'ended' ? 
-              `Final Level ${props.level} Achieved!` : 
-              'Help supporting the Hypetrain'
-            }
+            {props.state === 'ended'
+              ? `Final Level ${props.level} Achieved!`
+              : 'Help supporting the Hypetrain'}
           </Text>
-          <Text fw={900} size='28px' className={props.state === 'ended' ? htClasses.completed : undefined}>
+          <Text
+            fw={900}
+            size="28px"
+            className={props.state === 'ended' ? htClasses.completed : undefined}
+          >
             {progress}%
           </Text>
         </Group>
       </Stack>
     </Card>
+  );
 }

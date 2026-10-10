@@ -11,76 +11,82 @@ import { useForceUpdate } from '@mantine/hooks';
 import classes from './EventList.module.css';
 
 export function RecentEventsPanel() {
-    const config = useContext(ConfigContext);
-    const profile = useContext(ProfileContext);
-    const { events } = useEventFeed();
-    const [checkedEvents, setCheckedEvents] = useState<Dictionary<boolean>>({});
-    const forceUpdate = useForceUpdate();
+  const config = useContext(ConfigContext);
+  const profile = useContext(ProfileContext);
+  const { events } = useEventFeed();
+  const [checkedEvents, setCheckedEvents] = useState<Dictionary<boolean>>({});
+  const forceUpdate = useForceUpdate();
 
-    const replayEvent = (data: EventData) => {
-        if (AlertSystem.shouldBePlayedInBrowsersource(data) && !checkedEvents[data.id]) {
-            PubSub.publish('WSSEND', {type: 'replayevent', data: data, profile: profile.guid });
-        } else if (AlertSystem.shouldBePlayedInApp(data) && !checkedEvents[data.id]) {
-            AlertSystem.addEvent({ ...data, replay: true });
-        }
-        setCheckedEvents(ev => {
-            ev[data.id] = true;
-            return ev;
-        });
+  const replayEvent = (data: EventData) => {
+    if (AlertSystem.shouldBePlayedInBrowsersource(data) && !checkedEvents[data.id]) {
+      PubSub.publish('WSSEND', { type: 'replayevent', data: data, profile: profile.guid });
+    } else if (AlertSystem.shouldBePlayedInApp(data) && !checkedEvents[data.id]) {
+      AlertSystem.addEvent({ ...data, replay: true });
+    }
+    setCheckedEvents((ev) => {
+      ev[data.id] = true;
+      return ev;
+    });
+    forceUpdate();
+    setTimeout(() => {
+      setCheckedEvents((ev) => {
+        ev[data.id] = false;
         forceUpdate();
-        setTimeout(() => {
-            setCheckedEvents(ev => {
-                ev[data.id] = false;
-                forceUpdate();
-                return ev;
-            });
-        }, 2500);
-    };
+        return ev;
+      });
+    }, 2500);
+  };
 
-    if (!config.recentEventsCount) {
-        return null;
-    }
+  if (!config.recentEventsCount) {
+    return null;
+  }
 
-    const recent = events.slice(-config.recentEventsCount).reverse();
+  const recent = events.slice(-config.recentEventsCount).reverse();
 
-    if (recent.length === 0) {
-        return null;
-    }
+  if (recent.length === 0) {
+    return null;
+  }
 
-    if (config.recentEventsCompact && 0) {
-        return (
-            <Stack gap={0} mt={38}>
-                {recent.map((event, i) => (
-                    <Group key={'recent-event-' + i} gap="xs" wrap="nowrap">
-                        {getIcon(event, 'recent-event-icon-' + i)}
-                        <Text size="sm" lineClamp={1}>{formatEventText(event)}</Text>
-                    </Group>
-                ))}
-            </Stack>
-        );
-    }
-
+  if (config.recentEventsCompact && 0) {
     return (
-        <Stack gap={0}>
-            {recent.reverse().map((event, i) => (
-                <InfoCard
-                    key={'recent-event-' + i}
-                    channel={event.channel}
-                    className={classes.event}
-                    name={event.username}
-                    date={event.date}
-                    text={formatEventText(event)}
-                    left={getIcon(event, 'recent-event-icon-' + i)}
-                    onClick={() => replayEvent(event)}
-                    right={
-                        <ActionIcon
-                            disabled={!AlertSystem.shouldBePlayedInApp(event) && !AlertSystem.shouldBePlayedInBrowsersource(event)}
-                            variant='transparent'>
-                                {(checkedEvents[event.id] ? <IconCheck/> : <IconReload/>)}
-                        </ActionIcon>
-                    }
-                />
-            ))}
-        </Stack>
+      <Stack gap={0} mt={38}>
+        {recent.map((event, i) => (
+          <Group key={'recent-event-' + i} gap="xs" wrap="nowrap">
+            {getIcon(event, 'recent-event-icon-' + i)}
+            <Text size="sm" lineClamp={1}>
+              {formatEventText(event)}
+            </Text>
+          </Group>
+        ))}
+      </Stack>
     );
+  }
+
+  return (
+    <Stack gap={0}>
+      {recent.reverse().map((event, i) => (
+        <InfoCard
+          key={'recent-event-' + i}
+          channel={event.channel}
+          className={classes.event}
+          name={event.username}
+          date={event.date}
+          text={formatEventText(event)}
+          left={getIcon(event, 'recent-event-icon-' + i)}
+          onClick={() => replayEvent(event)}
+          right={
+            <ActionIcon
+              disabled={
+                !AlertSystem.shouldBePlayedInApp(event) &&
+                !AlertSystem.shouldBePlayedInBrowsersource(event)
+              }
+              variant="transparent"
+            >
+              {checkedEvents[event.id] ? <IconCheck /> : <IconReload />}
+            </ActionIcon>
+          }
+        />
+      ))}
+    </Stack>
+  );
 }

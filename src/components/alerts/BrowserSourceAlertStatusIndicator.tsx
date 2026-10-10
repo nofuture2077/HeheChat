@@ -11,19 +11,14 @@ export function BrowserSourceAlertStatusIndicator(_props: BrowserSourceAlertStat
   const [updateCountdown, setUpdateCountdown] = useState<number>(0);
 
   // Use version check hook with custom remote URL
-  const { 
-    newVersionAvailable, 
-    currentVersion, 
-    latestVersion, 
-    isChecking 
-  } = useVersionCheck({
+  const { newVersionAvailable, currentVersion, latestVersion, isChecking } = useVersionCheck({
     checkInterval: 30 * 60 * 1000, // Check every 30 minutes
     remoteManifestUrl: window.location.origin + '/manifest.json',
     onNewVersionDetected: (current, latest) => {
       console.log(`New version detected: ${current} -> ${latest}`);
       // Start countdown for update
       setUpdateCountdown(1); // 30 seconds countdown
-    }
+    },
   });
 
   useEffect(() => {
@@ -40,12 +35,12 @@ export function BrowserSourceAlertStatusIndicator(_props: BrowserSourceAlertStat
   useEffect(() => {
     if (updateCountdown > 0) {
       const countdownInterval = setInterval(() => {
-        setUpdateCountdown(prev => {
+        setUpdateCountdown((prev) => {
           if (prev <= 1) {
             // Check if it's safe to update (no alerts playing and queue is empty)
             const isPlaying = AlertSystem.playing;
             const queueLength = AlertSystem.quequeLength();
-            
+
             if (!isPlaying && queueLength === 0) {
               // Safe to update - store new version and reload
               if (latestVersion) {
@@ -73,22 +68,22 @@ export function BrowserSourceAlertStatusIndicator(_props: BrowserSourceAlertStat
       return {
         color: '#ffa500', // Orange for pending update
         title: `Updating in ${updateCountdown}s`,
-        show: true
+        show: true,
       };
     }
-    
+
     if (!isAlertSystemRunning) {
       return {
         color: '#ff1493', // Pink/red for alert system not running
         title: 'Alert System is not running',
-        show: true
+        show: true,
       };
     }
-    
+
     return {
       color: '#00ff00', // Green for all good
       title: 'All systems running',
-      show: false // Don't show when everything is working
+      show: false, // Don't show when everything is working
     };
   };
 

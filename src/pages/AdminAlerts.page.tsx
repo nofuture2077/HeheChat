@@ -1,28 +1,28 @@
-import { 
-  Container, 
-  Title, 
-  Text, 
-  Button, 
-  Alert, 
-  Stack, 
-  Table, 
-  Badge, 
-  LoadingOverlay, 
-  Card, 
-  Group, 
+import {
+  Container,
+  Title,
+  Text,
+  Button,
+  Alert,
+  Stack,
+  Table,
+  Badge,
+  LoadingOverlay,
+  Card,
+  Group,
   Pagination,
   Anchor,
   TextInput,
-  ActionIcon
+  ActionIcon,
 } from '@mantine/core';
-import { 
+import {
   IconLink,
-  IconRefresh, 
-  IconAlertCircle, 
-  IconClock, 
+  IconRefresh,
+  IconAlertCircle,
+  IconClock,
   IconBell,
   IconSearch,
-  IconX
+  IconX,
 } from '@tabler/icons-react';
 import { useState, useEffect, useContext } from 'react';
 import { LoginContextContext } from '@/ApplicationContext';
@@ -54,7 +54,7 @@ export function AdminAlertsPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  
+
   // Pagination state
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
@@ -73,12 +73,14 @@ export function AdminAlertsPage() {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       const offset = (page - 1) * limit;
       const searchParam = search ? `&query=${encodeURIComponent(search)}` : '';
-      const response = await fetch(`${BASE_URL}/api/admin/alerts/token?token=${adminToken}&limit=${limit}&offset=${offset}${searchParam}`);
-      
+      const response = await fetch(
+        `${BASE_URL}/api/admin/alerts/token?token=${adminToken}&limit=${limit}&offset=${offset}${searchParam}`
+      );
+
       if (!response.ok) {
         if (response.status === 401) {
           localStorage.removeItem('hehe-token_state');
@@ -94,7 +96,7 @@ export function AdminAlertsPage() {
       }
 
       const data: ApiResponse = await response.json();
-      
+
       if (data.success && data.tokens) {
         setAlertTokens(data);
         setLastUpdated(new Date());
@@ -112,7 +114,7 @@ export function AdminAlertsPage() {
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
   };
-  
+
   const handleSearch = (query: string) => {
     setSearch(query);
     setPage(1); // Reset to first page when searching
@@ -143,13 +145,13 @@ export function AdminAlertsPage() {
         <Text size="sm">{token.channelname}</Text>
       </Table.Td>
       <Table.Td>
-        <Anchor 
-          href={`${EDITOR_URL}?token=${token.token}`} 
-          target="_blank" 
+        <Anchor
+          href={`${EDITOR_URL}?token=${token.token}`}
+          target="_blank"
           rel="noopener noreferrer"
           size="sm"
         >
-            <IconLink />
+          <IconLink />
         </Anchor>
       </Table.Td>
     </Table.Tr>
@@ -196,7 +198,7 @@ export function AdminAlertsPage() {
               </Badge>
             </Group>
           </Card.Section>
-          
+
           <Card.Section p="md" withBorder>
             <TextInput
               placeholder="Search tokens..."
@@ -217,31 +219,26 @@ export function AdminAlertsPage() {
           <Card.Section>
             <div style={{ position: 'relative' }}>
               <LoadingOverlay visible={loading} />
-              
+
               {error && (
-                <Alert 
-                  icon={<IconAlertCircle size="1rem" />} 
-                  title="Error Loading Tokens" 
+                <Alert
+                  icon={<IconAlertCircle size="1rem" />}
+                  title="Error Loading Tokens"
                   color="red"
                   variant="light"
                   m="md"
                 >
                   <Text>{error}</Text>
-                  <Button 
-                    size="xs" 
-                    variant="light" 
-                    mt="xs"
-                    onClick={fetchAlertTokens}
-                  >
+                  <Button size="xs" variant="light" mt="xs" onClick={fetchAlertTokens}>
                     Try Again
                   </Button>
                 </Alert>
               )}
 
               {!error && alertTokens?.total === 0 && !loading && (
-                <Alert 
-                  icon={<IconBell size="1rem" />} 
-                  title="No Alert Tokens" 
+                <Alert
+                  icon={<IconBell size="1rem" />}
+                  title="No Alert Tokens"
                   color="blue"
                   variant="light"
                   m="md"
@@ -261,7 +258,7 @@ export function AdminAlertsPage() {
                     </Table.Thead>
                     <Table.Tbody>{rows}</Table.Tbody>
                   </Table>
-                  
+
                   <Group justify="center" p="md">
                     <Pagination
                       value={page}
