@@ -1081,10 +1081,11 @@ class AlertPlayer {
         console.log('Start playing');
         const rawTtsText = (eventData && eventData.text)
             ? this.parsedPartsToTTSText(eventData.text.parts || eventData.text) : undefined;
-        // Preview alerts reuse the same sample user and text, the spam filter would block every repeat within 30s
+        // Preview alerts reuse the same sample user and text, the spam filter would block every repeat within 30s.
+        // Replays must always play in full.
         const isPreviewAlert = !!(event as any).force;
         const smartFilter = this.config?.alertSmartFilter;
-        const blockedBySmartFilter = !isPreviewAlert && !!(smartFilter?.enabled &&
+        const blockedBySmartFilter = !isPreviewAlert && !event.replay && !!(smartFilter?.enabled &&
             rawTtsText && !shouldPlayTTSText(rawTtsText, event.username, smartFilter, Date.now()));
         const ttsMessage = blockedBySmartFilter ? undefined : this.cleanMessage(formatString(alert.audio?.tts?.text || "", {
             ...vars,

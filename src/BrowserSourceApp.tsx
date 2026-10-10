@@ -160,7 +160,7 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
       }
 
       if (data.type === 'event' || data.type === 'replayevent') {
-        const event = data.data;
+        const event = data.type === 'replayevent' ? { ...data.data, replay: true } : data.data;
 
         const shouldPlayAudio = AlertSystem.shouldBePlayedInBrowsersourceAudio(event);
         const shouldShowVisual = AlertSystem.shouldBePlayedInBrowsersourceVisual(event);

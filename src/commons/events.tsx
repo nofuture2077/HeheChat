@@ -130,6 +130,7 @@ export type Event = {
     rerollPending?: boolean; // Flag indicating a reroll is pending for this user
     selectedSpriteFilename?: string; // Selected sprite filename for TTS and visual display
     useLastSpriteFilename?: boolean; // Flag to control whether to use lastFilename or selectedFilename
+    replay?: boolean; // Replayed events always play in full, bypassing the TTS smart filter
 }
 
 // User sprite assignment interface

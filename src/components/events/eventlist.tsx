@@ -171,7 +171,7 @@ export function EventList() {
         if (AlertSystem.shouldBePlayedInBrowsersource(data) && !checkedEvents[data.id]) {
             PubSub.publish('WSSEND', {type: 'replayevent', data: data, profile: profile.guid });
         } else if (AlertSystem.shouldBePlayedInApp(data) && !checkedEvents[data.id]) {
-            AlertSystem.addEvent(data);
+            AlertSystem.addEvent({ ...data, replay: true });
         }
         setCheckedEvents(ev => {
             ev[data.id] = true;

@@ -347,7 +347,7 @@ export default function HeheChat() {
         const psReplayEvent = PubSub.subscribe("WS-replayevent", (msg, event) => {
             // Process replay events the same way as regular events
             if (AlertSystem.shouldBePlayedInApp(event)) {
-                AlertSystem.addEvent(event);
+                AlertSystem.addEvent({ ...event, replay: true });
             }
         });
     
