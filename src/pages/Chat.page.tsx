@@ -238,7 +238,9 @@ export function ChatPage() {
 
     // Track username from new messages
     if (msg.type === 'chat') {
-      setUsernames((prev) => new Set([...prev, msg.userInfo.userName.toLowerCase()]));
+      const name = msg.userInfo.userName.toLowerCase();
+      // Move to end so set order reflects last appearance
+      setUsernames((prev) => new Set([...[...prev].filter((u) => u !== name), name]));
     }
 
     setChatMessages((prevMessages) =>
@@ -286,7 +288,8 @@ export function ChatPage() {
       newMessages.push(msg);
     }
 
-    setUsernames(new Set(newUsernames));
+    // Keep each user's last appearance, oldest first
+    setUsernames(new Set([...new Set(newUsernames.reverse())].reverse()));
 
     setChatMessages(newMessages);
   };

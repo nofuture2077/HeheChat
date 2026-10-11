@@ -59,6 +59,7 @@ export function ChatInput(props: ChatInputProps) {
   const [tagOpen, tagHandler] = useDisclosure(false);
   const [tagUsers, setTagUsers] = useState<string[]>([]);
   const [tagText, setTagText] = useState<string>('');
+  const [tagList, setTagList] = useState<string[]>([]);
 
   // Load message history from localStorage on component mount
   useEffect(() => {
@@ -248,6 +249,12 @@ export function ChatInput(props: ChatInputProps) {
   };
 
   const chatChannel = config.getChatChannel();
+  const tagCandidates = [
+    ...new Set([
+      ...(chatChannel ? [chatChannel.toLowerCase()] : []),
+      ...[...props.usernames].reverse(),
+    ]),
+  ];
   const sendMessage = async (text: string, close: boolean) => {
     // Add message to history if it's not empty and different from the last message
     if (
@@ -607,7 +614,11 @@ export function ChatInput(props: ChatInputProps) {
                     variant="transparent"
                     color="gray"
                     className={inputClasses.emoteButton}
-                    onClick={tagHandler.open}
+                    onClick={() => {
+                      // Snapshot so the list does not reorder while the dialog is open
+                      setTagList(tagCandidates);
+                      tagHandler.open();
+                    }}
                     aria-label="Tag users"
                   >
                     <IconUsers style={{ width: rem(20), height: rem(20) }} stroke={1.5} />
@@ -662,24 +673,27 @@ export function ChatInput(props: ChatInputProps) {
       </Flex>
       <Modal opened={tagOpen} onClose={tagHandler.close} title="Tag users">
         <Stack>
-          {props.usernames.length === 0 ? (
+          {tagList.length === 0 ? (
             <Text c="dimmed">No chatters yet</Text>
           ) : (
             <>
               <Button
                 size="xs"
                 variant="subtle"
-                onClick={() =>
-                  setTagUsers(tagUsers.length === props.usernames.length ? [] : props.usernames)
-                }
+                onClick={() => setTagUsers(tagUsers.length === tagList.length ? [] : tagList)}
               >
-                {tagUsers.length === props.usernames.length ? 'Select none' : 'Select all'}
+                {tagUsers.length === tagList.length ? 'Select none' : 'Select all'}
               </Button>
               <ScrollArea.Autosize mah={300}>
                 <Checkbox.Group value={tagUsers} onChange={setTagUsers}>
-                  <Stack gap="xs">
-                    {[...props.usernames].sort().map((username) => (
-                      <Checkbox key={username} value={username} label={username} />
+                  <Stack gap={4}>
+                    {tagList.map((username) => (
+                      <Checkbox.Card key={username} value={username} radius="sm" p="sm">
+                        <Group wrap="nowrap">
+                          <Checkbox.Indicator />
+                          <Text>{username}</Text>
+                        </Group>
+                      </Checkbox.Card>
                     ))}
                   </Stack>
                 </Checkbox.Group>
