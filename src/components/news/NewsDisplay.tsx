@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Notification, Stack, Text, Collapse, ActionIcon, Group } from '@mantine/core';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { NewsApiClient, NewsMessage } from '../../api/news';
+import { PremiumContext } from '../../commons/premium';
 
 interface NewsDisplayProps {
   className?: string;
@@ -12,6 +13,32 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
   const [loading, setLoading] = useState(false);
   const [dismissedMessages, setDismissedMessages] = useState<Set<number>>(new Set());
   const [collapsedMessages, setCollapsedMessages] = useState<Set<number>>(new Set());
+  const [dismissedPremium, setDismissedPremium] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('hehe-dismissed-premium') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const { isPremium, expiresAt, daysRemaining } = useContext(PremiumContext);
+
+  // Remind at 10 and 3 days left; key includes expiresAt so an extension re-arms both reminders
+  const premiumStage =
+    isPremium && expiresAt && daysRemaining != null
+      ? daysRemaining <= 3
+        ? 3
+        : daysRemaining <= 10
+          ? 10
+          : null
+      : null;
+  const premiumKey = `${expiresAt}:${premiumStage}`;
+  const showPremiumReminder = premiumStage !== null && !dismissedPremium.includes(premiumKey);
+
+  const dismissPremium = () => {
+    const newDismissed = [...dismissedPremium, premiumKey];
+    setDismissedPremium(newDismissed);
+    localStorage.setItem('hehe-dismissed-premium', JSON.stringify(newDismissed));
+  };
 
   const fetchActiveNews = async () => {
     setLoading(true);
@@ -81,7 +108,7 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
     return !isDismissed && isActive && isNotExpired;
   });
 
-  if (loading || visibleMessages.length === 0) {
+  if (!showPremiumReminder && (loading || visibleMessages.length === 0)) {
     return null;
   }
 
@@ -91,7 +118,26 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
       className={className}
       style={{ maxWidth: '400px', width: '100%', margin: '0 auto' }}
     >
-      {visibleMessages.map((message) => {
+      {showPremiumReminder && (
+        <Notification
+          withBorder
+          color="pink"
+          style={{ width: '100%' }}
+          title={
+            <Text fw={500} size="sm">
+              Premium expires soon
+            </Text>
+          }
+          onClose={dismissPremium}
+        >
+          <Text size="sm" style={{ lineHeight: 1.4 }}>
+            Your premium runs out in {daysRemaining} day{daysRemaining === 1 ? '' : 's'} (on{' '}
+            {formatDate(expiresAt!)}).
+          </Text>
+        </Notification>
+      )}
+      {!loading &&
+        visibleMessages.map((message) => {
         const isCollapsed = collapsedMessages.has(message.id);
         const isLongText = message.text.length > 200;
 
