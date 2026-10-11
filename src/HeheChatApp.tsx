@@ -89,6 +89,15 @@ async function storeProfile(profile: Profile): Promise<any> {
   );
 }
 
+// Blank profiles start in 'own' mode with shared chat, so they never begin with an empty
+// channel list; the server responds with the computed channels ([me, ...partners]).
+async function storeNewOwnProfile(profile: Profile): Promise<Profile> {
+  profile.config = { ...profile.config, channelMode: 'own', useSharedChat: true };
+  const saved = await storeProfile(profile).then((r) => r?.json?.());
+  profile.config.channels = saved?.config?.channels ?? [];
+  return profile;
+}
+
 async function loadProfileFromServer(guid: String): Promise<Profile> {
   if (MockService.isEnabled()) {
     const profile = await MockService.loadProfile(guid.toString());
@@ -298,7 +307,7 @@ export default function HeheChat() {
 
           try {
             // Save the new profile to the server
-            await storeProfile(newProfile);
+            await storeNewOwnProfile(newProfile);
             // Update local state
             AlertSystem.updateProfile(newProfile);
             setProfile(newProfile);
@@ -794,8 +803,8 @@ export default function HeheChat() {
     const newProfile = { ...DEFAULT_PROFILE, ...oldProfile, name, guid };
 
     try {
-      // First save the new profile to the server
-      await storeProfile(newProfile);
+      // First save the new profile to the server (copies keep their channels)
+      await (oldProfile ? storeProfile(newProfile) : storeNewOwnProfile(newProfile));
       // Then update local state
       setProfile(newProfile);
       setProfiles((prev) => prev.concat(newProfile));

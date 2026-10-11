@@ -20,6 +20,18 @@ export function GeneralUISettings() {
   const login = useContext(LoginContextContext);
   const ownMode = config.channelMode === 'own';
   const ownName = login.user?.name;
+  const extraChannels = config.extraChannels || [];
+
+  const setExtraChannels = (next: string[]) => {
+    next = next.map((c) => c.toLowerCase().substring(0, 25).trim());
+    // optimistic; server recomputes on save and pushes the result back
+    config.patchConfig({
+      extraChannels: next,
+      channels: [
+        ...new Set([...config.channels.filter((c) => !extraChannels.includes(c)), ...next]),
+      ],
+    });
+  };
 
   const setMode = (mode: string) => {
     if (mode === 'own' && ownName) {
@@ -63,17 +75,25 @@ export function GeneralUISettings() {
           {ownMode ? (
             <>
               <Group gap="xs">
-                {config.channels.map((c) => (
-                  <Badge key={c} variant={c === ownName ? 'filled' : 'light'}>
-                    {c}
-                  </Badge>
-                ))}
+                {config.channels
+                  .filter((c) => c === ownName || !extraChannels.includes(c))
+                  .map((c) => (
+                    <Badge key={c} variant={c === ownName ? 'filled' : 'light'}>
+                      {c}
+                    </Badge>
+                  ))}
               </Group>
               <Switch
                 label="Use Shared Chat"
                 description="Automatically add and remove channels from your Twitch Shared Chat session."
                 checked={!!config.useSharedChat}
                 onChange={(e) => config.patchConfig({ useSharedChat: e.currentTarget.checked })}
+              />
+              <TagsInput
+                label="Additional channels"
+                placeholder="Add a channel…"
+                value={extraChannels}
+                onChange={setExtraChannels}
               />
             </>
           ) : (

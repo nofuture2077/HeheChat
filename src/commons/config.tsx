@@ -52,6 +52,8 @@ export interface ConfigData {
   useSharedChat?: boolean;
   // manual list stashed while in 'own' mode
   manualChannels?: string[];
+  // always-added channels in 'own' mode
+  extraChannels?: string[];
   showVideo: boolean;
   desktopVideoMode: boolean;
   videoQuality: string;
