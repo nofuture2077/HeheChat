@@ -671,7 +671,7 @@ export function ChatInput(props: ChatInputProps) {
           onClose={handleEmoteGridClose}
         />
       </Flex>
-      <Modal opened={tagOpen} onClose={tagHandler.close} title="Tag users">
+      <Modal zIndex={400} opened={tagOpen} onClose={tagHandler.close} title="Tag users">
         <Stack>
           {tagList.length === 0 ? (
             <Text c="dimmed">No chatters yet</Text>
