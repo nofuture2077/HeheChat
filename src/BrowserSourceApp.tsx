@@ -114,16 +114,8 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
     backendWorkerRef.current.onmessage = (event) => {
       const { data } = event;
 
-      if (data.type === 'profile') {
-        const { profile: newProfile } = data;
-        setProfile(newProfile);
-        AlertSystem.updateProfile(newProfile);
-        (newProfile.config.channels || []).forEach((channel: string) => {
-          chatEmotes.updateChannel(channel);
-        });
-      }
-
-      if (data.type === 'sharedata') {
+      // profile pushes resubscribe too, so shared chat partners get joined live
+      if (data.type === 'sharedata' || data.type === 'profile') {
         if (!AlertSystem.status()) {
           AlertSystem.initialize();
         }

@@ -26,6 +26,7 @@ import { Music, DEFAULT_MUSIC, musicController } from './commons/music';
 import * as premiumApi from './api/premium';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import {
+  ConfigData,
   ConfigKey,
   DEFAULT_CONFIG,
   DEFAULT_CHAT_SMART_FILTER,
@@ -399,6 +400,19 @@ export default function HeheChat() {
       }
     });
 
+    // Server owns channels in 'own' mode (shared chat partners); only adopt real changes,
+    // otherwise setProfile -> save -> PROFILE push would loop.
+    const psProfile = PubSub.subscribe('WS-profile', (_msg, data: { profile?: Profile }) => {
+      const pushed = data?.profile;
+      const channels = pushed?.config?.channels;
+      if (!channels) return;
+      setProfile((prev) =>
+        prev.guid !== pushed!.guid || prev.config.channels.join() === channels.join()
+          ? prev
+          : { ...prev, config: { ...prev.config, channels } }
+      );
+    });
+
     // Track the latest connection state to decide whether to re-kick after wake.
     let latestConnectionState: string = 'connecting';
     const psConnStatus = PubSub.subscribe(
@@ -439,6 +453,7 @@ export default function HeheChat() {
       PubSub.unsubscribe(psReplayEvent);
       PubSub.unsubscribe(psWSSend);
       PubSub.unsubscribe(psConnStatus);
+      PubSub.unsubscribe(psProfile);
 
       // Remove event listeners
       window.removeEventListener('online', handleNetworkOrVisibilityChange);
@@ -518,6 +533,8 @@ export default function HeheChat() {
   };
 
   const setChannels = (value: string[]) => updateConfig('channels', value);
+  const patchConfig = (patch: Partial<ConfigData>) =>
+    setProfile((prev) => ({ ...prev, config: { ...prev.config, ...patch } }));
   const setIgnoredUsers = (value: string[]) => updateConfig('ignoredUsers', value);
   const setMaxMessages = (value: number) => updateConfig('maxMessages', value);
   const setShowTimestamp = (value: boolean) => updateConfig('showTimestamp', value);
@@ -874,6 +891,7 @@ export default function HeheChat() {
   const appConfig = {
     ...profile.config,
     setChannels,
+    patchConfig,
     setIgnoredUsers,
     setMaxMessages,
     setShowTimestamp,
