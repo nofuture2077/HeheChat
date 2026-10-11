@@ -671,7 +671,13 @@ export function ChatInput(props: ChatInputProps) {
           onClose={handleEmoteGridClose}
         />
       </Flex>
-      <Modal zIndex={400} opened={tagOpen} onClose={tagHandler.close} title="Tag users">
+      <Modal
+        zIndex={400}
+        opened={tagOpen}
+        onClose={tagHandler.close}
+        title="Tag users"
+        classNames={{ content: inputClasses.tagModal, header: inputClasses.tagModalHeader }}
+      >
         <Stack>
           {tagList.length === 0 ? (
             <Text c="dimmed">No chatters yet</Text>
@@ -688,7 +694,13 @@ export function ChatInput(props: ChatInputProps) {
                 <Checkbox.Group value={tagUsers} onChange={setTagUsers}>
                   <Stack gap={4}>
                     {tagList.map((username) => (
-                      <Checkbox.Card key={username} value={username} radius="sm" p="sm">
+                      <Checkbox.Card
+                        key={username}
+                        value={username}
+                        radius="sm"
+                        p="sm"
+                        className={inputClasses.tagCard}
+                      >
                         <Group wrap="nowrap">
                           <Checkbox.Indicator />
                           <Text truncate="end" miw={0}>
@@ -708,7 +720,7 @@ export function ChatInput(props: ChatInputProps) {
             onChange={(event) => setTagText(event.currentTarget.value)}
           />
           <Button
-            disabled={tagUsers.length === 0}
+            disabled={tagUsers.length === 0 || !tagText.trim()}
             onClick={() => {
               sendMessage(`${tagUsers.map((u) => `@${u}`).join(' ')} ${tagText}`.trim(), false);
               setTagUsers([]);
