@@ -175,9 +175,10 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
 
         // Only process events if browserSourceAudio is true (meaning browsersource handles its own processing)
         // If browserSourceAudio is false, the main app will send pre-processed alerts via 'alert' type
+        // Forced events (editor test alerts) play in preview tabs and the live OBS source alike
         if (
           profile.config.browserSourceAudio &&
-          (((shouldPlayAudio || shouldShowVisual) && !evt.force) || (preview && evt.force))
+          (evt.force || shouldPlayAudio || shouldShowVisual)
         ) {
           AlertSystem.addEvent(evt);
         }
