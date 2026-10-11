@@ -12,8 +12,14 @@ import {
   Alert,
   Button,
   Group,
+  Modal,
+  Checkbox,
+  ScrollArea,
+  TextInput,
+  Text,
 } from '@mantine/core';
-import { IconSend, IconX, IconSticker } from '@tabler/icons-react';
+import { useDisclosure } from '@mantine/hooks';
+import { IconSend, IconX, IconSticker, IconUsers } from '@tabler/icons-react';
 import { ConfigContext, ChatEmotesContext, LoginContextContext } from '../../ApplicationContext';
 import {
   postSwitcherScene,
@@ -50,6 +56,9 @@ export function ChatInput(props: ChatInputProps) {
   const [manuallyClosedEmoteGrid, setManuallyClosedEmoteGrid] = useState<boolean>(false);
   const [sceneList, setSceneList] = useState<string[]>([]);
   const [pendingConfirm, setPendingConfirm] = useState<'start' | 'stop' | null>(null);
+  const [tagOpen, tagHandler] = useDisclosure(false);
+  const [tagUsers, setTagUsers] = useState<string[]>([]);
+  const [tagText, setTagText] = useState<string>('');
 
   // Load message history from localStorage on component mount
   useEffect(() => {
@@ -517,7 +526,7 @@ export function ChatInput(props: ChatInputProps) {
                   ? `Reply to ${props.replyToMsg.userInfo.displayName} in ${chatChannel}`
                   : `Chat in ${chatChannel}`
               }
-              rightSectionWidth={90}
+              rightSectionWidth={130}
               leftSectionWidth={44}
               onKeyDown={(event) => {
                 if (event.key === 'Enter') {
@@ -598,6 +607,17 @@ export function ChatInput(props: ChatInputProps) {
                     variant="transparent"
                     color="gray"
                     className={inputClasses.emoteButton}
+                    onClick={tagHandler.open}
+                    aria-label="Tag users"
+                  >
+                    <IconUsers style={{ width: rem(20), height: rem(20) }} stroke={1.5} />
+                  </ActionIcon>
+                  <ActionIcon
+                    size={36}
+                    radius="xl"
+                    variant="transparent"
+                    color="gray"
+                    className={inputClasses.emoteButton}
                     onClick={toggleEmoteGrid}
                   >
                     <IconSticker style={{ width: rem(20), height: rem(20) }} stroke={1.5} />
@@ -640,6 +660,50 @@ export function ChatInput(props: ChatInputProps) {
           onClose={handleEmoteGridClose}
         />
       </Flex>
+      <Modal opened={tagOpen} onClose={tagHandler.close} title="Tag users">
+        <Stack>
+          {props.usernames.length === 0 ? (
+            <Text c="dimmed">No chatters yet</Text>
+          ) : (
+            <>
+              <Button
+                size="xs"
+                variant="subtle"
+                onClick={() =>
+                  setTagUsers(tagUsers.length === props.usernames.length ? [] : props.usernames)
+                }
+              >
+                {tagUsers.length === props.usernames.length ? 'Select none' : 'Select all'}
+              </Button>
+              <ScrollArea.Autosize mah={300}>
+                <Checkbox.Group value={tagUsers} onChange={setTagUsers}>
+                  <Stack gap="xs">
+                    {[...props.usernames].sort().map((username) => (
+                      <Checkbox key={username} value={username} label={username} />
+                    ))}
+                  </Stack>
+                </Checkbox.Group>
+              </ScrollArea.Autosize>
+            </>
+          )}
+          <TextInput
+            placeholder="Message"
+            value={tagText}
+            onChange={(event) => setTagText(event.currentTarget.value)}
+          />
+          <Button
+            disabled={tagUsers.length === 0}
+            onClick={() => {
+              sendMessage(`${tagUsers.map((u) => `@${u}`).join(' ')} ${tagText}`.trim(), false);
+              setTagUsers([]);
+              setTagText('');
+              tagHandler.close();
+            }}
+          >
+            Send
+          </Button>
+        </Stack>
+      </Modal>
     </Stack>
   );
 }
