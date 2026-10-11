@@ -684,14 +684,16 @@ export function ChatInput(props: ChatInputProps) {
               >
                 {tagUsers.length === tagList.length ? 'Select none' : 'Select all'}
               </Button>
-              <ScrollArea.Autosize mah={300}>
+              <ScrollArea.Autosize mah={300} scrollbars="y" styles={{ content: { minWidth: 0 } }}>
                 <Checkbox.Group value={tagUsers} onChange={setTagUsers}>
                   <Stack gap={4}>
                     {tagList.map((username) => (
                       <Checkbox.Card key={username} value={username} radius="sm" p="sm">
                         <Group wrap="nowrap">
                           <Checkbox.Indicator />
-                          <Text>{username}</Text>
+                          <Text truncate="end" miw={0}>
+                            {username}
+                          </Text>
                         </Group>
                       </Checkbox.Card>
                     ))}
