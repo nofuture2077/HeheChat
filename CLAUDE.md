@@ -8,6 +8,7 @@
   - `feature/<short-name>` for new features
   - `bugfix/<short-name>` for fixes
 - Bump the `version` field in [package.json](package.json) for every change.
+- Before every commit, run `yarn prettier:write` and `yarn lint` — commits must pass `yarn prettier` and have 0 lint errors.
 
 ## Project overview
 

@@ -138,50 +138,54 @@ export function NewsDisplay({ className }: NewsDisplayProps) {
       )}
       {!loading &&
         visibleMessages.map((message) => {
-        const isCollapsed = collapsedMessages.has(message.id);
-        const isLongText = message.text.length > 200;
+          const isCollapsed = collapsedMessages.has(message.id);
+          const isLongText = message.text.length > 200;
 
-        return (
-          <Notification
-            key={message.id}
-            withBorder
-            color="pink"
-            style={{ width: '100%' }}
-            title={
-              <Group justify="space-between" align="center" gap="xs" style={{ width: '100%' }}>
-                <Text fw={500} size="sm" style={{ flex: 1 }}>
-                  {message.headline}
+          return (
+            <Notification
+              key={message.id}
+              withBorder
+              color="pink"
+              style={{ width: '100%' }}
+              title={
+                <Group justify="space-between" align="center" gap="xs" style={{ width: '100%' }}>
+                  <Text fw={500} size="sm" style={{ flex: 1 }}>
+                    {message.headline}
+                  </Text>
+                  {isLongText && (
+                    <ActionIcon
+                      variant="subtle"
+                      size="sm"
+                      onClick={() => toggleCollapse(message.id)}
+                    >
+                      {isCollapsed ? (
+                        <IconChevronDown size="0.8rem" />
+                      ) : (
+                        <IconChevronUp size="0.8rem" />
+                      )}
+                    </ActionIcon>
+                  )}
+                </Group>
+              }
+              onClose={() => dismissMessage(message.id)}
+            >
+              <Collapse expanded={!isCollapsed || !isLongText}>
+                <Text size="sm" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
+                  {message.text}
                 </Text>
-                {isLongText && (
-                  <ActionIcon variant="subtle" size="sm" onClick={() => toggleCollapse(message.id)}>
-                    {isCollapsed ? (
-                      <IconChevronDown size="0.8rem" />
-                    ) : (
-                      <IconChevronUp size="0.8rem" />
-                    )}
-                  </ActionIcon>
-                )}
-              </Group>
-            }
-            onClose={() => dismissMessage(message.id)}
-          >
-            <Collapse expanded={!isCollapsed || !isLongText}>
-              <Text size="sm" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
-                {message.text}
-              </Text>
-              <Text size="xs" c="dimmed" mt="xs">
-                Posted {formatDate(message.created_at)}
-              </Text>
-            </Collapse>
+                <Text size="xs" c="dimmed" mt="xs">
+                  Posted {formatDate(message.created_at)}
+                </Text>
+              </Collapse>
 
-            {isCollapsed && isLongText && (
-              <Text size="sm" c="dimmed" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
-                {message.text.substring(0, 200)}...
-              </Text>
-            )}
-          </Notification>
-        );
-      })}
+              {isCollapsed && isLongText && (
+                <Text size="sm" c="dimmed" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.4 }}>
+                  {message.text.substring(0, 200)}...
+                </Text>
+              )}
+            </Notification>
+          );
+        })}
     </Stack>
   );
 }
