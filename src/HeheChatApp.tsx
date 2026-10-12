@@ -26,6 +26,7 @@ import { Music, DEFAULT_MUSIC, musicController } from './commons/music';
 import * as premiumApi from './api/premium';
 import { LoginContext, DEFAULT_LOGIN_CONTEXT } from './commons/login';
 import {
+  ConfigData,
   ConfigKey,
   DEFAULT_CONFIG,
   DEFAULT_CHAT_SMART_FILTER,
@@ -86,6 +87,15 @@ async function storeProfile(profile: Profile): Promise<any> {
       body: JSON.stringify(profile),
     }
   );
+}
+
+// Blank profiles start in 'own' mode with shared chat, so they never begin with an empty
+// channel list; the server responds with the computed channels ([me, ...partners]).
+async function storeNewOwnProfile(profile: Profile): Promise<Profile> {
+  profile.config = { ...profile.config, channelMode: 'own', useSharedChat: true };
+  const saved = await storeProfile(profile).then((r) => r?.json?.());
+  profile.config.channels = saved?.config?.channels ?? [];
+  return profile;
 }
 
 async function loadProfileFromServer(guid: String): Promise<Profile> {
@@ -297,7 +307,7 @@ export default function HeheChat() {
 
           try {
             // Save the new profile to the server
-            await storeProfile(newProfile);
+            await storeNewOwnProfile(newProfile);
             // Update local state
             AlertSystem.updateProfile(newProfile);
             setProfile(newProfile);
@@ -399,6 +409,19 @@ export default function HeheChat() {
       }
     });
 
+    // Server owns channels in 'own' mode (shared chat partners); only adopt real changes,
+    // otherwise setProfile -> save -> PROFILE push would loop.
+    const psProfile = PubSub.subscribe('WS-profile', (_msg, data: { profile?: Profile }) => {
+      const pushed = data?.profile;
+      const channels = pushed?.config?.channels;
+      if (!channels) return;
+      setProfile((prev) =>
+        prev.guid !== pushed!.guid || prev.config.channels.join() === channels.join()
+          ? prev
+          : { ...prev, config: { ...prev.config, channels } }
+      );
+    });
+
     // Track the latest connection state to decide whether to re-kick after wake.
     let latestConnectionState: string = 'connecting';
     const psConnStatus = PubSub.subscribe(
@@ -439,6 +462,7 @@ export default function HeheChat() {
       PubSub.unsubscribe(psReplayEvent);
       PubSub.unsubscribe(psWSSend);
       PubSub.unsubscribe(psConnStatus);
+      PubSub.unsubscribe(psProfile);
 
       // Remove event listeners
       window.removeEventListener('online', handleNetworkOrVisibilityChange);
@@ -518,6 +542,8 @@ export default function HeheChat() {
   };
 
   const setChannels = (value: string[]) => updateConfig('channels', value);
+  const patchConfig = (patch: Partial<ConfigData>) =>
+    setProfile((prev) => ({ ...prev, config: { ...prev.config, ...patch } }));
   const setIgnoredUsers = (value: string[]) => updateConfig('ignoredUsers', value);
   const setMaxMessages = (value: number) => updateConfig('maxMessages', value);
   const setShowTimestamp = (value: boolean) => updateConfig('showTimestamp', value);
@@ -777,8 +803,8 @@ export default function HeheChat() {
     const newProfile = { ...DEFAULT_PROFILE, ...oldProfile, name, guid };
 
     try {
-      // First save the new profile to the server
-      await storeProfile(newProfile);
+      // First save the new profile to the server (copies keep their channels)
+      await (oldProfile ? storeProfile(newProfile) : storeNewOwnProfile(newProfile));
       // Then update local state
       setProfile(newProfile);
       setProfiles((prev) => prev.concat(newProfile));
@@ -874,6 +900,7 @@ export default function HeheChat() {
   const appConfig = {
     ...profile.config,
     setChannels,
+    patchConfig,
     setIgnoredUsers,
     setMaxMessages,
     setShowTimestamp,

@@ -1,12 +1,52 @@
-import { Stack, Fieldset, TagsInput, Alert, Text } from '@mantine/core';
+import {
+  Stack,
+  Fieldset,
+  TagsInput,
+  Alert,
+  Text,
+  SegmentedControl,
+  Switch,
+  Group,
+  Badge,
+} from '@mantine/core';
 import { useContext, useMemo } from 'react';
 import { IconInfoCircle } from '@tabler/icons-react';
-import { ConfigContext } from '@/ApplicationContext';
+import { ConfigContext, LoginContextContext } from '@/ApplicationContext';
 import { ColorSchemeToggle } from '../../colorscheme/colorscheme';
 import { useChannels } from '@/hooks/useChannels';
 
 export function GeneralUISettings() {
   const config = useContext(ConfigContext);
+  const login = useContext(LoginContextContext);
+  const ownMode = config.channelMode === 'own';
+  const ownName = login.user?.name;
+  const extraChannels = config.extraChannels || [];
+
+  const setExtraChannels = (next: string[]) => {
+    next = next.map((c) => c.toLowerCase().substring(0, 25).trim());
+    // optimistic; server recomputes on save and pushes the result back
+    config.patchConfig({
+      extraChannels: next,
+      channels: [
+        ...new Set([...config.channels.filter((c) => !extraChannels.includes(c)), ...next]),
+      ],
+    });
+  };
+
+  const setMode = (mode: string) => {
+    if (mode === 'own' && ownName) {
+      config.patchConfig({
+        channelMode: 'own',
+        manualChannels: config.channels,
+        channels: [ownName],
+      });
+    } else if (mode === 'manual') {
+      config.patchConfig({
+        channelMode: 'manual',
+        channels: config.manualChannels?.length ? config.manualChannels : config.channels,
+      });
+    }
+  };
   const { channels: authorizedChannels, loading } = useChannels();
 
   const unauthorizedChannels = useMemo(() => {
@@ -24,13 +64,47 @@ export function GeneralUISettings() {
       <ColorSchemeToggle />
       <Fieldset legend="Channels" variant="filled">
         <Stack gap="sm">
-          <TagsInput
-            placeholder="Add a channel…"
-            value={config.channels}
-            onChange={(channels) =>
-              config.setChannels(channels.map((c) => c.toLowerCase().substring(0, 25).trim()))
-            }
+          <SegmentedControl
+            value={ownMode ? 'own' : 'manual'}
+            onChange={setMode}
+            data={[
+              { label: 'My Channel', value: 'own', disabled: !ownName },
+              { label: 'Manual Channel(s)', value: 'manual' },
+            ]}
           />
+          {ownMode ? (
+            <>
+              <Group gap="xs">
+                {config.channels
+                  .filter((c) => c === ownName || !extraChannels.includes(c))
+                  .map((c) => (
+                    <Badge key={c} variant={c === ownName ? 'filled' : 'light'}>
+                      {c}
+                    </Badge>
+                  ))}
+              </Group>
+              <Switch
+                label="Use Shared Chat"
+                description="Automatically add and remove channels from your Twitch Shared Chat session."
+                checked={!!config.useSharedChat}
+                onChange={(e) => config.patchConfig({ useSharedChat: e.currentTarget.checked })}
+              />
+              <TagsInput
+                label="Additional channels"
+                placeholder="Add a channel…"
+                value={extraChannels}
+                onChange={setExtraChannels}
+              />
+            </>
+          ) : (
+            <TagsInput
+              placeholder="Add a channel…"
+              value={config.channels}
+              onChange={(channels) =>
+                config.setChannels(channels.map((c) => c.toLowerCase().substring(0, 25).trim()))
+              }
+            />
+          )}
           {unauthorizedChannels.length > 0 ? (
             <Alert
               variant="light"

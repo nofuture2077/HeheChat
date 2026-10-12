@@ -47,6 +47,13 @@ export interface NotificationSettings {
 
 export interface ConfigData {
   channels: string[];
+  // 'own' = server keeps channels as [me, ...shared chat partners]; undefined = manual
+  channelMode?: 'own' | 'manual';
+  useSharedChat?: boolean;
+  // manual list stashed while in 'own' mode
+  manualChannels?: string[];
+  // always-added channels in 'own' mode
+  extraChannels?: string[];
   showVideo: boolean;
   desktopVideoMode: boolean;
   videoQuality: string;
@@ -176,6 +183,7 @@ export type ConfigKey = keyof ConfigData;
 
 export interface Config extends ConfigData {
   setChannels: (channels: string[]) => void;
+  patchConfig: (patch: Partial<ConfigData>) => void;
   setIgnoredUsers: (users: string[]) => void;
   setMaxMessages: (value: number) => void;
   setShowTimestamp: (value: boolean) => void;
@@ -438,6 +446,7 @@ export const DEFAULT_CONFIG: Config = {
   chatBsShowUsername: true,
   chatBsMsgBackground: 'none',
   setChannels: () => {},
+  patchConfig: () => {},
   setIgnoredUsers: () => {},
   setMaxMessages: () => {},
   setShowTimestamp: () => {},

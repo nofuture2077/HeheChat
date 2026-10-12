@@ -87,16 +87,8 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
     backendWorkerRef.current.onmessage = (event) => {
       const { data } = event;
 
-      if (data.type === 'profile') {
-        const p: Profile = data.profile;
-        profileRef.current = p;
-        setProfile(p);
-        (p.config.channels || []).forEach((channel: string) => {
-          chatEmotes.updateChannel(channel);
-        });
-      }
-
-      if (data.type === 'sharedata') {
+      // profile pushes resubscribe too, so shared chat partners get joined live
+      if (data.type === 'sharedata' || data.type === 'profile') {
         const p: Profile = data.profile;
         profileRef.current = p;
         setProfile(p);
