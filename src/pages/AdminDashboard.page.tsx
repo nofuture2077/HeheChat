@@ -260,7 +260,15 @@ export function AdminDashboardPage() {
   const timeLabel = (t: number) =>
     data && data.bucket < 86400
       ? new Date(t * 1000).toLocaleString([], { weekday: 'short', hour: '2-digit' })
-      : new Date(t * 1000).toLocaleDateString();
+      : dayLabel(t);
+  // Daily buckets start at UTC midnight
+  const dayLabel = (t: number) =>
+    new Date(t * 1000).toLocaleDateString(
+      [],
+      Number(days) <= 7
+        ? { weekday: 'short', timeZone: 'UTC' }
+        : { day: 'numeric', month: 'short', timeZone: 'UTC' }
+    );
 
   return (
     <Container size="xl">
@@ -418,7 +426,7 @@ export function AdminDashboardPage() {
                   h={220}
                   data={daily.map((p) => ({
                     ...p,
-                    label: new Date(p.t * 1000).toLocaleDateString(),
+                    label: dayLabel(p.t),
                   }))}
                   dataKey="label"
                   series={[{ name: 'messages', label: 'Messages', color: 'blue.6' }]}
@@ -435,7 +443,7 @@ export function AdminDashboardPage() {
                   type="stacked"
                   data={daily.map((p) => ({
                     ...p,
-                    label: new Date(p.t * 1000).toLocaleDateString(),
+                    label: dayLabel(p.t),
                   }))}
                   dataKey="label"
                   series={[
@@ -456,7 +464,7 @@ export function AdminDashboardPage() {
                   h={220}
                   data={data.new_users
                     .filter((p) => p.t >= dayStart)
-                    .map((p) => ({ ...p, label: new Date(p.t * 1000).toLocaleDateString() }))}
+                    .map((p) => ({ ...p, label: dayLabel(p.t) }))}
                   dataKey="label"
                   series={[{ name: 'count', label: 'New users', color: 'teal.6' }]}
                 />
