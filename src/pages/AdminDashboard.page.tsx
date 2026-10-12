@@ -95,6 +95,15 @@ const EVENT_COLORS: Record<string, string> = {
   cheer: 'pink.6',
 };
 
+// keep long names on one line; full name in tooltip
+const BAR_STYLE = {
+  display: 'block',
+  lineHeight: 'var(--bars-list-bar-height)',
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+} as const;
+
 const sum = (values: number[]) => values.reduce((a, b) => a + (b || 0), 0);
 
 // null when there is no previous value to compare against
@@ -464,10 +473,13 @@ export function AdminDashboardPage() {
                 <BarsList
                   barsLabel="Channel"
                   valueLabel="Hours"
+                  minBarSize="40%"
+                  variant="filled"
+                  getBarProps={(d) => ({ title: d.name, style: BAR_STYLE })}
                   data={data.top_channels.map((c) => ({
                     name: c.channel,
                     value: c.hours,
-                    color: 'violet.2',
+                    color: 'violet.7',
                   }))}
                 />
               </Paper>
@@ -480,10 +492,13 @@ export function AdminDashboardPage() {
                 <BarsList
                   barsLabel="Category"
                   valueLabel="Hours"
+                  minBarSize="40%"
+                  variant="filled"
+                  getBarProps={(d) => ({ title: d.name, style: BAR_STYLE })}
                   data={data.top_categories.map((c) => ({
                     name: c.category,
                     value: c.hours,
-                    color: 'teal.2',
+                    color: 'teal.7',
                   }))}
                 />
               </Paper>
