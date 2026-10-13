@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import {
   ActionIcon,
   Alert,
+  Anchor,
   Badge,
   Container,
   Grid,
@@ -110,7 +111,24 @@ const sum = (values: number[]) => values.reduce((a, b) => a + (b || 0), 0);
 const percentDiff = (current: number, previous: number | null) =>
   previous ? Math.round(((current - previous) / previous) * 100) : null;
 
-const formatDate = (ms: number | null) => (ms ? new Date(ms).toLocaleString() : '-');
+const formatDate = (ms: number | null) =>
+  ms
+    ? new Date(ms).toLocaleString([], {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23',
+      })
+    : '-';
+
+function ChannelLink({ name }: { name: string }) {
+  return (
+    <Anchor href={`https://twitch.tv/${name}`} target="_blank" rel="noreferrer" size="sm" fw={500}>
+      {name}
+    </Anchor>
+  );
+}
 
 const formatUptime = (startTime: number) => {
   const seconds = Math.floor(Date.now() / 1000) - startTime;
@@ -559,9 +577,7 @@ export function AdminDashboardPage() {
                       {live.streams.map((s) => (
                         <Table.Tr key={s.userName}>
                           <Table.Td>
-                            <Text size="sm" fw={500}>
-                              {s.userName}
-                            </Text>
+                            <ChannelLink name={s.userName} />
                             <Text size="xs" c="dimmed" lineClamp={1}>
                               {s.title}
                             </Text>
@@ -603,9 +619,7 @@ export function AdminDashboardPage() {
                           {(list === 'latest' ? data.latest_users : data.recent_users).map((u) => (
                             <Table.Tr key={u.username}>
                               <Table.Td>
-                                <Text size="sm" fw={500}>
-                                  {u.username}
-                                </Text>
+                                <ChannelLink name={u.username} />
                               </Table.Td>
                               <Table.Td>
                                 <Text size="sm">{formatDate(u.created)}</Text>
