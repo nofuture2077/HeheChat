@@ -34,6 +34,7 @@ import { ChatMessageComp } from './ChatMessage';
 import inputClasses from './ChatInput.module.css';
 import { ModActions } from './mod/modactions';
 import { getUserId } from '@/components/chat/mod/modactions';
+import { pinOwnMessageOnEcho, unpinCurrentMessage } from '@/components/pinned/pincommands';
 
 interface ChatInputProps {
   close: () => void;
@@ -126,6 +127,8 @@ export function ChatInput(props: ChatInputProps) {
       value: '/timeout',
       label: '/timeout [username] [seconds] - Timeout a user for specified duration',
     },
+    { value: '/pin', label: '/pin [message] - Send a message and pin it' },
+    { value: '/unpin', label: '/unpin - Unpin the pinned message' },
     { value: '/massban', label: '/massban - Open mass ban tool to ban multiple users' },
     { value: '/premium', label: '/premium - Show ad for HeheChat Pro' },
     { value: '/scene', label: '/scene [name] - Switch OBS scene', requiresBridge: true },
@@ -233,6 +236,24 @@ export function ChatInput(props: ChatInputProps) {
               'Timed out via HeheChat'
             );
           }
+        }
+        break;
+      case 'pin': {
+        const text = args.join(' ').trim();
+        const userId = loginContext.user?.id;
+        if (channelname && channelId && userId && text) {
+          pinOwnMessageOnEcho(channelname, channelId, userId, text);
+          config.fireMessage(channelId, text);
+        }
+        break;
+      }
+      case 'unpin':
+        if (!unpinCurrentMessage(channelname || '')) {
+          notifications.show({
+            title: 'Nothing to unpin',
+            message: 'There is no pinned message in this channel.',
+            color: 'yellow',
+          });
         }
         break;
       case 'user':
