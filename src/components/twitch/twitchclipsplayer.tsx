@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import { IconX } from '@tabler/icons-react';
+import { IconExternalLink, IconX } from '@tabler/icons-react';
 import { ActionIcon } from '@mantine/core';
 import { useViewportWidthCallback } from '../../commons/helper';
 
@@ -55,6 +55,20 @@ export function TwitchClipsPlayer({ clipId, onClose }: TwitchClipsPlayerProps) {
         allowFullScreen
         style={{ border: 'none' }}
       />
+      <ActionIcon
+        component="a"
+        href={`https://clips.twitch.tv/${clipId}`}
+        target="_blank"
+        rel="noreferrer"
+        title="Open in browser"
+        size={32}
+        pos="absolute"
+        top={10}
+        right={50}
+        variant="light"
+      >
+        <IconExternalLink />
+      </ActionIcon>
       <ActionIcon onClick={onClose} size={32} pos="absolute" top={10} right={10} variant="light">
         <IconX />
       </ActionIcon>
