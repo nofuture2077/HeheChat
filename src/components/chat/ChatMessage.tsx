@@ -68,9 +68,15 @@ const wordMapper = (
     if (clipId) {
       return (
         <a
-          href="#"
+          href={word}
           key={`${partIndex}_${index}`}
+          target="_blank"
+          rel="noreferrer"
           onClick={(e) => {
+            // Ctrl/Cmd/Shift-click opens the clip in the browser instead of the in-app player
+            if (e.ctrlKey || e.metaKey || e.shiftKey) {
+              return;
+            }
             e.preventDefault();
             PubSub.publish('CLIP-CLICK', { clipId });
           }}
