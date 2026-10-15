@@ -9,12 +9,15 @@ import { Poll } from '@/components/pinned/poll';
 import { Raid } from '@/components/pinned/raid';
 import { Shoutout } from '@/components/pinned/shoutout';
 import { AdBreak } from '@/components/pinned/adbreak';
+import { PinnedMessage, TwitchPinnedMessage } from '@/components/pinned/pinnedmessage';
+import { requestPin } from '@/components/chat/mod/modactions';
 import { ConfigContext } from '../../ApplicationContext';
 import { generateGUID } from '@/commons/helper';
 
 const FINAL_STATE_DURATION = 15000; // 15 seconds in milliseconds
 const RAID_DURATION = 90 * 1000; // 90 seconds in milliseconds
 const SHOUTOUT_DURATION = 15 * 1000; // 15 seconds in milliseconds
+const PINNED_MESSAGE_REFRESH = 60 * 1000; // re-request pinned chat messages, also keeps the backend polling
 
 export interface PinProps extends Pin {
   remove: () => void;
@@ -25,7 +28,7 @@ export interface PinProps extends Pin {
 }
 
 export interface Pin {
-  type: 'hypetrain' | 'poll' | 'prediction' | 'raid' | 'shoutout' | 'adbreak';
+  type: 'hypetrain' | 'poll' | 'prediction' | 'raid' | 'shoutout' | 'adbreak' | 'message';
   id: string;
   channel: string;
   endTime: Date;
@@ -134,6 +137,23 @@ const toNode = (
           toggleExpand={() => toggleExpand(pin.id)}
         />
       );
+    case 'message':
+      return (
+        <PinnedMessage
+          pinsExpanded={pinsExpanded}
+          expanded={pin.expanded}
+          hidden={pin.hidden}
+          key={pin.id}
+          id={pin.id}
+          channel={pin.channel}
+          endTime={pin.endTime}
+          {...pin.data}
+          onClick={() => onClick(pin.id)}
+          remove={() => removePin(pin.id)}
+          hide={() => hidePin(pin.id)}
+          toggleExpand={() => toggleExpand(pin.id)}
+        />
+      );
     case 'adbreak':
       return (
         <AdBreak
@@ -155,6 +175,33 @@ const toNode = (
   return null;
 };
 
+export interface PinnedMessageUpdate {
+  channel: string;
+  channelId: string;
+  pin: TwitchPinnedMessage | null;
+}
+
+// One pinned chat message per channel; null removes it
+export const applyPinnedMessage = (pins: Pin[], update: PinnedMessageUpdate): Pin[] => {
+  const id = `message-${update.channel}`;
+  const existing = pins.find((p) => p.id === id);
+  if (!update.pin) {
+    return existing ? pins.filter((p) => p.id !== id) : pins;
+  }
+  const isSameMessage = existing?.data.pin.message_id === update.pin.message_id;
+  const newPin: Pin = {
+    // A newly pinned message is shown again even if the previous one was hidden
+    expanded: isSameMessage ? existing.expanded : false,
+    hidden: isSameMessage ? existing.hidden : false,
+    type: 'message',
+    id,
+    channel: update.channel,
+    endTime: update.pin.ends_at ? new Date(Date.parse(update.pin.ends_at)) : new Date(8.64e15),
+    data: { pin: update.pin, channelId: update.channelId },
+  };
+  return existing ? pins.map((p) => (p.id === id ? newPin : p)) : [newPin, ...pins];
+};
+
 export function PinManager() {
   const config = useContext(ConfigContext);
   const [pinsExpanded, expandHandler] = useDisclosure(false);
@@ -168,6 +215,27 @@ export function PinManager() {
     //    {expanded: true, hidden: false, type: 'raid', id: '8', endTime: new Date(Date.now() + 5*1000*60), channel: 'nofuture2077', data: { broadcasterName: 'z0kka', targetChannelName: 'nofuture2077', viewers: 1242}},
   ]);
   const forceUpdate = useForceUpdate();
+  // Native Twitch pinned chat message, answered by the backend on request and broadcast on changes
+  useEffect(() => {
+    const pinSub = PubSub.subscribe('WS-pin', (msg, data: PinnedMessageUpdate) => {
+      setPins((prevPins) => applyPinnedMessage(prevPins, data));
+    });
+    return () => {
+      PubSub.unsubscribe(pinSub);
+    };
+  }, []);
+
+  const channelList = config.channels.join(',');
+  useEffect(() => {
+    const request = () =>
+      channelList
+        .split(',')
+        .filter(Boolean)
+        .forEach((channel) => requestPin(channel));
+    request();
+    const interval = window.setInterval(request, PINNED_MESSAGE_REFRESH);
+    return () => clearInterval(interval);
+  }, [channelList]);
 
   useEffect(() => {
     const streamEventSub = PubSub.subscribe('WS-streamevent', (msg, data) => {
