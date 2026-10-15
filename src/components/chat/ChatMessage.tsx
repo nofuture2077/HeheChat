@@ -6,6 +6,7 @@ import {
   IconHammer,
   IconCopy,
   IconUser,
+  IconPin,
 } from '@tabler/icons-react';
 import { Text, Image, useComputedColorScheme } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -424,6 +425,18 @@ export function ChatMessageComp(props: ChatMessageProps) {
         tooltip: 'Ban',
       }
     );
+  }
+
+  const { pinMessage } = props.modActions;
+  if (config.modToolsEnabled && pinMessage) {
+    radialActions.push({
+      icon: <IconPin size={48} />,
+      disabled: !isMod,
+      onClick: () => {
+        pinMessage(channel, props.msg.channelId || '', props.msg.id);
+      },
+      tooltip: 'Pin',
+    });
   }
 
   if (config.modToolsEnabled) {

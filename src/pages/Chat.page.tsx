@@ -86,6 +86,7 @@ import {
   vipUser,
   unvipUser,
   unraid,
+  pinMessage,
 } from '../components/chat/mod/modactions';
 import { Storage } from '../components/chat/chatstorage';
 import { EventStorage, EventData } from '../components/events/eventstorage';
@@ -858,6 +859,7 @@ export function ChatPage() {
     vipUser,
     unvipUser,
     unraid,
+    pinMessage,
   };
 
   // Resize handlers

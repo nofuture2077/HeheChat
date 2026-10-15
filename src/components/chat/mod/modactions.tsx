@@ -60,6 +60,34 @@ export const unraid = (channelIdFrom: string) => {
   PubSub.publish('WSSEND', { type: 'unraid', channelIdFrom });
 };
 
+// Native Twitch pinned chat messages, relayed by the backend. duration in seconds (30-1800), omitted = until stream end
+export const pinMessage = (
+  channel: string,
+  channelId: string,
+  messageId: string,
+  duration?: number
+) => {
+  PubSub.publish('WSSEND', { type: 'pinMessage', channel, channelId, messageId, duration });
+};
+
+export const updatePin = (
+  channel: string,
+  channelId: string,
+  messageId: string,
+  duration?: number
+) => {
+  PubSub.publish('WSSEND', { type: 'updatePin', channel, channelId, messageId, duration });
+};
+
+export const unpinMessage = (channel: string, channelId: string, messageId: string) => {
+  PubSub.publish('WSSEND', { type: 'unpinMessage', channel, channelId, messageId });
+};
+
+// The answer arrives as 'WS-pin'
+export const requestPin = (channel: string) => {
+  PubSub.publish('WSSEND', { type: 'getPin', channel });
+};
+
 export const getUserId = async (username: string) => {
   const state = localStorage.getItem('hehe-token_state') || '';
   return fetch(
@@ -93,4 +121,5 @@ export interface ModActions {
   unmodUser: (channelId: string, userId: string) => void;
   vipUser: (channelId: string, userId: string) => void;
   unvipUser: (channelId: string, userId: string) => void;
+  pinMessage?: (channel: string, channelId: string, messageId: string, duration?: number) => void;
 }
