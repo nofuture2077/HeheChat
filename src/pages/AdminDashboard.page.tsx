@@ -132,6 +132,15 @@ function ChannelLink({ name }: { name: string }) {
   );
 }
 
+const formatMB = (bytes: number) => `${Math.round(bytes / 1024 ** 2).toLocaleString()} MB`;
+
+interface SystemStats {
+  rss: number;
+  memUsed: number;
+  memTotal: number;
+  load: number;
+}
+
 const formatUptime = (startTime: number) => {
   const seconds = Math.floor(Date.now() / 1000) - startTime;
   return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
@@ -199,7 +208,11 @@ export function AdminDashboardPage() {
   const loginContext = useContext(LoginContextContext);
   const [days, setDays] = useState('7');
   const [data, setData] = useState<DashboardData | null>(null);
-  const [live, setLive] = useState<{ connections: number; streams: LiveStream[] }>({
+  const [live, setLive] = useState<{
+    connections: number;
+    streams: LiveStream[];
+    system?: SystemStats;
+  }>({
     connections: 0,
     streams: [],
   });
@@ -251,6 +264,7 @@ export function AdminDashboardPage() {
       setLive({
         connections: result.connection_count || 0,
         streams: [...streams.values()].sort((a, b) => b.viewerCount - a.viewerCount),
+        system: result.system,
       });
     } catch (e) {
       console.error('Error fetching live connections:', e);
@@ -378,13 +392,32 @@ export function AdminDashboardPage() {
           </SimpleGrid>
 
           <Paper withBorder p="md" radius="md" mb="md">
-            <SimpleGrid cols={{ base: 2, sm: 3, md: 6 }}>
+            <SimpleGrid cols={{ base: 2, sm: 4, md: 8 }}>
               <SmallStat label="Registered users" value={data.users.total} />
               <SmallStat label="Active users" value={data.users.active} />
               <SmallStat label="Streams" value={data.streams.current.streams} />
               <SmallStat label="Hours streamed" value={data.streams.current.hours} />
               <SmallStat label="Active premium" value={data.premium} />
               <SmallStat label="Connections" value={live.connections} />
+              {live.system && (
+                <>
+                  <Tooltip
+                    label={`Server process: ${formatMB(live.system.rss)} / host: ${formatMB(live.system.memUsed)} of ${formatMB(live.system.memTotal)}`}
+                  >
+                    <div>
+                      <SmallStat label="RAM (process)" value={formatMB(live.system.rss)} />
+                    </div>
+                  </Tooltip>
+                  <Tooltip label="1-minute load average per CPU core">
+                    <div>
+                      <SmallStat
+                        label="CPU load"
+                        value={`${Math.round(live.system.load * 100)}%`}
+                      />
+                    </div>
+                  </Tooltip>
+                </>
+              )}
             </SimpleGrid>
           </Paper>
 
