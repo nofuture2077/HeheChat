@@ -152,7 +152,7 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
         return;
       }
 
-      if (data.type === 'alert') {
+      if (data.type === 'alert' && !profile.config.browserSourceAudio) {
         // Publish alert data
         setTimeout(() => {
           PubSub.publish('ALERT_SHOW', data.data);
