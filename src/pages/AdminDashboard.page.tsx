@@ -76,6 +76,8 @@ interface DashboardData {
   event_types: { event_type: string; count: number }[];
   top_channels: { channel: string; streams: number; hours: number; peak_viewers: number }[];
   top_categories: { category: string; streams: number; hours: number }[];
+  tts: { count: number; characters: number; previews: number };
+  top_tts_users: { username: string; count: number; characters: number }[];
   latest_users: DashboardUser[];
   recent_users: DashboardUser[];
 }
@@ -550,6 +552,58 @@ export function AdminDashboardPage() {
                     `${date}: ${(value || 0).toLocaleString()} messages`
                   }
                 />
+              </Paper>
+            </Grid.Col>
+          </Grid>
+
+          <Grid mb="md">
+            <Grid.Col span={{ base: 12, md: 4 }}>
+              <Paper withBorder p="md" radius="md" h="100%">
+                <Text fw={600} mb="md">
+                  Text-to-speech
+                </Text>
+                <SimpleGrid cols={3}>
+                  <SmallStat label="TTS messages" value={data.tts.count} />
+                  <SmallStat label="Characters" value={data.tts.characters} />
+                  <SmallStat label="Previews" value={data.tts.previews} />
+                </SimpleGrid>
+              </Paper>
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 8 }}>
+              <Paper withBorder p="md" radius="md" h="100%">
+                <Text fw={600} mb="md">
+                  Top TTS users
+                </Text>
+                {data.top_tts_users.length > 0 ? (
+                  <Table striped highlightOnHover>
+                    <Table.Thead>
+                      <Table.Tr>
+                        <Table.Th>User</Table.Th>
+                        <Table.Th>TTS</Table.Th>
+                        <Table.Th>Characters</Table.Th>
+                      </Table.Tr>
+                    </Table.Thead>
+                    <Table.Tbody>
+                      {data.top_tts_users.map((u) => (
+                        <Table.Tr key={u.username}>
+                          <Table.Td>
+                            <ChannelLink name={u.username} />
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm">{u.count.toLocaleString()}</Text>
+                          </Table.Td>
+                          <Table.Td>
+                            <Text size="sm">{u.characters.toLocaleString()}</Text>
+                          </Table.Td>
+                        </Table.Tr>
+                      ))}
+                    </Table.Tbody>
+                  </Table>
+                ) : (
+                  <Text c="dimmed" size="sm">
+                    No TTS usage in this range
+                  </Text>
+                )}
               </Paper>
             </Grid.Col>
           </Grid>
