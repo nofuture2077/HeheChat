@@ -7,10 +7,11 @@ import {
   Group,
   Slider,
   SegmentedControl,
+  Alert,
 } from '@mantine/core';
 import { useForceUpdate } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
-import { IconCopy } from '@tabler/icons-react';
+import { IconAlertTriangle, IconCopy } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { ConfigContext } from '@/ApplicationContext';
 import { GradientSegmentedControl } from '../../GradientSegmentedControl/GradientSegmentedControl';
@@ -50,17 +51,32 @@ export function AlertSoundOutputSection() {
             { label: 'None', value: 'none' },
             { label: 'Obs', value: 'obs' },
             { label: 'Hehe', value: 'app' },
+            { label: 'Both', value: 'both' },
           ]}
-          value={config.playAlerts ? 'app' : config.browserSourceAudio ? 'obs' : 'none'}
+          value={
+            config.playAlerts && config.browserSourceAudio
+              ? 'both'
+              : config.playAlerts
+                ? 'app'
+                : config.browserSourceAudio
+                  ? 'obs'
+                  : 'none'
+          }
           setValue={(value: string) => {
-            config.setPlayAlerts(value === 'app');
-            config.setBrowserSourceAudio(value === 'obs');
+            config.setPlayAlerts(value === 'app' || value === 'both');
+            config.setBrowserSourceAudio(value === 'obs' || value === 'both');
             forceUpdate();
           }}
         />
         <Text fs="italic" size="14px">
           Select where alert sounds should be played
         </Text>
+        {config.playAlerts && config.browserSourceAudio && (
+          <Alert color="orange" icon={<IconAlertTriangle size={16} />}>
+            Alerts play in both OBS and HeheChat. Do not use this unless you know what you are
+            doing.
+          </Alert>
+        )}
         {sink ? (
           <>
             <Group gap="xs">
