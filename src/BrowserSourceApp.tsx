@@ -255,7 +255,8 @@ export default function BrowserSource({ token, preview, embed = false }: Browser
         case 'hehe-preview:event':
           if (msg.event) {
             ensureAudio();
-            AlertSystem.addEvent({ ...msg.event, force: true });
+            // Marked here after the origin check, only the embedded editor preview may try Pro voices
+            AlertSystem.addEvent({ ...msg.event, force: true, editorPreview: true });
           }
           break;
         case 'hehe-preview:show':

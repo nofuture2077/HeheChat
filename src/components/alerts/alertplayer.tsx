@@ -193,7 +193,8 @@ class AlertPlayer {
     channel: string,
     voice: string,
     state: string,
-    sink: string
+    sink: string,
+    preview?: boolean
   ): Promise<string> {
     const params = new URLSearchParams({
       text: encodeURIComponent(msg),
@@ -202,6 +203,8 @@ class AlertPlayer {
       voice,
       channel,
     });
+    // Previews may use Pro voices without premium
+    if (preview) params.set('preview', 'true');
     const response = await fetchWithRetry(`${BASE_URL}/tts/generate?${params}`);
     if (!response.ok) throw new Error(`TTS HTTP error! status: ${response.status}`);
     const data = await response.json();
@@ -802,7 +805,8 @@ class AlertPlayer {
     voiceType: string,
     state: string,
     sink: string,
-    voiceParams?: Record<string, string | number>
+    voiceParams?: Record<string, string | number>,
+    preview?: boolean
   ) {
     // Skip if explicitly disabled
     if (voiceType === 'none') return undefined;
@@ -828,7 +832,7 @@ class AlertPlayer {
     const audioData =
       resolvedVoiceType === 'ai'
         ? await this.aiTTS(ttsMessage, channel, resolvedVoice, state, sink)
-        : await this.googleTTS(ttsMessage, channel, resolvedVoice, state, sink);
+        : await this.googleTTS(ttsMessage, channel, resolvedVoice, state, sink, preview);
 
     if (!audioData) return undefined;
     const audioInfo = await this.getAudioInfo(`data:audio/mp3;base64,${audioData}`);
@@ -1270,7 +1274,8 @@ class AlertPlayer {
               alert.audio.tts.voiceType,
               state,
               sink,
-              alert.audio.tts.voiceParams
+              alert.audio.tts.voiceParams,
+              !!(event as any).editorPreview
             )
           : undefined;
       const jingleAudio = alert.audio?.jingle
