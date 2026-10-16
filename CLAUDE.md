@@ -16,6 +16,39 @@ HeheChat is a Twitch chat/streaming companion app built with Vite + React 19 + T
 
 Package manager: **yarn 4.3.1**.
 
+## System overview
+
+HeheChat consists of three projects that are developed side by side (sibling folders under `~/Development`):
+
+| Project | Folder | Role |
+| --- | --- | --- |
+| **HeheChat** (frontend) | `HeheChat/` | Vite + React app: multi-channel Twitch chat for streamers/mods, admin dashboard, OBS browser sources (alerts, chat overlay), alert replay, scene switcher |
+| **HeheServer** (backend) | `HeheServer/` | Node.js/Express + `ws` server: Twitch auth, chat/EventSub ingestion, alert pipeline, profiles, premium, analytics, TTS, integrations; PostgreSQL storage |
+| **HeheChat-AlertEditor** | `HeheChat-AlertEditor/` | Standalone Vite + React app to design alert configs (media, text, TTS, conditions) and import StreamElements overlays |
+
+How they talk to each other:
+
+- All frontends call the backend over HTTP at `VITE_BACKEND_URL`. The backend allows these origins via CORS (`FRONTEND_ORIGIN`, `BROWSERSOURCE_ORIGIN`, `EDITOR_ORIGIN`, `REPLAY_ORIGIN`, `ADMIN_ORIGIN`, `PROMO_ORIGIN`).
+- Live data (chat messages, events, alerts, profile updates, OBS commands) flows from the backend to clients over a single WebSocket server. Inside the backend, modules publish to PubSub.js topics (`WS-<channel>`, `SINK-<token>`, `PROFILE-<id>`, ...) and `HeheServer/src/websocket.js` forwards them to subscribed sockets.
+- The chat app opens the alert editor via `VITE_EDITOR_URL?token=<editor token>`. The editor loads and saves the alert config through `/event/config/*` and fetches the sink via `/sink/get`.
+- The alert browser source (`alert.html` in HeheChat, URL `VITE_SINK_URL#token=<sink>`) connects to the WebSocket with its sink token and plays the alerts the backend publishes to `SINK-<token>`. The editor embeds it in preview mode (`&preview=true&embed=true`) and triggers test alerts via `/event/replay`.
+
+Changes that touch an HTTP endpoint or a WebSocket message type usually require matching changes in the other project(s) — check both sides.
+
+## Architecture overview (HeheChat)
+
+Each entry point is its own app; they share `src/commons`, `src/components` and `src/api`.
+
+- **Chat app** (`index.html` → `HeheChatApp` → [src/Router.tsx](src/Router.tsx), [src/pages/Chat.page.tsx](src/pages/Chat.page.tsx)) — login, multi-channel chat ([src/components/chat/](src/components/chat/), mod tools in `chat/mod/`), event list and alert controls ([src/components/events/](src/components/events/)), pinned items such as polls, predictions, hype trains, raids ([src/components/pinned/](src/components/pinned/)), Twitch player/stream info ([src/components/twitch/](src/components/twitch/)), settings ([src/components/settings/](src/components/settings/)), premium, profiles, shortcuts, music player, news, stream switcher UI ([src/components/switcher/](src/components/switcher/)).
+- **Backend connection** — [src/components/webworker/backendworker.ts](src/components/webworker/backendworker.ts) is a Web Worker that holds the WebSocket to HeheServer (heartbeat watchdog, exponential-backoff reconnect) and relays messages to the page, where they are dispatched through PubSub.js / `MessageHandler` ([src/commons/message.tsx](src/commons/message.tsx)). Used by the chat app, the alert browser source and the replay viewer.
+- **HTTP API clients** — [src/api/](src/api/), one file per backend domain, all against `VITE_BACKEND_URL`.
+- **Alert browser source** (`alert.html` → `BrowserSourceApp`) — OBS source authenticated by the sink token in the URL hash; plays alerts with [src/components/alerts/alertplayer.tsx](src/components/alerts/alertplayer.tsx) and [src/components/browsersource/](src/components/browsersource/). Also embedded by the alert editor as live preview.
+- **Chat browser source** (`chat.html` → `ChatSourceApp`) — chat overlay for OBS.
+- **Admin dashboard** (`admin.html` → `AdminApp` / [src/AdminRouter.tsx](src/AdminRouter.tsx), `src/pages/Admin*.page.tsx`) — alerts, analytics, channels, connections, news, premium.
+- **Replay** (`replay.html` → `ReplayApp`), **collection** (`collection.html`), **promo** (`promo.html` → `src/pages/promo/`) — smaller standalone pages.
+- **Scene switcher** (`switcher.html` → [src/switcher.ts](src/switcher.ts)) — no React; connects to OBS via obs-websocket and to the backend WebSocket as `obs-client`, executing scene commands from the backend's stream-switcher rule engine.
+- **Client-side persistence** — IndexedDB ([src/commons/database.ts](src/commons/database.ts)) for emotes, alert configs and 7TV cosmetics; settings and profile in the contexts described below.
+
 ## Entry points
 
 The app ships multiple Vite entry points, each producing a standalone bundle:
@@ -26,6 +59,8 @@ The app ships multiple Vite entry points, each producing a standalone bundle:
 - [replay.html](replay.html) → [src/replay.tsx](src/replay.tsx) — alert replay viewer
 - [collection.html](collection.html) → [src/collection.tsx](src/collection.tsx) — sprite/emote collection viewer
 - [switcher.html](switcher.html) → [src/switcher.ts](src/switcher.ts) — OBS scene/stream-state synchronizer
+- [chat.html](chat.html) → [src/chat-source.tsx](src/chat-source.tsx) — OBS chat overlay (`ChatSourceApp`)
+- [promo.html](promo.html) → [src/promo.tsx](src/promo.tsx) — promo page
 
 Browser sources (alert, switcher) authenticate via URL hash parameters (token, preview flags) — not the normal login flow.
 
@@ -78,4 +113,4 @@ Profile state syncs to backend via `storeProfile()` / `loadProfileFromServer()` 
 - `yarn vitest` (one-shot) / `yarn vitest:watch`
 - `yarn test` — full gate: typecheck → prettier → lint → vitest → build
 
-Run `yarn test` before opening a PR. There are currently no test files in `src/`, but the gate still runs.
+Run `yarn test` before opening a PR. Vitest picks up `*.test.ts` files next to the code (e.g. `src/commons/message.test.ts`).
