@@ -25,9 +25,9 @@ export function HomePage() {
               </linearGradient>
               {/* Light sweep: a soft highlight band that crosses the logo, then rests */}
               <linearGradient id="hehe-icon-fill" x1="-1" y1="0" x2="0" y2="0">
-                <stop offset="0.35" stopColor="currentColor" />
+                <stop offset="0.35" className={classes.stopBase} />
                 <stop offset="0.5" stopColor="#ffd1ea" />
-                <stop offset="0.65" stopColor="currentColor" />
+                <stop offset="0.65" className={classes.stopBase} />
                 <animate
                   attributeName="x1"
                   values="-1;1;1"
