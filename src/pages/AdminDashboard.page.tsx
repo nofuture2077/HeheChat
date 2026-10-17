@@ -10,6 +10,7 @@ import {
   Paper,
   SegmentedControl,
   SimpleGrid,
+  Skeleton,
   Table,
   Tabs,
   Text,
@@ -204,6 +205,48 @@ function SmallStat({ label, value }: { label: string; value: string | number }) 
   );
 }
 
+// Mirrors the dashboard grid while the first load is in flight
+const SKELETON_ROWS: [number[], number][] = [
+  [[8, 4], 280],
+  [[4, 4, 4], 220],
+  [[4, 4, 4], 220],
+  [[4, 8], 120],
+  [[6, 6], 300],
+];
+
+function SkeletonCard({ h }: { h: number }) {
+  return (
+    <Paper withBorder p="md" radius="md" h="100%">
+      <Skeleton h={16} w="40%" mb="md" />
+      <Skeleton h={h} />
+    </Paper>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <>
+      <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} mb="md">
+        {[0, 1, 2, 3].map((i) => (
+          <SkeletonCard key={i} h={90} />
+        ))}
+      </SimpleGrid>
+      <Paper withBorder p="md" radius="md" mb="md">
+        <Skeleton h={44} />
+      </Paper>
+      {SKELETON_ROWS.map(([spans, h], row) => (
+        <Grid mb="md" key={row}>
+          {spans.map((span, i) => (
+            <Grid.Col key={i} span={{ base: 12, md: span }}>
+              <SkeletonCard h={h} />
+            </Grid.Col>
+          ))}
+        </Grid>
+      ))}
+    </>
+  );
+}
+
 export function AdminDashboardPage() {
   const loginContext = useContext(LoginContextContext);
   const [days, setDays] = useState('7');
@@ -272,6 +315,7 @@ export function AdminDashboardPage() {
   };
 
   useEffect(() => {
+    setData(null);
     fetchDashboard();
     const interval = setInterval(fetchDashboard, REFRESH_INTERVAL);
     return () => clearInterval(interval);
@@ -333,6 +377,7 @@ export function AdminDashboardPage() {
               size="lg"
               loading={loading}
               onClick={() => {
+                setData(null);
                 fetchDashboard();
                 fetchLive();
               }}
@@ -348,6 +393,8 @@ export function AdminDashboardPage() {
           {error}
         </Alert>
       )}
+
+      {!data && !error && <DashboardSkeleton />}
 
       {data && (
         <>
