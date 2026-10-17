@@ -568,6 +568,13 @@ export function ChatPage() {
       }
     });
     const modEventSub = PubSub.subscribe('WS-modevent', onModEvent);
+    const raidErrorSub = PubSub.subscribe('WS-raidError', (_msg, data: { message?: string }) => {
+      notifications.show({
+        title: 'Raid failed',
+        message: data?.message || 'Twitch rejected the raid.',
+        color: 'red',
+      });
+    });
 
     const gapSub = PubSub.subscribe('WS-gapDetected', (_msg, data: { since: number }) => {
       const since = data?.since ?? Date.now() - 60000;
@@ -662,6 +669,7 @@ export function ChatPage() {
       PubSub.unsubscribe(ytChatSub);
       PubSub.unsubscribe(eventSub);
       PubSub.unsubscribe(modEventSub);
+      PubSub.unsubscribe(raidErrorSub);
       PubSub.unsubscribe(massBanSub);
       PubSub.unsubscribe(premiumSub);
       PubSub.unsubscribe(gapSub);
