@@ -78,6 +78,7 @@ interface DashboardData {
   top_channels: { channel: string; streams: number; hours: number; peak_viewers: number }[];
   top_categories: { category: string; streams: number; hours: number }[];
   tts: { count: number; characters: number; previews: number };
+  tts_series: { t: number; count: number }[];
   top_tts_users: { username: string; count: number; characters: number }[];
   latest_users: DashboardUser[];
   recent_users: DashboardUser[];
@@ -210,7 +211,7 @@ const SKELETON_ROWS: [number[], number][] = [
   [[8, 4], 280],
   [[4, 4, 4], 220],
   [[4, 4, 4], 220],
-  [[4, 8], 120],
+  [[4, 8], 280],
   [[6, 6], 300],
 ];
 
@@ -647,6 +648,13 @@ export function AdminDashboardPage() {
                   <SmallStat label="Characters" value={data.tts.characters} />
                   <SmallStat label="Previews" value={data.tts.previews} />
                 </SimpleGrid>
+                <BarChart
+                  h={160}
+                  mt="md"
+                  data={data.tts_series.map((p) => ({ ...p, label: timeLabel(p.t) }))}
+                  dataKey="label"
+                  series={[{ name: 'count', label: 'TTS messages', color: 'cyan.6' }]}
+                />
               </Paper>
             </Grid.Col>
             <Grid.Col span={{ base: 12, md: 8 }}>
