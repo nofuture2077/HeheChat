@@ -62,7 +62,7 @@
 }
 
 .draw {
-    fill: url("#hehe-icon-fill");
+    fill: currentColor;
     stroke: url("#hehe-icon-stroke");
     stroke-width: 6;
     stroke-linejoin: round;
@@ -70,9 +70,9 @@
     animation: draw 2s cubic-bezier(0.6, 0, 0.3, 1) both;
 }
 
-/* currentColor in gradient stops resolves to black on Android Chrome, so use the theme variable */
-.stopBase {
-    stop-color: var(--mantine-color-text);
+.sweep {
+    fill: url("#hehe-icon-sweep");
+    pointer-events: none;
 }
 
 .wordmark {
