@@ -68,8 +68,8 @@ export function GeneralUISettings() {
             value={ownMode ? 'own' : 'manual'}
             onChange={setMode}
             data={[
-              { label: 'My Channel', value: 'own', disabled: !ownName },
-              { label: 'Manual Channel(s)', value: 'manual' },
+              { label: 'Auto', value: 'own', disabled: !ownName },
+              { label: 'Manual', value: 'manual' },
             ]}
           />
           {ownMode ? (
