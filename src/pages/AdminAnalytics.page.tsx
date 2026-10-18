@@ -99,6 +99,7 @@ export function AdminAnalyticsPage() {
   const [selectedChannel, setSelectedChannel] = useState<string>('');
   const [selectedStreamData, setSelectedStreamData] = useState<any>(null);
   const [streamEventFilter, setStreamEventFilter] = useState<string>('');
+  const [eventsFilter, setEventsFilter] = useState<string>('');
 
   // Pagination state for All Events table
   const [eventsPage, setEventsPage] = useState(1);
@@ -106,11 +107,11 @@ export function AdminAnalyticsPage() {
 
   // Pagination state for Top Chat Users table
   const [chatUsersPage, setChatUsersPage] = useState(1);
-  const [chatUsersLimit] = useState(10);
+  const [chatUsersLimit] = useState(7);
 
   // API methods for additional features
 
-  const fetchStreamEvents = async (channel: string, eventType?: string) => {
+  const fetchStreamEvents = async (channel: string) => {
     const adminToken = localStorage.getItem('hehe-token_state') || '';
     if (!channel) return;
 
@@ -130,8 +131,8 @@ export function AdminAnalyticsPage() {
         offset: offset.toString(),
       });
 
-      if (eventType) {
-        params.append('event_type', eventType);
+      if (eventsFilter) {
+        params.append('event_type', eventsFilter);
       }
 
       const response = await fetch(
@@ -237,7 +238,7 @@ export function AdminAnalyticsPage() {
     if (selectedChannel) {
       fetchStreamEvents(selectedChannel);
     }
-  }, [eventsPage]);
+  }, [eventsPage, eventsFilter]);
 
   // Fetch chat users when page changes
   useEffect(() => {
@@ -248,10 +249,10 @@ export function AdminAnalyticsPage() {
 
   const formatNumber = (num: number) => new Intl.NumberFormat().format(num);
 
-  const formatCurrency = (amount: number) =>
+  const formatCurrency = (amount: number, currency?: string) =>
     new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currency || 'USD',
     }).format(amount);
 
   const formatDuration = (seconds: number) => {
@@ -259,6 +260,50 @@ export function AdminAnalyticsPage() {
     const minutes = Math.floor((seconds % 3600) / 60);
     return `${hours}h ${minutes}m`;
   };
+
+  const subtypeLabels: Record<string, string> = {
+    tier1000: 'Tier 1',
+    tier2000: 'Tier 2',
+    tier3000: 'Tier 3',
+    prime: 'Prime',
+  };
+
+  const formatAmount = (event: StreamEvent) => {
+    if (event.event_type === 'donation' && event.amount) {
+      return formatCurrency(event.amount, event.metadata?.currency);
+    }
+    if (event.metadata?.isGift) {
+      return `${event.amount ?? 1}x`;
+    }
+    return event.amount ?? '-';
+  };
+
+  const renderDetails = (event: StreamEvent) => (
+    <>
+      <Group gap={4}>
+        {event.event_subtype && (
+          <Badge variant="light" size="xs">
+            {subtypeLabels[event.event_subtype] ?? event.event_subtype}
+          </Badge>
+        )}
+        {event.metadata?.isGift && (
+          <Badge variant="light" color="grape" size="xs">
+            Gift
+          </Badge>
+        )}
+      </Group>
+      {event.metadata?.gifterName && (
+        <Text size="xs" c="dimmed">
+          from {event.metadata.gifterName}
+        </Text>
+      )}
+      {event.metadata?.message && (
+        <Text size="xs" c="dimmed" truncate>
+          {event.metadata.message}
+        </Text>
+      )}
+    </>
+  );
 
   const formatTimestamp = (timestamp: number) => new Date(timestamp * 1000).toLocaleString();
 
@@ -545,19 +590,8 @@ export function AdminAnalyticsPage() {
                               </Group>
                             </Table.Td>
                             <Table.Td>{event.display_name}</Table.Td>
-                            <Table.Td>{event.amount ? formatCurrency(event.amount) : '-'}</Table.Td>
-                            <Table.Td>
-                              {event.event_subtype && (
-                                <Badge variant="light" size="xs">
-                                  {event.event_subtype}
-                                </Badge>
-                              )}
-                              {event.metadata?.message && (
-                                <Text size="xs" c="dimmed" truncate>
-                                  {event.metadata.message}
-                                </Text>
-                              )}
-                            </Table.Td>
+                            <Table.Td>{formatAmount(event)}</Table.Td>
+                            <Table.Td>{renderDetails(event)}</Table.Td>
                             <Table.Td>
                               <Text size="sm">{formatTimestamp(event.timestamp)}</Text>
                             </Table.Td>
@@ -638,7 +672,11 @@ export function AdminAnalyticsPage() {
                     { value: 'donation', label: 'Donations' },
                     { value: 'raid', label: 'Raids' },
                   ]}
-                  onChange={(value) => fetchStreamEvents(selectedChannel, value || undefined)}
+                  value={eventsFilter}
+                  onChange={(value) => {
+                    setEventsPage(1);
+                    setEventsFilter(value || '');
+                  }}
                   w={200}
                 />
               </Group>
@@ -676,19 +714,8 @@ export function AdminAnalyticsPage() {
                               </Group>
                             </Table.Td>
                             <Table.Td>{event.display_name}</Table.Td>
-                            <Table.Td>{event.amount ? formatCurrency(event.amount) : '-'}</Table.Td>
-                            <Table.Td>
-                              {event.event_subtype && (
-                                <Badge variant="light" size="xs">
-                                  {event.event_subtype}
-                                </Badge>
-                              )}
-                              {event.metadata?.message && (
-                                <Text size="xs" c="dimmed" truncate>
-                                  {event.metadata.message}
-                                </Text>
-                              )}
-                            </Table.Td>
+                            <Table.Td>{formatAmount(event)}</Table.Td>
+                            <Table.Td>{renderDetails(event)}</Table.Td>
                             <Table.Td>
                               <Text size="sm">{formatTimestamp(event.timestamp)}</Text>
                             </Table.Td>
@@ -780,7 +807,7 @@ export function AdminAnalyticsPage() {
               </Paper>
 
               {/* Pagination for Chat Users */}
-              {chatUsers.length > 0 && (
+              {chatUsers.length > chatUsersLimit && (
                 <Group justify="center" p="md">
                   <Pagination
                     value={chatUsersPage}
