@@ -32,6 +32,8 @@ import {
   DEFAULT_CHAT_SMART_FILTER,
   DEFAULT_ALERT_SMART_FILTER,
   MessageHandler,
+  CyclingHudTheme,
+  CyclingHudLayout,
 } from './commons/config';
 import { ChatEmotes, DEFAULT_CHAT_EMOTES } from './commons/emotes';
 import { Profile, DEFAULT_PROFILE } from './commons/profile';
@@ -657,9 +659,9 @@ export default function HeheChat() {
     updateConfig('cyclingHudMaxHeartRateBpm', value);
   const setCyclingHudAveragePowerWatts = (value: number) =>
     updateConfig('cyclingHudAveragePowerWatts', value);
-  const setCyclingHudTheme = (value: 'classic' | 'mono' | 'matrix' | 'japan') =>
+  const setCyclingHudTheme = (value: CyclingHudTheme) =>
     updateConfig('cyclingHudTheme', value);
-  const setCyclingHudLayout = (value: 'default' | 'cockpit') =>
+  const setCyclingHudLayout = (value: CyclingHudLayout) =>
     updateConfig('cyclingHudLayout', value);
   const setShowSceneSwitchNotifications = (value: boolean) =>
     updateConfig('showSceneSwitchNotifications', value);

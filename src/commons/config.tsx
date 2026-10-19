@@ -25,6 +25,10 @@ export const DEFAULT_ALERT_SMART_FILTER: SmartFilterConfig = {
   skipSpam: true,
 };
 
+// must match VALID_THEMES / VALID_LAYOUTS in hehe-cycling-hud (src/hud/theme.ts, src/hud/layout.ts)
+export type CyclingHudTheme = 'classic' | 'mono' | 'matrix' | 'japan' | 'cyberpunk2077' | 'vivid';
+export type CyclingHudLayout = 'default' | 'cockpit' | 'netrunner' | 'float' | 'rings' | 'ribbon';
+
 export type MessageHandler = {
   id?: number;
   handle: (channel: string, text: string, replyTo?: string) => void;
@@ -140,8 +144,8 @@ export interface ConfigData {
   cyclingHudPauseMinDistanceM: number;
   cyclingHudMaxHeartRateBpm: number;
   cyclingHudAveragePowerWatts: number;
-  cyclingHudTheme: 'classic' | 'mono' | 'matrix' | 'japan';
-  cyclingHudLayout: 'default' | 'cockpit';
+  cyclingHudTheme: CyclingHudTheme;
+  cyclingHudLayout: CyclingHudLayout;
   showSceneSwitchNotifications: boolean;
   chatBsTransparentBg: boolean;
   chatBsTextColor: string;
@@ -275,8 +279,8 @@ export interface Config extends ConfigData {
   setCyclingHudPauseMinDistanceM: (val: number) => void;
   setCyclingHudMaxHeartRateBpm: (val: number) => void;
   setCyclingHudAveragePowerWatts: (val: number) => void;
-  setCyclingHudTheme: (val: 'classic' | 'mono' | 'matrix' | 'japan') => void;
-  setCyclingHudLayout: (val: 'default' | 'cockpit') => void;
+  setCyclingHudTheme: (val: CyclingHudTheme) => void;
+  setCyclingHudLayout: (val: CyclingHudLayout) => void;
   setShowSceneSwitchNotifications: (val: boolean) => void;
   setChatBsTransparentBg: (val: boolean) => void;
   setChatBsTextColor: (val: string) => void;

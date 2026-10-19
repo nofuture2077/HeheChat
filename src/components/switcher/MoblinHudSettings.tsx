@@ -16,6 +16,7 @@ import { IconCopy, IconUpload, IconTrash } from '@tabler/icons-react';
 import { useState, useEffect, useContext, useRef } from 'react';
 import { notifications } from '@mantine/notifications';
 import { ConfigContext } from '@/ApplicationContext';
+import type { CyclingHudTheme, CyclingHudLayout } from '@/commons/config';
 import { GpxSettings } from '../settings/cycling/GpxSettings';
 
 const MAX_LOGO_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -151,11 +152,13 @@ export function MoblinHudSettings() {
               { value: 'mono', label: 'Minimal (flat, grayscale, single accent)' },
               { value: 'matrix', label: 'Matrix (green accent)' },
               { value: 'japan', label: 'Japan (red & white, minimal accent)' },
+              { value: 'cyberpunk2077', label: 'Cyberpunk 2077 (neon cyan/pink, cut corners)' },
+              { value: 'vivid', label: 'Vivid (clean, colorful, one color per metric)' },
             ]}
             value={config.cyclingHudTheme}
             onChange={(value) =>
               config.setCyclingHudTheme(
-                (value as 'classic' | 'mono' | 'matrix' | 'japan') ?? 'classic'
+                (value as CyclingHudTheme) ?? 'classic'
               )
             }
             allowDeselect={false}
@@ -172,10 +175,14 @@ export function MoblinHudSettings() {
             data={[
               { value: 'default', label: 'Default' },
               { value: 'cockpit', label: 'Cockpit (telemetry strip arrangement)' },
+              { value: 'netrunner', label: 'Netrunner (segmented vitals bars)' },
+              { value: 'float', label: 'Float (no panels, big speed, route line)' },
+              { value: 'rings', label: 'Rings (activity rings around speed)' },
+              { value: 'ribbon', label: 'Ribbon (single glass bar along the bottom)' },
             ]}
             value={config.cyclingHudLayout}
             onChange={(value) =>
-              config.setCyclingHudLayout((value as 'default' | 'cockpit') ?? 'default')
+              config.setCyclingHudLayout((value as CyclingHudLayout) ?? 'default')
             }
             allowDeselect={false}
           />
