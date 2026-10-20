@@ -11,8 +11,13 @@ import {
   Select,
   FileButton,
   Loader,
+  Box,
+  Flex,
+  Modal,
+  ScrollArea,
 } from '@mantine/core';
-import { IconCopy, IconUpload, IconTrash } from '@tabler/icons-react';
+import { useDisclosure, useElementSize, useMediaQuery } from '@mantine/hooks';
+import { IconCopy, IconUpload, IconTrash, IconArrowsMaximize } from '@tabler/icons-react';
 import { useState, useEffect, useContext, useRef } from 'react';
 import { notifications } from '@mantine/notifications';
 import { ConfigContext } from '@/ApplicationContext';
@@ -27,13 +32,70 @@ interface LogoMeta {
   sizeBytes: number;
 }
 
+const HUD_WIDTH = 1920;
+const HUD_HEIGHT = 1080;
+// above the settings drawer (zIndex 300); dropdowns inside the modal must sit above it
+const PREVIEW_MODAL_Z_INDEX = 400;
+
+// Embeds the real HUD browser source; it picks up config changes via the auto-saved profile
+function HudPreviewFrame({ src, onExpand }: { src: string; onExpand?: () => void }) {
+  const { ref, width } = useElementSize();
+  const scale = width / HUD_WIDTH;
+
+  return (
+    <Box
+      ref={ref}
+      pos="relative"
+      style={{
+        width: '100%',
+        aspectRatio: '16 / 9',
+        overflow: 'hidden',
+        borderRadius: 'var(--mantine-radius-md)',
+        border: '1px solid var(--mantine-color-dark-4)',
+        backgroundColor: '#3a3a3a',
+        backgroundImage: 'repeating-conic-gradient(#444 0% 25%, #3a3a3a 0% 50%)',
+        backgroundSize: '32px 32px',
+      }}
+    >
+      <iframe
+        src={src}
+        title="Cycling HUD preview"
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: HUD_WIDTH,
+          height: HUD_HEIGHT,
+          border: 0,
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+          background: 'transparent',
+          colorScheme: 'normal',
+          // not interactive - lets touch swipes scroll the page instead of the iframe
+          pointerEvents: 'none',
+        }}
+      />
+      {onExpand && (
+        <ActionIcon
+          pos="absolute"
+          top={8}
+          right={8}
+          variant="filled"
+          color="dark"
+          onClick={onExpand}
+          aria-label="Expand preview"
+        >
+          <IconArrowsMaximize size={16} />
+        </ActionIcon>
+      )}
+    </Box>
+  );
+}
+
 export function MoblinHudSettings() {
-  const config = useContext(ConfigContext);
   const [sink, setSink] = useState<string | undefined>(undefined);
-  const [logo, setLogo] = useState<LogoMeta | null>(null);
-  const [logoLoading, setLogoLoading] = useState(false);
-  const [logoUploading, setLogoUploading] = useState(false);
-  const logoResetRef = useRef<() => void>(null);
+  const [previewOpened, { open: openPreview, close: closePreview }] = useDisclosure(false);
+  const isDesktop = useMediaQuery('(min-width: 62em)');
   const state = localStorage.getItem('hehe-token_state') || '';
 
   useEffect(() => {
@@ -41,6 +103,110 @@ export function MoblinHudSettings() {
       .then((res) => res.json())
       .then((data) => setSink(data.sink));
   }, []);
+
+  // VITE_HUD_URL overrides the derived URL, e.g. for a local HUD dev server
+  const hudUrl =
+    import.meta.env.VITE_HUD_URL ||
+    new URL(import.meta.env.VITE_SINK_URL.replaceAll('browsersource', 'hud')).href;
+  const telemetryUrl = sink ? `${hudUrl}#token=${encodeURIComponent(sink)}` : '';
+  const previewUrl = `${telemetryUrl}&preview=true`;
+
+  return (
+    <Stack gap={30}>
+      <Fieldset legend="Cycling Telemetry Browser Source" variant="filled">
+        <Stack gap="md">
+          <Text fs="italic" size="14px">
+            Add this URL as a browser source in OBS to show the cycling HUD. Unlike Moblin&apos;s
+            own browser source, this keeps updating even while the source isn&apos;t visible.
+          </Text>
+          {sink ? (
+            <TextInput
+              label="Browser Source URL"
+              value={telemetryUrl}
+              readOnly
+              styles={{ input: { fontFamily: 'monospace', fontSize: 11 } }}
+              rightSection={
+                <ActionIcon
+                  variant="subtle"
+                  onClick={() => navigator.clipboard.writeText(telemetryUrl)}
+                >
+                  <IconCopy size="1rem" />
+                </ActionIcon>
+              }
+            />
+          ) : (
+            <Text size="sm" c="dimmed">
+              Loading token…
+            </Text>
+          )}
+        </Stack>
+      </Fieldset>
+      {/* only one HUD iframe (and its WebSocket) at a time - hidden while the modal is open */}
+      {sink && !previewOpened && (
+        <Fieldset
+          legend="Cycling HUD Preview"
+          variant="filled"
+          style={{ position: 'sticky', top: 0, zIndex: 2 }}
+        >
+          <Stack gap="xs">
+            <HudPreviewFrame src={previewUrl} onExpand={openPreview} />
+            <Text size="xs" c="dimmed">
+              Live preview - changes apply after a moment. Shows sample values while no telemetry is
+              coming in.
+            </Text>
+          </Stack>
+        </Fieldset>
+      )}
+      <HudOptions />
+      <GpxSettings />
+      <Modal
+        opened={previewOpened}
+        onClose={closePreview}
+        title="Cycling HUD Preview"
+        fullScreen
+        zIndex={PREVIEW_MODAL_Z_INDEX}
+      >
+        {isDesktop ? (
+          <Flex gap="md" align="flex-start">
+            <Box style={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'center' }}>
+              <Box style={{ width: 'min(100%, calc((100dvh - 100px) * 16 / 9))' }}>
+                <HudPreviewFrame src={previewUrl} />
+              </Box>
+            </Box>
+            <ScrollArea.Autosize mah="calc(100dvh - 100px)" w={380} style={{ flexShrink: 0 }}>
+              <Box pr="sm">
+                <HudOptions />
+              </Box>
+            </ScrollArea.Autosize>
+          </Flex>
+        ) : (
+          <Stack gap="md">
+            <Box
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 2,
+                background: 'var(--mantine-color-body)',
+                paddingBottom: 'var(--mantine-spacing-xs)',
+              }}
+            >
+              <HudPreviewFrame src={previewUrl} />
+            </Box>
+            <HudOptions />
+          </Stack>
+        )}
+      </Modal>
+    </Stack>
+  );
+}
+
+function HudOptions() {
+  const config = useContext(ConfigContext);
+  const [logo, setLogo] = useState<LogoMeta | null>(null);
+  const [logoLoading, setLogoLoading] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const logoResetRef = useRef<() => void>(null);
+  const state = localStorage.getItem('hehe-token_state') || '';
 
   useEffect(() => {
     setLogoLoading(true);
@@ -106,40 +272,8 @@ export function MoblinHudSettings() {
     }
   };
 
-  const telemetryUrl = sink
-    ? `${new URL(import.meta.env.VITE_SINK_URL.replaceAll('browsersource', 'hud')).href}#token=${encodeURIComponent(sink)}`
-    : '';
-
   return (
     <Stack gap={30}>
-      <Fieldset legend="Cycling Telemetry Browser Source" variant="filled">
-        <Stack gap="md">
-          <Text fs="italic" size="14px">
-            Add this URL as a browser source in OBS to show the cycling HUD. Unlike Moblin&apos;s
-            own browser source, this keeps updating even while the source isn&apos;t visible.
-          </Text>
-          {sink ? (
-            <TextInput
-              label="Browser Source URL"
-              value={telemetryUrl}
-              readOnly
-              styles={{ input: { fontFamily: 'monospace', fontSize: 11 } }}
-              rightSection={
-                <ActionIcon
-                  variant="subtle"
-                  onClick={() => navigator.clipboard.writeText(telemetryUrl)}
-                >
-                  <IconCopy size="1rem" />
-                </ActionIcon>
-              }
-            />
-          ) : (
-            <Text size="sm" c="dimmed">
-              Loading token…
-            </Text>
-          )}
-        </Stack>
-      </Fieldset>
       <Fieldset legend="Cycling HUD Theme" variant="filled">
         <Stack gap="sm">
           <Text fs="italic" size="14px">
@@ -156,12 +290,9 @@ export function MoblinHudSettings() {
               { value: 'vivid', label: 'Vivid (clean, colorful, one color per metric)' },
             ]}
             value={config.cyclingHudTheme}
-            onChange={(value) =>
-              config.setCyclingHudTheme(
-                (value as CyclingHudTheme) ?? 'classic'
-              )
-            }
+            onChange={(value) => config.setCyclingHudTheme((value as CyclingHudTheme) ?? 'classic')}
             allowDeselect={false}
+            comboboxProps={{ zIndex: PREVIEW_MODAL_Z_INDEX + 1 }}
           />
         </Stack>
       </Fieldset>
@@ -185,6 +316,7 @@ export function MoblinHudSettings() {
               config.setCyclingHudLayout((value as CyclingHudLayout) ?? 'default')
             }
             allowDeselect={false}
+            comboboxProps={{ zIndex: PREVIEW_MODAL_Z_INDEX + 1 }}
           />
         </Stack>
       </Fieldset>
@@ -436,7 +568,6 @@ export function MoblinHudSettings() {
           />
         </Stack>
       </Fieldset>
-      <GpxSettings />
     </Stack>
   );
 }

@@ -48,6 +48,7 @@ import {
   IconInfoCircle,
   IconBrandSpotify,
   IconShieldOff,
+  IconBike,
 } from '@tabler/icons-react';
 import classes from './settings.module.css';
 import { ModSettings } from './ModSettings';
@@ -166,7 +167,7 @@ export type SettingsTab =
   | 'Switcher/Provider'
   | 'Switcher/Rules'
   | 'Switcher/Tokens'
-  | 'Switcher/MoblinHud'
+  | 'CyclingHud'
   | 'Premium'
   | 'Premium/Donate'
   | 'Premium/Redeem'
@@ -264,9 +265,9 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'Switcher/Provider', label: 'Provider', icon: IconSettings },
       { id: 'Switcher/Rules', label: 'Rules', icon: IconList },
       { id: 'Switcher/Tokens', label: 'Browsersource', icon: IconKey },
-      { id: 'Switcher/MoblinHud', label: 'Moblin HUD', icon: IconVideo },
     ],
   },
+  { id: 'CyclingHud', label: 'Cycling HUD', icon: IconBike },
   { id: 'Mod', label: 'Mod', icon: IconSword },
   {
     id: 'Notifications',
@@ -342,7 +343,7 @@ const tabLabels: Partial<Record<SettingsTab, string>> = {
   'Switcher/Provider': 'OBS Remote › Provider',
   'Switcher/Rules': 'OBS Remote › Rules',
   'Switcher/Tokens': 'OBS Remote › Browsersource',
-  'Switcher/MoblinHud': 'OBS Remote › Moblin HUD',
+  CyclingHud: 'Cycling HUD',
   Premium: 'Premium',
   'Premium/Donate': 'Premium › Donate',
   'Premium/Redeem': 'Premium › Redeem',
@@ -569,7 +570,7 @@ export function Settings(props: SettingsProperties) {
             {premium.isPremium ? <TokenTab /> : <PremiumRequired />}
           </Stack>
         );
-      case 'Switcher/MoblinHud':
+      case 'CyclingHud':
         return (
           <Stack mt={30} mb={30} gap={30}>
             <Alert variant="transparent" color="blue" icon={<IconInfoCircle />}>
