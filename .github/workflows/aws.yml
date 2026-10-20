@@ -14,6 +14,7 @@ jobs:
       VITE_SINK_URL: https://browsersource.hehechat.io
       VITE_REPLAY_URL: https://replay.hehechat.io
       VITE_ADMIN_URL: https://admin.hehechat.io
+      VITE_HUD_URL: https://hud.hehechat.io
       VITE_CLIENT_ID: 7tmrvoh4llxtx9yft7pwhtgbi61ba9
       VITE_ADMIN_CLIENT_ID: zjttjwday68ycl72iyb7q5s0u02ply
       VITE_BUILDNUMBER: ${{ github.run_number }}

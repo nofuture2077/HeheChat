@@ -165,60 +165,58 @@ export function GpxSettings() {
           )}
         </Stack>
       </Fieldset>
-      {activeFile && (
-        <Fieldset legend="Cycling HUD GPX Sections" variant="filled">
-          <Stack gap="sm">
-            <Switch
-              label="Show map"
-              checked={config.showGpxMap}
-              onChange={(e) => config.setShowGpxMap(e.currentTarget.checked)}
-            />
-            <Switch
-              label="Show elevation map"
-              checked={config.showGpxElevationMap}
-              onChange={(e) => config.setShowGpxElevationMap(e.currentTarget.checked)}
-            />
-            <Switch
-              label="Show position on map"
-              checked={config.showGpxPosition}
-              onChange={(e) => config.setShowGpxPosition(e.currentTarget.checked)}
-            />
-            <Switch
-              label="Show position on elevation map"
-              checked={config.showGpxElevationPosition}
-              onChange={(e) => config.setShowGpxElevationPosition(e.currentTarget.checked)}
-            />
-            <Switch
-              label="Show remaining distance"
-              checked={config.showGpxRemainingDistance}
-              onChange={(e) => config.setShowGpxRemainingDistance(e.currentTarget.checked)}
-            />
-            <Switch
-              label="Show remaining elevation"
-              checked={config.showGpxRemainingElevation}
-              onChange={(e) => config.setShowGpxRemainingElevation(e.currentTarget.checked)}
-            />
-            <Switch
-              label="Show waypoints"
-              checked={config.showGpxWaypoints}
-              onChange={(e) => config.setShowGpxWaypoints(e.currentTarget.checked)}
-            />
-            <Text size="sm" mt="sm">
-              Map radius
-            </Text>
-            <SegmentedControl
-              value={config.gpxMapRadius === null ? 'full' : String(config.gpxMapRadius)}
-              onChange={(value) => config.setGpxMapRadius(value === 'full' ? null : Number(value))}
-              data={[
-                { label: 'Full track', value: 'full' },
-                { label: '1 km', value: '1000' },
-                { label: '2 km', value: '2000' },
-                { label: '5 km', value: '5000' },
-              ]}
-            />
-          </Stack>
-        </Fieldset>
-      )}
+      <Fieldset legend="Cycling HUD GPX Sections" variant="filled">
+        <Stack gap="sm">
+          <Switch
+            label="Show map"
+            checked={config.showGpxMap}
+            onChange={(e) => config.setShowGpxMap(e.currentTarget.checked)}
+          />
+          <Switch
+            label="Show elevation map"
+            checked={config.showGpxElevationMap}
+            onChange={(e) => config.setShowGpxElevationMap(e.currentTarget.checked)}
+          />
+          <Switch
+            label="Show position on map"
+            checked={config.showGpxPosition}
+            onChange={(e) => config.setShowGpxPosition(e.currentTarget.checked)}
+          />
+          <Switch
+            label="Show position on elevation map"
+            checked={config.showGpxElevationPosition}
+            onChange={(e) => config.setShowGpxElevationPosition(e.currentTarget.checked)}
+          />
+          <Switch
+            label="Show remaining distance"
+            checked={config.showGpxRemainingDistance}
+            onChange={(e) => config.setShowGpxRemainingDistance(e.currentTarget.checked)}
+          />
+          <Switch
+            label="Show remaining elevation"
+            checked={config.showGpxRemainingElevation}
+            onChange={(e) => config.setShowGpxRemainingElevation(e.currentTarget.checked)}
+          />
+          <Switch
+            label="Show waypoints"
+            checked={config.showGpxWaypoints}
+            onChange={(e) => config.setShowGpxWaypoints(e.currentTarget.checked)}
+          />
+          <Text size="sm" mt="sm">
+            Map radius
+          </Text>
+          <SegmentedControl
+            value={config.gpxMapRadius === null ? 'full' : String(config.gpxMapRadius)}
+            onChange={(value) => config.setGpxMapRadius(value === 'full' ? null : Number(value))}
+            data={[
+              { label: 'Full track', value: 'full' },
+              { label: '1 km', value: '1000' },
+              { label: '2 km', value: '2000' },
+              { label: '5 km', value: '5000' },
+            ]}
+          />
+        </Stack>
+      </Fieldset>
     </Stack>
   );
 }

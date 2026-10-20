@@ -659,10 +659,8 @@ export default function HeheChat() {
     updateConfig('cyclingHudMaxHeartRateBpm', value);
   const setCyclingHudAveragePowerWatts = (value: number) =>
     updateConfig('cyclingHudAveragePowerWatts', value);
-  const setCyclingHudTheme = (value: CyclingHudTheme) =>
-    updateConfig('cyclingHudTheme', value);
-  const setCyclingHudLayout = (value: CyclingHudLayout) =>
-    updateConfig('cyclingHudLayout', value);
+  const setCyclingHudTheme = (value: CyclingHudTheme) => updateConfig('cyclingHudTheme', value);
+  const setCyclingHudLayout = (value: CyclingHudLayout) => updateConfig('cyclingHudLayout', value);
   const setShowSceneSwitchNotifications = (value: boolean) =>
     updateConfig('showSceneSwitchNotifications', value);
   const setChatBsTransparentBg = (value: boolean) => updateConfig('chatBsTransparentBg', value);
