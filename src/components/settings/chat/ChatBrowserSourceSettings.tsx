@@ -330,6 +330,7 @@ function ChatBsOptions() {
             max={48}
           />
           <ColorInput
+            popoverProps={{ zIndex: PREVIEW_MODAL_Z_INDEX + 1 }}
             label="Text Color"
             description="Leave empty to use the default chat colors"
             value={config.chatBsTextColor ?? ''}
@@ -351,6 +352,7 @@ function ChatBsOptions() {
             size="lg"
           />
           <Select
+            comboboxProps={{ zIndex: PREVIEW_MODAL_Z_INDEX + 1 }}
             label="Message Background"
             description="Adds a semi-transparent box behind each message"
             value={config.chatBsMsgBackground ?? 'none'}
@@ -443,6 +445,7 @@ function ChatBsOptions() {
       <Fieldset legend="Animations" variant="filled">
         <Stack gap="md">
           <Select
+            comboboxProps={{ zIndex: PREVIEW_MODAL_Z_INDEX + 1 }}
             label="Animate In"
             value={config.chatBsAnimateIn ?? 'slide'}
             onChange={(val) =>
@@ -455,6 +458,7 @@ function ChatBsOptions() {
             ]}
           />
           <Select
+            comboboxProps={{ zIndex: PREVIEW_MODAL_Z_INDEX + 1 }}
             label="Animate Out"
             value={config.chatBsAnimateOut ?? 'fade'}
             onChange={(val) => config.setChatBsAnimateOut((val ?? 'fade') as 'fade' | 'none')}
