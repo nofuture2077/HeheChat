@@ -14,8 +14,11 @@ function getQueryVariable(query: string, variable: string): string | undefined {
 
 const query = window.location.hash.substring(1);
 const token = getQueryVariable(query, 'token');
+const preview = getQueryVariable(query, 'preview') === 'true';
 
 localStorage.setItem('hehe-sink', token || '');
 localStorage.setItem('hehe-mode', 'browsersource');
 
-ReactDOM.createRoot(document.getElementById('chat')!).render(<ChatSourceApp token={token} />);
+ReactDOM.createRoot(document.getElementById('chat')!).render(
+  <ChatSourceApp token={token} preview={preview} />
+);

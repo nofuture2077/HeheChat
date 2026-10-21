@@ -21,6 +21,7 @@ import { YTChatMessageBrowserSource } from './components/chat/YTChatMessageBrows
 import { SystemMessageComp } from './components/chat/systemmessage';
 import { ModActions } from './components/chat/mod/modactions';
 import { initializeStoragePatches } from './commons/patches';
+import { createMockMessage } from './mocks/service';
 import { theme } from './theme';
 import { version } from '../package.json';
 
@@ -46,6 +47,7 @@ interface TrackedMessage {
 
 interface ChatSourceAppProps {
   token: string | undefined;
+  preview?: boolean;
 }
 
 const FADE_OUT_MS = 600;
@@ -65,7 +67,7 @@ const KEYFRAME_STYLES = `
     }
 `;
 
-export default function ChatSourceApp({ token }: ChatSourceAppProps) {
+export default function ChatSourceApp({ token, preview }: ChatSourceAppProps) {
   const backendWorkerRef = useRef<Worker | undefined>(undefined);
   const [profile, setProfile] = useState<Profile>({ ...DEFAULT_PROFILE });
   const [chatEmotes] = useState<ChatEmotes>(DEFAULT_CHAT_EMOTES);
@@ -77,6 +79,41 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
   useEffect(() => {
     initializeStoragePatches();
   }, []);
+
+  // only reads refs and the state setter, so it is stable
+  const pushMessage = useCallback((msg: HeheMessage) => {
+    setMessages((prev) => {
+      const cfg = profileRef.current.config;
+      if (isSystemMessageType(msg)) {
+        if (!(cfg.chatBsShowSystem ?? false)) return prev;
+        const sysMsg = msg as SystemMessage;
+        const mainType = EventTypeMapping[sysMsg.data?.type] as SystemMessageMainType | undefined;
+        if (mainType && cfg.systemMessageInChat[mainType] === false) return prev;
+      } else {
+        const ignoredUsers = (cfg.chatBsIgnoredUsers ?? []).map((u: string) => u.toLowerCase());
+        if (ignoredUsers.includes((msg as HeheChatMessage).userInfo?.displayName?.toLowerCase())) {
+          return prev;
+        }
+      }
+      return [...prev, { msg, addedAt: Date.now(), exiting: false }];
+    });
+  }, []);
+
+  // settings preview: simulate a busy chat with demo messages
+  useEffect(() => {
+    if (!preview) return undefined;
+    const interval = setInterval(() => {
+      let channels = profileRef.current.config.channels ?? [];
+      if (!channels.length) {
+        // no-op once loaded; loads the global badges the demo users show
+        chatEmotes.updateChannel('demo');
+        channels = ['demo'];
+      }
+      const msg = createMockMessage(channels);
+      if (msg) pushMessage(msg);
+    }, 1500);
+    return () => clearInterval(interval);
+  }, [preview, pushMessage, chatEmotes]);
 
   useEffect(() => {
     backendWorkerRef.current = new Worker(
@@ -109,26 +146,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
       }
 
       if (data.type === 'msg') {
-        const msg = parseMessage(data.data.message);
-        setMessages((prev) => {
-          const cfg = profileRef.current.config;
-          if (isSystemMessageType(msg)) {
-            if (!(cfg.chatBsShowSystem ?? false)) return prev;
-            const sysMsg = msg as SystemMessage;
-            const mainType = EventTypeMapping[sysMsg.data?.type] as
-              | SystemMessageMainType
-              | undefined;
-            if (mainType && cfg.systemMessageInChat[mainType] === false) return prev;
-          } else {
-            const ignoredUsers = (cfg.chatBsIgnoredUsers ?? []).map((u: string) => u.toLowerCase());
-            if (
-              ignoredUsers.includes((msg as HeheChatMessage).userInfo?.displayName?.toLowerCase())
-            ) {
-              return prev;
-            }
-          }
-          return [...prev, { msg, addedAt: Date.now(), exiting: false }];
-        });
+        pushMessage(parseMessage(data.data.message));
       }
 
       if (data.type === 'ytchat') {
@@ -148,7 +166,7 @@ export default function ChatSourceApp({ token }: ChatSourceAppProps) {
         backendWorkerRef.current.terminate();
       }
     };
-  }, [token]);
+  }, [token, pushMessage]);
 
   useEffect(() => {
     let timeoutId: number;
