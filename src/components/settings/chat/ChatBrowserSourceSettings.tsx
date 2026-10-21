@@ -10,14 +10,168 @@ import {
   Select,
   ColorInput,
   TagsInput,
+  Box,
+  Flex,
+  Modal,
+  ScrollArea,
 } from '@mantine/core';
+import { useDisclosure, useElementSize, useMediaQuery } from '@mantine/hooks';
 import { useContext, useState, useEffect } from 'react';
-import { IconCopy } from '@tabler/icons-react';
+import { IconCopy, IconArrowsMaximize } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { ConfigContext } from '@/ApplicationContext';
 
+// above the settings drawer (zIndex 300); dropdowns inside the modal must sit above it
+const PREVIEW_MODAL_Z_INDEX = 400;
+const CANVAS_WIDTH = 1920;
+const CANVAS_HEIGHT = 1080;
+const MIN_BOX_SIZE = 100;
+
+interface ChatBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+// 600x400 in the lower left of a 1080p scene
+const DEFAULT_CHAT_BOX: ChatBox = { x: 40, y: CANVAS_HEIGHT - 440, width: 600, height: 400 };
+
+// Embeds the real chat browser source as a box inside a scaled 1920x1080 scene, like it would sit
+// in OBS. The box can be moved (drag) and resized (corner handle); it picks up config changes via
+// the auto-saved profile and adds demo messages in preview mode.
+function ChatPreviewFrame({
+  src,
+  box,
+  onBoxChange,
+  onExpand,
+}: {
+  src: string;
+  box: ChatBox;
+  onBoxChange: (box: ChatBox) => void;
+  onExpand?: () => void;
+}) {
+  const { ref, width } = useElementSize();
+  const scale = width / CANVAS_WIDTH || 1;
+
+  const startDrag = (mode: 'move' | 'resize') => (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const start = box;
+    const onMove = (ev: PointerEvent) => {
+      const dx = Math.round((ev.clientX - startX) / scale);
+      const dy = Math.round((ev.clientY - startY) / scale);
+      onBoxChange(
+        mode === 'move'
+          ? {
+              ...start,
+              x: Math.min(Math.max(start.x + dx, 0), CANVAS_WIDTH - start.width),
+              y: Math.min(Math.max(start.y + dy, 0), CANVAS_HEIGHT - start.height),
+            }
+          : {
+              ...start,
+              width: Math.min(Math.max(start.width + dx, MIN_BOX_SIZE), CANVAS_WIDTH - start.x),
+              height: Math.min(Math.max(start.height + dy, MIN_BOX_SIZE), CANVAS_HEIGHT - start.y),
+            }
+      );
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
+  return (
+    <Box
+      ref={ref}
+      pos="relative"
+      style={{
+        width: '100%',
+        aspectRatio: '16 / 9',
+        overflow: 'hidden',
+        borderRadius: 'var(--mantine-radius-md)',
+        border: '1px solid var(--mantine-color-dark-4)',
+        backgroundColor: '#3a3a3a',
+        backgroundImage: 'repeating-conic-gradient(#444 0% 25%, #3a3a3a 0% 50%)',
+        backgroundSize: '32px 32px',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: CANVAS_WIDTH,
+          height: CANVAS_HEIGHT,
+          transform: `scale(${scale})`,
+          transformOrigin: 'top left',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            left: box.x,
+            top: box.y,
+            width: box.width,
+            height: box.height,
+            outline: `${1 / scale}px dashed rgba(255,255,255,0.5)`,
+          }}
+        >
+          <iframe
+            src={src}
+            title="Chat browser source preview"
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 0,
+              background: 'transparent',
+              colorScheme: 'normal',
+              pointerEvents: 'none',
+            }}
+          />
+          {/* drag surface above the iframe; touch-action none so dragging doesn't scroll */}
+          <div
+            onPointerDown={startDrag('move')}
+            style={{ position: 'absolute', inset: 0, cursor: 'move', touchAction: 'none' }}
+          />
+          <div
+            onPointerDown={startDrag('resize')}
+            aria-label="Resize chat box"
+            style={{
+              position: 'absolute',
+              right: 0,
+              bottom: 0,
+              width: 16 / scale,
+              height: 16 / scale,
+              cursor: 'nwse-resize',
+              touchAction: 'none',
+              background: 'rgba(255,255,255,0.7)',
+            }}
+          />
+        </div>
+      </div>
+      {onExpand && (
+        <ActionIcon
+          pos="absolute"
+          top={8}
+          right={8}
+          variant="filled"
+          color="dark"
+          onClick={onExpand}
+          aria-label="Expand preview"
+        >
+          <IconArrowsMaximize size={16} />
+        </ActionIcon>
+      )}
+    </Box>
+  );
+}
+
 export function ChatBrowserSourceSettings() {
-  const config = useContext(ConfigContext);
   const [sink, setSink] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -30,6 +184,12 @@ export function ChatBrowserSourceSettings() {
   const chatUrl = sink
     ? `${new URL('chat.html', import.meta.env.VITE_SINK_URL).href}#token=${encodeURIComponent(sink)}`
     : '';
+  const previewUrl = `${chatUrl}&preview=true`;
+  const [previewOpened, { open: openPreview, close: closePreview }] = useDisclosure(false);
+  const isDesktop = useMediaQuery('(min-width: 62em)');
+  // ponytail: preview-only placement, not persisted - it just mirrors how the source sits in OBS
+  const [chatBox, setChatBox] = useState<ChatBox>(DEFAULT_CHAT_BOX);
+  const frameProps = { src: previewUrl, box: chatBox, onBoxChange: setChatBox };
 
   const copyUrl = async () => {
     try {
@@ -85,6 +245,74 @@ export function ChatBrowserSourceSettings() {
         </Stack>
       </Fieldset>
 
+      {/* only one chat iframe (and its WebSocket) at a time - hidden while the modal is open */}
+      {sink && !previewOpened && (
+        <Fieldset
+          legend="Chat Preview"
+          variant="filled"
+          style={{ position: 'sticky', top: 0, zIndex: 2 }}
+        >
+          <Stack gap="xs">
+            <ChatPreviewFrame {...frameProps} onExpand={openPreview} />
+            <Text size="xs" c="dimmed">
+              Live preview with demo messages in a 1920x1080 scene - drag the chat box to move it,
+              drag its corner to resize. Chat box: {chatBox.width}x{chatBox.height} at {chatBox.x},
+              {chatBox.y}.
+            </Text>
+          </Stack>
+        </Fieldset>
+      )}
+
+      <ChatBsOptions />
+
+      <Modal
+        opened={previewOpened}
+        onClose={closePreview}
+        title="Chat Preview"
+        fullScreen
+        zIndex={PREVIEW_MODAL_Z_INDEX}
+      >
+        {isDesktop ? (
+          <Flex gap="md" align="flex-start">
+            <Box style={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: 'center' }}>
+              <Box style={{ width: 'min(100%, calc((100dvh - 100px) * 16 / 9))' }}>
+                <ChatPreviewFrame {...frameProps} />
+              </Box>
+            </Box>
+            <ScrollArea.Autosize mah="calc(100dvh - 100px)" w={380} style={{ flexShrink: 0 }}>
+              <Stack gap={30} pr="sm">
+                <ChatBsOptions />
+              </Stack>
+            </ScrollArea.Autosize>
+          </Flex>
+        ) : (
+          <Stack gap="md">
+            <Box
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 2,
+                background: 'var(--mantine-color-body)',
+                paddingBottom: 'var(--mantine-spacing-xs)',
+              }}
+            >
+              <ChatPreviewFrame {...frameProps} />
+            </Box>
+            <Stack gap={30}>
+              <ChatBsOptions />
+            </Stack>
+          </Stack>
+        )}
+      </Modal>
+    </Stack>
+  );
+}
+
+function ChatBsOptions() {
+  const config = useContext(ConfigContext);
+
+  return (
+    <>
       <Fieldset legend="Appearance" variant="filled">
         <Stack gap="md">
           <TextInput
@@ -284,6 +512,6 @@ export function ChatBrowserSourceSettings() {
           />
         </Stack>
       </Fieldset>
-    </Stack>
+    </>
   );
 }
